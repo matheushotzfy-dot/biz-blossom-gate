@@ -1,145 +1,202 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, Clock, Package, Trophy, Truck, XCircle } from "lucide-react";
+import { AlertTriangle, Check, ChevronLeft, ChevronRight, ExternalLink, Package, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ArtifactViewer } from "@/features/awards/ArtifactViewer";
 import { AwardGallery } from "@/features/awards/AwardGallery";
 import { ClaimDialog } from "@/features/awards/ClaimDialog";
-import { AWARDS, formatMoney } from "@/features/awards/awards-data";
-import { useAwards } from "@/features/awards/use-awards";
+import { formatMoney } from "@/features/awards/awards-data";
+import { useAwards, type RewardClaim } from "@/features/awards/use-awards";
 import { cn } from "@/lib/utils";
 import "@/features/awards/vault.css";
 
-const CLAIM_STATUS = {
-  pending: { label: "Em análise", icon: Clock, tone: "text-warning" },
-  approved: { label: "Aprovado", icon: CheckCircle2, tone: "text-info" },
-  shipped: { label: "Em trânsito", icon: Truck, tone: "text-primary" },
-  delivered: { label: "Entregue", icon: CheckCircle2, tone: "text-success" },
-  cancelled: { label: "Cancelado", icon: XCircle, tone: "text-destructive" },
-} as const;
+const STEPS = [
+  { id: "pending", label: "Análise" },
+  { id: "approved", label: "Aprovado" },
+  { id: "shipped", label: "Enviado" },
+  { id: "delivered", label: "Entregue" },
+] as const;
+
+/** Linha de rastreio de um resgate: 4 etapas espelhando o status definido no admin. */
+function ClaimRow({ claim }: { claim: RewardClaim }) {
+  const cancelled = claim.status === "cancelled";
+  const current = Math.max(STEPS.findIndex((s) => s.id === claim.status), 0);
+  return (
+    <li className="grid gap-4 border-t border-border py-4 first:border-t-0 md:grid-cols-[minmax(180px,1fr)_2fr_auto] md:items-center">
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-border bg-muted"><Package className="h-4 w-4 text-primary" /></span>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-foreground">{claim.tier_label}</p>
+          <p className="font-mono text-[10px] text-muted-foreground">{new Date(claim.created_at).toLocaleDateString("pt-BR")}</p>
+        </div>
+      </div>
+      {cancelled ? (
+        <p className="text-xs font-semibold text-destructive">Resgate cancelado</p>
+      ) : (
+        <ol className="flex items-center" aria-label="Etapas do resgate">
+          {STEPS.map((step, i) => {
+            const done = i <= current;
+            return (
+              <li key={step.id} className="flex flex-1 items-center last:flex-none">
+                <span className="flex flex-col items-center gap-1">
+                  <span className={cn("grid h-5 w-5 place-items-center rounded-full border text-[9px]", done ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground")}>
+                    {done ? <Check className="h-3 w-3" /> : i + 1}
+                  </span>
+                  <span className={cn("text-[10px] font-medium", done ? "text-foreground" : "text-muted-foreground")}>{step.label}</span>
+                </span>
+                {i < STEPS.length - 1 && <span className={cn("mx-1 mb-4 h-px flex-1", i < current ? "bg-primary" : "bg-border")} />}
+              </li>
+            );
+          })}
+        </ol>
+      )}
+      <div className="text-left md:text-right">
+        {claim.tracking_code ? (
+          <a href={claim.tracking_url || undefined} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-mono text-[11px] text-primary hover:underline">
+            {claim.tracking_carrier ? `${claim.tracking_carrier} · ` : ""}{claim.tracking_code}{claim.tracking_url && <ExternalLink className="h-3 w-3" />}
+          </a>
+        ) : <span className="font-mono text-[10px] text-muted-foreground">Sem rastreio ainda</span>}
+        {claim.admin_notes && <p className="mt-1 max-w-[260px] text-[11px] text-muted-foreground md:ml-auto">{claim.admin_notes}</p>}
+      </div>
+    </li>
+  );
+}
 
 export default function Premiacoes() {
-  const { user, revenue, claims, setClaims, loading, failed, unlocked, next, targetProgress } = useAwards();
-  const [activeIndex, setActiveIndex] = useState(() => Math.max(AWARDS.findIndex((award) => award.id === next.id), 0));
+  const { user, revenue, claims, setClaims, loading, failed, unlocked, next, targetProgress, awards } = useAwards();
+  const [activeIndex, setActiveIndex] = useState(0);
   const [claimOpen, setClaimOpen] = useState(false);
   const touched = useRef(false);
   const reduceMotion = useReducedMotion();
 
-  const award = AWARDS[activeIndex];
-  const claimed = claims.some((claim) => claim.tier_id === award.id && claim.status !== "cancelled");
+  const safeIndex = Math.min(activeIndex, awards.length - 1);
+  const award = awards[safeIndex];
+  const claimed = claims.some((c) => c.tier_id === award.id && c.status !== "cancelled");
+  const top = awards[awards.length - 1]?.value || 1;
 
   useEffect(() => {
     if (loading || touched.current) return;
-    setActiveIndex(Math.max(AWARDS.findIndex((item) => item.id === next.id), 0));
-  }, [loading, next.id]);
+    setActiveIndex(Math.max(awards.findIndex((a) => a.id === next.id), 0));
+  }, [loading, next.id, awards]);
 
   const select = (index: number) => {
-    if (index < 0 || index >= AWARDS.length) return;
+    if (index < 0 || index >= awards.length) return;
     touched.current = true;
     setActiveIndex(index);
   };
 
   const share = async () => {
-    const text = revenue >= award.value
-      ? `Conquistei ${award.title} na VENXPAY.`
-      : `Minha próxima meta na VENXPAY é ${award.label}.`;
+    const text = revenue >= award.value ? `Conquistei ${award.title} na VENXPAY.` : `Minha próxima meta na VENXPAY é ${award.label}.`;
     try {
       if (navigator.share) await navigator.share({ title: `VENXPAY · ${award.title}`, text });
       else { await navigator.clipboard.writeText(text); toast.success("Marco copiado"); }
-    } catch { /* usuário cancelou o compartilhamento */ }
+    } catch { /* cancelado */ }
   };
 
   return (
     <main
-      className="venx-vault -mx-3 -mt-1 pb-14 sm:mx-0"
-      onKeyDown={(event) => {
-        if (event.key === "ArrowLeft") select(activeIndex - 1);
-        if (event.key === "ArrowRight") select(activeIndex + 1);
-      }}
+      className="venx-vault pb-14"
+      onKeyDown={(e) => { if (e.key === "ArrowLeft") select(safeIndex - 1); if (e.key === "ArrowRight") select(safeIndex + 1); }}
     >
-      <section className="venx-vault-bg relative isolate overflow-hidden rounded-none border border-awards-steel/12 sm:rounded-lg">
-        <header className="relative z-10 grid gap-5 border-b border-awards-steel/12 px-4 py-5 sm:px-7 lg:grid-cols-[1fr_auto] lg:items-end">
+      <section className="venx-vault-bg relative isolate overflow-hidden rounded-xl border border-border">
+        <header className="relative z-10 grid gap-6 border-b border-border px-5 py-6 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-awards-accent"><Trophy className="h-3.5 w-3.5" /> Hall de conquistas</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-awards-ink sm:text-4xl">Sua operação merece ser vista.</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-awards-steel">Cada marco libera uma peça física VENXPAY, produzida para registrar o tamanho da sua operação.</p>
+            <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-primary"><Trophy className="h-3.5 w-3.5" /> Hall de conquistas</p>
+            <h1 className="mt-2 font-display text-3xl font-bold text-foreground sm:text-[2.6rem] sm:leading-tight">Sua operação merece ser vista.</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Cada marco libera uma peça física VENXPAY, produzida para registrar o tamanho da sua operação.</p>
           </div>
-          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-md border border-awards-steel/15 bg-awards-steel/15">
-            <div className="bg-awards-obsidian px-4 py-3 sm:min-w-[170px]">
-              <p className="font-mono text-[9px] uppercase text-awards-steel">Faturamento validado</p>
-              <p className="mt-1 font-display text-lg font-bold tabular-nums text-awards-ink">{loading ? "—" : formatMoney(revenue)}</p>
-            </div>
-            <div className="bg-awards-obsidian px-4 py-3 sm:min-w-[120px]">
-              <p className="font-mono text-[9px] uppercase text-awards-steel">Conquistadas</p>
-              <p className="mt-1 font-display text-lg font-bold tabular-nums text-awards-ink">{unlocked} <span className="text-xs text-awards-steel">/ {AWARDS.length}</span></p>
-            </div>
-          </div>
+          <dl className="grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-border bg-border">
+            {[
+              ["Faturamento", loading ? "—" : formatMoney(revenue)],
+              ["Conquistadas", `${unlocked}/${awards.length}`],
+              ["Resgates", String(claims.filter((c) => c.status !== "cancelled").length)],
+            ].map(([k, v]) => (
+              <div key={k} className="bg-card px-4 py-3 sm:min-w-[140px]">
+                <dt className="font-mono text-[9px] uppercase text-muted-foreground">{k}</dt>
+                <dd className="mt-1 font-display text-lg font-bold tabular-nums text-foreground">{v}</dd>
+              </div>
+            ))}
+          </dl>
         </header>
 
-        <div className="relative z-10 border-b border-awards-steel/12">
-          <ArtifactViewer index={activeIndex} revenue={revenue} claimed={claimed} onClaim={() => setClaimOpen(true)} onShare={share} />
-          <div className="absolute left-3 top-1/2 z-20 -translate-y-1/2 sm:left-5">
-            <Button variant="outline" size="icon" aria-label="Marco anterior" disabled={activeIndex === 0} onClick={() => select(activeIndex - 1)} className="h-10 w-10 rounded-full border-awards-steel/25 bg-awards-obsidian text-awards-ink hover:bg-awards-accent/10"><ChevronLeft /></Button>
+        {/* Linha do tempo dos marcos com a posição atual */}
+        <div className="relative z-10 border-b border-border px-5 py-6 sm:px-8">
+          <div className="flex justify-between font-mono text-[10px] uppercase text-muted-foreground">
+            <span>{Math.round(targetProgress)}% até {next.label}</span>
+            <span>{revenue >= next.value ? "Jornada concluída" : `Faltam ${formatMoney(Math.max(next.value - revenue, 0))}`}</span>
           </div>
-          <div className="absolute right-3 top-1/2 z-20 -translate-y-1/2 sm:right-5">
-            <Button variant="outline" size="icon" aria-label="Próximo marco" disabled={activeIndex === AWARDS.length - 1} onClick={() => select(activeIndex + 1)} className="h-10 w-10 rounded-full border-awards-steel/25 bg-awards-obsidian text-awards-ink hover:bg-awards-accent/10"><ChevronRight /></Button>
+          <div className="relative mt-5 h-1 rounded-full bg-muted">
+            <motion.div
+              className="absolute inset-y-0 left-0 rounded-full bg-primary"
+              initial={reduceMotion ? false : { width: 0 }}
+              animate={{ width: `${Math.min((Math.log10(Math.max(revenue, 1)) / Math.log10(top)) * 100, 100)}%` }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            />
+            {awards.map((a, i) => {
+              const left = (Math.log10(a.value) / Math.log10(top)) * 100;
+              const done = revenue >= a.value;
+              return (
+                <button
+                  key={a.id}
+                  type="button"
+                  onClick={() => select(i)}
+                  aria-label={`Marco ${a.label}`}
+                  style={{ left: `${left}%` }}
+                  className={cn(
+                    "absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition-transform hover:scale-125",
+                    done ? "border-primary bg-primary" : "border-border bg-background",
+                    i === safeIndex && "ring-4 ring-primary/25",
+                  )}
+                />
+              );
+            })}
+          </div>
+          <div className="relative mt-3 hidden h-4 sm:block">
+            {awards.map((a) => (
+              <span key={a.id} style={{ left: `${(Math.log10(a.value) / Math.log10(top)) * 100}%` }} className="absolute -translate-x-1/2 font-mono text-[10px] text-muted-foreground">{a.label}</span>
+            ))}
           </div>
         </div>
 
-        <motion.div initial={reduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} className="relative z-10 px-4 py-5 sm:px-7">
-          <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-            <div>
-              <p className="font-mono text-[9px] uppercase text-awards-steel">Coleção VENXPAY · selecione uma peça</p>
-              <p className="mt-1 font-display text-base font-bold text-awards-ink">{next.title} é sua próxima conquista</p>
-            </div>
-            <div className="min-w-0 sm:w-[310px]">
-              <div className="flex justify-between gap-3 font-mono text-[9px] uppercase text-awards-steel">
-                <span>{Math.round(targetProgress)}% concluído</span>
-                <span>{revenue >= next.value ? "Jornada concluída" : `Faltam ${formatMoney(Math.max(next.value - revenue, 0))}`}</span>
-              </div>
-              <progress className="venx-meter mt-2 h-1.5 w-full rounded-full" value={targetProgress} max={100} aria-label={`Progresso até ${next.label}`} />
-            </div>
+        <div className="relative z-10 border-b border-border">
+          <ArtifactViewer award={award} revenue={revenue} claimed={claimed} onClaim={() => setClaimOpen(true)} onShare={share} />
+          <div className="absolute left-3 top-1/2 z-20 -translate-y-1/2 sm:left-5">
+            <Button variant="outline" size="icon" aria-label="Marco anterior" disabled={safeIndex === 0} onClick={() => select(safeIndex - 1)} className="h-10 w-10 rounded-full"><ChevronLeft /></Button>
           </div>
-          <AwardGallery activeIndex={activeIndex} revenue={revenue} onSelect={select} />
-        </motion.div>
+          <div className="absolute right-3 top-1/2 z-20 -translate-y-1/2 sm:right-5">
+            <Button variant="outline" size="icon" aria-label="Próximo marco" disabled={safeIndex === awards.length - 1} onClick={() => select(safeIndex + 1)} className="h-10 w-10 rounded-full"><ChevronRight /></Button>
+          </div>
+        </div>
+
+        <div className="relative z-10 px-5 py-6 sm:px-8">
+          <p className="mb-3 font-mono text-[10px] uppercase text-muted-foreground">Coleção VENXPAY · selecione uma peça</p>
+          <AwardGallery awards={awards} activeIndex={safeIndex} revenue={revenue} onSelect={select} />
+        </div>
       </section>
 
       {failed && (
-        <div role="alert" className="mt-4 flex items-center gap-2 rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+        <div role="alert" className="mt-4 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
           <AlertTriangle className="h-4 w-4" /> Alguns dados não puderam ser sincronizados.
         </div>
       )}
 
-      <section className="mt-4 rounded-none border border-border bg-card p-5 sm:rounded-lg sm:p-6">
-        <p className="font-mono text-[9px] uppercase text-muted-foreground">Registro logístico</p>
+      <section className="mt-4 rounded-xl border border-border bg-card px-5 py-5 sm:px-8">
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="font-mono text-[10px] uppercase text-muted-foreground">Registro logístico</p>
+            <h2 className="mt-1 font-display text-lg font-bold text-foreground">Seus resgates</h2>
+          </div>
+          <span className="font-mono text-[10px] uppercase text-muted-foreground">Atualiza em tempo real</span>
+        </div>
         {claims.length === 0 ? (
-          <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">
-            Nenhuma peça solicitada ainda. Ao conquistar um marco, o resgate abre aqui com rastreio completo.
-          </p>
+          <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">Nenhuma peça solicitada ainda. Ao conquistar um marco, o resgate aparece aqui com rastreio completo.</p>
         ) : (
-          <ul className="mt-4 space-y-3">
-            {claims.slice(0, 4).map((claim) => {
-              const status = CLAIM_STATUS[claim.status as keyof typeof CLAIM_STATUS] ?? CLAIM_STATUS.pending;
-              const StatusIcon = status.icon;
-              return (
-                <li key={claim.id} className="flex items-center gap-3 border-t border-border pt-3">
-                  <Package className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-foreground">{claim.tier_label}</p>
-                    <p className="font-mono text-[9px] text-muted-foreground">{new Date(claim.created_at).toLocaleDateString("pt-BR")}</p>
-                  </div>
-                  <span className={cn("flex items-center gap-1 font-mono text-[9px] uppercase", status.tone)}>
-                    <StatusIcon className="h-3 w-3" />{status.label}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
+          <ul className="mt-2">{claims.map((c) => <ClaimRow key={c.id} claim={c} />)}</ul>
         )}
       </section>
 
-      <ClaimDialog open={claimOpen} userId={user?.id} award={award} onOpenChange={setClaimOpen} onCreated={(claim) => setClaims((current) => [claim, ...current])} />
+      <ClaimDialog open={claimOpen} userId={user?.id} award={award} onOpenChange={setClaimOpen} onCreated={(claim) => setClaims((cur) => [claim, ...cur])} />
     </main>
   );
 }

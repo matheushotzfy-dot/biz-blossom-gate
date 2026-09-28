@@ -3,10 +3,10 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Check, Gift, Lock, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AWARDS, formatMoney } from "./awards-data";
+import { formatMoney, type AwardItem } from "./awards-data";
 
 interface ArtifactViewerProps {
-  index: number;
+  award: AwardItem;
   revenue: number;
   claimed: boolean;
   onClaim: () => void;
@@ -14,11 +14,10 @@ interface ArtifactViewerProps {
 }
 
 /** Visor 3D do artefato com paralaxe pelo ponteiro. */
-export function ArtifactViewer({ index, revenue, claimed, onClaim, onShare }: ArtifactViewerProps) {
+export function ArtifactViewer({ award, revenue, claimed, onClaim, onShare }: ArtifactViewerProps) {
   const reduceMotion = useReducedMotion();
   const frame = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
-  const award = AWARDS[index];
   const unlocked = revenue >= award.value;
   const missing = Math.max(award.value - revenue, 0);
 

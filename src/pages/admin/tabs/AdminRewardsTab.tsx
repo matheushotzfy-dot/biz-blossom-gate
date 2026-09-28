@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { logAdminAction } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
+import { AdminAwardTiersEditor } from "./AdminAwardTiersEditor";
 import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 
 type Claim = {
@@ -180,6 +181,7 @@ export default function AdminRewardsTab({ profiles }: { profiles: { user_id: str
 
   return (
     <div className="space-y-6">
+      <AdminAwardTiersEditor />
       <FinanceiroHero
         eyebrow="Programa de premiações"
         title="Premiações"

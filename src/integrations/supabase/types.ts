@@ -920,6 +920,51 @@ export type Database = {
         }
         Relationships: []
       }
+      award_tiers: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          phrase: string
+          rewards: string[]
+          sort_order: number
+          tier: string
+          title: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id: string
+          image_url?: string | null
+          is_active?: boolean
+          phrase?: string
+          rewards?: string[]
+          sort_order?: number
+          tier?: string
+          title: string
+          updated_at?: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          phrase?: string
+          rewards?: string[]
+          sort_order?: number
+          tier?: string
+          title?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: []
+      }
       balance_adjustments: {
         Row: {
           admin_user_id: string

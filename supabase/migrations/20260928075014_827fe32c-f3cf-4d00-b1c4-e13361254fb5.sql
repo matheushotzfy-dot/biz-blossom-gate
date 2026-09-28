@@ -1,0 +1,1 @@
+ALTER PUBLICATION supabase_realtime ADD TABLE public.reward_claims, public.revenue_races, public.revenue_race_prizes, public.revenue_race_overrides;

@@ -1,322 +1,219 @@
-import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import { PageShell, PageTitle, Panel, EmptyState } from "@/components/PageShell";
-import { Flag, Trophy, Gift, Clock, TrendingUp, Crown, Medal, Award } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Clock, Crown, Flag, Gift, Medal, Award, Trophy, Target } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 
-type Race = {
-  id: string;
-  title: string;
-  description: string | null;
-  starts_at: string;
-  ends_at: string;
-  is_active: boolean;
-  banner_url: string | null;
-  logo_url: string | null;
-};
+type Race = { id: string; title: string; description: string | null; starts_at: string; ends_at: string; is_active: boolean; banner_url: string | null; logo_url: string | null };
+type Prize = { id: string; title: string; description: string | null; image_url: string | null; min_revenue_cents: number; target_position: number | null; sort_order: number };
+type LeaderRow = { seller_id: string | null; seller_name: string; seller_avatar: string | null; revenue_cents: number; sales_count: number; rank_position: number };
 
-type Prize = {
-  id: string;
-  race_id: string;
-  title: string;
-  description: string | null;
-  image_url: string | null;
-  min_revenue_cents: number;
-  target_position: number | null;
-  sort_order: number;
-};
+const fmtBRL = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const POS_ICON = [Crown, Medal, Award];
 
-type LeaderRow = {
-  seller_id: string | null;
-  seller_name: string;
-  seller_avatar: string | null;
-  revenue_cents: number;
-  sales_count: number;
-  rank_position: number;
-  is_manual?: boolean;
-};
-
-const fmtBRL = (cents: number) =>
-  (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-
-function useCountdown(target: string) {
+function useCountdown(target?: string) {
   const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
-  const diff = Math.max(0, new Date(target).getTime() - now);
-  const d = Math.floor(diff / 86400000);
-  const h = Math.floor((diff / 3600000) % 24);
-  const m = Math.floor((diff / 60000) % 60);
-  const s = Math.floor((diff / 1000) % 60);
-  return { d, h, m, s, ended: diff === 0 };
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  const diff = Math.max(0, (target ? new Date(target).getTime() : now) - now);
+  return { d: Math.floor(diff / 864e5), h: Math.floor((diff / 36e5) % 24), m: Math.floor((diff / 6e4) % 60), s: Math.floor((diff / 1e3) % 60), ended: diff === 0 };
+}
+
+function Avatar({ row, size = "h-10 w-10" }: { row: LeaderRow; size?: string }) {
+  return row.seller_avatar
+    ? <img src={row.seller_avatar} alt="" className={cn(size, "shrink-0 rounded-full object-cover")} />
+    : <span className={cn(size, "grid shrink-0 place-items-center rounded-full bg-muted font-display font-bold text-foreground")}>{row.seller_name.charAt(0).toUpperCase()}</span>;
 }
 
 export default function CorridaFaturamento() {
   const { user } = useAuth();
+  const reduce = useReducedMotion();
   const [race, setRace] = useState<Race | null>(null);
   const [prizes, setPrizes] = useState<Prize[]>([]);
   const [leaders, setLeaders] = useState<LeaderRow[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      const { data: races } = await supabase
-        .from("revenue_races")
-        .select("*")
-        .eq("is_active", true)
-        .order("starts_at", { ascending: false })
-        .limit(1);
-      const active = (races || [])[0] as Race | undefined;
-      if (!active) { setRace(null); setLoading(false); return; }
-      setRace(active);
+  const load = useCallback(async () => {
+    const { data: races } = await supabase.from("revenue_races").select("*").eq("is_active", true).order("starts_at", { ascending: false }).limit(1);
+    const active = (races ?? [])[0] as Race | undefined;
+    setRace(active ?? null);
+    if (active) {
       const [{ data: pr }, { data: lb }] = await Promise.all([
-        supabase.from("revenue_race_prizes").select("*").eq("race_id", active.id).order("sort_order", { ascending: true }),
+        supabase.from("revenue_race_prizes").select("*").eq("race_id", active.id).order("sort_order"),
         supabase.rpc("race_leaderboard", { _race_id: active.id }),
       ]);
-      setPrizes((pr || []) as Prize[]);
-      setLeaders((lb || []) as LeaderRow[]);
-      setLoading(false);
-    })();
+      setPrizes((pr ?? []) as Prize[]);
+      setLeaders((lb ?? []) as LeaderRow[]);
+    }
+    setLoading(false);
   }, []);
 
-  const cd = useCountdown(race?.ends_at || new Date().toISOString());
+  useEffect(() => {
+    void load();
+    // Anything the admin changes (race, prizes, ranking adjustments) refreshes here live.
+    const ch = supabase.channel("race-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "revenue_races" }, () => void load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "revenue_race_prizes" }, () => void load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "revenue_race_overrides" }, () => void load())
+      .subscribe();
+    const t = setInterval(() => void load(), 60_000);
+    return () => { clearInterval(t); void supabase.removeChannel(ch); };
+  }, [load]);
 
-  const mine = useMemo(() => leaders.find(l => l.seller_id === user?.id), [leaders, user?.id]);
+  const cd = useCountdown(race?.ends_at);
+  const mine = useMemo(() => leaders.find((l) => l.seller_id === user?.id), [leaders, user?.id]);
 
-  if (loading) {
-    return (
-      <PageShell>
-        <PageTitle icon={<Flag className="h-6 w-6" />} title="Corrida de Faturamento" subtitle="Ranking e prêmios da temporada" />
-        <div className="py-16 text-center text-sm text-muted-foreground">Carregando corrida...</div>
-      </PageShell>
-    );
-  }
+  if (loading) return <div className="grid gap-4"><div className="h-56 animate-pulse rounded-xl border border-border bg-card" /><div className="h-80 animate-pulse rounded-xl border border-border bg-card" /></div>;
 
-  if (!race) {
-    return (
-      <PageShell>
-        <PageTitle icon={<Flag className="h-6 w-6" />} title="Corrida de Faturamento" subtitle="Ranking e prêmios da temporada" />
-        <EmptyState
-          icon={<Trophy className="h-10 w-10" />}
-          title="Nenhuma corrida ativa"
-          subtitle="Aguarde o admin abrir a próxima temporada. Você será notificado quando começar."
-        />
-      </PageShell>
-    );
-  }
+  if (!race) return (
+    <section className="grid place-items-center rounded-xl border border-border bg-card px-6 py-24 text-center">
+      <Flag className="h-10 w-10 text-primary" />
+      <h2 className="mt-4 font-display text-2xl font-bold text-foreground">Nenhuma corrida ativa</h2>
+      <p className="mt-2 max-w-md text-sm text-muted-foreground">Aguarde a próxima temporada. Assim que ela for aberta, ranking e prêmios aparecem aqui automaticamente.</p>
+    </section>
+  );
 
-  const top5 = leaders.slice(0, 5);
-  const top3 = top5.slice(0, 3);
-  const topRevenue = leaders[0]?.revenue_cents || 0;
-  // Podium visual order: 2nd, 1st, 3rd
-  const podiumOrder = [top3[1], top3[0], top3[2]].filter(Boolean) as LeaderRow[];
+  const top3 = leaders.slice(0, 3);
+  const podium = [top3[1], top3[0], top3[2]].filter(Boolean) as LeaderRow[];
+  const topRevenue = leaders[0]?.revenue_cents || 1;
+  const total = new Date(race.ends_at).getTime() - new Date(race.starts_at).getTime();
+  const elapsed = Math.min(Math.max((Date.now() - new Date(race.starts_at).getTime()) / total, 0), 1) * 100;
+  const mineVisible = mine && mine.rank_position <= 10;
 
   return (
-    <PageShell>
-      <PageTitle icon={<Flag className="h-6 w-6" />} title="Corrida de Faturamento" subtitle={race.title} />
-
-      {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/[0.08] mb-6">
-        {race.banner_url && (
-          <img src={race.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-25" />
-        )}
-        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-40"
-          style={{ backgroundImage: "radial-gradient(50% 80% at 90% 50%, hsl(var(--primary)/0.25), transparent 60%)" }} />
-        <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6 p-6 md:p-8">
-          <div className="flex-1 min-w-0 space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-primary">
-              <Flag className="h-3.5 w-3.5" /> Temporada Ativa
+    <div className="grid gap-4 pb-14">
+      {/* HERO */}
+      <section className="relative isolate overflow-hidden rounded-xl border border-border bg-card">
+        {race.banner_url && <img src={race.banner_url} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-20" />}
+        <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(60%_90%_at_100%_0%,hsl(var(--primary)/0.14),transparent_60%)]" />
+        <div className="grid gap-8 px-5 py-7 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="min-w-0">
+            <p className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-primary">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" /> {cd.ended ? "Temporada encerrada" : "Temporada ao vivo"}
+            </p>
+            <div className="mt-3 flex items-center gap-4">
+              {race.logo_url && <img src={race.logo_url} alt="" className="h-14 w-14 shrink-0 object-contain" />}
+              <h1 className="font-display text-3xl font-bold leading-tight text-foreground sm:text-[2.6rem]">{race.title}</h1>
             </div>
-            <h2 className="font-display font-black text-3xl md:text-5xl tracking-[-0.03em] leading-[0.95]">
-              {race.title}
-            </h2>
-            {race.description && (
-              <p className="text-muted-foreground text-sm max-w-xl">{race.description}</p>
-            )}
-            <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground pt-2">
-              <div className="flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5" />
-                <span>
-                  {format(new Date(race.starts_at), "dd/MM", { locale: ptBR })} — {format(new Date(race.ends_at), "dd/MM/yyyy", { locale: ptBR })}
-                </span>
+            {race.description && <p className="mt-3 max-w-2xl whitespace-pre-line text-sm leading-6 text-muted-foreground">{race.description}</p>}
+            <div className="mt-5 max-w-xl">
+              <div className="flex justify-between font-mono text-[10px] uppercase text-muted-foreground">
+                <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" />{format(new Date(race.starts_at), "dd MMM", { locale: ptBR })}</span>
+                <span>{format(new Date(race.ends_at), "dd MMM yyyy · HH:mm", { locale: ptBR })}</span>
               </div>
-              {!cd.ended && (
-                <div className="flex items-center gap-1.5 text-primary font-bold tabular-nums">
-                  <TrendingUp className="h-3.5 w-3.5" />
-                  Termina em {cd.d}d {String(cd.h).padStart(2, "0")}h {String(cd.m).padStart(2, "0")}m {String(cd.s).padStart(2, "0")}s
-                </div>
-              )}
+              <div className="mt-2 h-1 rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${elapsed}%` }} /></div>
             </div>
           </div>
-          {race.logo_url && (
-            <img src={race.logo_url} alt={race.title} className="h-24 w-24 md:h-32 md:w-32 object-contain shrink-0" />
-          )}
-        </div>
-      </section>
-
-      {/* ─── MY POSITION (só ranking, sem barra de meta) ─── */}
-      {mine && (
-        <Panel className="mb-6 border-primary/30 bg-primary/[0.03]">
-          <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-              <span className="font-display font-black text-2xl text-primary tabular-nums">#{mine.rank_position}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70">Sua posição no ranking</p>
-              <p className="font-display font-bold text-xl mt-0.5 tabular-nums">{fmtBRL(mine.revenue_cents)}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{mine.sales_count} vendas aprovadas · {mine.rank_position <= 5 ? "Concorrendo aos prêmios!" : "Suba pro Top 5 pra concorrer"}</p>
-            </div>
-          </div>
-        </Panel>
-      )}
-
-      {/* ─── TOP 3 CINEMATIC PODIUM ─── */}
-      {top3.length > 0 && (
-        <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-b from-background via-card to-primary/[0.05] p-6 md:p-10 mb-6">
-          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-60"
-            style={{ backgroundImage: "radial-gradient(60% 50% at 50% 0%, hsl(var(--primary)/0.18), transparent 70%)" }} />
-          <div className="relative">
-            <div className="text-center mb-8">
-              <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.3em] text-primary">
-                <Crown className="h-3.5 w-3.5" /> Top 3 · Campeões da Temporada
-              </p>
-              <h3 className="font-display font-black text-2xl md:text-3xl tracking-[-0.02em] mt-2">Pódio</h3>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 md:gap-6 items-end max-w-3xl mx-auto">
-              {podiumOrder.map((l) => {
-                const pos = l.rank_position;
-                const isFirst = pos === 1;
-                const isSecond = pos === 2;
-                const Icon = isFirst ? Crown : isSecond ? Medal : Award;
-                const height = isFirst ? "h-44 md:h-56" : isSecond ? "h-32 md:h-40" : "h-24 md:h-32";
-                const iconTone = isFirst ? "text-yellow-400" : isSecond ? "text-slate-300" : "text-orange-400";
-                const ringTone = isFirst ? "ring-yellow-400/60 shadow-[0_0_40px_-8px_rgba(250,204,21,0.5)]" : isSecond ? "ring-slate-300/40" : "ring-orange-400/40";
-                const pedestalTone = isFirst
-                  ? "bg-gradient-to-b from-yellow-400/25 via-yellow-500/10 to-yellow-600/5 border-yellow-400/40"
-                  : isSecond
-                  ? "bg-gradient-to-b from-slate-300/20 via-slate-400/10 to-slate-500/5 border-slate-300/30"
-                  : "bg-gradient-to-b from-orange-400/20 via-orange-500/10 to-orange-600/5 border-orange-400/30";
-                return (
-                  <div key={String(l.seller_id) + pos} className="flex flex-col items-center">
-                    <div className={cn(
-                      "relative h-16 w-16 md:h-20 md:w-20 rounded-full ring-4 overflow-hidden bg-muted flex items-center justify-center mb-3",
-                      ringTone
-                    )}>
-                      {l.seller_avatar
-                        ? <img src={l.seller_avatar} alt="" className="h-full w-full object-cover" />
-                        : <span className="font-display font-black text-2xl">{l.seller_name.charAt(0).toUpperCase()}</span>}
-                      <div className={cn("absolute -top-1 -right-1 h-7 w-7 rounded-full bg-background border border-border flex items-center justify-center", iconTone)}>
-                        <Icon className="h-4 w-4" />
-                      </div>
-                    </div>
-                    <p className="font-bold text-sm md:text-base text-center truncate max-w-full">{l.seller_name}</p>
-                    <p className="font-display font-black text-base md:text-lg tabular-nums text-primary mt-0.5">{fmtBRL(l.revenue_cents)}</p>
-                    <p className="text-[10px] text-muted-foreground">{l.sales_count} vendas</p>
-                    <div className={cn(
-                      "mt-3 w-full rounded-t-2xl border border-b-0 flex items-start justify-center pt-4",
-                      pedestalTone,
-                      height
-                    )}>
-                      <span className="font-display font-black text-3xl md:text-5xl tabular-nums opacity-90">{pos}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ─── LEADERBOARD (Top 5) ─── */}
-      <Panel className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-primary" /> Top 5 do Ranking
-          </h3>
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{leaders.length} participantes</span>
-        </div>
-        {top5.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">Nenhuma venda registrada ainda nesta corrida.</p>
-        ) : (
-          <div className="space-y-2">
-            {top5.map(l => {
-              const isMe = l.seller_id && l.seller_id === user?.id;
-              const pct = topRevenue > 0 ? (l.revenue_cents / topRevenue) * 100 : 0;
-              const isTop3 = l.rank_position <= 3;
-              const posTone = l.rank_position === 1 ? "bg-yellow-400/15 text-yellow-500 border-yellow-400/40"
-                : l.rank_position === 2 ? "bg-slate-300/15 text-slate-300 border-slate-300/40"
-                : l.rank_position === 3 ? "bg-orange-400/15 text-orange-400 border-orange-400/40"
-                : "bg-muted/60 text-muted-foreground border-border/40";
-              return (
-                <div key={String(l.seller_id) + l.rank_position} className={cn(
-                  "relative overflow-hidden rounded-2xl border border-border/50 p-4 flex items-center gap-4 transition-colors",
-                  isTop3 && "bg-gradient-to-r from-primary/[0.04] to-transparent",
-                  isMe && "border-primary/50 bg-primary/[0.06]"
-                )}>
-                  <div className={cn("h-11 w-11 shrink-0 rounded-xl border flex items-center justify-center font-display font-black text-lg tabular-nums", posTone)}>
-                    {l.rank_position}
-                  </div>
-                  {l.seller_avatar
-                    ? <img src={l.seller_avatar} alt="" className="h-10 w-10 rounded-full object-cover shrink-0" />
-                    : <div className="h-10 w-10 rounded-full bg-muted text-sm font-bold flex items-center justify-center shrink-0">{l.seller_name.charAt(0).toUpperCase()}</div>}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className={cn("font-bold text-sm truncate", isMe && "text-primary")}>{l.seller_name}{isMe && " (você)"}</p>
-                    </div>
-                    <div className="mt-1.5 h-1.5 w-full rounded-full bg-muted/60 overflow-hidden">
-                      <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60" style={{ width: `${Math.max(6, pct)}%` }} />
-                    </div>
-                    <p className="text-[10px] text-muted-foreground mt-1 tabular-nums">{l.sales_count} vendas · {pct.toFixed(1)}% do 1º</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="font-display font-black text-base md:text-lg tabular-nums">{fmtBRL(l.revenue_cents)}</p>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Faturamento</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </Panel>
-
-      {/* ─── PRIZES GRID ─── */}
-      {prizes.length > 0 && (
-        <Panel>
-          <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
-            <Gift className="h-4 w-4 text-primary" /> Prêmios
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {prizes.map(p => (
-              <div key={p.id} className="rounded-2xl border border-border/40 bg-card overflow-hidden group hover:border-primary/40 transition-colors">
-                {p.image_url ? (
-                  <div className="aspect-video bg-muted/30 overflow-hidden">
-                    <img src={p.image_url} alt={p.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  </div>
-                ) : (
-                  <div className="aspect-video bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-                    <Gift className="h-10 w-10 text-primary/40" />
-                  </div>
-                )}
-                <div className="p-4">
-                  <p className="font-bold text-sm truncate">{p.title}</p>
-                  {p.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{p.description}</p>}
-                  <div className="mt-3 flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Meta</span>
-                    <span className="font-display font-bold text-primary tabular-nums">{fmtBRL(p.min_revenue_cents)}</span>
-                  </div>
-                </div>
+          <div className="grid grid-cols-4 gap-px overflow-hidden rounded-lg border border-border bg-border">
+            {([["Dias", cd.d], ["Horas", cd.h], ["Min", cd.m], ["Seg", cd.s]] as const).map(([k, v]) => (
+              <div key={k} className="min-w-[68px] bg-background px-3 py-3 text-center">
+                <p className="font-display text-2xl font-bold tabular-nums text-foreground">{String(v).padStart(2, "0")}</p>
+                <p className="font-mono text-[9px] uppercase text-muted-foreground">{k}</p>
               </div>
             ))}
           </div>
-        </Panel>
+        </div>
+      </section>
+
+      <div className="grid gap-4 xl:grid-cols-[1.35fr_1fr]">
+        {/* PODIUM */}
+        <section className="rounded-xl border border-border bg-card px-5 py-6 sm:px-8">
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="font-mono text-[10px] uppercase text-muted-foreground">Top 3 da temporada</p>
+              <h2 className="mt-1 font-display text-lg font-bold text-foreground">Pódio</h2>
+            </div>
+            <span className="font-mono text-[10px] uppercase text-muted-foreground">{leaders.length} participantes</span>
+          </div>
+          {podium.length === 0 ? (
+            <p className="py-16 text-center text-sm text-muted-foreground">Nenhuma venda registrada ainda nesta corrida.</p>
+          ) : (
+            <div className="mx-auto mt-8 grid max-w-2xl grid-cols-3 items-end gap-3 sm:gap-5">
+              {podium.map((l) => {
+                const first = l.rank_position === 1;
+                const Icon = POS_ICON[l.rank_position - 1] ?? Award;
+                return (
+                  <motion.div key={`${l.seller_id}-${l.rank_position}`} initial={reduce ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: first ? 0.15 : 0.05 }} className="flex min-w-0 flex-col items-center">
+                    <div className={cn("relative rounded-full p-[2px]", first ? "bg-primary" : "bg-border")}>
+                      <Avatar row={l} size={first ? "h-20 w-20 text-2xl" : "h-14 w-14 text-lg"} />
+                      <span className={cn("absolute -right-1 -top-1 grid h-7 w-7 place-items-center rounded-full border border-border bg-background", first ? "text-primary" : "text-muted-foreground")}><Icon className="h-3.5 w-3.5" /></span>
+                    </div>
+                    <p className="mt-3 max-w-full truncate text-sm font-semibold text-foreground">{l.seller_name}</p>
+                    <p className={cn("font-display text-sm font-bold tabular-nums sm:text-base", first ? "text-primary" : "text-foreground")}>{fmtBRL(l.revenue_cents)}</p>
+                    <div className={cn("mt-3 flex w-full items-start justify-center rounded-t-lg border border-b-0 pt-3", first ? "h-40 border-primary/40 bg-primary/10" : l.rank_position === 2 ? "h-28 border-border bg-muted/60" : "h-20 border-border bg-muted/40")}>
+                      <span className={cn("font-display text-3xl font-bold tabular-nums sm:text-4xl", first ? "text-primary" : "text-muted-foreground")}>{l.rank_position}</span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        {/* RANKING */}
+        <section className="rounded-xl border border-border bg-card px-5 py-6 sm:px-6">
+          <p className="font-mono text-[10px] uppercase text-muted-foreground">Classificação</p>
+          <h2 className="mt-1 font-display text-lg font-bold text-foreground">Top 10</h2>
+          <ol className="mt-4">
+            {leaders.slice(0, 10).map((l) => {
+              const me = l.seller_id === user?.id;
+              return (
+                <li key={`${l.seller_id}-${l.rank_position}`} className={cn("flex items-center gap-3 border-t border-border py-2.5 first:border-t-0", me && "-mx-3 rounded-md border-transparent bg-primary/10 px-3")}>
+                  <span className={cn("w-6 text-right font-mono text-xs tabular-nums", l.rank_position <= 3 ? "text-primary" : "text-muted-foreground")}>{l.rank_position}</span>
+                  <Avatar row={l} size="h-8 w-8 text-xs" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">{l.seller_name}{me && <span className="text-primary"> · você</span>}</p>
+                    <div className="mt-1 h-0.5 rounded-full bg-muted"><div className="h-full rounded-full bg-primary/70" style={{ width: `${Math.max(4, (l.revenue_cents / topRevenue) * 100)}%` }} /></div>
+                  </div>
+                  <span className="font-numbers text-sm font-semibold tabular-nums text-foreground">{fmtBRL(l.revenue_cents)}</span>
+                </li>
+              );
+            })}
+            {leaders.length === 0 && <li className="py-10 text-center text-sm text-muted-foreground">Ranking vazio por enquanto.</li>}
+          </ol>
+          {mine && !mineVisible && (
+            <div className="mt-3 flex items-center gap-3 rounded-md border border-primary/40 bg-primary/10 px-3 py-2.5">
+              <span className="font-mono text-xs text-primary">#{mine.rank_position}</span>
+              <span className="flex-1 text-sm font-medium text-foreground">Sua posição</span>
+              <span className="font-numbers text-sm font-semibold tabular-nums">{fmtBRL(mine.revenue_cents)}</span>
+            </div>
+          )}
+          {!mine && <p className="mt-3 text-xs text-muted-foreground">Faça sua primeira venda na temporada para entrar no ranking.</p>}
+        </section>
+      </div>
+
+      {/* PRIZES */}
+      {prizes.length > 0 && (
+        <section className="rounded-xl border border-border bg-card px-5 py-6 sm:px-8">
+          <p className="font-mono text-[10px] uppercase text-muted-foreground">Definidos pela VENXPAY</p>
+          <h2 className="mt-1 flex items-center gap-2 font-display text-lg font-bold text-foreground"><Gift className="h-4 w-4 text-primary" />Prêmios da temporada</h2>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            {prizes.map((p) => {
+              const reached = mine ? (p.target_position ? mine.rank_position <= p.target_position : mine.revenue_cents >= p.min_revenue_cents) : false;
+              return (
+                <article key={p.id} className={cn("group overflow-hidden rounded-lg border bg-background transition-[border-color,transform] duration-200 hover:-translate-y-0.5", reached ? "border-primary/50" : "border-border hover:border-primary/40")}>
+                  <div className="aspect-video overflow-hidden bg-muted">
+                    {p.image_url ? <img src={p.image_url} alt={p.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : <div className="grid h-full place-items-center"><Trophy className="h-9 w-9 text-primary/50" /></div>}
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="font-semibold text-foreground">{p.title}</p>
+                      {reached && <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 font-mono text-[9px] uppercase text-primary-foreground">Garantido</span>}
+                    </div>
+                    {p.description && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{p.description}</p>}
+                    <p className="mt-3 flex items-center gap-1.5 border-t border-border pt-3 font-mono text-[11px] text-muted-foreground">
+                      <Target className="h-3 w-3 text-primary" />
+                      {p.target_position ? `Top ${p.target_position} no ranking` : `Meta ${fmtBRL(p.min_revenue_cents)}`}
+                    </p>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
       )}
-    </PageShell>
+    </div>
   );
 }
