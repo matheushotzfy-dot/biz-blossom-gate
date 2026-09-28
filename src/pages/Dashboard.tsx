@@ -762,7 +762,24 @@ export default function Dashboard() {
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
               </div>
-              <p className="mt-3 text-[12px] text-muted-foreground/60 italic">Nenhum link de pagamento criado.</p>
+              {payLinks.length === 0 ? (
+                <p className="mt-3 text-[12px] text-muted-foreground/60 italic">Nenhum link de pagamento criado.</p>
+              ) : (
+                <div className="mt-3 space-y-2">
+                  {payLinks.map((l) => (
+                    <div key={l.id} className="flex items-center justify-between gap-3 text-[12px]">
+                      <span className="min-w-0 truncate text-foreground/85">{l.title}</span>
+                      <span className="shrink-0 tabular-nums text-muted-foreground/70">
+                        {Number(l.current_uses || 0)} vendas ·{" "}
+                        <span className="font-semibold text-foreground">{fmt(Number(l.total_revenue || 0))}</span>
+                      </span>
+                    </div>
+                  ))}
+                  <p className="border-t border-border/40 pt-2 text-[11px] tabular-nums text-muted-foreground/60">
+                    {payLinksActive} ativo{payLinksActive === 1 ? "" : "s"} · {fmt(payLinksRevenue)} gerados no total
+                  </p>
+                </div>
+              )}
             </button>
           </div>
         </section>
