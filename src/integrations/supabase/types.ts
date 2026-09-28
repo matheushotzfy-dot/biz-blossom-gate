@@ -5307,6 +5307,17 @@ export type Database = {
         Args: { _staff: string }
         Returns: number
       }
+      get_thank_you_summary: {
+        Args: { _tx_id: string }
+        Returns: {
+          amount: number
+          customer_email_masked: string
+          customer_first_name: string
+          payment_method: string
+          product_id: string
+          status: string
+        }[]
+      }
       get_user_max_ticket: { Args: { _user_id: string }; Returns: number }
       grade_quiz_attempt: {
         Args: { _answers: Json; _quiz_id: string }
