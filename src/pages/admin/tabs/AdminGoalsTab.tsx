@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { logAdminAction } from "@/lib/auditLog";
 
 type Goal = {
   id: string;
@@ -85,11 +86,12 @@ export default function AdminGoalsTab() {
     };
     if (!payload.title || !payload.reward_title || !payload.target_amount) { toast.error("Preencha os campos obrigatórios"); return; }
 
-    const { error } = editing
-      ? await supabase.from("revenue_goals").update(payload).eq("id", editing.id)
-      : await supabase.from("revenue_goals").insert(payload as never);
+    const { data: saved, error } = editing
+      ? await supabase.from("revenue_goals").update(payload).eq("id", editing.id).select().maybeSingle()
+      : await supabase.from("revenue_goals").insert(payload as never).select().maybeSingle();
     if (error) { toast.error("Erro: " + error.message); return; }
     toast.success(editing ? "Meta atualizada!" : "Meta criada!");
+    await logAdminAction(editing ? "update_goal" : "create_goal", "revenue_goal", editing?.id ?? (saved as Goal | null)?.id, payload as any);
     setOpen(false); load();
   };
 
@@ -98,11 +100,14 @@ export default function AdminGoalsTab() {
     const { error } = await supabase.from("revenue_goals").delete().eq("id", id);
     if (error) { toast.error("Erro ao remover"); return; }
     toast.success("Meta removida");
+    await logAdminAction("delete_goal", "revenue_goal", id);
     load();
   };
 
   const toggleActive = async (g: Goal) => {
-    await supabase.from("revenue_goals").update({ is_active: !g.is_active }).eq("id", g.id);
+    const { error } = await supabase.from("revenue_goals").update({ is_active: !g.is_active }).eq("id", g.id);
+    if (error) { toast.error("Erro ao atualizar"); return; }
+    await logAdminAction(g.is_active ? "deactivate_goal" : "activate_goal", "revenue_goal", g.id);
     load();
   };
 
