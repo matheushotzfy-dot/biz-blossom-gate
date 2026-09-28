@@ -64,7 +64,7 @@ function ClaimRow({ claim }: { claim: RewardClaim }) {
 }
 
 export default function Premiacoes() {
-  const { user, revenue, claims, setClaims, loading, failed, unlocked, next, targetProgress, awards } = useAwards();
+  const { user, revenue, claims, setClaims, loading, failed, reload, unlocked, next, targetProgress, awards } = useAwards();
   const [activeIndex, setActiveIndex] = useState(0);
   const [claimOpen, setClaimOpen] = useState(false);
   const touched = useRef(false);
@@ -177,8 +177,9 @@ export default function Premiacoes() {
       </section>
 
       {failed && (
-        <div role="alert" className="mt-4 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-          <AlertTriangle className="h-4 w-4" /> Alguns dados não puderam ser sincronizados.
+        <div role="alert" className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          <span className="flex items-center gap-2"><AlertTriangle className="h-4 w-4" /> Alguns dados não puderam ser sincronizados.</span>
+          <Button variant="outline" size="sm" onClick={() => void reload()} className="h-7 shrink-0 border-destructive/40 text-destructive hover:bg-destructive/10">Tentar novamente</Button>
         </div>
       )}
 

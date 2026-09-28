@@ -7,7 +7,7 @@ import {
   FileText, CheckCircle2, Clock, AlertCircle, Search,
   Settings, Zap, ShieldCheck, FileCheck, Building2, RefreshCw
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { StatCard } from "@/components/StatCard";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { format } from "date-fns";
@@ -23,7 +23,7 @@ const STATUS_MAP: Record<DeliveryStatus, { label: string; cls: string; dot: stri
   exhausted: { label: "Falhou",    cls: "bg-red-500/10 text-red-500 border-red-500/20",             dot: "bg-red-500",     Icon: AlertCircle },
 };
 
-const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const fmt = formatCurrency;
 
 interface InvoiceRow {
   id: string;

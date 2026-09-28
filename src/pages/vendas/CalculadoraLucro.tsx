@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { formatCurrency } from "@/lib/utils";
+import { calcFee } from "@/lib/fees";
 
 export default function CalculadoraLucro() {
  const [price, setPrice] = useState(197);
@@ -14,7 +16,7 @@ export default function CalculadoraLucro() {
 
  const calc = useMemo(() => {
  const grossRevenue = price * monthlySales;
- const platformFee = grossRevenue * 0.0499 + monthlySales * 2.50;
+ const platformFee = calcFee(grossRevenue, 4.99, monthlySales * 2.50);
  const affiliateCost = grossRevenue * (affiliatePct / 100) * (affiliateCommission / 100);
  const totalCosts = platformFee + adSpend + affiliateCost;
  const netProfit = grossRevenue - totalCosts;
@@ -25,7 +27,6 @@ export default function CalculadoraLucro() {
  return { grossRevenue, platformFee, affiliateCost, totalCosts, netProfit, roi, profitMargin, cpa };
  }, [price, monthlySales, adSpend, affiliateCommission, affiliatePct]);
 
- const fmt = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
  return (
  <div className="mx-auto w-full max-w-[1180px] space-y-6 p-4 md:p-6">
@@ -87,8 +88,8 @@ export default function CalculadoraLucro() {
  <div className="space-y-4">
  <div className="grid grid-cols-2 gap-3">
  {[
- { label: "Faturamento Bruto", value: `R$ ${fmt(calc.grossRevenue)}`, icon: DollarSign, color: "text-primary" },
- { label: "Lucro Líquido", value: `R$ ${fmt(calc.netProfit)}`, icon: TrendingUp, color: calc.netProfit >= 0 ? "text-emerald-500" : "text-destructive" },
+ { label: "Faturamento Bruto", value: formatCurrency(calc.grossRevenue), icon: DollarSign, color: "text-primary" },
+ { label: "Lucro Líquido", value: formatCurrency(calc.netProfit), icon: TrendingUp, color: calc.netProfit >= 0 ? "text-emerald-500" : "text-destructive" },
  { label: "ROI do Tráfego", value: `${calc.roi.toFixed(0)}%`, icon: Target, color: calc.roi >= 100 ? "text-emerald-500" : "text-amber-500" },
  { label: "Margem de Lucro", value: `${calc.profitMargin.toFixed(1)}%`, icon: Percent, color: calc.profitMargin >= 30 ? "text-emerald-500" : "text-amber-500" },
  ].map(kpi => (
@@ -117,12 +118,12 @@ export default function CalculadoraLucro() {
  ].map(item => (
  <div key={item.label} className="flex items-center justify-between rounded-xl bg-muted/15 px-4 py-2.5">
  <span className="text-[12px] font-medium text-muted-foreground">{item.label}</span>
- <span className="text-[13px] font-bold">R$ {fmt(item.value)}</span>
+ <span className="text-[13px] font-bold">{formatCurrency(item.value)}</span>
  </div>
  ))}
  <div className="flex items-center justify-between rounded-xl bg-primary/10 px-4 py-3">
  <span className="text-[13px] font-bold">Total de Custos</span>
- <span className="text-[14px] font-black text-primary">R$ {fmt(calc.totalCosts)}</span>
+ <span className="text-[14px] font-black text-primary">{formatCurrency(calc.totalCosts)}</span>
  </div>
  </CardContent>
  </Card>

@@ -19,10 +19,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { StatCard } from "@/components/StatCard";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/PageShell";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
 
-const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+const fmt = formatCurrency;
 
 type AffiliateLink = {
   id: string; product_id: string; affiliate_user_id: string; owner_user_id: string;

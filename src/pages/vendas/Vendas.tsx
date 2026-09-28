@@ -10,7 +10,7 @@ import { TransactionDetailPanel } from "@/components/transactions/TransactionDet
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
 import type { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { cn, deriveTransactionStatus } from "@/lib/utils";
+import { cn, deriveTransactionStatus, formatCurrency } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { Seo } from "@/components/Seo";
 import { supabase } from "@/integrations/supabase/client";
 
-const fmt = (v: number) => v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const fmt = formatCurrency;
 
 const SP_TZ = "America/Sao_Paulo";
 const spDateTime = (iso: string) => new Intl.DateTimeFormat("pt-BR", {

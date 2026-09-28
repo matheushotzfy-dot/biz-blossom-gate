@@ -8,10 +8,10 @@ import {
 import { PageShell, PageTitle, GlassKpi, Panel, EmptyState } from "@/components/PageShell";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { motion } from "framer-motion";
 
-const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+const fmt = formatCurrency;
 
 type AffLink = {
  id: string; product_id: string; slug: string; commission_pct: number;

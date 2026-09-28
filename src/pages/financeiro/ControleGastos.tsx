@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { PageShell, PageTitle, EmptyState, Panel as SharedPanel } from "@/components/PageShell";
-import { cn, isApprovedTransaction } from "@/lib/utils";
+import { cn, isApprovedTransaction, formatCurrency } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 const CATEGORIES = [
@@ -27,7 +27,7 @@ const CATEGORIES = [
   { value: "outros", label: "Outros", color: "hsl(var(--muted-foreground))", icon: Filter },
 ];
 
-const fmt = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
+const fmt = formatCurrency;
 
 type Expense = {
   id: string; user_id: string; category: string; description: string | null;
