@@ -257,8 +257,8 @@ export default function Apps() {
     isComingSoon
       ? "border-border/40 bg-card/50 cursor-not-allowed opacity-90"
       : active
-      ? "border-primary/40 bg-card  hover:border-primary/70 hover:bg-primary/[0.045] hover: "
-      : "border-border/70  hover:border-primary/60 hover:bg-primary/[0.035] hover: "
+      ? "border-primary/40 bg-card hover:-translate-y-0.5 hover:border-primary/70 hover:bg-primary/[0.045]"
+      : "border-border/70 hover:-translate-y-0.5 hover:border-primary/60 hover:bg-primary/[0.035]"
   )}
   style={{ animationDelay: `${idx * 35}ms`, animationFillMode: "backwards" }}
   >
@@ -278,7 +278,7 @@ export default function Apps() {
 
                <div className="relative z-[1] flex h-full w-full items-center justify-center">
                  <div className={cn(
- "flex h-20 w-32 items-center justify-center md:h-24 md:w-40 transition-all",
+ "flex h-20 w-40 items-center justify-center rounded-xl border border-border/50 bg-background px-4 md:h-24 md:w-44 transition-all",
                    isComingSoon && "grayscale opacity-40"
                  )}>
                    <img
@@ -286,7 +286,7 @@ export default function Apps() {
                      alt={app.name}
                      className={cn(
  "max-h-full max-w-full object-contain transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                       !isComingSoon && "group-"
+                       !isComingSoon && "group-hover:scale-105"
                      )}
                    />
                  </div>
@@ -318,7 +318,7 @@ export default function Apps() {
             {/* Header — premium */}
             <div className="relative flex items-center gap-4 border-b border-border/70 bg-gradient-to-b from-primary/[0.04] to-transparent px-6 py-5">
               <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-              <div className="premium-icon-shell relative flex h-14 w-14 shrink-0 items-center justify-center rounded-[12px] p-2.5">
+              <div className="relative flex h-14 w-20 shrink-0 items-center justify-center rounded-[12px] border border-border/60 bg-background p-2.5">
                 <img src={dialogApp.logo} alt={dialogApp.name} className="relative h-full w-full object-contain" />
               </div>
               <div className="min-w-0 flex-1">
@@ -462,7 +462,7 @@ export default function Apps() {
                               <Checkbox
                                 checked={selected}
                                 onCheckedChange={() => toggleEvent(event)}
-                                className="h-4 w-4 rounded-[5px] border-border/80 data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:"
+                                className="h-4 w-4 rounded-[5px] border-border/80 data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
                               />
                               <span className="flex-1 font-bold">{event}</span>
                               <span className={cn("rounded-md border px-1.5 py-0.5 text-[11px] font-semibold ", tone)}>

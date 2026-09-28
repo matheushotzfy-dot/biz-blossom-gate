@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebhooks, useInvalidateAll } from "@/hooks/useQueryData";
 import type { Tables } from "@/integrations/supabase/types";
 import {
   Plus, Trash2, Globe, Search, Pencil, Radio, Send,
-  Power, PowerOff, Copy, Webhook, CheckCircle2, Clock, AlertTriangle, ExternalLink,
+  Power, PowerOff, Copy, Webhook, ShieldCheck, ExternalLink,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -43,41 +42,9 @@ const EVENT_GROUPS = [
 ];
 
 type WebhookConfig = Tables<"webhook_configs_safe">;
-type Delivery = Pick<
-  Tables<"webhook_deliveries">,
- "id" | "event" | "status" | "attempt" | "response_status" | "error" | "created_at" | "delivered_at"
->;
-
-/** Recent delivery attempts for the signed-in seller (RLS scoped). */
-function useWebhookDeliveries() {
-  const { user } = useAuth();
-  return useQuery({
-    queryKey: ["webhook-deliveries", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("webhook_deliveries")
-        .select("id, event, status, attempt, response_status, error, created_at, delivered_at")
-        .order("created_at", { ascending: false })
-        .limit(12);
-      if (error) throw error;
-      return (data || []) as Delivery[];
-    },
-    enabled: !!user?.id,
-    refetchInterval: 30_000,
-    staleTime: 15_000,
-  });
-}
-
-const DELIVERY_TONE: Record<string, { label: string; className: string; Icon: typeof Clock }> = {
-  success: { label: "Entregue", className: "text-success", Icon: CheckCircle2 },
-  pending: { label: "Na fila", className: "text-muted-foreground", Icon: Clock },
-  exhausted: { label: "Falhou", className: "text-destructive", Icon: AlertTriangle },
-};
-
 export default function Webhooks() {
   const { user } = useAuth();
   const { data: webhooks = [], refetch: refetchWebhooks } = useWebhooks();
-  const { data: deliveries = [], refetch: refetchDeliveries } = useWebhookDeliveries();
   const invalidateAll = useInvalidateAll();
   const [createOpen, setCreateOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -168,8 +135,7 @@ export default function Webhooks() {
     try {
       const { error } = await supabase.rpc("enqueue_test_webhook", { _config_id: id });
       if (error) { toast.error(friendlyError(error, "Não foi possível enviar o teste")); return; }
-      toast.success("Evento de teste enfileirado", { description: "A entrega aparece no histórico em até 1 minuto." });
-      await refetchDeliveries();
+      toast.success("Evento de teste enfileirado", { description: "O endpoint deve receber a chamada assinada em até 1 minuto." });
     } finally {
       setTestingId(null);
     }
@@ -187,8 +153,6 @@ export default function Webhooks() {
   );
 
   const activeCount = webhooks.filter((w) => w.is_active).length;
-  const delivered = deliveries.filter((d) => d.status === "success").length;
-  const failing = deliveries.filter((d) => d.status === "exhausted").length;
 
   return (
     <HDShell>
@@ -290,12 +254,12 @@ export default function Webhooks() {
 
       <HDStatGrid>
         <HDStat label="Endpoints" value={String(webhooks.length)} sub={`${activeCount} ativos`} icon={Webhook} />
-        <HDStat label="Entregas recentes" value={String(delivered)} sub="respostas 2xx" icon={CheckCircle2} tone="success" />
-        <HDStat label="Falhas" value={String(failing)} sub="tentativas esgotadas" icon={AlertTriangle} tone={failing ? "danger" : "neutral"} />
+        <HDStat label="Eventos" value={String(EVENT_GROUPS.reduce((total, group) => total + group.events.length, 0))} sub="tipos disponíveis" icon={Radio} />
+        <HDStat label="Transporte" value="HTTPS" sub="POST seguro" icon={Globe} tone="success" />
         <HDStat label="Assinatura" value="HMAC" sub="SHA-256 · HTTPS" icon={Radio} />
       </HDStatGrid>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-4">
         <HDCard
           title="Endpoints"
           description={webhooks.length === 0 ? "Nenhum endpoint configurado" : `${webhooks.length} cadastrados`}
@@ -371,38 +335,6 @@ export default function Webhooks() {
           )}
         </HDCard>
 
-        <HDCard title="Entregas recentes" description="Atualiza a cada 30 segundos">
-          {deliveries.length === 0 ? (
-            <div className="px-6 py-16 text-center">
-              <Clock size={20} className="mx-auto text-muted-foreground/40" />
-              <p className="mt-3 text-[13px] text-foreground">Nenhuma entrega ainda</p>
-              <p className="mt-1 text-[12px] text-muted-foreground">Use “Testar” para validar seu endpoint agora.</p>
-            </div>
-          ) : (
-            <ul className="divide-y divide-border/40">
-              {deliveries.map((d) => {
-                const tone = DELIVERY_TONE[d.status] ?? DELIVERY_TONE.pending;
-                const Icon = tone.Icon;
-                return (
-                  <li key={d.id} className="flex items-center gap-3 px-6 py-3.5">
-                    <Icon className={cn("h-4 w-4 shrink-0", tone.className)} strokeWidth={2} />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-mono text-[12px] text-foreground">{d.event}</p>
-                      <p className="mt-0.5 truncate text-[11px] text-muted-foreground/70">
-                        {new Date(d.created_at).toLocaleString("pt-BR")}
-                        {d.attempt > 0 ? ` · ${d.attempt} tentativa${d.attempt > 1 ? "s" : ""}` : ""}
-                        {d.error ? ` · ${d.error}` : ""}
-                      </p>
-                    </div>
-                    <span className={cn("shrink-0 text-[11.5px] font-semibold tabular-nums", tone.className)}>
-                      {d.response_status ?? tone.label}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </HDCard>
       </div>
     </HDShell>
   );

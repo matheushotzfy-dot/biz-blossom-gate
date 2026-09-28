@@ -105,15 +105,17 @@ export default function AdminSupportTab({
   );
   const { others: typingOthers, notifyTyping } = useTicketTyping(selectedId, meIdentity);
 
-  const getProfile = (uid: string) => profiles.find(p => p.user_id === uid);
+  const profileById = useMemo(() => new Map(profiles.map((profile) => [profile.user_id, profile])), [profiles]);
+  const getProfile = (uid: string) => profileById.get(uid);
 
   const load = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("support_tickets")
       .select("*")
       .order("last_message_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
       .limit(500);
+    if (error) toast.error("Não foi possível carregar os tickets.");
     if (data) setTickets(data as any);
     setLoading(false);
   };
@@ -247,7 +249,7 @@ export default function AdminSupportTab({
       });
     }
     return r;
-  }, [tickets, statusFilter, search, profiles]);
+  }, [tickets, statusFilter, search, profileById]);
 
   const selected = selectedId ? tickets.find(t => t.id === selectedId) : null;
   const selectedProfile = selected ? getProfile(selected.user_id) : null;
@@ -286,9 +288,9 @@ export default function AdminSupportTab({
       {loading ? (
         <div className="flex justify-center py-20"><div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-4 min-h-[640px]">
+        <div className="grid min-h-[calc(100dvh-14rem)] grid-cols-1 gap-4 lg:grid-cols-[380px_1fr]">
           {/* LIST PANEL */}
-          <div className={cn("bg-card rounded-2xl border border-border/60 overflow-hidden flex flex-col", selectedId && "hidden lg:flex")}>
+          <div className={cn("bg-card rounded-2xl border border-border overflow-hidden flex flex-col", selectedId && "hidden lg:flex")}>
             <div className="p-3 border-b border-border/40 space-y-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
@@ -372,7 +374,7 @@ export default function AdminSupportTab({
           </div>
 
           {/* THREAD PANEL */}
-          <div className={cn("bg-card rounded-2xl border border-border/60 overflow-hidden flex flex-col", !selectedId && "hidden lg:flex")}>
+          <div className={cn("bg-card rounded-2xl border border-border overflow-hidden flex flex-col", !selectedId && "hidden lg:flex")}>
             {!selected ? (
               <div className="flex-1 flex flex-col items-center justify-center p-10 text-center">
                 <div className="h-16 w-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
@@ -424,7 +426,7 @@ export default function AdminSupportTab({
                     ) : (
                       <button
                         onClick={() => handleStatusChange(selected.id, "closed", "Ticket encerrado")}
-                        className="h-8 px-3 rounded-lg border border-border/60 bg-muted/20 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-emerald-500 flex items-center gap-1"
+                         className="h-8 px-3 rounded-lg border border-border/60 bg-muted/20 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-success flex items-center gap-1"
                       >
                         <CheckCircle2 className="h-3 w-3" /> Encerrar
                       </button>
@@ -445,7 +447,7 @@ export default function AdminSupportTab({
                         <div className={cn(
                           "h-9 w-9 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 border",
                           isStaff
-                            ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-500"
+                             ? "bg-success/15 border-success/30 text-success"
                             : "bg-primary/15 border-primary/30 text-primary"
                         )}>
                           {isStaff ? initials(m.sender_name) : initials(selectedProfile?.full_name || selectedProfile?.email)}
@@ -454,7 +456,7 @@ export default function AdminSupportTab({
                           <div className="flex items-center gap-2 mb-1 text-[10px] font-black uppercase tracking-widest">
                             {isStaff ? (
                               <>
-                                <span className="text-emerald-500">{m.sender_role?.toUpperCase() || "STAFF"}</span>
+                                 <span className="text-success">{m.sender_role?.toUpperCase() || "STAFF"}</span>
                                 <span className="text-muted-foreground/70 normal-case tracking-normal font-bold">· {m.sender_name || "—"}</span>
                               </>
                             ) : (
@@ -465,7 +467,7 @@ export default function AdminSupportTab({
                           <div className={cn(
                             "rounded-2xl px-4 py-2.5 text-[13px] leading-relaxed whitespace-pre-wrap",
                             isStaff
-                              ? "bg-emerald-500/10 border border-emerald-500/25 text-foreground rounded-tr-sm"
+                               ? "bg-success/10 border border-success/25 text-foreground rounded-tr-sm"
                               : "bg-card border border-border/60 text-foreground rounded-tl-sm"
                           )}>
                             {m.body}

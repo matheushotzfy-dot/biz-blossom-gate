@@ -9,6 +9,7 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useKycStatus } from "@/hooks/useKycStatus";
 import { usePixKeys, useBankAccounts } from "@/hooks/useQueryData";
 import {
   UserCircle, Save, Shield, FileCheck, CheckCircle2,
@@ -53,6 +54,7 @@ const pixKeyLabels: Record<string, string> = {
 export default function Identidade() {
   const { user } = useAuth();
   const { profile } = useProfile();
+  const kyc = useKycStatus();
   const { data: pixKeys = [] } = usePixKeys();
   const { data: bankAccounts = [] } = useBankAccounts();
   const [nickname, setNickname] = useState("");
@@ -78,7 +80,9 @@ export default function Identidade() {
     }
   }, [profile, nicknameInit]);
 
-  useEffect(() => { loadKycDocs(); }, [user, profile?.document_type]);
+  useEffect(() => {
+    if (kyc.resolved && !kyc.approved) void loadKycDocs();
+  }, [user, profile?.document_type, kyc.resolved, kyc.approved]);
 
   const loadKycDocs = async () => {
     if (!user) return;
@@ -137,13 +141,13 @@ export default function Identidade() {
   ];
   const doneCount = completionSteps.filter(s => s.done).length;
   const pct = Math.round((doneCount / completionSteps.length) * 100);
-  const isApproved = profile?.account_status === "approved";
+  const isApproved = kyc.approved;
   const formattedDoc = profile?.document_number
     ? formatDoc(profile.document_number, profile.document_type || "cpf")
     : "Não informado";
 
   const KPIS = [
-    { icon: Fingerprint, label: "Verificação",  value: `${pct}%`,             sub: `${doneCount}/${completionSteps.length} etapas` },
+    { icon: Fingerprint, label: "Verificação",  value: isApproved ? "100%" : `${pct}%`, sub: isApproved ? "Identidade confirmada" : `${doneCount}/${completionSteps.length} etapas` },
     { icon: Wallet,      label: "Chaves PIX",   value: `${pixKeys.length}/3`, sub: pixKeys.length ? "Cadastradas" : "Nenhuma" },
     { icon: Building2,   label: "Contas Bancárias", value: bankAccounts.length, sub: bankAccounts.length ? "Vinculadas" : "Nenhuma" },
     { icon: Shield,      label: "Status",       value: status.label,          sub: isApproved ? "Saques liberados" : "Aguardando aprovação" },
@@ -185,8 +189,8 @@ export default function Identidade() {
 
 
 
-      {/* Progress bar + steps */}
-      <div className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
+      {/* Progress is only actionable before the profile is approved. */}
+      {!isApproved ? <div className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
         <div className="p-6 border-b border-border/40 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="premium-icon-shell h-11 w-11 rounded-[12px] flex items-center justify-center">
@@ -220,7 +224,17 @@ export default function Identidade() {
             ))}
           </div>
         </div>
-      </div>
+      </div> : (
+        <div className="flex items-center gap-4 rounded-[24px] border border-success/30 bg-success/10 px-6 py-5">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-success/30 bg-background text-success">
+            <BadgeCheck className="h-6 w-6" strokeWidth={2.5} />
+          </div>
+          <div>
+            <h2 className="font-display text-base font-bold text-foreground">Identidade confirmada</h2>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">Sua análise foi concluída. As pendências e os documentos de verificação não precisam mais ser exibidos.</p>
+          </div>
+        </div>
+      )}
 
       {/* Dados Pessoais + PIX/Bancos */}
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6">
@@ -355,8 +369,8 @@ export default function Identidade() {
         </div>
       </div>
 
-      {/* KYC Documentos */}
-      <div ref={kycRef} className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
+      {/* Approved accounts no longer see document prompts or upload slots. */}
+      {!isApproved && <div ref={kycRef} className="group premium-hover-card bg-card rounded-[24px] border border-border/60 overflow-hidden">
         <div className="p-6 border-b border-border/40 flex items-center gap-3">
           <div className="premium-icon-shell info h-11 w-11 rounded-[12px] flex items-center justify-center">
             <FileCheck size={18} strokeWidth={2.5} className="relative" />
@@ -397,7 +411,7 @@ export default function Identidade() {
             </div>
           )}
         </div>
-      </div>
+      </div>}
     </HDShell>
   );
 }

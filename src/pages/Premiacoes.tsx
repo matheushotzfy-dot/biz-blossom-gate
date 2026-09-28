@@ -96,15 +96,15 @@ export default function Premiacoes() {
 
   return (
     <main
-      className="venx-vault pb-14"
+      className="venx-vault -mx-3 min-h-[calc(100dvh-5rem)] pb-14 sm:-mx-5 lg:-mx-8"
       onKeyDown={(e) => { if (e.key === "ArrowLeft") select(safeIndex - 1); if (e.key === "ArrowRight") select(safeIndex + 1); }}
     >
-      <section className="venx-vault-bg relative isolate overflow-hidden rounded-xl border border-border">
-        <header className="relative z-10 grid gap-6 border-b border-border px-5 py-6 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-end">
+      <section className="venx-vault-bg relative isolate min-h-[calc(100dvh-5rem)] overflow-hidden border-y border-border">
+        <header className="relative z-10 grid gap-7 border-b border-border px-6 py-8 sm:px-10 lg:grid-cols-[1fr_auto] lg:items-end lg:px-14 lg:py-10">
           <div>
             <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-primary"><Trophy className="h-3.5 w-3.5" /> Hall de conquistas</p>
-            <h1 className="mt-2 font-display text-3xl font-bold text-foreground sm:text-[2.6rem] sm:leading-tight">Sua operação merece ser vista.</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Cada marco libera uma peça física VENXPAY, produzida para registrar o tamanho da sua operação.</p>
+            <h1 className="mt-3 max-w-4xl font-display text-4xl font-bold leading-tight text-foreground sm:text-5xl lg:text-6xl">Sua operação merece ser vista.</h1>
+            <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">Cada marco libera uma peça física VENXPAY, produzida para registrar o tamanho da sua operação.</p>
           </div>
           <dl className="grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-border bg-border">
             {[
@@ -112,7 +112,7 @@ export default function Premiacoes() {
               ["Conquistadas", `${unlocked}/${awards.length}`],
               ["Resgates", String(claims.filter((c) => c.status !== "cancelled").length)],
             ].map(([k, v]) => (
-              <div key={k} className="bg-card px-4 py-3 sm:min-w-[140px]">
+              <div key={k} className="bg-card px-4 py-4">
                 <dt className="font-mono text-[9px] uppercase text-muted-foreground">{k}</dt>
                 <dd className="mt-1 font-display text-lg font-bold tabular-nums text-foreground">{v}</dd>
               </div>
@@ -121,7 +121,7 @@ export default function Premiacoes() {
         </header>
 
         {/* Linha do tempo dos marcos com a posição atual */}
-        <div className="relative z-10 border-b border-border px-5 py-6 sm:px-8">
+        <div className="relative z-10 border-b border-border px-6 py-7 sm:px-10 lg:px-14">
           <div className="flex justify-between font-mono text-[10px] uppercase text-muted-foreground">
             <span>{Math.round(targetProgress)}% até {next.label}</span>
             <span>{revenue >= next.value ? "Jornada concluída" : `Faltam ${formatMoney(Math.max(next.value - revenue, 0))}`}</span>
@@ -134,7 +134,8 @@ export default function Premiacoes() {
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             />
             {awards.map((a, i) => {
-              const left = (Math.log10(a.value) / Math.log10(top)) * 100;
+              const denominator = Math.log10(Math.max(top, 10));
+              const left = (Math.log10(Math.max(a.value, 1)) / denominator) * 100;
               const done = revenue >= a.value;
               return (
                 <button
@@ -154,7 +155,7 @@ export default function Premiacoes() {
           </div>
           <div className="relative mt-3 hidden h-4 sm:block">
             {awards.map((a) => (
-              <span key={a.id} style={{ left: `${(Math.log10(a.value) / Math.log10(top)) * 100}%` }} className="absolute -translate-x-1/2 font-mono text-[10px] text-muted-foreground">{a.label}</span>
+              <span key={a.id} style={{ left: `${(Math.log10(Math.max(a.value, 1)) / Math.log10(Math.max(top, 10))) * 100}%` }} className="absolute max-w-24 -translate-x-1/2 truncate font-mono text-[10px] text-muted-foreground">{a.label}</span>
             ))}
           </div>
         </div>
@@ -169,7 +170,7 @@ export default function Premiacoes() {
           </div>
         </div>
 
-        <div className="relative z-10 px-5 py-6 sm:px-8">
+        <div className="relative z-10 px-6 py-8 sm:px-10 lg:px-14">
           <p className="mb-3 font-mono text-[10px] uppercase text-muted-foreground">Coleção VENXPAY · selecione uma peça</p>
           <AwardGallery awards={awards} activeIndex={safeIndex} revenue={revenue} onSelect={select} />
         </div>
@@ -181,7 +182,7 @@ export default function Premiacoes() {
         </div>
       )}
 
-      <section className="mt-4 rounded-xl border border-border bg-card px-5 py-5 sm:px-8">
+      <section className="mt-4 border-y border-border bg-card px-6 py-7 sm:px-10 lg:px-14">
         <div className="flex items-end justify-between">
           <div>
             <p className="font-mono text-[10px] uppercase text-muted-foreground">Registro logístico</p>
