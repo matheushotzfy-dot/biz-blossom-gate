@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { GlassPanel as AdminPanel, GlassPanelTitle as PanelTitle } from "./AdminOverviewTab";
 import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+import AdminPager from "@/components/admin/AdminPager";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Source = "all" | "admin" | "staff" | "activity";
@@ -31,10 +32,13 @@ const ROLE_LABEL: Record<string, string> = {
   admin: "ADMIN", manager: "GERENTE", employee: "FUNCIONÁRIO", user: "USUÁRIO", staff: "STAFF",
 };
 
+const sanitizeSearch = (v: string) => v.replace(/[%,()*\\]/g, " ").trim();
+
 export default function AdminAuditTab({ profiles }: Props) {
   const [source, setSource] = useState<Source>("all");
   const [logs, setLogs] = useState<UnifiedLog[]>([]);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -42,24 +46,76 @@ export default function AdminAuditTab({ profiles }: Props) {
   const [counts, setCounts] = useState({ admin: 0, staff: 0, activity: 0, today: 0 });
   const [rolesByUser, setRolesByUser] = useState<Record<string, string>>({});
 
-  useEffect(() => { setPage(0); }, [source]);
+  useEffect(() => { setPage(1); }, [source, search]);
+
+  // KPI counts — independent head:true queries, not tied to the current page/filter.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+      const [adminRes, staffRes, activityRes, adminTodayRes, staffTodayRes, activityTodayRes] = await Promise.all([
+        supabase.from("audit_logs").select("id", { count: "exact", head: true }),
+        supabase.from("staff_audit_log").select("id", { count: "exact", head: true }),
+        supabase.from("activity_logs").select("id", { count: "exact", head: true }),
+        supabase.from("audit_logs").select("id", { count: "exact", head: true }).gte("created_at", todayStart.toISOString()),
+        supabase.from("staff_audit_log").select("id", { count: "exact", head: true }).gte("created_at", todayStart.toISOString()),
+        supabase.from("activity_logs").select("id", { count: "exact", head: true }).gte("created_at", todayStart.toISOString()),
+      ]);
+      if (cancelled) return;
+      setCounts({
+        admin: adminRes.count || 0,
+        staff: staffRes.count || 0,
+        activity: activityRes.count || 0,
+        today: (adminTodayRes.count || 0) + (staffTodayRes.count || 0) + (activityTodayRes.count || 0),
+      });
+    })();
+    return () => { cancelled = true; };
+  }, [reloadTick]);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setLoadError(null);
     (async () => {
-      // Only query the sources actually rendered — previously we always pulled
-      // 1500 rows even when filtered to a single source. Skipped sources return
-      // an empty result to keep the merge logic below unchanged.
-      const wantAdmin = source === "all" || source === "admin";
-      const wantStaff = source === "all" || source === "staff";
-      const wantActivity = source === "all" || source === "activity";
+      const q = sanitizeSearch(search);
+
+      if (source !== "all") {
+        // True server-side pagination for a single source table.
+        const table = source === "admin" ? "audit_logs" : source === "staff" ? "staff_audit_log" : "activity_logs";
+        const from = (page - 1) * PAGE_SIZE;
+        let query = supabase.from(table).select("*", { count: "exact" }).order("created_at", { ascending: false });
+        if (q) query = query.or(`action.ilike.%${q}%,entity_type.ilike.%${q}%,entity_id.ilike.%${q}%`);
+        const { data, error, count } = await query.range(from, from + PAGE_SIZE - 1);
+        if (cancelled) return;
+        if (error) {
+          setLoadError(error.message || "Erro ao carregar trilha de auditoria");
+          setLoading(false);
+          return;
+        }
+        const merged: UnifiedLog[] = (data || []).map((r: any) => {
+          if (table === "audit_logs") {
+            return { id: `a-${r.id}`, source: "admin" as const, actor_id: r.admin_user_id, actor_role: "admin", action: r.action, entity_type: r.entity_type, entity_id: r.entity_id, details: (r.details as Record<string, unknown>) || {}, created_at: r.created_at };
+          }
+          if (table === "staff_audit_log") {
+            return { id: `s-${r.id}`, source: "staff" as const, actor_id: r.staff_user_id, actor_role: "staff", action: r.action, entity_type: r.entity_type, entity_id: r.entity_id, details: { before: r.before, after: r.after, ...((r.metadata as Record<string, unknown>) || {}) }, created_at: r.created_at };
+          }
+          return { id: `l-${r.id}`, source: "activity" as const, actor_id: r.user_id, actor_role: "user", action: r.action, entity_type: r.entity_type, entity_id: r.entity_id, details: { old: r.old_data, new: r.new_data }, created_at: r.created_at };
+        });
+        setLogs(merged);
+        setTotalCount(count || 0);
+        await resolveRoles(merged);
+        setLoading(false);
+        return;
+      }
+
+      // "all" sources: merge is required across three distinct tables, so we
+      // pull a bounded recent window from each, filter/sort in memory, and
+      // paginate the merged result client-side with AdminPager.
       const empty = Promise.resolve({ data: [] as any[], error: null as any });
       const [aRes, sRes, lRes] = await Promise.all([
-        wantAdmin ? supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(500) : empty,
-        wantStaff ? supabase.from("staff_audit_log").select("*").order("created_at", { ascending: false }).limit(500) : empty,
-        wantActivity ? supabase.from("activity_logs").select("*").order("created_at", { ascending: false }).limit(500) : empty,
+        supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(1000),
+        supabase.from("staff_audit_log").select("*").order("created_at", { ascending: false }).limit(1000),
+        supabase.from("activity_logs").select("*").order("created_at", { ascending: false }).limit(1000),
       ]);
       if (cancelled) return;
 
@@ -71,61 +127,58 @@ export default function AdminAuditTab({ profiles }: Props) {
       }
 
       const merged: UnifiedLog[] = [];
-      if (source === "all" || source === "admin") {
-        (aRes.data || []).forEach((r) => merged.push({
-          id: `a-${r.id}`, source: "admin", actor_id: r.admin_user_id,
-          actor_role: "admin", action: r.action, entity_type: r.entity_type,
-          entity_id: r.entity_id, details: (r.details as Record<string, unknown>) || {}, created_at: r.created_at,
-        }));
-      }
-      if (source === "all" || source === "staff") {
-        (sRes.data || []).forEach((r) => merged.push({
-          id: `s-${r.id}`, source: "staff", actor_id: r.staff_user_id,
-          actor_role: "staff", action: r.action, entity_type: r.entity_type,
-          entity_id: r.entity_id, details: { before: r.before, after: r.after, ...((r.metadata as Record<string, unknown>) || {}) },
-          created_at: r.created_at,
-        }));
-      }
-      if (source === "all" || source === "activity") {
-        (lRes.data || []).forEach((r) => merged.push({
-          id: `l-${r.id}`, source: "activity", actor_id: r.user_id,
-          actor_role: "user", action: r.action, entity_type: r.entity_type,
-          entity_id: r.entity_id, details: { old: r.old_data, new: r.new_data },
-          created_at: r.created_at,
-        }));
-      }
+      (aRes.data || []).forEach((r) => merged.push({
+        id: `a-${r.id}`, source: "admin", actor_id: r.admin_user_id,
+        actor_role: "admin", action: r.action, entity_type: r.entity_type,
+        entity_id: r.entity_id, details: (r.details as Record<string, unknown>) || {}, created_at: r.created_at,
+      }));
+      (sRes.data || []).forEach((r) => merged.push({
+        id: `s-${r.id}`, source: "staff", actor_id: r.staff_user_id,
+        actor_role: "staff", action: r.action, entity_type: r.entity_type,
+        entity_id: r.entity_id, details: { before: r.before, after: r.after, ...((r.metadata as Record<string, unknown>) || {}) },
+        created_at: r.created_at,
+      }));
+      (lRes.data || []).forEach((r) => merged.push({
+        id: `l-${r.id}`, source: "activity", actor_id: r.user_id,
+        actor_role: "user", action: r.action, entity_type: r.entity_type,
+        entity_id: r.entity_id, details: { old: r.old_data, new: r.new_data },
+        created_at: r.created_at,
+      }));
       merged.sort((x, y) => +new Date(y.created_at) - +new Date(x.created_at));
-      setLogs(merged);
 
-      // Resolve roles for all unique actors
-      const ids = Array.from(new Set(merged.map(m => m.actor_id).filter(Boolean)));
-      if (ids.length > 0) {
-        const { data: rolesData } = await supabase.from("user_roles").select("user_id, role").in("user_id", ids);
-        const map: Record<string, string[]> = {};
-        (rolesData || []).forEach((r) => { (map[r.user_id] ||= []).push(r.role); });
-        const top: Record<string, string> = {};
-        Object.entries(map).forEach(([uid, list]) => {
-          top[uid] = list.includes("admin") ? "admin"
-            : list.includes("manager") ? "manager"
-            : list.includes("employee") ? "employee"
-            : "user";
-        });
-        setRolesByUser(top);
-      }
+      const filtered = q ? merged.filter(l => {
+        const s = q.toLowerCase();
+        return l.action.toLowerCase().includes(s)
+          || l.entity_type.toLowerCase().includes(s)
+          || (l.entity_id || "").toLowerCase().includes(s);
+      }) : merged;
 
-      const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-      const todayCount = merged.filter(m => new Date(m.created_at) >= todayStart).length;
-      setCounts({
-        admin: (aRes.data || []).length,
-        staff: (sRes.data || []).length,
-        activity: (lRes.data || []).length,
-        today: todayCount,
-      });
-
+      setTotalCount(filtered.length);
+      const from = (page - 1) * PAGE_SIZE;
+      const pageLogs = filtered.slice(from, from + PAGE_SIZE);
+      setLogs(pageLogs);
+      await resolveRoles(pageLogs);
       setLoading(false);
     })();
+
+    async function resolveRoles(rows: UnifiedLog[]) {
+      const ids = Array.from(new Set(rows.map(m => m.actor_id).filter(Boolean)));
+      if (ids.length === 0) return;
+      const { data: rolesData } = await supabase.from("user_roles").select("user_id, role").in("user_id", ids);
+      const map: Record<string, string[]> = {};
+      (rolesData || []).forEach((r) => { (map[r.user_id] ||= []).push(r.role); });
+      const top: Record<string, string> = {};
+      Object.entries(map).forEach(([uid, list]) => {
+        top[uid] = list.includes("admin") ? "admin"
+          : list.includes("manager") ? "manager"
+          : list.includes("employee") ? "employee"
+          : "user";
+      });
+      setRolesByUser(prev => ({ ...prev, ...top }));
+    }
+
     return () => { cancelled = true; };
-  }, [source, reloadTick]);
+  }, [source, search, page, reloadTick]);
 
   const getActorName = (uid: string) => {
     if (!uid) return "Sistema";
@@ -136,18 +189,6 @@ export default function AdminAuditTab({ profiles }: Props) {
     const r = rolesByUser[uid] || fallback;
     return ROLE_LABEL[r] || "—";
   };
-
-  const filtered = useMemo(() => logs.filter(l => {
-    if (!search) return true;
-    const s = search.toLowerCase();
-    return l.action.toLowerCase().includes(s)
-      || l.entity_type.toLowerCase().includes(s)
-      || l.entity_id?.toLowerCase().includes(s)
-      || getActorName(l.actor_id).toLowerCase().includes(s);
-  }), [logs, search, profiles, rolesByUser]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   const actionColors: Record<string, string> = {
     approve: "text-primary bg-primary/10 border-primary/20",
@@ -213,19 +254,19 @@ export default function AdminAuditTab({ profiles }: Props) {
         </div>
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input placeholder="Buscar ação, entidade, pessoa..." value={search} onChange={e => setSearch(e.target.value)}
+          <input placeholder="Buscar ação, entidade, ID..." value={search} onChange={e => setSearch(e.target.value)}
             className="w-full h-10 pl-10 pr-4 bg-muted/30 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30" />
         </div>
       </div>
 
       <AdminPanel>
         <div className="flex items-center justify-between">
-          <PanelTitle color="blue" icon={<Activity className="h-4 w-4" />}>Trilha unificada ({filtered.length})</PanelTitle>
+          <PanelTitle color="blue" icon={<Activity className="h-4 w-4" />}>Trilha unificada ({totalCount})</PanelTitle>
           <div className="flex items-center gap-2">
             <button
               onClick={() => {
                 const headers = ["data_hora","origem","actor_id","actor","papel","acao","entidade","entity_id","detalhes"];
-                const rows = filtered.map(l => [
+                const rows = logs.map(l => [
                   new Date(l.created_at).toISOString(),
                   l.source,
                   l.actor_id || "",
@@ -243,23 +284,10 @@ export default function AdminAuditTab({ profiles }: Props) {
                 a.href = url; a.download = `audit-log-${new Date().toISOString().slice(0,10)}.csv`; a.click();
                 URL.revokeObjectURL(url);
               }}
-              disabled={loading || filtered.length === 0}
+              disabled={loading || logs.length === 0}
               className="h-8 px-3 flex items-center gap-1.5 rounded-lg border border-border text-[11px] font-semibold text-foreground/80 hover:bg-muted/40 disabled:opacity-40 transition-colors"
-              aria-label="Exportar CSV"
+              aria-label="Exportar CSV (página atual)"
             ><Download className="h-3.5 w-3.5" /> Exportar CSV</button>
-            <button
-              onClick={() => setPage(p => Math.max(0, p - 1))}
-              disabled={page === 0 || loading}
-              className="h-8 w-8 flex items-center justify-center rounded-lg border border-border text-foreground/70 hover:bg-muted/40 disabled:opacity-40 transition-colors"
-              aria-label="Página anterior"
-            ><ChevronLeft className="h-4 w-4" /></button>
-            <span className="text-xs font-semibold text-muted-foreground tabular-nums">{page + 1} / {totalPages}</span>
-            <button
-              onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-              disabled={page >= totalPages - 1 || loading}
-              className="h-8 w-8 flex items-center justify-center rounded-lg border border-border text-foreground/70 hover:bg-muted/40 disabled:opacity-40 transition-colors"
-              aria-label="Próxima página"
-            ><ChevronRight className="h-4 w-4" /></button>
           </div>
         </div>
         <div className="overflow-x-auto mt-4">
@@ -270,7 +298,7 @@ export default function AdminAuditTab({ profiles }: Props) {
               ))}
             </tr></thead>
             <tbody>
-              {paged.map(log => (
+              {logs.map(log => (
                 <tr key={log.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
                   <td className="p-3 text-[11px] text-muted-foreground flex items-center gap-1.5">
                     <Clock className="h-3 w-3" />{new Date(log.created_at).toLocaleString("pt-BR")}
@@ -295,10 +323,11 @@ export default function AdminAuditTab({ profiles }: Props) {
                   </td>
                 </tr>
               ))}
-              {paged.length === 0 && <tr><td colSpan={8} className="p-10 text-center text-muted-foreground text-xs"><FileText className="h-6 w-6 mx-auto mb-2 opacity-20" />{loading ? "Carregando..." : "Nenhum log"}</td></tr>}
+              {logs.length === 0 && <tr><td colSpan={8} className="p-10 text-center text-muted-foreground text-xs"><FileText className="h-6 w-6 mx-auto mb-2 opacity-20" />{loading ? "Carregando..." : "Nenhum log"}</td></tr>}
             </tbody>
           </table>
         </div>
+        <AdminPager page={page} pageSize={PAGE_SIZE} totalCount={totalCount} onPageChange={setPage} loading={loading} />
       </AdminPanel>
     </div>
   );
