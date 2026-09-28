@@ -26,7 +26,7 @@ import {
   Webhook,
   Puzzle,
 } from "lucide-react";
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Bar, BarChart, Cell, PieChart, Pie } from "recharts";
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
 import { Trophy, Lock, RefreshCw, QrCode, Receipt, Link2, Eye, EyeOff, ArrowRight, Sparkles } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { Link, useNavigate } from "react-router-dom";
@@ -85,6 +85,7 @@ type ChartGranularity = "hour" | "day" | "month";
 type ChartPoint = {
   name: string;
   vendas: number;
+  pedidos: number;
   fullLabel: string;
   timestamp: number;
   granularity: ChartGranularity;
@@ -207,6 +208,8 @@ export default function Dashboard() {
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
   const [isCustom, setIsCustom] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [chartMode, setChartMode] = useState<"revenue" | "orders">("revenue");
+  const [indexMode, setIndexMode] = useState<"pix" | "card" | "boleto">("pix");
   const privacy = usePrivacyMode();
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
   const [pixDialogOpen, setPixDialogOpen] = useState(false);
@@ -306,9 +309,11 @@ export default function Dashboard() {
 
     // Série agregada no servidor: chave = timestamp local (America/Sao_Paulo) truncado
     const byKey = new Map<string, number>();
+    const countByKey = new Map<string, number>();
     (stats?.series ?? []).forEach((point) => {
       const raw = String(point.bucket);
       byKey.set(raw.slice(0, 13), (byKey.get(raw.slice(0, 13)) || 0) + Number(point.revenue));
+      countByKey.set(raw.slice(0, 13), (countByKey.get(raw.slice(0, 13)) || 0) + Number(point.count));
     });
     const pad = (n: number) => String(n).padStart(2, "0");
     const dayKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -321,6 +326,7 @@ export default function Dashboard() {
         return {
           name: `${i}h`,
           vendas: byKey.get(`${dayKey(point)}T${pad(i)}`) || 0,
+          pedidos: countByKey.get(`${dayKey(point)}T${pad(i)}`) || 0,
           fullLabel: `${i}:00`,
           timestamp: point.getTime(),
           granularity: "hour",
@@ -337,6 +343,7 @@ export default function Dashboard() {
         result.push({
           name: cursor.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""),
           vendas: byKey.get(`${dayKey(cursor)}T00`) || 0,
+          pedidos: countByKey.get(`${dayKey(cursor)}T00`) || 0,
           fullLabel: cursor.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }),
           timestamp: cursor.getTime(),
           granularity: "month",
@@ -353,6 +360,7 @@ export default function Dashboard() {
       return {
         name: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
         vendas: byKey.get(`${dayKey(d)}T00`) || 0,
+        pedidos: countByKey.get(`${dayKey(d)}T00`) || 0,
         fullLabel: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long" }),
         timestamp: d.getTime(),
         granularity: "day",
@@ -467,8 +475,14 @@ export default function Dashboard() {
     return map;
   }, [productsData]);
 
-  const donutPix = [{ name: "on", value: pixConversion }, { name: "off", value: Math.max(0, 100 - pixConversion) }];
-  const donutChb = [{ name: "on", value: chargebackRate }, { name: "off", value: Math.max(0, 100 - chargebackRate) }];
+  const indexData = {
+    pix: { label: "PIX", conversion: pixConversion, approved: pixApprovedCount, total: pixTotalCount, icon: PixLogoMark },
+    card: { label: "Cartão", conversion: cardConversion, approved: cardApprovedCount, total: cardTotalCount, icon: CreditCard },
+    boleto: { label: "Boleto", conversion: boletoConversion, approved: boletoApprovedCount, total: boletoTotalCount, icon: Barcode },
+  } as const;
+  const selectedIndex = indexData[indexMode];
+  const chartMetric = chartMode === "revenue" ? "vendas" : "pedidos";
+  const chartTotal = chartMode === "revenue" ? (privacy.hidden ? CENSORED : fmt(revenue)) : approvedCount.toLocaleString("pt-BR");
 
 
 
@@ -603,16 +617,51 @@ export default function Dashboard() {
         {/* ═══════════ CHART + SIDE PANEL ═══════════ */}
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
-          {/* Faturamento — Clean line chart (Cakto-style) */}
+          {/* Faturamento — seleção operacional no padrão das integrações */}
           <div className="xl:col-span-2 overflow-hidden rounded-[24px] border border-border bg-card">
-            <div className="flex items-center justify-between gap-3 border-b border-border/40 px-6 py-5 md:px-8">
-              <div className="min-w-0">
-                <h4 className="font-display font-bold text-xl tracking-[-0.02em] text-foreground">Faturamento</h4>
-                <p className="text-[11px] text-muted-foreground/60 mt-1">Comparativo de entradas e saídas</p>
+            <div className="border-b border-border/60 px-5 pt-4 md:px-7">
+              <div className="flex min-w-max items-end gap-7" role="tablist" aria-label="Métrica do gráfico">
+                {[
+                  { id: "revenue" as const, label: "Faturamento", icon: TrendingUp },
+                  { id: "orders" as const, label: "Vendas", icon: Receipt },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  const active = chartMode === item.id;
+                  return (
+                    <Button
+                      key={item.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      variant="ghost"
+                      onClick={() => setChartMode(item.id)}
+                      className={cn(
+                        "relative h-12 rounded-none px-0 text-[13px] font-semibold transition-colors hover:bg-transparent",
+                        active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      <Icon className={cn("mr-2 h-4 w-4", active && "text-primary")} strokeWidth={1.9} />
+                      {item.label}
+                      <span className={cn("absolute inset-x-0 bottom-0 h-0.5 bg-primary transition-transform", active ? "scale-x-100" : "scale-x-0")} />
+                    </Button>
+                  );
+                })}
               </div>
-              <span className="shrink-0 rounded-[10px] border border-border/60 bg-background px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
-                {isCustom ? "Período personalizado" : selectedPeriod.label}
-              </span>
+            </div>
+
+            <div className="flex flex-col gap-3 px-6 pb-2 pt-5 sm:flex-row sm:items-end sm:justify-between md:px-8">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{chartMode === "revenue" ? "Volume aprovado" : "Pedidos aprovados"}</p>
+                <p className="mt-1 font-display text-[26px] font-bold tabular-nums text-foreground">{chartTotal}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                {chartMode === "revenue" && revenueTrend !== undefined && (
+                  <span className={cn("text-[11px] font-semibold", revenueTrend >= 0 ? "text-success" : "text-destructive")}>{revenueTrend >= 0 ? "+" : ""}{revenueTrend}% {compareLabel}</span>
+                )}
+                <span className="rounded-[8px] border border-border bg-secondary px-2.5 py-1 text-[10px] font-semibold uppercase text-muted-foreground">
+                  {isCustom ? "Personalizado" : selectedPeriod.label}
+                </span>
+              </div>
             </div>
 
 
@@ -646,7 +695,7 @@ export default function Dashboard() {
                   />
                   <YAxis width={52} axisLine={false} tickLine={false}
                     tick={{ fill: "hsl(var(--muted-foreground)/0.55)", fontSize: 10, fontWeight: 500 }}
-                    tickFormatter={(v) => Number(v) >= 1000 ? `${Math.round(Number(v) / 1000)}k` : `${v}`}
+                    tickFormatter={(v) => chartMode === "revenue" && Number(v) >= 1000 ? `${Math.round(Number(v) / 1000)}k` : `${v}`}
                   />
                   <Tooltip cursor={{ stroke: "hsl(var(--primary)/0.45)", strokeWidth: 1, strokeDasharray: "4 4" }} wrapperStyle={{ outline: "none" }}
                     content={({ active, payload }) => {
@@ -655,14 +704,14 @@ export default function Dashboard() {
                         return (
                           <div className="rounded-[10px] border border-border bg-card px-3.5 py-2.5">
                             <p className="text-[10px] font-medium text-muted-foreground/70 mb-1">{p.payload.fullLabel}</p>
-                            <p className="text-foreground font-display font-bold text-[14px] tabular-nums">{fmt(p.value as number)}</p>
+                            <p className="text-foreground font-display font-bold text-[14px] tabular-nums">{chartMode === "revenue" ? fmt(p.value as number) : `${Number(p.value).toLocaleString("pt-BR")} vendas`}</p>
                           </div>
                         );
                       }
                       return null;
                     }}
                   />
-                  <Area type="monotone" dataKey="vendas" stroke="url(#revStroke)" strokeWidth={2.5} fill="url(#revGrad)"
+                  <Area type="monotone" dataKey={chartMetric} stroke="url(#revStroke)" strokeWidth={2.5} fill="url(#revGrad)"
                     dot={false}
                     activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2.5 }}
                     isAnimationActive={false}
@@ -674,53 +723,44 @@ export default function Dashboard() {
 
           {/* Right side: donuts + links */}
           <div className="space-y-4">
-            {/* Donuts card */}
-             <div className="rounded-[24px] border border-border bg-card p-7">
-              <div className="mb-6">
-                <h4 className="font-display font-bold text-xl tracking-[-0.02em]">Índices</h4>
-                <p className="text-[11px] text-muted-foreground/60 mt-1">Conversão por método de pagamento</p>
-              </div>
-              <div className="space-y-5">
-
-                {/* Pix */}
-                <div className="flex items-center gap-4">
-                  <div className="relative h-16 w-16 shrink-0">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={donutPix} dataKey="value" innerRadius={22} outerRadius={30} startAngle={90} endAngle={-270} stroke="none" isAnimationActive={false}>
-                          <Cell fill="hsl(var(--primary))" />
-                          <Cell fill="hsl(var(--muted)/0.6)" />
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex items-center justify-center font-display font-black text-[12px] tabular-nums">{pixConversion.toFixed(0)}%</div>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-bold text-[14px]">Pix</p>
-                    <p className="text-[11px] text-muted-foreground/70">Conversão</p>
-                  </div>
+            {/* Índices com seleção por método */}
+             <div className="overflow-hidden rounded-[24px] border border-border bg-card">
+              <div className="border-b border-border/60 px-5 pt-4">
+                <div className="flex min-w-max items-end gap-5" role="tablist" aria-label="Índice por método">
+                  {(Object.keys(indexData) as Array<keyof typeof indexData>).map((id) => {
+                    const item = indexData[id];
+                    const Icon = item.icon;
+                    const active = indexMode === id;
+                    return (
+                      <Button key={id} type="button" role="tab" aria-selected={active} variant="ghost" onClick={() => setIndexMode(id)} className={cn("relative h-11 rounded-none px-0 text-[11px] font-semibold hover:bg-transparent", active ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>
+                        <Icon className={cn("mr-1.5 h-3.5 w-3.5", active && "text-primary")} />
+                        {item.label}
+                        <span className={cn("absolute inset-x-0 bottom-0 h-0.5 bg-primary transition-transform", active ? "scale-x-100" : "scale-x-0")} />
+                      </Button>
+                    );
+                  })}
                 </div>
-                {/* Chargeback */}
-                <div className="flex items-center gap-4">
-                  <div className="relative h-16 w-16 shrink-0">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={donutChb} dataKey="value" innerRadius={22} outerRadius={30} startAngle={90} endAngle={-270} stroke="none" isAnimationActive={false}>
-                          <Cell fill={chargebackRate < 1 ? "hsl(var(--primary))" : "hsl(var(--destructive))"} />
-                          <Cell fill="hsl(var(--muted)/0.6)" />
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex items-center justify-center font-display font-black text-[12px] tabular-nums">{chargebackRate.toFixed(1)}%</div>
+              </div>
+
+              <div className="p-5">
+                <div className="flex items-end justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Taxa de aprovação</p>
+                    <p className="mt-2 font-display text-[36px] font-bold leading-none tabular-nums text-foreground">{selectedIndex.conversion.toFixed(1)}%</p>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-bold text-[14px]">Taxa de estorno</p>
-                    <p className="text-[11px] text-muted-foreground/70">Saúde da conta{" "}
-                      <span className={cn("ml-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold", chargebackRate < 1 ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive")}>
-                        {chargebackRate < 1 ? "Excelente" : "Atenção"}
-                      </span>
-                    </p>
+                  <span className="text-right text-[11px] text-muted-foreground"><strong className="block text-[14px] font-bold text-foreground">{selectedIndex.approved}</strong>de {selectedIndex.total} tentativas</span>
+                </div>
+
+                <div className="mt-5 h-2 overflow-hidden rounded-full bg-muted" aria-label={`${selectedIndex.conversion.toFixed(1)}% de aprovação`}>
+                  <div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${Math.min(100, selectedIndex.conversion)}%` }} />
+                </div>
+
+                <div className="mt-5 flex items-center justify-between border-t border-border/50 pt-4">
+                  <div>
+                    <p className="text-[11px] font-semibold text-foreground">Índice de estorno</p>
+                    <p className="mt-0.5 text-[10px] text-muted-foreground">Saúde geral da operação</p>
                   </div>
+                  <span className={cn("rounded-[8px] border px-2 py-1 text-[11px] font-bold tabular-nums", chargebackRate < 1 ? "border-success/25 bg-success/10 text-success" : "border-destructive/25 bg-destructive/10 text-destructive")}>{chargebackRate.toFixed(1)}%</span>
                 </div>
               </div>
             </div>

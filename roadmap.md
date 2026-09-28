@@ -15,6 +15,7 @@
 - [ ] Refazer o calendário e validar presets/intervalos.
 - [ ] Auditar e endurecer superfícies críticas de seller, admin e páginas públicas.
 - [ ] Validar dados, testes, execução e telas desktop/mobile.
+- [x] Remodelar o gráfico de faturamento e os índices com seleções operacionais no padrão visual do painel.
 - [x] Corrigir KYC aprovado e ocultar progresso/documentos concluídos.
 - [x] Corrigir contraste dos logos de Integrações no modo claro.
 - [x] Remover Entregas recentes da interface de Webhooks.
