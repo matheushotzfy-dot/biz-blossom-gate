@@ -5031,6 +5031,10 @@ export type Database = {
         Args: { _acquirer_id: string; _active: boolean; _reason?: string }
         Returns: Json
       }
+      admin_set_payment_link_status: {
+        Args: { _payment_link_id: string; _reason?: string; _status: string }
+        Returns: Json
+      }
       admin_set_seller_acquirer: {
         Args: {
           _new_acquirer_id?: string
