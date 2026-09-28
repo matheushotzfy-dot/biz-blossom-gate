@@ -24,6 +24,7 @@ import {
 import { logAdminAction } from "@/lib/auditLog";
 import { cn, isApprovedTransaction } from "@/lib/utils";
 import { friendlyError } from "@/lib/friendlyError";
+import AdminPager from "@/components/admin/AdminPager";
 
 // ============== Types ==============
 type Health = "online" | "degraded" | "offline" | "maintenance";
@@ -86,6 +87,8 @@ const ago = (d: string | null) => {
 };
 const shortId = (v: string | null | undefined, n = 8) => v ? v.slice(0, n) : "—";
 const copyTxt = (v: string) => { navigator.clipboard.writeText(v); toast.success("Copiado"); };
+const sanitizeSearch = (v: string) => v.replace(/[%,()*\\]/g, " ").trim();
+const PAGE_SIZE = 50;
 
 const HEALTH_CONFIG = {
   online: { color: "text-success", bg: "bg-success/10", border: "border-success/30", dot: "bg-success", label: "Online" },
@@ -112,6 +115,19 @@ export default function AdminAcquirersTab() {
   const [subTab, setSubTab] = useState<SubTab>("overview");
   const [typeFilter, setTypeFilter] = useState<"all" | "white" | "black">("all");
   const [search, setSearch] = useState("");
+
+  // Dedicated server-side pagination for the long lists (Sellers / Sales sub-tabs).
+  // The `sellers`/`txs` state above stays as a bounded dataset used only for
+  // overview KPIs and stats — it is not what gets rendered as the long lists.
+  const [sellersListRows, setSellersListRows] = useState<SellerLite[]>([]);
+  const [sellersListPage, setSellersListPage] = useState(1);
+  const [sellersListTotal, setSellersListTotal] = useState(0);
+  const [sellersListLoading, setSellersListLoading] = useState(false);
+
+  const [salesListRows, setSalesListRows] = useState<TxLite[]>([]);
+  const [salesListPage, setSalesListPage] = useState(1);
+  const [salesListTotal, setSalesListTotal] = useState(0);
+  const [salesListLoading, setSalesListLoading] = useState(false);
 
   const [form, setForm] = useState<Partial<Acquirer>>({});
 
@@ -186,6 +202,56 @@ export default function AdminAcquirersTab() {
   };
 
   useEffect(() => { load(); }, []);
+
+  useEffect(() => { setSellersListPage(1); }, [search, subTab]);
+  useEffect(() => { setSalesListPage(1); }, [search, subTab]);
+
+  // Sellers sub-tab: server-side paginated list of sellers linked to an acquirer.
+  useEffect(() => {
+    if (subTab !== "sellers") return;
+    let cancelled = false;
+    setSellersListLoading(true);
+    (async () => {
+      const from = (sellersListPage - 1) * PAGE_SIZE;
+      let query = supabase.from("profiles")
+        .select("user_id, full_name, email, nickname, acquirer_id, account_status", { count: "exact" })
+        .not("acquirer_id", "is", null)
+        .order("full_name");
+      const q = sanitizeSearch(search);
+      if (q) query = query.or(`full_name.ilike.%${q}%,email.ilike.%${q}%,nickname.ilike.%${q}%`);
+      const { data, error, count } = await query.range(from, from + PAGE_SIZE - 1);
+      if (cancelled) return;
+      if (error) { toast.error("Erro ao carregar sellers: " + friendlyError(error)); setSellersListLoading(false); return; }
+      setSellersListRows((data || []) as SellerLite[]);
+      setSellersListTotal(count || 0);
+      setSellersListLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [subTab, search, sellersListPage]);
+
+  // Sales sub-tab: server-side paginated list of transactions (last 30 days).
+  useEffect(() => {
+    if (subTab !== "sales") return;
+    let cancelled = false;
+    setSalesListLoading(true);
+    (async () => {
+      const since30 = new Date(Date.now() - 30 * 86400000).toISOString();
+      const from = (salesListPage - 1) * PAGE_SIZE;
+      let query = supabase.from("transactions")
+        .select("id, user_id, amount, net_amount, fee_amount, status, payment_method, created_at, customer_email, customer_name, podpay_payment_id, external_id, checkout_session_id, metadata", { count: "exact" })
+        .gte("created_at", since30)
+        .order("created_at", { ascending: false });
+      const q = sanitizeSearch(search);
+      if (q) query = query.or(`id.ilike.%${q}%,podpay_payment_id.ilike.%${q}%,external_id.ilike.%${q}%,checkout_session_id.ilike.%${q}%,customer_email.ilike.%${q}%,user_id.ilike.%${q}%`);
+      const { data, error, count } = await query.range(from, from + PAGE_SIZE - 1);
+      if (cancelled) return;
+      if (error) { toast.error("Erro ao carregar vendas: " + friendlyError(error)); setSalesListLoading(false); return; }
+      setSalesListRows((data || []) as TxLite[]);
+      setSalesListTotal(count || 0);
+      setSalesListLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [subTab, search, salesListPage]);
 
   const filteredAcqs = useMemo(() => acquirers.filter(a => {
     if (typeFilter !== "all" && a.type !== typeFilter) return false;
@@ -556,19 +622,10 @@ export default function AdminAcquirersTab() {
 
       {/* SELLERS */}
       {subTab === "sellers" && (
-        <PremiumPanel icon={Users} eyebrow="Vinculações" title={`Sellers por Adquirente (${sellers.filter(s => s.acquirer_id).length})`}>
+        <PremiumPanel icon={Users} eyebrow="Vinculações" title={`Sellers por Adquirente (${sellersListTotal})`}>
           {(() => {
-            const list = sellers.filter(s => s.acquirer_id).filter(s => {
-              if (!search) return true;
-              const q = search.toLowerCase();
-              const a = acquirers.find(x => x.id === s.acquirer_id);
-              return (s.full_name || "").toLowerCase().includes(q) ||
-                (s.email || "").toLowerCase().includes(q) ||
-                (s.nickname || "").toLowerCase().includes(q) ||
-                s.user_id.toLowerCase().includes(q) ||
-                (a?.name || "").toLowerCase().includes(q);
-            });
-            if (list.length === 0) return <PremiumEmpty icon={Users} title="Nenhum seller vinculado" />;
+            const list = sellersListRows;
+            if (!sellersListLoading && list.length === 0) return <PremiumEmpty icon={Users} title="Nenhum seller vinculado" />;
             return (
               <div className={premiumTable.wrapper}>
                 <table className={premiumTable.table}>
@@ -582,7 +639,7 @@ export default function AdminAcquirersTab() {
                     </tr>
                   </thead>
                   <tbody>
-                    {list.slice(0, 500).map(s => {
+                    {list.map(s => {
                       const a = acquirers.find(x => x.id === s.acquirer_id);
                       return (
                         <tr key={s.user_id} className={premiumTable.row}>
@@ -614,7 +671,7 @@ export default function AdminAcquirersTab() {
                     })}
                   </tbody>
                 </table>
-                {list.length > 500 && <p className="text-[10px] text-muted-foreground text-center py-3">Exibindo primeiros 500 — exporte CSV para a lista completa.</p>}
+                {sellersListTotal > 0 && <AdminPager page={sellersListPage} pageSize={PAGE_SIZE} totalCount={sellersListTotal} onPageChange={setSellersListPage} loading={sellersListLoading} className="px-1 pb-1" />}
               </div>
             );
           })()}
@@ -623,21 +680,10 @@ export default function AdminAcquirersTab() {
 
       {/* SALES */}
       {subTab === "sales" && (
-        <PremiumPanel icon={Receipt} eyebrow="Trilha de Auditoria" title={`Vendas 30d com IDs (${txs.length})`}>
+        <PremiumPanel icon={Receipt} eyebrow="Trilha de Auditoria" title={`Vendas 30d com IDs (${salesListTotal})`}>
           {(() => {
-            const list = txs.filter(t => {
-              if (!search) return true;
-              const q = search.toLowerCase();
-              const a = acquirers.find(x => x.id === sellerAcqMap.get(t.user_id));
-              return t.id.toLowerCase().includes(q) ||
-                (t.podpay_payment_id || "").toLowerCase().includes(q) ||
-                (t.external_id || "").toLowerCase().includes(q) ||
-                (t.checkout_session_id || "").toLowerCase().includes(q) ||
-                (t.customer_email || "").toLowerCase().includes(q) ||
-                t.user_id.toLowerCase().includes(q) ||
-                (a?.name || "").toLowerCase().includes(q);
-            });
-            if (list.length === 0) return <PremiumEmpty icon={Receipt} title="Nenhuma venda" subtitle="Nenhuma transação nos últimos 30 dias para o filtro atual." />;
+            const list = salesListRows;
+            if (!salesListLoading && list.length === 0) return <PremiumEmpty icon={Receipt} title="Nenhuma venda" subtitle="Nenhuma transação nos últimos 30 dias para o filtro atual." />;
             return (
               <div className={premiumTable.wrapper}>
                 <table className={premiumTable.table}>
@@ -656,7 +702,7 @@ export default function AdminAcquirersTab() {
                     </tr>
                   </thead>
                   <tbody>
-                    {list.slice(0, 500).map(t => {
+                    {list.map(t => {
                       const txAcquirer = String(t.metadata?.acquirer || "").toLowerCase();
                       const aid = txAcquirer === "podpay"
                         ? acquirers.find(x => x.slug === "podpay")?.id
@@ -710,7 +756,7 @@ export default function AdminAcquirersTab() {
                     })}
                   </tbody>
                 </table>
-                {list.length > 500 && <p className="text-[10px] text-muted-foreground text-center py-3">Exibindo primeiras 500 — exporte CSV para auditoria completa.</p>}
+                {salesListTotal > 0 && <AdminPager page={salesListPage} pageSize={PAGE_SIZE} totalCount={salesListTotal} onPageChange={setSalesListPage} loading={salesListLoading} className="px-1 pb-1" />}
               </div>
             );
           })()}
