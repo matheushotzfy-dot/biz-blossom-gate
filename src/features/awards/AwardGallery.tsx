@@ -36,8 +36,8 @@ export function AwardGallery({ activeIndex, revenue, onSelect }: AwardGalleryPro
                 className={cn(
                   "group relative h-[154px] w-full flex-col justify-end overflow-hidden rounded-md border px-2 pb-2 pt-1 transition-colors duration-200",
                   active
-                    ? "border-awards-accent bg-awards-accent/10"
-                    : "border-awards-steel/15 bg-awards-surface/80 hover:border-awards-steel/35 hover:bg-awards-surface",
+                    ? "border-awards-accent bg-awards-accent/10 before:absolute before:inset-x-3 before:top-0 before:h-[2px] before:rounded-full before:bg-awards-accent"
+                    : "border-awards-steel/15 bg-awards-surface/80 hover:-translate-y-0.5 hover:border-awards-accent/40 hover:bg-awards-surface",
                 )}
               >
                 <img

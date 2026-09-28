@@ -39,6 +39,7 @@ export function ArtifactViewer({ index, revenue, claimed, onClaim, onShare }: Ar
         onPointerLeave={() => setTilt({ x: 0, y: 0 })}
         className="awards-stage relative mx-auto flex min-h-[390px] w-full max-w-[620px] items-center justify-center [perspective:1400px] sm:min-h-[460px]"
       >
+        <div aria-hidden className="awards-stage-cone pointer-events-none absolute inset-x-0 top-0 h-full" />
         <div aria-hidden className="awards-stage-light absolute inset-x-[8%] bottom-[7%] h-[42%]" />
         <div aria-hidden className="awards-stage-floor absolute bottom-[4%] left-1/2 h-12 w-[72%] -translate-x-1/2 rounded-[50%]" />
         <AnimatePresence mode="wait">
@@ -57,7 +58,7 @@ export function ArtifactViewer({ index, revenue, claimed, onClaim, onShare }: Ar
               width={620}
               height={520}
               loading="eager"
-              className={cn("relative z-10 mx-auto h-[380px] w-full object-contain sm:h-[455px]", !unlocked && "grayscale")}
+              className={cn("awards-artifact-img relative z-10 mx-auto h-[380px] w-full object-contain sm:h-[455px]", !unlocked && "grayscale opacity-80")}
             />
             {!unlocked && (
               <span className="absolute inset-x-0 bottom-5 z-20 mx-auto flex w-fit items-center gap-2 rounded-full border border-awards-steel/20 bg-awards-obsidian px-3 py-1.5 font-mono text-[9px] uppercase text-awards-steel">
@@ -96,7 +97,7 @@ export function ArtifactViewer({ index, revenue, claimed, onClaim, onShare }: Ar
           <Button
             onClick={onClaim}
             disabled={!unlocked || claimed}
-            className="h-12 flex-1 rounded-md bg-awards-accent font-semibold text-awards-obsidian hover:bg-awards-accent/90 active:scale-[0.98]"
+            className="h-12 flex-1 rounded-md bg-primary font-semibold text-primary-foreground transition-transform hover:-translate-y-px hover:bg-primary/90 active:scale-[0.98]"
           >
             <Gift />{claimed ? "Resgate registrado" : unlocked ? "Resgatar artefato" : `Meta ${award.label}`}
           </Button>
