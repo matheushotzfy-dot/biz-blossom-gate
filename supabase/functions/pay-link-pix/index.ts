@@ -1,3 +1,4 @@
+import { computeFee, computeNet } from "../_shared/fees.ts";
 import { buildCorsHeaders } from "../_shared/security.ts";
 // Public PIX for payment links — no auth required
 // Derives seller from payment_link.user_id
@@ -120,12 +121,12 @@ Deno.serve(async (req) => {
 
     const pct = Number(cuf?.pix_percentage ?? cuf?.transaction_percentage ?? platformPixPct);
     const fixed = Number(cuf?.pix_fixed ?? platformPixFixed) + platformExtraFx;
-    const feeAmount = Math.round(((amt * pct) / 100 + fixed) * 100) / 100;
+    const feeAmount = computeFee(amt, pct, fixed);
     if (feeAmount < 0 || feeAmount >= amt) {
       return new Response(JSON.stringify({ success: false, error: "Configuração de taxas inválida" }),
         { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-    const netAmount = Math.round((amt - feeAmount) * 100) / 100;
+    const netAmount = computeNet(amt, feeAmount);
 
     const acquirerSlug = await resolveAcquirerSlug(supabase, userId);
     const preTxId = crypto.randomUUID();

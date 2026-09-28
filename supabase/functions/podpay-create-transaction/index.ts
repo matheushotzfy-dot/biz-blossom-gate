@@ -1,3 +1,4 @@
+import { computeFee, computeNet } from "../_shared/fees.ts";
 const _baseCors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
@@ -426,7 +427,7 @@ Deno.serve(async (req) => {
       fixed = platformBoleto + platformExtraFx;
     }
 
-    let feeAmount = Math.round((finalPrice * pct / 100 + fixed) * 100) / 100;
+    let feeAmount = computeFee(finalPrice, pct, fixed);
     if (feeAmount < 0 || feeAmount >= finalPrice) {
       safeLog('Fee values out of safe range', { feeAmount, productPrice: finalPrice });
       return new Response(
@@ -434,7 +435,7 @@ Deno.serve(async (req) => {
         { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    const netAmount = Math.round((finalPrice - feeAmount) * 100) / 100;
+    const netAmount = computeNet(finalPrice, feeAmount);
 
 
     // ===================================================================
