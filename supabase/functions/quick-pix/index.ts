@@ -1,3 +1,4 @@
+import { computeFee, computeNet } from "../_shared/fees.ts";
 // Quick PIX generation — creates a standalone PIX cobrança without a product
 // Auth required: user_id is derived from the JWT
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -191,7 +192,7 @@ Deno.serve(async (req) => {
     const pct   = Number(cuf?.pix_percentage ?? cuf?.transaction_percentage ?? platformPixPct);
     const fixed = Number(cuf?.pix_fixed      ?? platformPixFixed) + platformExtraFx;
 
-    let feeAmount = Math.round(((amt * pct) / 100 + fixed) * 100) / 100;
+    let feeAmount = computeFee(amt, pct, fixed);
     if (feeAmount < 0 || feeAmount >= amt) {
       safeLog("Fee out of safe range", { feeAmount, amt });
       return new Response(
@@ -199,7 +200,7 @@ Deno.serve(async (req) => {
         { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-    const netAmount = Math.round((amt - feeAmount) * 100) / 100;
+    const netAmount = computeNet(amt, feeAmount);
     const amountInCents = Math.round(amt * 100);
 
     // ===================================================================

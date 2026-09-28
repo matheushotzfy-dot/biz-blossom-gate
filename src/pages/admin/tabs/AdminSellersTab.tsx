@@ -29,6 +29,7 @@ import { logAdminAction } from "@/lib/auditLog";
 import { cn, isApprovedTransaction } from "@/lib/utils";
 import { z } from "zod";
 import { friendlyError } from "@/lib/friendlyError";
+import AdminPager from "@/components/admin/AdminPager";
 
 type Dispute = Tables<"disputes"> & { buyer_name?: string | null };
 type BalanceAdjustment = Tables<"balance_adjustments">;
@@ -160,6 +161,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [retentionForm, setRetentionForm] = useState({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
   const [impersonating, setImpersonating] = useState(false);
   const [ipHistory, setIpHistory] = useState<IpLog[]>([]);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 50;
 
 
   useEffect(() => {
@@ -530,6 +533,9 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       || (digits.length > 0 && docDigits.includes(digits));
   });
 
+  useEffect(() => { setPage(1); }, [sellerFilter, search]);
+  const pagedFiltered = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   const whiteCount = profiles.filter(p => p.seller_type === "white").length;
   const blackCount = profiles.filter(p => p.seller_type === "black").length;
   const unsetCount = profiles.filter(p => p.seller_type == null).length;
@@ -725,7 +731,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       {sellerFilter === "kyc" ? (
         <PremiumPanel title={`Fila de Aprovação KYC`} eyebrow={`${filtered.length} pendentes`} icon={FileText}>
           <div className="space-y-3">
-            {filtered.map(p => (
+            {pagedFiltered.map(p => (
               <div key={p.id} className="group rounded-xl border border-border bg-card p-4 flex items-center gap-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-muted/20">
                 <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
                   {(p.full_name || "U")[0].toUpperCase()}
@@ -756,6 +762,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
               <PremiumEmpty icon={CheckCircle2} title="Nenhum KYC pendente" subtitle="Todos os sellers foram revisados." />
             )}
           </div>
+          {filtered.length > 0 && <AdminPager page={page} pageSize={PAGE_SIZE} totalCount={filtered.length} onPageChange={setPage} className="mt-3" />}
         </PremiumPanel>
       ) : (
         /* ── Sellers Table ── */
@@ -770,7 +777,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((p) => {
+                {pagedFiltered.map((p) => {
                   const stats = getSellerStats(p.user_id);
                   const frozen = isFrozen(p);
                   return (
@@ -862,6 +869,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
               </tbody>
             </table>
           </div>
+          {filtered.length > 0 && <AdminPager page={page} pageSize={PAGE_SIZE} totalCount={filtered.length} onPageChange={setPage} className="mt-3" />}
         </PremiumPanel>
       )}
 

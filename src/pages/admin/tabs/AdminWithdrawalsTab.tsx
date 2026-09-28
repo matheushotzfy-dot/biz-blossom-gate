@@ -23,6 +23,7 @@ import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { formatCurrency } from "@/lib/utils";
 import { friendlyError } from "@/lib/friendlyError";
+import AdminPager from "@/components/admin/AdminPager";
 
 /* ── Types ── */
 interface AuditLog { id: string; admin_user_id: string; action: string; entity_id: string | null; created_at: string; }
@@ -171,6 +172,8 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  const [subTab, setSubTab] = useState<SubTab>("queue");
  const [rejectDialog, setRejectDialog] = useState<string | null>(null);
  const [rejectReason, setRejectReason] = useState("");
+ const [page, setPage] = useState(1);
+ const PAGE_SIZE = 50;
 
   useEffect(() => {
     Promise.all([
@@ -223,6 +226,13 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  return getSellerName(w.user_id).toLowerCase().includes(s) || w.id.includes(s);
  });
  }, [withdrawals, statusFilter, riskFilter, originFilter, search, profiles]);
+
+ useEffect(() => { setPage(1); }, [statusFilter, riskFilter, originFilter, search]);
+
+ const pagedFiltered = useMemo(() => {
+ const from = (page - 1) * PAGE_SIZE;
+ return filtered.slice(from, from + PAGE_SIZE);
+ }, [filtered, page]);
 
  /* ── Batch Approval ── */
  const handleBatchApprove = async () => {
@@ -512,7 +522,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
             ))}
           </tr></thead>
           <tbody>
-            {filtered.map(w => {
+            {pagedFiltered.map(w => {
               const audit = getWithdrawalAudit(w.id);
               const autoConfig = getAutoConfig(w.user_id);
               const isPending = w.status === "pending";
@@ -642,6 +652,9 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
           <PremiumEmpty icon={ArrowDownToLine} title="Nenhum saque encontrado" subtitle="Ajuste filtros ou aguarde novas solicitações" />
         )}
       </div>
+      {filtered.length > 0 && (
+        <AdminPager page={page} pageSize={PAGE_SIZE} totalCount={filtered.length} onPageChange={setPage} />
+      )}
     </PremiumPanel>
   )}
 
