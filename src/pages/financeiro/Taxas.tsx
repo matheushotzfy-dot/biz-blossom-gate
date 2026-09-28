@@ -91,13 +91,14 @@ export default function Taxas({ embedded = false }: { embedded?: boolean } = {})
     { label: "Boleto", value: "D+1", sub: "Após a compensação", tone: "warning", icon: Barcode },
   ];
 
-  return <TaxasView methods={methodCards} withdrawFee={withdrawFee} deadlines={deadlines} personalized={Boolean(custom)} embedded={embedded} />;
+  return <TaxasView customError={customError} onRetry={() => setReloadKey((k) => k + 1)} methods={methodCards} withdrawFee={withdrawFee} deadlines={deadlines} personalized={Boolean(custom)} embedded={embedded} />;
 }
 
 type Method = { label: string; icon: LucideIcon; percent: number; fixed: number; sub: string };
 
-function TaxasView({ methods, withdrawFee, deadlines, personalized, embedded }: {
+function TaxasView({ methods, withdrawFee, deadlines, personalized, embedded, customError = false, onRetry }: {
   methods: Method[]; withdrawFee: number; personalized: boolean; embedded: boolean;
+  customError?: boolean; onRetry?: () => void;
   deadlines: Array<{ label: string; value: string; sub: string; icon: LucideIcon }>;
 }) {
   const [amount, setAmount] = useState(197);
@@ -124,7 +125,7 @@ function TaxasView({ methods, withdrawFee, deadlines, personalized, embedded }: 
       {customError && (
         <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           <span>Não conseguimos carregar suas taxas personalizadas. Os valores abaixo podem não ser os seus.</span>
-          <button type="button" onClick={() => setReloadKey((k) => k + 1)} className="rounded-full border border-destructive/40 px-3 py-1 text-xs font-semibold hover:bg-destructive/15">Tentar de novo</button>
+          <button type="button" onClick={onRetry} className="rounded-full border border-destructive/40 px-3 py-1 text-xs font-semibold hover:bg-destructive/15">Tentar de novo</button>
         </div>
       )}
 
