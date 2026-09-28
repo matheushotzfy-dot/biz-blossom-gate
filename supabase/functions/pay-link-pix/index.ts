@@ -1,3 +1,4 @@
+import { buildCorsHeaders } from "../_shared/security.ts";
 // Public PIX for payment links — no auth required
 // Derives seller from payment_link.user_id
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -5,7 +6,7 @@ import { createVeopagDeposit, resolveAcquirerSlug } from "../_shared/veopag.ts";
 import { createPodpayAppPix } from "../_shared/podpay-app.ts";
 import { blockIfPaymentsPaused } from "../_shared/kill-switch.ts";
 
-const corsHeaders = {
+const _baseCors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
@@ -18,6 +19,7 @@ function safeLog(msg: string, ctx: Record<string, unknown> = {}) {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = { ...buildCorsHeaders(req), "Access-Control-Allow-Headers": _baseCors["Access-Control-Allow-Headers"] };
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
@@ -161,7 +163,7 @@ Deno.serve(async (req) => {
         data: {
           transactionId: tx?.id ?? preTxId,
           gatewayId: veo.transactionId,
-          acquirer: "veopag",
+
           amount: amt,
           pix: { qrcode: veo.qrcode, expiresAt: pixExpiresAt },
         },
@@ -201,7 +203,7 @@ Deno.serve(async (req) => {
         data: {
           transactionId: tx?.id ?? preTxId,
           gatewayId: pod.transactionId,
-          acquirer: "podpay_app",
+
           amount: amt,
           pix: { qrcode: pod.qrcode, expiresAt: pixExpiresAt },
         },
@@ -255,7 +257,7 @@ Deno.serve(async (req) => {
     safeLog("PodPay link PIX created", { transactionId: tx?.id, slug });
     return new Response(JSON.stringify({
       success: true,
-      data: { transactionId: tx?.id, gatewayId: podpayId, acquirer: "podpay", amount: amt, pix },
+      data: { transactionId: tx?.id, gatewayId: podpayId, amount: amt, pix },
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     safeLog("Internal error", { error: error instanceof Error ? error.message : "unknown" });

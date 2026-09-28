@@ -1,10 +1,10 @@
-const corsHeaders = {
+const _baseCors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { clientIp } from "../_shared/security.ts";
+import { clientIp, buildCorsHeaders } from "../_shared/security.ts";
 import { createVeopagDeposit, resolveAcquirerSlug } from "../_shared/veopag.ts";
 
 /** Log only safe fields — never PII, card data, or full payloads */
@@ -18,6 +18,7 @@ function safeLog(message: string, context: Record<string, unknown> = {}) {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = { ...buildCorsHeaders(req), "Access-Control-Allow-Headers": _baseCors["Access-Control-Allow-Headers"] };
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -283,7 +284,7 @@ Deno.serve(async (req) => {
                   transactionId: existing.id,
                   podpayId: existing.podpay_payment_id,
                   gatewayId: existing.podpay_payment_id,
-                  acquirer: 'veopag',
+
                   status: 'pending',
                   pix: pixCode ? { qrcode: pixCode, expiresAt: existing.pix_expires_at || null } : null,
                   boleto: null,
@@ -319,7 +320,7 @@ Deno.serve(async (req) => {
                 transactionId: existing.id,
                 podpayId: existing.podpay_payment_id,
                 gatewayId: existing.podpay_payment_id,
-                acquirer: 'podpay',
+
                 status: 'pending',
                 pix: pixData,
                 boleto: boletoData,
@@ -533,7 +534,7 @@ Deno.serve(async (req) => {
           transactionId: transaction.id,
           podpayId: veo.transactionId, // reusa o campo esperado pelo frontend
           gatewayId: veo.transactionId,
-          acquirer: "veopag",
+
           status: "pending",
           pix: { qrcode: veo.qrcode, expiresAt: pixExpiresAt },
           boleto: null,
@@ -741,7 +742,7 @@ Deno.serve(async (req) => {
         transactionId: transaction?.id,
         podpayId,
         gatewayId: podpayId,
-        acquirer: 'podpay',
+
         status: podpayData.data?.status || podpayData.status,
         pix: podpayData.data?.pix || podpayData.pix || null,
         boleto: podpayData.data?.boleto || podpayData.boleto || null,
