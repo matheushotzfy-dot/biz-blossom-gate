@@ -520,10 +520,8 @@ export default function Perfil() {
           </div>
         </Panel>
 
-        {/* TAXAS */}
-        <Panel icon={BadgePercent} title="Suas taxas" subtitle="Custos por venda, saque e prazos de liberação" className="lg:col-span-2">
-          <Suspense fallback={<div className="h-64 animate-pulse" />}><TaxasEmbedded embedded /></Suspense>
-        </Panel>
+        {/* TAXAS — mesmo lugar e tamanho do antigo card de progresso */}
+        <ProfileFeesCard />
       </div>
 
       {/* ENDEREÇO */}
