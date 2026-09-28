@@ -70,7 +70,7 @@ export default function AdminNotificationsTab({ profiles }: Props) {
   setLoading(true);
   const from = (page - 1) * PAGE_SIZE;
   let query = supabase.from("notifications").select("*", { count: "exact" }).order("created_at", { ascending: false });
-  const q = search.trim();
+  const q = search.trim().replace(/[%,()*\\]/g, " ").trim();
   if (q) query = query.or(`title.ilike.%${q}%,message.ilike.%${q}%`);
   const { data, error, count } = await query.range(from, from + PAGE_SIZE - 1);
   if (error) toast.error("Erro ao carregar: " + friendlyError(error));
@@ -148,10 +148,10 @@ export default function AdminNotificationsTab({ profiles }: Props) {
  };
  const typeLabels: Record<string, string> = { info: "Info", announcement: "Anúncio", warning: "Alerta", success: "Sucesso", alert: "Alerta", withdrawal: "Saque" };
 
- const totalCount = notifications.length;
- const globalCount = notifications.filter(n => n.user_id === null).length;
- const individualCount = totalCount - globalCount;
- const readCount = notifications.filter(n => n.is_read).length;
+ const sentCount = stats.total;
+ const globalCount = stats.global;
+ const individualCount = stats.individual;
+ const readCount = stats.read;
 
  return (
  <div className="space-y-6">
@@ -160,7 +160,7 @@ export default function AdminNotificationsTab({ profiles }: Props) {
     eyebrow="Central de notificações"
     title="Notificações"
     subtitle="Envie comunicados globais ou individuais para sellers em tempo real."
-    status={{ tone: "info", label: `${totalCount} enviadas · ${readCount} lidas`, pulse: true }}
+    status={{ tone: "info", label: `${sentCount} enviadas · ${readCount} lidas`, pulse: true }}
     actions={
       <>
         <Button variant="outline" onClick={handlePurgeOrphans} disabled={purging} className="h-10 rounded-xl gap-1.5 text-[11px] font-black uppercase tracking-wider">
@@ -175,10 +175,10 @@ export default function AdminNotificationsTab({ profiles }: Props) {
 
   {/* Premium KPI Grid */}
   <FinanceiroKpiGrid cols={4}>
-    <FinanceiroKpi label="Total enviadas" value={String(totalCount)} sub="Todas as notificações" icon={Bell} tone="primary" />
+    <FinanceiroKpi label="Total enviadas" value={String(sentCount)} sub="Todas as notificações" icon={Bell} tone="primary" />
     <FinanceiroKpi label="Broadcasts globais" value={String(globalCount)} sub="Enviadas a todos" icon={Radio} tone="info" />
     <FinanceiroKpi label="Individuais" value={String(individualCount)} sub="Direcionadas a sellers" icon={User} tone="neutral" />
-    <FinanceiroKpi label="Já lidas" value={String(readCount)} sub={`${totalCount > 0 ? Math.round((readCount / totalCount) * 100) : 0}% do total`} icon={Eye} tone="success" />
+    <FinanceiroKpi label="Já lidas" value={String(readCount)} sub={`${sentCount > 0 ? Math.round((readCount / sentCount) * 100) : 0}% do total`} icon={Eye} tone="success" />
   </FinanceiroKpiGrid>
 
   <div className="relative">
