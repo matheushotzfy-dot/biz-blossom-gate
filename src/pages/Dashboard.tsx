@@ -610,49 +610,29 @@ export default function Dashboard() {
         {/* ═══════════ CHART + SIDE PANEL ═══════════ */}
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
-          {/* Faturamento — leitura contínua e interação de precisão */}
-          <div className="group/chart xl:col-span-2 overflow-hidden rounded-[24px] border border-border bg-card transition-colors duration-500 hover:border-primary/30">
-            <div className="flex flex-col gap-4 px-5 pb-3 pt-5 sm:flex-row sm:items-end sm:justify-between md:px-7 md:pt-6">
+          {/* Faturamento — clean: título, período e gráfico */}
+          <div className="xl:col-span-2 overflow-hidden rounded-[24px] border border-border bg-card">
+            <div className="flex items-start justify-between gap-4 px-6 pt-6 md:px-7">
               <div className="min-w-0">
-                <div className="mb-2 flex items-center gap-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-[8px] border border-primary/25 bg-primary/10 text-primary">
-                    <TrendingUp className="h-3.5 w-3.5" strokeWidth={2.2} />
-                  </span>
-                  <h4 className="font-display text-[13px] font-bold text-foreground">Faturamento</h4>
-                  <span className="h-1 w-1 rounded-full bg-primary" />
-                  <span className="text-[10px] font-semibold uppercase text-muted-foreground">Aprovado</span>
-                </div>
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <p className="font-display text-[28px] font-black leading-none tabular-nums text-foreground md:text-[32px]">
-                    {privacy.hidden ? CENSORED : fmt(revenue)}
-                  </p>
-                  {revenueTrend !== undefined && (
-                    <span className={cn("rounded-[7px] border px-2 py-1 text-[10px] font-bold tabular-nums", revenueTrend >= 0 ? "border-success/25 bg-success/10 text-success" : "border-destructive/25 bg-destructive/10 text-destructive")}>{revenueTrend >= 0 ? "+" : ""}{revenueTrend}%</span>
-                  )}
-                </div>
-                <p className="mt-2 text-[11px] text-muted-foreground">{compareLabel}</p>
+                <h4 className="font-display text-xl font-bold text-foreground">Faturamento</h4>
+                <p className="mt-1 text-[11px] text-muted-foreground">Vendas aprovadas no período</p>
               </div>
-              <span className="w-fit shrink-0 rounded-[9px] border border-border bg-secondary px-3 py-1.5 text-[10px] font-bold uppercase text-muted-foreground">
-                {isCustom ? "Período personalizado" : selectedPeriod.label}
+              <span className="shrink-0 rounded-full border border-border bg-secondary px-3 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                {isCustom ? "Personalizado" : selectedPeriod.label}
               </span>
             </div>
 
-            <div className="relative h-[310px] w-full px-1 pb-2 md:px-3">
+            <div className="h-[320px] w-full px-2 pb-4 pt-4 md:px-4">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 18, right: 16, left: 0, bottom: 8 }}>
+                <AreaChart data={chartData} margin={{ top: 12, right: 12, left: 0, bottom: 4 }}>
                   <defs>
                     <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.34} />
-                      <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity={0.11} />
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.26} />
+                      <stop offset="60%" stopColor="hsl(var(--primary))" stopOpacity={0.06} />
                       <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
-                    <linearGradient id="revStroke" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.55} />
-                      <stop offset="55%" stopColor="hsl(var(--primary))" stopOpacity={0.9} />
-                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={1} />
-                    </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="1 7" vertical={false} stroke="hsl(var(--border)/0.45)" />
+                  <CartesianGrid strokeDasharray="2 6" vertical={false} stroke="hsl(var(--border)/0.5)" />
                   <XAxis dataKey="timestamp" type="number" scale="time"
                     domain={[chartData[0]?.timestamp ?? 0, chartData[chartData.length - 1]?.timestamp ?? 0]}
                     ticks={chartTicks} tickFormatter={chartTickFormatter}
@@ -666,63 +646,37 @@ export default function Dashboard() {
                     minTickGap={chartData[0]?.granularity === "hour" ? -1 : 5}
                     padding={{ left: 6, right: 6 }}
                   />
-                  <YAxis width={52} axisLine={false} tickLine={false}
+                  <YAxis width={44} axisLine={false} tickLine={false}
                     tick={{ fill: "hsl(var(--muted-foreground)/0.55)", fontSize: 10, fontWeight: 500 }}
                     tickFormatter={(v) => Number(v) >= 1000 ? `${Math.round(Number(v) / 1000)}k` : `${v}`}
                   />
                   <Tooltip
-                    cursor={{ stroke: "hsl(var(--primary)/0.7)", strokeWidth: 1, strokeDasharray: "3 3" }}
+                    cursor={{ stroke: "hsl(var(--primary)/0.5)", strokeWidth: 1 }}
                     wrapperStyle={{ outline: "none", zIndex: 20 }}
                     content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        const p = payload[0];
-                        return (
-                          <div className="min-w-[190px] overflow-hidden rounded-[12px] border border-primary/30 bg-popover">
-                            <div className="flex items-center justify-between gap-5 border-b border-border/60 bg-secondary px-3.5 py-2.5">
-                              <p className="text-[10px] font-bold uppercase text-muted-foreground">{p.payload.fullLabel}</p>
-                              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                            </div>
-                            <div className="space-y-3 px-3.5 py-3">
-                              <div>
-                                <p className="text-[9px] font-semibold uppercase text-muted-foreground">Faturamento</p>
-                                <p className="mt-1 font-display text-[16px] font-black tabular-nums text-foreground">{privacy.hidden ? CENSORED : fmt(Number(p.payload.vendas))}</p>
-                              </div>
-                              <div className="flex items-center justify-between gap-6 border-t border-border/50 pt-2.5">
-                                <span className="text-[10px] text-muted-foreground">Vendas aprovadas</span>
-                                <span className="text-[12px] font-bold tabular-nums text-foreground">{Number(p.payload.pedidos).toLocaleString("pt-BR")}</span>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      }
-                      return null;
+                      if (!active || !payload?.length) return null;
+                      const p = payload[0];
+                      return (
+                        <div className="rounded-[12px] border border-border bg-popover px-3.5 py-2.5">
+                          <p className="text-[10px] font-medium text-muted-foreground">{p.payload.fullLabel}</p>
+                          <p className="mt-0.5 font-display text-[15px] font-bold tabular-nums text-foreground">
+                            {privacy.hidden ? CENSORED : fmt(Number(p.payload.vendas))}
+                          </p>
+                        </div>
+                      );
                     }}
                   />
-                  <Area type="monotone" dataKey="vendas" stroke="url(#revStroke)" strokeWidth={3} fill="url(#revGrad)"
+                  <Area type="monotone" dataKey="vendas" stroke="hsl(var(--primary))" strokeWidth={2.5} fill="url(#revGrad)"
                     dot={false}
-                    activeDot={{ r: 6, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 3 }}
-                    animationDuration={900}
+                    activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 3 }}
+                    animationDuration={800}
                     animationEasing="ease-out"
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-
-            <div className="grid grid-cols-2 border-t border-border/60 bg-secondary/40 sm:grid-cols-3">
-              <div className="px-5 py-3.5 md:px-7">
-                <p className="text-[9px] font-semibold uppercase text-muted-foreground">Vendas aprovadas</p>
-                <p className="mt-1 text-[13px] font-bold tabular-nums text-foreground">{approvedCount.toLocaleString("pt-BR")}</p>
-              </div>
-              <div className="border-l border-border/60 px-5 py-3.5 md:px-7">
-                <p className="text-[9px] font-semibold uppercase text-muted-foreground">Ticket médio</p>
-                <p className="mt-1 text-[13px] font-bold tabular-nums text-foreground">{privacy.hidden ? CENSORED : fmt(chartAverage)}</p>
-              </div>
-              <div className="col-span-2 border-t border-border/60 px-5 py-3.5 sm:col-span-1 sm:border-l sm:border-t-0 md:px-7">
-                <p className="text-[9px] font-semibold uppercase text-muted-foreground">Conversão</p>
-                <p className="mt-1 text-[13px] font-bold tabular-nums text-foreground">{conversion.toFixed(1)}%</p>
-              </div>
-            </div>
           </div>
+
 
           {/* Right side: donuts + links */}
           <div className="space-y-4">
