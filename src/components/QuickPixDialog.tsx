@@ -182,9 +182,9 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-1.5rem)] max-w-[520px] max-h-[92vh] overflow-y-auto p-0 rounded-[28px] border border-border bg-card">
+      <DialogContent className="w-[calc(100vw-1.5rem)] max-w-[700px] max-h-[90vh] overflow-y-auto p-0 rounded-[28px] border border-border bg-card">
         {/* Header — solid, no gradients/blur */}
-        <div className="relative px-7 pt-7 pb-6 border-b border-border bg-card sm:px-8">
+        <div className="relative px-7 pt-7 pb-6 border-b border-border bg-card sm:px-9">
           <DialogHeader>
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
@@ -210,7 +210,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
 
         {/* Body */}
         {step === "form" && (
-          <div className="px-7 py-6 space-y-5 bg-card sm:px-8">
+          <div className="px-7 py-6 space-y-5 bg-card sm:px-9">
             {/* Amount — large input */}
             <div className="space-y-2">
               <Label className="text-[12px] font-semibold text-muted-foreground">
@@ -256,24 +256,23 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
               )}
             </div>
 
-            {/* Name */}
-            <div className="space-y-2">
-              <Label className="text-[12px] font-semibold text-muted-foreground">
-                Nome do pagador
-              </Label>
-              <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className={cn("h-12 pl-10 rounded-2xl border border-border/80 bg-card-inset text-[13px] font-bold focus-visible:border-primary/45 focus-visible:ring-primary/20", ease)}
-                  placeholder="Nome completo"
-                />
+            {/* Payer fields — compact two-column grid keeps the dialog short */}
+            <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label className="text-[12px] font-semibold text-muted-foreground">
+                  Nome do pagador
+                </Label>
+                <div className="relative">
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className={cn("h-12 pl-10 rounded-2xl border border-border/80 bg-card-inset text-[13px] font-bold focus-visible:border-primary/45 focus-visible:ring-primary/20", ease)}
+                    placeholder="Nome completo"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* CPF + Email side-by-side */}
-            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label className="text-[12px] font-semibold text-muted-foreground">
                   CPF / CNPJ
@@ -292,6 +291,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
                   />
                 </div>
               </div>
+
               <div className="space-y-2">
                 <Label className="text-[12px] font-semibold text-muted-foreground">
                   E-mail <span className="opacity-60 normal-case font-bold">(opcional)</span>
@@ -307,19 +307,18 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
                   />
                 </div>
               </div>
-            </div>
 
-            {/* Description */}
-            <div className="space-y-2">
-              <Label className="text-[12px] font-semibold text-muted-foreground">
-                Descrição <span className="opacity-60 normal-case font-bold">(opcional)</span>
-              </Label>
-              <Input
-                value={desc}
-                onChange={(e) => setDesc(e.target.value.slice(0, 100))}
-                className={cn("h-12 rounded-2xl border border-border/80 bg-card-inset text-[13px] font-bold focus-visible:border-primary/45 focus-visible:ring-primary/20", ease)}
-                placeholder="Ex: Consultoria, Mentoria..."
-              />
+              <div className="space-y-2">
+                <Label className="text-[12px] font-semibold text-muted-foreground">
+                  Descrição <span className="opacity-60 normal-case font-bold">(opcional)</span>
+                </Label>
+                <Input
+                  value={desc}
+                  onChange={(e) => setDesc(e.target.value.slice(0, 100))}
+                  className={cn("h-12 rounded-2xl border border-border/80 bg-card-inset text-[13px] font-bold focus-visible:border-primary/45 focus-visible:ring-primary/20", ease)}
+                  placeholder="Ex: Consultoria, Mentoria..."
+                />
+              </div>
             </div>
 
             {/* Trust row */}
@@ -359,7 +358,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
         )}
 
         {step === "result" && result && (
-          <div className="px-7 py-6 space-y-5 bg-card sm:px-8">
+          <div className="px-7 py-6 bg-card sm:px-9 sm:py-7">
             {paid ? (
               <div className="flex flex-col items-center text-center py-6 space-y-4">
                 <div className="h-16 w-16 rounded-2xl bg-success/10 border border-success/30 flex items-center justify-center">
@@ -377,7 +376,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
                 <button
                   onClick={() => onOpenChange(false)}
                   className={cn(
-                    "w-full h-11 rounded-xl bg-primary text-primary-foreground font-display font-black text-[12px] uppercase tracking-[0.14em]",
+                    "w-full max-w-xs h-11 rounded-xl bg-primary text-primary-foreground font-display font-black text-[12px] uppercase tracking-[0.14em]",
                     "hover:bg-primary/90 active:scale-[0.985] border border-primary/40",
                     ease,
                   )}
@@ -386,107 +385,112 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
                 </button>
               </div>
             ) : (
-              <>
-                {/* Amount + Timer */}
-                <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-background">
-                  <div>
-                    <p className="text-[12px] font-semibold text-muted-foreground">
-                      Valor a receber
-                    </p>
-                    <p className="font-display text-[26px] font-black tabular-nums tracking-[-0.03em] text-foreground leading-none mt-1.5"
-                       style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}>
-                      {fmtBrl(Math.round(result.amount * 100))}
-                    </p>
+              /* Two-column layout: QR stays fixed on the left, details on the right —
+                 no vertical scrolling needed to see the full content. */
+              <div className="grid items-start gap-7 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-9">
+                {/* QR column */}
+                <div className="flex flex-col items-center gap-4 justify-self-center">
+                  {pixCode && (
+                    <div className="p-4 rounded-2xl bg-white border border-border">
+                      <QRCodeSVG
+                        value={pixCode}
+                        size={210}
+                        level="M"
+                        includeMargin={false}
+                      />
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setStep("form")}
+                    className={cn(
+                      "text-[11px] font-bold text-muted-foreground hover:text-foreground flex items-center justify-center gap-1.5",
+                      ease,
+                    )}
+                  >
+                    <ArrowLeft className="h-3 w-3" />
+                    Gerar outro PIX
+                  </button>
+                </div>
+
+                {/* Details column */}
+                <div className="min-w-0 space-y-4">
+                  {/* Amount + Timer */}
+                  <div className="flex items-center justify-between p-4 rounded-2xl border border-border bg-background">
+                    <div>
+                      <p className="text-[12px] font-semibold text-muted-foreground">
+                        Valor a receber
+                      </p>
+                      <p className="font-display text-[26px] font-black tabular-nums tracking-[-0.03em] text-foreground leading-none mt-1.5"
+                         style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}>
+                        {fmtBrl(Math.round(result.amount * 100))}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-card">
+                      <Timer className="h-3 w-3 text-muted-foreground" />
+                      <span className="font-mono text-[11px] font-black text-foreground tabular-nums">
+                        {mmss}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-card">
-                    <Timer className="h-3 w-3 text-muted-foreground" />
-                    <span className="font-mono text-[11px] font-black text-foreground tabular-nums">
-                      {mmss}
+
+                  {/* Copy code */}
+                  <div className="space-y-2">
+                    <Label className="text-[12px] font-semibold text-muted-foreground">
+                      PIX copia e cola
+                    </Label>
+                    <div className="relative">
+                      <div className="p-3 pr-12 rounded-xl border border-border bg-muted/40 font-mono text-[10.5px] text-muted-foreground break-all max-h-20 overflow-hidden">
+                        {pixCode || "—"}
+                      </div>
+                      <button
+                        onClick={copyCode}
+                        disabled={!pixCode}
+                        className={cn(
+                          "absolute right-2 top-2 h-8 w-8 rounded-md bg-primary text-primary-foreground border border-primary/40 flex items-center justify-center",
+                          "hover:bg-primary/90 active:scale-95",
+                          ease,
+                        )}
+                        aria-label="Copiar código"
+                      >
+                        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={copyCode}
+                    disabled={!pixCode}
+                    className={cn(
+                      "w-full h-12 rounded-xl font-display text-[12.5px] font-bold uppercase tracking-[0.12em] flex items-center justify-center gap-2",
+                      "bg-primary text-primary-foreground transition-colors duration-200 hover:bg-primary/90",
+                      "disabled:opacity-40 disabled:cursor-not-allowed",
+                    )}
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="h-4 w-4" />
+                        Código copiado
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4" />
+                        Copiar código PIX
+                      </>
+                    )}
+                  </button>
+
+                  {/* Status */}
+                  <div className="flex items-center justify-center gap-2 pt-1">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inset-0 animate-ping rounded-full bg-success opacity-60" />
+                      <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
+                    </span>
+                    <span className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                      Aguardando pagamento
                     </span>
                   </div>
                 </div>
-
-                {/* QR Code — white background is intentional for QR contrast */}
-                {pixCode && (
-                  <div className="flex justify-center p-5 rounded-xl bg-white border border-border">
-                    <QRCodeSVG
-                      value={pixCode}
-                      size={200}
-                      level="M"
-                      includeMargin={false}
-                    />
-                  </div>
-                )}
-
-                {/* Copy code */}
-                <div className="space-y-2">
-                  <Label className="text-[12px] font-semibold text-muted-foreground">
-                    PIX copia e cola
-                  </Label>
-                  <div className="relative">
-                    <div className="p-3 pr-12 rounded-xl border border-border bg-muted/40 font-mono text-[10.5px] text-muted-foreground break-all max-h-20 overflow-hidden">
-                      {pixCode || "—"}
-                    </div>
-                    <button
-                      onClick={copyCode}
-                      disabled={!pixCode}
-                      className={cn(
-                        "absolute right-2 top-2 h-8 w-8 rounded-md bg-primary text-primary-foreground border border-primary/40 flex items-center justify-center",
-                        "hover:bg-primary/90 active:scale-95",
-                        ease,
-                      )}
-                      aria-label="Copiar código"
-                    >
-                      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <button
-                  onClick={copyCode}
-                  disabled={!pixCode}
-                  className={cn(
-                    "w-full h-12 rounded-xl font-display text-[12.5px] font-bold uppercase tracking-[0.12em] flex items-center justify-center gap-2",
-                    "bg-primary text-primary-foreground transition-colors duration-200 hover:bg-primary/90",
-                    "disabled:opacity-40 disabled:cursor-not-allowed",
-                  )}
-
-                >
-                  {copied ? (
-                    <>
-                      <Check className="h-4 w-4" />
-                      Código copiado
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-4 w-4" />
-                      Copiar código PIX
-                    </>
-                  )}
-                </button>
-
-                {/* Status */}
-                <div className="flex items-center justify-center gap-2 pt-1">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inset-0 animate-ping rounded-full bg-success opacity-60" />
-                    <span className="relative h-1.5 w-1.5 rounded-full bg-success" />
-                  </span>
-                  <span className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                    Aguardando pagamento
-                  </span>
-                </div>
-
-                <button
-                  onClick={() => setStep("form")}
-                  className={cn(
-                    "w-full text-[11px] font-bold text-muted-foreground hover:text-foreground flex items-center justify-center gap-1.5",
-                    ease,
-                  )}
-                >
-                  <ArrowLeft className="h-3 w-3" />
-                  Gerar outro PIX
-                </button>
-              </>
+              </div>
             )}
           </div>
         )}

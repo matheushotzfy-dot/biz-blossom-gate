@@ -301,7 +301,7 @@ export default function SaquesCrypto() {
                     Novo saque crypto
                   </button>
                 </DialogTrigger>
-                <DialogContent className="max-w-[460px] rounded-[12px] border border-border bg-card p-0 overflow-hidden max-h-[92vh] overflow-y-auto">
+                <DialogContent className="w-[calc(100vw-1.5rem)] max-w-[560px] rounded-[24px] border border-border bg-card p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
                   <div className="px-6 pt-6 pb-4 border-b border-border">
                     <DialogHeader>
                       <DialogTitle className="font-display font-black text-[15px] tracking-[-0.02em] flex items-center gap-2.5">
