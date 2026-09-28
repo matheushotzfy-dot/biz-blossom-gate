@@ -1,3 +1,3 @@
 # Architecture Decisions
 
-- Dashboard revenue visualization remains a single continuous approved-revenue area chart; secondary sales data belongs in hover details and summary metrics, not a metric switcher, to preserve rapid financial scanning.
+- Dashboard revenue card is minimal: title, subtitle, period chip and a single approved-revenue area chart; value details only in the hover tooltip — no summary metrics, big totals or metric switcher (user wants it clean).
