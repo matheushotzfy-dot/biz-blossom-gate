@@ -7,7 +7,7 @@ import {
   FileText, CheckCircle2, Clock, AlertCircle, Search,
   Settings, Zap, ShieldCheck, FileCheck, Building2, RefreshCw
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { StatCard } from "@/components/StatCard";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { format } from "date-fns";
@@ -23,7 +23,7 @@ const STATUS_MAP: Record<DeliveryStatus, { label: string; cls: string; dot: stri
   exhausted: { label: "Falhou",    cls: "bg-red-500/10 text-red-500 border-red-500/20",             dot: "bg-red-500",     Icon: AlertCircle },
 };
 
-const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const fmt = formatCurrency;
 
 interface InvoiceRow {
   id: string;
@@ -184,7 +184,49 @@ export default function NotasFiscais() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile cards */}
+        <div className="divide-y divide-border/40 md:hidden">
+          {invoices.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 px-4 py-14 opacity-30">
+              <FileText size={40} strokeWidth={1} />
+              <p className="text-[11px] font-semibold">
+                {integrationConnected ? "Nenhuma nota emitida ainda" : "Conecte a Notazz para começar"}
+              </p>
+            </div>
+          ) : (
+            invoices.map((inv) => {
+              const st = STATUS_MAP[inv.status];
+              return (
+                <div key={inv.id} className="flex items-center gap-3 px-4 py-4 active:bg-muted/20" title={inv.error || undefined}>
+                  <Avatar className="h-9 w-9 rounded-xl border border-border/40 shrink-0">
+                    <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-black">
+                      {inv.number.split('-')[1].slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-[11px] font-mono font-bold text-primary truncate">{inv.number}</p>
+                      <p className="text-sm font-black text-foreground tabular-nums shrink-0">{fmt(inv.amount)}</p>
+                    </div>
+                    <p className="text-sm font-black text-foreground truncate">{inv.customer}</p>
+                    <div className="mt-1 flex items-center justify-between gap-2">
+                      <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border", st.cls)}>
+                        <span className={cn("h-1.5 w-1.5 rounded-full", st.dot)} />
+                        {st.label}
+                      </span>
+                      <span className="text-[11px] font-medium text-muted-foreground/60">
+                        {format(new Date(inv.date), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                      </span>
+                    </div>
+                    {inv.error && <p className="text-[10px] text-red-500 truncate mt-1">{inv.error}</p>}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full min-w-[640px] text-left">
             <thead>
               <tr className="bg-muted/30 text-[11px] font-semibold text-muted-foreground/60 border-b border-border/40">

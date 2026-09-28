@@ -23,9 +23,9 @@ import { toast } from "sonner";
 import { PageShell, Panel, GlowPanel, PageTitle, SectionHeader, EmptyState } from "@/components/PageShell";
 import CheckoutSettingsDialog from "@/components/CheckoutSettingsDialog";
 import type { Tables } from "@/integrations/supabase/types";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
-const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+const fmt = formatCurrency;
 
 export default function Checkout() {
  const { user } = useAuth();

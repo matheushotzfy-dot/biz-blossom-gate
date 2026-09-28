@@ -17,6 +17,10 @@ import { LinearHero, LinearStat, LinearStatRow } from "@/components/admin/Linear
 import type { Tables, Json } from "@/integrations/supabase/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { friendlyError } from "@/lib/friendlyError";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type PlatformSetting = Tables<"platform_settings">;
 type RetentionSetting = Omit<Tables<"retention_settings">, "pix_retention_pct" | "card_retention_pct" | "retention_days" | "card_release_days"> & {
@@ -37,6 +41,8 @@ export default function AdminSettingsTab() {
  const [settings, setSettings] = useState<PlatformSetting[]>([]);
  const [loading, setLoading] = useState(true);
  const [saving, setSaving] = useState(false);
+ const [loadError, setLoadError] = useState<string | null>(null);
+ const [confirmAction, setConfirmAction] = useState<{ title: string; description: string; onConfirm: () => void } | null>(null);
 
  const [whitePercentage, setWhitePercentage] = useState("4.99");
  const [whiteFixed, setWhiteFixed] = useState("2.50");
@@ -72,6 +78,7 @@ export default function AdminSettingsTab() {
 
  const loadAll = async () => {
  setLoading(true);
+ setLoadError(null);
  const [feesRes, settingsRes, retentionRes, profilesRes, notifsRes] = await Promise.all([
  supabase.from("fees").select("*").order("name"),
  supabase.from("platform_settings").select("*"),
@@ -135,6 +142,8 @@ export default function AdminSettingsTab() {
  }
  if (profilesRes.data) setProfiles(profilesRes.data);
  if (notifsRes.data) setNotifications(notifsRes.data);
+ const firstError = feesRes.error || settingsRes.error || retentionRes.error || profilesRes.error || notifsRes.error;
+ if (firstError) setLoadError(firstError.message || "Erro ao carregar configurações");
  setLoading(false);
  };
 
@@ -197,46 +206,61 @@ export default function AdminSettingsTab() {
   };
 
   // Wipe all per-seller overrides → everyone (new and old) falls back to platform defaults
-  const applyGlobalToAllSellers = async () => {
+  const applyGlobalToAllSellers = () => {
     if (!user) return;
-    if (!window.confirm("Aplicar taxas globais a TODOS os sellers? Isso APAGA todas as taxas individuais (atuais e antigos).")) return;
-    setSaving(true);
-    const { error, count } = await supabase
-      .from("custom_user_fees")
-      .delete({ count: "exact" })
-      .not("user_id", "is", null);
-    if (error) { toast.error("Erro ao aplicar global: " + friendlyError(error)); setSaving(false); return; }
-    toast.success(`Taxas globais aplicadas. ${count ?? 0} overrides removidos.`);
-    await logAdminAction("apply_global_fees_to_all", "custom_user_fees", "bulk", { removed: count } as Record<string, Json>);
-    setSaving(false);
+    setConfirmAction({
+      title: "Aplicar taxas globais a todos os sellers?",
+      description: "Isso APAGA todas as taxas individuais (atuais e antigos).",
+      onConfirm: async () => {
+        setSaving(true);
+        const { error, count } = await supabase
+          .from("custom_user_fees")
+          .delete({ count: "exact" })
+          .not("user_id", "is", null);
+        if (error) { toast.error("Erro ao aplicar global: " + friendlyError(error)); setSaving(false); return; }
+        toast.success(`Taxas globais aplicadas. ${count ?? 0} overrides removidos.`);
+        await logAdminAction("apply_global_fees_to_all", "custom_user_fees", "bulk", { removed: count } as Record<string, Json>);
+        setSaving(false);
+      },
+    });
   };
 
   // Max Ticket: aplica apenas para novos usuários (snapshot do valor atual nos antigos)
-  const saveMaxTicketNewOnly = async () => {
+  const saveMaxTicketNewOnly = () => {
     const val = Number(maxTicketInput);
     if (!val || val <= 0) { toast.error("Informe um valor válido"); return; }
-    if (!window.confirm(`Definir limite de R$ ${val.toLocaleString("pt-BR")} para novos usuários? Os usuários existentes mantêm o limite atual.`)) return;
-    setSavingMaxTicket(true);
-    const { data, error } = await supabase.rpc("set_max_ticket_new_users_only", { _new_value: val });
-    if (error) { toast.error("Erro: " + friendlyError(error)); setSavingMaxTicket(false); return; }
-    toast.success(`Novo limite global: R$ ${val.toLocaleString("pt-BR")}. Limite anterior preservado nos usuários existentes.`);
-    await logAdminAction("set_max_ticket_new_only", "platform_settings", "max_ticket_default", data as unknown as Record<string, Json>);
-    setMaxTicketGlobal(String(val));
-    setSavingMaxTicket(false);
+    setConfirmAction({
+      title: "Definir novo limite de ticket?",
+      description: `Aplica R$ ${val.toLocaleString("pt-BR")} para novos usuários. Os usuários existentes mantêm o limite atual.`,
+      onConfirm: async () => {
+        setSavingMaxTicket(true);
+        const { data, error } = await supabase.rpc("set_max_ticket_new_users_only", { _new_value: val });
+        if (error) { toast.error("Erro: " + friendlyError(error)); setSavingMaxTicket(false); return; }
+        toast.success(`Novo limite global: R$ ${val.toLocaleString("pt-BR")}. Limite anterior preservado nos usuários existentes.`);
+        await logAdminAction("set_max_ticket_new_only", "platform_settings", "max_ticket_default", data as unknown as Record<string, Json>);
+        setMaxTicketGlobal(String(val));
+        setSavingMaxTicket(false);
+      },
+    });
   };
 
   // Max Ticket: aplica para TODOS (limpa overrides individuais)
-  const saveMaxTicketForAll = async () => {
+  const saveMaxTicketForAll = () => {
     const val = Number(maxTicketInput);
     if (!val || val <= 0) { toast.error("Informe um valor válido"); return; }
-    if (!window.confirm(`Aplicar R$ ${val.toLocaleString("pt-BR")} a TODOS os sellers (novos e antigos)? Isso APAGA todos os limites individuais de ticket.`)) return;
-    setSavingMaxTicket(true);
-    const { data, error } = await supabase.rpc("set_max_ticket_for_all", { _new_value: val });
-    if (error) { toast.error("Erro: " + friendlyError(error)); setSavingMaxTicket(false); return; }
-    toast.success(`Limite R$ ${val.toLocaleString("pt-BR")} aplicado a todos os sellers.`);
-    await logAdminAction("set_max_ticket_for_all", "platform_settings", "max_ticket_default", data as unknown as Record<string, Json>);
-    setMaxTicketGlobal(String(val));
-    setSavingMaxTicket(false);
+    setConfirmAction({
+      title: "Aplicar limite a todos os sellers?",
+      description: `Aplica R$ ${val.toLocaleString("pt-BR")} a TODOS os sellers (novos e antigos). Isso APAGA todos os limites individuais de ticket.`,
+      onConfirm: async () => {
+        setSavingMaxTicket(true);
+        const { data, error } = await supabase.rpc("set_max_ticket_for_all", { _new_value: val });
+        if (error) { toast.error("Erro: " + friendlyError(error)); setSavingMaxTicket(false); return; }
+        toast.success(`Limite R$ ${val.toLocaleString("pt-BR")} aplicado a todos os sellers.`);
+        await logAdminAction("set_max_ticket_for_all", "platform_settings", "max_ticket_default", data as unknown as Record<string, Json>);
+        setMaxTicketGlobal(String(val));
+        setSavingMaxTicket(false);
+      },
+    });
   };
 
 
@@ -325,11 +349,17 @@ export default function AdminSettingsTab() {
  loadAll();
  };
 
- const deleteNotification = async (id: string) => {
- if (!window.confirm("Excluir esta notificação?")) return;
- const { error } = await supabase.from("notifications").delete().eq("id", id);
- if (error) { toast.error("Erro ao excluir"); return; }
- loadAll();
+ const deleteNotification = (id: string) => {
+ setConfirmAction({
+   title: "Excluir notificação?",
+   description: "Esta ação não pode ser desfeita.",
+   onConfirm: async () => {
+     const { error } = await supabase.from("notifications").delete().eq("id", id);
+     if (error) { toast.error("Erro ao excluir"); return; }
+     await logAdminAction("delete_platform_notification", "notification", id);
+     loadAll();
+   },
+ });
  };
 
  const getSellerName = (uid: string | null) => {
@@ -345,7 +375,16 @@ export default function AdminSettingsTab() {
  );
 
  return (
+ <>
  <div className="space-y-6 animate-fade-in">
+ {loadError && (
+   <div className="flex items-center justify-between gap-3 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+     <span>Erro ao carregar configurações: {loadError}</span>
+     <Button size="sm" variant="outline" className="h-8 shrink-0 border-destructive/40 text-destructive hover:bg-destructive/20" onClick={loadAll}>
+       Tentar de novo
+     </Button>
+   </div>
+ )}
  <LinearHero
    eyebrow="Plataforma · Configurações"
    title="Controles globais"
@@ -758,6 +797,22 @@ export default function AdminSettingsTab() {
  </AdminPanel>
  </div>
  </div>
+
+ <AlertDialog open={!!confirmAction} onOpenChange={(v) => !v && setConfirmAction(null)}>
+   <AlertDialogContent>
+     <AlertDialogHeader>
+       <AlertDialogTitle>{confirmAction?.title}</AlertDialogTitle>
+       <AlertDialogDescription>{confirmAction?.description}</AlertDialogDescription>
+     </AlertDialogHeader>
+     <AlertDialogFooter>
+       <AlertDialogCancel>Cancelar</AlertDialogCancel>
+       <AlertDialogAction onClick={() => { confirmAction?.onConfirm(); setConfirmAction(null); }}>
+         Confirmar
+       </AlertDialogAction>
+     </AlertDialogFooter>
+   </AlertDialogContent>
+ </AlertDialog>
+ </>
  );
 }
 

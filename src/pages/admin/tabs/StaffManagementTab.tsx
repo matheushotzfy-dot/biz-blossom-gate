@@ -17,6 +17,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { friendlyError } from "@/lib/friendlyError";
+import { logAdminAction } from "@/lib/auditLog";
 
 export const STAFF_PERMISSIONS: { key: string; label: string; group: string }[] = [
   { key: "view_sellers", label: "Ver vendedores", group: "Visualização" },
@@ -159,6 +160,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
       return;
     }
     toast.success(row.frozen ? "Conta descongelada" : "Conta congelada");
+    await logAdminAction(action === "freeze" ? "freeze_staff" : "unfreeze_staff", "staff", row.user_id);
     load();
     onReload?.();
   };
@@ -175,6 +177,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
     }
     await navigator.clipboard.writeText(pw).catch(() => {});
     toast.success("Senha redefinida (copiada).");
+    await logAdminAction("reset_staff_password", "staff", row.user_id);
   };
 
   const removeStaff = async (row: StaffRow) => {
@@ -187,6 +190,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
       return;
     }
     toast.success("Conta excluída.");
+    await logAdminAction("delete_staff", "staff", row.user_id, { email: row.email });
     load();
     onReload?.();
   };
@@ -198,6 +202,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
     });
     if (error) { toast.error(friendlyError(error)); return; }
     toast.success("% atualizada.");
+    await logAdminAction("update_staff_commission_pct", "staff", row.user_id, { pct: value });
     load();
   };
 
@@ -495,6 +500,7 @@ function CreateStaffDialog({ open, onOpenChange, role, onCreated }: {
     }
     await navigator.clipboard.writeText(`Email: ${email}\nSenha: ${password}`).catch(() => {});
     toast.success("Conta criada. Credenciais copiadas.");
+    await logAdminAction("create_staff", "staff", (data as { user_id?: string })?.user_id ?? email, { email, role, permissions: Array.from(perms), commission_pct: pct });
     onOpenChange(false);
     onCreated();
   };
@@ -607,6 +613,7 @@ function PermissionsDialog({ row, onClose, onSaved }: {
       );
     }
     toast.success("Permissões salvas.");
+    await logAdminAction("update_staff_permissions", "staff", row.user_id, { permissions: Array.from(perms) });
     onSaved();
     onClose();
   };

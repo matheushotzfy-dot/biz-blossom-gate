@@ -22,10 +22,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import { EmptyState, Panel } from "@/components/PageShell";
 import { HDStat, HDStatGrid } from "@/components/hd/HDPage";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
 
-const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+const fmt = formatCurrency;
 
 type Coupon = Tables<"coupons">;
 type StatusFilter = "all" | "active" | "inactive" | "expired";
@@ -54,7 +54,7 @@ function CouponStatusPill({ coupon }: { coupon: Coupon }) {
 export default function Cupons() {
   const { user } = useAuth();
   const { data: products = [] } = useProducts();
-  const { data: coupons = [], refetch } = useCoupons();
+  const { data: coupons = [], refetch, isLoading } = useCoupons();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [openCreate, setOpenCreate] = useState(false);
@@ -420,7 +420,13 @@ export default function Cupons() {
         )}
 
         {/* Rows */}
-        {filtered.length === 0 ? (
+        {isLoading ? (
+          <div className="space-y-2 animate-pulse">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-14 rounded-xl bg-muted/30" />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
           <EmptyState
             icon={<Ticket className="h-7 w-7" />}
             title={coupons.length === 0 ? "Nenhum cupom ainda" : "Nenhum resultado"}

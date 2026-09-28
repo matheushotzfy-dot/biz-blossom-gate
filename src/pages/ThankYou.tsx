@@ -37,11 +37,19 @@ export default function ThankYou() {
  useEffect(() => {
  if (!txId) { setLoading(false); return; }
  (async () => {
- const { data } = await supabase
- .from("transactions")
- .select("amount, payment_method, customer_name, customer_email, status, product_id")
- .eq("id", txId)
- .maybeSingle();
+ // Consulta segura: devolve só dados mínimos e mascarados desta compra.
+ const { data: rows } = await supabase.rpc("get_thank_you_summary", { _tx_id: txId });
+ const row = Array.isArray(rows) ? rows[0] : null;
+ const data = row
+  ? {
+    amount: Number(row.amount ?? 0),
+    payment_method: row.payment_method,
+    customer_name: row.customer_first_name,
+    customer_email: row.customer_email_masked,
+    status: row.status,
+    product_id: row.product_id,
+   }
+  : null;
  if (data) {
  let productName = "Produto";
  if (data.product_id) {

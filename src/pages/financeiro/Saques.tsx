@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import DadosBancarios from "./DadosBancarios";
@@ -20,8 +20,7 @@ import { friendlyError } from "@/lib/friendlyError";
 import { ReauthenticationDialog } from "@/components/security/ReauthenticationDialog";
 import { WithdrawDestinationPicker, getPixKeyLabel, getPixKeyMeta } from "@/components/financeiro/WithdrawDestinationPicker";
 
-const fmt = (v: number) =>
-  `R$ ${(Number.isFinite(v) ? v : 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const fmt = formatCurrency;
 
 // Mask raw digits into BR currency string "1.234,56"
 const maskBRL = (raw: string): string => {

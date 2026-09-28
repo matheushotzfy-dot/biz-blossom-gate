@@ -48,7 +48,7 @@ export default function CheckoutWhatsApp() {
  ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(
  autoMessage
  .replace("{{produto}}", selectedProd.name)
- .replace("{{preco}}", (selectedProd.price / 100).toFixed(2))
+ .replace("{{preco}}", Number(selectedProd.price).toFixed(2))
  .replace("{{link}}", checkoutUrl)
  )}`
  : "";
@@ -101,7 +101,7 @@ export default function CheckoutWhatsApp() {
  <SelectContent>
  {products.map((p) => (
  <SelectItem key={p.id} value={p.id}>
- {p.name} — R$ {(p.price / 100).toFixed(2)}
+ {p.name} — R$ {Number(p.price).toFixed(2)}
  </SelectItem>
  ))}
  </SelectContent>
@@ -252,7 +252,7 @@ export default function CheckoutWhatsApp() {
  <div>
  <p className="text-sm font-semibold truncate max-w-[180px]">{p.name}</p>
  <p className="text-xs text-muted-foreground">
- R$ {(p.price / 100).toFixed(2)}
+ R$ {Number(p.price).toFixed(2)}
  </p>
  </div>
  <Button
@@ -267,7 +267,7 @@ export default function CheckoutWhatsApp() {
  toast.error("Configure a URL de checkout do produto primeiro");
  return;
  }
- const msg = `Confira *${p.name}* por apenas R$ ${(p.price / 100).toFixed(2)}!\n\n${url}`;
+ const msg = `Confira *${p.name}* por apenas R$ ${Number(p.price).toFixed(2)}!\n\n${url}`;
  window.open(
  `https://wa.me/?text=${encodeURIComponent(msg)}`,
  "_blank"

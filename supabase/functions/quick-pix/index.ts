@@ -260,7 +260,7 @@ Deno.serve(async (req) => {
           transactionId: transaction?.id ?? preTxId,
           podpayId: veo.transactionId,
           gatewayId: veo.transactionId,
-          acquirer: "veopag",
+
           amount: amt,
           pix: { qrcode: veo.qrcode, expiresAt: pixExpiresAt },
         },
@@ -331,7 +331,7 @@ Deno.serve(async (req) => {
           transactionId: transaction?.id ?? preTxId,
           podpayId: pod.transactionId,
           gatewayId: pod.transactionId,
-          acquirer: "podpay_app",
+
           amount: amt,
           pix: { qrcode: pod.qrcode, expiresAt: pixExpiresAt },
         },
@@ -452,7 +452,7 @@ Deno.serve(async (req) => {
         transactionId: transaction?.id,
         podpayId,
         gatewayId: podpayId,
-        acquirer: "podpay",
+
         amount: amt,
         pix,
       },

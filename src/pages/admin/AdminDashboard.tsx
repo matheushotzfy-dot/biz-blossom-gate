@@ -13,6 +13,7 @@ import {
   Package2, BarChart3, Calendar,
   PanelLeftClose, PanelLeft,
   Trophy, Search, ChevronDown, Sun, Moon, Target, Gauge, Lock, Clock, SearchX,
+  Link as LinkIcon,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -55,6 +56,7 @@ import AdminCorridasTab from "./tabs/AdminCorridasTab";
 import AdminGoalsTab from "./tabs/AdminGoalsTab";
 import AdminCommandCenterTab from "./tabs/AdminCommandCenterTab";
 import AdminToolsTab from "./tabs/AdminToolsTab";
+import AdminPaymentLinksTab from "./tabs/AdminPaymentLinksTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
@@ -78,6 +80,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
     items: [
       { id: "withdrawals", label: "Saques", icon: ArrowDownToLine, employeeAccess: false },
       { id: "transactions", label: "Transações", icon: CreditCard, employeeAccess: true },
+      { id: "payment-links", label: "Links de Pagamento", icon: LinkIcon, employeeAccess: false },
     ],
   },
   {
@@ -144,6 +147,8 @@ export default function AdminDashboard() {
   const [products, setProducts] = useState<Tables<"products">[]>([]);
   const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
   const [financialOverview, setFinancialOverview] = useState<AdminFinancialOverview | null>(null);
+  const [dataCapHit, setDataCapHit] = useState<{ field: string; count: number }[]>([]);
+  const lastLoadAtRef = useRef<number>(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEmployee, setIsEmployee] = useState(false);
   const [hasSupportPerm, setHasSupportPerm] = useState(false);
@@ -191,7 +196,14 @@ export default function AdminDashboard() {
       setProducts(payload.products ?? []);
       setWithdrawals(payload.withdrawals ?? []);
       setFinancialOverview((overviewResult.data ?? null) as AdminFinancialOverview | null);
+      const caps: { field: string; count: number }[] = [];
+      if ((payload.transactions?.length ?? 0) >= 5000) caps.push({ field: "transações", count: 5000 });
+      if ((payload.profiles?.length ?? 0) >= 2000) caps.push({ field: "perfis", count: 2000 });
+      if ((payload.products?.length ?? 0) >= 2000) caps.push({ field: "produtos", count: 2000 });
+      if ((payload.withdrawals?.length ?? 0) >= 5000) caps.push({ field: "saques", count: 5000 });
+      setDataCapHit(caps);
       setLastSync(new Date());
+      lastLoadAtRef.current = Date.now();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "desconhecido";
       toast.error("Erro ao carregar dados: " + msg);
@@ -244,7 +256,9 @@ export default function AdminDashboard() {
     let timer: ReturnType<typeof setTimeout> | null = null;
     const reconcile = () => {
       if (timer) return;
-      timer = setTimeout(() => { timer = null; void loadData(); }, 500);
+      const elapsed = Date.now() - lastLoadAtRef.current;
+      const wait = Math.max(500, 10_000 - elapsed);
+      timer = setTimeout(() => { timer = null; void loadData(); }, wait);
     };
     const channel = supabase.channel("admin-financial-sync")
       .on("postgres_changes", { event: "*", schema: "public", table: "transactions" }, reconcile)
@@ -315,7 +329,7 @@ export default function AdminDashboard() {
   const activeTabLabel = allItems.find(i => i.id === activeTab)?.label || "";
 
   const handleTabChange = useCallback((tabId: TabId) => {
-    if (isEmployee && !EMPLOYEE_ALLOWED_TABS.has(tabId)) {
+    if (isEmployee && !EMPLOYEE_ALLOWED_TABS.has(tabId) && !(tabId === "support" && hasSupportPerm)) {
       toast.error("Sem permissão para acessar esta área");
       return;
     }
@@ -327,7 +341,7 @@ export default function AdminDashboard() {
     const scrollable = document.querySelector("[data-admin-content]");
     if (scrollable) scrollable.scrollTop = 0;
     else window.scrollTo(0, 0);
-  }, [isEmployee, setSearchParams]);
+  }, [isEmployee, hasSupportPerm, setSearchParams]);
 
   // ── Auto refresh silencioso a cada 60s (só com a aba do navegador visível) ──
   useEffect(() => {
@@ -640,6 +654,14 @@ export default function AdminDashboard() {
           <div className="p-5 lg:p-7 xl:p-9 admin-fluid" key={activeTab}>
             <div className="mx-auto max-w-[1800px]">
               {activeTab === "god-mode" && (
+                <>
+                {dataCapHit.length > 0 && (
+                  <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
+                    <span>
+                      Mostrando os {dataCapHit.map(c => `${c.count} ${c.field} mais recentes`).join(", ")} — pode haver mais dados no período selecionado.
+                    </span>
+                  </div>
+                )}
                 <AdminOverviewTab
                   transactions={transactions} profiles={profiles} products={products}
                   withdrawals={withdrawals} onWithdrawalAction={handleWithdrawalAction}
@@ -648,6 +670,7 @@ export default function AdminDashboard() {
                    financialOverview={financialOverview}
                   onNavigate={(id) => handleTabChange(id as TabId)}
                 />
+                </>
               )}
               {activeTab === "tools" && isAdmin && (
                 <AdminToolsTab transactions={transactions} profiles={profiles} withdrawals={withdrawals} />
@@ -708,6 +731,7 @@ export default function AdminDashboard() {
               {activeTab === "affiliates" && isAdmin && <AdminAffiliateSalesTab profiles={profiles} products={products} fmtCurrency={fmtCurrency} />}
               {activeTab === "subscriptions" && isAdmin && <AdminSubscriptionsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
               {activeTab === "referrals" && isAdmin && <AdminReferralsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
+              {activeTab === "payment-links" && isAdmin && <AdminPaymentLinksTab fmtCurrency={fmtCurrency} />}
               {activeTab === "support" && (isAdmin || hasSupportPerm) && <AdminSupportTab profiles={profiles} />}
               {activeTab === "rewards" && isAdmin && <AdminRewardsTab profiles={profiles} />}
               {activeTab === "corridas" && isAdmin && <AdminCorridasTab />}

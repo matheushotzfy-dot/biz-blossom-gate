@@ -4,6 +4,11 @@ import { toast } from "sonner";
 import { Flag, Plus, Trash2, Upload, Gift, Save, Eye, EyeOff, RefreshCw, Users, Sparkles, Trophy, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+import { logAdminAction } from "@/lib/auditLog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Race = {
   id: string;
@@ -52,6 +57,7 @@ export default function AdminCorridasTab() {
   const [overrides, setOverrides] = useState<Override[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{ title: string; description: string; onConfirm: () => void } | null>(null);
 
   const selected = races.find(r => r.id === selectedId) || null;
 
@@ -87,6 +93,7 @@ export default function AdminCorridasTab() {
     }).select().single();
     if (error) { toast.error(error.message); return; }
     setOverrides(prev => [data as Override, ...prev]);
+    await logAdminAction("create_race_override", "revenue_race_override", data.id, { race_id: selected.id });
     loadPrizes(selected.id);
   };
 
@@ -94,31 +101,45 @@ export default function AdminCorridasTab() {
     const { error } = await supabase.from("revenue_race_overrides").update(patch).eq("id", id);
     if (error) { toast.error(error.message); return; }
     setOverrides(prev => prev.map(o => o.id === id ? { ...o, ...patch } as Override : o));
+    await logAdminAction("update_race_override", "revenue_race_override", id, patch as any);
     if (selected) loadPrizes(selected.id);
   };
 
-  const deleteOverride = async (id: string) => {
-    if (!confirm("Remover esta entrada do ranking?")) return;
-    const { error } = await supabase.from("revenue_race_overrides").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    setOverrides(prev => prev.filter(o => o.id !== id));
-    if (selected) loadPrizes(selected.id);
+  const deleteOverride = (id: string) => {
+    setConfirmAction({
+      title: "Remover entrada do ranking?",
+      description: "Esta ação não pode ser desfeita.",
+      onConfirm: async () => {
+        const { error } = await supabase.from("revenue_race_overrides").delete().eq("id", id);
+        if (error) { toast.error(error.message); return; }
+        setOverrides(prev => prev.filter(o => o.id !== id));
+        await logAdminAction("delete_race_override", "revenue_race_override", id);
+        if (selected) loadPrizes(selected.id);
+      },
+    });
   };
 
-  const seedDemoRanking = async () => {
+  const seedDemoRanking = () => {
     if (!selected) return;
-    if (!confirm("Preencher com 5 participantes de exemplo? Isso NÃO remove os existentes.")) return;
-    const demo = [
-      { display_name: "Bryan G.",    revenue_cents: 87500000, sales_count: 342 },
-      { display_name: "Airis F.",    revenue_cents: 64200000, sales_count: 258 },
-      { display_name: "Wdzin",       revenue_cents: 41800000, sales_count: 197 },
-      { display_name: "Marina S.",   revenue_cents: 28900000, sales_count: 134 },
-      { display_name: "Lucas P.",    revenue_cents: 19700000, sales_count: 88 },
-    ].map(d => ({ ...d, race_id: selected.id }));
-    const { error } = await supabase.from("revenue_race_overrides").insert(demo);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Ranking de demonstração inserido");
-    loadPrizes(selected.id);
+    setConfirmAction({
+      title: "Preencher ranking de demonstração?",
+      description: "Adiciona 5 participantes de exemplo. Isso NÃO remove os existentes.",
+      onConfirm: async () => {
+        if (!selected) return;
+        const demo = [
+          { display_name: "Bryan G.",    revenue_cents: 87500000, sales_count: 342 },
+          { display_name: "Airis F.",    revenue_cents: 64200000, sales_count: 258 },
+          { display_name: "Wdzin",       revenue_cents: 41800000, sales_count: 197 },
+          { display_name: "Marina S.",   revenue_cents: 28900000, sales_count: 134 },
+          { display_name: "Lucas P.",    revenue_cents: 19700000, sales_count: 88 },
+        ].map(d => ({ ...d, race_id: selected.id }));
+        const { error } = await supabase.from("revenue_race_overrides").insert(demo);
+        if (error) { toast.error(error.message); return; }
+        toast.success("Ranking de demonstração inserido");
+        await logAdminAction("seed_demo_ranking", "revenue_race", selected.id, { count: demo.length });
+        loadPrizes(selected.id);
+      },
+    });
   };
 
 
@@ -134,6 +155,7 @@ export default function AdminCorridasTab() {
     }).select().single();
     if (error) { toast.error(error.message); return; }
     toast.success("Corrida criada");
+    await logAdminAction("create_race", "revenue_race", data.id, { title: data.title });
     setRaces(prev => [data as Race, ...prev]);
     setSelectedId(data.id);
   };
@@ -146,16 +168,24 @@ export default function AdminCorridasTab() {
     if (error) { toast.error(error.message); return; }
     setRaces(prev => prev.map(r => r.id === selected.id ? { ...r, ...patch } as Race : r));
     toast.success("Salvo");
+    await logAdminAction("update_race", "revenue_race", selected.id, patch as any);
   };
 
-  const deleteRace = async () => {
+  const deleteRace = () => {
     if (!selected) return;
-    if (!confirm("Excluir esta corrida e todos os prêmios?")) return;
-    const { error } = await supabase.from("revenue_races").delete().eq("id", selected.id);
-    if (error) { toast.error(error.message); return; }
-    setRaces(prev => prev.filter(r => r.id !== selected.id));
-    setSelectedId(races[0]?.id ?? null);
-    toast.success("Corrida excluída");
+    const raceId = selected.id;
+    setConfirmAction({
+      title: "Excluir esta corrida?",
+      description: "Todos os prêmios e o ranking associado serão removidos. Esta ação não pode ser desfeita.",
+      onConfirm: async () => {
+        const { error } = await supabase.from("revenue_races").delete().eq("id", raceId);
+        if (error) { toast.error(error.message); return; }
+        setRaces(prev => prev.filter(r => r.id !== raceId));
+        setSelectedId(races.find(r => r.id !== raceId)?.id ?? null);
+        toast.success("Corrida excluída");
+        await logAdminAction("delete_race", "revenue_race", raceId);
+      },
+    });
   };
 
   const uploadAsset = async (file: File, field: "banner_url" | "logo_url") => {
@@ -186,19 +216,27 @@ export default function AdminCorridasTab() {
     }).select().single();
     if (error) { toast.error(error.message); return; }
     setPrizes(prev => [...prev, data as Prize]);
+    await logAdminAction("create_race_prize", "revenue_race_prize", data.id, { race_id: selected.id });
   };
 
   const updatePrize = async (id: string, patch: Partial<Prize>) => {
     const { error } = await supabase.from("revenue_race_prizes").update(patch).eq("id", id);
     if (error) { toast.error(error.message); return; }
     setPrizes(prev => prev.map(p => p.id === id ? { ...p, ...patch } as Prize : p));
+    await logAdminAction("update_race_prize", "revenue_race_prize", id, patch as any);
   };
 
-  const deletePrize = async (id: string) => {
-    if (!confirm("Remover este prêmio?")) return;
-    const { error } = await supabase.from("revenue_race_prizes").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    setPrizes(prev => prev.filter(p => p.id !== id));
+  const deletePrize = (id: string) => {
+    setConfirmAction({
+      title: "Remover este prêmio?",
+      description: "Esta ação não pode ser desfeita.",
+      onConfirm: async () => {
+        const { error } = await supabase.from("revenue_race_prizes").delete().eq("id", id);
+        if (error) { toast.error(error.message); return; }
+        setPrizes(prev => prev.filter(p => p.id !== id));
+        await logAdminAction("delete_race_prize", "revenue_race_prize", id);
+      },
+    });
   };
 
   if (loading) return <div className="p-6 text-sm text-muted-foreground">Carregando corridas...</div>;
@@ -455,6 +493,21 @@ export default function AdminCorridasTab() {
           </div>
         )}
       </div>
+
+      <AlertDialog open={!!confirmAction} onOpenChange={(v) => !v && setConfirmAction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmAction?.title}</AlertDialogTitle>
+            <AlertDialogDescription>{confirmAction?.description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { confirmAction?.onConfirm(); setConfirmAction(null); }}>
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

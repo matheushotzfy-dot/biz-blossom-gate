@@ -104,6 +104,7 @@ export default function AdminAcquirersTab() {
   const [txs, setTxs] = useState<TxLite[]>([]);
   const [txStats, setTxStats] = useState<Record<string, { sales: number; volume: number; refused: number; refunded: number; medpix: number; sellers: number; fees: number; net: number }>>({});
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
@@ -123,6 +124,7 @@ export default function AdminAcquirersTab() {
 
   const load = async () => {
     setLoading(true);
+    setLoadError(null);
     const since30 = new Date(Date.now() - 30 * 86400000).toISOString();
     const [acqRes, heRes, foRes, profRes, txRes, dispRes] = await Promise.all([
       supabase.from("acquirers").select("id,name,slug,type,is_active,api_endpoint,description,conversion_rate,seller_visible,health_status,last_health_check_at,last_failure_at,last_latency_ms,avg_latency_ms,uptime_pct,min_transaction_amount,max_transaction_amount,supported_methods,transaction_fee_percentage,transaction_fee_fixed,webhook_url,api_environment,priority,allow_failover,notes,created_at,updated_at,has_api_key,has_api_secret,has_webhook_secret").order("priority", { ascending: false }).order("created_at"),
@@ -133,6 +135,12 @@ export default function AdminAcquirersTab() {
       supabase.from("disputes").select("transaction_id, type, created_at").gte("created_at", since30),
     ]);
 
+    const firstError = acqRes.error || heRes.error || foRes.error || profRes.error || txRes.error || dispRes.error;
+    if (firstError) {
+      setLoadError(firstError.message || "Erro ao carregar dados de adquirentes");
+      setLoading(false);
+      return;
+    }
     const acqs = (acqRes.data || []) as unknown as Acquirer[];
     setAcquirers(acqs);
     setHealthEvents((heRes.data || []) as HealthEvent[]);
@@ -322,6 +330,14 @@ export default function AdminAcquirersTab() {
 
   return (
     <div className="space-y-5 animate-fade-in">
+      {loadError && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <span>Erro ao carregar adquirentes: {loadError}</span>
+          <Button size="sm" variant="outline" className="h-8 shrink-0 border-destructive/40 text-destructive hover:bg-destructive/20" onClick={load}>
+            Tentar de novo
+          </Button>
+        </div>
+      )}
       <FinanceiroHero
         eyebrow="Infraestrutura · Adquirentes"
         title="Centro de Adquirentes"

@@ -5031,6 +5031,10 @@ export type Database = {
         Args: { _acquirer_id: string; _active: boolean; _reason?: string }
         Returns: Json
       }
+      admin_set_payment_link_status: {
+        Args: { _payment_link_id: string; _reason?: string; _status: string }
+        Returns: Json
+      }
       admin_set_seller_acquirer: {
         Args: {
           _new_acquirer_id?: string
@@ -5307,6 +5311,17 @@ export type Database = {
         Args: { _staff: string }
         Returns: number
       }
+      get_thank_you_summary: {
+        Args: { _tx_id: string }
+        Returns: {
+          amount: number
+          customer_email_masked: string
+          customer_first_name: string
+          payment_method: string
+          product_id: string
+          status: string
+        }[]
+      }
       get_user_max_ticket: { Args: { _user_id: string }; Returns: number }
       grade_quiz_attempt: {
         Args: { _answers: Json; _quiz_id: string }
@@ -5416,6 +5431,29 @@ export type Database = {
       release_due_card_holds: { Args: never; Returns: number }
       request_anticipation: {
         Args: { _idempotency_key: string; _max_days: number; _user_id: string }
+        Returns: {
+          created_at: string
+          fee_amount: number
+          gross_amount: number
+          id: string
+          idempotency_key: string
+          max_days: number
+          net_amount: number
+          status: string
+          transaction_ids: string[]
+          tx_count: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "anticipations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      request_my_anticipation: {
+        Args: { _idempotency_key: string; _max_days: number }
         Returns: {
           created_at: string
           fee_amount: number

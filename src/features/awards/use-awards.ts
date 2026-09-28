@@ -68,21 +68,26 @@ export function useAwards() {
     setClaims((data ?? []) as RewardClaim[]);
   }, [user?.id]);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!user?.id) return;
-    let active = true;
     setLoading(true);
-    Promise.all([
+    setFailed(false);
+    return Promise.all([
       supabase.from("transactions").select("net_amount").eq("user_id", user.id).eq("status", "completed").eq("is_simulated", false),
       supabase.from("award_tiers").select("*"),
       loadClaims(),
     ]).then(([tx, tierRes]) => {
-      if (!active) return;
       setFailed(Boolean(tx.error));
       setRevenue((tx.data ?? []).reduce((s, t) => s + Number(t.net_amount ?? 0), 0));
       setTiers((tierRes.data ?? []) as TierRow[]);
       setLoading(false);
-    }).catch(() => { if (active) { setFailed(true); setLoading(false); } });
+    }).catch(() => { setFailed(true); setLoading(false); });
+  }, [user?.id, loadClaims]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let active = true;
+    void load();
 
     // Live: admin status/tracking changes and tier edits show up without reload.
     const channel = supabase
@@ -94,7 +99,7 @@ export function useAwards() {
       })
       .subscribe();
     return () => { active = false; void supabase.removeChannel(channel); };
-  }, [user?.id, loadClaims]);
+  }, [user?.id, loadClaims, load]);
 
   const awards = useMemo(() => mergeTiers(tiers), [tiers]);
 
@@ -105,5 +110,5 @@ export function useAwards() {
     return { unlocked, next, targetProgress };
   }, [revenue, awards]);
 
-  return { user, revenue, claims, setClaims, loading, failed, awards, ...journey };
+  return { user, revenue, claims, setClaims, loading, failed, reload: load, awards, ...journey };
 }

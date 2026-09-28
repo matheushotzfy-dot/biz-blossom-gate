@@ -81,7 +81,7 @@ export default function MemberLayout() {
   };
 
   if (loading) return (
-    <div className="min-h-dvh bg-[#050505] flex items-center justify-center">
+    <div className="min-h-dvh bg-background flex items-center justify-center">
       <div className="h-1 w-32 bg-white/5 overflow-hidden">
         <motion.div
           className="h-full w-full bg-emerald-500"
@@ -98,7 +98,7 @@ export default function MemberLayout() {
 
 
   return (
-    <div className="min-h-dvh bg-[#050505] text-zinc-100 font-display antialiased selection:bg-emerald-500/30 flex">
+    <div className="min-h-dvh bg-background text-zinc-100 font-display antialiased selection:bg-emerald-500/30 flex">
       {!isCourse && <MemberSidebar />}
 
       <div className="flex-1 flex flex-col relative overflow-x-hidden">
@@ -106,7 +106,7 @@ export default function MemberLayout() {
         {!isCourse && (
           <header className={cn(
             "h-20 shrink-0 flex items-center justify-between px-6 lg:px-10 z-40 transition-all duration-500 sticky top-0",
-            scrolled ? "bg-[#050505]/80 backdrop-blur-2xl border-b border-white/[0.05]" : "bg-transparent"
+            scrolled ? "bg-background/80 backdrop-blur-2xl border-b border-white/[0.05]" : "bg-transparent"
           )}>
             <div className="flex-1 max-w-2xl relative group hidden md:block">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 transition-colors group-focus-within:text-primary" />
@@ -133,7 +133,7 @@ export default function MemberLayout() {
                   className="h-10 w-10 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center font-bold text-sm text-zinc-200 hover:border-primary/40 transition-all relative"
                 >
                   {initial}
-                  <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-emerald-500 border-2 border-[#050505] shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                  <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-emerald-500 border-2 border-background shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
                 </button>
               </div>
             </div>
@@ -144,7 +144,7 @@ export default function MemberLayout() {
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute right-10 top-24 w-72 rounded-2xl bg-[#0c0c0c] border border-white/10 shadow-2xl overflow-hidden z-50 p-2"
+                  className="absolute right-10 top-24 w-72 rounded-2xl bg-card border border-white/10 shadow-2xl overflow-hidden z-50 p-2"
                   onClick={e => e.stopPropagation()}
                 >
                   <div className="p-4 border-b border-white/5">

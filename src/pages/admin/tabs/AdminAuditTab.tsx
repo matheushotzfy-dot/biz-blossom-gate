@@ -37,6 +37,8 @@ export default function AdminAuditTab({ profiles }: Props) {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadTick, setReloadTick] = useState(0);
   const [counts, setCounts] = useState({ admin: 0, staff: 0, activity: 0, today: 0 });
   const [rolesByUser, setRolesByUser] = useState<Record<string, string>>({});
 
@@ -45,6 +47,7 @@ export default function AdminAuditTab({ profiles }: Props) {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    setLoadError(null);
     (async () => {
       // Only query the sources actually rendered — previously we always pulled
       // 1500 rows even when filtered to a single source. Skipped sources return
@@ -52,13 +55,20 @@ export default function AdminAuditTab({ profiles }: Props) {
       const wantAdmin = source === "all" || source === "admin";
       const wantStaff = source === "all" || source === "staff";
       const wantActivity = source === "all" || source === "activity";
-      const empty = Promise.resolve({ data: [] as any[] });
+      const empty = Promise.resolve({ data: [] as any[], error: null as any });
       const [aRes, sRes, lRes] = await Promise.all([
         wantAdmin ? supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(500) : empty,
         wantStaff ? supabase.from("staff_audit_log").select("*").order("created_at", { ascending: false }).limit(500) : empty,
         wantActivity ? supabase.from("activity_logs").select("*").order("created_at", { ascending: false }).limit(500) : empty,
       ]);
       if (cancelled) return;
+
+      const firstError = aRes.error || sRes.error || lRes.error;
+      if (firstError) {
+        setLoadError(firstError.message || "Erro ao carregar trilha de auditoria");
+        setLoading(false);
+        return;
+      }
 
       const merged: UnifiedLog[] = [];
       if (source === "all" || source === "admin") {
@@ -115,7 +125,7 @@ export default function AdminAuditTab({ profiles }: Props) {
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [source]);
+  }, [source, reloadTick]);
 
   const getActorName = (uid: string) => {
     if (!uid) return "Sistema";
@@ -160,8 +170,18 @@ export default function AdminAuditTab({ profiles }: Props) {
     activity: "bg-amber-500/10 text-amber-400 border-amber-500/20",
   };
 
+  const reload = () => setReloadTick(t => t + 1);
+
   return (
     <div className="space-y-6 animate-fade-in">
+      {loadError && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <span>Erro ao carregar auditoria: {loadError}</span>
+          <button onClick={reload} className="h-8 shrink-0 rounded-lg border border-destructive/40 px-3 text-xs font-bold text-destructive hover:bg-destructive/20 transition-colors">
+            Tentar de novo
+          </button>
+        </div>
+      )}
       <FinanceiroHero
         eyebrow="Trilha de auditoria"
         title="Auditoria Unificada"
