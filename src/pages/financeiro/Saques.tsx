@@ -213,7 +213,7 @@ export default function Saques() {
                 </p>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 lg:col-start-2 lg:row-start-1 lg:row-span-2">
                 <label className="text-[11px] font-semibold text-muted-foreground">Chave de recebimento</label>
                 <div className="overflow-hidden rounded-2xl border border-border/60 bg-background">
                   <div className="grid grid-cols-2 border-b border-border/40 p-1.5">
@@ -323,7 +323,7 @@ export default function Saques() {
                 </div>
               </div>
 
-              <div className="bg-muted/30 p-5 rounded-2xl border border-border/60 space-y-3">
+              <div className="bg-muted/30 p-5 rounded-2xl border border-border/60 space-y-3 self-start lg:col-start-1 lg:row-start-2">
                 <div className="flex justify-between text-xs font-bold">
                   <span className="text-muted-foreground ">Taxa Administrativa</span>
                   <span className="text-red-500">-{fmt(withdrawFee)}</span>
@@ -333,7 +333,7 @@ export default function Saques() {
                   <span className="text-2xl font-black text-emerald-500 tabular-nums">{fmt(netPreview)}</span>
                 </div>
               </div>
-              <button type="submit" className="w-full bg-primary text-primary-foreground h-14 rounded-2xl font-bold text-sm transition-all hover:opacity-90 active:scale-[0.98]">
+              <button type="submit" className="w-full bg-primary text-primary-foreground h-14 rounded-2xl font-bold text-sm transition-all hover:opacity-90 active:scale-[0.98] lg:col-span-2 lg:row-start-3">
                 Confirmar Solicitação
               </button>
             </form>
