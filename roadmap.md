@@ -15,8 +15,8 @@
 - [ ] Refazer o calendário e validar presets/intervalos.
 - [ ] Auditar e endurecer superfícies críticas de seller, admin e páginas públicas.
 - [ ] Validar dados, testes, execução e telas desktop/mobile.
-- [ ] Corrigir KYC aprovado e ocultar progresso/documentos concluídos.
-- [ ] Corrigir contraste dos logos de Integrações no modo claro.
-- [ ] Remover Entregas recentes da interface de Webhooks.
-- [ ] Expandir e refinar Premiações em tela cheia.
-- [ ] Refinar Suporte seller/admin e validar vínculo em tempo real.
+- [x] Corrigir KYC aprovado e ocultar progresso/documentos concluídos.
+- [x] Corrigir contraste dos logos de Integrações no modo claro.
+- [x] Remover Entregas recentes da interface de Webhooks.
+- [x] Expandir e refinar Premiações em tela cheia.
+- [x] Refinar Suporte seller/admin e validar vínculo em tempo real.
