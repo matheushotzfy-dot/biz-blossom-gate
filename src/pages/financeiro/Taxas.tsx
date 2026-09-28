@@ -21,7 +21,7 @@ type CustomFees = {
   withdrawal_fee: number | null;
 };
 
-export default function Taxas() {
+export default function Taxas({ embedded = false }: { embedded?: boolean } = {}) {
   const { user } = useAuth();
   const { data: fees = [] } = useFees();
   const [custom, setCustom] = useState<CustomFees | null>(null);
@@ -82,13 +82,13 @@ export default function Taxas() {
     { label: "Boleto", value: "D+1", sub: "Após a compensação", tone: "warning", icon: Barcode },
   ];
 
-  return <TaxasView methods={methodCards} withdrawFee={withdrawFee} deadlines={deadlines} personalized={Boolean(custom)} />;
+  return <TaxasView methods={methodCards} withdrawFee={withdrawFee} deadlines={deadlines} personalized={Boolean(custom)} embedded={embedded} />;
 }
 
 type Method = { label: string; icon: LucideIcon; percent: number; fixed: number; sub: string };
 
-function TaxasView({ methods, withdrawFee, deadlines, personalized }: {
-  methods: Method[]; withdrawFee: number; personalized: boolean;
+function TaxasView({ methods, withdrawFee, deadlines, personalized, embedded }: {
+  methods: Method[]; withdrawFee: number; personalized: boolean; embedded: boolean;
   deadlines: Array<{ label: string; value: string; sub: string; icon: LucideIcon }>;
 }) {
   const [amount, setAmount] = useState(197);
@@ -99,8 +99,8 @@ function TaxasView({ methods, withdrawFee, deadlines, personalized }: {
   const effective = amount > 0 ? (fee / amount) * 100 : 0;
 
   return (
-    <div className="mx-auto grid w-full max-w-[1180px] gap-4 pb-14">
-      <header className="flex flex-col justify-between gap-4 border-b border-border pb-5 sm:flex-row sm:items-end">
+    <div className={cn("grid w-full gap-4", embedded ? "p-4 sm:p-5" : "mx-auto max-w-[1180px] pb-14")}>
+      {!embedded && <header className="flex flex-col justify-between gap-4 border-b border-border pb-5 sm:flex-row sm:items-end">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Financeiro · custos</p>
           <h1 className="mt-2 font-display text-3xl font-bold text-foreground">Taxas e tarifas</h1>
@@ -110,7 +110,8 @@ function TaxasView({ methods, withdrawFee, deadlines, personalized }: {
           <span className={cn("h-1.5 w-1.5 rounded-full", personalized ? "bg-primary" : "bg-muted-foreground")} />
           {personalized ? "Taxas personalizadas" : "Taxas padrão da plataforma"}
         </span>
-      </header>
+      </header>}
+      {embedded && <span className={cn("w-fit rounded-full border px-3 py-1 text-xs font-semibold", personalized ? "border-primary/40 bg-primary/10 text-primary" : "border-border text-muted-foreground")}>{personalized ? "Taxas personalizadas" : "Taxas padrão da plataforma"}</span>}
 
       {/* Rate cards */}
       <section className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">

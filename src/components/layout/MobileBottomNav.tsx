@@ -34,7 +34,7 @@ const moreGroups: Array<{
     label: "Operação",
     items: [
       { title: "Cupons", subtitle: "Descontos e promoções", url: "/vendas/cupons", icon: Ticket, accent: "info" },
-      { title: "Taxas & Config", subtitle: "Tarifas e regras financeiras", url: "/financeiro/config", icon: Building2, accent: "success" },
+      { title: "Taxas", subtitle: "No seu perfil", url: "/perfil", icon: Building2, accent: "success" },
       { title: "Integrações", subtitle: "Apps, Webhooks e API", url: "/integracoes", icon: Blocks, accent: "primary" },
     ],
   },

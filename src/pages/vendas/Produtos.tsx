@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -232,8 +233,8 @@ export default function Produtos() {
 
       {/* ── Filtros + busca ── */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="-mx-2 overflow-x-auto scrollbar-none sm:mx-0">
-          <div className="mx-2 inline-flex min-w-full items-center gap-px rounded-xl border border-border/60 bg-card p-px sm:mx-0 lg:w-fit lg:min-w-0">
+        <div className="overflow-x-auto scrollbar-none">
+          <div role="tablist" className="flex min-w-full items-center border-b border-border lg:min-w-0">
             {tabs.map((item) => {
               const active = tab === item.value;
               return (
@@ -241,19 +242,20 @@ export default function Produtos() {
                   key={item.value}
                   onClick={() => setTab(item.value)}
                   className={cn(
-                    "inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[10px] px-3.5 text-[12px] font-medium transition-colors",
-                    active ? "bg-muted/50 text-foreground" : "text-muted-foreground/70 hover:text-foreground",
+                    "group relative inline-flex shrink-0 items-center gap-2 whitespace-nowrap px-4 pb-3 pt-2 text-[13px] font-semibold transition-colors",
+                    active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  <span className={cn("flex h-3.5 w-3.5 items-center justify-center", active ? tabAccent[item.value] : "text-muted-foreground/40")}>
+                  <span className={cn("flex h-3.5 w-3.5 items-center justify-center", active ? "text-primary" : "text-muted-foreground/60 group-hover:text-primary")}>
                     {tabIcon[item.value]}
                   </span>
                   {item.label}
                   {item.count > 0 && (
-                    <span className={cn("text-[11px] tabular-nums", active ? "text-foreground/60" : "text-muted-foreground/40")}>
+                    <span className={cn("min-w-[18px] rounded-full px-1.5 text-center font-mono text-[10px] leading-[18px] tabular-nums", active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
                       {item.count}
                     </span>
                   )}
+                  {active && <motion.span layoutId="products-tab" transition={{ type: "spring", stiffness: 520, damping: 40 }} className="absolute inset-x-2 -bottom-px h-[2px] rounded-full bg-primary" />}
                 </button>
               );
             })}

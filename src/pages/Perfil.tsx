@@ -21,6 +21,9 @@ import { HDShell, HDHeader, HDStat, HDStatGrid } from "@/components/hd/HDPage";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+import { lazy, Suspense } from "react";
+import { BadgePercent } from "lucide-react";
+const TaxasEmbedded = lazy(() => import("@/pages/financeiro/Taxas"));
 import { MILESTONES, TIER_LABELS, getMilestone as getCurrentMilestone } from "@/lib/tiers";
 
 /* ─────────── Constants & helpers ─────────── */
@@ -517,75 +520,9 @@ export default function Perfil() {
           </div>
         </Panel>
 
-        {/* PROGRESSO DE FATURAMENTO */}
-        <Panel
-          icon={Trophy}
-          title="Progresso de faturamento"
-          subtitle={`Próxima meta: ${milestone.next.label}`}
-          action={
-            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/10 border border-primary/20 text-[11px] font-medium text-primary ">
-              <Sparkles className="h-3 w-3" /> {tierLabel}
-            </span>
-          }
-        >
-          <div className="p-5">
-            <div className="grid grid-cols-3 gap-px bg-border/40 rounded-lg overflow-hidden border border-border/40 mb-5">
-              <div className="bg-card px-4 py-3">
-                <p className="text-[12px] text-muted-foreground mb-1.5">Total</p>
-                <p className="text-[17px] font-display font-bold text-foreground tabular-nums tracking-[-0.02em]">
-                  {fmtCompact(allTimeRevenue)}
-                </p>
-              </div>
-              <div className="bg-card px-4 py-3">
-                <p className="text-[12px] text-muted-foreground mb-1.5">Meta</p>
-                <p className="text-[17px] font-display font-bold text-primary tabular-nums tracking-[-0.02em]">
-                  {milestone.next.label}
-                </p>
-              </div>
-              <div className="bg-card px-4 py-3">
-                <p className="text-[12px] text-muted-foreground mb-1.5">Falta</p>
-                <p className="text-[17px] font-display font-bold text-foreground/70 tabular-nums tracking-[-0.02em]">
-                  {fmtCompact(Math.max(0, milestone.next.value - allTimeRevenue))}
-                </p>
-              </div>
-
-            </div>
-
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-foreground tabular-nums">{milestone.pct.toFixed(0)}%</span>
-                <span className="text-[11px] text-muted-foreground tabular-nums font-medium ">
-                  até {milestone.next.label}
-                </span>
-              </div>
-              <div className="h-2 rounded-full bg-secondary overflow-hidden border border-border/40">
-                <div
-                  className="h-full rounded-full bg-primary transition-[width] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                  style={{ width: `${Math.max(milestone.pct, 2)}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-4 border-t border-border/40">
-              {MILESTONES.slice(1).map((m) => {
-                const unlocked = allTimeRevenue >= m.value;
-                return (
-                  <div key={m.label} className="flex flex-col items-center gap-1.5">
-                    <div className={cn(
-                      "h-2.5 w-2.5 rounded-full transition-colors border",
-                      unlocked ? "bg-primary border-primary" : "bg-secondary border-border/60"
-                    )} />
-                    <span className={cn(
-                      "text-[10px] font-bold tabular-nums",
-                      unlocked ? "text-primary" : "text-muted-foreground/50"
-                    )}>
-                      {m.label}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+        {/* TAXAS */}
+        <Panel icon={BadgePercent} title="Suas taxas" subtitle="Custos por venda, saque e prazos de liberação" className="lg:col-span-2">
+          <Suspense fallback={<div className="h-64 animate-pulse" />}><TaxasEmbedded embedded /></Suspense>
         </Panel>
       </div>
 
