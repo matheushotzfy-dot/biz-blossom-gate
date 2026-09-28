@@ -182,24 +182,23 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[440px] max-h-[88vh] overflow-y-auto p-0 rounded-2xl border border-border bg-card">
+      <DialogContent className="w-[calc(100vw-1.5rem)] max-w-[520px] max-h-[92vh] overflow-y-auto p-0 rounded-[28px] border border-border bg-card">
         {/* Header — solid, no gradients/blur */}
-        <div className="relative px-6 pt-6 pb-5 border-b border-border bg-card">
-          <span className="absolute left-0 top-6 bottom-6 w-[3px] rounded-r-full bg-primary/80" />
+        <div className="relative px-7 pt-7 pb-6 border-b border-border bg-card sm:px-8">
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
                 {step === "form" ? (
-                  <Link2 className="h-4 w-4 text-primary" strokeWidth={2.5} />
+                  <Link2 className="h-5 w-5" strokeWidth={2.5} />
                 ) : (
-                  <QrCode className="h-4 w-4 text-primary" strokeWidth={2.5} />
+                  <QrCode className="h-5 w-5" strokeWidth={2.5} />
                 )}
               </div>
               <div>
-                <DialogTitle className="font-display text-[15px] font-black tracking-[-0.02em] text-foreground">
-                  {step === "form" ? "Link de Pagamento" : "PIX gerado"}
+                <DialogTitle className="font-display text-xl font-bold tracking-tight text-foreground">
+                  {step === "form" ? "Gerar cobrança Pix" : "Pix gerado"}
                 </DialogTitle>
-                <p className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground mt-0.5">
+                <p className="text-[12.5px] text-muted-foreground mt-0.5">
                   {step === "form"
                     ? "Receba via PIX em segundos"
                     : "Compartilhe ou aguarde o pagamento"}
@@ -211,10 +210,10 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
 
         {/* Body */}
         {step === "form" && (
-          <div className="px-6 py-5 space-y-4 bg-card">
+          <div className="px-7 py-6 space-y-5 bg-card sm:px-8">
             {/* Amount — large input */}
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+              <Label className="text-[12px] font-semibold text-muted-foreground">
                 Valor a cobrar
               </Label>
               <div className="relative">
@@ -227,13 +226,28 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
                   }}
                   inputMode="numeric"
                   className={cn(
-                    "h-14 pl-12 font-display text-[28px] font-black tabular-nums tracking-tight rounded-xl border border-primary/30 bg-primary/[0.035] shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.06)]",
+                    "h-16 pl-12 font-display text-[30px] font-bold tabular-nums tracking-tight rounded-2xl border border-primary/40 bg-primary/[0.05]",
                     ease,
                     "focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:border-primary/50",
                   )}
                   placeholder="R$ 0,00"
                   style={{ fontVariantNumeric: "tabular-nums slashed-zero" }}
                 />
+              </div>
+              <div className="grid grid-cols-4 gap-2 pt-1">
+                {[5000, 10000, 25000, 50000].map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setAmountCents(c)}
+                    className={cn(
+                      "h-9 rounded-full border text-[12px] font-semibold tabular-nums transition-all active:scale-[0.97]",
+                      amountCents === c ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background/40 text-muted-foreground hover:border-primary/50 hover:text-foreground",
+                    )}
+                  >
+                    R$ {c / 100}
+                  </button>
+                ))}
               </div>
               {amountCents > 0 && amountCents < 100 && (
                 <p className="text-[11px] text-destructive font-bold">
@@ -244,7 +258,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
 
             {/* Name */}
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+              <Label className="text-[12px] font-semibold text-muted-foreground">
                 Nome do pagador
               </Label>
               <div className="relative">
@@ -252,7 +266,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className={cn("h-11 pl-10 rounded-xl border border-border/80 bg-card-inset text-[13px] font-bold focus-visible:border-primary/45 focus-visible:ring-primary/20", ease)}
+                  className={cn("h-12 pl-10 rounded-2xl border border-border/80 bg-card-inset text-[13px] font-bold focus-visible:border-primary/45 focus-visible:ring-primary/20", ease)}
                   placeholder="Nome completo"
                 />
               </div>
@@ -261,7 +275,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
             {/* CPF + Email side-by-side */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                <Label className="text-[12px] font-semibold text-muted-foreground">
                   CPF / CNPJ
                 </Label>
                 <div className="relative">
@@ -273,13 +287,13 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
                       setDoc(d.length <= 11 ? fmtCpf(d) : d);
                     }}
                     inputMode="numeric"
-                    className={cn("h-11 pl-10 rounded-xl border border-border/80 bg-card-inset font-mono text-[12.5px] font-bold tabular-nums focus-visible:border-primary/45 focus-visible:ring-primary/20", ease)}
+                    className={cn("h-12 pl-10 rounded-2xl border border-border/80 bg-card-inset font-mono text-[12.5px] font-bold tabular-nums focus-visible:border-primary/45 focus-visible:ring-primary/20", ease)}
                     placeholder="000.000.000-00"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                <Label className="text-[12px] font-semibold text-muted-foreground">
                   E-mail <span className="opacity-60 normal-case font-bold">(opcional)</span>
                 </Label>
                 <div className="relative">
@@ -287,7 +301,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
                   <Input
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className={cn("h-11 pl-10 rounded-xl border border-border/80 bg-card-inset text-[13px] font-bold focus-visible:border-primary/45 focus-visible:ring-primary/20", ease)}
+                    className={cn("h-12 pl-10 rounded-2xl border border-border/80 bg-card-inset text-[13px] font-bold focus-visible:border-primary/45 focus-visible:ring-primary/20", ease)}
                     placeholder="email@exemplo.com"
                     type="email"
                   />
@@ -297,13 +311,13 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
 
             {/* Description */}
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+              <Label className="text-[12px] font-semibold text-muted-foreground">
                 Descrição <span className="opacity-60 normal-case font-bold">(opcional)</span>
               </Label>
               <Input
                 value={desc}
                 onChange={(e) => setDesc(e.target.value.slice(0, 100))}
-                className={cn("h-11 rounded-xl border border-border/80 bg-card-inset text-[13px] font-bold focus-visible:border-primary/45 focus-visible:ring-primary/20", ease)}
+                className={cn("h-12 rounded-2xl border border-border/80 bg-card-inset text-[13px] font-bold focus-visible:border-primary/45 focus-visible:ring-primary/20", ease)}
                 placeholder="Ex: Consultoria, Mentoria..."
               />
             </div>
@@ -320,7 +334,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
               onClick={handleSubmit}
               disabled={!valid || submitting}
               className={cn(
-                "group relative w-full h-12 overflow-hidden rounded-xl font-display text-[12.5px] font-bold uppercase tracking-[0.12em]",
+                "group relative w-full h-14 overflow-hidden rounded-2xl font-display text-[14px] font-bold active:scale-[0.98]",
                 "flex items-center justify-center gap-2 bg-primary text-primary-foreground",
                 "transition-colors duration-200 hover:bg-primary/90",
                 "disabled:opacity-40 disabled:cursor-not-allowed",
@@ -345,7 +359,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
         )}
 
         {step === "result" && result && (
-          <div className="px-6 py-5 space-y-4 bg-card">
+          <div className="px-7 py-6 space-y-5 bg-card sm:px-8">
             {paid ? (
               <div className="flex flex-col items-center text-center py-6 space-y-4">
                 <div className="h-16 w-16 rounded-2xl bg-success/10 border border-success/30 flex items-center justify-center">
@@ -376,7 +390,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
                 {/* Amount + Timer */}
                 <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-background">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                    <p className="text-[12px] font-semibold text-muted-foreground">
                       Valor a receber
                     </p>
                     <p className="font-display text-[26px] font-black tabular-nums tracking-[-0.03em] text-foreground leading-none mt-1.5"
@@ -406,7 +420,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
 
                 {/* Copy code */}
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                  <Label className="text-[12px] font-semibold text-muted-foreground">
                     PIX copia e cola
                   </Label>
                   <div className="relative">
