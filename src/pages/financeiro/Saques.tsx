@@ -6,7 +6,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useWithdrawals, usePixKeys, useBankAccounts, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   Plus, Wallet, Clock, History, Search, ArrowDownToLine, Info,
-  CheckCircle2, Key, Building2, MapPin, ClipboardPaste, QrCode,
+  CheckCircle2, Key, Building2, MapPin,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -18,6 +18,7 @@ import DadosBancarios from "./DadosBancarios";
 import AutoWithdrawalSettings from "@/components/financeiro/AutoWithdrawalSettings";
 import { friendlyError } from "@/lib/friendlyError";
 import { ReauthenticationDialog } from "@/components/security/ReauthenticationDialog";
+import { WithdrawDestinationPicker, getPixKeyLabel, getPixKeyMeta } from "@/components/financeiro/WithdrawDestinationPicker";
 
 const fmt = (v: number) =>
   `R$ ${(Number.isFinite(v) ? v : 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -36,6 +37,30 @@ const parseBRL = (masked: string): number => {
   return digits ? Number(digits) / 100 : 0;
 };
 const DEFAULT_WITHDRAW_FEE = 5;
+
+const QUICK_FILLS = [
+  { label: "25%", pct: 0.25 },
+  { label: "50%", pct: 0.5 },
+  { label: "Tudo", pct: 1 },
+] as const;
+
+function StepLabel({ id, n, title }: { id: string; n: number; title: string }) {
+  return (
+    <h3 id={id} className="flex items-center gap-2 text-[13px] font-semibold text-foreground">
+      <span className="grid h-5 w-5 place-items-center rounded-md bg-primary/15 text-[11px] font-bold text-primary">{n}</span>
+      {title}
+    </h3>
+  );
+}
+
+function SummaryRow({ label, value, valueClass }: { label: string; value: string; valueClass?: string }) {
+  return (
+    <div className="flex items-center justify-between text-[12px]">
+      <span className="text-muted-foreground">{label}</span>
+      <span className={cn("font-semibold tabular-nums text-foreground", valueClass)}>{value}</span>
+    </div>
+  );
+}
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   approved: { label: "Concluído", color: "text-emerald-500", bg: "bg-emerald-500/10" },
@@ -100,6 +125,8 @@ export default function Saques() {
       navigate("/perfil?focus=address");
       return;
     }
+    // Pre-select the first saved key so the seller never lands on an empty choice
+    if (next && !pickedKey && pixKeys[0]?.id) setPickedKey(pixKeys[0].id);
     setOpen(next);
   };
 
@@ -161,6 +188,16 @@ export default function Saques() {
   const parsedAmount = parseBRL(amount);
   const netPreview = parsedAmount > withdrawFee ? parsedAmount - withdrawFee : 0;
 
+  // Human-readable summary of where the money is going (shown in the dialog footer)
+  const destinationSummary = (() => {
+    if (pickedKey === "copy_paste") {
+      return copyPasteCode.trim() ? "PIX Copia e Cola · código avulso" : "Cole o código PIX Copia e Cola";
+    }
+    const key = pixKeys.find((k) => k.id === pickedKey);
+    if (!key) return "Selecione uma chave PIX";
+    return `${getPixKeyMeta(key.key_type).label} · ${getPixKeyLabel(key)}`;
+  })();
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <ReauthenticationDialog
@@ -184,158 +221,88 @@ export default function Saques() {
               <Plus size={18} strokeWidth={3} /> Solicitar Saque
             </button>
           </DialogTrigger>
-          <DialogContent className="w-[calc(100vw-1.5rem)] max-w-[680px] max-h-[90vh] overflow-y-auto rounded-[28px] border border-border bg-card p-6 sm:p-8">
-            <DialogHeader className="flex-row items-center gap-4 space-y-0 text-left">
+          <DialogContent className="w-[calc(100vw-1.5rem)] max-w-[760px] max-h-[92vh] overflow-y-auto rounded-[28px] border border-border bg-card p-0">
+            <DialogHeader className="flex-row items-center gap-4 space-y-0 border-b border-border/60 px-6 py-5 text-left sm:px-8">
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground">
                 <Wallet className="h-5 w-5" strokeWidth={2.5} />
               </span>
-              <div>
+              <div className="min-w-0 flex-1">
                 <DialogTitle className="text-xl font-bold tracking-tight">Solicitar saque</DialogTitle>
                 <p className="mt-0.5 text-[12.5px] text-muted-foreground">Transfira seu saldo disponível via Pix</p>
               </div>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="grid gap-5 pt-4 lg:grid-cols-2">
-              <div className="space-y-2 lg:col-start-1 lg:row-start-1">
-                <label className="text-[11px] font-semibold text-muted-foreground">Valor do Saque</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-muted-foreground">R$</span>
-                  <Input
-                    type="text"
-                    inputMode="numeric"
-                    value={amount}
-                    onChange={(e) => setAmount(maskBRL(e.target.value))}
-                    className="pl-12 h-16 text-2xl font-bold tabular-nums bg-primary/[0.05] border-primary/40 rounded-2xl"
-                    placeholder="0,00"
-                  />
-                </div>
-                <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1.5">
-                  <Info className="h-3 w-3" /> Taxa fixa de {fmt(withdrawFee)} por transação.
-                </p>
+              <div className="mr-8 hidden rounded-2xl border border-border/60 bg-background px-4 py-2 text-right sm:block">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Disponível</p>
+                <p className="text-[15px] font-bold tabular-nums text-foreground">{fmt(availableBalance)}</p>
               </div>
+            </DialogHeader>
 
-              <div className="space-y-2 lg:col-start-2 lg:row-start-1 lg:row-span-2">
-                <label className="text-[11px] font-semibold text-muted-foreground">Chave de recebimento</label>
-                <div className="overflow-hidden rounded-2xl border border-border/60 bg-background">
-                  <div className="grid grid-cols-2 border-b border-border/40 p-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setPickedKey(pixKeys[0]?.id ?? "")}
-                      className={cn(
- "flex h-10 items-center justify-center gap-2 rounded-xl text-[11px] font-semibold transition-all duration-200",
-                        pickedKey !== "copy_paste"
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-primary/[0.06] hover:text-foreground",
-                      )}
-                    >
-                      <Key className="h-3.5 w-3.5" strokeWidth={2.5} /> Minhas Chaves
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPickedKey("copy_paste")}
-                      className={cn(
- "flex h-10 items-center justify-center gap-2 rounded-xl text-[11px] font-semibold transition-all duration-200",
-                        pickedKey === "copy_paste"
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-primary/[0.06] hover:text-foreground",
-                      )}
-                    >
-                      <ClipboardPaste className="h-3.5 w-3.5" strokeWidth={2.5} /> Copia e Cola
-                    </button>
+            <form onSubmit={handleSubmit}>
+              <div className="grid gap-6 px-6 py-6 sm:px-8 md:grid-cols-2">
+                {/* 1 — Valor */}
+                <section className="flex flex-col gap-3" aria-labelledby="saque-step-valor">
+                  <StepLabel id="saque-step-valor" n={1} title="Quanto sacar" />
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-muted-foreground">R$</span>
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      aria-label="Valor do saque"
+                      value={amount}
+                      onChange={(e) => setAmount(maskBRL(e.target.value))}
+                      className="h-16 rounded-2xl border-primary/40 bg-primary/[0.05] pl-12 text-2xl font-bold tabular-nums"
+                      placeholder="0,00"
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {QUICK_FILLS.map((q) => (
+                      <button
+                        key={q.label}
+                        type="button"
+                        disabled={availableBalance <= withdrawFee}
+                        onClick={() => setAmount(maskBRL(String(Math.floor(availableBalance * q.pct * 100))))}
+                        className="h-9 rounded-xl border border-border/60 bg-background text-[12px] font-semibold text-muted-foreground transition-all hover:border-primary/50 hover:text-foreground active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40"
+                      >
+                        {q.label}
+                      </button>
+                    ))}
                   </div>
 
-                  {pickedKey === "copy_paste" ? (
-                    <div className="space-y-3 p-4 animate-in fade-in slide-in-from-top-1 duration-200">
-                      <div className="flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/[0.04] p-3">
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-primary/25 bg-primary/10 text-primary">
-                          <QrCode className="h-4 w-4" strokeWidth={2.5} />
-                        </span>
-                        <div className="min-w-0">
-                          <p className="text-[12px] font-black text-foreground">PIX Copia e Cola avulso</p>
-                          <p className="mt-0.5 text-[10px] font-semibold leading-relaxed text-muted-foreground">
-                            Use para um código de cobrança única. Ele vai apenas nesta solicitação e não será cadastrado como chave.
-                          </p>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[11px] font-semibold text-muted-foreground">Código BR Code</label>
-                        <textarea
-                          value={copyPasteCode}
-                          onChange={(e) => setCopyPasteCode(e.target.value)}
-                          rows={5}
-                          placeholder="Cole aqui o código completo do PIX Copia e Cola"
-                          className="w-full resize-none rounded-xl border border-border/60 bg-card px-3.5 py-3 font-mono text-[12px] leading-relaxed text-foreground placeholder:text-muted-foreground/50 transition-all focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                        />
-                        <div className="flex items-center justify-between gap-3 text-[10px] font-bold text-muted-foreground/70">
-                          <span className="flex items-center gap-1.5">
-                            <Info className="h-3 w-3" /> Não fica salvo no perfil
-                          </span>
-                          <span className="tabular-nums">{copyPasteCode.trim().length} caracteres</span>
-                        </div>
-                      </div>
+                  <div className="mt-auto space-y-2.5 rounded-2xl border border-border/60 bg-background p-4">
+                    <SummaryRow label="Valor solicitado" value={fmt(parsedAmount)} />
+                    <SummaryRow label="Taxa de saque" value={`-${fmt(withdrawFee)}`} valueClass="text-destructive" />
+                    <div className="flex items-center justify-between border-t border-border/50 pt-3">
+                      <span className="text-[12px] font-semibold text-muted-foreground">Você receberá</span>
+                      <span className="text-2xl font-black tabular-nums text-success">{fmt(netPreview)}</span>
                     </div>
-                  ) : (
-                    <div className="space-y-2 p-3">
-                      {pixKeys.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-border/70 p-5 text-center">
-                          <p className="text-[11px] font-semibold text-muted-foreground">Nenhuma chave PIX cadastrada</p>
-                        </div>
-                      ) : (
-                        pixKeys.map((pk) => {
-                          const active = pickedKey === pk.id;
-                          const label = pk.key_value || (pk as any).key_value_masked || "Chave indisponível";
-                          const typeLabel = ({ cpf: "CPF", cnpj: "CNPJ", email: "E-mail", phone: "Telefone", random: "Aleatória" } as Record<string, string>)[pk.key_type] || pk.key_type;
-                          return (
-                            <button
-                              key={pk.id}
-                              type="button"
-                              onClick={() => setPickedKey(pk.id)}
-                              className={cn(
- "group flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-all duration-200",
-                                active
-                                  ? "border-primary/60 bg-primary/[0.07]"
-                                  : "border-border/60 bg-card  hover:border-primary/35 hover:bg-primary/[0.03]",
-                              )}
-                            >
-                              <span className={cn(
- "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-all duration-200",
-                                active ? "border-primary/45 bg-primary/[0.12] text-primary" : "border-border/60 bg-background text-muted-foreground group-hover:border-primary/30 group-hover:text-primary",
-                              )}>
-                                <Key className="h-4 w-4" strokeWidth={2.5} />
-                              </span>
-                              <div className="min-w-0 flex-1 space-y-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="rounded-md border border-primary/20 bg-primary/[0.06] px-2 py-0.5 text-[11px] font-semibold text-primary">
-                                    {typeLabel}
-                                  </span>
-                                  {active && <span className="text-[11px] font-semibold text-primary">Selecionada</span>}
-                                </div>
-                                <p className="break-all font-mono text-[12px] font-black leading-relaxed text-foreground">
-                                  {label}
-                                </p>
-                              </div>
-                              {active && <CheckCircle2 className="mt-2 h-4 w-4 shrink-0 text-primary" strokeWidth={2.5} />}
-                            </button>
-                          );
-                        })
-                      )}
-                    </div>
-                  )}
-                </div>
+                  </div>
+                </section>
+
+                {/* 2 — Destino */}
+                <section className="flex flex-col gap-3" aria-labelledby="saque-step-destino">
+                  <StepLabel id="saque-step-destino" n={2} title="Para onde enviar" />
+                  <WithdrawDestinationPicker
+                    pixKeys={pixKeys}
+                    pickedKey={pickedKey}
+                    onPickKey={setPickedKey}
+                    copyPasteCode={copyPasteCode}
+                    onCopyPasteChange={setCopyPasteCode}
+                  />
+                </section>
               </div>
 
-              <div className="bg-muted/30 p-5 rounded-2xl border border-border/60 space-y-3 self-start lg:col-start-1 lg:row-start-2">
-                <div className="flex justify-between text-xs font-bold">
-                  <span className="text-muted-foreground ">Taxa Administrativa</span>
-                  <span className="text-red-500">-{fmt(withdrawFee)}</span>
+              {/* Footer */}
+              <div className="flex flex-col gap-3 border-t border-border/60 bg-background/60 px-6 py-5 sm:flex-row sm:items-center sm:px-8">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Destino</p>
+                  <p className="truncate text-[13px] font-semibold text-foreground">{destinationSummary}</p>
                 </div>
-                <div className="flex justify-between border-t border-border/40 pt-4 items-center">
-                  <span className="text-[11px] font-semibold text-muted-foreground">Você receberá</span>
-                  <span className="text-2xl font-black text-emerald-500 tabular-nums">{fmt(netPreview)}</span>
-                </div>
+                <button
+                  type="submit"
+                  className="h-14 w-full rounded-2xl bg-primary px-8 text-sm font-bold text-primary-foreground transition-all hover:opacity-90 active:scale-[0.98] sm:w-auto sm:min-w-[260px]"
+                >
+                  {netPreview > 0 ? `Confirmar saque de ${fmt(parsedAmount)}` : "Confirmar solicitação"}
+                </button>
               </div>
-              <button type="submit" className="w-full bg-primary text-primary-foreground h-14 rounded-2xl font-bold text-sm transition-all hover:opacity-90 active:scale-[0.98] lg:col-span-2 lg:row-start-3">
-                Confirmar Solicitação
-              </button>
             </form>
           </DialogContent>
         </Dialog>
