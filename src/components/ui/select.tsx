@@ -17,14 +17,14 @@ const SelectTrigger = React.forwardRef<
  <SelectPrimitive.Trigger
  ref={ref}
  className={cn(
- "group/select flex h-9 w-full appearance-none items-center justify-between gap-2 rounded-lg border border-input bg-card px-3 py-2 text-[13px] font-medium text-foreground shadow-[inset_0_1px_0_hsl(var(--foreground)/0.025)] ring-offset-background placeholder:text-muted-foreground/55 transition-[border-color,box-shadow,background-color] duration-200 ease-out hover:border-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/12 data-[state=open]:border-primary/60 data-[state=open]:ring-2 data-[state=open]:ring-primary/12 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+ "group/select flex h-11 w-full appearance-none items-center justify-between gap-2 rounded-xl border border-border/75 bg-card px-4 py-2.5 text-sm font-bold text-foreground ring-offset-background placeholder:text-muted-foreground/60 transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/55 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 hover:-translate-y-px hover:border-primary/50 hover:bg-primary/[0.04] data-[state=open]:border-primary/65 data-[state=open]:bg-primary/[0.065] data-[state=open]:ring-2 data-[state=open]:ring-primary/15",
  className,
  )}
  {...props}
  >
  {children}
  <SelectPrimitive.Icon asChild>
-  <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground/65 transition-transform duration-200 group-data-[state=open]/select:rotate-180 group-data-[state=open]/select:text-foreground" />
+  <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 transition-transform duration-300 group-data-[state=open]/select:rotate-180 group-data-[state=open]/select:text-primary" />
  </SelectPrimitive.Icon>
  </SelectPrimitive.Trigger>
 ));
@@ -66,7 +66,7 @@ const SelectContent = React.forwardRef<
  <SelectPrimitive.Content
  ref={ref}
  className={cn(
-   "relative z-50 max-h-[min(var(--radix-select-content-available-height),20rem)] min-w-[8rem] overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground overlay-surface shadow-[0_14px_40px_hsl(var(--background)/0.45)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1 duration-200 ease-out",
+   "relative z-50 max-h-[min(var(--radix-select-content-available-height),20rem)] min-w-[8rem] overflow-hidden rounded-2xl border border-primary/20 bg-popover text-popover-foreground overlay-surface shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.97] data-[state=open]:zoom-in-[0.97] data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 duration-[220ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
  position === "popper" &&
  "data-[side=bottom]:translate-y-1.5 data-[side=left]:-translate-x-1.5 data-[side=right]:translate-x-1.5 data-[side=top]:-translate-y-1.5",
  className,
@@ -103,15 +103,19 @@ const SelectItem = React.forwardRef<
  <SelectPrimitive.Item
  ref={ref}
  className={cn(
-   "group/item relative flex w-full cursor-pointer select-none items-center rounded-md py-2 pl-9 pr-3 text-[13px] font-medium outline-none transition-colors duration-150 ease-out data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-   "focus:bg-accent focus:text-foreground data-[highlighted]:bg-accent data-[highlighted]:text-foreground data-[state=checked]:bg-primary/10 data-[state=checked]:font-semibold data-[state=checked]:text-primary",
+   "group/item relative flex w-full cursor-pointer select-none items-center rounded-xl py-2.5 pl-10 pr-3.5 text-sm font-bold outline-none transition-[background-color,color,padding-left,transform] duration-200 ease-out data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+   "before:absolute before:left-1.5 before:top-2 before:bottom-2 before:w-[3px] before:origin-center before:scale-y-50 before:rounded-r-full before:bg-primary before:opacity-0 before:transition-all before:duration-200",
+   "hover:bg-gradient-to-r hover:from-primary/[0.10] hover:to-primary/[0.02] hover:pl-[2.75rem] focus:bg-primary/[0.08] focus:text-foreground data-[highlighted]:bg-gradient-to-r data-[highlighted]:from-primary/[0.10] data-[highlighted]:to-primary/[0.02] data-[highlighted]:pl-[2.75rem] data-[highlighted]:before:scale-y-100 data-[highlighted]:before:opacity-100",
+   "data-[state=checked]:text-primary data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-primary/[0.14] data-[state=checked]:to-primary/[0.04] data-[state=checked]:font-black data-[state=checked]:before:scale-y-100 data-[state=checked]:before:opacity-100 data-[state=checked]:shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.18)]",
  className,
  )}
  {...props}
  >
  <span className="absolute left-2.5 flex h-[18px] w-[18px] items-center justify-center">
  <SelectPrimitive.ItemIndicator>
- <Check className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
+ <div className="h-[18px] w-[18px] rounded-md bg-primary/20 border border-primary/25 flex items-center justify-center shadow-[inset_0_1px_0_hsl(var(--primary)/0.25)]">
+ <Check className="h-3 w-3 text-primary" strokeWidth={3} />
+ </div>
  </SelectPrimitive.ItemIndicator>
  </span>
 

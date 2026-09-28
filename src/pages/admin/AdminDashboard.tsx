@@ -402,8 +402,8 @@ export default function AdminDashboard() {
         )}
       >
         {/* Brand */}
-        <div className="h-14 flex items-center px-4 gap-3 af-border border-b shrink-0">
-           <div className="h-8 w-8 rounded-lg af-accent-bg flex items-center justify-center shrink-0 text-primary-foreground">
+        <div className="h-[64px] flex items-center px-4 gap-3 af-border border-b shrink-0">
+           <div className="h-9 w-9 rounded-md af-accent-bg flex items-center justify-center shrink-0 text-primary-foreground">
             <Shield className="h-[18px] w-[18px]" strokeWidth={2.25} />
           </div>
           {!sidebarCollapsed && (
@@ -462,8 +462,8 @@ export default function AdminDashboard() {
                       title={sidebarCollapsed ? item.label : undefined}
                       data-active={isActive ? "true" : "false"}
                       className={cn(
-                        "admin-nav-item relative w-full flex items-center gap-3 rounded-lg group",
-                        sidebarCollapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5",
+                        "admin-nav-item relative w-full flex items-center gap-3 rounded-md group",
+                        sidebarCollapsed ? "justify-center px-0 py-2.5" : "px-3 py-2",
                         isActive ? "af-accent-bg" : "af-text-3 hover:af-surface-2 hover:af-text"
                       )}
                       style={!isActive ? {} : undefined}
@@ -511,7 +511,7 @@ export default function AdminDashboard() {
       {/* ═══ MAIN AREA ═══ */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="h-14 flex items-center px-4 lg:px-6 gap-3 shrink-0 af-surface af-border border-b">
+        <header className="h-[64px] flex items-center px-4 lg:px-6 gap-3 shrink-0 af-surface af-border border-b">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <button
               onClick={() => setMobileMenuOpen(true)}
@@ -540,7 +540,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Date picker */}
-            <div className="flex items-center gap-px p-0.5 rounded-lg af-surface-2 af-border border max-w-[50vw] overflow-x-auto scrollbar-thin md:max-w-none md:overflow-visible">
+          <div className="flex items-center gap-px p-0.5 rounded-md af-surface-2 af-border border max-w-[50vw] overflow-x-auto scrollbar-thin md:max-w-none md:overflow-visible">
             {DATE_PRESETS.map(p => (
               <button
                 key={p.label}

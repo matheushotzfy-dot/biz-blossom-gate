@@ -92,7 +92,7 @@ function RevenueBar({ collapsed, revenue, milestone, onOpenRewards }: RevenueBar
       aria-hidden={collapsed}
       tabIndex={collapsed ? -1 : 0}
       title={`${current} de ${goal} — ${pctDisplay}% • ${milestone.current.tier}`}
-      className="sidebar-revenue-bar seller-clickable group/rev relative mt-4 block max-h-28 w-full overflow-hidden rounded-lg border border-sidebar-border bg-sidebar-accent px-4 py-3 text-left transition-[border-color,background-color,transform] duration-200 hover:border-sidebar-foreground/20 hover:bg-sidebar-accent/80 active:scale-[0.99]"
+      className="sidebar-revenue-bar seller-clickable group/rev relative mt-4 block max-h-28 w-full overflow-hidden rounded-xl border border-sidebar-border bg-sidebar-accent px-4 py-3.5 text-left hover:border-primary/40"
     >
       {/* Marca d'água da logo */}
       <span
@@ -113,7 +113,7 @@ function RevenueBar({ collapsed, revenue, milestone, onOpenRewards }: RevenueBar
         </div>
 
         {/* Trilho */}
-        <div className="mt-2.5 h-1 w-[calc(100%-46px)] overflow-hidden rounded-full bg-sidebar-border/70">
+        <div className="mt-2.5 h-[6px] w-[calc(100%-46px)] overflow-hidden rounded-full bg-sidebar-border/70">
           <div
             className="h-full rounded-full bg-gradient-to-r from-primary/70 to-primary transition-[width] duration-700 ease-out"
             style={{ width: `${pct}%` }}
@@ -169,24 +169,24 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
                     activeClassName=""
 
                     className={cn(
-                       "group/nav relative flex h-10 w-full items-center gap-3 overflow-hidden rounded-lg px-3 text-[12.5px] outline-none",
-                      "transition-[background-color,border-color,color,transform] duration-200 ease-out active:scale-[0.99]",
+                       "group/nav relative flex h-11 w-full items-center gap-3 overflow-hidden rounded-lg px-3 text-[13px] outline-none",
+                      "transition-colors duration-200 ease-out",
                       isActive
-                         ? "border border-sidebar-border bg-sidebar-accent font-semibold text-sidebar-accent-foreground shadow-[inset_2px_0_0_hsl(var(--primary))]"
-                         : "border border-transparent font-medium text-sidebar-foreground/72 hover:border-sidebar-border/70 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground",
+                         ? "border border-primary/25 bg-primary/[0.10] font-semibold text-sidebar-accent-foreground"
+                         : "border border-transparent font-medium text-sidebar-foreground/72 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                     )}
                   >
                     <span
                       className={cn(
-                         "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center transition-colors duration-200 ease-out",
+                         "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center transition-colors duration-300 ease-out",
                         isActive
                           ? "text-primary"
                           : "text-sidebar-foreground/48 group-hover/nav:text-sidebar-accent-foreground",
                       )}
                     >
                       <item.icon
-                         size={19}
-                         strokeWidth={isActive ? 2 : 1.8}
+                         size={22}
+                         strokeWidth={isActive ? 1.9 : 1.6}
                       />
                     </span>
 
@@ -205,6 +205,12 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
                       </span>
                     )}
 
+                    {isActive && (
+                      <span
+                        aria-hidden
+                        className="sidebar-item-meta absolute right-3.5 h-1.5 w-1.5 rounded-full bg-primary"
+                      />
+                    )}
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>

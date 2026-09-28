@@ -36,22 +36,8 @@ export default function PremiacoesHub() {
         path="/premiacoes"
         noindex
       />
-      {active === "corrida" ? (
-        <>
-          <HubTabs tabs={TABS} active={active} onChange={onChange} />
-          <CorridaFaturamento />
-        </>
-      ) : (
-        <div className="relative">
-          <HubTabs
-            tabs={TABS}
-            active={active}
-            onChange={onChange}
-            className="absolute left-0 right-0 top-0 z-30 px-4 pt-4 sm:px-6 lg:px-8"
-          />
-          <Premiacoes />
-        </div>
-      )}
+      <HubTabs tabs={TABS} active={active} onChange={onChange} />
+      {active === "corrida" ? <CorridaFaturamento /> : <Premiacoes />}
     </>
   );
 }

@@ -82,7 +82,7 @@ export function MobileBottomNav() {
             className="absolute inset-0 bg-background/80 animate-in fade-in duration-200"
             onClick={() => setMoreOpen(false)}
           />
-          <div className="absolute bottom-0 left-0 right-0 max-h-[88vh] overflow-y-auto rounded-t-xl border-t border-border bg-card shadow-[0_-16px_48px_hsl(var(--background)/0.45)] animate-slide-up">
+          <div className="absolute bottom-0 left-0 right-0 max-h-[88vh] overflow-y-auto rounded-t-2xl border-t border-border bg-card animate-slide-up">
             {/* Handle */}
             <div className="sticky top-0 z-10 rounded-t-2xl bg-card pb-1 pt-3">
               <div className="flex justify-center">
@@ -111,7 +111,7 @@ export function MobileBottomNav() {
                   <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground/60 font-black px-2 mb-2">
                     {group.label}
                   </p>
-                   <div className="overflow-hidden rounded-lg border border-border bg-card divide-y divide-border/40">
+                  <div className="rounded-[12px] border border-border/60 bg-card/60 divide-y divide-border/40 overflow-hidden">
                     {group.items.map((item) => {
                       const isActive = location.pathname === item.url || location.pathname.startsWith(item.url + "/");
                       const acc = ACCENTS[item.accent || "primary"];
@@ -177,17 +177,17 @@ export function MobileBottomNav() {
                     else { setMoreOpen(false); navigate(tab.path); }
                   }}
                   className={cn(
-                     "relative flex min-w-[60px] flex-1 flex-col items-center gap-1 rounded-lg px-1 py-1 transition-transform duration-150 active:scale-[0.96]",
+                    "relative flex min-w-[60px] flex-1 flex-col items-center gap-1 rounded-[14px] px-1 py-1 transition-transform duration-150 active:scale-[0.94]",
                     isActive ? "text-primary" : "text-muted-foreground/70",
                   )}
                 >
                   <span
                     className={cn(
-                       "flex h-8 w-full max-w-[50px] items-center justify-center rounded-lg border border-transparent transition-[background-color,border-color] duration-200",
-                       isActive && "border-primary/15 bg-primary/[0.10]",
+                      "flex h-9 w-full max-w-[54px] items-center justify-center rounded-[13px] transition-colors duration-200",
+                      isActive && "bg-primary/[0.12]",
                     )}
                   >
-                     <tab.icon className={cn("h-[18px] w-[18px]", isActive ? "stroke-[2]" : "stroke-[1.8]")} />
+                    <tab.icon className={cn("h-[19px] w-[19px]", isActive && "stroke-[2.5]")} />
                   </span>
                   <span
                     className={cn(

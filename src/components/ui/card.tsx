@@ -3,7 +3,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("platform-card group relative overflow-hidden rounded-xl border border-border/90 bg-card text-card-foreground shadow-[0_1px_0_hsl(var(--foreground)/0.025)] transition-[border-color,background-color,box-shadow] duration-200 ease-out", className)} {...props}>
+  <div ref={ref} className={cn("platform-card group relative overflow-hidden rounded-xl border border-border bg-card text-card-foreground transition-colors duration-200 ease-out", className)} {...props}>
     <div className="relative z-10 h-full">
       {props.children}
     </div>
@@ -13,14 +13,14 @@ Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("flex flex-col space-y-1 p-5 sm:p-6", className)} {...props} />
+    <div ref={ref} className={cn("flex flex-col space-y-1.5 p-5 sm:p-6", className)} {...props} />
   ),
 );
 CardHeader.displayName = "CardHeader";
 
 const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
   ({ className, ...props }, ref) => (
-    <h3 ref={ref} className={cn("font-heading text-[14px] font-semibold leading-tight", className)} {...props} />
+    <h3 ref={ref} className={cn("text-[15px] font-heading font-bold leading-none tracking-[-0.02em]", className)} {...props} />
   ),
 );
 CardTitle.displayName = "CardTitle";

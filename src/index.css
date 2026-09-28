@@ -1,4 +1,3 @@
-@import "./styles/surfaces.css";
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Sora:wght@400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
@@ -41,7 +40,7 @@ input[type="number"]::-webkit-inner-spin-button {
     --border: 220 13% 93%;
     --input: 220 13% 91%;
     --ring: 160 84% 45%;
-    --radius: 0.875rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 220 9% 38%;
@@ -146,7 +145,7 @@ input[type="number"]::-webkit-inner-spin-button {
   /* Ultra-smooth press feel */
   button:active:not(:disabled),
   [role="button"]:active {
-    transform: scale(0.975);
+    transform: scale(0.965);
     transition-duration: 80ms;
   }
 
@@ -1163,256 +1162,6 @@ input[type="number"]::-webkit-inner-spin-button {
 @media (prefers-reduced-motion: reduce) {
   .vendas-rise, .vendas-rise-d1, .vendas-rise-d2, .vendas-rise-d3, .vendas-rise-d4, .vendas-rise-d5 {
     animation: none !important;
-  }
-}
-
-/* Dashboard seller — electric blue, open bands, solid financial surfaces. */
-.seller-dashboard {
-  --primary: 211 100% 54%;
-  --primary-foreground: 222 72% 11%;
-  --info: 197 100% 71%;
-  --ring: 211 100% 54%;
-  font-family: "Manrope", system-ui, sans-serif;
-}
-
-.seller-dashboard :is(.font-display, .font-heading) {
-  font-family: "Sora", system-ui, sans-serif;
-  letter-spacing: 0;
-}
-
-.seller-dashboard :is(.font-numbers, .tabular-nums) {
-  font-family: "Manrope", system-ui, sans-serif;
-  font-variant-numeric: tabular-nums lining-nums;
-  font-feature-settings: "tnum" 1, "lnum" 1;
-  letter-spacing: 0;
-}
-
-.seller-dashboard .dashboard-heading-band {
-  border-color: hsl(var(--primary) / 0.24);
-}
-
-.seller-dashboard .stat-hero-card {
-  border-radius: 8px !important;
-  border-color: hsl(var(--border)) !important;
-  background: hsl(var(--card)) !important;
-}
-
-.seller-dashboard .stat-hero-card::before {
-  top: 0;
-  bottom: auto;
-  width: 100%;
-  height: 2px;
-  border-radius: 0;
-  background: hsl(var(--primary));
-  opacity: 0.72;
-  transform: scaleX(0.22);
-  transform-origin: left;
-}
-
-.seller-dashboard .stat-hero-card::after {
-  display: none;
-}
-
-.seller-dashboard .stat-hero-card:hover {
-  transform: translateY(-2px) !important;
-  border-color: hsl(var(--primary) / 0.48) !important;
-  background: hsl(var(--card-elevated)) !important;
-}
-
-.seller-dashboard .stat-hero-card:hover::before {
-  opacity: 1;
-  transform: scaleX(1);
-}
-
-.seller-dashboard .dashboard-actions-band {
-  border-color: hsl(var(--primary) / 0.16);
-}
-
-.seller-dashboard :is(.dashboard-action, .dashboard-data-panel, .dashboard-payment-link) {
-  position: relative;
-  isolation: isolate;
-}
-
-.seller-dashboard .dashboard-action::after,
-.seller-dashboard .dashboard-payment-link::after {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 2px;
-  background: hsl(var(--primary));
-  opacity: 0;
-  transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.seller-dashboard .dashboard-action:hover::after,
-.seller-dashboard .dashboard-payment-link:hover::after {
-  opacity: 1;
-}
-
-.seller-dashboard .dashboard-data-panel {
-  border-color: hsl(var(--border));
-  background: hsl(var(--card));
-  transition: border-color 300ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.seller-dashboard .dashboard-data-panel:hover {
-  border-color: hsl(var(--primary) / 0.3);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .seller-dashboard .stat-hero-card,
-  .seller-dashboard .dashboard-action,
-  .seller-dashboard .dashboard-payment-link {
-    transform: none !important;
-  }
-}
-
-/* ════════════════════════════════════════════════════════════
-   VENXPAY PRODUCT FINISH — Lovable-inspired precision layer
-   Preserves the existing layout while unifying motion and finish.
-   ════════════════════════════════════════════════════════════ */
-:root {
-  --venx-control-radius: 8px;
-  --venx-surface-radius: 12px;
-  --venx-motion-fast: 180ms;
-  --venx-motion-base: 240ms;
-  --venx-ease: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.font-display,
-.font-heading {
-  font-family: "Sora", system-ui, sans-serif;
-  letter-spacing: 0;
-}
-
-.font-numbers,
-.tabular-nums {
-  font-family: "JetBrains Mono", "Manrope", monospace;
-  font-variant-numeric: tabular-nums slashed-zero;
-  letter-spacing: 0;
-}
-
-.platform-shell,
-.admin-frame {
-  font-feature-settings: "ss01", "cv11", "tnum";
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-.platform-shell :is(button, a, [role="button"], [role="tab"], [role="option"]),
-.admin-frame :is(button, a, [role="button"], [role="tab"], [role="option"]) {
-  transition-duration: var(--venx-motion-fast);
-  transition-timing-function: var(--venx-ease);
-}
-
-.platform-shell :is(button, a, [role="button"]):active:not(:disabled),
-.admin-frame :is(button, a, [role="button"]):active:not(:disabled) {
-  transform: scale(0.98);
-}
-
-.platform-shell :is(button, a, [role="button"]):focus-visible,
-.admin-frame :is(button, a, [role="button"]):focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.18);
-}
-
-.platform-card,
-.dashboard-panel,
-.dashboard-hero-surface,
-.dashboard-surface,
-.dashboard-tile,
-.seller-panel,
-.seller-shell,
-.stat-hero-card {
-  border-radius: var(--venx-surface-radius) !important;
-  box-shadow: 0 1px 0 hsl(var(--foreground) / 0.025) !important;
-}
-
-:is(.platform-card, .dashboard-panel, .dashboard-hero-surface, .dashboard-surface, .dashboard-tile, .seller-panel, .seller-shell, .stat-hero-card):hover {
-  border-color: hsl(var(--foreground) / 0.15) !important;
-  box-shadow: 0 1px 0 hsl(var(--foreground) / 0.04) !important;
-}
-
-.technical-sidebar [data-sidebar="sidebar"],
-.technical-topbar {
-  box-shadow: none !important;
-}
-
-.technical-topbar {
-  backdrop-filter: none !important;
-}
-
-.seller-clickable,
-.seller-action {
-  transition-property: background-color, border-color, color, opacity, transform;
-  transition-duration: var(--venx-motion-fast);
-  transition-timing-function: var(--venx-ease);
-}
-
-.seller-clickable:hover,
-.seller-action:hover {
-  border-color: hsl(var(--foreground) / 0.14);
-  background-color: hsl(var(--accent) / 0.55);
-}
-
-.seller-clickable:active,
-.seller-action:active {
-  opacity: 1;
-  transform: scale(0.98);
-}
-
-.platform-shell svg,
-.admin-frame svg {
-  shape-rendering: geometricPrecision;
-}
-
-.admin-frame {
-  --as-radius: 10px;
-  --as-ring: 0 0 0 3px hsl(var(--primary) / 0.16);
-}
-
-.admin-nav-item {
-  border-radius: var(--venx-control-radius) !important;
-  transition: background-color var(--venx-motion-fast) var(--venx-ease), border-color var(--venx-motion-fast) var(--venx-ease), color var(--venx-motion-fast) var(--venx-ease), transform var(--venx-motion-fast) var(--venx-ease) !important;
-}
-
-.admin-nav-item[data-active="true"] {
-  border-color: var(--as-border) !important;
-  box-shadow: inset 2px 0 0 var(--as-rail) !important;
-}
-
-.admin-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-.admin-shell textarea,
-.admin-shell select,
-.admin-shell [role="combobox"],
-.admin-frame .af-input {
-  border-radius: var(--venx-control-radius) !important;
-  transition: border-color var(--venx-motion-fast) var(--venx-ease), box-shadow var(--venx-motion-fast) var(--venx-ease), background-color var(--venx-motion-fast) var(--venx-ease);
-}
-
-.admin-shell button,
-.admin-frame button {
-  border-radius: var(--venx-control-radius) !important;
-  transition: background-color var(--venx-motion-fast) var(--venx-ease), border-color var(--venx-motion-fast) var(--venx-ease), color var(--venx-motion-fast) var(--venx-ease), transform var(--venx-motion-fast) var(--venx-ease) !important;
-}
-
-.admin-shell table :is(td, th),
-.admin-shell [class*="font-mono"],
-.admin-shell [class*="tabular-nums"] {
-  font-variant-numeric: tabular-nums slashed-zero;
-}
-
-.overlay-surface {
-  border-radius: var(--venx-surface-radius);
-  box-shadow: 0 18px 56px hsl(var(--background) / 0.5);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .platform-shell *,
-  .admin-frame * {
-    animation-duration: 1ms !important;
-    transition-duration: 1ms !important;
-    scroll-behavior: auto !important;
   }
 }
 
@@ -4890,40 +4639,40 @@ html body .lp .lp-progress {
 }
 
 /* ════════════════════════════════════════════════════════════
-   VENXPAY GRAPHITE SYSTEM — deep graphite + electric blue action
+   VENXPAY GOAT SYSTEM — black operational canvas + yellow action
    Shared by seller, admin and all authenticated product surfaces.
    ════════════════════════════════════════════════════════════ */
 @layer base {
   :root,
   .dark {
-    --background: 222 24% 7%;
-    --foreground: 216 24% 96%;
-    --card: 222 20% 10%;
-    --card-elevated: 221 18% 13%;
-    --card-inset: 223 22% 8%;
-    --card-foreground: 216 24% 96%;
-    --popover: 222 19% 11%;
-    --popover-foreground: 216 24% 96%;
-    --primary: 215 92% 62%;
-    --primary-foreground: 222 32% 8%;
-    --secondary: 220 16% 14%;
-    --secondary-foreground: 216 20% 92%;
-    --muted: 220 16% 14%;
-    --muted-foreground: 217 12% 66%;
-    --accent: 219 20% 16%;
-    --accent-foreground: 216 24% 96%;
-    --border: 219 16% 20%;
-    --input: 219 16% 23%;
-    --ring: 215 92% 62%;
+    --background: 0 0% 2%;
+    --foreground: 0 0% 96%;
+    --card: 0 0% 4.5%;
+    --card-elevated: 0 0% 6.5%;
+    --card-inset: 0 0% 3%;
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 49 100% 55%;
+    --primary-foreground: 0 0% 3%;
+    --secondary: 0 0% 8%;
+    --secondary-foreground: 0 0% 92%;
+    --muted: 0 0% 8%;
+    --muted-foreground: 0 0% 56%;
+    --accent: 0 0% 10%;
+    --accent-foreground: 0 0% 96%;
+    --border: 0 0% 13%;
+    --input: 0 0% 16%;
+    --ring: 49 100% 55%;
     --radius: 0.625rem;
-    --sidebar-background: 223 25% 7%;
-    --sidebar-foreground: 217 12% 68%;
-    --sidebar-primary: 215 92% 62%;
-    --sidebar-primary-foreground: 222 32% 8%;
-    --sidebar-accent: 220 19% 13%;
-    --sidebar-accent-foreground: 216 24% 96%;
-    --sidebar-border: 219 17% 18%;
-    --sidebar-ring: 215 92% 62%;
+    --sidebar-background: 0 0% 2.5%;
+    --sidebar-foreground: 0 0% 62%;
+    --sidebar-primary: 49 100% 55%;
+    --sidebar-primary-foreground: 0 0% 3%;
+    --sidebar-accent: 0 0% 7%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 0 0% 12%;
+    --sidebar-ring: 49 100% 55%;
     --success: 153 70% 48%;
     --success-foreground: 0 0% 3%;
     --warning: 38 96% 56%;
@@ -4937,7 +4686,7 @@ html body .lp .lp-progress {
   body {
     background: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: "Plus Jakarta Sans", "Manrope", system-ui, sans-serif;
+    font-family: "Manrope", system-ui, sans-serif;
     letter-spacing: 0;
   }
 }
@@ -4990,8 +4739,8 @@ html body .lp .lp-progress {
 .product-studio,
 .dark .product-studio,
 .product-studio-workspace {
-  --product-electric: 215 92% 62%;
-  --product-cyan: 190 92% 52%;
+  --product-electric: 49 100% 55%;
+  --product-cyan: 49 100% 55%;
   background: hsl(var(--background));
 }
 
@@ -5033,7 +4782,7 @@ html body .lp .lp-progress {
   --as-ring: 0 0 0 3px hsl(var(--primary) / 0.14);
   background: hsl(var(--background));
   color: hsl(var(--foreground));
-  font-family: "Plus Jakarta Sans", "Manrope", system-ui, sans-serif;
+  font-family: "Manrope", system-ui, sans-serif;
 }
 
 .admin-shell h1,
@@ -5043,24 +4792,7 @@ html body .lp .lp-progress {
 .admin-frame h1,
 .admin-frame h2 {
   color: hsl(var(--foreground));
-  font-family: "Plus Jakarta Sans", "Manrope", system-ui, sans-serif;
-  letter-spacing: 0;
-}
-
-/* Financial figures stay proportional and calm instead of looking like code. */
-.platform-shell :is(.font-display, .font-heading),
-.venx-executive-shell :is(.font-display, .font-heading),
-.admin-frame :is(.font-display, .font-heading) {
-  font-family: "Plus Jakarta Sans", "Manrope", system-ui, sans-serif;
-  letter-spacing: 0;
-}
-
-.platform-shell :is(.font-numbers, .tabular-nums),
-.venx-executive-shell :is(.font-numbers, .tabular-nums),
-.admin-frame :is(.font-numbers, .tabular-nums) {
-  font-family: "Plus Jakarta Sans", "Manrope", system-ui, sans-serif;
-  font-variant-numeric: tabular-nums lining-nums;
-  font-feature-settings: "tnum" 1, "lnum" 1;
+  font-family: "Sora", system-ui, sans-serif;
   letter-spacing: 0;
 }
 
@@ -5119,40 +4851,3 @@ html body .lp .lp-progress {
     transition-duration: 1ms !important;
   }
 }
-
-/* Dashboard seller — continuous financial workspace. */
-.seller-dashboard {
-  --primary: 211 92% 58%;
-  --primary-foreground: 0 0% 100%;
-  --info: 194 82% 58%;
-  --ring: 211 92% 58%;
-  background-color: hsl(var(--background));
-  background-image: none;
-}
-
-.seller-dashboard .dashboard-heading-band { border: 0; }
-.seller-dashboard :is(.dashboard-summary, .dashboard-analytics, .dashboard-activity) {
-  background: hsl(var(--card)) !important;
-  border-color: hsl(var(--border)) !important;
-  box-shadow: none !important;
-  transition: border-color 240ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-.seller-dashboard :is(.dashboard-summary, .dashboard-analytics, .dashboard-activity):hover {
-  border-color: hsl(var(--primary) / 0.3) !important;
-}
-
-.seller-dashboard .dashboard-progress {
-  display: block;
-  width: 100%;
-  height: 6px;
-  overflow: hidden;
-  border: 0;
-  border-radius: 999px;
-  background: hsl(var(--muted));
-  appearance: none;
-}
-.seller-dashboard .dashboard-progress::-webkit-progress-bar { background: hsl(var(--muted)); }
-.seller-dashboard .dashboard-progress::-webkit-progress-value { border-radius: 999px; background: hsl(var(--primary)); }
-.seller-dashboard .dashboard-progress::-moz-progress-bar { border-radius: 999px; background: hsl(var(--primary)); }
-.seller-dashboard .dashboard-progress-danger::-webkit-progress-value { background: hsl(var(--destructive)); }
-.seller-dashboard .dashboard-progress-danger::-moz-progress-bar { background: hsl(var(--destructive)); }

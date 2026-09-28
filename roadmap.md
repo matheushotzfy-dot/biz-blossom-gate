@@ -1,8 +1,5 @@
 # Roadmap
 
-- [x] Refinar globalmente seller, admin e mobile no estilo visual e interativo do Lovable, preservando o layout atual.
-- [x] Refinar tipografia de textos e valores e substituir o preto puro por grafite azulado com contraste vivo.
-- [x] Reconstruir Premiações em tela inteira, sem recorte dos artefatos e com composição mais clean.
 - [x] Aplicar o sistema visual do cadastro GoatPay em toda a plataforma seller e admin.
 - [x] Reconstruir a entrada e o cadastro VENXPAY no padrão visual minimalista da referência GoatPay.
 - [x] Substituir a paleta esverdeada por azul financeiro escuro em seller e admin.
@@ -18,7 +15,3 @@
 - [ ] Refazer o calendário e validar presets/intervalos.
 - [ ] Auditar e endurecer superfícies críticas de seller, admin e páginas públicas.
 - [ ] Validar dados, testes, execução e telas desktop/mobile.
-- [x] Reconstruir o dashboard seller com visual clean, sólido e profissional, removendo o banner promocional experimental.
-- [x] Elevar o dashboard seller com azul elétrico, Sora + Manrope e faixas abertas mais vivas e profissionais.
-- [x] Reconstruir o dashboard seller no padrão visual da referência Central, adaptado à VENXPAY.
-- [x] Refinar o dashboard em três áreas contínuas, removendo o excesso de cartões e decorações.
