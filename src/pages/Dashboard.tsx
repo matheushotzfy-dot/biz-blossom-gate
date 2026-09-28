@@ -779,34 +779,31 @@ export default function Dashboard() {
               const method = item.label;
               const methodLabel = method === "pix" ? "PIX" : method === "credit_card" ? "Cartão" : method === "boleto" ? "Boleto" : "—";
               const custName = item.tx.customer_name || item.tx.customer_email || "Cliente";
-              const dot =
-                isApproved ? "bg-emerald-500"
-                : item.status === "pending" ? "bg-amber-500"
-                : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "bg-red-500"
-                : "bg-muted-foreground/50";
-              const statusColor =
-                isApproved ? "text-emerald-600 dark:text-emerald-500"
-                : item.status === "pending" ? "text-amber-600 dark:text-amber-500"
-                : item.status === "chargeback" || item.status === "med" || item.status === "dispute" || item.status === "disputed" ? "text-red-600 dark:text-red-500"
-                : "text-muted-foreground";
+              const bad = ["chargeback", "med", "dispute", "disputed", "refunded", "failed"].includes(item.status);
+              const dot = isApproved ? "bg-success" : item.status === "pending" ? "bg-warning animate-pulse" : bad ? "bg-destructive" : "bg-muted-foreground/50";
+              const statusColor = isApproved ? "text-success bg-success/10 border-success/25" : item.status === "pending" ? "text-warning bg-warning/10 border-warning/25" : bad ? "text-destructive bg-destructive/10 border-destructive/25" : "text-muted-foreground bg-muted border-border";
+              const initial = custName.trim().charAt(0).toUpperCase() || "C";
               return (
                 <li key={item.id}>
                   <button
                     type="button"
                     onClick={() => setDetailTx(item.tx)}
-                    className="group w-full grid md:grid-cols-[1fr_100px_120px_110px_20px] grid-cols-[1fr_auto] gap-4 items-center px-5 md:px-6 py-3 text-left hover:bg-muted/30 transition-colors"
+                    className="group w-full grid md:grid-cols-[1fr_100px_120px_130px_20px] grid-cols-[1fr_auto] gap-4 items-center px-5 md:px-6 py-3.5 text-left transition-all hover:bg-primary/[0.04] active:scale-[0.995]"
                   >
-                    <div className="min-w-0">
-                      <p className="text-[13px] font-medium text-foreground truncate">{custName}</p>
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border bg-secondary font-display text-[13px] font-bold text-foreground transition-colors group-hover:border-primary/50 group-hover:bg-primary group-hover:text-primary-foreground">{initial}</span>
+                      <div className="min-w-0">
+                      <p className="text-[13px] font-semibold text-foreground truncate">{custName}</p>
                       <p className="text-[11px] text-muted-foreground/70 tabular-nums mt-0.5">
                         {new Date(item.createdAt).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
                       </p>
+                      </div>
                     </div>
-                    <span className="hidden md:inline text-[12px] text-muted-foreground">{methodLabel}</span>
+                    <span className="hidden md:inline-flex w-fit rounded-full border border-border bg-background/50 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{methodLabel}</span>
                     <span className="hidden md:block text-right font-display font-semibold text-[13px] tabular-nums text-foreground">
                       {privacy.hidden ? CENSORED : fmt(item.amount)}
                     </span>
-                    <span className={cn("hidden md:inline-flex items-center gap-1.5 text-[11px] font-semibold", statusColor)}>
+                    <span className={cn("hidden md:inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold", statusColor)}>
                       <span className={cn("h-1.5 w-1.5 rounded-full", dot)} />
                       {statusLabel(item.status)}
                     </span>
@@ -814,7 +811,7 @@ export default function Dashboard() {
                       <span className="font-display font-semibold text-[13px] tabular-nums text-foreground">
                         {privacy.hidden ? CENSORED : fmt(item.amount)}
                       </span>
-                      <span className={cn("inline-flex items-center gap-1 text-[10px] font-semibold", statusColor)}>
+                      <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold", statusColor)}>
                         <span className={cn("h-1.5 w-1.5 rounded-full", dot)} />
                         {statusLabel(item.status)}
                       </span>
