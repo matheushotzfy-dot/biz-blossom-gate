@@ -5448,6 +5448,29 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      request_my_anticipation: {
+        Args: { _idempotency_key: string; _max_days: number }
+        Returns: {
+          created_at: string
+          fee_amount: number
+          gross_amount: number
+          id: string
+          idempotency_key: string
+          max_days: number
+          net_amount: number
+          status: string
+          transaction_ids: string[]
+          tx_count: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "anticipations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       resolve_commission_pct: {
         Args: { _seller: string; _staff: string }
         Returns: number
