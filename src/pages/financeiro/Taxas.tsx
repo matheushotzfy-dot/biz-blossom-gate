@@ -121,6 +121,12 @@ function TaxasView({ methods, withdrawFee, deadlines, personalized, embedded }: 
         </span>
       </header>}
       {embedded && <span className={cn("w-fit rounded-full border px-3 py-1 text-xs font-semibold", personalized ? "border-primary/40 bg-primary/10 text-primary" : "border-border text-muted-foreground")}>{personalized ? "Taxas personalizadas" : "Taxas padrão da plataforma"}</span>}
+      {customError && (
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <span>Não conseguimos carregar suas taxas personalizadas. Os valores abaixo podem não ser os seus.</span>
+          <button type="button" onClick={() => setReloadKey((k) => k + 1)} className="rounded-full border border-destructive/40 px-3 py-1 text-xs font-semibold hover:bg-destructive/15">Tentar de novo</button>
+        </div>
+      )}
 
       {/* Rate cards */}
       <section className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
