@@ -267,7 +267,7 @@ export default function Antecipacao() {
               </Button>
               <p className="text-[10px] text-muted-foreground/70 mt-2 text-center flex items-center justify-center gap-1 font-medium">
                 <Info className="h-3 w-3" />
-                Crédito em até 1 dia útil após aprovação
+                Valor liberado na hora no seu saldo
               </p>
             </div>
           </div>
