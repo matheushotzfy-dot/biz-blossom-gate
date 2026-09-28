@@ -248,7 +248,7 @@ function DashboardLayoutInner() {
  <MobileRevenueBar />
 
              <div ref={scrollRef} className="dashboard-scroll-field relative z-10 flex-1 overflow-y-auto overscroll-contain px-3 sm:px-5 md:px-8 xl:px-12 pb-28 md:pb-12 min-h-0">
-   <div className="mx-auto w-full max-w-[1280px] py-3 md:py-7">
+   <div className={cn("mx-auto w-full py-3 md:py-7", pathname.startsWith("/premiacoes") ? "max-w-none" : "max-w-[1280px]")}>
   <div key={routeKey} className="page-fluid">
   <Outlet />
   </div>
