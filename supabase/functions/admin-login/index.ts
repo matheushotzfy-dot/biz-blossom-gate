@@ -159,43 +159,15 @@ Deno.serve(async (req) => {
 
     const role = isAdmin ? "admin" : "employee";
 
-    // Never persist or return the password-authenticated session. The final
-    // session is minted only after the email OTP is validated by Auth.
-    const tempToken = crypto.randomUUID();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-    await adminClient.from("admin_2fa_codes").delete().eq("email", trimmedEmail);
-
-    const { error: otpError } = await authClient.auth.signInWithOtp({
-      email: trimmedEmail,
-      options: { shouldCreateUser: false },
-    });
-    if (otpError) {
-      console.error("[admin-login] OTP delivery failed");
-      return new Response(
-        JSON.stringify({ success: false, error: "Não foi possível enviar o código de acesso." }),
-        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-
-    const { error: challengeError } = await adminClient.from("admin_2fa_codes").insert({
-      email: trimmedEmail,
-      user_id: userId,
-      code_hash: null,
-      temp_token: tempToken,
-      role,
-      expires_at: expiresAt,
-      attempts: 0,
-    });
-    if (challengeError) {
-      console.error("[admin-login] Challenge creation failed");
-      return new Response(
-        JSON.stringify({ success: false, error: "Não foi possível iniciar a verificação." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-
+    // Direct password login (email code step disabled at owner's request).
+    // Role was verified server-side above; password attempts stay rate-limited.
     return new Response(
-      JSON.stringify({ success: true, requires2FA: true, temp_token: tempToken }),
+      JSON.stringify({
+        success: true,
+        access_token: authData.session.access_token,
+        refresh_token: authData.session.refresh_token,
+        role,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error) {
