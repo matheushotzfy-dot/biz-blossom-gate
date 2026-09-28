@@ -205,6 +205,30 @@ export default function Dashboard() {
   const { data: withdrawals = [] } = useWithdrawals(10);
   const { data: disputes = [] } = useDisputes();
   const { data: productsData, isError: productsError } = useProductsQuery();
+
+  // Links de pagamento — alimenta o card lateral do dashboard com dados reais.
+  const { data: payLinks = [] } = useQuery({
+    queryKey: ["dashboard-payment-links", user?.id],
+    queryFn: async () => {
+      if (!user) return [] as Tables<"payment_links">[];
+      const { data, error } = await supabase
+        .from("payment_links")
+        .select("id,title,total_revenue,current_uses,is_active")
+        .eq("user_id", user.id)
+        .order("total_revenue", { ascending: false })
+        .limit(3);
+      if (error) throw error;
+      return (data ?? []) as Tables<"payment_links">[];
+    },
+    enabled: !!user,
+    staleTime: 60_000,
+  });
+  const payLinksRevenue = useMemo(
+    () => payLinks.reduce((s, l) => s + Number(l.total_revenue || 0), 0),
+    [payLinks],
+  );
+  const payLinksActive = payLinks.filter((l) => l.is_active).length;
+
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodPreset>(PERIOD_PRESETS[0]);
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
   const [isCustom, setIsCustom] = useState(false);
