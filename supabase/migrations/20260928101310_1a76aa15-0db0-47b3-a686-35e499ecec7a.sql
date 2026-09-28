@@ -1,0 +1,1 @@
+REVOKE INSERT, UPDATE, DELETE ON public.transactions, public.withdrawals, public.financial_ledger, public.balance_adjustments, public.anticipations FROM anon;
