@@ -223,6 +223,7 @@ Deno.serve(async (req) => {
     const amountInCents = Math.round(amt * 100);
 
     const podpayResp = await fetch("https://api.podpay.co/v1/transactions", {
+      signal: AbortSignal.timeout(15000),
       method: "POST",
       headers: { Authorization: auth, "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({

@@ -302,6 +302,7 @@ Deno.serve(async (req) => {
             const auth = 'Basic ' + btoa(publicKey + ':' + secretKey);
             const txResp = await fetch(`https://api.podpay.co/v1/transactions/${existing.podpay_payment_id}`, {
               headers: { 'Authorization': auth, 'Accept': 'application/json' },
+              signal: AbortSignal.timeout(15000),
             });
             if (txResp.ok) {
               const txData = await txResp.json();
@@ -621,6 +622,7 @@ Deno.serve(async (req) => {
     let response: Response;
     try {
       response = await fetch('https://api.podpay.co/v1/transactions', {
+        signal: AbortSignal.timeout(15000),
         method: 'POST',
         headers: {
           'Authorization': auth,

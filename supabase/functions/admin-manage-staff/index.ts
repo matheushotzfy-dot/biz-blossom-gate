@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
       }
       const { error } = await admin.auth.admin.updateUserById(target_user_id, { password: newPassword });
       if (error) {
-        return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ error: "Não foi possível concluir a ação. Tente novamente." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       // Kill existing sessions so old JWT can't linger with the previous password
       try { await admin.auth.admin.signOut(target_user_id, "global"); } catch (_) {}
@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
     if (action === "delete") {
       const { error } = await admin.auth.admin.deleteUser(target_user_id);
       if (error) {
-        return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ error: "Não foi possível concluir a ação. Tente novamente." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       await admin.from("staff_audit_log").insert({
         staff_user_id: callerId,
