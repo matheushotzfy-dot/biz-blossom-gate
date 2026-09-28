@@ -2027,71 +2027,343 @@ export type Database = {
           },
         ]
       }
+      payment_link_events: {
+        Row: {
+          actor_id: string | null
+          actor_type: string
+          created_at: string
+          event_type: string
+          id: string
+          intent_id: string | null
+          metadata: Json
+          payment_link_id: string
+          seller_user_id: string
+          transaction_id: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_type?: string
+          created_at?: string
+          event_type: string
+          id?: string
+          intent_id?: string | null
+          metadata?: Json
+          payment_link_id: string
+          seller_user_id: string
+          transaction_id?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          actor_type?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          intent_id?: string | null
+          metadata?: Json
+          payment_link_id?: string
+          seller_user_id?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_link_events_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "payment_link_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_link_events_payment_link_id_fkey"
+            columns: ["payment_link_id"]
+            isOneToOne: false
+            referencedRelation: "payment_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_link_events_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_link_intents: {
+        Row: {
+          amount: number
+          created_at: string
+          customer_document_hash: string
+          customer_email: string
+          customer_name: string
+          expires_at: string | null
+          id: string
+          idempotency_key: string
+          payment_link_id: string
+          payment_method: string
+          public_token: string
+          quantity: number
+          selected_option_ids: string[]
+          seller_user_id: string
+          status: string
+          transaction_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          customer_document_hash: string
+          customer_email: string
+          customer_name: string
+          expires_at?: string | null
+          id?: string
+          idempotency_key: string
+          payment_link_id: string
+          payment_method: string
+          public_token?: string
+          quantity?: number
+          selected_option_ids?: string[]
+          seller_user_id: string
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          customer_document_hash?: string
+          customer_email?: string
+          customer_name?: string
+          expires_at?: string | null
+          id?: string
+          idempotency_key?: string
+          payment_link_id?: string
+          payment_method?: string
+          public_token?: string
+          quantity?: number
+          selected_option_ids?: string[]
+          seller_user_id?: string
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_link_intents_payment_link_id_fkey"
+            columns: ["payment_link_id"]
+            isOneToOne: false
+            referencedRelation: "payment_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_link_intents_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_link_options: {
+        Row: {
+          amount_delta: number
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_required: boolean
+          label: string
+          payment_link_id: string
+          position: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_delta?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          label: string
+          payment_link_id: string
+          position?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_delta?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          label?: string
+          payment_link_id?: string
+          position?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_link_options_payment_link_id_fkey"
+            columns: ["payment_link_id"]
+            isOneToOne: false
+            referencedRelation: "payment_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_links: {
         Row: {
           accept_boleto: boolean
           accept_card: boolean
           accept_pix: boolean
+          admin_block_reason: string | null
+          admin_blocked_at: string | null
+          admin_blocked_by: string | null
+          admin_status: string
+          allow_quantity: boolean
           amount: number
+          archived_at: string | null
+          billing_type: string
+          cancellation_policy: string
+          checkout_starts: number
           clicks: number
           cover_url: string | null
           created_at: string
           current_uses: number
           description: string | null
           expires_at: string | null
+          failed_attempts: number
           id: string
           image_url: string | null
+          instructions: string | null
           is_active: boolean
+          max_amount: number | null
+          max_quantity: number | null
           max_uses: number | null
+          min_amount: number | null
+          payment_attempts: number
+          pix_expiration_minutes: number
+          pricing_type: string
+          recurrence_cycles: number | null
+          recurrence_interval: string | null
+          recurrence_interval_count: number
+          redirect_url: string | null
+          reference_code: string | null
           slug: string
+          subscription_plan_id: string | null
+          suggested_amount: number | null
           title: string
           total_revenue: number
+          trial_days: number
           updated_at: string
           user_id: string
+          version: number
         }
         Insert: {
           accept_boleto?: boolean
           accept_card?: boolean
           accept_pix?: boolean
+          admin_block_reason?: string | null
+          admin_blocked_at?: string | null
+          admin_blocked_by?: string | null
+          admin_status?: string
+          allow_quantity?: boolean
           amount: number
+          archived_at?: string | null
+          billing_type?: string
+          cancellation_policy?: string
+          checkout_starts?: number
           clicks?: number
           cover_url?: string | null
           created_at?: string
           current_uses?: number
           description?: string | null
           expires_at?: string | null
+          failed_attempts?: number
           id?: string
           image_url?: string | null
+          instructions?: string | null
           is_active?: boolean
+          max_amount?: number | null
+          max_quantity?: number | null
           max_uses?: number | null
+          min_amount?: number | null
+          payment_attempts?: number
+          pix_expiration_minutes?: number
+          pricing_type?: string
+          recurrence_cycles?: number | null
+          recurrence_interval?: string | null
+          recurrence_interval_count?: number
+          redirect_url?: string | null
+          reference_code?: string | null
           slug: string
+          subscription_plan_id?: string | null
+          suggested_amount?: number | null
           title: string
           total_revenue?: number
+          trial_days?: number
           updated_at?: string
           user_id: string
+          version?: number
         }
         Update: {
           accept_boleto?: boolean
           accept_card?: boolean
           accept_pix?: boolean
+          admin_block_reason?: string | null
+          admin_blocked_at?: string | null
+          admin_blocked_by?: string | null
+          admin_status?: string
+          allow_quantity?: boolean
           amount?: number
+          archived_at?: string | null
+          billing_type?: string
+          cancellation_policy?: string
+          checkout_starts?: number
           clicks?: number
           cover_url?: string | null
           created_at?: string
           current_uses?: number
           description?: string | null
           expires_at?: string | null
+          failed_attempts?: number
           id?: string
           image_url?: string | null
+          instructions?: string | null
           is_active?: boolean
+          max_amount?: number | null
+          max_quantity?: number | null
           max_uses?: number | null
+          min_amount?: number | null
+          payment_attempts?: number
+          pix_expiration_minutes?: number
+          pricing_type?: string
+          recurrence_cycles?: number | null
+          recurrence_interval?: string | null
+          recurrence_interval_count?: number
+          redirect_url?: string | null
+          reference_code?: string | null
           slug?: string
+          subscription_plan_id?: string | null
+          suggested_amount?: number | null
           title?: string
           total_revenue?: number
+          trial_days?: number
           updated_at?: string
           user_id?: string
+          version?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "payment_links_subscription_plan_id_fkey"
+            columns: ["subscription_plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pix_keys: {
         Row: {
@@ -3389,6 +3661,79 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_cycles: {
+        Row: {
+          amount: number
+          attempt_count: number
+          created_at: string
+          cycle_number: number
+          due_at: string
+          id: string
+          last_attempt_at: string | null
+          paid_at: string | null
+          payment_link_id: string
+          seller_user_id: string
+          status: string
+          subscription_id: string
+          transaction_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          attempt_count?: number
+          created_at?: string
+          cycle_number: number
+          due_at: string
+          id?: string
+          last_attempt_at?: string | null
+          paid_at?: string | null
+          payment_link_id: string
+          seller_user_id: string
+          status?: string
+          subscription_id: string
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          attempt_count?: number
+          created_at?: string
+          cycle_number?: number
+          due_at?: string
+          id?: string
+          last_attempt_at?: string | null
+          paid_at?: string | null
+          payment_link_id?: string
+          seller_user_id?: string
+          status?: string
+          subscription_id?: string
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_cycles_payment_link_id_fkey"
+            columns: ["payment_link_id"]
+            isOneToOne: false
+            referencedRelation: "payment_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_cycles_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_cycles_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_plans: {
         Row: {
           created_at: string
@@ -3451,14 +3796,24 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          billing_method: string
+          cancel_at_period_end: boolean
           canceled_at: string | null
+          completed_cycles: number
           created_at: string
           current_period_end: string | null
           current_period_start: string
           id: string
+          last_payment_at: string | null
+          max_cycles: number | null
+          next_charge_at: string | null
+          payment_link_id: string | null
           plan_id: string
+          provider_customer_id: string | null
+          provider_payment_token: string | null
           seller_user_id: string
           status: string
+          subscriber_document_hash: string | null
           subscriber_email: string
           subscriber_name: string | null
           subscriber_user_id: string | null
@@ -3466,14 +3821,24 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          billing_method?: string
+          cancel_at_period_end?: boolean
           canceled_at?: string | null
+          completed_cycles?: number
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string
           id?: string
+          last_payment_at?: string | null
+          max_cycles?: number | null
+          next_charge_at?: string | null
+          payment_link_id?: string | null
           plan_id: string
+          provider_customer_id?: string | null
+          provider_payment_token?: string | null
           seller_user_id: string
           status?: string
+          subscriber_document_hash?: string | null
           subscriber_email: string
           subscriber_name?: string | null
           subscriber_user_id?: string | null
@@ -3481,14 +3846,24 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          billing_method?: string
+          cancel_at_period_end?: boolean
           canceled_at?: string | null
+          completed_cycles?: number
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string
           id?: string
+          last_payment_at?: string | null
+          max_cycles?: number | null
+          next_charge_at?: string | null
+          payment_link_id?: string | null
           plan_id?: string
+          provider_customer_id?: string | null
+          provider_payment_token?: string | null
           seller_user_id?: string
           status?: string
+          subscriber_document_hash?: string | null
           subscriber_email?: string
           subscriber_name?: string | null
           subscriber_user_id?: string | null
@@ -3496,6 +3871,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "subscriptions_payment_link_id_fkey"
+            columns: ["payment_link_id"]
+            isOneToOne: false
+            referencedRelation: "payment_links"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "subscriptions_plan_id_fkey"
             columns: ["plan_id"]
@@ -3683,6 +4065,7 @@ export type Database = {
           metadata: Json
           net_amount: number
           payment_link_id: string | null
+          payment_link_intent_id: string | null
           payment_method: string | null
           pix_copy_paste: string | null
           pix_expires_at: string | null
@@ -3696,6 +4079,8 @@ export type Database = {
           retention_released: boolean
           source: string
           status: string
+          subscription_cycle_id: string | null
+          subscription_id: string | null
           updated_at: string
           user_id: string
         }
@@ -3722,6 +4107,7 @@ export type Database = {
           metadata?: Json
           net_amount?: number
           payment_link_id?: string | null
+          payment_link_intent_id?: string | null
           payment_method?: string | null
           pix_copy_paste?: string | null
           pix_expires_at?: string | null
@@ -3735,6 +4121,8 @@ export type Database = {
           retention_released?: boolean
           source?: string
           status?: string
+          subscription_cycle_id?: string | null
+          subscription_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -3761,6 +4149,7 @@ export type Database = {
           metadata?: Json
           net_amount?: number
           payment_link_id?: string | null
+          payment_link_intent_id?: string | null
           payment_method?: string | null
           pix_copy_paste?: string | null
           pix_expires_at?: string | null
@@ -3774,6 +4163,8 @@ export type Database = {
           retention_released?: boolean
           source?: string
           status?: string
+          subscription_cycle_id?: string | null
+          subscription_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -3814,6 +4205,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "transactions_payment_link_intent_id_fkey"
+            columns: ["payment_link_intent_id"]
+            isOneToOne: false
+            referencedRelation: "payment_link_intents"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "transactions_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
@@ -3825,6 +4223,20 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_subscription_cycle_id_fkey"
+            columns: ["subscription_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
             referencedColumns: ["id"]
           },
         ]
@@ -4745,6 +5157,16 @@ export type Database = {
         Args: { _days_threshold?: number }
         Returns: Json
       }
+      get_admin_payment_links_page: {
+        Args: {
+          _billing_type?: string
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _status?: string
+        }
+        Returns: Json
+      }
       get_admin_top_sellers: { Args: { _period_days?: number }; Returns: Json }
       get_admin_transactions_page: {
         Args: {
@@ -4791,6 +5213,25 @@ export type Database = {
       get_ledger_integrity_report: { Args: never; Returns: Json }
       get_my_goal_progress: { Args: { _goal_id: string }; Returns: number }
       get_my_max_ticket: { Args: never; Returns: number }
+      get_my_payment_link_dashboard: {
+        Args: {
+          _billing_type?: string
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _status?: string
+        }
+        Returns: Json
+      }
+      get_payment_link_intent_status: {
+        Args: { _public_token: string }
+        Returns: {
+          expires_at: string
+          redirect_url: string
+          status: string
+          transaction_id: string
+        }[]
+      }
       get_platform_fees: {
         Args: never
         Returns: {
@@ -4801,18 +5242,37 @@ export type Database = {
       get_public_payment_link: {
         Args: { _slug: string }
         Returns: {
+          accept_boleto: boolean
           accept_card: boolean
           accept_pix: boolean
+          admin_status: string
+          allow_quantity: boolean
           amount: number
+          billing_type: string
+          cancellation_policy: string
           cover_url: string
           current_uses: number
           description: string
           expires_at: string
           id: string
+          instructions: string
           is_active: boolean
+          max_amount: number
+          max_quantity: number
           max_uses: number
+          min_amount: number
+          options: Json
+          pix_expiration_minutes: number
+          pricing_type: string
+          recurrence_cycles: number
+          recurrence_interval: string
+          recurrence_interval_count: number
+          redirect_url: string
+          reference_code: string
           slug: string
+          suggested_amount: number
           title: string
+          trial_days: number
         }[]
       }
       get_quiz_questions_for_student: {
