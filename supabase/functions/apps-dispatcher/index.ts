@@ -690,23 +690,30 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-  // Internal queue worker: service-role bearer ou x-cron-secret (pg_cron).
-  if (!isInternalCall(req)) {
-    return unauthorizedResponse(corsHeaders);
-  }
-
   const admin = createClient(supabaseUrl, serviceKey);
 
-
-  // Optional test mode: { action: "test", integration_id, sample_event? }
+  // Optional test mode: { action: "test", integration_id }
   let action: string | undefined;
   let testIntegrationId: string | undefined;
   if (req.method === "POST") {
     try {
       const body = await req.json();
-      action = body?.action;
-      testIntegrationId = body?.integration_id;
+      action = typeof body?.action === "string" ? body.action : undefined;
+      const rawId = typeof body?.integration_id === "string" ? body.integration_id : "";
+      testIntegrationId = /^[0-9a-f-]{36}$/i.test(rawId) ? rawId : undefined;
     } catch { /* ignore */ }
+  }
+
+  const internal = isInternalCall(req);
+  // Sellers may only run "test" on their own integrations (validated JWT).
+  let callerUserId: string | null = null;
+  if (!internal) {
+    if (action !== "test" || !testIntegrationId) return unauthorizedResponse(corsHeaders);
+    const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
+    if (!token) return unauthorizedResponse(corsHeaders);
+    const { data: u, error: uErr } = await admin.auth.getUser(token);
+    if (uErr || !u?.user) return unauthorizedResponse(corsHeaders);
+    callerUserId = u.user.id;
   }
 
   if (action === "test" && testIntegrationId) {
@@ -715,7 +722,7 @@ Deno.serve(async (req) => {
       .select("id, user_id, app_name, api_key, api_url, webhook_url, is_active, config")
       .eq("id", testIntegrationId)
       .maybeSingle<Integration & { user_id: string }>();
-    if (!integ) {
+    if (!integ || (callerUserId && integ.user_id !== callerUserId)) {
       return new Response(JSON.stringify({ ok: false, error: "Integration not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
@@ -752,6 +759,8 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ ok, ...result }),
       { status: ok ? 200 : 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
+
+  if (!internal) return unauthorizedResponse(corsHeaders);
 
   // Atomically claim a batch via RPC (FOR UPDATE SKIP LOCKED) so parallel cron
   // runs never pick the same delivery twice.
