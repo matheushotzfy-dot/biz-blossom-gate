@@ -476,7 +476,7 @@ export default function Dashboard() {
     <div className="seller-dashboard relative min-h-full w-full text-foreground animate-in fade-in duration-500">
       <Seo title="Dashboard | Venxpay" description="Painel operacional Venxpay — saldos, ranking, aprovação e liquidações em tempo real." path="/dashboard" noindex />
 
-      <div className="relative z-10 px-1 sm:px-2 md:px-3 pt-2 pb-24 max-w-[1280px] mx-auto space-y-6">
+      <div className="relative z-10 px-1 sm:px-2 md:px-3 pt-0 pb-24 max-w-[1280px] mx-auto space-y-6">
 
         {(txError || statsError || productsError) && (
           <div className="flex items-center justify-between gap-3 rounded-[12px] border border-destructive/40 bg-destructive/5 px-4 py-2.5 text-[12px] text-destructive">
@@ -488,7 +488,7 @@ export default function Dashboard() {
         <SellerOnboarding />
 
         {/* ═══════════ GREETING ═══════════ */}
-        <header className="min-w-0 pt-2 md:pt-3">
+        <header className="-mt-3 min-w-0 md:-mt-4">
           <h1 className="font-display font-bold text-[22px] md:text-[28px] leading-[1.15] truncate">
             Seja bem-vindo, {nickname}
             <button
