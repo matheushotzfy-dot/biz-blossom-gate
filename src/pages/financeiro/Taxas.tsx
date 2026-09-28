@@ -25,16 +25,25 @@ export default function Taxas({ embedded = false }: { embedded?: boolean } = {})
   const { user } = useAuth();
   const { data: fees = [] } = useFees();
   const [custom, setCustom] = useState<CustomFees | null>(null);
+  const [customError, setCustomError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!user?.id) return;
+    let ignore = false;
+    setCustomError(false);
     supabase
       .from("custom_user_fees")
       .select("pix_percentage, pix_fixed, card_percentage, card_fixed, boleto_percentage, boleto_fixed, transaction_percentage, transaction_fixed, withdrawal_fee")
       .eq("user_id", user.id)
       .maybeSingle()
-      .then(({ data }) => setCustom(data ?? null));
-  }, [user?.id]);
+      .then(({ data, error }) => {
+        if (ignore) return;
+        if (error) { setCustomError(true); return; }
+        setCustom(data ?? null);
+      });
+    return () => { ignore = true; };
+  }, [user?.id, reloadKey]);
 
   const platformFee = (exactName: string, def = 0) => {
     const f = fees.find((f) => f.name === exactName);
