@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 
 import { lazy, Suspense } from "react";
 import { BadgePercent } from "lucide-react";
-const TaxasEmbedded = lazy(() => import("@/pages/financeiro/Taxas"));
+import { ProfileFeesCard } from "@/components/profile/ProfileFeesCard";
 import { MILESTONES, TIER_LABELS, getMilestone as getCurrentMilestone } from "@/lib/tiers";
 
 /* ─────────── Constants & helpers ─────────── */
@@ -520,10 +520,8 @@ export default function Perfil() {
           </div>
         </Panel>
 
-        {/* TAXAS */}
-        <Panel icon={BadgePercent} title="Suas taxas" subtitle="Custos por venda, saque e prazos de liberação" className="lg:col-span-2">
-          <Suspense fallback={<div className="h-64 animate-pulse" />}><TaxasEmbedded embedded /></Suspense>
-        </Panel>
+        {/* TAXAS — mesmo lugar e tamanho do antigo card de progresso */}
+        <ProfileFeesCard />
       </div>
 
       {/* ENDEREÇO */}

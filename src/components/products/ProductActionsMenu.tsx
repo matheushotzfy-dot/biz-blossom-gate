@@ -95,19 +95,15 @@ export function ProductActionsMenu({
         key={row.label}
         onClick={row.action}
         className={cn(
-          "group flex h-9 cursor-pointer items-center gap-3 rounded-md px-2.5 text-[13px] font-medium outline-none transition-colors",
+          "group flex h-11 cursor-pointer items-center gap-3 rounded-xl px-2.5 text-[13px] font-semibold outline-none transition-colors",
           isDestructive
             ? "text-destructive focus:bg-destructive/10 data-[highlighted]:bg-destructive/10"
             : "text-foreground/85 focus:bg-muted data-[highlighted]:bg-muted focus:text-foreground",
         )}
       >
-        <row.icon
-          className={cn(
-            "h-4 w-4 shrink-0 transition-colors",
-            isDestructive ? "text-destructive/80" : "text-muted-foreground group-data-[highlighted]:text-foreground",
-          )}
-          strokeWidth={2}
-        />
+        <span className={cn("grid h-8 w-8 shrink-0 place-items-center rounded-lg transition-colors", isDestructive ? "bg-destructive/10 text-destructive" : "bg-secondary text-muted-foreground group-data-[highlighted]:bg-primary group-data-[highlighted]:text-primary-foreground")}>
+          <row.icon className="h-4 w-4" strokeWidth={2} />
+        </span>
         <span className="truncate">{row.label}</span>
       </DropdownMenuItem>
     );
@@ -136,10 +132,11 @@ export function ProductActionsMenu({
         align="end"
         side="bottom"
         sideOffset={6}
-        className="w-56 rounded-xl border border-border/70 bg-popover p-1.5 shadow-lg"
+        className="w-64 rounded-2xl border border-border bg-popover p-2 shadow-lg"
       >
         <div className="px-2 pb-1.5 pt-1">
-          <p className="truncate text-[12px] font-semibold text-foreground/90">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Ações do produto</p>
+          <p className="truncate text-[13px] font-bold text-foreground">
             {product.name || "Sem nome"}
           </p>
         </div>

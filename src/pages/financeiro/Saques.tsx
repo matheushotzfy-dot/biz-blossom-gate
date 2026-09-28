@@ -184,9 +184,15 @@ export default function Saques() {
               <Plus size={18} strokeWidth={3} /> Solicitar Saque
             </button>
           </DialogTrigger>
-          <DialogContent className="max-w-md bg-card border-border/60 max-h-[92vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-xl font-semibold tracking-tight">Solicitar Saque</DialogTitle>
+          <DialogContent className="w-[calc(100vw-1.5rem)] max-w-[520px] max-h-[92vh] overflow-y-auto rounded-[28px] border border-border bg-card p-7 sm:p-8">
+            <DialogHeader className="flex-row items-center gap-4 space-y-0 text-left">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground">
+                <Wallet className="h-5 w-5" strokeWidth={2.5} />
+              </span>
+              <div>
+                <DialogTitle className="text-xl font-bold tracking-tight">Solicitar saque</DialogTitle>
+                <p className="mt-0.5 text-[12.5px] text-muted-foreground">Transfira seu saldo disponível via Pix</p>
+              </div>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-5 pt-4">
               <div className="space-y-2">
@@ -198,7 +204,7 @@ export default function Saques() {
                     inputMode="numeric"
                     value={amount}
                     onChange={(e) => setAmount(maskBRL(e.target.value))}
-                    className="pl-11 h-14 text-xl font-black tabular-nums bg-background border-border/60 rounded-xl"
+                    className="pl-12 h-16 text-2xl font-bold tabular-nums bg-primary/[0.05] border-primary/40 rounded-2xl"
                     placeholder="0,00"
                   />
                 </div>
@@ -209,7 +215,7 @@ export default function Saques() {
 
               <div className="space-y-2">
                 <label className="text-[11px] font-semibold text-muted-foreground">Chave de recebimento</label>
-                <div className="overflow-hidden rounded-[12px] border border-border/60 bg-background">
+                <div className="overflow-hidden rounded-2xl border border-border/60 bg-background">
                   <div className="grid grid-cols-2 border-b border-border/40 p-1.5">
                     <button
                       type="button"
@@ -317,7 +323,7 @@ export default function Saques() {
                 </div>
               </div>
 
-              <div className="bg-muted/30 p-5 rounded-[12px] border border-border/60 space-y-3">
+              <div className="bg-muted/30 p-5 rounded-2xl border border-border/60 space-y-3">
                 <div className="flex justify-between text-xs font-bold">
                   <span className="text-muted-foreground ">Taxa Administrativa</span>
                   <span className="text-red-500">-{fmt(withdrawFee)}</span>
@@ -327,7 +333,7 @@ export default function Saques() {
                   <span className="text-2xl font-black text-emerald-500 tabular-nums">{fmt(netPreview)}</span>
                 </div>
               </div>
-              <button type="submit" className="w-full bg-primary text-primary-foreground h-14 rounded-[12px] font-semibold text-xs ">
+              <button type="submit" className="w-full bg-primary text-primary-foreground h-14 rounded-2xl font-bold text-sm transition-all hover:opacity-90 active:scale-[0.98]">
                 Confirmar Solicitação
               </button>
             </form>
