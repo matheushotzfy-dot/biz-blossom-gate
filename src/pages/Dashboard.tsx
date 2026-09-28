@@ -26,7 +26,7 @@ import {
   Webhook,
   Puzzle,
 } from "lucide-react";
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell } from "recharts";
 import { Trophy, Lock, RefreshCw, QrCode, Receipt, Link2, Eye, EyeOff, ArrowRight, Sparkles } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { Link, useNavigate } from "react-router-dom";
@@ -209,7 +209,6 @@ export default function Dashboard() {
   const [isCustom, setIsCustom] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [chartMode, setChartMode] = useState<"revenue" | "orders">("revenue");
-  const [indexMode, setIndexMode] = useState<"pix" | "card" | "boleto">("pix");
   const privacy = usePrivacyMode();
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
   const [pixDialogOpen, setPixDialogOpen] = useState(false);
@@ -475,12 +474,8 @@ export default function Dashboard() {
     return map;
   }, [productsData]);
 
-  const indexData = {
-    pix: { label: "PIX", conversion: pixConversion, approved: pixApprovedCount, total: pixTotalCount, icon: PixLogoMark },
-    card: { label: "Cartão", conversion: cardConversion, approved: cardApprovedCount, total: cardTotalCount, icon: CreditCard },
-    boleto: { label: "Boleto", conversion: boletoConversion, approved: boletoApprovedCount, total: boletoTotalCount, icon: Barcode },
-  } as const;
-  const selectedIndex = indexData[indexMode];
+  const donutPix = [{ name: "on", value: pixConversion }, { name: "off", value: Math.max(0, 100 - pixConversion) }];
+  const donutChb = [{ name: "on", value: chargebackRate }, { name: "off", value: Math.max(0, 100 - chargebackRate) }];
   const chartMetric = chartMode === "revenue" ? "vendas" : "pedidos";
   const chartTotal = chartMode === "revenue" ? (privacy.hidden ? CENSORED : fmt(revenue)) : approvedCount.toLocaleString("pt-BR");
 
@@ -697,14 +692,36 @@ export default function Dashboard() {
                     tick={{ fill: "hsl(var(--muted-foreground)/0.55)", fontSize: 10, fontWeight: 500 }}
                     tickFormatter={(v) => chartMode === "revenue" && Number(v) >= 1000 ? `${Math.round(Number(v) / 1000)}k` : `${v}`}
                   />
-                  <Tooltip cursor={{ stroke: "hsl(var(--primary)/0.45)", strokeWidth: 1, strokeDasharray: "4 4" }} wrapperStyle={{ outline: "none" }}
+                  <Tooltip
+                    cursor={{ stroke: "hsl(var(--primary)/0.35)", strokeWidth: 2 }}
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         const p = payload[0];
                         return (
-                          <div className="rounded-[10px] border border-border bg-card px-3.5 py-2.5">
-                            <p className="text-[10px] font-medium text-muted-foreground/70 mb-1">{p.payload.fullLabel}</p>
-                            <p className="text-foreground font-display font-bold text-[14px] tabular-nums">{chartMode === "revenue" ? fmt(p.value as number) : `${Number(p.value).toLocaleString("pt-BR")} vendas`}</p>
+                          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-2xl backdrop-blur-sm">
+                            <div className="bg-muted/30 border-b border-border/50 px-3 py-2">
+                              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{p.payload.fullLabel}</p>
+                            </div>
+                            <div className="px-3.5 py-3 space-y-2">
+                              <div className="flex items-center justify-between gap-6">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                                  <span className="text-[11px] font-medium text-muted-foreground">Faturamento</span>
+                                </div>
+                                <span className={cn("text-[13px] font-bold tabular-nums", chartMode === "revenue" ? "text-foreground" : "text-muted-foreground/60")}>
+                                  {fmt(p.payload.vendas)}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between gap-6">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-1.5 w-1.5 rounded-full bg-primary/40" />
+                                  <span className="text-[11px] font-medium text-muted-foreground">Vendas</span>
+                                </div>
+                                <span className={cn("text-[13px] font-bold tabular-nums", chartMode === "orders" ? "text-foreground" : "text-muted-foreground/60")}>
+                                  {p.payload.pedidos.toLocaleString("pt-BR")}
+                                </span>
+                              </div>
+                            </div>
                           </div>
                         );
                       }
