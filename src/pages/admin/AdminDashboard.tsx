@@ -144,6 +144,8 @@ export default function AdminDashboard() {
   const [products, setProducts] = useState<Tables<"products">[]>([]);
   const [withdrawals, setWithdrawals] = useState<Tables<"withdrawals">[]>([]);
   const [financialOverview, setFinancialOverview] = useState<AdminFinancialOverview | null>(null);
+  const [dataCapHit, setDataCapHit] = useState<{ field: string; count: number }[]>([]);
+  const lastLoadAtRef = useRef<number>(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEmployee, setIsEmployee] = useState(false);
   const [hasSupportPerm, setHasSupportPerm] = useState(false);
@@ -191,7 +193,14 @@ export default function AdminDashboard() {
       setProducts(payload.products ?? []);
       setWithdrawals(payload.withdrawals ?? []);
       setFinancialOverview((overviewResult.data ?? null) as AdminFinancialOverview | null);
+      const caps: { field: string; count: number }[] = [];
+      if ((payload.transactions?.length ?? 0) >= 5000) caps.push({ field: "transações", count: 5000 });
+      if ((payload.profiles?.length ?? 0) >= 2000) caps.push({ field: "perfis", count: 2000 });
+      if ((payload.products?.length ?? 0) >= 2000) caps.push({ field: "produtos", count: 2000 });
+      if ((payload.withdrawals?.length ?? 0) >= 5000) caps.push({ field: "saques", count: 5000 });
+      setDataCapHit(caps);
       setLastSync(new Date());
+      lastLoadAtRef.current = Date.now();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "desconhecido";
       toast.error("Erro ao carregar dados: " + msg);
@@ -244,7 +253,9 @@ export default function AdminDashboard() {
     let timer: ReturnType<typeof setTimeout> | null = null;
     const reconcile = () => {
       if (timer) return;
-      timer = setTimeout(() => { timer = null; void loadData(); }, 500);
+      const elapsed = Date.now() - lastLoadAtRef.current;
+      const wait = Math.max(500, 10_000 - elapsed);
+      timer = setTimeout(() => { timer = null; void loadData(); }, wait);
     };
     const channel = supabase.channel("admin-financial-sync")
       .on("postgres_changes", { event: "*", schema: "public", table: "transactions" }, reconcile)
@@ -640,6 +651,14 @@ export default function AdminDashboard() {
           <div className="p-5 lg:p-7 xl:p-9 admin-fluid" key={activeTab}>
             <div className="mx-auto max-w-[1800px]">
               {activeTab === "god-mode" && (
+                <>
+                {dataCapHit.length > 0 && (
+                  <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
+                    <span>
+                      Mostrando os {dataCapHit.map(c => `${c.count} ${c.field} mais recentes`).join(", ")} — pode haver mais dados no período selecionado.
+                    </span>
+                  </div>
+                )}
                 <AdminOverviewTab
                   transactions={transactions} profiles={profiles} products={products}
                   withdrawals={withdrawals} onWithdrawalAction={handleWithdrawalAction}
