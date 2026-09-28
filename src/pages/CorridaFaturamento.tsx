@@ -34,16 +34,20 @@ export default function CorridaFaturamento() {
   const [prizes, setPrizes] = useState<Prize[]>([]);
   const [leaders, setLeaders] = useState<LeaderRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const load = useCallback(async () => {
-    const { data: races } = await supabase.from("revenue_races").select("*").eq("is_active", true).order("starts_at", { ascending: false }).limit(1);
+    setError(false);
+    const { data: races, error: racesError } = await supabase.from("revenue_races").select("*").eq("is_active", true).order("starts_at", { ascending: false }).limit(1);
+    if (racesError) { setError(true); setLoading(false); return; }
     const active = (races ?? [])[0] as Race | undefined;
     setRace(active ?? null);
     if (active) {
-      const [{ data: pr }, { data: lb }] = await Promise.all([
+      const [{ data: pr, error: prError }, { data: lb, error: lbError }] = await Promise.all([
         supabase.from("revenue_race_prizes").select("*").eq("race_id", active.id).order("sort_order"),
         supabase.rpc("race_leaderboard", { _race_id: active.id }),
       ]);
+      if (prError || lbError) { setError(true); setLoading(false); return; }
       setPrizes((pr ?? []) as Prize[]);
       setLeaders((lb ?? []) as LeaderRow[]);
     }
@@ -66,6 +70,18 @@ export default function CorridaFaturamento() {
   const mine = useMemo(() => leaders.find((l) => l.seller_id === user?.id), [leaders, user?.id]);
 
   if (loading) return <div className="grid gap-4"><div className="h-56 animate-pulse rounded-xl border border-border bg-card" /><div className="h-80 animate-pulse rounded-xl border border-border bg-card" /></div>;
+
+  if (error) return (
+    <div className="flex flex-col items-center gap-3 rounded-xl border border-destructive/40 bg-destructive/10 px-6 py-14 text-center text-destructive">
+      <p className="text-sm font-semibold">Não foi possível carregar a corrida de faturamento.</p>
+      <button
+        onClick={() => { setLoading(true); void load(); }}
+        className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-2 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/20"
+      >
+        Tentar de novo
+      </button>
+    </div>
+  );
 
   if (!race) return (
     <section className="grid place-items-center rounded-xl border border-border bg-card px-6 py-24 text-center">

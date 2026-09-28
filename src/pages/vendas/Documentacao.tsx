@@ -168,6 +168,10 @@ export default function Documentacao() {
         </div>
       </header>
 
+      <div className="mb-6 rounded-xl border border-primary/15 bg-primary/5 px-4 py-3 text-[12.5px] text-muted-foreground">
+        <strong className="text-foreground">Nota:</strong> Valores da API são em centavos (ex.: <code className="mono-inline">amount_cents: 4990</code> = R$ 49,90). O painel mostra em reais.
+      </div>
+
       {/* Layout: Sidebar + Content */}
       <div className="flex gap-6 relative">
         <aside className="hidden lg:block w-[220px] shrink-0">

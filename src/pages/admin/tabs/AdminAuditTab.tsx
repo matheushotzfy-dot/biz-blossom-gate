@@ -55,7 +55,7 @@ export default function AdminAuditTab({ profiles }: Props) {
       const wantAdmin = source === "all" || source === "admin";
       const wantStaff = source === "all" || source === "staff";
       const wantActivity = source === "all" || source === "activity";
-      const empty = Promise.resolve({ data: [] as any[] });
+      const empty = Promise.resolve({ data: [] as any[], error: null as any });
       const [aRes, sRes, lRes] = await Promise.all([
         wantAdmin ? supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(500) : empty,
         wantStaff ? supabase.from("staff_audit_log").select("*").order("created_at", { ascending: false }).limit(500) : empty,

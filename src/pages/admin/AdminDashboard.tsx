@@ -13,6 +13,7 @@ import {
   Package2, BarChart3, Calendar,
   PanelLeftClose, PanelLeft,
   Trophy, Search, ChevronDown, Sun, Moon, Target, Gauge, Lock, Clock, SearchX,
+  Link as LinkIcon,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -55,6 +56,7 @@ import AdminCorridasTab from "./tabs/AdminCorridasTab";
 import AdminGoalsTab from "./tabs/AdminGoalsTab";
 import AdminCommandCenterTab from "./tabs/AdminCommandCenterTab";
 import AdminToolsTab from "./tabs/AdminToolsTab";
+import AdminPaymentLinksTab from "./tabs/AdminPaymentLinksTab";
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
@@ -78,6 +80,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
     items: [
       { id: "withdrawals", label: "Saques", icon: ArrowDownToLine, employeeAccess: false },
       { id: "transactions", label: "Transações", icon: CreditCard, employeeAccess: true },
+      { id: "payment-links", label: "Links de Pagamento", icon: LinkIcon, employeeAccess: false },
     ],
   },
   {
@@ -728,6 +731,7 @@ export default function AdminDashboard() {
               {activeTab === "affiliates" && isAdmin && <AdminAffiliateSalesTab profiles={profiles} products={products} fmtCurrency={fmtCurrency} />}
               {activeTab === "subscriptions" && isAdmin && <AdminSubscriptionsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
               {activeTab === "referrals" && isAdmin && <AdminReferralsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
+              {activeTab === "payment-links" && isAdmin && <AdminPaymentLinksTab fmtCurrency={fmtCurrency} />}
               {activeTab === "support" && (isAdmin || hasSupportPerm) && <AdminSupportTab profiles={profiles} />}
               {activeTab === "rewards" && isAdmin && <AdminRewardsTab profiles={profiles} />}
               {activeTab === "corridas" && isAdmin && <AdminCorridasTab />}

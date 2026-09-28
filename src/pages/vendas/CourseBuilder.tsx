@@ -455,9 +455,9 @@ export default function CourseBuilder() {
   ];
 
   return (
-    <div className="fixed inset-0 z-[70] bg-[#050505] text-zinc-100 flex flex-col overflow-hidden selection:bg-blue-500/30 font-sans">
+    <div className="fixed inset-0 z-[70] bg-background text-zinc-100 flex flex-col overflow-hidden selection:bg-blue-500/30 font-sans">
       {/* ═══ PREMIUM TOP BAR ═══ */}
-      <header className="h-16 border-b border-white/[0.04] bg-[#050505]/80 backdrop-blur-xl flex items-center justify-between px-4 sm:px-6 shrink-0 z-50 relative">
+      <header className="h-16 border-b border-white/[0.04] bg-background/80 backdrop-blur-xl flex items-center justify-between px-4 sm:px-6 shrink-0 z-50 relative">
         <div className="relative flex items-center gap-4 min-w-0">
           <button
             onClick={() => navigate("/vendas/conteudo")}
@@ -578,7 +578,7 @@ export default function CourseBuilder() {
       </header>
 
       {/* ═══ MAIN LAYOUT ═══ */}
-      <div className="flex-1 flex overflow-hidden relative bg-[#050505]">
+      <div className="flex-1 flex overflow-hidden relative bg-background">
         {/* Background Gradients */}
         <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-blue-500/[0.03] blur-[150px] rounded-full pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-indigo-500/[0.03] blur-[150px] rounded-full pointer-events-none" />
@@ -591,7 +591,7 @@ export default function CourseBuilder() {
               animate={{ width: 380, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-[#050505]/40 backdrop-blur-xl border-r border-white/[0.04] flex flex-col overflow-hidden shrink-0 z-20"
+              className="bg-background/40 backdrop-blur-xl border-r border-white/[0.04] flex flex-col overflow-hidden shrink-0 z-20"
             >
               {/* Sidebar Header */}
               <div className="px-6 py-5 border-b border-white/[0.04] flex items-center justify-between shrink-0">
@@ -862,7 +862,7 @@ export default function CourseBuilder() {
  </AnimatePresence>
 
         {/* ─── RIGHT: Lesson Editor ─── */}
-        <main className="flex-1 bg-[#030303] overflow-y-auto z-10" style={{ WebkitOverflowScrolling: "touch" }}>
+        <main className="flex-1 bg-background overflow-y-auto z-10" style={{ WebkitOverflowScrolling: "touch" }}>
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-500/[0.03] blur-[150px] rounded-full pointer-events-none" />
           
           {selectedLesson ? (
@@ -1118,7 +1118,7 @@ export default function CourseBuilder() {
                           <input
                             type="number" min={0} value={lessonDuration}
                             onChange={e => { const v = parseInt(e.target.value) || 0; setLessonDuration(v); debouncedSave("duration_minutes", v); }}
-                            className="h-12 w-20 rounded-xl bg-[#080808] border border-white/[0.05] text-center text-[15px] font-black tabular-nums text-white focus:outline-none focus:border-blue-500/40 transition-all"
+                            className="h-12 w-20 rounded-xl bg-muted border border-white/[0.05] text-center text-[15px] font-black tabular-nums text-white focus:outline-none focus:border-blue-500/40 transition-all"
                           />
                           <span className="text-[11px] text-zinc-600 font-medium ">min</span>
                         </div>
@@ -1167,7 +1167,7 @@ export default function CourseBuilder() {
                                 <input
                                   type="number" min={0} value={lessonDripDays}
                                   onChange={e => { const v = parseInt(e.target.value) || 0; setLessonDripDays(v); debouncedSave("drip_days", v); }}
-                                  className="h-12 w-20 rounded-xl bg-[#080808] border border-white/[0.05] text-center text-[15px] font-black tabular-nums text-white focus:outline-none focus:border-orange-500/40 transition-all"
+                                  className="h-12 w-20 rounded-xl bg-muted border border-white/[0.05] text-center text-[15px] font-black tabular-nums text-white focus:outline-none focus:border-orange-500/40 transition-all"
                                 />
                                 <span className="text-[11px] text-zinc-600 font-medium whitespace-nowrap">dias</span>
                               </motion.div>
@@ -1357,7 +1357,7 @@ export default function CourseBuilder() {
 
   {/* ═══ Course Settings Sheet ═══ */}
   <Sheet open={courseSettingsOpen} onOpenChange={setCourseSettingsOpen}>
-  <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-[#050505] border-white/[0.05] text-white">
+  <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-background border-white/[0.05] text-white">
   <SheetHeader className="mb-8">
   <SheetTitle className="font-display font-black text-2xl tracking-tight flex items-center gap-4">
   <div className="h-12 w-12 rounded-[12px] bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
