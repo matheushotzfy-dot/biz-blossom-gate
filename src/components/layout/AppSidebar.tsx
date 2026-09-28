@@ -261,7 +261,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
 
       const [{ data: tx }, { count: products }, { count: courses }, { count: subscriptions }, { count: coupons }] = await Promise.all([
         supabase.from("transactions").select("net_amount, created_at").eq("user_id", user.id).eq("status", "completed"),
-        supabase.from("products").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("products").select("id", { count: "exact", head: true }).eq("user_id", user.id).is("deleted_at", null),
         supabase.from("courses").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("subscriptions").select("id", { count: "exact", head: true }).eq("seller_user_id", user.id).eq("status", "active"),
         supabase.from("coupons").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("is_active", true),
@@ -286,7 +286,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
     };
     void load();
     return () => { ignore = true; };
-  }, [user?.id]);
+  }, [user?.id, location.pathname]);
 
   const milestone = useMemo(() => getMilestone(revenue), [revenue]);
 

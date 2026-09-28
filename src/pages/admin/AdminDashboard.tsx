@@ -315,7 +315,7 @@ export default function AdminDashboard() {
   const activeTabLabel = allItems.find(i => i.id === activeTab)?.label || "";
 
   const handleTabChange = useCallback((tabId: TabId) => {
-    if (isEmployee && !EMPLOYEE_ALLOWED_TABS.has(tabId)) {
+    if (isEmployee && !EMPLOYEE_ALLOWED_TABS.has(tabId) && !(tabId === "support" && hasSupportPerm)) {
       toast.error("Sem permissão para acessar esta área");
       return;
     }
@@ -327,7 +327,7 @@ export default function AdminDashboard() {
     const scrollable = document.querySelector("[data-admin-content]");
     if (scrollable) scrollable.scrollTop = 0;
     else window.scrollTo(0, 0);
-  }, [isEmployee, setSearchParams]);
+  }, [isEmployee, hasSupportPerm, setSearchParams]);
 
   // ── Auto refresh silencioso a cada 60s (só com a aba do navegador visível) ──
   useEffect(() => {
