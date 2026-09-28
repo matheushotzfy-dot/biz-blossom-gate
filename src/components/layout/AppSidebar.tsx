@@ -296,7 +296,6 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
     { title: "Produtos", url: "/vendas/produtos", icon: Package, count: counts.products },
     { title: "Cupons", url: "/vendas/cupons", icon: TicketPercent, count: counts.coupons },
     { title: "Financeiro", url: "/financeiro/saques", icon: Wallet },
-    { title: "Taxas", url: "/financeiro/config", icon: BadgePercent },
     { title: "Apps & Integrações", url: "/integracoes", icon: Grid2X2 },
     { title: "Meu Perfil & KYC", url: "/perfil", icon: CircleUserRound },
     { title: "Premiações", url: "/premiacoes", icon: Trophy },
