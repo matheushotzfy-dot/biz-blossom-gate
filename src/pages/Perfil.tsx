@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 
 import { lazy, Suspense } from "react";
 import { BadgePercent } from "lucide-react";
-const TaxasEmbedded = lazy(() => import("@/pages/financeiro/Taxas"));
+import { ProfileFeesCard } from "@/components/profile/ProfileFeesCard";
 import { MILESTONES, TIER_LABELS, getMilestone as getCurrentMilestone } from "@/lib/tiers";
 
 /* ─────────── Constants & helpers ─────────── */

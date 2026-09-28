@@ -184,9 +184,15 @@ export default function Saques() {
               <Plus size={18} strokeWidth={3} /> Solicitar Saque
             </button>
           </DialogTrigger>
-          <DialogContent className="max-w-md bg-card border-border/60 max-h-[92vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-xl font-semibold tracking-tight">Solicitar Saque</DialogTitle>
+          <DialogContent className="w-[calc(100vw-1.5rem)] max-w-[520px] max-h-[92vh] overflow-y-auto rounded-[28px] border border-border bg-card p-7 sm:p-8">
+            <DialogHeader className="flex-row items-center gap-4 space-y-0 text-left">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground">
+                <Wallet className="h-5 w-5" strokeWidth={2.5} />
+              </span>
+              <div>
+                <DialogTitle className="text-xl font-bold tracking-tight">Solicitar saque</DialogTitle>
+                <p className="mt-0.5 text-[12.5px] text-muted-foreground">Transfira seu saldo disponível via Pix</p>
+              </div>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-5 pt-4">
               <div className="space-y-2">
