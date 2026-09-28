@@ -6,7 +6,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useWithdrawals, usePixKeys, useBankAccounts, useInvalidateAll } from "@/hooks/useQueryData";
 import {
   Plus, Wallet, Clock, History, Search, ArrowDownToLine, Info,
-  CheckCircle2, Key, Building2, MapPin, ClipboardPaste, QrCode,
+  CheckCircle2, Key, Building2, MapPin,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
