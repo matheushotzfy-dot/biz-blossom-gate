@@ -1,4 +1,6 @@
 import { useState, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Tx = Tables<"transactions">;
@@ -26,6 +28,31 @@ export default function Antecipacao() {
   const { data: transactions } = useTransactions(200);
   const [antecipationDays, setAntecipationDays] = useState(15);
   const { data: summary } = useAnticipationSummary(antecipationDays);
+  const queryClient = useQueryClient();
+  const [requesting, setRequesting] = useState(false);
+
+  // Pedido real: o servidor usa a conta logada, confere status e é idempotente.
+  const handleRequest = async () => {
+    if (requesting) return;
+    setRequesting(true);
+    try {
+      const key = crypto.randomUUID();
+      const { data, error } = await supabase.rpc("request_my_anticipation", { _max_days: antecipationDays, _idempotency_key: key });
+      if (error) throw error;
+      const row = data as { status?: string; net_amount?: number } | null;
+      if (!row || row.status !== "completed") {
+        toast.error("Nenhum valor disponível para antecipar nesta janela.");
+      } else {
+        toast.success(`Antecipação concluída: ${fmt(Number(row.net_amount ?? 0))} liberados no seu saldo.`);
+      }
+      await queryClient.invalidateQueries();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "";
+      toast.error(/aprovada|congelad|inválid/i.test(msg) ? msg : "Não foi possível solicitar a antecipação agora.");
+    } finally {
+      setRequesting(false);
+    }
+  };
 
 
   // Amostra local só para a tabela; os números oficiais vêm do servidor.
@@ -231,11 +258,11 @@ export default function Antecipacao() {
               </div>
 
               <Button
-                disabled={antecipationCalc.count === 0}
-                onClick={() => toast.info("Funcionalidade de antecipação será ativada em breve junto à adquirente.")}
+                disabled={antecipationCalc.count === 0 || requesting}
+                onClick={handleRequest}
                 className="w-full gap-2 rounded-xl font-display font-semibold text-[12px] h-11"
               >
-                <Banknote className="h-4 w-4" /> Solicitar antecipação
+                <Banknote className="h-4 w-4" /> {requesting ? "Processando..." : "Solicitar antecipação"}
                 <ArrowRight className="h-3.5 w-3.5" />
               </Button>
               <p className="text-[10px] text-muted-foreground/70 mt-2 text-center flex items-center justify-center gap-1 font-medium">
