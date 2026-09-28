@@ -148,12 +148,13 @@ export default function Suporte() {
 
   const loadTickets = async () => {
     if (!user?.id) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("support_tickets")
       .select("*")
       .eq("user_id", user.id)
       .order("last_message_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false });
+    if (error) toast.error("Não foi possível carregar seus tickets.");
     if (data) setTickets(data as any);
     setLoading(false);
   };
@@ -300,14 +301,12 @@ export default function Suporte() {
       <Seo title="Suporte | Venxpay" description="Central de ajuda — abra tickets e converse com o time de suporte." path="/suporte" noindex />
 
       {/* Premium Hero */}
-      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/[0.08] p-6 md:p-7">
-        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-40"
-          style={{ backgroundImage: "radial-gradient(40% 60% at 90% 20%, hsl(var(--primary)/0.25), transparent 60%), radial-gradient(35% 55% at 10% 100%, hsl(var(--primary)/0.15), transparent 60%)" }}
-        />
+      <section className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 md:p-8">
+        <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-primary" />
         <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="min-w-0 space-y-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-500">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Equipe online agora
+            <div className="inline-flex items-center gap-2 rounded-full border border-success/30 bg-success/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-success">
+              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Equipe online agora
             </div>
             <h1 className="font-display font-black text-2xl md:text-4xl tracking-[-0.02em] leading-tight flex items-center gap-3">
               <Headphones className="h-8 w-8 text-primary shrink-0" />
@@ -503,10 +502,10 @@ export default function Suporte() {
       )}
 
       {/* Inbox split */}
-      <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 min-h-[600px]">
+      <div className="grid min-h-[calc(100dvh-15rem)] grid-cols-1 gap-4 lg:grid-cols-[360px_1fr]">
         {/* LIST */}
         <div className={cn(
-          "bg-card rounded-2xl border border-border/60 overflow-hidden flex flex-col",
+          "bg-card rounded-2xl border border-border overflow-hidden flex flex-col",
           selectedId && "hidden lg:flex"
         )}>
           <div className="p-3 border-b border-border/40 space-y-3">
@@ -591,7 +590,7 @@ export default function Suporte() {
 
         {/* THREAD */}
         <div className={cn(
-          "bg-card rounded-2xl border border-border/60 overflow-hidden flex flex-col",
+          "bg-card rounded-2xl border border-border overflow-hidden flex flex-col",
           !selectedId && "hidden lg:flex"
         )}>
           {!selected ? (
@@ -644,7 +643,7 @@ export default function Suporte() {
                         "h-9 w-9 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 border",
                         isMe
                           ? "bg-primary/15 border-primary/30 text-primary"
-                          : "bg-emerald-500/15 border-emerald-500/30 text-emerald-500"
+                           : "bg-success/15 border-success/30 text-success"
                       )}>
                         {isMe ? <UserIcon className="h-4 w-4" /> : initials(m.sender_name)}
                       </div>
@@ -654,7 +653,7 @@ export default function Suporte() {
                             <span className="text-primary">Você</span>
                           ) : (
                             <>
-                              <span className="text-emerald-500">{roleLabel}</span>
+                               <span className="text-success">{roleLabel}</span>
                               {m.sender_name && <span className="text-muted-foreground/70 normal-case tracking-normal font-bold">· {m.sender_name}</span>}
                             </>
                           )}
@@ -678,11 +677,11 @@ export default function Suporte() {
                 })}
                 <div ref={threadEndRef} />
                 {typingOthers.length > 0 && (
-                  <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-500 animate-in fade-in duration-150">
+                   <div className="flex items-center gap-2 text-[11px] font-bold text-success animate-in fade-in duration-150">
                     <span className="flex gap-0.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.3s]" />
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.15s]" />
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-bounce" />
+                       <span className="h-1.5 w-1.5 rounded-full bg-success animate-bounce [animation-delay:-0.3s]" />
+                       <span className="h-1.5 w-1.5 rounded-full bg-success animate-bounce [animation-delay:-0.15s]" />
+                       <span className="h-1.5 w-1.5 rounded-full bg-success animate-bounce" />
                     </span>
                     {typingOthers[0].name || "Suporte"} está digitando…
                   </div>

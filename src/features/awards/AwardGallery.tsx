@@ -16,7 +16,7 @@ export function AwardGallery({ awards, activeIndex, revenue, onSelect }: AwardGa
 
   return (
     <nav aria-label="Galeria de premiações" className="awards-gallery overflow-x-auto pb-2">
-      <div className="flex gap-2.5 [&>*]:min-w-[132px] [&>*]:flex-1">
+      <div className="flex gap-3 [&>*]:min-w-[156px] [&>*]:flex-1">
         {awards.map((award, index) => {
           const unlocked = revenue >= award.value;
           const active = activeIndex === index;
@@ -35,7 +35,7 @@ export function AwardGallery({ awards, activeIndex, revenue, onSelect }: AwardGa
                 aria-label={`Ver ${award.title}`}
                 onClick={() => onSelect(index)}
                 className={cn(
-                  "group relative h-[154px] w-full flex-col justify-end overflow-hidden rounded-md border px-2 pb-2 pt-1 transition-colors duration-200",
+                  "group relative h-[180px] w-full flex-col justify-end overflow-hidden rounded-md border px-3 pb-3 pt-1 transition-colors duration-200",
                   active
                     ? "border-awards-accent bg-awards-accent/10 before:absolute before:inset-x-3 before:top-0 before:h-[2px] before:rounded-full before:bg-awards-accent"
                     : "border-awards-steel/15 bg-awards-surface/80 hover:-translate-y-0.5 hover:border-awards-accent/40 hover:bg-awards-surface",
@@ -48,7 +48,7 @@ export function AwardGallery({ awards, activeIndex, revenue, onSelect }: AwardGa
                   height={115}
                   loading="lazy"
                   className={cn(
-                    "absolute inset-x-0 top-0 mx-auto h-[112px] w-full object-contain px-1 transition-transform duration-200 group-hover:-translate-y-1 group-hover:scale-[1.03]",
+                    "absolute inset-x-0 top-0 mx-auto h-[132px] w-full object-contain px-1 transition-transform duration-200 group-hover:-translate-y-1 group-hover:scale-[1.03]",
                     !unlocked && "grayscale",
                   )}
                 />
