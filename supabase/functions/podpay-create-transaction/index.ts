@@ -59,7 +59,6 @@ Deno.serve(async (req) => {
       customerDocument,
       customerPhone,
       cardToken,
-      ip,
       checkoutSessionId,
       idempotencyKey,
       couponCode,
