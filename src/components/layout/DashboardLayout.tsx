@@ -7,8 +7,8 @@ import { GlobalSearchDialog } from "./GlobalSearchDialog";
 import { NotificationPanel, useNotificationCount } from "@/components/NotificationPanel";
 import { KycOnboardingPopup } from "@/components/KycOnboardingPopup";
 import { Outlet, useNavigate } from "react-router-dom";
-import { AlertTriangle, ArrowRight, X as XIcon, CheckCircle2, Wallet } from "lucide-react";
-import { ScanSearchIcon, IrisIcon, SunDialIcon, MoonDialIcon, SignalBellIcon, PanelToggleIcon } from "@/components/icons/ShellIcons";
+import { AlertTriangle, ArrowRight, X as XIcon, CheckCircle2, Wallet, Search } from "lucide-react";
+import { IrisIcon, SunDialIcon, MoonDialIcon, SignalBellIcon, PanelToggleIcon } from "@/components/icons/ShellIcons";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -148,9 +148,9 @@ function DashboardLayoutInner() {
               onClick={() => setSearchOpen(true)}
               aria-label="Pesquisar (⌘K)"
               title="Buscar em tudo · ⌘K"
-              className="seller-clickable icon-only mr-auto h-8 w-8 rounded-[9px] border border-transparent bg-transparent flex items-center justify-center text-muted-foreground transition-colors duration-200 hover:border-border/70 hover:text-foreground"
+              className="seller-clickable mr-auto flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors duration-200 hover:text-foreground"
             >
-              <ScanSearchIcon size={17} />
+              <Search className="h-[17px] w-[17px]" strokeWidth={2.2} />
             </button>
 
             {/* ─── BALANCE ─── */}
