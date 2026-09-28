@@ -953,12 +953,36 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
 
           <section className="product-studio-panel rounded-xl border border-border bg-card p-4 sm:p-5">
             <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <Label className="text-xs font-semibold text-foreground">Categoria *</Label>
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger className="mt-1 h-10 border-border bg-background px-3 text-sm"><SelectValue /></SelectTrigger>
-                  <SelectContent>{CATEGORIES.map((option) => <RichSelectItem key={option.value} value={option.value} icon={option.icon} label={option.label} desc={option.desc} />)}</SelectContent>
-                </Select>
+              <div className="sm:col-span-2">
+                <Label className="text-xs font-semibold text-foreground">Tipo de produto *</Label>
+                <div role="radiogroup" aria-label="Tipo de produto" className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {CATEGORIES.map((option) => {
+                    const active = category === option.value;
+                    const Icon = option.icon;
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        onClick={() => setCategory(option.value)}
+                        className={cn(
+                          "group relative flex flex-col items-start gap-2 rounded-2xl border p-3 text-left transition-all duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+                          active ? "border-primary bg-primary/[0.08]" : "border-border bg-background/40 hover:-translate-y-0.5 hover:border-primary/40",
+                        )}
+                      >
+                        <span className={cn("grid h-9 w-9 place-items-center rounded-xl transition-colors", active ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground group-hover:text-foreground")}>
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block truncate text-[12.5px] font-bold text-foreground">{option.label}</span>
+                          <span className="block truncate text-[10.5px] text-muted-foreground">{option.desc}</span>
+                        </span>
+                        {active && <CheckCircle2 className="absolute right-2.5 top-2.5 h-4 w-4 text-primary" />}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
               <div>
                 <Label htmlFor="product-price" className="text-xs font-semibold text-foreground">Preço de venda *</Label>
