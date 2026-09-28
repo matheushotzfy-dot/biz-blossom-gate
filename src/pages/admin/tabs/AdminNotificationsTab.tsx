@@ -18,6 +18,7 @@ import { ptBR } from "date-fns/locale";
 import { logAdminAction } from "@/lib/auditLog";
 import { friendlyError } from "@/lib/friendlyError";
 import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+import AdminPager from "@/components/admin/AdminPager";
 
 type Profile = { user_id: string; full_name: string | null; email: string | null; };
 type Notification = { id: string; title: string; message: string; type: string; user_id: string | null; is_read: boolean; created_at: string; created_by: string | null; };
@@ -45,14 +46,36 @@ export default function AdminNotificationsTab({ profiles }: Props) {
   const [sending, setSending] = useState(false);
   const [sellerSearch, setSellerSearch] = useState("");
   const [purging, setPurging] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [stats, setStats] = useState({ total: 0, global: 0, individual: 0, read: 0 });
+  const PAGE_SIZE = 50;
 
-  useEffect(() => { loadNotifications(); }, []);
+  useEffect(() => { setPage(1); }, [search]);
+  useEffect(() => { loadNotifications(); }, [page, search]);
+  useEffect(() => { loadStats(); }, []);
+
+  const loadStats = async () => {
+    const [totalRes, globalRes, readRes] = await Promise.all([
+      supabase.from("notifications").select("id", { count: "exact", head: true }),
+      supabase.from("notifications").select("id", { count: "exact", head: true }).is("user_id", null),
+      supabase.from("notifications").select("id", { count: "exact", head: true }).eq("is_read", true),
+    ]);
+    const total = totalRes.count || 0;
+    const global = globalRes.count || 0;
+    setStats({ total, global, individual: total - global, read: readRes.count || 0 });
+  };
 
   const loadNotifications = async () => {
   setLoading(true);
-  const { data, error } = await supabase.from("notifications").select("*").order("created_at", { ascending: false }).limit(200);
+  const from = (page - 1) * PAGE_SIZE;
+  let query = supabase.from("notifications").select("*", { count: "exact" }).order("created_at", { ascending: false });
+  const q = search.trim();
+  if (q) query = query.or(`title.ilike.%${q}%,message.ilike.%${q}%`);
+  const { data, error, count } = await query.range(from, from + PAGE_SIZE - 1);
   if (error) toast.error("Erro ao carregar: " + friendlyError(error));
   setNotifications((data || []) as Notification[]);
+  setTotalCount(count || 0);
   setLoading(false);
   };
 
@@ -81,7 +104,9 @@ export default function AdminNotificationsTab({ profiles }: Props) {
   }
   setShowSendDialog(false);
   setSendTitle(""); setSendMessage(""); setSendType("info"); setSelectedUserId("");
+  setPage(1);
   loadNotifications();
+  loadStats();
   } catch (e: unknown) { toast.error("Erro ao enviar: " + (e instanceof Error ? friendlyError(e) : "desconhecido")); } finally { setSending(false); }
   };
 
@@ -93,6 +118,7 @@ export default function AdminNotificationsTab({ profiles }: Props) {
     if (error) { toast.error("Erro: " + friendlyError(error)); return; }
     toast.success(`${Number(data || 0)} notificação(ões) órfã(s) removida(s)`);
     loadNotifications();
+    loadStats();
   };
 
  const handleDelete = async (id: string) => {
@@ -100,14 +126,11 @@ export default function AdminNotificationsTab({ profiles }: Props) {
  const { error } = await supabase.from("notifications").delete().eq("id", id);
  if (error) { toast.error("Erro ao excluir notificação"); return; }
  toast.success("Notificação excluída");
- setNotifications(prev => prev.filter(n => n.id !== id));
+ loadNotifications();
+ loadStats();
  };
 
- const filteredNotifications = notifications.filter(n => {
- if (!search) return true;
- const q = search.toLowerCase();
- return n.title.toLowerCase().includes(q) || n.message.toLowerCase().includes(q);
- });
+ const filteredNotifications = notifications;
 
  const filteredSellers = profiles.filter(p => {
  if (!sellerSearch) return true;
@@ -152,7 +175,7 @@ export default function AdminNotificationsTab({ profiles }: Props) {
 
   {/* Premium KPI Grid */}
   <FinanceiroKpiGrid cols={4}>
-    <FinanceiroKpi label="Total enviadas" value={String(totalCount)} sub="Últimas 200 entradas" icon={Bell} tone="primary" />
+    <FinanceiroKpi label="Total enviadas" value={String(totalCount)} sub="Todas as notificações" icon={Bell} tone="primary" />
     <FinanceiroKpi label="Broadcasts globais" value={String(globalCount)} sub="Enviadas a todos" icon={Radio} tone="info" />
     <FinanceiroKpi label="Individuais" value={String(individualCount)} sub="Direcionadas a sellers" icon={User} tone="neutral" />
     <FinanceiroKpi label="Já lidas" value={String(readCount)} sub={`${totalCount > 0 ? Math.round((readCount / totalCount) * 100) : 0}% do total`} icon={Eye} tone="success" />
@@ -205,6 +228,10 @@ export default function AdminNotificationsTab({ profiles }: Props) {
  );
  })}
  </div>
+ )}
+
+ {!loading && filteredNotifications.length > 0 && (
+   <AdminPager page={page} pageSize={PAGE_SIZE} totalCount={totalCount} onPageChange={setPage} loading={loading} />
  )}
 
  {/* Send Notification Dialog */}
