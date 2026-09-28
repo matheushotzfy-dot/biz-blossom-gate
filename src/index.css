@@ -4643,7 +4643,7 @@ html body .lp .lp-progress {
    Shared by seller, admin and all authenticated product surfaces.
    ════════════════════════════════════════════════════════════ */
 @layer base {
-  :root,
+  /* Dark-only: light mode keeps the earlier :root tokens so the theme toggle works. */
   .dark {
     --background: 0 0% 2%;
     --foreground: 0 0% 96%;
