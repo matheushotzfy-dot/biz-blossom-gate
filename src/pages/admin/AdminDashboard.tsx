@@ -667,6 +667,7 @@ export default function AdminDashboard() {
                    financialOverview={financialOverview}
                   onNavigate={(id) => handleTabChange(id as TabId)}
                 />
+                </>
               )}
               {activeTab === "tools" && isAdmin && (
                 <AdminToolsTab transactions={transactions} profiles={profiles} withdrawals={withdrawals} />
