@@ -2,21 +2,22 @@ import { Check, Lock } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AWARDS } from "./awards-data";
+import type { AwardItem } from "./awards-data";
 
 interface AwardGalleryProps {
+  awards: AwardItem[];
   activeIndex: number;
   revenue: number;
   onSelect: (index: number) => void;
 }
 
-export function AwardGallery({ activeIndex, revenue, onSelect }: AwardGalleryProps) {
+export function AwardGallery({ awards, activeIndex, revenue, onSelect }: AwardGalleryProps) {
   const reduceMotion = useReducedMotion();
 
   return (
     <nav aria-label="Galeria de premiações" className="awards-gallery overflow-x-auto pb-2">
-      <div className="grid min-w-[850px] grid-cols-7 gap-2.5 lg:min-w-0">
-        {AWARDS.map((award, index) => {
+      <div className="flex gap-2.5 [&>*]:min-w-[132px] [&>*]:flex-1">
+        {awards.map((award, index) => {
           const unlocked = revenue >= award.value;
           const active = activeIndex === index;
 
