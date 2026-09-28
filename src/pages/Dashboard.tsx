@@ -208,7 +208,6 @@ export default function Dashboard() {
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
   const [isCustom, setIsCustom] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
-  const [chartMode, setChartMode] = useState<"revenue" | "orders">("revenue");
   const privacy = usePrivacyMode();
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
   const [pixDialogOpen, setPixDialogOpen] = useState(false);
@@ -476,8 +475,7 @@ export default function Dashboard() {
 
   const donutPix = [{ name: "on", value: pixConversion }, { name: "off", value: Math.max(0, 100 - pixConversion) }];
   const donutChb = [{ name: "on", value: chargebackRate }, { name: "off", value: Math.max(0, 100 - chargebackRate) }];
-  const chartMetric = chartMode === "revenue" ? "vendas" : "pedidos";
-  const chartTotal = chartMode === "revenue" ? (privacy.hidden ? CENSORED : fmt(revenue)) : approvedCount.toLocaleString("pt-BR");
+  const chartAverage = approvedCount > 0 ? revenue / approvedCount : 0;
 
 
 
@@ -612,69 +610,49 @@ export default function Dashboard() {
         {/* ═══════════ CHART + SIDE PANEL ═══════════ */}
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
-          {/* Faturamento — seleção operacional no padrão das integrações */}
-          <div className="xl:col-span-2 overflow-hidden rounded-[24px] border border-border bg-card">
-            <div className="border-b border-border/60 px-5 pt-4 md:px-7">
-              <div className="flex min-w-max items-end gap-7" role="tablist" aria-label="Métrica do gráfico">
-                {[
-                  { id: "revenue" as const, label: "Faturamento", icon: TrendingUp },
-                  { id: "orders" as const, label: "Vendas", icon: Receipt },
-                ].map((item) => {
-                  const Icon = item.icon;
-                  const active = chartMode === item.id;
-                  return (
-                    <Button
-                      key={item.id}
-                      type="button"
-                      role="tab"
-                      aria-selected={active}
-                      variant="ghost"
-                      onClick={() => setChartMode(item.id)}
-                      className={cn(
-                        "relative h-12 rounded-none px-0 text-[13px] font-semibold transition-colors hover:bg-transparent",
-                        active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
-                      )}
-                    >
-                      <Icon className={cn("mr-2 h-4 w-4", active && "text-primary")} strokeWidth={1.9} />
-                      {item.label}
-                      <span className={cn("absolute inset-x-0 bottom-0 h-0.5 bg-primary transition-transform", active ? "scale-x-100" : "scale-x-0")} />
-                    </Button>
-                  );
-                })}
+          {/* Faturamento — leitura contínua e interação de precisão */}
+          <div className="group/chart xl:col-span-2 overflow-hidden rounded-[24px] border border-border bg-card transition-colors duration-500 hover:border-primary/30">
+            <div className="flex flex-col gap-4 px-5 pb-3 pt-5 sm:flex-row sm:items-end sm:justify-between md:px-7 md:pt-6">
+              <div className="min-w-0">
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-[8px] border border-primary/25 bg-primary/10 text-primary">
+                    <TrendingUp className="h-3.5 w-3.5" strokeWidth={2.2} />
+                  </span>
+                  <h4 className="font-display text-[13px] font-bold text-foreground">Faturamento</h4>
+                  <span className="h-1 w-1 rounded-full bg-primary" />
+                  <span className="text-[10px] font-semibold uppercase text-muted-foreground">Aprovado</span>
+                </div>
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <p className="font-display text-[28px] font-black leading-none tabular-nums text-foreground md:text-[32px]">
+                    {privacy.hidden ? CENSORED : fmt(revenue)}
+                  </p>
+                  {revenueTrend !== undefined && (
+                    <span className={cn("rounded-[7px] border px-2 py-1 text-[10px] font-bold tabular-nums", revenueTrend >= 0 ? "border-success/25 bg-success/10 text-success" : "border-destructive/25 bg-destructive/10 text-destructive")}>{revenueTrend >= 0 ? "+" : ""}{revenueTrend}%</span>
+                  )}
+                </div>
+                <p className="mt-2 text-[11px] text-muted-foreground">{compareLabel}</p>
               </div>
+              <span className="w-fit shrink-0 rounded-[9px] border border-border bg-secondary px-3 py-1.5 text-[10px] font-bold uppercase text-muted-foreground">
+                {isCustom ? "Período personalizado" : selectedPeriod.label}
+              </span>
             </div>
 
-            <div className="flex flex-col gap-3 px-6 pb-2 pt-5 sm:flex-row sm:items-end sm:justify-between md:px-8">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{chartMode === "revenue" ? "Volume aprovado" : "Pedidos aprovados"}</p>
-                <p className="mt-1 font-display text-[26px] font-bold tabular-nums text-foreground">{chartTotal}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                {chartMode === "revenue" && revenueTrend !== undefined && (
-                  <span className={cn("text-[11px] font-semibold", revenueTrend >= 0 ? "text-success" : "text-destructive")}>{revenueTrend >= 0 ? "+" : ""}{revenueTrend}% {compareLabel}</span>
-                )}
-                <span className="rounded-[8px] border border-border bg-secondary px-2.5 py-1 text-[10px] font-semibold uppercase text-muted-foreground">
-                  {isCustom ? "Personalizado" : selectedPeriod.label}
-                </span>
-              </div>
-            </div>
-
-
-            <div className="h-[300px] w-full pr-4 pb-4">
+            <div className="relative h-[310px] w-full px-1 pb-2 md:px-3">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 14, right: 8, left: 8, bottom: 4 }}>
+                <AreaChart data={chartData} margin={{ top: 18, right: 16, left: 0, bottom: 8 }}>
                   <defs>
                     <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.28} />
-                      <stop offset="55%" stopColor="hsl(var(--primary))" stopOpacity={0.08} />
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.34} />
+                      <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity={0.11} />
                       <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="revStroke" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.85} />
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.55} />
+                      <stop offset="55%" stopColor="hsl(var(--primary))" stopOpacity={0.9} />
                       <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={1} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="2 4" vertical={false} stroke="hsl(var(--border)/0.28)" />
+                  <CartesianGrid strokeDasharray="1 7" vertical={false} stroke="hsl(var(--border)/0.45)" />
                   <XAxis dataKey="timestamp" type="number" scale="time"
                     domain={[chartData[0]?.timestamp ?? 0, chartData[chartData.length - 1]?.timestamp ?? 0]}
                     ticks={chartTicks} tickFormatter={chartTickFormatter}
@@ -690,36 +668,28 @@ export default function Dashboard() {
                   />
                   <YAxis width={52} axisLine={false} tickLine={false}
                     tick={{ fill: "hsl(var(--muted-foreground)/0.55)", fontSize: 10, fontWeight: 500 }}
-                    tickFormatter={(v) => chartMode === "revenue" && Number(v) >= 1000 ? `${Math.round(Number(v) / 1000)}k` : `${v}`}
+                    tickFormatter={(v) => Number(v) >= 1000 ? `${Math.round(Number(v) / 1000)}k` : `${v}`}
                   />
                   <Tooltip
-                    cursor={{ stroke: "hsl(var(--primary)/0.35)", strokeWidth: 2 }}
+                    cursor={{ stroke: "hsl(var(--primary)/0.7)", strokeWidth: 1, strokeDasharray: "3 3" }}
+                    wrapperStyle={{ outline: "none", zIndex: 20 }}
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         const p = payload[0];
                         return (
-                          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-2xl backdrop-blur-sm">
-                            <div className="bg-muted/30 border-b border-border/50 px-3 py-2">
-                              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{p.payload.fullLabel}</p>
+                          <div className="min-w-[190px] overflow-hidden rounded-[12px] border border-primary/30 bg-popover">
+                            <div className="flex items-center justify-between gap-5 border-b border-border/60 bg-secondary px-3.5 py-2.5">
+                              <p className="text-[10px] font-bold uppercase text-muted-foreground">{p.payload.fullLabel}</p>
+                              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                             </div>
-                            <div className="px-3.5 py-3 space-y-2">
-                              <div className="flex items-center justify-between gap-6">
-                                <div className="flex items-center gap-2">
-                                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                  <span className="text-[11px] font-medium text-muted-foreground">Faturamento</span>
-                                </div>
-                                <span className={cn("text-[13px] font-bold tabular-nums", chartMode === "revenue" ? "text-foreground" : "text-muted-foreground/60")}>
-                                  {fmt(p.payload.vendas)}
-                                </span>
+                            <div className="space-y-3 px-3.5 py-3">
+                              <div>
+                                <p className="text-[9px] font-semibold uppercase text-muted-foreground">Faturamento</p>
+                                <p className="mt-1 font-display text-[16px] font-black tabular-nums text-foreground">{privacy.hidden ? CENSORED : fmt(Number(p.payload.vendas))}</p>
                               </div>
-                              <div className="flex items-center justify-between gap-6">
-                                <div className="flex items-center gap-2">
-                                  <div className="h-1.5 w-1.5 rounded-full bg-primary/40" />
-                                  <span className="text-[11px] font-medium text-muted-foreground">Vendas</span>
-                                </div>
-                                <span className={cn("text-[13px] font-bold tabular-nums", chartMode === "orders" ? "text-foreground" : "text-muted-foreground/60")}>
-                                  {p.payload.pedidos.toLocaleString("pt-BR")}
-                                </span>
+                              <div className="flex items-center justify-between gap-6 border-t border-border/50 pt-2.5">
+                                <span className="text-[10px] text-muted-foreground">Vendas aprovadas</span>
+                                <span className="text-[12px] font-bold tabular-nums text-foreground">{Number(p.payload.pedidos).toLocaleString("pt-BR")}</span>
                               </div>
                             </div>
                           </div>
@@ -728,56 +698,78 @@ export default function Dashboard() {
                       return null;
                     }}
                   />
-                  <Area type="monotone" dataKey={chartMetric} stroke="url(#revStroke)" strokeWidth={2.5} fill="url(#revGrad)"
+                  <Area type="monotone" dataKey="vendas" stroke="url(#revStroke)" strokeWidth={3} fill="url(#revGrad)"
                     dot={false}
-                    activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2.5 }}
-                    isAnimationActive={false}
+                    activeDot={{ r: 6, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 3 }}
+                    animationDuration={900}
+                    animationEasing="ease-out"
                   />
                 </AreaChart>
               </ResponsiveContainer>
+            </div>
+
+            <div className="grid grid-cols-2 border-t border-border/60 bg-secondary/40 sm:grid-cols-3">
+              <div className="px-5 py-3.5 md:px-7">
+                <p className="text-[9px] font-semibold uppercase text-muted-foreground">Vendas aprovadas</p>
+                <p className="mt-1 text-[13px] font-bold tabular-nums text-foreground">{approvedCount.toLocaleString("pt-BR")}</p>
+              </div>
+              <div className="border-l border-border/60 px-5 py-3.5 md:px-7">
+                <p className="text-[9px] font-semibold uppercase text-muted-foreground">Ticket médio</p>
+                <p className="mt-1 text-[13px] font-bold tabular-nums text-foreground">{privacy.hidden ? CENSORED : fmt(chartAverage)}</p>
+              </div>
+              <div className="col-span-2 border-t border-border/60 px-5 py-3.5 sm:col-span-1 sm:border-l sm:border-t-0 md:px-7">
+                <p className="text-[9px] font-semibold uppercase text-muted-foreground">Conversão</p>
+                <p className="mt-1 text-[13px] font-bold tabular-nums text-foreground">{conversion.toFixed(1)}%</p>
+              </div>
             </div>
           </div>
 
           {/* Right side: donuts + links */}
           <div className="space-y-4">
-            {/* Índices com seleção por método */}
-             <div className="overflow-hidden rounded-[24px] border border-border bg-card">
-              <div className="border-b border-border/60 px-5 pt-4">
-                <div className="flex min-w-max items-end gap-5" role="tablist" aria-label="Índice por método">
-                  {(Object.keys(indexData) as Array<keyof typeof indexData>).map((id) => {
-                    const item = indexData[id];
-                    const Icon = item.icon;
-                    const active = indexMode === id;
-                    return (
-                      <Button key={id} type="button" role="tab" aria-selected={active} variant="ghost" onClick={() => setIndexMode(id)} className={cn("relative h-11 rounded-none px-0 text-[11px] font-semibold hover:bg-transparent", active ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>
-                        <Icon className={cn("mr-1.5 h-3.5 w-3.5", active && "text-primary")} />
-                        {item.label}
-                        <span className={cn("absolute inset-x-0 bottom-0 h-0.5 bg-primary transition-transform", active ? "scale-x-100" : "scale-x-0")} />
-                      </Button>
-                    );
-                  })}
-                </div>
+            {/* Índices — formato original */}
+             <div className="rounded-[24px] border border-border bg-card p-7">
+              <div className="mb-6">
+                <h4 className="font-display font-bold text-xl text-foreground">Índices</h4>
+                <p className="mt-1 text-[11px] text-muted-foreground">Conversão por método de pagamento</p>
               </div>
-
-              <div className="p-5">
-                <div className="flex items-end justify-between gap-3">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Taxa de aprovação</p>
-                    <p className="mt-2 font-display text-[36px] font-bold leading-none tabular-nums text-foreground">{selectedIndex.conversion.toFixed(1)}%</p>
+              <div className="space-y-5">
+                <div className="flex items-center gap-4">
+                  <div className="relative h-16 w-16 shrink-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={donutPix} dataKey="value" innerRadius={22} outerRadius={30} startAngle={90} endAngle={-270} stroke="none" isAnimationActive={false}>
+                          <Cell fill="hsl(var(--primary))" />
+                          <Cell fill="hsl(var(--muted)/0.6)" />
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex items-center justify-center font-display text-[12px] font-black tabular-nums text-foreground">{pixConversion.toFixed(0)}%</div>
                   </div>
-                  <span className="text-right text-[11px] text-muted-foreground"><strong className="block text-[14px] font-bold text-foreground">{selectedIndex.approved}</strong>de {selectedIndex.total} tentativas</span>
-                </div>
-
-                <div className="mt-5 h-2 overflow-hidden rounded-full bg-muted" aria-label={`${selectedIndex.conversion.toFixed(1)}% de aprovação`}>
-                  <div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${Math.min(100, selectedIndex.conversion)}%` }} />
-                </div>
-
-                <div className="mt-5 flex items-center justify-between border-t border-border/50 pt-4">
-                  <div>
-                    <p className="text-[11px] font-semibold text-foreground">Índice de estorno</p>
-                    <p className="mt-0.5 text-[10px] text-muted-foreground">Saúde geral da operação</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[14px] font-bold text-foreground">Pix</p>
+                    <p className="text-[11px] text-muted-foreground">Conversão</p>
                   </div>
-                  <span className={cn("rounded-[8px] border px-2 py-1 text-[11px] font-bold tabular-nums", chargebackRate < 1 ? "border-success/25 bg-success/10 text-success" : "border-destructive/25 bg-destructive/10 text-destructive")}>{chargebackRate.toFixed(1)}%</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="relative h-16 w-16 shrink-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={donutChb} dataKey="value" innerRadius={22} outerRadius={30} startAngle={90} endAngle={-270} stroke="none" isAnimationActive={false}>
+                          <Cell fill={chargebackRate < 1 ? "hsl(var(--primary))" : "hsl(var(--destructive))"} />
+                          <Cell fill="hsl(var(--muted)/0.6)" />
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex items-center justify-center font-display text-[12px] font-black tabular-nums text-foreground">{chargebackRate.toFixed(1)}%</div>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[14px] font-bold text-foreground">Taxa de estorno</p>
+                    <p className="text-[11px] text-muted-foreground">Saúde da conta{" "}
+                      <span className={cn("ml-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold", chargebackRate < 1 ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive")}>
+                        {chargebackRate < 1 ? "Excelente" : "Atenção"}
+                      </span>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
