@@ -2710,6 +2710,7 @@ export type Database = {
           neighborhood: string | null
           nickname: string | null
           phone: string | null
+          pix_enabled: boolean
           pix_key: string | null
           pix_key_enc: string | null
           pix_key_masked: string | null
@@ -2752,6 +2753,7 @@ export type Database = {
           neighborhood?: string | null
           nickname?: string | null
           phone?: string | null
+          pix_enabled?: boolean
           pix_key?: string | null
           pix_key_enc?: string | null
           pix_key_masked?: string | null
@@ -2794,6 +2796,7 @@ export type Database = {
           neighborhood?: string | null
           nickname?: string | null
           phone?: string | null
+          pix_enabled?: boolean
           pix_key?: string | null
           pix_key_enc?: string | null
           pix_key_masked?: string | null
@@ -4825,62 +4828,6 @@ export type Database = {
           price: number | null
           status: string | null
           support_email: string | null
-        }
-        Insert: {
-          affiliate_commission?: number | null
-          affiliate_enabled?: boolean | null
-          checkout_address_required?: boolean | null
-          checkout_banner_desktop_url?: string | null
-          checkout_banner_mobile_url?: string | null
-          checkout_boleto_enabled?: boolean | null
-          checkout_button_color?: string | null
-          checkout_credit_card_enabled?: boolean | null
-          checkout_email_confirm?: boolean | null
-          checkout_guarantee_enabled?: boolean | null
-          checkout_pix_enabled?: boolean | null
-          checkout_social_proof?: boolean | null
-          checkout_theme?: string | null
-          checkout_timer_enabled?: boolean | null
-          checkout_timer_minutes?: number | null
-          checkout_url?: string | null
-          created_at?: string | null
-          delivery_type?: string | null
-          description?: string | null
-          display_name?: string | null
-          id?: string | null
-          image_url?: string | null
-          name?: string | null
-          price?: number | null
-          status?: string | null
-          support_email?: string | null
-        }
-        Update: {
-          affiliate_commission?: number | null
-          affiliate_enabled?: boolean | null
-          checkout_address_required?: boolean | null
-          checkout_banner_desktop_url?: string | null
-          checkout_banner_mobile_url?: string | null
-          checkout_boleto_enabled?: boolean | null
-          checkout_button_color?: string | null
-          checkout_credit_card_enabled?: boolean | null
-          checkout_email_confirm?: boolean | null
-          checkout_guarantee_enabled?: boolean | null
-          checkout_pix_enabled?: boolean | null
-          checkout_social_proof?: boolean | null
-          checkout_theme?: string | null
-          checkout_timer_enabled?: boolean | null
-          checkout_timer_minutes?: number | null
-          checkout_url?: string | null
-          created_at?: string | null
-          delivery_type?: string | null
-          description?: string | null
-          display_name?: string | null
-          id?: string | null
-          image_url?: string | null
-          name?: string | null
-          price?: number | null
-          status?: string | null
-          support_email?: string | null
         }
         Relationships: []
       }
