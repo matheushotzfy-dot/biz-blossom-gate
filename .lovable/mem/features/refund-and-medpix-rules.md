@@ -1,0 +1,1 @@
+- Decisões do dono: seller emite reembolso na hora (debita saldo); MED sem saldo → saldo fica negativo e desconta das próximas vendas; MED perdido pelo seller: sem taxa (só valor da venda); MED entra manual pelo admin E já pronto para aviso automático da adquirente.
