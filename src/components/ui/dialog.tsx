@@ -5,13 +5,25 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type DialogOrigin = { x: number; y: number };
+let lastDialogOrigin: DialogOrigin = { x: 0, y: 0 };
+
+if (typeof window !== "undefined") {
+ window.addEventListener("pointerdown", (event) => {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  const trigger = target.closest("button, [role='button'], a");
+  if (!trigger) return;
+  const rect = trigger.getBoundingClientRect();
+  lastDialogOrigin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+ }, { capture: true });
+}
 const DialogMotionContext = React.createContext<{
  origin: DialogOrigin;
  setOrigin: React.Dispatch<React.SetStateAction<DialogOrigin>>;
 }>({ origin: { x: 50, y: 50 }, setOrigin: () => undefined });
 
 const Dialog = ({ children, ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) => {
- const [origin, setOrigin] = React.useState<DialogOrigin>({ x: 50, y: 50 });
+ const [origin, setOrigin] = React.useState<DialogOrigin>(() => lastDialogOrigin.x > 0 ? lastDialogOrigin : { x: window.innerWidth / 2, y: window.innerHeight / 2 });
  return <DialogMotionContext.Provider value={{ origin, setOrigin }}><DialogPrimitive.Root {...props}>{children}</DialogPrimitive.Root></DialogMotionContext.Provider>;
 };
 
@@ -25,7 +37,9 @@ const DialogTrigger = React.forwardRef<
    ref={ref}
    onPointerDown={(event) => {
     const rect = event.currentTarget.getBoundingClientRect();
-    setOrigin({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+    const nextOrigin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    lastDialogOrigin = nextOrigin;
+    setOrigin(nextOrigin);
     onPointerDown?.(event);
    }}
    {...props}

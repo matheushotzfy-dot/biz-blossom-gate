@@ -1054,9 +1054,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   {/* ── Métodos de Pagamento Permitidos ── */}
                   <div className="rounded-xl border border-border bg-muted/20 p-4">
                     <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-1">Métodos de Pagamento</p>
-                    <p className="text-[10px] text-muted-foreground/70 mb-3">Desativando aqui, o seller não verá a opção nos próprios produtos.</p>
-                    <div className="grid grid-cols-2 gap-2">
+                    <p className="text-[10px] text-muted-foreground/70 mb-3">O bloqueio vale para produtos, links e checkouts públicos.</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       {([
+                        { key: "pix_enabled", label: "Pix" },
                         { key: "boleto_enabled", label: "Boleto" },
                         { key: "credit_card_enabled", label: "Cartão de Crédito" },
                       ] as const).map(opt => {
@@ -1068,14 +1069,15 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                             onClick={async () => {
                               if (!selectedUser) return;
                               const next = !enabled;
+                              const previous = selectedUser;
+                              setSelectedUser({ ...selectedUser, [opt.key]: next });
                               const { error } = await supabase
                                 .from("profiles")
                                 .update({ [opt.key]: next })
                                 .eq("user_id", selectedUser.user_id);
-                              if (error) { toast.error("Erro ao atualizar"); return; }
-                              setSelectedUser({ ...selectedUser, [opt.key]: next });
+                               if (error) { setSelectedUser(previous); toast.error("Erro ao atualizar método"); return; }
                               toast.success(`${opt.label} ${next ? "ativado" : "desativado"}`);
-                              await logAdminAction(`toggle_${opt.key}`, "profile", selectedUser.user_id, { enabled: next });
+                               onReload();
                             }}
                             className={cn(
                               "flex items-center justify-between rounded-lg border px-3 py-2.5 transition-colors",

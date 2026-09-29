@@ -274,8 +274,6 @@ export default function Perfil() {
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
     : 0;
 
-  const tierLabel = TIER_LABELS[milestone.tier] || "Iniciante";
-
   const initials = (profile?.full_name || "U").trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase();
 
   return (
@@ -284,7 +282,7 @@ export default function Perfil() {
       <HDHeader
         eyebrow="Meu perfil & KYC"
         title="Identidade & Conta"
-        subtitle="Dados cadastrais, limites operacionais, progresso de faturamento e endereço fiscal."
+        subtitle="Dados cadastrais, segurança, taxas e endereço fiscal."
         actions={
           <span className={cn(
             "inline-flex items-center rounded-xl border border-border/50 bg-card px-3.5 py-2 text-[12px] font-medium",
