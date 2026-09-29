@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { lazy, Suspense, useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { uniqueChannelName } from "@/lib/realtime";
 import { useAuth } from "@/hooks/useAuth";
@@ -25,38 +25,39 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { subDays, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import AdminOverviewTab from "./tabs/AdminOverviewTab";
 import type { AdminFinancialOverview } from "./tabs/AdminOverviewTab";
-import AdminSellersTab from "./tabs/AdminSellersTab";
-import AdminProductsTab from "./tabs/AdminProductsTab";
-import AdminDisputesTab from "./tabs/AdminDisputesTab";
-import AdminTransactionsTab from "./tabs/AdminTransactionsTab";
-import AdminWithdrawalsTab from "./tabs/AdminWithdrawalsTab";
-import AdminCouponsTab from "./tabs/AdminCouponsTab";
-import AdminCoursesTab from "./tabs/AdminCoursesTab";
-import AdminAuditTab from "./tabs/AdminAuditTab";
-import AdminSettingsTab from "./tabs/AdminSettingsTab";
-import AdminEmployeesTab from "./tabs/AdminEmployeesTab";
-import AdminTopSellersTab from "./tabs/AdminTopSellersTab";
-import AdminTopProductsTab from "./tabs/AdminTopProductsTab";
-import AdminErrorLogsTab from "./tabs/AdminErrorLogsTab";
-import AdminInactiveSellersTab from "./tabs/AdminInactiveSellersTab";
-import AdminRiskComplianceTab from "./tabs/AdminRiskComplianceTab";
-import AdminAbuseMetricsTab from "./tabs/AdminAbuseMetricsTab";
-import AdminAnalyticsTab from "./tabs/AdminAnalyticsTab";
-import AdminManagersTab from "./tabs/AdminManagersTab";
-import AdminStaffCommissionsTab from "./tabs/AdminStaffCommissionsTab";
-import AdminNotificationsTab from "./tabs/AdminNotificationsTab";
-import AdminAffiliateSalesTab from "./tabs/AdminAffiliateSalesTab";
-import AdminSupportTab from "./tabs/AdminSupportTab";
-import AdminSubscriptionsTab from "./tabs/AdminSubscriptionsTab";
-import AdminReferralsTab from "./tabs/AdminReferralsTab";
-import AdminRewardsTab from "./tabs/AdminRewardsTab";
-import AdminCorridasTab from "./tabs/AdminCorridasTab";
-import AdminGoalsTab from "./tabs/AdminGoalsTab";
-import AdminCommandCenterTab from "./tabs/AdminCommandCenterTab";
-import AdminToolsTab from "./tabs/AdminToolsTab";
-import AdminPaymentLinksTab from "./tabs/AdminPaymentLinksTab";
+
+const AdminOverviewTab = lazy(() => import("./tabs/AdminOverviewTab"));
+const AdminSellersTab = lazy(() => import("./tabs/AdminSellersTab"));
+const AdminProductsTab = lazy(() => import("./tabs/AdminProductsTab"));
+const AdminDisputesTab = lazy(() => import("./tabs/AdminDisputesTab"));
+const AdminTransactionsTab = lazy(() => import("./tabs/AdminTransactionsTab"));
+const AdminWithdrawalsTab = lazy(() => import("./tabs/AdminWithdrawalsTab"));
+const AdminCouponsTab = lazy(() => import("./tabs/AdminCouponsTab"));
+const AdminCoursesTab = lazy(() => import("./tabs/AdminCoursesTab"));
+const AdminAuditTab = lazy(() => import("./tabs/AdminAuditTab"));
+const AdminSettingsTab = lazy(() => import("./tabs/AdminSettingsTab"));
+const AdminEmployeesTab = lazy(() => import("./tabs/AdminEmployeesTab"));
+const AdminTopSellersTab = lazy(() => import("./tabs/AdminTopSellersTab"));
+const AdminTopProductsTab = lazy(() => import("./tabs/AdminTopProductsTab"));
+const AdminErrorLogsTab = lazy(() => import("./tabs/AdminErrorLogsTab"));
+const AdminInactiveSellersTab = lazy(() => import("./tabs/AdminInactiveSellersTab"));
+const AdminRiskComplianceTab = lazy(() => import("./tabs/AdminRiskComplianceTab"));
+const AdminAbuseMetricsTab = lazy(() => import("./tabs/AdminAbuseMetricsTab"));
+const AdminAnalyticsTab = lazy(() => import("./tabs/AdminAnalyticsTab"));
+const AdminManagersTab = lazy(() => import("./tabs/AdminManagersTab"));
+const AdminStaffCommissionsTab = lazy(() => import("./tabs/AdminStaffCommissionsTab"));
+const AdminNotificationsTab = lazy(() => import("./tabs/AdminNotificationsTab"));
+const AdminAffiliateSalesTab = lazy(() => import("./tabs/AdminAffiliateSalesTab"));
+const AdminSupportTab = lazy(() => import("./tabs/AdminSupportTab"));
+const AdminSubscriptionsTab = lazy(() => import("./tabs/AdminSubscriptionsTab"));
+const AdminReferralsTab = lazy(() => import("./tabs/AdminReferralsTab"));
+const AdminRewardsTab = lazy(() => import("./tabs/AdminRewardsTab"));
+const AdminCorridasTab = lazy(() => import("./tabs/AdminCorridasTab"));
+const AdminGoalsTab = lazy(() => import("./tabs/AdminGoalsTab"));
+const AdminCommandCenterTab = lazy(() => import("./tabs/AdminCommandCenterTab"));
+const AdminToolsTab = lazy(() => import("./tabs/AdminToolsTab"));
+const AdminPaymentLinksTab = lazy(() => import("./tabs/AdminPaymentLinksTab"));
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
@@ -658,6 +659,7 @@ export default function AdminDashboard() {
         <main className="flex-1 overflow-y-auto af-bg-soft scrollbar-thin admin-shell" data-admin-content>
           <div className="p-5 lg:p-7 xl:p-9 admin-fluid" key={activeTab}>
             <div className="mx-auto max-w-[1800px]">
+              <Suspense fallback={<div className="min-h-[320px] animate-pulse rounded-2xl border border-border/50 bg-card/40" aria-label="Carregando área administrativa" />}>
               {activeTab === "god-mode" && (
                 <>
                 {dataCapHit.length > 0 && (
@@ -746,6 +748,7 @@ export default function AdminDashboard() {
                 <AdminInactiveSellersTab profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
               )}
               {activeTab === "settings" && isAdmin && <AdminSettingsTab />}
+              </Suspense>
             </div>
           </div>
         </main>
