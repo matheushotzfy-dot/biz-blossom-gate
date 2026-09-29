@@ -7,6 +7,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
+import { SellerRefundDialog } from "@/components/transactions/SellerRefundDialog";
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
 import type { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
@@ -100,6 +101,7 @@ export default function Vendas() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
+  const [refundTx, setRefundTx] = useState<Tables<"transactions"> | null>(null);
   const [privacyHidden, setPrivacyHidden] = useState(() => localStorage.getItem("privacy_mode") === "true");
   const [periodValue, setPeriodValue] = useState<PeriodValue>(() => buildPeriod("today"));
   const range = useMemo<DateRange>(() => ({ from: periodValue.from, to: periodValue.to }), [periodValue]);
@@ -660,8 +662,9 @@ export default function Vendas() {
         )}
       </div>
 
+      <SellerRefundDialog tx={refundTx} onClose={() => setRefundTx(null)} onDone={() => setDetailTx(null)} />
       {detailTx && (
-        <TransactionDetailPanel tx={detailTx} products={prodsMap} onClose={() => setDetailTx(null)} />
+        <TransactionDetailPanel tx={detailTx} products={prodsMap} onClose={() => setDetailTx(null)} onRefund={(t) => setRefundTx(t as Tables<"transactions">)} />
       )}
     </HDShell>
   );
