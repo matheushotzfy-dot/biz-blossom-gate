@@ -29,8 +29,9 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
  const [socialProof, setSocialProof] = useState(product.checkout_social_proof ?? false);
  const [guaranteeEnabled, setGuaranteeEnabled] = useState(product.checkout_guarantee_enabled ?? true);
  const [pixEnabled, setPixEnabled] = useState(product.checkout_pix_enabled ?? true);
- const [boletoEnabled, setBoletoEnabled] = useState(product.checkout_boleto_enabled ?? true);
+ const [boletoEnabled, setBoletoEnabled] = useState(product.checkout_boleto_enabled ?? false);
  const [creditCardEnabled, setCreditCardEnabled] = useState(product.checkout_credit_card_enabled ?? true);
+ const [allowedMethods, setAllowedMethods] = useState({ pix: true, boleto: false, card: true });
  const [addressRequired, setAddressRequired] = useState(product.checkout_address_required ?? false);
  const [emailConfirm, setEmailConfirm] = useState(product.checkout_email_confirm ?? true);
 
@@ -54,6 +55,14 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
  // Load existing order bumps
  supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", product.id)
  .then(({ data }) => { if (data) setOrderBumps(data); });
+ supabase.from("profiles").select("pix_enabled, boleto_enabled, credit_card_enabled").eq("user_id", user.id).maybeSingle()
+ .then(({ data }) => {
+  if (!data) return;
+  setAllowedMethods({ pix: data.pix_enabled, boleto: data.boleto_enabled, card: data.credit_card_enabled });
+  if (!data.pix_enabled) setPixEnabled(false);
+  if (!data.boleto_enabled) setBoletoEnabled(false);
+  if (!data.credit_card_enabled) setCreditCardEnabled(false);
+ });
  }, [user?.id, open, product.id]);
 
   const uploadBanner = async (file: File, type: string): Promise<string | null> => {
