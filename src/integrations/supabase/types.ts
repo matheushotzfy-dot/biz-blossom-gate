@@ -3779,6 +3779,57 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_action_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          id: string
+          kind: string
+          payload: Json
+          reason: string
+          requested_by: string
+          requested_role: string
+          status: string
+          target_acquirer_id: string | null
+          target_seller_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          kind: string
+          payload?: Json
+          reason: string
+          requested_by: string
+          requested_role: string
+          status?: string
+          target_acquirer_id?: string | null
+          target_seller_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          kind?: string
+          payload?: Json
+          reason?: string
+          requested_by?: string
+          requested_role?: string
+          status?: string
+          target_acquirer_id?: string | null
+          target_seller_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       staff_audit_log: {
         Row: {
           action: string
@@ -4366,6 +4417,8 @@ export type Database = {
           discount_amount: number
           external_id: string | null
           fee_amount: number
+          fee_fixed_amount: number
+          fee_percent_amount: number
           id: string
           is_simulated: boolean
           metadata: Json
@@ -4408,6 +4461,8 @@ export type Database = {
           discount_amount?: number
           external_id?: string | null
           fee_amount?: number
+          fee_fixed_amount?: number
+          fee_percent_amount?: number
           id?: string
           is_simulated?: boolean
           metadata?: Json
@@ -4450,6 +4505,8 @@ export type Database = {
           discount_amount?: number
           external_id?: string | null
           fee_amount?: number
+          fee_fixed_amount?: number
+          fee_percent_amount?: number
           id?: string
           is_simulated?: boolean
           metadata?: Json
@@ -5264,6 +5321,10 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_decide_staff_action: {
+        Args: { _approve: boolean; _id: string; _note?: string }
+        Returns: Json
+      }
       admin_decrypt_field: { Args: { _cipher: string }; Returns: string }
       admin_freeze_account: {
         Args: { _freeze: boolean; _reason?: string; _user_id: string }
@@ -5469,6 +5530,10 @@ export type Database = {
       encrypt_field: { Args: { _plain: string }; Returns: string }
       enqueue_test_webhook: { Args: { _config_id: string }; Returns: string }
       expire_stale_pix_transactions: { Args: never; Returns: number }
+      get_acquirer_overview: {
+        Args: { _from: string; _to: string }
+        Returns: Json
+      }
       get_admin_analytics: { Args: { _period_days?: number }; Returns: Json }
       get_admin_dashboard_data: {
         Args: {
@@ -5532,6 +5597,15 @@ export type Database = {
           _offset?: number
           _seller?: string
           _to?: string
+        }
+        Returns: Json
+      }
+      get_financial_metrics: {
+        Args: {
+          _acquirer?: string
+          _from: string
+          _seller?: string
+          _to: string
         }
         Returns: Json
       }
@@ -5676,6 +5750,7 @@ export type Database = {
         }[]
       }
       get_seller_360: { Args: { _user_id: string }; Returns: Json }
+      get_seller_acquirer_history: { Args: { _user_id: string }; Returns: Json }
       get_seller_anticipation_summary: {
         Args: { _max_days?: number }
         Returns: Json
@@ -5738,6 +5813,14 @@ export type Database = {
       ledger_entry_effect: {
         Args: { _amount: number; _entry_type: string }
         Returns: number
+      }
+      list_acquirers_basic: {
+        Args: never
+        Returns: {
+          id: string
+          is_active: boolean
+          name: string
+        }[]
       }
       list_visible_acquirers: {
         Args: never
@@ -5865,6 +5948,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      request_staff_action: {
+        Args: {
+          _kind: string
+          _payload?: Json
+          _reason: string
+          _target_acquirer?: string
+          _target_seller?: string
+        }
+        Returns: string
+      }
       resolve_admin_alert: { Args: { _kind: string }; Returns: undefined }
       resolve_commission_pct: {
         Args: { _seller: string; _staff: string }
@@ -5956,7 +6049,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user" | "employee" | "manager"
+      app_role: "admin" | "user" | "employee" | "manager" | "partner"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -6084,7 +6177,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "employee", "manager"],
+      app_role: ["admin", "user", "employee", "manager", "partner"],
     },
   },
 } as const

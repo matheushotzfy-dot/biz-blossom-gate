@@ -72,6 +72,7 @@ const ImpersonateReceiver = lazy(() => import("./pages/ImpersonateReceiver"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ManagerLogin = lazy(() => import("./pages/manager/ManagerLogin"));
 const ManagerDashboard = lazy(() => import("./pages/manager/ManagerDashboard"));
+const PartnerPanel = lazy(() => import("./pages/partner/PartnerPanel"));
 const TermosDeUso = lazy(() => import("./pages/TermosDeUso"));
 const PoliticaDePrivacidade = lazy(() => import("./pages/PoliticaDePrivacidade"));
 const ThankYou = lazy(() => import("./pages/ThankYou"));
@@ -159,6 +160,7 @@ const App = () => (
 
                 <Route path="/gerentes" element={<ManagerLogin />} />
                 <Route path="/gerentes/dashboard" element={<RequireManager><ManagerDashboard /></RequireManager>} />
+                <Route path="/socio" element={<PartnerPanel />} />
 
                 <Route path="/vendas/conteudo/:courseId/analytics" element={<RequireAuth><CourseAnalytics /></RequireAuth>} />
                 <Route path="/vendas/conteudo/:courseId/builder" element={<RequireAuth><CourseBuilder /></RequireAuth>} />

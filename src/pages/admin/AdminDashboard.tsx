@@ -33,6 +33,9 @@ const AdminProductsTab = lazy(() => import("./tabs/AdminProductsTab"));
 const FinancialAuditTab = lazy(() => import("@/features/admin-finance/FinancialAuditTab"));
 const DisputesCenter = lazy(() => import("@/features/admin-finance/DisputesCenter"));
 const RefundApprovalsTab = lazy(() => import("@/features/admin-finance/RefundApprovalsTab"));
+const StaffRequestsTab = lazy(() => import("@/features/admin-finance/StaffRequestsTab"));
+const AcquirersPanel = lazy(() => import("@/features/admin-finance/AcquirersPanel"));
+const FinancialMetricsPanel = lazy(() => import("@/features/admin-finance/FinancialMetricsPanel").then((m) => ({ default: m.FinancialMetricsPanel })));
 const AdminTransactionsTab = lazy(() => import("./tabs/AdminTransactionsTab"));
 const AdminWithdrawalsTab = lazy(() => import("./tabs/AdminWithdrawalsTab"));
 const AdminCouponsTab = lazy(() => import("./tabs/AdminCouponsTab"));
@@ -81,7 +84,10 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
   {
     id: "treasury", label: "Financeiro",
     items: [
+      { id: "fin-metrics", label: "Métricas Financeiras", icon: BarChart3, employeeAccess: false },
       { id: "refund-approvals", label: "Pendentes de aprovação", icon: Clock, employeeAccess: false },
+      { id: "staff-requests", label: "Pedidos da Equipe", icon: UserCog, employeeAccess: false },
+      { id: "acquirers-panel", label: "Adquirentes", icon: Package2, employeeAccess: false },
       { id: "withdrawals", label: "Saques", icon: ArrowDownToLine, employeeAccess: false },
       { id: "transactions", label: "Transações", icon: CreditCard, employeeAccess: true },
       { id: "payment-links", label: "Links de Pagamento", icon: LinkIcon, employeeAccess: false },
@@ -722,6 +728,11 @@ export default function AdminDashboard() {
               {activeTab === "abuse-metrics" && isAdmin && <AdminAbuseMetricsTab />}
               {activeTab === "financial-audit" && isAdmin && <FinancialAuditTab profiles={profiles} />}
               {activeTab === "refund-approvals" && isAdmin && <RefundApprovalsTab />}
+              {activeTab === "staff-requests" && isAdmin && <StaffRequestsTab profiles={profiles} />}
+              {activeTab === "acquirers-panel" && isAdmin && <AcquirersPanel profiles={profiles} />}
+              {activeTab === "fin-metrics" && isAdmin && (
+                <div className="space-y-4"><div><h2 className="text-lg font-semibold">Métricas financeiras</h2><p className="text-xs text-muted-foreground">Quanto entra, quanto sai e cada tipo de taxa, por período, seller e adquirente.</p></div><FinancialMetricsPanel profiles={profiles} /></div>
+              )}
               {["medpix", "refunds", "chargeback", "premed"].includes(activeTab) && isAdmin && (
                 <DisputesCenter
                   profiles={profiles}
