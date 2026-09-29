@@ -130,7 +130,7 @@ export default function Premiacoes() {
             <motion.div
               className="absolute inset-y-0 left-0 rounded-full bg-primary"
               initial={reduceMotion ? false : { width: 0 }}
-              animate={{ width: `${Math.min((Math.log10(Math.max(revenue, 1)) / Math.log10(top)) * 100, 100)}%` }}
+              animate={{ width: `${Math.min((Math.log10(Math.max(revenue, 1)) / Math.log10(Math.max(top, 10))) * 100, 100)}%` }}
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             />
             {awards.map((a, i) => {

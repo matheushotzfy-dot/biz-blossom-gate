@@ -94,7 +94,7 @@ export default function LinkPagamento() {
   };
 
   const resetForm = () => {
-    setForm({ title: "", description: "", amount: "", slug: "", accept_pix: true, accept_card: false, accept_boleto: false });
+    setForm({ title: "", description: "", amount: "", slug: "", accept_pix: allowedMethods.accept_pix, accept_card: false, accept_boleto: false });
     setCoverFile(null);
     setCoverPreview(null);
   };
@@ -125,6 +125,7 @@ export default function LinkPagamento() {
     const amount = Number(String(form.amount).replace(",", "."));
     if (!amount || amount <= 0) { toast.error("Valor inválido"); return; }
     if (!form.title.trim()) { toast.error("Título obrigatório"); return; }
+    if (!form.accept_pix && !form.accept_card && !form.accept_boleto) { toast.error("Ative ao menos um método liberado"); return; }
 
     setUploading(true);
     try {

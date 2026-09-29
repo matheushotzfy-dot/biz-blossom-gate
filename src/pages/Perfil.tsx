@@ -21,18 +21,9 @@ import { HDShell, HDHeader, HDStat, HDStatGrid } from "@/components/hd/HDPage";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-import { lazy, Suspense } from "react";
-import { BadgePercent } from "lucide-react";
 import { ProfileFeesCard } from "@/components/profile/ProfileFeesCard";
 
 /* ─────────── Constants & helpers ─────────── */
-const fmtCurrency = (v: number) =>
-  `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-const fmtCompact = (v: number) =>
-  v >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(1).replace(".", ",")}M`
-  : v >= 1_000 ? `R$ ${(v / 1_000).toFixed(0)}K`
-  : fmtCurrency(v);
-
 /* ─────────── Subcomponents ─────────── */
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -114,7 +105,6 @@ function FieldLabel({ children, locked }: { children: React.ReactNode; locked?: 
 export default function Perfil() {
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
-  const [allTimeRevenue, setAllTimeRevenue] = useState(0);
   const [totalSales, setTotalSales] = useState(0);
   const [last30Sales, setLast30Sales] = useState(0);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "" });
@@ -177,7 +167,6 @@ export default function Perfil() {
       .eq("status", "completed")
       .then(({ data }) => {
         if (!data) return;
-        setAllTimeRevenue(data.reduce((a, t) => a + Number(t.net_amount), 0));
         setTotalSales(data.length);
         const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
         setLast30Sales(data.filter(t => new Date(t.created_at).getTime() >= cutoff).length);

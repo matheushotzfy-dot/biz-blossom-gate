@@ -29,8 +29,9 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
  const [socialProof, setSocialProof] = useState(product.checkout_social_proof ?? false);
  const [guaranteeEnabled, setGuaranteeEnabled] = useState(product.checkout_guarantee_enabled ?? true);
  const [pixEnabled, setPixEnabled] = useState(product.checkout_pix_enabled ?? true);
- const [boletoEnabled, setBoletoEnabled] = useState(product.checkout_boleto_enabled ?? true);
+ const [boletoEnabled, setBoletoEnabled] = useState(product.checkout_boleto_enabled ?? false);
  const [creditCardEnabled, setCreditCardEnabled] = useState(product.checkout_credit_card_enabled ?? true);
+ const [allowedMethods, setAllowedMethods] = useState({ pix: true, boleto: false, card: true });
  const [addressRequired, setAddressRequired] = useState(product.checkout_address_required ?? false);
  const [emailConfirm, setEmailConfirm] = useState(product.checkout_email_confirm ?? true);
 
@@ -54,6 +55,14 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
  // Load existing order bumps
  supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", product.id)
  .then(({ data }) => { if (data) setOrderBumps(data); });
+ supabase.from("profiles").select("pix_enabled, boleto_enabled, credit_card_enabled").eq("user_id", user.id).maybeSingle()
+ .then(({ data }) => {
+  if (!data) return;
+  setAllowedMethods({ pix: data.pix_enabled, boleto: data.boleto_enabled, card: data.credit_card_enabled });
+  if (!data.pix_enabled) setPixEnabled(false);
+  if (!data.boleto_enabled) setBoletoEnabled(false);
+  if (!data.credit_card_enabled) setCreditCardEnabled(false);
+ });
  }, [user?.id, open, product.id]);
 
   const uploadBanner = async (file: File, type: string): Promise<string | null> => {
@@ -204,15 +213,15 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
           <TabsContent value="payment" className="mt-5 space-y-4 pb-2">
             <Section title="Métodos de pagamento" subtitle="Formas de pagamento aceitas no checkout">
               <div className="rounded-xl border border-border/60 divide-y divide-border/60 overflow-hidden bg-card">
-                <Row icon={<QrCode className="h-4 w-4 text-success" />} title="PIX" description="Aprovação imediata · taxa baixa">
+                {allowedMethods.pix && <Row icon={<QrCode className="h-4 w-4 text-success" />} title="PIX" description="Aprovação imediata">
                   <Switch checked={pixEnabled} onCheckedChange={setPixEnabled} />
-                </Row>
-                <Row icon={<FileText className="h-4 w-4 text-warning" />} title="Boleto bancário" description="Compensação em 1–3 dias úteis">
+                </Row>}
+                {allowedMethods.boleto && <Row icon={<FileText className="h-4 w-4 text-warning" />} title="Boleto bancário" description="Compensação em 1–3 dias úteis">
                   <Switch checked={boletoEnabled} onCheckedChange={setBoletoEnabled} />
-                </Row>
-                <Row icon={<CreditCard className="h-4 w-4 text-primary" />} title="Cartão de crédito" description="Parcelamento em até 12x">
+                </Row>}
+                {allowedMethods.card && <Row icon={<CreditCard className="h-4 w-4 text-primary" />} title="Cartão de crédito" description="Parcelamento em até 12x">
                   <Switch checked={creditCardEnabled} onCheckedChange={setCreditCardEnabled} />
-                </Row>
+                </Row>}
               </div>
               <p className="text-[11px] text-muted-foreground/70 mt-2 px-1">Ao menos um método deve permanecer ativo.</p>
             </Section>

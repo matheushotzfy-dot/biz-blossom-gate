@@ -205,8 +205,9 @@ export default function CheckoutBuilder() {
  const [socialProof, setSocialProof] = useState(initialProduct?.checkout_social_proof ?? false);
  const [guaranteeEnabled, setGuaranteeEnabled] = useState(initialProduct?.checkout_guarantee_enabled ?? true);
  const [pixEnabled, setPixEnabled] = useState(initialProduct?.checkout_pix_enabled ?? true);
- const [boletoEnabled, setBoletoEnabled] = useState(initialProduct?.checkout_boleto_enabled ?? true);
+ const [boletoEnabled, setBoletoEnabled] = useState(initialProduct?.checkout_boleto_enabled ?? false);
  const [creditCardEnabled, setCreditCardEnabled] = useState(initialProduct?.checkout_credit_card_enabled ?? true);
+ const [allowedMethods, setAllowedMethods] = useState({ pix: true, boleto: false, card: true });
  const [addressRequired, setAddressRequired] = useState(initialProduct?.checkout_address_required ?? false);
  const [emailConfirm, setEmailConfirm] = useState(initialProduct?.checkout_email_confirm ?? true);
  const [bannerDesktopPreview, setBannerDesktopPreview] = useState(initialProduct?.checkout_banner_desktop_url || "");
@@ -287,7 +288,7 @@ export default function CheckoutBuilder() {
  setSocialProof(data.checkout_social_proof ?? false);
  setGuaranteeEnabled(data.checkout_guarantee_enabled ?? true);
  setPixEnabled(data.checkout_pix_enabled ?? true);
- setBoletoEnabled(data.checkout_boleto_enabled ?? true);
+ setBoletoEnabled(data.checkout_boleto_enabled ?? false);
  setCreditCardEnabled(data.checkout_credit_card_enabled ?? true);
  setAddressRequired(data.checkout_address_required ?? false);
  setEmailConfirm(data.checkout_email_confirm ?? true);
@@ -301,6 +302,18 @@ export default function CheckoutBuilder() {
  .then(({ data }) => { if (data) setOrderBumps(data); });
  // eslint-disable-next-line react-hooks/exhaustive-deps
  }, [user?.id, productId]);
+
+ useEffect(() => {
+  if (!user?.id) return;
+  supabase.from("profiles").select("pix_enabled, boleto_enabled, credit_card_enabled").eq("user_id", user.id).maybeSingle()
+   .then(({ data }) => {
+    if (!data) return;
+    setAllowedMethods({ pix: data.pix_enabled, boleto: data.boleto_enabled, card: data.credit_card_enabled });
+    if (!data.pix_enabled) setPixEnabled(false);
+    if (!data.boleto_enabled) setBoletoEnabled(false);
+    if (!data.credit_card_enabled) setCreditCardEnabled(false);
+   });
+ }, [user?.id]);
 
  // Auto-save
  const autoSave = useCallback(async () => {
@@ -645,9 +658,9 @@ export default function CheckoutBuilder() {
  {/* Payment summary cards */}
  <div className="grid grid-cols-3 gap-2">
  {[
- { enabled: pixEnabled, icon: QrCode, label: "PIX", color: "text-emerald-500", bg: "bg-emerald-500/10 border-emerald-500/20" },
- { enabled: boletoEnabled, icon: FileText, label: "Boleto", color: "text-amber-500", bg: "bg-amber-500/10 border-amber-500/20" },
- { enabled: creditCardEnabled, icon: CreditCard, label: "Cartão", color: "text-blue-500", bg: "bg-blue-500/10 border-blue-500/20" },
+ { enabled: allowedMethods.pix && pixEnabled, icon: QrCode, label: "PIX", color: "text-success", bg: "bg-success/10 border-success/20" },
+ { enabled: allowedMethods.boleto && boletoEnabled, icon: FileText, label: "Boleto", color: "text-warning", bg: "bg-warning/10 border-warning/20" },
+ { enabled: allowedMethods.card && creditCardEnabled, icon: CreditCard, label: "Cartão", color: "text-info", bg: "bg-info/10 border-info/20" },
  ].map(pm => (
  <div key={pm.label} className={cn(
  "rounded-lg p-3 text-center border transition-all",
@@ -660,9 +673,9 @@ export default function CheckoutBuilder() {
  ))}
  </div>
 
- <ToggleRow icon={QrCode} title="PIX" desc="Pagamento instantâneo — 99% aprovação" checked={pixEnabled} onChange={setPixEnabled} />
- <ToggleRow icon={FileText} title="Boleto Bancário" desc="Vencimento em 3 dias úteis" checked={boletoEnabled} onChange={setBoletoEnabled} />
- <ToggleRow icon={CreditCard} title="Cartão de Crédito" desc="Até 12x sem juros" checked={creditCardEnabled} onChange={setCreditCardEnabled} />
+ {allowedMethods.pix && <ToggleRow icon={QrCode} title="PIX" desc="Pagamento instantâneo" checked={pixEnabled} onChange={setPixEnabled} />}
+ {allowedMethods.boleto && <ToggleRow icon={FileText} title="Boleto Bancário" desc="Vencimento em 3 dias úteis" checked={boletoEnabled} onChange={setBoletoEnabled} />}
+ {allowedMethods.card && <ToggleRow icon={CreditCard} title="Cartão de Crédito" desc="Até 12x" checked={creditCardEnabled} onChange={setCreditCardEnabled} />}
  <ConversionTip text="PIX + Cartão maximiza a conversão. PIX converte 99% e cartão captura quem prefere parcelar." />
  </>
  )}
