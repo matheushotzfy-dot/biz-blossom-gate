@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { uniqueChannelName } from "@/lib/realtime";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Bell, ArrowDownToLine, CheckCircle2, XCircle, Info,
@@ -66,7 +67,7 @@ export function NotificationPanel({ open, onClose }: Props) {
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel(`notifications-realtime-${user.id}`)
+      .channel(uniqueChannelName(`notifications-realtime-${user.id}`))
       .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, (payload) => {
         const row = (payload.new || payload.old) as Notification | undefined;
         if (!row) return;
@@ -252,7 +253,7 @@ export function useNotificationCount() {
     };
     load();
     const channel = supabase
-      .channel(`notif-count-${user.id}-${Math.random().toString(36).slice(2, 8)}`)
+      .channel(uniqueChannelName(`notif-count-${user.id}`))
       .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(channel); };

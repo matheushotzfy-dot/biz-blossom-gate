@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { uniqueChannelName } from "@/lib/realtime";
 import {
   Zap,
   QrCode,
@@ -150,7 +151,7 @@ export function TransactionTimeline({ transactionId, variant = "seller", classNa
     void load();
 
     const channel = supabase
-      .channel(`tx-events-${transactionId}`)
+      .channel(uniqueChannelName(`tx-events-${transactionId}`))
       .on(
         "postgres_changes",
         {

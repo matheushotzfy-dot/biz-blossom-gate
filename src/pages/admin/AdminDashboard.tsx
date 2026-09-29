@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { uniqueChannelName } from "@/lib/realtime";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTheme } from "@/hooks/useTheme";
@@ -258,7 +259,7 @@ export default function AdminDashboard() {
       const wait = Math.max(500, 10_000 - elapsed);
       timer = setTimeout(() => { timer = null; void loadData(); }, wait);
     };
-    const channel = supabase.channel("admin-financial-sync")
+    const channel = supabase.channel(uniqueChannelName("admin-financial-sync"))
       .on("postgres_changes", { event: "*", schema: "public", table: "transactions" }, reconcile)
       .on("postgres_changes", { event: "*", schema: "public", table: "withdrawals" }, reconcile)
       .on("postgres_changes", { event: "*", schema: "public", table: "disputes" }, reconcile)

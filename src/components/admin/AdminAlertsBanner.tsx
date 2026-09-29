@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { uniqueChannelName } from "@/lib/realtime";
 import { AlertTriangle, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -39,7 +40,7 @@ export function AdminAlertsBanner({ isAdmin = false }: { isAdmin?: boolean }) {
   useEffect(() => {
     load();
     const ch = supabase
-      .channel("admin-alerts-banner")
+      .channel(uniqueChannelName("admin-alerts-banner"))
       .on("postgres_changes", { event: "*", schema: "public", table: "admin_alerts" }, () => load())
       .subscribe();
     const t = setInterval(load, 60_000);

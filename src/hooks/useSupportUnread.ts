@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { uniqueChannelName } from "@/lib/realtime";
 import { useAuth } from "@/hooks/useAuth";
 import { playIncomingBeep } from "@/lib/ticketAttachments";
 
@@ -63,7 +64,7 @@ export function useSupportUnread(): number {
 
     // Realtime: refresh count on any ticket change for this user
     const ticketsChannel = (supabase as any)
-      .channel(`support_unread_${user.id}`)
+      .channel(uniqueChannelName(`support_unread_${user.id}`))
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "support_tickets", filter: `user_id=eq.${user.id}` },
@@ -75,7 +76,7 @@ export function useSupportUnread(): number {
     // Filter server-side by sender_type only; we then confirm ownership via a
     // lightweight lookup because ticket_messages carries no user_id column.
     const messagesChannel = (supabase as any)
-      .channel(`support_msgs_${user.id}`)
+      .channel(uniqueChannelName(`support_msgs_${user.id}`))
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "ticket_messages", filter: `sender_type=eq.staff` },

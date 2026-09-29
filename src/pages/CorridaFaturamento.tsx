@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Clock, Crown, Flag, Gift, Medal, Award, Trophy, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { uniqueChannelName } from "@/lib/realtime";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
@@ -62,7 +63,7 @@ export default function CorridaFaturamento() {
   useEffect(() => {
     void load();
     // Anything the admin changes (race, prizes, ranking adjustments) refreshes here live.
-    const ch = supabase.channel("race-live")
+    const ch = supabase.channel(uniqueChannelName("race-live"))
       .on("postgres_changes", { event: "*", schema: "public", table: "revenue_races" }, () => void load())
       .on("postgres_changes", { event: "*", schema: "public", table: "revenue_race_prizes" }, () => void load())
       .on("postgres_changes", { event: "*", schema: "public", table: "revenue_race_overrides" }, () => void load())

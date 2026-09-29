@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { uniqueChannelName } from "@/lib/realtime";
 import {
   DollarSign, Users, TrendingUp, CheckCircle2, XCircle,
   CreditCard, Package, Activity, Percent, ShieldAlert, RotateCcw, Lock,
@@ -185,7 +186,7 @@ export default function AdminOverviewTab({
 
   useEffect(() => {
     const channel = supabase
-      .channel("admin-god-mode-tx")
+      .channel(uniqueChannelName("admin-god-mode-tx"))
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "transactions" }, (payload) => {
         setRealtimeTx(prev => [payload.new as Tables<"transactions">, ...prev].slice(0, 25));
       })

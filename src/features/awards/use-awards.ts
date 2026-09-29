@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { uniqueChannelName } from "@/lib/realtime";
 import { useAuth } from "@/hooks/useAuth";
 import { AWARDS, type AwardItem } from "./awards-data";
 
@@ -91,7 +92,7 @@ export function useAwards() {
 
     // Live: admin status/tracking changes and tier edits show up without reload.
     const channel = supabase
-      .channel(`awards-${user.id}`)
+      .channel(uniqueChannelName(`awards-${user.id}`))
       .on("postgres_changes", { event: "*", schema: "public", table: "reward_claims", filter: `user_id=eq.${user.id}` }, () => { void loadClaims(); })
       .on("postgres_changes", { event: "*", schema: "public", table: "award_tiers" }, async () => {
         const { data } = await supabase.from("award_tiers").select("*");
