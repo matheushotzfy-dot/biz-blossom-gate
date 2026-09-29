@@ -1071,9 +1071,11 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                               const next = !enabled;
                               const previous = selectedUser;
                               setSelectedUser({ ...selectedUser, [opt.key]: next });
+                              const methodUpdate: TablesUpdate<"profiles"> = {};
+                              methodUpdate[opt.key] = next;
                               const { error } = await supabase
                                 .from("profiles")
-                                .update({ [opt.key]: next })
+                                .update(methodUpdate)
                                 .eq("user_id", selectedUser.user_id);
                                if (error) { setSelectedUser(previous); toast.error("Erro ao atualizar método"); return; }
                               toast.success(`${opt.label} ${next ? "ativado" : "desativado"}`);

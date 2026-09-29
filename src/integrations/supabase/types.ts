@@ -2777,7 +2777,6 @@ export type Database = {
           price: number
           product_created_at: string
           status: string
-          support_email: string | null
           updated_at: string
         }
         Insert: {
@@ -2806,7 +2805,6 @@ export type Database = {
           price: number
           product_created_at: string
           status: string
-          support_email?: string | null
           updated_at?: string
         }
         Update: {
@@ -2835,7 +2833,6 @@ export type Database = {
           price?: number
           product_created_at?: string
           status?: string
-          support_email?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -4812,7 +4809,6 @@ export type Database = {
           name: string | null
           price: number | null
           status: string | null
-          support_email: string | null
         }
         Insert: {
           affiliate_commission?: number | null
@@ -4840,7 +4836,6 @@ export type Database = {
           name?: string | null
           price?: never
           status?: string | null
-          support_email?: string | null
         }
         Update: {
           affiliate_commission?: number | null
@@ -4868,7 +4863,6 @@ export type Database = {
           name?: string | null
           price?: never
           status?: string | null
-          support_email?: string | null
         }
         Relationships: []
       }
@@ -5295,7 +5289,6 @@ export type Database = {
           price: number
           product_created_at: string
           status: string
-          support_email: string | null
           updated_at: string
         }[]
         SetofOptions: {

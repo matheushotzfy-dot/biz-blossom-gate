@@ -1,5 +1,5 @@
-- [ ] Restringir acesso público de catálogo e validar linter
-- [ ] Finalizar controles de métodos no admin, produtos, links e checkout
-- [ ] Finalizar Perfil, Cupons, Premiações, Suporte e animações de janelas
-- [ ] Validar chaves API sem limite e segurança mantida
-- [ ] Executar testes funcionais, visuais, mobile e acessibilidade
+- [x] Restringir acesso público de catálogo e validar linter
+- [x] Finalizar controles de métodos no admin, produtos, links e checkout
+- [x] Finalizar Perfil, Cupons, Premiações, Suporte e animações de janelas
+- [x] Validar chaves API sem limite e segurança mantida
+- [x] Executar testes funcionais, visuais, mobile e acessibilidade

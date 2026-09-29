@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 import { logAdminAction } from "@/lib/auditLog";
 import { useAuth } from "@/hooks/useAuth";
-import type { Tables, Json } from "@/integrations/supabase/types";
+import type { Tables, TablesUpdate, Json } from "@/integrations/supabase/types";
 import { GlassPanel as Panel, GlassPanelTitle } from "./AdminOverviewTab";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid } from "./AdminPremium";
@@ -24,6 +24,7 @@ import { PremiumMetric, PremiumMetricGrid } from "./AdminPremium";
 /* ── Types ── */
 interface BlacklistEntry { id: string; entry_type: string; entry_value: string; reason: string; added_by: string; is_active: boolean; created_at: string; }
 interface VelocityRule { id: string; rule_name: string; rule_type: string; is_enabled: boolean; max_attempts: number; time_window_minutes: number; threshold_amount: number | null; action: string; updated_by: string | null; }
+type EditableVelocityField = "max_attempts" | "time_window_minutes" | "threshold_amount";
 interface FraudLog { id: string; block_type: string; block_reason: string; matched_value: string | null; matched_type: string | null; customer_email: string | null; customer_document: string | null; customer_ip: string | null; product_id: string | null; seller_user_id: string | null; metadata: Json; created_at: string; }
 
 type SubTab = "blacklist" | "chargeback-radar" | "velocity" | "fraud-trail";
@@ -131,8 +132,10 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
  setVelocityRules(prev => prev.map(r => r.id === rule.id ? { ...r, is_enabled: !r.is_enabled } : r));
  };
 
- const handleUpdateRule = async (rule: VelocityRule, field: string, value: number) => {
- const { error } = await supabase.from("velocity_rules").update({ [field]: value, updated_by: user?.id }).eq("id", rule.id);
+ const handleUpdateRule = async (rule: VelocityRule, field: EditableVelocityField, value: number) => {
+ const update: TablesUpdate<"velocity_rules"> = { updated_by: user?.id };
+ update[field] = value;
+ const { error } = await supabase.from("velocity_rules").update(update).eq("id", rule.id);
  if (error) { toast.error("Erro"); return; }
  toast.success("Regra atualizada");
  setVelocityRules(prev => prev.map(r => r.id === rule.id ? { ...r, [field]: value } : r));

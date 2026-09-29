@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import { ProfileFeesCard } from "@/components/profile/ProfileFeesCard";
+import type { TablesUpdate } from "@/integrations/supabase/types";
 
 /* ─────────── Constants & helpers ─────────── */
 /* ─────────── Subcomponents ─────────── */
@@ -219,7 +220,7 @@ export default function Perfil() {
     e.preventDefault();
     if (!user) return;
     setSaving(true);
-    const updates: Record<string, string> = {};
+    const updates: TablesUpdate<"profiles"> = {};
     if (!profile?.full_name) updates.full_name = form.full_name;
     if (!profile?.email) updates.email = form.email;
     if (!profile?.phone) updates.phone = form.phone;
