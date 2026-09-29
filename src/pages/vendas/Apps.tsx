@@ -314,7 +314,7 @@ export default function Apps() {
       {/* ─── Integration Dialog · Billion-Dollar SaaS ─── */}
       {dialogApp && dialogApp.id !== "webhooks" && (
         <Dialog open={!!dialogApp} onOpenChange={(v) => { if (!v) closeDialog(); }}>
-          <DialogContent className="max-w-[580px] rounded-[12px] border border-border bg-card p-0 overflow-hidden max-h-[92vh] flex flex-col gap-0">
+          <DialogContent className="w-[calc(100vw-1.5rem)] max-w-[680px] rounded-3xl border border-border bg-card p-0 overflow-hidden max-h-[92vh] flex flex-col gap-0">
             {/* Header — premium */}
             <div className="relative flex items-center gap-4 border-b border-border/70 bg-gradient-to-b from-primary/[0.04] to-transparent px-6 py-5">
               <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
@@ -434,7 +434,7 @@ export default function Apps() {
 
                   {formEventMode === "custom" && (
                     <div className="rounded-xl border border-border/70 bg-secondary/50 overflow-hidden">
-                      <div className="max-h-56 overflow-y-auto divide-y divide-border/60">
+                      <div className="grid grid-cols-1 divide-y divide-border/60 sm:grid-cols-2 sm:divide-y-0">
                         {dialogApp.events.map(event => {
                           const selected = formSelectedEvents.includes(event);
                           const isReversal = event.includes("Refund") || event.includes("Chargeback");
