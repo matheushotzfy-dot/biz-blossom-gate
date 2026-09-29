@@ -184,16 +184,38 @@ input[type="number"]::-webkit-inner-spin-button {
     font-family: 'Manrope', system-ui, sans-serif;
   }
 
+  .auth-form-panel {
+    background: linear-gradient(180deg, hsl(var(--background) / .97), hsl(var(--background) / .92));
+  }
+
+  .auth-mobile-ambient {
+    background:
+      radial-gradient(circle at 84% 6%, hsl(var(--primary) / .16), transparent 38%),
+      radial-gradient(circle at 10% 86%, hsl(var(--success) / .08), transparent 42%);
+  }
+
   .auth-network {
-    background: hsl(0 0% 8%);
+    background: hsl(0 0% 3%);
   }
 
   .auth-network-grid {
-    opacity: 0.42;
-    background-image: radial-gradient(circle, hsl(var(--foreground) / 0.12) 1px, transparent 1px);
-    background-size: 18px 18px;
+    opacity: 0.34;
+    background-image: radial-gradient(circle, hsl(var(--foreground) / 0.14) 1px, transparent 1px);
+    background-size: 28px 28px;
     -webkit-mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, #000 20%, transparent 78%);
     mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, #000 20%, transparent 78%);
+  }
+
+  .auth-aurora { position:absolute; border-radius:999px; filter:blur(95px); will-change:transform; }
+  .auth-aurora-one { width:620px; height:620px; right:-180px; top:-180px; background:hsl(var(--primary) / .16); animation:auth-drift 12s ease-in-out infinite alternate; }
+  .auth-aurora-two { width:500px; height:500px; left:-160px; bottom:-180px; background:hsl(var(--success) / .09); animation:auth-drift 15s ease-in-out infinite alternate-reverse; }
+  .auth-preview { box-shadow:0 38px 100px hsl(0 0% 0% / .58); transition:transform .7s cubic-bezier(.16,1,.3,1), border-color .4s ease; }
+  .auth-preview:hover { transform:rotate(1deg) translateY(-6px); border-color:hsl(var(--primary) / .34); }
+  .auth-secure-float { position:absolute; right:20px; bottom:-22px; display:flex; align-items:center; gap:8px; border-radius:10px; background:hsl(var(--primary)); color:hsl(var(--primary-foreground)); padding:14px 16px; font-size:10px; font-weight:800; }
+  @keyframes auth-drift { to { transform:translate3d(-60px,55px,0) scale(1.1); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .auth-aurora { animation:none; }
   }
 
   .gradient-primary {

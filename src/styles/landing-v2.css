@@ -1,26 +1,27 @@
 /* ==========================================================================
    VENXPAY · Landing pública v2 — escopo isolado em .vx-land
-   "Sala de controle financeira à noite": grafite profundo, halo esmeralda,
+   "Kinetic Dark Mode": grafite profundo, energia solar e sinais esmeralda,
    tipografia editorial e grade técnica exposta.
    Nenhuma regra vaza para o painel, admin ou área de membros.
    ========================================================================== */
 
 .vx-land {
-  --background: 168 22% 4%;
-  --foreground: 150 30% 97%;
-  --card: 170 18% 7%;
-  --card-foreground: 150 30% 97%;
-  --muted: 170 14% 12%;
-  --muted-foreground: 160 10% 60%;
-  --border: 168 12% 16%;
-  --input: 168 12% 16%;
-  --ring: 156 82% 46%;
-  --primary: 156 82% 46%;
-  --primary-foreground: 168 30% 5%;
-  --secondary: 170 14% 12%;
-  --secondary-foreground: 150 30% 97%;
-  --accent: 156 82% 46%;
-  --radius: 4px;
+  --background: 0 0% 2%;
+  --foreground: 60 20% 98%;
+  --card: 50 10% 5%;
+  --card-foreground: 60 20% 98%;
+  --muted: 50 10% 10%;
+  --muted-foreground: 45 6% 61%;
+  --border: 50 12% 16%;
+  --input: 50 12% 16%;
+  --ring: 51 100% 50%;
+  --primary: 51 100% 50%;
+  --primary-foreground: 0 0% 3%;
+  --secondary: 50 10% 10%;
+  --secondary-foreground: 60 20% 98%;
+  --accent: 161 82% 46%;
+  --success: 161 82% 46%;
+  --radius: 8px;
 
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
@@ -47,7 +48,7 @@ html.vx-scroll body {
 .vx-land h2,
 .vx-land h3 {
   font-family: "Sora", system-ui, sans-serif !important;
-  letter-spacing: -0.04em !important;
+  letter-spacing: 0 !important;
   line-height: 0.96 !important;
   text-wrap: balance;
 }
@@ -97,6 +98,25 @@ html.vx-scroll body {
   );
   filter: blur(4px);
 }
+.vx-electric-text {
+  color: hsl(var(--primary));
+  text-shadow: 0 0 42px hsl(var(--primary) / .16);
+}
+.vx-aurora { position:absolute; border-radius:999px; filter:blur(105px); will-change:transform; }
+.vx-aurora-one { width:58vw; height:48vw; top:-25%; right:-10%; background:hsl(var(--primary) / .14); animation:vx-drift-a 12s ease-in-out infinite alternate; }
+.vx-aurora-two { width:46vw; height:38vw; bottom:-24%; left:18%; background:hsl(var(--accent) / .09); animation:vx-drift-b 15s ease-in-out infinite alternate; }
+.vx-orbit { position:absolute; border:1px solid hsl(var(--primary) / .14); border-radius:50%; }
+.vx-orbit-one { width:620px; height:620px; right:4%; top:8%; animation:vx-spin 28s linear infinite; }
+.vx-orbit-two { width:420px; height:420px; right:11%; top:19%; border-style:dashed; animation:vx-spin 34s linear infinite reverse; }
+.vx-noise { opacity:.12; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E"); }
+.vx-product-stage { perspective:1100px; }
+.vx-product-glow { position:absolute; inset:8% 4%; background:hsl(var(--primary) / .2); filter:blur(75px); }
+.vx-dashboard-preview { box-shadow:0 32px 90px hsl(0 0% 0% / .55); transform:rotateY(-5deg); transition:transform .7s cubic-bezier(.16,1,.3,1); }
+.vx-product-stage:hover .vx-dashboard-preview { transform:rotateY(0) rotate(1.5deg); }
+.vx-secure-badge { position:absolute; right:-14px; bottom:-18px; display:flex; align-items:center; gap:8px; border-radius:10px; background:hsl(var(--primary)); color:hsl(var(--primary-foreground)); padding:14px 16px; font:800 10px "Manrope",sans-serif; }
+@keyframes vx-drift-a { to { transform:translate3d(-9%,12%,0) scale(1.12); } }
+@keyframes vx-drift-b { to { transform:translate3d(12%,-10%,0) scale(.92); } }
+@keyframes vx-spin { to { transform:rotate(360deg); } }
 .vx-rule {
   height: 1px;
   background: hsl(var(--border));
@@ -110,7 +130,7 @@ html.vx-scroll body {
   gap: 10px;
   height: 50px;
   padding: 0 26px;
-  border-radius: 3px;
+  border-radius: 8px;
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
   font-size: 14.5px;
@@ -132,7 +152,7 @@ html.vx-scroll body {
   gap: 8px;
   height: 50px;
   padding: 0 22px;
-  border-radius: 3px;
+  border-radius: 8px;
   border: 1px solid hsl(var(--border));
   color: hsl(var(--foreground));
   font-size: 14.5px;
@@ -174,5 +194,5 @@ html.vx-scroll body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .vx-strip { animation: none; }
+  .vx-strip, .vx-aurora, .vx-orbit { animation: none; }
 }

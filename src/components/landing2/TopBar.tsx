@@ -33,7 +33,7 @@ export function TopBar({ onLogin, onSignup }: { onLogin: () => void; onSignup: (
       <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-5">
         <a href="#topo" className="flex items-center gap-2.5">
           <VenxpayLogo size={26} plate={false} animated={false} />
-          <span className="font-heading text-[15px] font-extrabold tracking-tight text-foreground">venxpay</span>
+          <span className="font-heading text-[15px] font-extrabold text-foreground">VENX<span className="text-primary">PAY</span></span>
         </a>
 
         <nav className="hidden items-center gap-8 lg:flex">
@@ -52,14 +52,14 @@ export function TopBar({ onLogin, onSignup }: { onLogin: () => void; onSignup: (
           <button
             type="button"
             onClick={onLogin}
-            className="hidden h-9 px-4 text-[13px] font-bold text-muted-foreground transition-colors hover:text-foreground sm:block"
+            className="hidden h-10 px-4 text-[13px] font-bold text-muted-foreground transition-colors hover:text-foreground sm:block"
           >
             Entrar
           </button>
           <button
             type="button"
             onClick={onSignup}
-            className="h-9 rounded-[3px] bg-primary px-4 text-[13px] font-extrabold text-primary-foreground transition-colors hover:bg-primary/88"
+            className="h-10 rounded-[8px] bg-primary px-5 text-[13px] font-extrabold text-primary-foreground transition-all hover:-translate-y-0.5 hover:bg-primary/88"
           >
             Criar conta
           </button>
