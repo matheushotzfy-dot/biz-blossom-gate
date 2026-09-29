@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -102,7 +102,8 @@ const TOTAL_STEPS = STEP_TITLES.length;
 
 
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [searchParams] = useSearchParams();
+  const [isLogin, setIsLogin] = useState(() => searchParams.get("mode") !== "signup");
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -347,19 +348,20 @@ export default function Auth() {
     : STEP_TITLES[step - 1];
 
   return (
-    <div className="auth-shell h-[100dvh] overflow-y-auto bg-background text-foreground">
+    <div className="auth-shell relative h-[100dvh] overflow-y-auto bg-background text-foreground">
+      <div className="auth-mobile-ambient pointer-events-none fixed inset-0 lg:hidden" aria-hidden="true" />
       <Seo
         title={isLogin ? "Entrar — VENXPAY" : "Criar conta grátis — VENXPAY"}
         description={isLogin ? "Acesse seu painel VENXPAY: produtos, vendas, saques e área de membros em um só lugar." : "Crie sua conta VENXPAY gratuitamente e comece a vender infoprodutos com checkout de alta conversão."}
         path="/auth"
       />
 
-      <div className="grid min-h-screen lg:grid-cols-[minmax(0,51.25%)_minmax(0,48.75%)]">
+      <div className="relative grid min-h-screen lg:grid-cols-[minmax(0,48%)_minmax(0,52%)]">
         {/* ═══ LEFT — form ═══ */}
-        <div className="relative flex min-h-screen flex-col justify-between border-r border-border px-5 py-7 sm:px-10 sm:py-9 lg:rounded-r-[22px] lg:px-16 lg:py-10 xl:px-24">
+        <div className="auth-form-panel relative z-10 flex min-h-screen flex-col justify-between border-r border-border px-5 py-7 sm:px-10 sm:py-9 lg:px-16 lg:py-10 xl:px-24">
           <a href="/" className="inline-flex w-fit items-center gap-2.5 opacity-95 transition-opacity hover:opacity-100">
             <VenxpayLogo size={32} plate={false} />
-            <span className="text-[18px] font-heading font-semibold text-foreground">VENXPAY</span>
+            <span className="text-[18px] font-heading font-bold text-foreground">VENX<span className="text-primary">PAY</span></span>
           </a>
 
           <div className="mx-auto w-full max-w-[390px] py-10 sm:py-12">
@@ -775,7 +777,7 @@ export default function Auth() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5 text-[10px] text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5 text-[10px] text-muted-foreground">
             <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5" /> Conexão protegida com SSL 256-bit</span>
             <span className="inline-flex items-center gap-1.5"><Shield className="h-3.5 w-3.5" /> LGPD</span>
           </div>
