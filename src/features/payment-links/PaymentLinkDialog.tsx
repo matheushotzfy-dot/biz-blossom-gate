@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { paymentLinkFormSchema } from "@/lib/validation";
 import { formatCurrency } from "@/lib/utils";
+import { toast } from "sonner";
 import { PaymentLinkFields } from "./PaymentLinkFields";
 import { emptyPaymentLinkDraft, paymentLinkToDraft, type PaymentLink, type PaymentLinkDraft, type PaymentLinkPermissions } from "./types";
 
@@ -42,8 +43,8 @@ export function PaymentLinkDialog({ open, busy, permissions, editing, onOpenChan
 
   const pickFile = (file: File | null) => {
     if (!file) return;
-    if (!file.type.match(/^image\/(jpeg|png|webp)$/)) throw new Error("Formato de capa inválido");
-    if (file.size > 4 * 1024 * 1024) throw new Error("A capa deve ter no máximo 4 MB");
+    if (!file.type.match(/^image\/(jpeg|png|webp)$/)) { toast.error("Use uma imagem JPG, PNG ou WebP"); return; }
+    if (file.size > 4 * 1024 * 1024) { toast.error("A capa deve ter no máximo 4 MB"); return; }
     setCoverFile(file);
     setCoverPreview(URL.createObjectURL(file));
   };
@@ -52,7 +53,7 @@ export function PaymentLinkDialog({ open, busy, permissions, editing, onOpenChan
     event.preventDefault();
     const normalized = { ...draft, slug: publicSlug, amount };
     const parsed = paymentLinkFormSchema.safeParse(normalized);
-    if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Revise os campos do link");
+    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Revise os campos do link"); return; }
     await onSubmit({ ...draft, slug: publicSlug, amount: String(amount) }, coverFile);
   };
 
@@ -63,7 +64,7 @@ export function PaymentLinkDialog({ open, busy, permissions, editing, onOpenChan
         <div className="min-w-0 flex-1"><DialogTitle className="text-xl font-bold tracking-tight">{editing ? "Editar link de pagamento" : "Novo link de pagamento"}</DialogTitle><DialogDescription className="mt-1">Configure uma cobrança avulsa e revise tudo antes de publicar.</DialogDescription></div>
         <div className="mr-8 hidden max-w-[250px] rounded-2xl border border-border/60 bg-background px-4 py-2 text-right sm:block"><p className="text-[10px] font-semibold uppercase text-muted-foreground">Endereço</p><p className="truncate font-mono text-xs font-semibold">/pl/{publicSlug}</p></div>
       </DialogHeader>
-      <form onSubmit={(event) => { void submit(event).catch((error: unknown) => { throw error; }); }} className="min-h-0 overflow-y-auto">
+      <form onSubmit={(event) => { void submit(event).catch((error: unknown) => toast.error(error instanceof Error ? error.message : "Não foi possível salvar o link")); }} className="min-h-0 overflow-y-auto">
         <PaymentLinkFields draft={draft} permissions={permissions} coverPreview={coverPreview} fileInputRef={fileInputRef} onChange={(patch) => setDraft((current) => ({ ...current, ...patch }))} onPickFile={pickFile} onClearCover={() => { setCoverFile(null); setCoverPreview(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} />
         <div className="sticky bottom-0 flex flex-col gap-3 border-t border-border/60 bg-background px-5 py-5 sm:flex-row sm:items-center sm:px-8">
           <div className="min-w-0 flex-1"><p className="text-[10px] font-semibold uppercase text-muted-foreground">Resumo</p><p className="truncate text-sm font-semibold">{amount > 0 ? formatCurrency(amount) : "Defina o valor"} · {selectedMethods || "Nenhum método"}</p><p className="text-xs text-warning">Cobranças permanecem indisponíveis até uma adquirente ser configurada.</p></div>

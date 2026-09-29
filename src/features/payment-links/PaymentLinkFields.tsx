@@ -1,4 +1,5 @@
 import { Image as ImageIcon, X } from "lucide-react";
+import type { ReactNode, RefObject } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,13 +11,13 @@ interface PaymentLinkFieldsProps {
   draft: PaymentLinkDraft;
   permissions: PaymentLinkPermissions;
   coverPreview: string | null;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: RefObject<HTMLInputElement>;
   onChange: (patch: Partial<PaymentLinkDraft>) => void;
   onPickFile: (file: File | null) => void;
   onClearCover: () => void;
 }
 
-function StepLabel({ number, children }: { number: number; children: React.ReactNode }) {
+function StepLabel({ number, children }: { number: number; children: ReactNode }) {
   return <h3 className="flex items-center gap-2 text-sm font-semibold"><span className="grid h-6 w-6 place-items-center rounded-md bg-primary/15 text-xs font-bold text-primary">{number}</span>{children}</h3>;
 }
 
