@@ -216,7 +216,7 @@ export default function CorridaFaturamento() {
               return (
                 <article key={p.id} className={cn("group overflow-hidden rounded-lg border bg-background transition-[border-color,transform] duration-200 hover:-translate-y-0.5", reached ? "border-primary/50" : "border-border hover:border-primary/40")}>
                   <div className="aspect-video overflow-hidden bg-muted">
-                    {p.image_url ? <img src={p.image_url} alt={p.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : <div className="grid h-full place-items-center"><Trophy className="h-9 w-9 text-primary/50" /></div>}
+                    {(assetUrls[`prize:${p.id}`] || p.image_url) ? <img src={assetUrls[`prize:${p.id}`] || p.image_url || ""} alt={p.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : <div className="grid h-full place-items-center"><Trophy className="h-9 w-9 text-primary/50" /></div>}
                   </div>
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-2">
