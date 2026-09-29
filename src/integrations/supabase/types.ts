@@ -1522,6 +1522,54 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_action_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_role: string | null
+          amount: number
+          balance_after: number | null
+          balance_before: number | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          ledger_id: string | null
+          reason: string | null
+          seller_user_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_role?: string | null
+          amount?: number
+          balance_after?: number | null
+          balance_before?: number | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          ledger_id?: string | null
+          reason?: string | null
+          seller_user_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_role?: string | null
+          amount?: number
+          balance_after?: number | null
+          balance_before?: number | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          ledger_id?: string | null
+          reason?: string | null
+          seller_user_id?: string
+        }
+        Relationships: []
+      }
       financial_ledger: {
         Row: {
           adjustment_id: string | null
@@ -1585,6 +1633,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      financial_role_permissions: {
+        Row: {
+          allowed: boolean
+          permission: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          allowed?: boolean
+          permission: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          allowed?: boolean
+          permission?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       fraud_logs: {
         Row: {
@@ -5370,6 +5442,17 @@ export type Database = {
         Returns: string
       }
       get_course_analytics: { Args: { _course_id: string }; Returns: Json }
+      get_financial_action_history: {
+        Args: {
+          _action?: string
+          _from?: string
+          _limit?: number
+          _offset?: number
+          _seller?: string
+          _to?: string
+        }
+        Returns: Json
+      }
       get_global_payment_toggles: {
         Args: never
         Returns: {
