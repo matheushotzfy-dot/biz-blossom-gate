@@ -148,6 +148,9 @@ export default function AdminDashboard() {
   const [financialOverview, setFinancialOverview] = useState<AdminFinancialOverview | null>(null);
   const [dataCapHit, setDataCapHit] = useState<{ field: string; count: number }[]>([]);
   const lastLoadAtRef = useRef<number>(0);
+  const loadRequestRef = useRef(0);
+  const loadInFlightRef = useRef(false);
+  const loadQueuedRef = useRef(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEmployee, setIsEmployee] = useState(false);
   const [hasSupportPerm, setHasSupportPerm] = useState(false);
@@ -170,6 +173,12 @@ export default function AdminDashboard() {
   const [calOpen, setCalOpen] = useState(false);
 
   const loadData = useCallback(async () => {
+    if (loadInFlightRef.current) {
+      loadQueuedRef.current = true;
+      return;
+    }
+    loadInFlightRef.current = true;
+    const requestId = ++loadRequestRef.current;
     setSyncing(true);
     try {
       const fromIso = dateRange.from.toISOString();
@@ -190,6 +199,7 @@ export default function AdminDashboard() {
         products?: Tables<"products">[];
         withdrawals?: Tables<"withdrawals">[];
       };
+      if (requestId !== loadRequestRef.current) return;
       setTransactions(payload.transactions ?? []);
       setProfiles(payload.profiles ?? []);
       setProducts(payload.products ?? []);
@@ -207,7 +217,12 @@ export default function AdminDashboard() {
       const msg = e instanceof Error ? e.message : "desconhecido";
       toast.error("Erro ao carregar dados: " + msg);
     } finally {
-      setSyncing(false);
+      loadInFlightRef.current = false;
+      if (requestId === loadRequestRef.current) setSyncing(false);
+      if (loadQueuedRef.current) {
+        loadQueuedRef.current = false;
+        window.setTimeout(() => { void loadData(); }, 0);
+      }
     }
   }, [dateRange.from, dateRange.to]);
 

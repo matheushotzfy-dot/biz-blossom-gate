@@ -7,6 +7,7 @@ import {
   bankAccountSchema,
   productSchema,
   checkoutSlugSchema,
+  paymentLinkFormSchema,
   flattenZodErrors,
 } from "@/lib/validation";
 import { detectPixKeyType, maskAccount, maskAgency, maskDocument, maskPhone, maskSensitivePixKey } from "@/lib/financial-input";
@@ -157,6 +158,40 @@ describe("checkoutSlugSchema", () => {
   it("rejects too short / too long", () => {
     expect(checkoutSlugSchema.safeParse("ab").success).toBe(false);
     expect(checkoutSlugSchema.safeParse("a".repeat(80)).success).toBe(false);
+  });
+});
+
+describe("paymentLinkFormSchema", () => {
+  const valid = {
+    title: "Consultoria Premium",
+    description: "Atendimento individual",
+    amount: 197,
+    slug: "consultoria-premium",
+    max_uses: "10",
+    expires_at: "",
+    pix_expiration_minutes: 30,
+    instructions: "Envie o comprovante após o pagamento.",
+    redirect_url: "https://example.com/obrigado",
+    accept_pix: true,
+    accept_card: false,
+    accept_boleto: false,
+  };
+
+  it("accepts a complete single payment link", () => {
+    expect(paymentLinkFormSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("requires an allowed payment method", () => {
+    expect(paymentLinkFormSchema.safeParse({ ...valid, accept_pix: false }).success).toBe(false);
+  });
+
+  it("rejects invalid amounts and redirect URLs", () => {
+    expect(paymentLinkFormSchema.safeParse({ ...valid, amount: 0 }).success).toBe(false);
+    expect(paymentLinkFormSchema.safeParse({ ...valid, redirect_url: "javascript:alert(1)" }).success).toBe(false);
+  });
+
+  it("rejects a past expiration date", () => {
+    expect(paymentLinkFormSchema.safeParse({ ...valid, expires_at: "2020-01-01T10:00" }).success).toBe(false);
   });
 });
 
