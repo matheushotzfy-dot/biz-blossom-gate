@@ -134,7 +134,7 @@ export default function AdminLogin() {
             <span className="af-text-2">sob controle absoluto.</span>
           </h2>
           <p className="mt-5 text-[13.5px] leading-relaxed af-muted max-w-[380px]">
-            Painel restrito para gestão de sellers, transações, adquirentes e disputas.
+            Painel restrito para gestão de sellers, transações e disputas.
             Cada acesso é auditado. Cada ação é imutável.
           </p>
 

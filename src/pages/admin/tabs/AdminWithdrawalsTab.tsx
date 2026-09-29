@@ -615,7 +615,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                           {w.status === "rejected" ? "Motivo" : "Última falha"}
                           {(w as any).failure_code ? ` · ${(w as any).failure_code}` : ""}
                         </p>
-                        <p className="line-clamp-3 text-[10px] text-muted-foreground">{w.rejection_reason || "Falha na adquirente"}</p>
+                        <p className="line-clamp-3 text-[10px] text-muted-foreground">{w.rejection_reason || "Processamento não concluído"}</p>
                       </div>
                     )}
                   </td>

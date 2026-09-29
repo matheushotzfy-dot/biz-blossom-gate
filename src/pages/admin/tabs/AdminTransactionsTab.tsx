@@ -511,7 +511,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
                   </dl>
                 </PremiumPanel>
 
-                {/* Timeline — real audit events (creation, acquirer switches, postbacks, polling, expiration) */}
+                {/* Timeline — real audit events for the transaction lifecycle. */}
                 <PremiumPanel eyebrow="Auditoria completa" title="Timeline da transação" icon={Clock}>
                   <TransactionTimeline transactionId={selectedTx.id} variant="admin" />
                 </PremiumPanel>
