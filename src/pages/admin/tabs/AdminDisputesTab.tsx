@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { uniqueChannelName } from "@/lib/realtime";
 import { useAuth } from "@/hooks/useAuth";
 import { AlertTriangle, Search, Plus, Save, MessageSquare, Clock, CheckCircle2, XCircle, Package, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -76,7 +77,7 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
   useEffect(() => { void load(); }, [load]);
 
   useEffect(() => {
-    const channel = supabase.channel(`admin-disputes-${type}`)
+    const channel = supabase.channel(uniqueChannelName(`admin-disputes-${type}`))
       .on("postgres_changes", { event: "*", schema: "public", table: "disputes" }, () => { void load(); })
       .subscribe();
     return () => { void supabase.removeChannel(channel); };

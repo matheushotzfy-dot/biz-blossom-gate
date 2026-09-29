@@ -6,6 +6,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { uniqueChannelName } from "@/lib/realtime";
 import { useAuth } from "@/hooks/useAuth";
 import { useTicketTyping } from "@/hooks/useTicketTyping";
 import {
@@ -185,7 +186,7 @@ export default function Suporte() {
       });
 
     const channel = (supabase as any)
-      .channel(`ticket_${selectedId}`)
+      .channel(uniqueChannelName(`ticket_${selectedId}`))
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "ticket_messages", filter: `ticket_id=eq.${selectedId}` },
         (payload: any) => {
           setMessages(prev => prev.some(m => m.id === payload.new.id) ? prev : [...prev, payload.new]);

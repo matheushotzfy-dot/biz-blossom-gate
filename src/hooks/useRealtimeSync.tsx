@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { uniqueChannelName } from "@/lib/realtime";
 import { useAuth } from "@/hooks/useAuth";
 
 /**
@@ -36,7 +37,7 @@ export function useRealtimeSync() {
 
 
     const channel = supabase
-      .channel(`rt-user-${uid}`)
+      .channel(uniqueChannelName(`rt-user-${uid}`))
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "transactions", filter: `user_id=eq.${uid}` },

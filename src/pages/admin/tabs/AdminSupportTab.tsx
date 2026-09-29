@@ -5,6 +5,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { uniqueChannelName } from "@/lib/realtime";
 import { toast } from "sonner";
 import {
   MessageSquare, Send, Clock, CheckCircle2, AlertCircle, Inbox, Search,
@@ -156,7 +157,7 @@ export default function AdminSupportTab({
     (supabase as any).from("support_tickets").update({ unread_by_staff: 0 }).eq("id", selectedId)
       .then(() => setTickets(prev => prev.map(t => t.id === selectedId ? { ...t, unread_by_staff: 0 } : t)));
 
-    const channel = (supabase as any).channel(`admin_ticket_${selectedId}`)
+    const channel = (supabase as any).channel(uniqueChannelName(`admin_ticket_${selectedId}`))
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "ticket_messages", filter: `ticket_id=eq.${selectedId}` },
         (payload: any) => {
           setMessages(prev => prev.some(m => m.id === payload.new.id) ? prev : [...prev, payload.new]);
