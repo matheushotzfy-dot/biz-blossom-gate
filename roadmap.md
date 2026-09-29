@@ -5,6 +5,7 @@
 - [x] Reembolso total/parcial pelo admin com estorno no saldo
 - [x] Central única de disputas no admin
 - [x] Visão 360 do seller (saldos, vendas, disputas, saques, risco, ajuste)
+- [x] Histórico financeiro auditável, permissões por função, confirmação com senha, análise de risco por IA
 - [ ] Tela de defesa da disputa no painel do seller
 - [ ] Saques: marcar como pago com comprovante e ações em lote
 - [ ] Exportação de planilhas, busca geral, ações em lote
