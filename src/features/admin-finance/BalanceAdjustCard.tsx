@@ -14,7 +14,7 @@ interface BalanceAdjustCardProps { userId: string; onDone: () => void }
 
 /**
  * Credit/debit a seller balance through the audited server routine.
- * Amounts above R$ 5.000 become a request that a second admin must approve.
+ * Owner (admin) applies directly; staff requests wait for owner approval.
  */
 export function BalanceAdjustCard({ userId, onDone }: BalanceAdjustCardProps) {
   const [type, setType] = useState<"credit" | "debit">("credit");
@@ -43,7 +43,7 @@ export function BalanceAdjustCard({ userId, onDone }: BalanceAdjustCardProps) {
     setBusy(false);
     if (error) { toast.error(rpcErrorMessage(error)); return; }
     const status = (data as { status?: string } | null)?.status;
-    toast.success(status === "pending_approval" ? "Pedido criado — outro admin precisa aprovar" : "Saldo ajustado");
+    toast.success(status === "pending_approval" ? "Pedido enviado para aprovação do dono" : "Saldo ajustado");
     setAmount(""); setReason("");
     void loadPending(); onDone();
   };
@@ -69,13 +69,13 @@ export function BalanceAdjustCard({ userId, onDone }: BalanceAdjustCardProps) {
       <Input inputMode="decimal" placeholder="Valor (R$)" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label="Valor do ajuste" />
       <Textarea rows={2} maxLength={1000} placeholder="Motivo (fica registrado na auditoria)" value={reason} onChange={(e) => setReason(e.target.value)} aria-label="Motivo" />
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[11px] text-muted-foreground">Acima de R$ 5.000 exige aprovação de outro admin.</p>
+        <p className="text-[11px] text-muted-foreground">Como dono, seu ajuste é aplicado na hora. Pedidos da equipe aparecem abaixo para você aprovar.</p>
         <Button size="sm" onClick={submit} disabled={busy}>{busy ? "Enviando..." : "Confirmar ajuste"}</Button>
       </div>
 
       {pending.length > 0 && (
         <div className="space-y-2 border-t border-border pt-3">
-          <p className="text-xs font-semibold">Aguardando aprovação</p>
+          <p className="text-xs font-semibold">Pedidos da equipe aguardando sua aprovação</p>
           {pending.map((p) => (
             <div key={p.id} className="flex items-center justify-between gap-2 rounded-lg border border-border p-2">
               <div className="min-w-0">
