@@ -54,6 +54,17 @@ Deno.serve(async (req) => {
       if (!data) return json({ error: "transaction not found" }, 404);
       txId = data.id;
     }
+    // Owner's manual mode: unless auto-intake is explicitly enabled, only alert the admin.
+    const { data: setting } = await admin.from("platform_settings").select("value").eq("key", "manual_approval").maybeSingle();
+    const autoIntake = (setting?.value as { acquirer_auto_intake?: boolean } | null)?.acquirer_auto_intake === true;
+    if (!autoIntake) {
+      await admin.from("admin_alerts").insert({
+        kind: "med_notice", severity: "critical",
+        message: "MED PIX recebido da adquirente — aguardando abertura manual",
+        metadata: { transaction_id: txId, med_id: b.med_id, reason: b.reason ?? null, deadline_days: b.deadline_days ?? 7 },
+      });
+      return json({ ok: true, queued_for_manual_review: true }, 202);
+    }
     const { data: disputeId, error } = await admin.rpc("system_open_med", {
       _transaction_id: txId, _external_ref: `med:${b.med_id}`, _reason: b.reason ?? "MED PIX notificado pela adquirente", _deadline_days: b.deadline_days ?? 7,
     });

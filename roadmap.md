@@ -1,17 +1,13 @@
-# Admin completo — disputas, saldo e ficha 360
+# Admin total — controle manual, métricas, adquirentes e ficha do seller
 
-- [x] Motor de saldo: ajuste auditado com dupla aprovação acima de R$ 5.000, detalhamento do saldo
-- [x] Disputas reais: abrir (bloqueia), em análise, ganhar (libera), perder (taxa + remove acesso), histórico
-- [x] Reembolso total/parcial pelo admin com estorno no saldo
-- [x] Central única de disputas no admin
-- [x] Visão 360 do seller (saldos, vendas, disputas, saques, risco, ajuste)
-- [x] Histórico financeiro auditável, permissões por função, confirmação com senha, análise de risco por IA
-- [ ] Tela de defesa da disputa no painel do seller
-- [ ] Saques: marcar como pago com comprovante e ações em lote
-- [ ] Exportação de planilhas, busca geral, ações em lote
-- [ ] Receita da plataforma e relatório para contador
-- [ ] Avisos por e-mail, painel de saúde, menu enxuto
-- [ ] Permissões da equipe aba por aba
-- [ ] Testes finais de dinheiro e isolamento
-- [x] Reembolso (suporte/seller) e MED PIX com congelamento exato, decisão admin, entrada automática da adquirente
-- [ ] Testar MED/reembolso com venda real (bloqueado: sem adquirente / sem vendas)
+- [x] Motor de saldo, disputas reais, central de disputas, visão 360, auditoria financeira, IA de risco
+- [x] Reembolso (seller/suporte) e MED PIX com congelamento exato
+- [x] Modo manual (padrão): reembolso desconta do seller na hora e cai em "Pendentes de aprovação" (efetivada / não efetivada devolve saldo)
+- [x] Interruptores de aprovação manual (só dono, com senha); MED da adquirente só gera alerta até você ligar
+- [ ] Métricas financeiras separadas (taxa %, fixa, adquirente, saque, por método, MED, reembolso, chargeback) + conciliação
+- [ ] Transações em abas + filtros (adquirente, código Pix, CPF, IP)
+- [ ] Adquirentes: padrão + fallback, por seller, histórico de trocas, conversão por adquirente
+- [ ] Ficha completa do seller (todas as abas, saques com recusa e motivo, premiações com status/rastreio)
+- [ ] Blindagem de formulários do seller
+- [ ] Saques: comprovante e lote; exportação; busca geral; relatórios; e-mails; saúde; menu enxuto; permissões aba por aba
+- [ ] Testes com venda real (bloqueado: sem adquirente e sem vendas)

@@ -32,6 +32,7 @@ const AdminSellersTab = lazy(() => import("./tabs/AdminSellersTab"));
 const AdminProductsTab = lazy(() => import("./tabs/AdminProductsTab"));
 const FinancialAuditTab = lazy(() => import("@/features/admin-finance/FinancialAuditTab"));
 const DisputesCenter = lazy(() => import("@/features/admin-finance/DisputesCenter"));
+const RefundApprovalsTab = lazy(() => import("@/features/admin-finance/RefundApprovalsTab"));
 const AdminTransactionsTab = lazy(() => import("./tabs/AdminTransactionsTab"));
 const AdminWithdrawalsTab = lazy(() => import("./tabs/AdminWithdrawalsTab"));
 const AdminCouponsTab = lazy(() => import("./tabs/AdminCouponsTab"));
@@ -80,6 +81,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
   {
     id: "treasury", label: "Financeiro",
     items: [
+      { id: "refund-approvals", label: "Pendentes de aprovação", icon: Clock, employeeAccess: false },
       { id: "withdrawals", label: "Saques", icon: ArrowDownToLine, employeeAccess: false },
       { id: "transactions", label: "Transações", icon: CreditCard, employeeAccess: true },
       { id: "payment-links", label: "Links de Pagamento", icon: LinkIcon, employeeAccess: false },
@@ -719,6 +721,7 @@ export default function AdminDashboard() {
               )}
               {activeTab === "abuse-metrics" && isAdmin && <AdminAbuseMetricsTab />}
               {activeTab === "financial-audit" && isAdmin && <FinancialAuditTab profiles={profiles} />}
+              {activeTab === "refund-approvals" && isAdmin && <RefundApprovalsTab />}
               {["medpix", "refunds", "chargeback", "premed"].includes(activeTab) && isAdmin && (
                 <DisputesCenter
                   profiles={profiles}
