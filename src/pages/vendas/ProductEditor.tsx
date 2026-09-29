@@ -111,7 +111,8 @@ export default function ProductEditor() {
  const { productId } = useParams<{ productId: string }>();
  const navigate = useNavigate();
  const { user } = useAuth();
- // Admin pode desativar Boleto/Cartão por seller — quando desativado, não exibimos o toggle no produto.
+  // Métodos bloqueados pelo admin ficam indisponíveis e também são validados no banco.
+  const [adminPixEnabled, setAdminPixEnabled] = useState(true);
  const [adminBoletoEnabled, setAdminBoletoEnabled] = useState(true);
  const [adminCardEnabled, setAdminCardEnabled] = useState(true);
  const invalidateAll = useInvalidateAll();
@@ -296,9 +297,10 @@ export default function ProductEditor() {
   // Carrega gates de pagamento definidos pelo admin no perfil do seller
   useEffect(() => {
     if (!user?.id) return;
-    supabase.from("profiles").select("boleto_enabled, credit_card_enabled").eq("user_id", user.id).maybeSingle()
+     supabase.from("profiles").select("pix_enabled, boleto_enabled, credit_card_enabled").eq("user_id", user.id).maybeSingle()
       .then(({ data }) => {
         if (!data) return;
+         if (data.pix_enabled === false) { setAdminPixEnabled(false); setPixEnabled(false); }
         if (data.boleto_enabled === false) { setAdminBoletoEnabled(false); setBoletoEnabled(false); }
         if (data.credit_card_enabled === false) { setAdminCardEnabled(false); setCreditCardEnabled(false); }
       });
@@ -744,7 +746,7 @@ export default function ProductEditor() {
   />}
 
 {activeTab === "configuracoes" && <TabConfiguracoes
- {...{ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType, adminBoletoEnabled, adminCardEnabled }}
+  {...{ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType, adminPixEnabled, adminBoletoEnabled, adminCardEnabled }}
 />}
 
  {activeTab === "conteudo" && <TabConteudo productId={effectiveProductId} isNew={tabsLocked} />}
@@ -1005,9 +1007,10 @@ type TabConfiguracoesProps = {
   deliveryType: string; setDeliveryType: StrS;
   adminBoletoEnabled?: boolean;
   adminCardEnabled?: boolean;
+  adminPixEnabled?: boolean;
 };
 
-function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType, adminBoletoEnabled = true, adminCardEnabled = true }: TabConfiguracoesProps) {
+function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType, adminPixEnabled = true, adminBoletoEnabled = true, adminCardEnabled = true }: TabConfiguracoesProps) {
  return (
  <div className="space-y-6">
  <SectionHeader icon={Settings} title="Configurações" subtitle="Métodos de pagamento, formulário e entrega de conteúdo." />
@@ -1017,7 +1020,7 @@ function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, set
  <CreditCard className="h-4 w-4 text-primary" /> Métodos de pagamento
  </h3>
  <div className="space-y-2">
- <PaymentMethodRow icon={QrCode} label="PIX" sublabel="Taxa: 2,49% • Aprovação imediata" color="text-success" checked={pixEnabled} onChange={setPixEnabled} />
+ {adminPixEnabled && <PaymentMethodRow icon={QrCode} label="PIX" sublabel="Taxa: 2,49% • Aprovação imediata" color="text-success" checked={pixEnabled} onChange={setPixEnabled} />}
  {adminBoletoEnabled && <PaymentMethodRow icon={FileText} label="Boleto" sublabel="Taxa: 2,49% + R$ 2,49" color="text-warning" checked={boletoEnabled} onChange={setBoletoEnabled} />}
  {adminCardEnabled && <PaymentMethodRow icon={CreditCard} label="Cartão de Crédito" sublabel="Taxa: 6,38% • Até 12x" color="text-info" checked={creditCardEnabled} onChange={setCreditCardEnabled} />}
  </div>

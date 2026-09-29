@@ -14,7 +14,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
  );
 }
 
-export function Panel({ children, className, onClick, style, accent }: { children: React.ReactNode; className?: string; onClick?: () => void; style?: React.CSSProperties; accent?: string }) {
+export function Panel({ children, className, onClick, style, accent, ...props }: React.HTMLAttributes<HTMLDivElement> & { accent?: string }) {
  return (
  <div
  className={cn(
@@ -24,6 +24,7 @@ export function Panel({ children, className, onClick, style, accent }: { childre
  )}
  onClick={onClick}
  style={style}
+  {...props}
  >
  {accent && <div className={cn("absolute inset-y-4 left-0 w-0.5", accent)} />}
  {children}

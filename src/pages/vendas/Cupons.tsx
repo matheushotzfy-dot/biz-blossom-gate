@@ -54,7 +54,7 @@ function CouponStatusPill({ coupon }: { coupon: Coupon }) {
 export default function Cupons() {
   const { user } = useAuth();
   const { data: products = [] } = useProducts();
-  const { data: coupons = [], refetch, isLoading } = useCoupons();
+  const { data: coupons = [], refetch, isLoading, isError } = useCoupons();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [openCreate, setOpenCreate] = useState(false);
@@ -349,23 +349,27 @@ export default function Cupons() {
 
         {/* ── Tabs + Search row ── */}
         <div className="flex flex-col gap-3 pb-1 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="inline-flex w-fit items-center gap-0.5 rounded-xl border border-border/50 bg-card/60 p-1 overflow-x-auto">
+          <div role="tablist" aria-label="Filtrar cupons por status" className="inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-xl border border-border/50 bg-card p-1">
             {filterTabs.map((t) => {
               const active = statusFilter === t.id;
               return (
                 <button
                   key={t.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  aria-controls="coupons-panel"
                   onClick={() => setStatusFilter(t.id)}
                   className={cn(
  "group/tab relative inline-flex shrink-0 items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
                     active
-                      ? "bg-secondary text-foreground"
-                      : "text-muted-foreground/80 hover:text-foreground"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   )}
                 >
                   <span className={cn(
  "flex h-4 w-4 items-center justify-center transition-colors",
-                    active ? tabAccent[t.id] : "text-muted-foreground/50 group-hover/tab:text-foreground/70"
+                    active ? "text-primary-foreground" : tabAccent[t.id]
                   )}>
                     {tabIcon[t.id]}
                   </span>
@@ -374,8 +378,8 @@ export default function Cupons() {
                     <span className={cn(
  "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
                       active
-                        ? "bg-background/80 text-foreground border-border/40"
-                        : "bg-muted/30 text-muted-foreground/60 border-transparent"
+                        ? "bg-background/20 text-primary-foreground border-primary-foreground/20"
+                        : "bg-muted text-muted-foreground border-border"
                     )}>
                       {t.count}
                     </span>
@@ -404,7 +408,7 @@ export default function Cupons() {
 
       {/* ── Workspace ── */}
       <div className="px-5 pt-6 sm:px-7">
-        <Panel className="p-0 overflow-hidden">
+        <Panel id="coupons-panel" role="tabpanel" className="p-0 overflow-hidden">
 
         {/* Column headers */}
         {filtered.length > 0 && (
@@ -426,6 +430,13 @@ export default function Cupons() {
               <div key={i} className="h-14 rounded-xl bg-muted/30" />
             ))}
           </div>
+        ) : isError ? (
+          <EmptyState
+            icon={<AlertCircle className="h-7 w-7" />}
+            title="Não foi possível carregar os cupons"
+            subtitle="Verifique sua conexão e tente novamente."
+            action={<Button variant="outline" onClick={() => void refetch()}>Tentar novamente</Button>}
+          />
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={<Ticket className="h-7 w-7" />}

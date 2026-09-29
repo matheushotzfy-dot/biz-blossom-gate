@@ -52,6 +52,7 @@ export default function LinkPagamento() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [allowedMethods, setAllowedMethods] = useState({ accept_pix: true, accept_card: true, accept_boleto: false });
   const fileRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
@@ -63,7 +64,16 @@ export default function LinkPagamento() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [user?.id]);
+  useEffect(() => {
+    load();
+    if (user?.id) supabase.from("profiles").select("pix_enabled, credit_card_enabled, boleto_enabled").eq("user_id", user.id).maybeSingle().then(({ data }) => {
+      if (!data) return;
+      const allowed = { accept_pix: data.pix_enabled, accept_card: data.credit_card_enabled, accept_boleto: data.boleto_enabled };
+      setAllowedMethods(allowed);
+      setForm(current => ({ ...current, accept_pix: current.accept_pix && allowed.accept_pix, accept_card: current.accept_card && allowed.accept_card, accept_boleto: current.accept_boleto && allowed.accept_boleto }));
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const totals = useMemo(() => ({
     revenue: links.reduce((s, l) => s + Number(l.total_revenue || 0), 0),
@@ -215,12 +225,15 @@ export default function LinkPagamento() {
                 { key: "accept_pix" as const, label: "PIX" },
                 { key: "accept_card" as const, label: "Cartão de crédito" },
                 { key: "accept_boleto" as const, label: "Boleto" },
-              ].map(m => (
+               ].map(m => {
+                const allowed = allowedMethods[m.key];
+                return (
                 <div key={m.key} className="flex items-center justify-between py-2.5">
-                  <span className="text-[14px] font-medium">{m.label}</span>
-                  <Switch checked={form[m.key]} onCheckedChange={v => setForm({ ...form, [m.key]: v })} />
+                   <span className="text-[14px] font-medium">{m.label}{!allowed && <span className="ml-2 text-[10px] text-muted-foreground">Bloqueado pelo admin</span>}</span>
+                   <Switch disabled={!allowed} checked={allowed && form[m.key]} onCheckedChange={v => setForm({ ...form, [m.key]: v })} />
                 </div>
-              ))}
+                );
+               })}
             </div>
           </div>
           <Button type="submit" disabled={uploading} className="h-11 w-full rounded-xl font-semibold">

@@ -31,12 +31,12 @@ export function ArtifactViewer({ award, revenue, claimed, onClaim, onShare }: Ar
   };
 
   return (
-    <div className="grid min-h-[620px] items-center gap-7 px-6 py-8 sm:px-10 lg:grid-cols-[minmax(420px,1.25fr)_minmax(340px,0.75fr)] lg:gap-14 lg:px-14 lg:py-10">
+    <div className="grid min-h-[430px] items-center gap-5 px-6 py-5 sm:px-10 lg:grid-cols-[minmax(420px,1.25fr)_minmax(340px,0.75fr)] lg:gap-10 lg:px-14 lg:py-6">
       <div
         ref={frame}
         onPointerMove={handleMove}
         onPointerLeave={() => setTilt({ x: 0, y: 0 })}
-        className="awards-stage relative mx-auto flex min-h-[430px] w-full max-w-[760px] items-center justify-center [perspective:1400px] sm:min-h-[540px]"
+        className="awards-stage relative mx-auto flex min-h-[300px] w-full max-w-[680px] items-center justify-center [perspective:1400px] sm:min-h-[360px]"
       >
         <div aria-hidden className="awards-stage-cone pointer-events-none absolute inset-x-0 top-0 h-full" />
         <div aria-hidden className="awards-stage-light absolute inset-x-[8%] bottom-[7%] h-[42%]" />
@@ -57,7 +57,7 @@ export function ArtifactViewer({ award, revenue, claimed, onClaim, onShare }: Ar
               width={620}
               height={520}
               loading="eager"
-              className={cn("awards-artifact-img relative z-10 mx-auto h-[410px] w-full object-contain sm:h-[540px]", !unlocked && "grayscale opacity-80")}
+              className={cn("awards-artifact-img relative z-10 mx-auto h-[290px] w-full object-contain sm:h-[370px]", !unlocked && "grayscale opacity-80")}
             />
             {!unlocked && (
               <span className="absolute inset-x-0 bottom-5 z-20 mx-auto flex w-fit items-center gap-2 rounded-full border border-awards-steel/20 bg-awards-obsidian px-3 py-1.5 font-mono text-[9px] uppercase text-awards-steel">
@@ -78,21 +78,21 @@ export function ArtifactViewer({ award, revenue, claimed, onClaim, onShare }: Ar
           </span>
         </div>
 
-        <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.18em] text-awards-steel">{award.tier} · {award.label} em vendas</p>
-        <h2 className="relative mt-3 inline-block overflow-hidden font-display text-4xl font-bold leading-tight text-awards-ink sm:text-6xl">
+        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-awards-steel">{award.tier} · {award.label} em vendas</p>
+        <h2 className="relative mt-2 inline-block overflow-hidden font-display text-3xl font-bold leading-tight text-awards-ink sm:text-5xl">
           {award.title}
           <span aria-hidden className="venx-sheen pointer-events-none absolute inset-0" />
         </h2>
-        <p className="mt-4 max-w-xl text-base leading-7 text-awards-steel">{award.description}</p>
-        <blockquote className="mt-6 border-l-2 border-awards-accent pl-4 font-display text-lg leading-7 text-awards-ink">“{award.phrase}”</blockquote>
+        <p className="mt-3 max-w-xl text-sm leading-6 text-awards-steel">{award.description}</p>
+        <blockquote className="mt-4 border-l-2 border-awards-accent pl-4 font-display text-base leading-6 text-awards-ink">“{award.phrase}”</blockquote>
 
-        <ul className="mt-5 flex flex-wrap gap-2">
+        <ul className="mt-4 flex flex-wrap gap-2">
           {award.rewards.map((reward) => (
             <li key={reward} className="rounded-sm border border-awards-steel/20 px-3 py-1 font-mono text-[10px] uppercase text-awards-steel">{reward}</li>
           ))}
         </ul>
 
-        <div className="mt-7 flex flex-col gap-2 sm:flex-row">
+        <div className="mt-5 flex flex-col gap-2 sm:flex-row">
           <Button
             onClick={onClaim}
             disabled={!unlocked || claimed}
