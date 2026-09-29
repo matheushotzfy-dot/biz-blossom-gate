@@ -1,26 +1,5 @@
-# Roadmap
-
-- [x] Aplicar o sistema visual do cadastro GoatPay em toda a plataforma seller e admin.
-- [x] Reconstruir a entrada e o cadastro VENXPAY no padrão visual minimalista da referência GoatPay.
-- [x] Substituir a paleta esverdeada por azul financeiro escuro em seller e admin.
-- [x] Remodelar o editor de produtos no estilo ultra-clean azul elétrico, mantendo todos os fluxos.
-- [x] Reconstruir o editor de produto como experiência focada, sofisticada e com detalhes progressivos.
-- [ ] Remover com segurança todas as transações simuladas e dependências.
-- [ ] Excluir dados simulados de todos os agregados seller/admin e desativar o simulador.
-- [ ] Unificar status financeiros e período comercial de São Paulo.
-- [ ] Corrigir faturamento mobile e invalidação em tempo real.
-- [ ] Refazer Gerar PIX ancorado no desktop e em tela inferior no mobile.
-- [ ] Refazer saque automático no mesmo padrão visual.
-- [ ] Refazer a página de taxas com identidade VENXPAY.
-- [ ] Refazer o calendário e validar presets/intervalos.
-- [ ] Auditar e endurecer superfícies críticas de seller, admin e páginas públicas.
-- [ ] Validar dados, testes, execução e telas desktop/mobile.
-- [x] Remover integralmente PodPay e VeoPag do banco, serviços e interface.
-- [x] Bloquear cobranças, estornos e saques enquanto não houver nova adquirente.
-- [x] Simplificar criação e edição de produtos sem remover funcionalidades.
-- [x] Restaurar os Índices originais e elevar o gráfico de faturamento com leitura contínua e hover detalhado.
-- [x] Corrigir KYC aprovado e ocultar progresso/documentos concluídos.
-- [x] Corrigir contraste dos logos de Integrações no modo claro.
-- [x] Remover Entregas recentes da interface de Webhooks.
-- [x] Expandir e refinar Premiações em tela cheia.
-- [x] Refinar Suporte seller/admin e validar vínculo em tempo real.
+- [ ] Restringir acesso público de catálogo e validar linter
+- [ ] Finalizar controles de métodos no admin, produtos, links e checkout
+- [ ] Finalizar Perfil, Cupons, Premiações, Suporte e animações de janelas
+- [ ] Validar chaves API sem limite e segurança mantida
+- [ ] Executar testes funcionais, visuais, mobile e acessibilidade
