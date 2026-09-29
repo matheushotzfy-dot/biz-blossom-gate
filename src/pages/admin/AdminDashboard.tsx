@@ -728,6 +728,11 @@ export default function AdminDashboard() {
               {activeTab === "abuse-metrics" && isAdmin && <AdminAbuseMetricsTab />}
               {activeTab === "financial-audit" && isAdmin && <FinancialAuditTab profiles={profiles} />}
               {activeTab === "refund-approvals" && isAdmin && <RefundApprovalsTab />}
+              {activeTab === "staff-requests" && isAdmin && <StaffRequestsTab profiles={profiles} />}
+              {activeTab === "acquirers-panel" && isAdmin && <AcquirersPanel profiles={profiles} />}
+              {activeTab === "fin-metrics" && isAdmin && (
+                <div className="space-y-4"><div><h2 className="text-lg font-semibold">Métricas financeiras</h2><p className="text-xs text-muted-foreground">Quanto entra, quanto sai e cada tipo de taxa, por período, seller e adquirente.</p></div><FinancialMetricsPanel profiles={profiles} /></div>
+              )}
               {["medpix", "refunds", "chargeback", "premed"].includes(activeTab) && isAdmin && (
                 <DisputesCenter
                   profiles={profiles}
