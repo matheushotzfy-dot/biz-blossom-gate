@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   Users, Search, Ban, CheckCircle2, Eye, MoreHorizontal, Activity, Package,
   Trash2, Edit, Plus, Clock, Wallet, ArrowDownToLine, ShoppingCart,
-  FileText, Globe, DollarSign, XCircle, Save, CreditCard, Shield, Landmark,
+  FileText, Globe, DollarSign, XCircle, Save, CreditCard, Shield,
   Key, TrendingUp, Percent, BarChart3, MessageSquareText, AlertTriangle,
   Snowflake, LogIn, Lock, Unlock, UserX, Send,
   type LucideIcon,
@@ -55,10 +55,6 @@ const deletedProductDataSchema = z
 
 type ActivityLog = z.infer<typeof activityLogSchema>;
 
-interface Acquirer {
-  id: string; name: string; slug: string; type: string; is_active: boolean;
-}
-
 interface PixKey {
   id: string; key_type: string; key_value: string; created_at: string;
 }
@@ -85,7 +81,6 @@ const ACTION_LABELS: Record<string, { label: string; color: string; icon: Lucide
   update_admin_notes: { label: "Observações Salvas", color: "text-muted-foreground", icon: MessageSquareText },
   update_custom_fees: { label: "Taxas Personalizadas", color: "text-warning", icon: Percent },
   set_seller_type: { label: "Tier Alterado", color: "text-info", icon: Shield },
-  set_seller_acquirer: { label: "Adquirente Alterada", color: "text-info", icon: Landmark },
   impersonate_user: { label: "Login Como Usuário", color: "text-warning", icon: LogIn },
   delete_pix_key: { label: "Chave PIX Removida", color: "text-destructive", icon: Trash2 },
   resolve_dispute_seller: { label: "Disputa: Vitória Seller", color: "text-success", icon: CheckCircle2 },
@@ -150,8 +145,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [balanceAdjustments, setBalanceAdjustments] = useState<BalanceAdjustment[]>([]);
   const [loading, setLoading] = useState(false);
   const [kycImages, setKycImages] = useState<string[]>([]);
-  const [acquirers, setAcquirers] = useState<Acquirer[]>([]);
-  const [selectedAcquirerId, setSelectedAcquirerId] = useState<string>("");
   const [adminNotes, setAdminNotes] = useState("");
   const [userDisputes, setUserDisputes] = useState<Dispute[]>([]);
   const [kycRejectReason, setKycRejectReason] = useState("");
@@ -166,9 +159,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
 
   useEffect(() => {
-    supabase.from("acquirers").select("id, name, slug, type, is_active").eq("is_active", true).then(({ data }) => {
-      if (data) setAcquirers(data as Acquirer[]);
-    });
     // Canonical seller balances (same fórmula do painel do vendedor)
     supabase.rpc("admin_get_seller_balances").then(({ data, error }) => {
       if (error) { console.warn("[AdminSellersTab] balances RPC failed", error.message); return; }
@@ -218,7 +208,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     setUserTransactions([]); setUserPixKeys([]); setUserDisputes([]);
     setBalanceAdjustments([]); setKycImages([]); setIpHistory([]);
     setUserRetention(null); setRetentionForm({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
-    setAdminNotes(""); setSelectedAcquirerId("");
+    setAdminNotes("");
     setPiiRevealed(false); setRevealedDoc(null); setRevealedPixKeys(null); setRevealedLegacyPix(null);
 
     try {
@@ -247,7 +237,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       // Sensitive PIX keys are NOT auto-revealed; admin must click "Revelar dados".
       setUserPixKeys([]);
 
-      setSelectedAcquirerId(profile.acquirer_id || "");
       setAdminNotes(profile.admin_notes || "");
       if (retRes.data) {
         setUserRetention(retRes.data as RetentionSettings);
@@ -430,21 +419,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     toast.success(`Seller classificado como ${sellerType || "sem classificação"}!`);
     await logAdminAction("set_seller_type", "profile", userId, { seller_type: sellerType });
     onReload();
-  };
-
-  const handleSetAcquirer = async (userId: string, acquirerId: string | null) => {
-    const { data, error } = await supabase.rpc("admin_set_seller_acquirer", {
-      _seller_id: userId,
-      _new_acquirer_id: acquirerId,
-      _reason: "Troca individual no painel de sellers",
-    });
-    if (error) { toast.error("Erro ao definir adquirente: " + friendlyError(error)); return; }
-    const result = data as { new_acquirer_name?: string } | null;
-    const acqName = result?.new_acquirer_name || acquirers.find(a => a.id === acquirerId)?.name || "Padrão";
-    toast.success(`Adquirente definida: ${acqName}`);
-    await logAdminAction("set_seller_acquirer", "profile", userId, { acquirer_id: acquirerId });
-    setSelectedAcquirerId(acquirerId || "");
-    if (selectedUser?.user_id === userId) setSelectedUser({ ...selectedUser, acquirer_id: acquirerId });
   };
 
   const handleSaveCustomFees = async () => {
@@ -1006,7 +980,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     { v: "compliance", l: "Compliance", i: Shield },
                     { v: "disputes", l: `Disputas (${userMedTotal})`, i: AlertTriangle },
                     { v: "pix", l: "Chaves PIX", i: Key },
-                    { v: "acquirer", l: "Adquirente", i: Landmark },
                     { v: "financial", l: "Financeiro", i: Wallet },
                     { v: "buyers", l: "Clientes", i: ShoppingCart },
                     { v: "logs", l: "Logs", i: Activity },
@@ -1323,29 +1296,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   </PremiumPanel>
                 </TabsContent>
 
-
-                {/* ── Adquirente ── */}
-                <TabsContent value="acquirer" className="mt-4 space-y-4">
-                  <PremiumPanel title="Adquirente Atribuída" icon={Landmark}>
-                    <div className="space-y-4">
-                      <div>
-                        <Label className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Adquirente para este seller</Label>
-                        <Select value={selectedAcquirerId} onValueChange={(v) => setSelectedAcquirerId(v)}>
-                          <SelectTrigger className="h-10 text-xs mt-1 rounded-xl bg-muted/30 border-border"><SelectValue placeholder="Usar padrão da plataforma" /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="default">Padrão da plataforma</SelectItem>
-                            {acquirers.map(a => (
-                              <SelectItem key={a.id} value={a.id}>{a.name} ({a.type.toUpperCase()})</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <Button size="sm" variant="outline" className="rounded-xl text-xs border-primary/30 text-primary" onClick={() => handleSetAcquirer(selectedUser!.user_id, selectedAcquirerId === "default" ? null : selectedAcquirerId)}>
-                        <Save className="h-3 w-3 mr-1" /> Salvar Adquirente
-                      </Button>
-                    </div>
-                  </PremiumPanel>
-                </TabsContent>
 
                 {/* ── Financeiro ── */}
                 <TabsContent value="financial" className="mt-4 space-y-4">
