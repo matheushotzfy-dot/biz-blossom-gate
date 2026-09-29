@@ -143,6 +143,36 @@ export const checkoutSlugSchema = z
   .max(60, { message: "Slug muito longo (máx. 60)" })
   .regex(/^[a-z0-9-]+$/, { message: "Use apenas letras minúsculas, números e hífen" });
 
+/* ─────────── Payment links ─────────── */
+const optionalPositiveInteger = z.union([
+  z.literal(""),
+  z.coerce.number().int().positive(),
+]);
+
+export const paymentLinkFormSchema = z.object({
+  title: z.string().trim().min(3, "Informe um título com pelo menos 3 caracteres").max(120),
+  description: z.string().trim().max(500),
+  amount: z.coerce.number().min(1, "O valor mínimo é R$ 1,00").max(999999, "O valor máximo é R$ 999.999,00"),
+  slug: checkoutSlugSchema,
+  max_uses: optionalPositiveInteger,
+  expires_at: z.string(),
+  pix_expiration_minutes: z.coerce.number().int().min(5).max(1440),
+  instructions: z.string().trim().max(1000),
+  redirect_url: z.union([z.literal(""), z.string().trim().url("Informe uma URL completa e válida").max(500)]),
+  accept_pix: z.boolean(),
+  accept_card: z.boolean(),
+  accept_boleto: z.boolean(),
+}).superRefine((value, ctx) => {
+  if (!value.accept_pix && !value.accept_card && !value.accept_boleto) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["accept_pix"], message: "Ative ao menos um método liberado" });
+  }
+  if (value.expires_at && new Date(value.expires_at).getTime() <= Date.now()) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["expires_at"], message: "A validade deve estar no futuro" });
+  }
+});
+
+export type PaymentLinkFormValues = z.input<typeof paymentLinkFormSchema>;
+
 /* ─────────── Helpers ─────────── */
 export type FieldErrors<T> = Partial<Record<keyof T, string>>;
 
