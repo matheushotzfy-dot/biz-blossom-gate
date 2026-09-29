@@ -781,9 +781,9 @@ export default function AdminSettingsTab() {
  <AdminPanel>
  <PanelTitle color="emerald" icon={<CreditCard className="h-4 w-4" />}>Métodos de Pagamento</PanelTitle>
  <div className="space-y-3 mt-3">
- <ToggleRow label="PIX" description="QR Code dinâmico via PodPay" defaultChecked />
- <ToggleRow label="Cartão de Crédito" description="Até 12x com juros" defaultChecked />
- <ToggleRow label="Boleto Bancário" description="Compensação 1-3 dias úteis" defaultChecked />
+  <ToggleRow label="PIX" description="Indisponível até a próxima integração" />
+  <ToggleRow label="Cartão de Crédito" description="Indisponível até a próxima integração" />
+  <ToggleRow label="Boleto Bancário" description="Indisponível até a próxima integração" />
  </div>
  </AdminPanel>
 

@@ -68,30 +68,7 @@ export default function PublicPaymentLink() {
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!link) return;
-    if (form.name.trim().length < 3) { toast.error("Nome inválido"); return; }
-    const doc = form.document.replace(/\D/g, "");
-    if (doc.length !== 11 && doc.length !== 14) { toast.error("CPF ou CNPJ inválido"); return; }
-    setGenerating(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("pay-link-pix", {
-        body: {
-          slug: link.slug,
-          customerName: form.name.trim(),
-          customerEmail: form.email.trim(),
-          customerDocument: doc,
-        },
-      });
-      if (error || !data?.success) {
-        toast.error(data?.error || "Falha ao gerar PIX. Tente novamente.");
-        return;
-      }
-      setPix({
-        qrcode: data.data.pix?.qrcode || data.data.pix?.copyPaste || "",
-        expiresAt: data.data.pix?.expiresAt || new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-        transactionId: data.data.transactionId,
-      });
-    } finally { setGenerating(false); }
+    toast.error("Pagamentos temporariamente indisponíveis.");
   };
 
   const copyPix = () => {
@@ -178,9 +155,9 @@ export default function PublicPaymentLink() {
                       onChange={e => setForm({ ...form, document: maskCpfCnpj(e.target.value) })}
                       className="mt-1.5 w-full h-11 rounded-xl border border-border/60 bg-background px-3.5 text-sm focus:border-primary/50 focus:outline-none tabular-nums" />
                   </div>
-                  <button type="submit" disabled={generating}
+                  <button type="submit" disabled
                     className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-black uppercase tracking-widest text-xs mt-2 flex items-center justify-center gap-2 hover:bg-primary/90 disabled:opacity-60">
-                    {generating ? <><Loader2 className="h-4 w-4 animate-spin" /> Gerando PIX...</> : <><QrCode className="h-4 w-4" /> Gerar PIX</>}
+                    <><QrCode className="h-4 w-4" /> Pagamentos indisponíveis</>
                   </button>
                 </form>
               </>

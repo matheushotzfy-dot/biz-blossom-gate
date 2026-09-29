@@ -198,20 +198,7 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
     if (isNaN(amount) || amount <= 0 || amount > Number(selectedTx.amount)) { toast.error("Valor inválido"); return; }
     if (!isApprovedTransaction(selectedTx.status)) { toast.error("Só é possível estornar transações aprovadas"); return; }
     if (!window.confirm(`Confirma estorno de R$ ${amount.toFixed(2)}?`)) return;
-    setRefunding(true);
-    try {
-      const sanitizedReason = refundReason.replace(/[<>]/g, "").trim().slice(0, 500);
-      const { data, error } = await supabase.functions.invoke("podpay-refund", {
-        body: { transactionId: selectedTx.id, amount, reason: sanitizedReason },
-      });
-      if (error || !data?.success) { toast.error(data?.error || "Erro ao processar estorno"); return; }
-      toast.success(`Estorno de ${fmtCurrency(amount)} processado!`);
-      await logAdminAction("refund_transaction", "transaction", selectedTx.id, { amount, type: refundType, reason: sanitizedReason });
-      setRefundOpen(false);
-      setSheetOpen(false);
-      onReload();
-    } catch { toast.error("Erro de conexão"); }
-    finally { setRefunding(false); }
+    toast.error("Estornos temporariamente indisponíveis sem uma adquirente configurada.");
   };
 
   const buildTimeline = (t: Tables<"transactions">) => {
@@ -515,19 +502,8 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
                     <Row icon={<User className="h-3 w-3" />} label="Vendedor" value={getSellerName(selectedTx.user_id)} />
                     <Row icon={<FileText className="h-3 w-3" />} label="Produto" value={getProductName(selectedTx.product_id)} />
                     <Row icon={<Globe className="h-3 w-3" />} label="Origem" value={selectedTx.source || "checkout"} />
-                    <Row
-                      icon={<Zap className="h-3 w-3" />}
-                      label="Adquirente"
-                      value={(() => {
-                        const meta = (selectedTx.metadata as Record<string, unknown> | null) || {};
-                        const acq = (meta.acquirer_slug as string) || (meta.acquirer as string) || selectedTx.source || "—";
-                        return String(acq).toUpperCase();
-                      })()}
-                    />
                     {selectedTx.api_key_id && <Row icon={<Key className="h-3 w-3" />} label="API Key" value={selectedTx.api_key_id} mono />}
                     {selectedTx.coupon_id && <Row icon={<Tag className="h-3 w-3" />} label="Cupom" value={`${selectedTx.coupon_id.slice(0, 8)} · −${fmtCurrency(Number(selectedTx.discount_amount || 0))}`} mono />}
-                    {selectedTx.podpay_payment_id && <Row icon={<Hash className="h-3 w-3" />} label="PodPay" value={selectedTx.podpay_payment_id} mono />}
-                    {selectedTx.podpay_event_id && <Row icon={<Hash className="h-3 w-3" />} label="Evento" value={selectedTx.podpay_event_id} mono />}
                     {selectedTx.checkout_session_id && <Row icon={<Hash className="h-3 w-3" />} label="Checkout" value={selectedTx.checkout_session_id} mono />}
                     {selectedTx.pix_expires_at && (
                       <Row icon={<Timer className="h-3 w-3" />} label="PIX expira" value={fmtDateCached(selectedTx.pix_expires_at)} />
@@ -551,8 +527,6 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
 {JSON.stringify({
   transaction_id: selectedTx.id,
   external_id: selectedTx.external_id,
-  podpay_payment_id: selectedTx.podpay_payment_id,
-  podpay_event_id: selectedTx.podpay_event_id,
   checkout_session_id: selectedTx.checkout_session_id,
   api_key_id: selectedTx.api_key_id,
   source: selectedTx.source,

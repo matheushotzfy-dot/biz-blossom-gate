@@ -422,76 +422,10 @@ export default function PublicCheckout() {
  const RATE_LIMIT_MAX = 3;
 
  // Payment Handler
- const handlePay = async (e: React.FormEvent) => {
+  const handlePay = async (e: React.FormEvent) => {
  e.preventDefault();
- if (!product || processingRef.current) return;
-
- const now = Date.now();
- submitCountRef.current = submitCountRef.current.filter(t => now - t < RATE_LIMIT_WINDOW);
- if (submitCountRef.current.length >= RATE_LIMIT_MAX) {
- toast.error("Muitas tentativas. Aguarde 1 minuto antes de tentar novamente.");
- return;
- }
- submitCountRef.current.push(now);
- const phoneDigits = phone.replace(/\D/g, "");
- if (phoneDigits.length < 10) { toast.error("Informe um WhatsApp válido"); return; }
- const docDigits = document.replace(/\D/g, "");
- if (docDigits.length === 11 && !isValidCpf(document)) { toast.error("CPF inválido"); return; }
- if (docDigits.length === 14 && !isValidCnpj(document)) { toast.error("CNPJ inválido"); return; }
- if (docDigits.length !== 11 && docDigits.length !== 14) { toast.error("CPF/CNPJ inválido"); return; }
- if (product.checkout_email_confirm && email !== emailConfirm) { toast.error("Os e-mails não coincidem"); return; }
-
- const sessionKey = slug || "default";
- firePixelEvent(productPixels, "InitiateCheckout", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
- firePixelEvent(productPixels, "AddPaymentInfo", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
-
- processingRef.current = true; setProcessing(true);
- try {
- const sessionId = getCheckoutSessionId(slug || "default");
-  const payload: Record<string, unknown> = {
-  productId: product.id, paymentMethod: method, customerName: name,
-  customerEmail: email, customerDocument: docDigits, customerPhone: phoneDigits,
-  checkoutSessionId: sessionId,
-  couponCode: appliedCoupon?.code || null,
-  affiliateSlug: affiliateSlug || null,
-  selectedBumpIds: orderBumps
-    .filter(b => selectedBumps.has(b.id))
-    .map(b => b.bump_product_id),
-  };
-
- if (method === "credit_card") { payload.installments = parseInt(installments); payload.cardToken = null; }
- const { data, error } = await supabase.functions.invoke("podpay-create-transaction", { body: payload });
-  if (error || !data?.success) { toast.error(data?.error || "Não foi possível processar. Tente novamente."); setCheckoutState("failed"); return; }
- const result = data.data;
- setTransactionId(result.transactionId);
- if (data.resumed) { if (result.pix) setPixData(result.pix); if (result.boleto) setBoletoData(result.boleto); setCheckoutState("pending"); return; }
- if (method === "pix" && result.pix) {
- setPixData(result.pix); setCheckoutState("pending");
- firePixelEvent(productPixels, "PixGenerated", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
- } else if (method === "boleto" && result.boleto) {
- setBoletoData(result.boleto); setCheckoutState("pending");
- firePixelEvent(productPixels, "BoletoGenerated", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
- } else if (method === "credit_card") {
- if (result.status === "paid" || result.status === "approved") {
- setCheckoutState("approved"); clearCheckoutSession(slug || "");
- firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey });
- } else if (result.secureUrl) {
- try {
- const url = new URL(result.secureUrl);
- if (url.protocol === 'https:' && (url.hostname.endsWith('.podpay.co') || url.hostname.endsWith('.pagar.me'))) {
- window.location.href = result.secureUrl;
- } else {
- toast.error("URL de pagamento inválida"); setCheckoutState("failed");
- }
- } catch { toast.error("URL de pagamento inválida"); setCheckoutState("failed"); }
- }
- else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey }); }
- } else { setCheckoutState("approved"); clearCheckoutSession(slug || ""); firePixelEvent(productPixels, "Purchase", { content_name: product.name, content_id: product.id, value: totalPrice, session_key: sessionKey }); }
- } catch { toast.error("Instabilidade na rede. Tente novamente."); setCheckoutState("failed"); }
- finally {
- setProcessing(false); processingRef.current = false;
- setCardNumber(""); setCardExpiry(""); setCardCvv(""); setCardName("");
- }
+  if (!product || processingRef.current) return;
+  toast.error("Pagamentos temporariamente indisponíveis.");
  };
 
  const retryPayment = () => { clearCheckoutSession(slug || ""); setCheckoutState("form"); setPixData(null); setBoletoData(null); setTransactionId(null); };
@@ -1303,7 +1237,7 @@ export default function PublicCheckout() {
  <div className="pt-1">
  <Button
  type="submit"
- disabled={processing}
+ disabled
  className="w-full h-[62px] text-base font-extrabold rounded-2xl text-white transition-all duration-300 hover:opacity-95 hover:scale-[1.008] active:scale-[0.995] disabled:opacity-50 disabled:hover:scale-100 relative overflow-hidden group"
  style={{ backgroundColor: btnColor, boxShadow: `0 12px 40px -12px ${btnColor}60, 0 4px 12px -4px ${btnColor}30` }}
  >
@@ -1312,17 +1246,7 @@ export default function PublicCheckout() {
  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
  </div>
  <span className="relative flex items-center gap-2.5">
- {processing ? (
- <><Loader2 className="h-5 w-5 animate-spin" /> Processando pagamento...</>
- ) : (
- <>
- <Lock className="h-4 w-4 opacity-80" />
- Finalizar compra
- <span className="opacity-50">•</span>
- <span className="tabular-nums">R$ {fmtBRL(totalPrice)}</span>
- <ArrowRight className="h-4 w-4 opacity-70" />
- </>
- )}
+ <><Lock className="h-4 w-4 opacity-80" /> Pagamentos indisponíveis</>
  </span>
  </Button>
  </div>

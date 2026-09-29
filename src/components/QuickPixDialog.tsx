@@ -34,7 +34,6 @@ interface Props {
 
 type PixResult = {
   transactionId: string;
-  podpayId: string;
   amount: number;
   pix: {
     qrcode?: string;
@@ -135,31 +134,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
 
   const handleSubmit = async () => {
     if (!valid || submitting) return;
-    setSubmitting(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("quick-pix", {
-        body: {
-          amount: amountCents / 100,
-          customerName: name.trim(),
-          customerDocument: docClean,
-          customerEmail: email.trim() || undefined,
-          description: desc.trim() || undefined,
-          idempotencyKey: idempotencyKeyRef.current,
-        },
-      });
-
-      if (error || !data?.success) {
-        toast.error(data?.error || error?.message || "Erro ao gerar PIX");
-        setSubmitting(false);
-        return;
-      }
-      setResult(data.data as PixResult);
-      setStep("result");
-    } catch {
-      toast.error("Falha de conexão. Tente novamente.");
-    } finally {
-      setSubmitting(false);
-    }
+    toast.error("Cobranças PIX temporariamente indisponíveis.");
   };
 
   const pixCode = result?.pix?.qrcode || "";
@@ -331,7 +306,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
 
             <button
               onClick={handleSubmit}
-              disabled={!valid || submitting}
+              disabled
               className={cn(
                 "group relative w-full h-14 overflow-hidden rounded-2xl font-display text-[14px] font-bold active:scale-[0.98]",
                 "flex items-center justify-center gap-2 bg-primary text-primary-foreground",
@@ -347,9 +322,7 @@ export default function QuickPixDialog({ open, onOpenChange }: Props) {
               ) : (
                 <>
                   <QrCode className="h-4 w-4" strokeWidth={2.25} />
-                  Gerar PIX
-                  <span className="mx-1 h-3.5 w-px bg-primary-foreground/30" />
-                  <span className="tabular-nums">{fmtBrl(amountCents)}</span>
+                  Cobranças indisponíveis
                 </>
               )}
             </button>
