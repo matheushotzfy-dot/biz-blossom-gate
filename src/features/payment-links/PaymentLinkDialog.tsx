@@ -31,6 +31,7 @@ export function PaymentLinkDialog({ open, busy, permissions, editing, onOpenChan
     setDraft(editing ? paymentLinkToDraft(editing, permissions) : emptyPaymentLinkDraft(permissions));
     setCoverFile(null);
     setCoverPreview(editing?.cover_url ?? null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }, [editing, open, permissions]);
 
   useEffect(() => () => {

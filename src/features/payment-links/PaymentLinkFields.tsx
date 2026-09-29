@@ -23,7 +23,7 @@ function StepLabel({ number, children }: { number: number; children: ReactNode }
 
 export function PaymentLinkFields({ draft, permissions, coverPreview, fileInputRef, onChange, onPickFile, onClearCover }: PaymentLinkFieldsProps) {
   const methods = [
-    { key: "accept_pix" as const, label: "PIX", detail: "Liberação imediata quando o processamento estiver ativo" },
+    { key: "accept_pix" as const, label: "PIX", detail: "Disponível quando houver processamento financeiro autorizado" },
     { key: "accept_card" as const, label: "Cartão", detail: "Disponível somente com autorização administrativa" },
     { key: "accept_boleto" as const, label: "Boleto", detail: "Desativado por padrão" },
   ];
