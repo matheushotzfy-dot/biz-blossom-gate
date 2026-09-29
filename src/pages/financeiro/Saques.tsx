@@ -208,7 +208,7 @@ export default function Saques() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold text-foreground tracking-tight tracking-tight">Saques</h1>
+          <h1 className="text-2xl font-semibold text-foreground tracking-tight">Saques</h1>
           <p className="text-[11px] font-medium text-muted-foreground flex items-center gap-2">
             <ArrowDownToLine className="h-3.5 w-3.5 text-primary" />
             Solicite a transferência dos seus lucros
@@ -266,10 +266,10 @@ export default function Saques() {
                     ))}
                   </div>
 
-                  <div className="mt-auto space-y-2.5 rounded-2xl border border-border/60 bg-background p-4">
-                    <SummaryRow label="Valor solicitado" value={fmt(parsedAmount)} />
-                    <SummaryRow label="Taxa de saque" value={`-${fmt(withdrawFee)}`} valueClass="text-destructive" />
-                    <div className="flex items-center justify-between border-t border-border/50 pt-3">
+                  <div className="rounded-2xl border border-border/60 bg-background px-4">
+                    <div className="border-b border-border/50 py-2.5"><SummaryRow label="Valor solicitado" value={fmt(parsedAmount)} /></div>
+                    <div className="border-b border-border/50 py-2.5"><SummaryRow label="Taxa de saque" value={`-${fmt(withdrawFee)}`} valueClass="text-destructive" /></div>
+                    <div className="flex items-center justify-between py-3">
                       <span className="text-[12px] font-semibold text-muted-foreground">Você receberá</span>
                       <span className="text-2xl font-black tabular-nums text-success">{fmt(netPreview)}</span>
                     </div>

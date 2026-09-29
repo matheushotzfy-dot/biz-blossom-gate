@@ -9,6 +9,7 @@ import {
   checkoutSlugSchema,
   flattenZodErrors,
 } from "@/lib/validation";
+import { detectPixKeyType, maskAccount, maskAgency, maskDocument, maskPhone, maskSensitivePixKey } from "@/lib/financial-input";
 
 /**
  * Onda 5 — Unit tests for the centralized validation lib.
@@ -177,5 +178,28 @@ describe("flattenZodErrors", () => {
       expect(errs.holder_name).toBeTruthy();
       expect(errs.holder_document).toBeTruthy();
     }
+  });
+});
+
+describe("financial input formatting", () => {
+  it("formats Brazilian documents and bank fields", () => {
+    expect(maskDocument("52998224725")).toBe("529.982.247-25");
+    expect(maskDocument("11222333000181")).toBe("11.222.333/0001-81");
+    expect(maskAgency("123456")).toBe("12345-6");
+    expect(maskAccount("123456")).toBe("12345-6");
+    expect(maskPhone("11987654321")).toBe("(11) 98765-4321");
+  });
+
+  it("detects PIX key types without guessing incomplete values", () => {
+    expect(detectPixKeyType("529.982.247-25")).toBe("cpf");
+    expect(detectPixKeyType("11.222.333/0001-81")).toBe("cnpj");
+    expect(detectPixKeyType("seller@example.com")).toBe("email");
+    expect(detectPixKeyType("(11) 98765-4321")).toBe("phone");
+    expect(detectPixKeyType("12345")).toBeNull();
+  });
+
+  it("masks PII before rendering it", () => {
+    expect(maskSensitivePixKey("52998224725", "cpf")).toBe("•••• 4725");
+    expect(maskSensitivePixKey("seller@example.com", "email")).toBe("se•••@example.com");
   });
 });
