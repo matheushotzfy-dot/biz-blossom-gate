@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import { rpcErrorMessage } from "./types";
 import { useSensitiveConfirm } from "./useSensitiveConfirm";
+import { CreatePartnerCard } from "./CreatePartnerCard";
 
 export const STAFF_KIND_LABEL: Record<string, string> = {
   acquirer_change: "Trocar adquirente de seller", acquirer_toggle: "Ligar/desligar adquirente", fee_change: "Mudança de taxa",
@@ -43,6 +44,7 @@ export default function StaffRequestsTab({ profiles }: { profiles: Tables<"profi
   return (
     <div className="space-y-4">
       <div><h2 className="text-lg font-semibold">Pedidos da equipe</h2><p className="text-xs text-muted-foreground">Sócios e gerentes não executam nada sensível: enviam pedidos e só você aprova.</p></div>
+      <CreatePartnerCard />
       <Tabs value={status} onValueChange={setStatus}><TabsList><TabsTrigger value="pending">Pendentes</TabsTrigger><TabsTrigger value="approved">Aprovados</TabsTrigger><TabsTrigger value="rejected">Recusados</TabsTrigger></TabsList></Tabs>
       {q.isLoading ? <div className="flex h-24 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-label="Carregando" /></div>
       : (q.data ?? []).length === 0 ? <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">Nenhum pedido</p>
