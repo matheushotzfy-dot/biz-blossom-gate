@@ -944,6 +944,48 @@ export type Database = {
         }
         Relationships: []
       }
+      balance_adjustment_requests: {
+        Row: {
+          adjustment_id: string | null
+          amount: number
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          reason: string
+          requested_by: string
+          status: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          adjustment_id?: string | null
+          amount: number
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          reason: string
+          requested_by: string
+          status?: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          adjustment_id?: string | null
+          amount?: number
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          reason?: string
+          requested_by?: string
+          status?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       balance_adjustments: {
         Row: {
           admin_user_id: string
@@ -1268,6 +1310,48 @@ export type Database = {
         }
         Relationships: []
       }
+      dispute_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          dispute_id: string
+          event: string
+          id: string
+          note: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          dispute_id: string
+          event: string
+          id?: string
+          note?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          dispute_id?: string
+          event?: string
+          id?: string
+          note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispute_events_dispute_id_fkey"
+            columns: ["dispute_id"]
+            isOneToOne: false
+            referencedRelation: "disputes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dispute_events_dispute_id_fkey"
+            columns: ["dispute_id"]
+            isOneToOne: false
+            referencedRelation: "disputes_seller"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disputes: {
         Row: {
           admin_notes: string | null
@@ -1278,9 +1362,13 @@ export type Database = {
           buyer_phone: string | null
           created_at: string
           evidence_urls: Json
+          fee_amount: number
           id: string
           reason: string | null
           resolved_at: string | null
+          response_deadline: string | null
+          seller_responded_at: string | null
+          seller_response: string | null
           seller_user_id: string
           status: string
           transaction_id: string | null
@@ -1297,9 +1385,13 @@ export type Database = {
           buyer_phone?: string | null
           created_at?: string
           evidence_urls?: Json
+          fee_amount?: number
           id?: string
           reason?: string | null
           resolved_at?: string | null
+          response_deadline?: string | null
+          seller_responded_at?: string | null
+          seller_response?: string | null
           seller_user_id: string
           status?: string
           transaction_id?: string | null
@@ -1316,9 +1408,13 @@ export type Database = {
           buyer_phone?: string | null
           created_at?: string
           evidence_urls?: Json
+          fee_amount?: number
           id?: string
           reason?: string | null
           resolved_at?: string | null
+          response_deadline?: string | null
+          seller_responded_at?: string | null
+          seller_response?: string | null
           seller_user_id?: string
           status?: string
           transaction_id?: string | null
@@ -5015,6 +5111,10 @@ export type Database = {
           success: boolean
         }[]
       }
+      admin_decide_balance_adjustment: {
+        Args: { _approve: boolean; _request_id: string }
+        Returns: Json
+      }
       admin_decrypt_field: { Args: { _cipher: string }; Returns: string }
       admin_freeze_account: {
         Args: { _freeze: boolean; _reason?: string; _user_id: string }
@@ -5027,9 +5127,40 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_open_dispute: {
+        Args: {
+          _deadline_days?: number
+          _reason: string
+          _transaction_id: string
+          _type: string
+        }
+        Returns: string
+      }
       admin_purge_orphan_notifications: { Args: never; Returns: number }
+      admin_refund_transaction: {
+        Args: { _amount: number; _reason: string; _transaction_id: string }
+        Returns: Json
+      }
       admin_reject_kyc: {
         Args: { _reason: string; _user_id: string }
+        Returns: undefined
+      }
+      admin_request_balance_adjustment: {
+        Args: {
+          _amount: number
+          _reason: string
+          _type: string
+          _user_id: string
+        }
+        Returns: Json
+      }
+      admin_resolve_dispute: {
+        Args: {
+          _dispute_id: string
+          _fee?: number
+          _note?: string
+          _outcome: string
+        }
         Returns: undefined
       }
       admin_reveal_bank_accounts: {
@@ -5069,6 +5200,10 @@ export type Database = {
       admin_set_acquirer_active: {
         Args: { _acquirer_id: string; _active: boolean; _reason?: string }
         Returns: Json
+      }
+      admin_set_dispute_review: {
+        Args: { _dispute_id: string; _note?: string }
+        Returns: undefined
       }
       admin_set_payment_link_status: {
         Args: { _payment_link_id: string; _reason?: string; _status: string }
@@ -5375,8 +5510,13 @@ export type Database = {
           sort_order: number
         }[]
       }
+      get_seller_360: { Args: { _user_id: string }; Returns: Json }
       get_seller_anticipation_summary: {
         Args: { _max_days?: number }
+        Returns: Json
+      }
+      get_seller_balance_breakdown: {
+        Args: { _user_id: string }
         Returns: Json
       }
       get_seller_dashboard_stats: {
@@ -5581,6 +5721,10 @@ export type Database = {
       }
       run_ledger_reconciliation: { Args: never; Returns: Json }
       run_monitoring_checks: { Args: never; Returns: Json }
+      seller_respond_dispute: {
+        Args: { _dispute_id: string; _evidence?: string[]; _response: string }
+        Returns: undefined
+      }
       set_max_ticket_for_all: { Args: { _new_value: number }; Returns: Json }
       set_max_ticket_new_users_only: {
         Args: { _new_value: number }
