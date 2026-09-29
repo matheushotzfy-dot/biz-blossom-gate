@@ -6,3 +6,9 @@
 - [x] Classificar as 63 funções privilegiadas legadas por consumidor e papel mínimo
 - [x] Revogar execuções excessivas sem quebrar funções públicas, seller ou admin
 - [x] Validar linter, fluxos críticos e isolamento após o hardening
+
+- [ ] Mapear alertas atuais do painel admin e os três achados de catálogo/armazenamento
+- [ ] Corrigir causas dos achados preservando acessos legítimos
+- [ ] Criar registro administrativo de achados e análise priorizada por IA
+- [ ] Integrar a experiência no painel admin com estados de erro e histórico
+- [ ] Validar segurança, build, testes e fluxos públicos/autenticados
