@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ReauthenticationDialog } from "@/components/security/ReauthenticationDialog";
 import { friendlyError } from "@/lib/friendlyError";
+import { maskSensitivePixKey } from "@/lib/financial-input";
 
 type Config = {
   id: string;
@@ -80,7 +81,7 @@ export default function AutoWithdrawalSettings() {
   const canSave = !saving && (enabled ? formValid : true);
 
   const selectedKey = activeKeys.find(k => k.id === (config?.pix_key_id || ""));
-  const maskedKey = (k?: typeof selectedKey) => k ? (k.key_value ?? k.key_value_masked ?? "•••") : "";
+  const maskedKey = (k?: typeof selectedKey) => k ? maskSensitivePixKey(k.key_value_masked ?? k.key_value, k.key_type) : "";
 
   function handleSave() {
     if (!user?.id || !canSave) return;
@@ -282,7 +283,7 @@ export default function AutoWithdrawalSettings() {
                         : k.key_type === "telefone" || k.key_type === "phone" ? Phone
                         : k.key_type === "cpf" || k.key_type === "cnpj" ? Hash
                         : Fingerprint;
-                      const val = k.key_value ?? k.key_value_masked ?? "•••";
+                      const val = maskSensitivePixKey(k.key_value_masked ?? k.key_value, k.key_type);
                       return (
                         <button
                           key={k.id}

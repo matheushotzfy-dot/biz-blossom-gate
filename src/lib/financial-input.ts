@@ -46,7 +46,7 @@ export function detectPixKeyType(value: string): PixKeyType | null {
   const numeric = digits(clean);
   if (numeric.length === 11 && isValidCPF(numeric)) return "cpf";
   if (numeric.length === 14 && isValidCNPJ(numeric)) return "cnpj";
-  if (/^\+?\d[\d\s().-]+$/.test(clean) && numeric.length >= 10 && numeric.length <= 13) return "phone";
+  if (/^\+?[\d\s().-]+$/.test(clean) && numeric.length >= 10 && numeric.length <= 13) return "phone";
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(clean) || clean.length >= 32) return "random";
   return null;
 }
