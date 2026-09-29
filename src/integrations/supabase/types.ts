@@ -5674,6 +5674,7 @@ export type Database = {
           value: number
         }[]
       }
+      get_product_link_status: { Args: { _slug: string }; Returns: string }
       get_public_payment_link: {
         Args: { _slug: string }
         Returns: {
