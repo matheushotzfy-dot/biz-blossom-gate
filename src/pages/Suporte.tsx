@@ -325,7 +325,7 @@ export default function Suporte() {
             </button>
             <button
               onClick={() => { setShowComposer(true); setSelectedId(null); }}
-              className="h-12 px-5 rounded-xl border border-foreground bg-foreground text-background font-black text-xs uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2"
+              className="h-12 px-5 rounded-xl border border-primary bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-colors flex items-center gap-2"
             >
               <Plus size={16} strokeWidth={3} /> Novo Ticket
             </button>
