@@ -1270,9 +1270,7 @@ export default function PublicCheckout() {
  </div>
  {product.display_name && (
  <div className="flex flex-col items-center gap-1 py-2.5 border-t border-gray-100">
- {product.display_name && (
  <span className="text-[11px] font-semibold text-gray-400">{product.display_name}</span>
- )}
  </div>
  )}
  <p className="text-center text-[10px] text-gray-300 leading-relaxed px-6">
