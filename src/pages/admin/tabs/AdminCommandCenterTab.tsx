@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Activity, AlertTriangle, ArrowDownToLine, ArrowRight, Banknote, Bug, CheckCircle2,
+  Activity, AlertTriangle, ArrowDownToLine, ArrowRight, Bug, CheckCircle2,
   Clock, CreditCard, Gauge, LifeBuoy, RefreshCw, Search, ShieldAlert, ShieldCheck,
   UserCheck, Webhook, type LucideIcon,
 } from "lucide-react";
@@ -37,17 +37,6 @@ interface QueueItem {
   count: number;
   tab: string;
   tone: "neutral" | "warning" | "danger";
-}
-
-interface AcquirerHealth {
-  id: string;
-  name: string;
-  is_active: boolean;
-  health_status: string;
-  priority: number;
-  conversion_rate: number;
-  last_latency_ms: number | null;
-  last_failure_at: string | null;
 }
 
 interface ErrorRow {
@@ -114,7 +103,6 @@ export default function AdminCommandCenterTab({
   const [ticketsOpen, setTicketsOpen] = useState(0);
   const [errors, setErrors] = useState<ErrorRow[]>([]);
   const [fraud, setFraud] = useState<FraudRow[]>([]);
-  const [acquirers, setAcquirers] = useState<AcquirerHealth[]>([]);
   const [webhookStats, setWebhookStats] = useState({ delivered: 0, failed: 0, pending: 0 });
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<SearchHit[] | null>(null);
@@ -124,14 +112,13 @@ export default function AdminCommandCenterTab({
     setLoading(true);
     try {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const [dRes, tRes, eRes, fRes, aRes, wRes] = await Promise.all([
+      const [dRes, tRes, eRes, fRes, wRes] = await Promise.all([
         supabase.from("disputes").select("id", { count: "exact", head: true }).eq("status", "open"),
         supabase.from("support_tickets").select("id", { count: "exact", head: true }).neq("status", "closed"),
         supabase.from("error_logs").select("id, error_type, message, created_at")
           .eq("resolved", false).order("created_at", { ascending: false }).limit(6),
         supabase.from("fraud_logs").select("id, block_type, block_reason, matched_value, created_at")
           .order("created_at", { ascending: false }).limit(6),
-        supabase.rpc("list_visible_acquirers"),
         supabase.from("webhook_deliveries").select("status").gte("created_at", since).limit(2000),
       ]);
 
@@ -139,7 +126,6 @@ export default function AdminCommandCenterTab({
       setTicketsOpen(tRes.count ?? 0);
       setErrors((eRes.data ?? []) as ErrorRow[]);
       setFraud((fRes.data ?? []) as FraudRow[]);
-      setAcquirers((aRes.data ?? []) as unknown as AcquirerHealth[]);
 
       const rows = (wRes.data ?? []) as { status: string }[];
       setWebhookStats({
@@ -209,15 +195,11 @@ export default function AdminCommandCenterTab({
     if (webhookStats.failed > 0) {
       list.push({ id: "wh", tone: "warning", label: "Webhooks falhando", detail: `${webhookStats.failed} entregas com falha nas últimas 24h` });
     }
-    const degraded = acquirers.filter(a => a.is_active && a.health_status !== "healthy");
-    if (degraded.length > 0) {
-      list.push({ id: "acq", tone: "danger", label: "Adquirente degradada", detail: degraded.map(a => a.name).join(", ") });
-    }
     if (errors.length >= 5) {
       list.push({ id: "err", tone: "warning", label: "Erros não resolvidos acumulando", detail: `${errors.length}+ erros abertos no log` });
     }
     return list;
-  }, [stats, oldestWithdrawalHours, webhookStats.failed, acquirers, errors.length]);
+  }, [stats, oldestWithdrawalHours, webhookStats.failed, errors.length]);
 
   const queues: QueueItem[] = useMemo(() => [
     { key: "withdrawals", label: "Saques pendentes", hint: fmtCurrency(stats.pendingVolume), icon: ArrowDownToLine, count: pendingWithdrawals.length, tab: "withdrawals", tone: pendingWithdrawals.length > 0 ? "warning" : "neutral" },
@@ -362,33 +344,6 @@ export default function AdminCommandCenterTab({
       </Panel>
 
       <div className="grid gap-5 lg:grid-cols-2">
-        {/* Saúde das adquirentes */}
-        <Panel title="Saúde das adquirentes" icon={Banknote}
-          action={
-            <button onClick={() => onNavigate("acquirers")} className="text-[11.5px] font-medium text-muted-foreground hover:text-foreground">Gerenciar</button>
-          }>
-          {acquirers.length === 0 ? <Empty label="Nenhuma adquirente configurada." /> : (
-            <ul className="divide-y divide-border">
-              {acquirers.map(a => (
-                <li key={a.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
-                  <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full",
-                    !a.is_active ? "bg-muted-foreground" : a.health_status === "healthy" ? "bg-success" : "bg-destructive")} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[12.5px] font-medium text-foreground">{a.name}</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {a.is_active ? `Prioridade ${a.priority}` : "Desativada"}
-                      {a.last_latency_ms != null && ` · ${a.last_latency_ms}ms`}
-                    </p>
-                  </div>
-                  <span className="text-[12px] font-semibold tabular-nums text-foreground">
-                    {Number(a.conversion_rate ?? 0).toFixed(1)}%
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Panel>
-
         {/* Webhooks */}
         <Panel title="Entregas de webhook (24h)" icon={Webhook}>
           <div className="grid grid-cols-3 gap-px overflow-hidden rounded-[12px] border border-border bg-border">

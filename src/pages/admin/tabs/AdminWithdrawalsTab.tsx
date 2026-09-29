@@ -438,9 +438,9 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
         selectedIds.size > 0 ? (
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{selectedIds.size} selecionados</span>
-            <Button size="sm" disabled={batchProcessing} onClick={handleBatchApprove}
+            <Button size="sm" disabled onClick={handleBatchApprove}
               className="h-8 gap-1 rounded-xl border border-primary/20 bg-primary/10 text-[11px] text-primary shadow-none hover:bg-primary/20">
-              <CheckCircle2 className="h-3 w-3" /> Aprovar lote
+              <CheckCircle2 className="h-3 w-3" /> Indisponível
             </Button>
             <Button size="sm" disabled={batchProcessing} onClick={handleBatchReject}
               className="h-8 gap-1 rounded-xl border border-destructive/20 bg-destructive/10 text-[11px] text-destructive shadow-none hover:bg-destructive/20">
@@ -583,8 +583,8 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                   <td className={premiumTable.td}>
                     {isPending && (
                       <div className="flex gap-2">
-                        <Button size="sm" className="h-7 gap-1 rounded-xl border border-primary/20 bg-primary/10 text-[11px] text-primary shadow-none hover:bg-primary/20" onClick={() => onWithdrawalAction(w.id, "approved")}>
-                          <CheckCircle2 className="h-3 w-3" /> Aprovar
+                        <Button size="sm" disabled className="h-7 gap-1 rounded-xl border border-primary/20 bg-primary/10 text-[11px] text-primary shadow-none" onClick={() => onWithdrawalAction(w.id, "approved")}>
+                          <CheckCircle2 className="h-3 w-3" /> Indisponível
                         </Button>
                         <Button size="sm" className="h-7 gap-1 rounded-xl border border-destructive/20 bg-destructive/10 text-[11px] text-destructive shadow-none hover:bg-destructive/20" onClick={() => { setRejectDialog(w.id); setRejectReason(""); }}>
                           <XCircle className="h-3 w-3" /> Recusar
@@ -615,7 +615,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                           {w.status === "rejected" ? "Motivo" : "Última falha"}
                           {(w as any).failure_code ? ` · ${(w as any).failure_code}` : ""}
                         </p>
-                        <p className="line-clamp-3 text-[10px] text-muted-foreground">{w.rejection_reason || "Falha na adquirente"}</p>
+                        <p className="line-clamp-3 text-[10px] text-muted-foreground">{w.rejection_reason || "Processamento não concluído"}</p>
                       </div>
                     )}
                   </td>

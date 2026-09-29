@@ -9,7 +9,7 @@ import {
   RotateCcw, ShieldAlert, CreditCard, ArrowDownToLine, Tag, GraduationCap,
   Activity, Settings, Bell, MessageSquare,
   UserCog, RefreshCw, Coins,
-  Bug, UserX, Banknote, ShieldCheck,
+  Bug, UserX, ShieldCheck,
   Package2, BarChart3, Calendar,
   PanelLeftClose, PanelLeft,
   Trophy, Search, ChevronDown, Sun, Moon, Target, Gauge, Lock, Clock, SearchX,
@@ -35,7 +35,6 @@ import AdminCouponsTab from "./tabs/AdminCouponsTab";
 import AdminCoursesTab from "./tabs/AdminCoursesTab";
 import AdminAuditTab from "./tabs/AdminAuditTab";
 import AdminSettingsTab from "./tabs/AdminSettingsTab";
-import AdminAcquirersTab from "./tabs/AdminAcquirersTab";
 import AdminEmployeesTab from "./tabs/AdminEmployeesTab";
 import AdminTopSellersTab from "./tabs/AdminTopSellersTab";
 import AdminTopProductsTab from "./tabs/AdminTopProductsTab";
@@ -109,7 +108,6 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
   {
     id: "system", label: "Sistema",
     items: [
-      { id: "acquirers", label: "Adquirentes", icon: Banknote, employeeAccess: false },
       { id: "settings", label: "Configurações", icon: Settings, employeeAccess: false },
       { id: "error-logs", label: "Error Logs", icon: Bug, employeeAccess: false },
       { id: "notifications", label: "Notificações", icon: Bell, employeeAccess: false },
@@ -702,7 +700,6 @@ export default function AdminDashboard() {
               {activeTab === "withdrawals" && isAdmin && (
                 <AdminWithdrawalsTab withdrawals={withdrawals} profiles={profiles} onWithdrawalAction={handleWithdrawalAction} onReload={loadData} fmtCurrency={fmtCurrency} />
               )}
-              {activeTab === "acquirers" && isAdmin && <AdminAcquirersTab />}
               {activeTab === "risk-compliance" && isAdmin && (
                 <AdminRiskComplianceTab profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
               )}

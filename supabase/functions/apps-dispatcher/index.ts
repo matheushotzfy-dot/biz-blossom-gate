@@ -1,7 +1,7 @@
 // Apps delivery worker — Z-API and UTMify.
 // Picks pending app_deliveries rows whose next_retry_at is due and POSTs them
 // to the right provider. Retries with exponential backoff. Can be invoked by
-// cron, manually, or fire-and-forget from podpay-postback.
+// cron, manually, or fire-and-forget after a confirmed payment event.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { isInternalCall, unauthorizedResponse } from "../_shared/cron-auth.ts";

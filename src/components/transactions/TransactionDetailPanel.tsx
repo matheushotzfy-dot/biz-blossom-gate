@@ -34,13 +34,12 @@ import { toast } from "sonner";
 type Transaction = Tables<"transactions">;
 
 interface TransactionDetailPanelProps {
- tx: Transaction & { acquirer_id?: string | null; acquirer_fee_amount?: number | null; buyer_ip?: string | null };
+ tx: Transaction & { buyer_ip?: string | null };
  products: Record<string, string>;
  onClose: () => void;
  onRefund?: (tx: Transaction) => void;
  variant?: "seller" | "admin";
  seller?: { full_name?: string | null; email?: string | null; nickname?: string | null } | null;
- acquirerName?: string | null;
 }
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
@@ -123,7 +122,7 @@ function DataRow({
  );
 }
 
-export function TransactionDetailPanel({ tx, products, onClose, onRefund, variant = "seller", seller, acquirerName }: TransactionDetailPanelProps) {
+export function TransactionDetailPanel({ tx, products, onClose, onRefund, variant = "seller", seller }: TransactionDetailPanelProps) {
  const [copiedId, setCopiedId] = useState(false);
 
  const customerName = tx.customer_name || "Cliente";
@@ -240,34 +239,11 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund, varian
  <SectionCard title="Transação">
  <DataRow label="Produto" value={<span className="block break-words text-right">{productName}</span>} icon={<Package className="h-3.5 w-3.5 shrink-0" />} />
  <DataRow label="Método" value={methodLabel} icon={<CreditCard className="h-3.5 w-3.5 shrink-0" />} />
- <DataRow
-   label="Adquirente"
-   icon={<Zap className="h-3.5 w-3.5 shrink-0" />}
-   value={
-     <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-       {(() => {
-         if (variant !== "admin") return "VENXPAY";
-         if (acquirerName) return acquirerName.toUpperCase();
-         const meta = (tx.metadata as Record<string, unknown> | null) || {};
-         const acq = (meta.acquirer_slug as string) || (meta.acquirer as string) || tx.source || "—";
-         return String(acq).toUpperCase();
-       })()}
-     </span>
-   }
- />
- {variant === "admin" && Number(tx.acquirer_fee_amount || 0) > 0 && (
-   <DataRow
-     label="Custo da adquirente"
-     icon={<ArrowDownRight className="h-3.5 w-3.5 shrink-0" />}
-     value={`- ${formatCurrency(Number(tx.acquirer_fee_amount))}`}
-     valueClassName="text-warning"
-   />
- )}
  {variant === "admin" && (
    <DataRow
      label="Lucro plataforma"
      icon={<TrendingUp className="h-3.5 w-3.5 shrink-0" />}
-     value={formatCurrency(Number(tx.fee_amount || 0) - Number(tx.acquirer_fee_amount || 0))}
+      value={formatCurrency(Number(tx.fee_amount || 0))}
      valueClassName="text-success"
    />
  )}

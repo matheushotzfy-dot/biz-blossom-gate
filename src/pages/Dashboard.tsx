@@ -32,7 +32,6 @@ import { useQuery } from "@tanstack/react-query";
 import type { Tables } from "@/integrations/supabase/types";
 import { Link, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import QuickPixDialog from "@/components/QuickPixDialog";
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -235,7 +234,6 @@ export default function Dashboard() {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const privacy = usePrivacyMode();
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
-  const [pixDialogOpen, setPixDialogOpen] = useState(false);
   const { data: availableBalance = 0 } = useLedgerBalance();
   const kyc = useKycStatus();
   const accountLocked = !kyc.approved;
@@ -601,7 +599,7 @@ export default function Dashboard() {
         {/* ═══════════ QUICK ACTIONS ═══════════ */}
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            { label: "Gerar PIX", sub: "QR Code para receber", icon: QrCode, onClick: () => { if (!requireApprovedAccount()) setPixDialogOpen(true); } },
+            { label: "Gerar PIX", sub: "Temporariamente indisponível", icon: QrCode, onClick: () => toast.error("Cobranças PIX temporariamente indisponíveis.") },
             { label: "Solicitar Saque", sub: "Transferir via PIX", icon: ArrowDownRight, onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
             { label: "Transações", sub: "Ver histórico", icon: Receipt, onClick: () => { if (!requireApprovedAccount()) navigate("/vendas"); } },
             { label: "Credenciais API", sub: "Gerencie suas credenciais", icon: KeyRound, onClick: () => { if (!requireApprovedAccount()) navigate("/integracoes/credenciais"); } },
@@ -879,7 +877,6 @@ export default function Dashboard() {
           />
         )}
 
-        <QuickPixDialog open={pixDialogOpen} onOpenChange={setPixDialogOpen} />
       </div>
     </div>
   );

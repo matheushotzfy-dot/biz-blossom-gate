@@ -341,7 +341,7 @@ export default function Antecipacao() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-border/40">
           {[
-            { icon: Clock, title: "Retenção", desc: "Transações aprovadas têm período de retenção definido pela adquirente.", tone: "info" as const },
+            { icon: Clock, title: "Retenção", desc: "Transações aprovadas seguem o período de retenção da sua conta.", tone: "info" as const },
             { icon: Percent, title: "Taxa pro-rata", desc: "2,5% a cada 15 dias restantes — quanto menor o tempo, menor a taxa.", tone: "warning" as const },
             { icon: CheckCircle2, title: "Crédito", desc: "Valor líquido creditado no saldo disponível em até 1 dia útil.", tone: "success" as const },
           ].map((item) => {
