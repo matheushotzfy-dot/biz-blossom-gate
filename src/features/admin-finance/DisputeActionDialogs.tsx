@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { DISPUTE_TYPE_LABEL, rpcErrorMessage, type DisputeType } from "./types";
+import { useSensitiveConfirm } from "./useSensitiveConfirm";
+import { brl, DISPUTE_TYPE_LABEL, rpcErrorMessage, type DisputeType } from "./types";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -67,11 +68,17 @@ export function RefundDialog({ open, onOpenChange, onDone }: BaseProps) {
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
 
+  const { confirm, dialog } = useSensitiveConfirm();
+
   const submit = async () => {
     const value = Number(amount.replace(",", "."));
     if (!UUID_RE.test(txId.trim())) { toast.error("ID da venda inválido"); return; }
     if (!Number.isFinite(value) || value <= 0) { toast.error("Valor inválido"); return; }
     if (reason.trim().length < 3) { toast.error("Informe o motivo"); return; }
+    confirm(`Reembolsar ${brl(value)} da venda ${txId.trim().slice(0, 8)}. O valor será debitado do seller.`, () => execute(value));
+  };
+
+  const execute = async (value: number) => {
     setBusy(true);
     const { data, error } = await supabase.rpc("admin_refund_transaction", { _transaction_id: txId.trim(), _amount: value, _reason: reason.trim() });
     setBusy(false);
@@ -94,6 +101,7 @@ export function RefundDialog({ open, onOpenChange, onDone }: BaseProps) {
           <div className="space-y-1"><Label htmlFor="rf-reason">Motivo</Label><Textarea id="rf-reason" rows={3} maxLength={500} value={reason} onChange={(e) => setReason(e.target.value)} /></div>
           <Button className="w-full" onClick={submit} disabled={busy}>{busy ? "Processando..." : "Confirmar reembolso"}</Button>
         </div>
+        {dialog}
       </DialogContent>
     </Dialog>
   );

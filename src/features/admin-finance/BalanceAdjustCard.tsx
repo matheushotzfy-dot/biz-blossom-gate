@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { brl, rpcErrorMessage } from "./types";
+import { useSensitiveConfirm } from "./useSensitiveConfirm";
 
 interface PendingRequest { id: string; type: string; amount: number; reason: string; created_at: string }
 
@@ -22,6 +23,7 @@ export function BalanceAdjustCard({ userId, onDone }: BalanceAdjustCardProps) {
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [pending, setPending] = useState<PendingRequest[]>([]);
+  const { confirm, dialog } = useSensitiveConfirm();
 
   const loadPending = useCallback(async () => {
     const { data } = await supabase.from("balance_adjustment_requests")
@@ -36,6 +38,10 @@ export function BalanceAdjustCard({ userId, onDone }: BalanceAdjustCardProps) {
     const value = Number(amount.replace(",", "."));
     if (!Number.isFinite(value) || value <= 0) { toast.error("Informe um valor válido"); return; }
     if (reason.trim().length < 5) { toast.error("Motivo obrigatório (mín. 5 caracteres)"); return; }
+    confirm(`${type === "credit" ? "Creditar" : "Debitar"} ${brl(value)} no saldo do seller.`, () => execute(value));
+  };
+
+  const execute = async (value: number) => {
     setBusy(true);
     const { data, error } = await supabase.rpc("admin_request_balance_adjustment", {
       _user_id: userId, _type: type, _amount: value, _reason: reason.trim(),
@@ -48,7 +54,12 @@ export function BalanceAdjustCard({ userId, onDone }: BalanceAdjustCardProps) {
     void loadPending(); onDone();
   };
 
-  const decide = async (id: string, approve: boolean) => {
+  const decide = (id: string, approve: boolean) => {
+    const req = pending.find((p) => p.id === id);
+    confirm(`${approve ? "Aprovar" : "Recusar"} pedido de ${req?.type === "credit" ? "crédito" : "débito"} de ${brl(req?.amount ?? 0)}.`, () => executeDecision(id, approve));
+  };
+
+  const executeDecision = async (id: string, approve: boolean) => {
     const { error } = await supabase.rpc("admin_decide_balance_adjustment", { _request_id: id, _approve: approve });
     if (error) { toast.error(rpcErrorMessage(error)); return; }
     toast.success(approve ? "Ajuste aprovado" : "Ajuste recusado");
@@ -90,6 +101,7 @@ export function BalanceAdjustCard({ userId, onDone }: BalanceAdjustCardProps) {
           ))}
         </div>
       )}
+      {dialog}
     </div>
   );
 }
