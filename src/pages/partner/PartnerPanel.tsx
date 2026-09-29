@@ -40,7 +40,7 @@ export default function PartnerPanel() {
 
   if (!user) return (
     <main className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Seo title="Painel do Sócio | VENXPAY" description="Acesso restrito aos sócios da VENXPAY." />
+      <Seo title="Painel do Sócio | VENXPAY" description="Acesso restrito aos sócios da VENXPAY." path="/socio" noindex />
       <form className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-6" onSubmit={(e) => { e.preventDefault(); void login(); }}>
         <h1 className="text-xl font-semibold">Painel do Sócio</h1>
         <div className="space-y-1"><Label htmlFor="p-email">E-mail</Label><Input id="p-email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
@@ -59,7 +59,7 @@ export default function PartnerPanel() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Seo title="Painel do Sócio | VENXPAY" description="Métricas da plataforma e pedidos ao dono." />
+      <Seo title="Painel do Sócio | VENXPAY" description="Métricas da plataforma e pedidos ao dono." path="/socio" noindex />
       <header className="flex items-center justify-between border-b border-border px-4 py-3 md:px-8">
         <h1 className="text-lg font-semibold">Painel do Sócio</h1>
         <Button size="sm" variant="ghost" onClick={() => void supabase.auth.signOut()}><LogOut className="mr-1.5 h-4 w-4" />Sair</Button>
