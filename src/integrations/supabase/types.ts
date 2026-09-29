@@ -2820,6 +2820,96 @@ export type Database = {
           },
         ]
       }
+      public_product_catalog: {
+        Row: {
+          affiliate_commission: number | null
+          affiliate_enabled: boolean | null
+          checkout_address_required: boolean | null
+          checkout_banner_desktop_url: string | null
+          checkout_banner_mobile_url: string | null
+          checkout_boleto_enabled: boolean
+          checkout_button_color: string | null
+          checkout_credit_card_enabled: boolean
+          checkout_email_confirm: boolean | null
+          checkout_guarantee_enabled: boolean | null
+          checkout_pix_enabled: boolean
+          checkout_social_proof: boolean | null
+          checkout_theme: string | null
+          checkout_timer_enabled: boolean | null
+          checkout_timer_minutes: number | null
+          checkout_url: string | null
+          delivery_type: string | null
+          description: string | null
+          display_name: string | null
+          id: string
+          image_url: string | null
+          name: string
+          price: number
+          product_created_at: string
+          status: string
+          support_email: string | null
+          updated_at: string
+        }
+        Insert: {
+          affiliate_commission?: number | null
+          affiliate_enabled?: boolean | null
+          checkout_address_required?: boolean | null
+          checkout_banner_desktop_url?: string | null
+          checkout_banner_mobile_url?: string | null
+          checkout_boleto_enabled?: boolean
+          checkout_button_color?: string | null
+          checkout_credit_card_enabled?: boolean
+          checkout_email_confirm?: boolean | null
+          checkout_guarantee_enabled?: boolean | null
+          checkout_pix_enabled?: boolean
+          checkout_social_proof?: boolean | null
+          checkout_theme?: string | null
+          checkout_timer_enabled?: boolean | null
+          checkout_timer_minutes?: number | null
+          checkout_url?: string | null
+          delivery_type?: string | null
+          description?: string | null
+          display_name?: string | null
+          id: string
+          image_url?: string | null
+          name: string
+          price: number
+          product_created_at: string
+          status: string
+          support_email?: string | null
+          updated_at?: string
+        }
+        Update: {
+          affiliate_commission?: number | null
+          affiliate_enabled?: boolean | null
+          checkout_address_required?: boolean | null
+          checkout_banner_desktop_url?: string | null
+          checkout_banner_mobile_url?: string | null
+          checkout_boleto_enabled?: boolean
+          checkout_button_color?: string | null
+          checkout_credit_card_enabled?: boolean
+          checkout_email_confirm?: boolean | null
+          checkout_guarantee_enabled?: boolean | null
+          checkout_pix_enabled?: boolean
+          checkout_social_proof?: boolean | null
+          checkout_theme?: string | null
+          checkout_timer_enabled?: boolean | null
+          checkout_timer_minutes?: number | null
+          checkout_url?: string | null
+          delivery_type?: string | null
+          description?: string | null
+          display_name?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          price?: number
+          product_created_at?: string
+          status?: string
+          support_email?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       quiz_attempts: {
         Row: {
           answers: Json
@@ -5229,33 +5319,40 @@ export type Database = {
       get_public_products: {
         Args: { _ids?: string[]; _slug?: string }
         Returns: {
-          affiliate_commission: number
-          affiliate_enabled: boolean
-          checkout_address_required: boolean
-          checkout_banner_desktop_url: string
-          checkout_banner_mobile_url: string
+          affiliate_commission: number | null
+          affiliate_enabled: boolean | null
+          checkout_address_required: boolean | null
+          checkout_banner_desktop_url: string | null
+          checkout_banner_mobile_url: string | null
           checkout_boleto_enabled: boolean
-          checkout_button_color: string
+          checkout_button_color: string | null
           checkout_credit_card_enabled: boolean
-          checkout_email_confirm: boolean
-          checkout_guarantee_enabled: boolean
+          checkout_email_confirm: boolean | null
+          checkout_guarantee_enabled: boolean | null
           checkout_pix_enabled: boolean
-          checkout_social_proof: boolean
-          checkout_theme: string
-          checkout_timer_enabled: boolean
-          checkout_timer_minutes: number
-          checkout_url: string
-          created_at: string
-          delivery_type: string
-          description: string
-          display_name: string
+          checkout_social_proof: boolean | null
+          checkout_theme: string | null
+          checkout_timer_enabled: boolean | null
+          checkout_timer_minutes: number | null
+          checkout_url: string | null
+          delivery_type: string | null
+          description: string | null
+          display_name: string | null
           id: string
-          image_url: string
+          image_url: string | null
           name: string
           price: number
+          product_created_at: string
           status: string
-          support_email: string
+          support_email: string | null
+          updated_at: string
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "public_product_catalog"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_quiz_questions_for_student: {
         Args: { _quiz_id: string }
@@ -5477,6 +5574,10 @@ export type Database = {
       set_max_ticket_new_users_only: {
         Args: { _new_value: number }
         Returns: Json
+      }
+      sync_public_product_catalog_row: {
+        Args: { _product_id: string }
+        Returns: undefined
       }
       touch_api_key: { Args: { _api_key_id: string }; Returns: undefined }
       validate_coupon: {
