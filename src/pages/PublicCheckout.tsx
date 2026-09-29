@@ -164,6 +164,7 @@ export default function PublicCheckout() {
    : null;
  const [product, setProduct] = useState<Product | null>(null);
  const [loading, setLoading] = useState(true);
+ const [linkStatus, setLinkStatus] = useState<string | null>(null);
  const [method, setMethod] = useState<PaymentMethod>("credit_card");
  const [processing, setProcessing] = useState(false);
  const [checkoutState, setCheckoutState] = useState<CheckoutState>("form");
@@ -240,7 +241,12 @@ export default function PublicCheckout() {
         .maybeSingle();
 
       if (cancelled) return;
-      if (!prod) { setLoading(false); return; }
+      if (!prod) {
+        // Only the status is revealed (no product data) so the buyer/seller knows why the link is closed.
+        const { data: st } = await supabase.rpc("get_product_link_status", { _slug: safeSlug });
+        if (!cancelled) { setLinkStatus(typeof st === "string" ? st : null); setLoading(false); }
+        return;
+      }
   const productWithTheme = { ...prod, checkout_theme: prod.checkout_theme || "gray" };
  if (cancelled) return;
  setProduct(productWithTheme as unknown as Product);
@@ -372,8 +378,8 @@ export default function PublicCheckout() {
  <AlertCircle className="h-8 w-8 text-gray-300" />
  </div>
  </div>
- <h1 className="text-xl font-extrabold text-gray-800 mb-2">Produto não encontrado</h1>
- <p className="text-sm text-gray-400 max-w-xs mx-auto">Verifique o link e tente novamente.</p>
+  <h1 className="text-xl font-extrabold text-gray-800 mb-2">{linkStatus === "pending_review" ? "Produto em análise" : linkStatus === "draft" ? "Produto em rascunho" : linkStatus === "inactive" || linkStatus === "rejected" ? "Produto indisponível" : "Produto não encontrado"}</h1>
+  <p className="text-sm text-gray-400 max-w-xs mx-auto">{linkStatus === "pending_review" ? "Este produto está aguardando aprovação e ainda não recebe pagamentos." : linkStatus === "draft" ? "O produtor ainda não publicou este produto." : linkStatus ? "Este produto não está aceitando pagamentos no momento." : "Verifique o link e tente novamente."}</p>
  </div>
  </div>
  );
