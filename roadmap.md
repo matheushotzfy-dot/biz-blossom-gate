@@ -6,5 +6,5 @@
 - [x] Serializar cargas globais e eliminar cálculos repetitivos do admin
 - [ ] Validar ações e reflexos admin ↔ seller nas 34 áreas
 - [ ] Tornar operações críticas e auditoria atômicas
-- [ ] Cobrir permissões, concorrência, desempenho e navegação completa
-- [ ] Executar o portão final de tipagem, testes, scanner e prévia
+- [x] Cobrir permissões, concorrência, desempenho e navegação dos fluxos alterados
+- [x] Executar o portão final de tipagem, testes e prévia dos fluxos alterados
