@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle, CheckCircle2, X } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Alert {
@@ -8,7 +8,7 @@ interface Alert {
   kind: string;
   severity: string;
   message: string;
-  metadata: any;
+  metadata: unknown;
   created_at: string;
 }
 
@@ -21,15 +21,18 @@ const SEVERITY_STYLE: Record<string, string> = {
 export function AdminAlertsBanner({ isAdmin = false }: { isAdmin?: boolean }) {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [resolving, setResolving] = useState<string | null>(null);
 
   const load = async () => {
-    const { data } = await supabase
+    const { data, error: queryError } = await supabase
       .from("admin_alerts")
       .select("id, kind, severity, message, metadata, created_at")
       .is("resolved_at", null)
       .order("created_at", { ascending: false })
-      .limit(10);
-    setAlerts((data as Alert[]) || []);
+      .limit(50);
+    setError(Boolean(queryError));
+    if (!queryError) setAlerts((data as Alert[]) || []);
     setLoading(false);
   };
 
@@ -47,11 +50,16 @@ export function AdminAlertsBanner({ isAdmin = false }: { isAdmin?: boolean }) {
   }, []);
 
   const resolve = async (id: string) => {
-    setAlerts((a) => a.filter((x) => x.id !== id));
-    await supabase.from("admin_alerts").update({ resolved_at: new Date().toISOString() }).eq("id", id);
+    setResolving(id);
+    const { error: updateError } = await supabase.from("admin_alerts").update({ resolved_at: new Date().toISOString() }).eq("id", id);
+    if (!updateError) setAlerts((a) => a.filter((x) => x.id !== id));
+    else setError(true);
+    setResolving(null);
   };
 
-  if (loading || alerts.length === 0) return null;
+  if (loading) return null;
+  if (error) return <div className="flex items-center justify-between rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"><span>Não foi possível carregar ou atualizar os alertas.</span><button onClick={() => void load()} className="inline-flex items-center gap-1 font-semibold"><RefreshCw className="h-3.5 w-3.5" />Tentar novamente</button></div>;
+  if (alerts.length === 0) return null;
 
   const critical = alerts.filter((a) => a.severity === "critical");
   const warnings = alerts.filter((a) => a.severity !== "critical");
@@ -84,7 +92,7 @@ export function AdminAlertsBanner({ isAdmin = false }: { isAdmin?: boolean }) {
               className="shrink-0 h-7 px-2 inline-flex items-center gap-1 rounded-lg border border-border/60 bg-card hover:bg-accent text-[11px] font-semibold text-foreground transition-colors"
               title="Marcar como resolvido"
             >
-              <CheckCircle2 className="h-3 w-3" />
+              {resolving === a.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
               Resolver
             </button>
           )}

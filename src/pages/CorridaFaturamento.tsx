@@ -35,6 +35,7 @@ export default function CorridaFaturamento() {
   const [leaders, setLeaders] = useState<LeaderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [assetUrls, setAssetUrls] = useState<Record<string, string>>({});
 
   const load = useCallback(async () => {
     setError(false);
@@ -43,13 +44,17 @@ export default function CorridaFaturamento() {
     const active = (races ?? [])[0] as Race | undefined;
     setRace(active ?? null);
     if (active) {
-      const [{ data: pr, error: prError }, { data: lb, error: lbError }] = await Promise.all([
+      const [{ data: pr, error: prError }, { data: lb, error: lbError }, assetsRes] = await Promise.all([
         supabase.from("revenue_race_prizes").select("*").eq("race_id", active.id).order("sort_order"),
         supabase.rpc("race_leaderboard", { _race_id: active.id }),
+        supabase.functions.invoke("get-race-asset-urls", { method: "GET" }),
       ]);
       if (prError || lbError) { setError(true); setLoading(false); return; }
       setPrizes((pr ?? []) as Prize[]);
       setLeaders((lb ?? []) as LeaderRow[]);
+      if (!assetsRes.error && assetsRes.data?.race_id === active.id) setAssetUrls(assetsRes.data.urls ?? {});
+    } else {
+      setAssetUrls({});
     }
     setLoading(false);
   }, []);
@@ -102,7 +107,7 @@ export default function CorridaFaturamento() {
     <div className="grid gap-4 pb-14">
       {/* HERO */}
       <section className="relative isolate overflow-hidden rounded-xl border border-border bg-card">
-        {race.banner_url && <img src={race.banner_url} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-20" />}
+        {(assetUrls.banner || race.banner_url) && <img src={assetUrls.banner || race.banner_url || ""} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-20" />}
         <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(60%_90%_at_100%_0%,hsl(var(--primary)/0.14),transparent_60%)]" />
         <div className="grid gap-8 px-5 py-7 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-end">
           <div className="min-w-0">
@@ -110,7 +115,7 @@ export default function CorridaFaturamento() {
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" /> {cd.ended ? "Temporada encerrada" : "Temporada ao vivo"}
             </p>
             <div className="mt-3 flex items-center gap-4">
-              {race.logo_url && <img src={race.logo_url} alt="" className="h-14 w-14 shrink-0 object-contain" />}
+              {(assetUrls.logo || race.logo_url) && <img src={assetUrls.logo || race.logo_url || ""} alt="" className="h-14 w-14 shrink-0 object-contain" />}
               <h1 className="font-display text-3xl font-bold leading-tight text-foreground sm:text-[2.6rem]">{race.title}</h1>
             </div>
             {race.description && <p className="mt-3 max-w-2xl whitespace-pre-line text-sm leading-6 text-muted-foreground">{race.description}</p>}
@@ -211,7 +216,7 @@ export default function CorridaFaturamento() {
               return (
                 <article key={p.id} className={cn("group overflow-hidden rounded-lg border bg-background transition-[border-color,transform] duration-200 hover:-translate-y-0.5", reached ? "border-primary/50" : "border-border hover:border-primary/40")}>
                   <div className="aspect-video overflow-hidden bg-muted">
-                    {p.image_url ? <img src={p.image_url} alt={p.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : <div className="grid h-full place-items-center"><Trophy className="h-9 w-9 text-primary/50" /></div>}
+                    {(assetUrls[`prize:${p.id}`] || p.image_url) ? <img src={assetUrls[`prize:${p.id}`] || p.image_url || ""} alt={p.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : <div className="grid h-full place-items-center"><Trophy className="h-9 w-9 text-primary/50" /></div>}
                   </div>
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-2">

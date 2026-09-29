@@ -3371,6 +3371,63 @@ export type Database = {
         }
         Relationships: []
       }
+      security_findings: {
+        Row: {
+          ai_recommendations: Json
+          ai_run_id: string | null
+          ai_summary: string | null
+          analyzed_at: string | null
+          created_at: string
+          created_by: string
+          description: string
+          error_message: string | null
+          evidence: Json
+          id: string
+          resolved_at: string | null
+          risk_level: string | null
+          source: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          ai_recommendations?: Json
+          ai_run_id?: string | null
+          ai_summary?: string | null
+          analyzed_at?: string | null
+          created_at?: string
+          created_by: string
+          description: string
+          error_message?: string | null
+          evidence?: Json
+          id?: string
+          resolved_at?: string | null
+          risk_level?: string | null
+          source: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          ai_recommendations?: Json
+          ai_run_id?: string | null
+          ai_summary?: string | null
+          analyzed_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string
+          error_message?: string | null
+          evidence?: Json
+          id?: string
+          resolved_at?: string | null
+          risk_level?: string | null
+          source?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       seller_acquirer_config: {
         Row: {
           acquirer_id: string
@@ -5494,6 +5551,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      resolve_admin_alert: { Args: { _kind: string }; Returns: undefined }
       resolve_commission_pct: {
         Args: { _seller: string; _staff: string }
         Returns: number
