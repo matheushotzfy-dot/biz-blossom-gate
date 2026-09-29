@@ -45,15 +45,7 @@ export default function StatusPage() {
  newServices[0] = { ...newServices[0], status: "down" };
  }
 
- // Check payment gateway (check if products_public view works - used by checkout)
- try {
- const start = Date.now();
- const { error } = await supabase.from("products_public").select("id").limit(1);
- const latency = Date.now() - start;
- newServices[1] = { ...newServices[1], status: error ? "degraded" : "operational", latency };
- } catch {
- newServices[1] = { ...newServices[1], status: "down" };
- }
+  newServices[1] = { ...newServices[1], status: "down", latency: undefined, description: "Temporariamente indisponível durante a troca da integração" };
 
  // Check auth
  try {

@@ -900,19 +900,17 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
   ];
 
   return (
-    <div className="mx-auto max-w-[760px]">
-      <div className="mb-5 flex items-end justify-between gap-4">
+    <div className="mx-auto max-w-[820px]">
+      <div className="mb-5 flex items-end justify-between gap-4 border-b border-border pb-4">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary">Etapa 01</p>
-          <h2 className="mt-1 font-display text-xl font-bold text-foreground">O essencial da sua oferta</h2>
-          <p className="mt-1 text-xs text-muted-foreground">Comece com o que o cliente precisa entender para comprar.</p>
+          <h2 className="font-display text-xl font-bold text-foreground">Informações do produto</h2>
+          <p className="mt-1 text-xs text-muted-foreground">Defina a oferta, o preço e os dados de publicação.</p>
         </div>
         <span className="hidden text-[10px] font-semibold text-muted-foreground sm:block">Campos obrigatórios *</span>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.45fr)_240px]">
-        <div className="space-y-4">
-          <section className="product-studio-panel rounded-xl border border-border bg-card p-4 sm:p-5">
+      <div className="space-y-4">
+          <section className="border-b border-border pb-5">
             <div className="mb-4 flex items-center gap-3">
               <div
                 className={cn("relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border transition-colors", isDragging ? "border-primary bg-primary/10" : "border-border bg-secondary")}
@@ -951,38 +949,14 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
             </div>
           </section>
 
-          <section className="product-studio-panel rounded-xl border border-border bg-card p-4 sm:p-5">
+          <section className="border-b border-border pb-5">
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="sm:col-span-2">
+              <div>
                 <Label className="text-xs font-semibold text-foreground">Tipo de produto *</Label>
-                <div role="radiogroup" aria-label="Tipo de produto" className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {CATEGORIES.map((option) => {
-                    const active = category === option.value;
-                    const Icon = option.icon;
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        role="radio"
-                        aria-checked={active}
-                        onClick={() => setCategory(option.value)}
-                        className={cn(
-                          "group relative flex flex-col items-start gap-2 rounded-2xl border p-3 text-left transition-all duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
-                          active ? "border-primary bg-primary/[0.08]" : "border-border bg-background/40 hover:-translate-y-0.5 hover:border-primary/40",
-                        )}
-                      >
-                        <span className={cn("grid h-9 w-9 place-items-center rounded-xl transition-colors", active ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground group-hover:text-foreground")}>
-                          <Icon className="h-4 w-4" />
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block truncate text-[12.5px] font-bold text-foreground">{option.label}</span>
-                          <span className="block truncate text-[10.5px] text-muted-foreground">{option.desc}</span>
-                        </span>
-                        {active && <CheckCircle2 className="absolute right-2.5 top-2.5 h-4 w-4 text-primary" />}
-                      </button>
-                    );
-                  })}
-                </div>
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger className="mt-1 h-10 bg-background"><SelectValue /></SelectTrigger>
+                  <SelectContent>{CATEGORIES.map((option) => <RichSelectItem key={option.value} {...option} />)}</SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="product-price" className="text-xs font-semibold text-foreground">Preço de venda *</Label>
@@ -998,7 +972,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
             </div>
           </section>
 
-          <details className="group rounded-xl border border-border bg-card">
+          <details className="group border-b border-border pb-1" open>
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">
               <div>
                 <p className="text-xs font-semibold text-foreground">Dados para publicação</p>
@@ -1006,7 +980,7 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-90" />
             </summary>
-            <div className="grid gap-3 border-t border-border p-4 sm:grid-cols-2">
+            <div className="grid gap-3 border-t border-border px-0 py-4 sm:grid-cols-2">
               <div><Label className="text-[11px] text-muted-foreground">Página de vendas *</Label><Input value={pageUrl} onChange={(event) => setPageUrl(event.target.value)} placeholder="seuproduto.com" className={cn("mt-1 h-9 bg-background", pageUrl && !urlValid && "border-destructive/50")} /></div>
               <div><Label className="text-[11px] text-muted-foreground">E-mail de suporte *</Label><Input value={supportEmail} onChange={(event) => setSupportEmail(event.target.value)} placeholder="suporte@seuproduto.com" type="email" className={cn("mt-1 h-9 bg-background", supportEmail && !emailValid && "border-destructive/50")} /></div>
               <div><Label className="text-[11px] text-muted-foreground">Telefone de suporte *</Label><Input value={supportPhone} onChange={(event) => setSupportPhone(formatPhone(event.target.value))} placeholder="(11) 91234-5678" inputMode="tel" className={cn("mt-1 h-9 bg-background", supportPhone && !phoneValid && "border-destructive/50")} /></div>
@@ -1015,24 +989,6 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
               <div><Label className="text-[11px] text-muted-foreground">Visibilidade</Label><Select value={status} onValueChange={setStatus}><SelectTrigger className="mt-1 h-9 bg-background"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="pending_review">Rascunho</SelectItem><SelectItem value="active">Ativo</SelectItem></SelectContent></Select></div>
             </div>
           </details>
-        </div>
-
-        <aside className="hidden lg:block">
-          <div className="sticky top-5 overflow-hidden rounded-xl border border-border bg-card">
-            <div className="aspect-[4/3] bg-secondary">
-              {imagePreview ? <img src={imagePreview} alt="Prévia do produto" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Package className="h-8 w-8 text-muted-foreground/35" /></div>}
-            </div>
-            <div className="p-4">
-              <p className="text-[9px] font-bold uppercase text-primary">Prévia da oferta</p>
-              <h3 className="mt-1.5 line-clamp-2 font-display text-sm font-bold text-foreground">{name || "Seu produto"}</h3>
-              <p className="mt-2 line-clamp-3 text-[10px] leading-relaxed text-muted-foreground">{description || "A descrição aparecerá aqui enquanto você constrói a oferta."}</p>
-              <div className="mt-4 border-t border-border pt-3">
-                <p className="font-numbers text-xl font-bold text-foreground">{priceNumber > 0 ? `R$ ${priceNumber.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "R$ 0,00"}</p>
-                <p className="mt-0.5 text-[9px] text-muted-foreground">Pagamento único via checkout seguro</p>
-              </div>
-            </div>
-          </div>
-        </aside>
       </div>
     </div>
   );
