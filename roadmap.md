@@ -13,3 +13,5 @@
 - [ ] Avisos por e-mail, painel de saúde, menu enxuto
 - [ ] Permissões da equipe aba por aba
 - [ ] Testes finais de dinheiro e isolamento
+- [x] Reembolso (suporte/seller) e MED PIX com congelamento exato, decisão admin, entrada automática da adquirente
+- [ ] Testar MED/reembolso com venda real (bloqueado: sem adquirente / sem vendas)

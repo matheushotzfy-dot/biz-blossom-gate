@@ -7,6 +7,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
+import { SellerRefundDialog } from "@/components/transactions/SellerRefundDialog";
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
 import type { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
@@ -56,7 +57,8 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
   refunded: { label: "Reembolso", cls: "bg-blue-500/10 text-blue-500 border-blue-500/20", dot: "bg-blue-500" },
   partially_refunded: { label: "Reembolso", cls: "bg-blue-500/10 text-blue-500 border-blue-500/20", dot: "bg-blue-500" },
   chargeback: { label: "Chargeback", cls: "bg-red-500/10 text-red-500 border-red-500/20", dot: "bg-red-500" },
-  med: { label: "MED", cls: "bg-orange-500/10 text-orange-500 border-orange-500/20", dot: "bg-orange-500" },
+  med: { label: "MED PIX · em análise", cls: "bg-orange-500/10 text-orange-500 border-orange-500/20", dot: "bg-orange-500" },
+  med_lost: { label: "MED perdido", cls: "bg-red-500/10 text-red-500 border-red-500/20", dot: "bg-red-500" },
   error: { label: "Erro", cls: "bg-red-500/10 text-red-500 border-red-500/20", dot: "bg-red-500" },
   failed: { label: "Erro", cls: "bg-red-500/10 text-red-500 border-red-500/20", dot: "bg-red-500" },
   cancelled: { label: "Cancelada", cls: "bg-muted text-muted-foreground border-border/60", dot: "bg-muted-foreground/50" },
@@ -99,6 +101,7 @@ export default function Vendas() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
+  const [refundTx, setRefundTx] = useState<Tables<"transactions"> | null>(null);
   const [privacyHidden, setPrivacyHidden] = useState(() => localStorage.getItem("privacy_mode") === "true");
   const [periodValue, setPeriodValue] = useState<PeriodValue>(() => buildPeriod("today"));
   const range = useMemo<DateRange>(() => ({ from: periodValue.from, to: periodValue.to }), [periodValue]);
@@ -659,8 +662,9 @@ export default function Vendas() {
         )}
       </div>
 
+      <SellerRefundDialog tx={refundTx} onClose={() => setRefundTx(null)} onDone={() => setDetailTx(null)} />
       {detailTx && (
-        <TransactionDetailPanel tx={detailTx} products={prodsMap} onClose={() => setDetailTx(null)} />
+        <TransactionDetailPanel tx={detailTx} products={prodsMap} onClose={() => setDetailTx(null)} onRefund={(t) => setRefundTx(t as Tables<"transactions">)} />
       )}
     </HDShell>
   );

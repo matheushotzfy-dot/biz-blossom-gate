@@ -440,7 +440,7 @@ export default function Dashboard() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
   const nickname = profile?.nickname || profile?.full_name?.split(" ")[0] || "Vendedor";
-  const statusLabel = (s: string) => isApprovedTransaction(s) ? 'Aprovado' : s === 'pending' || s === 'processing' ? 'Pendente' : s === 'expired' ? 'Expirada' : s === 'refunded' || s === 'partially_refunded' ? 'Reembolso' : s === 'chargeback' ? 'Chargeback' : s === 'med' || s === 'mediation' || s === 'dispute' || s === 'disputed' ? 'MED' : s === 'cancelled' || s === 'canceled' ? 'Cancelada' : s === 'failed' || s === 'refused' || s === 'rejected' || s === 'error' ? 'Erro' : s;
+  const statusLabel = (s: string) => isApprovedTransaction(s) ? 'Aprovado' : s === 'pending' || s === 'processing' ? 'Pendente' : s === 'expired' ? 'Expirada' : s === 'refunded' || s === 'partially_refunded' ? 'Reembolso' : s === 'chargeback' ? 'Chargeback' : s === 'med_lost' ? 'MED perdido' : s === 'med' || s === 'mediation' || s === 'dispute' || s === 'disputed' ? 'MED PIX · em análise' : s === 'cancelled' || s === 'canceled' ? 'Cancelada' : s === 'failed' || s === 'refused' || s === 'rejected' || s === 'error' ? 'Erro' : s;
   const statusBg = (s: string) =>
     isApprovedTransaction(s) ? 'bg-emerald-500/20 ring-1 ring-emerald-500/40'
     : s === 'pending' ? 'bg-amber-400/25 ring-1 ring-amber-400/50'
@@ -822,7 +822,7 @@ export default function Dashboard() {
               const method = item.label;
               const methodLabel = method === "pix" ? "PIX" : method === "credit_card" ? "Cartão" : method === "boleto" ? "Boleto" : "—";
               const custName = item.tx.customer_name || item.tx.customer_email || "Cliente";
-              const bad = ["chargeback", "med", "dispute", "disputed", "refunded", "failed"].includes(item.status);
+              const bad = ["chargeback", "med", "med_lost", "dispute", "disputed", "refunded", "failed"].includes(item.status);
               const dot = isApproved ? "bg-success" : item.status === "pending" ? "bg-warning animate-pulse" : bad ? "bg-destructive" : "bg-muted-foreground/50";
               const statusColor = isApproved ? "text-success bg-success/10 border-success/25" : item.status === "pending" ? "text-warning bg-warning/10 border-warning/25" : bad ? "text-destructive bg-destructive/10 border-destructive/25" : "text-muted-foreground bg-muted border-border";
               const initial = custName.trim().charAt(0).toUpperCase() || "C";
