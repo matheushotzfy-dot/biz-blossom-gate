@@ -5266,6 +5266,15 @@ export type Database = {
         }
         Returns: Json
       }
+      get_my_payment_links_page: {
+        Args: {
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _status?: string
+        }
+        Returns: Json
+      }
       get_payment_link_intent_status: {
         Args: { _public_token: string }
         Returns: {
