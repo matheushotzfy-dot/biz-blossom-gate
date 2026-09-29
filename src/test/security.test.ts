@@ -89,7 +89,7 @@ describe("sanitizeText — audit log sanitization", () => {
 // Safe Logging Tests
 // ============================
 describe("Edge Function safeLog pattern", () => {
-  const ALLOWED_KEYS = ['transactionId', 'productId', 'status', 'amount', 'paymentMethod', 'podpayId', 'error', 'code', 'resumed'];
+  const ALLOWED_KEYS = ['transactionId', 'productId', 'status', 'amount', 'paymentMethod', 'error', 'code', 'resumed'];
 
   function filterSafe(context: Record<string, unknown>): Record<string, unknown> {
     const safe: Record<string, unknown> = {};

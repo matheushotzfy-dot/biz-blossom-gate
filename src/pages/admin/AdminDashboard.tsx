@@ -292,11 +292,8 @@ export default function AdminDashboard() {
   const handleWithdrawalAction = async (id: string, action: "approved" | "rejected") => {
     if (!isAdmin) { toast.error("Sem permissão"); return; }
     if (action === "approved") {
-      toast.info("Processando saque via PIX...");
-      const { data, error } = await supabase.functions.invoke("podpay-cashout", { body: { withdrawalId: id } });
-      if (error || !data?.success) { toast.error("Erro ao processar saque"); return; }
-      toast.success("Saque aprovado e enviado!");
-      await logAdminAction("approve_withdrawal", "withdrawal", id, { method: "podpay_pix" });
+      toast.error("Saques estão indisponíveis sem uma adquirente configurada.");
+      return;
     } else {
       const { error, data: updated } = await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", id).eq("status", "pending").select("id");
       if (error) { toast.error("Erro ao recusar"); return; }

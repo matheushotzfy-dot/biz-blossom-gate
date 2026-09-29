@@ -15,6 +15,9 @@
 - [ ] Refazer o calendário e validar presets/intervalos.
 - [ ] Auditar e endurecer superfícies críticas de seller, admin e páginas públicas.
 - [ ] Validar dados, testes, execução e telas desktop/mobile.
+- [ ] Remover integralmente PodPay e VeoPag do banco, serviços e interface.
+- [ ] Bloquear cobranças, estornos e saques enquanto não houver nova adquirente.
+- [ ] Simplificar criação e edição de produtos sem remover funcionalidades.
 - [x] Restaurar os Índices originais e elevar o gráfico de faturamento com leitura contínua e hover detalhado.
 - [x] Corrigir KYC aprovado e ocultar progresso/documentos concluídos.
 - [x] Corrigir contraste dos logos de Integrações no modo claro.
