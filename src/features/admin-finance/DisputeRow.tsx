@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { ChevronDown, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSensitiveConfirm } from "./useSensitiveConfirm";
 import { brl, DISPUTE_STATUS_LABEL, DISPUTE_TYPE_LABEL, rpcErrorMessage, type DisputeType } from "./types";
 
 export interface DisputeItem {
@@ -28,6 +29,7 @@ export function DisputeRow({ item, sellerName, onChanged }: DisputeRowProps) {
   const [fee, setFee] = useState("0");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
+  const { confirm, dialog } = useSensitiveConfirm();
   const active = item.status === "open" || item.status === "in_review";
 
   const toggle = async () => {
@@ -84,13 +86,13 @@ export function DisputeRow({ item, sellerName, onChanged }: DisputeRowProps) {
                     onClick={() => run(() => supabase.rpc("admin_set_dispute_review", { _dispute_id: item.id, _note: note || undefined }), "Movida para análise")}>Em análise</Button>
                 )}
                 <Button size="sm" variant="outline" disabled={busy}
-                  onClick={() => run(() => supabase.rpc("admin_resolve_dispute", { _dispute_id: item.id, _outcome: "seller", _note: note || undefined }), "Seller ganhou — valor liberado")}>Seller ganhou</Button>
+                  onClick={() => confirm(`Liberar ${brl(item.amount)} de volta ao seller (disputa ganha).`, () => run(() => supabase.rpc("admin_resolve_dispute", { _dispute_id: item.id, _outcome: "seller", _note: note || undefined }), "Seller ganhou — valor liberado"))}>Seller ganhou</Button>
                 <div className="flex items-center gap-1">
                   <Input className="h-8 w-24" inputMode="decimal" value={fee} onChange={(e) => setFee(e.target.value)} aria-label="Taxa de disputa" title="Taxa de disputa (R$)" />
                   <Button size="sm" variant="destructive" disabled={busy}
                     onClick={() => {
-                      if (!window.confirm("Confirmar perda? O valor não volta ao seller e o acesso do comprador será removido.")) return;
-                      void run(() => supabase.rpc("admin_resolve_dispute", { _dispute_id: item.id, _outcome: "buyer", _fee: Number(fee.replace(",", ".")) || 0, _note: note || undefined }), "Disputa encerrada contra o seller");
+                      const feeValue = Number(fee.replace(",", ".")) || 0;
+                      confirm(`Encerrar contra o seller: ${brl(item.amount)} não volta${feeValue > 0 ? ` e será cobrada taxa de ${brl(feeValue)}` : ""}. O acesso do comprador será removido.`, () => run(() => supabase.rpc("admin_resolve_dispute", { _dispute_id: item.id, _outcome: "buyer", _fee: feeValue, _note: note || undefined }), "Disputa encerrada contra o seller"));
                     }}>Seller perdeu</Button>
                 </div>
               </div>
@@ -98,6 +100,7 @@ export function DisputeRow({ item, sellerName, onChanged }: DisputeRowProps) {
           )}
         </div>
       )}
+      {dialog}
     </div>
   );
 }
