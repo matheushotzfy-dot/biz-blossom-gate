@@ -3,3 +3,6 @@
 - [x] Finalizar Perfil, Cupons, Premiações, Suporte e animações de janelas
 - [x] Validar chaves API sem limite e segurança mantida
 - [x] Executar testes funcionais, visuais, mobile e acessibilidade
+- [x] Classificar as 63 funções privilegiadas legadas por consumidor e papel mínimo
+- [x] Revogar execuções excessivas sem quebrar funções públicas, seller ou admin
+- [x] Validar linter, fluxos críticos e isolamento após o hardening
