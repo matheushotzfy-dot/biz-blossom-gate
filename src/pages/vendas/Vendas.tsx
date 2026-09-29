@@ -24,6 +24,11 @@ import ExcelJS from "exceljs";
 import { toast } from "sonner";
 import { Seo } from "@/components/Seo";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { filterTransactions, spreadsheetSafe, type SalesExportFilters } from "@/lib/sales-export";
 
 const fmt = formatCurrency;
 
@@ -100,6 +105,9 @@ export default function Vendas() {
   const range = useMemo<DateRange>(() => ({ from: periodValue.from, to: periodValue.to }), [periodValue]);
   const [page, setPage] = useState(1);
   const [exporting, setExporting] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportProgress, setExportProgress] = useState(0);
+  const [exportFilters, setExportFilters] = useState<SalesExportFilters>({ search: "", statuses: [], productId: "", customerName: "", customerEmail: "" });
 
   // Debounce da busca: cada tecla dispara uma query no servidor.
   useEffect(() => {
@@ -152,13 +160,13 @@ export default function Vendas() {
   const buildRows = (source: Tables<"transactions">[]) => source.map((t) => ({
  "ID da Transação": t.id,
  "Data": spDateTime(t.created_at),
- "Cliente": t.customer_name ?? "",
- "Email": t.customer_email ?? "",
- "Documento": t.customer_document ?? "",
- "Telefone": t.customer_phone ?? "",
- "Produto": prodsMap[t.product_id ?? ""] ?? "",
- "Método": t.payment_method ?? "",
- "Status": STATUS_MAP[deriveTransactionStatus(t)]?.label ?? t.status ?? "",
+ "Cliente": spreadsheetSafe(t.customer_name),
+ "Email": spreadsheetSafe(t.customer_email),
+ "Documento": spreadsheetSafe(t.customer_document),
+ "Telefone": spreadsheetSafe(t.customer_phone),
+ "Produto": spreadsheetSafe(prodsMap[t.product_id ?? ""] ?? ""),
+ "Método": spreadsheetSafe(t.payment_method),
+ "Status": spreadsheetSafe(STATUS_MAP[deriveTransactionStatus(t)]?.label ?? t.status ?? ""),
  "Valor Bruto (R$)": Number(t.amount),
  "Taxa (R$)": Number(t.fee_amount ?? 0),
  "Valor Líquido (R$)": Number(t.net_amount ?? 0),
@@ -171,12 +179,14 @@ export default function Vendas() {
       toast.error("Sessão expirada. Entre novamente.");
       return null;
     }
-    const rows = await fetchTransactionsForExport(user.id, rangeStart, rangeEnd);
-    if (!rows.length) {
+    setExportProgress(0);
+    const rows = await fetchTransactionsForExport(user.id, rangeStart, rangeEnd, setExportProgress);
+    const filteredRows = filterTransactions(rows, exportFilters);
+    if (!filteredRows.length) {
       toast.error("Nenhuma transação para exportar");
       return null;
     }
-    return buildRows(rows);
+    return buildRows(filteredRows);
   };
 
 
@@ -228,7 +238,7 @@ export default function Vendas() {
       if (!rows) return;
       const headers = Object.keys(rows[0]);
       const esc = (v: unknown) => {
-        const s = v == null ? "" : String(v);
+        const s = String(spreadsheetSafe(v));
         return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
       };
       const csv = "\uFEFF" + [
@@ -264,6 +274,10 @@ export default function Vendas() {
       }));
       ws.getRow(1).font = { bold: true };
       rows.forEach((r) => ws.addRow(r));
+      ["Valor Bruto (R$)", "Taxa (R$)", "Valor Líquido (R$)"].forEach((key) => {
+        const column = ws.getColumn(key);
+        column.numFmt = 'R$ #,##0.00';
+      });
       const buf = await wb.xlsx.writeBuffer();
       download(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), fileName("xlsx"));
       void logExport("xlsx", rows.length);
@@ -344,44 +358,34 @@ export default function Vendas() {
             >
               {privacyHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button disabled={exporting || totalRows === 0} className="h-10 px-4 rounded-xl font-semibold text-xs gap-2">
-                  <Download className="h-4 w-4" /> Exportar
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64">
-                <DropdownMenuLabel className="text-[11px] font-semibold text-muted-foreground">
-                  Exportar dados da tabela
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={exportXLSX} className="gap-3 py-2.5 cursor-pointer">
-                  <div className="h-8 w-8 rounded-md bg-success/10 border border-success/20 flex items-center justify-center text-success font-black text-[10px]">
-                    XLSX
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-bold">Excel (.xlsx)</div>
-                    <div className="text-[10px] text-muted-foreground">Planilha formatada</div>
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={exportCSV} className="gap-3 py-2.5 cursor-pointer">
-                  <div className="h-8 w-8 rounded-md bg-info/10 border border-info/20 flex items-center justify-center text-info font-black text-[10px]">
-                    CSV
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-bold">CSV (.csv)</div>
-                    <div className="text-[10px] text-muted-foreground">Compatível com qualquer ferramenta</div>
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <div className="px-2 py-1.5 text-[10px] text-muted-foreground">
-                  {totalRows.toLocaleString("pt-BR")} {totalRows === 1 ? "linha" : "linhas"} • Período atual
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button disabled={exporting || totalRows === 0} onClick={() => setExportOpen(true)} className="h-10 px-4 rounded-xl font-semibold text-xs gap-2">
+              <Download className="h-4 w-4" /> Exportar
+            </Button>
           </div>
         }
       />
+
+      <Dialog open={exportOpen} onOpenChange={setExportOpen}>
+        <DialogContent className="w-[calc(100vw-1.5rem)] max-w-3xl overflow-hidden rounded-3xl p-0">
+          <DialogHeader className="border-b border-border/60 px-6 py-5">
+            <DialogTitle>Exportar vendas</DialogTitle>
+            <p className="text-xs text-muted-foreground">Escolha exatamente quais vendas deseja incluir no período atual.</p>
+          </DialogHeader>
+          <div className="grid gap-4 px-6 py-5 sm:grid-cols-2">
+            <div className="space-y-1.5 sm:col-span-2"><Label>Busca geral</Label><Input value={exportFilters.search} onChange={(e) => setExportFilters((f) => ({ ...f, search: e.target.value }))} placeholder="ID, cliente, e-mail ou documento" /></div>
+            <div className="space-y-1.5"><Label>Status</Label><Select value={exportFilters.statuses?.[0] ?? "all"} onValueChange={(value) => setExportFilters((f) => ({ ...f, statuses: value === "all" ? [] : value === "paid" ? ["approved", "completed", "paid"] : [value] }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todos</SelectItem><SelectItem value="paid">Pagos</SelectItem><SelectItem value="pending">Pendentes</SelectItem><SelectItem value="expired">Expirados</SelectItem><SelectItem value="refunded">Reembolsados</SelectItem><SelectItem value="chargeback">Chargebacks</SelectItem><SelectItem value="failed">Falhos</SelectItem><SelectItem value="cancelled">Cancelados</SelectItem></SelectContent></Select></div>
+            <div className="space-y-1.5"><Label>Produto</Label><Select value={exportFilters.productId || "all"} onValueChange={(value) => setExportFilters((f) => ({ ...f, productId: value === "all" ? "" : value }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todos os produtos</SelectItem>{products.map((product) => <SelectItem key={product.id} value={product.id}>{product.name}</SelectItem>)}</SelectContent></Select></div>
+            <div className="space-y-1.5"><Label>Nome do cliente</Label><Input value={exportFilters.customerName} onChange={(e) => setExportFilters((f) => ({ ...f, customerName: e.target.value }))} placeholder="Nome ou parte do nome" /></div>
+            <div className="space-y-1.5"><Label>E-mail do cliente</Label><Input type="email" value={exportFilters.customerEmail} onChange={(e) => setExportFilters((f) => ({ ...f, customerEmail: e.target.value }))} placeholder="cliente@email.com" /></div>
+            {exporting && <div className="sm:col-span-2 rounded-xl border border-border/60 bg-muted/20 px-4 py-3 text-xs text-muted-foreground">Carregando {exportProgress.toLocaleString("pt-BR")} vendas…</div>}
+          </div>
+          <div className="flex flex-col gap-2 border-t border-border/60 bg-muted/20 px-6 py-4 sm:flex-row sm:justify-end">
+            <Button variant="outline" onClick={() => setExportOpen(false)} disabled={exporting}>Cancelar</Button>
+            <Button variant="outline" onClick={exportCSV} disabled={exporting}><FileText className="mr-2 h-4 w-4" />CSV</Button>
+            <Button onClick={exportXLSX} disabled={exporting}><Download className="mr-2 h-4 w-4" />Excel</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Premium KPI Grid */}
       <HDStatGrid>

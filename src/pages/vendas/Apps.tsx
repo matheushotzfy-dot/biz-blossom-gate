@@ -478,10 +478,7 @@ export default function Apps() {
                         </span>
                         {formSelectedEvents.length > 0 && (
                           <span className="inline-flex h-1.5 w-16 overflow-hidden rounded-full bg-secondary">
-                            <span
-                              className="h-full bg-primary transition-[width] duration-500"
-                              style={{ width: `${(formSelectedEvents.length / dialogApp.events.length) * 100}%` }}
-                            />
+                    <span className={cn("h-full bg-primary transition-[width] duration-500", formSelectedEvents.length === dialogApp.events.length ? "w-full" : formSelectedEvents.length === 0 ? "w-0" : "w-1/2")} />
                           </span>
                         )}
                       </div>

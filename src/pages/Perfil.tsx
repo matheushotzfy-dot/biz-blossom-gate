@@ -387,10 +387,10 @@ export default function Perfil() {
         </div>
       </div>
 
-      {/* GRID: Dados / Detalhes / Limites / Progresso */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-in stagger-3">
+      {/* GRID SIMÉTRICO: Dados / Identificação / Segurança / Taxas */}
+      <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-2 animate-fade-in stagger-3">
         {/* DADOS PESSOAIS */}
-        <Panel icon={User} title="Dados pessoais" subtitle="Informações verificadas pelo KYC">
+        <Panel icon={User} title="Dados pessoais" subtitle="Informações verificadas pelo KYC" className="h-full">
           <form onSubmit={handleSave} className="p-5 space-y-4">
             <div>
               <FieldLabel locked={!!profile?.full_name}>Nome completo</FieldLabel>
@@ -432,7 +432,7 @@ export default function Perfil() {
         </Panel>
 
         {/* DETALHES DA CONTA */}
-        <Panel icon={Shield} title="Detalhes da conta" subtitle="Identificação e segurança" tone="info">
+        <Panel icon={Shield} title="Identificação da conta" subtitle="Cadastro e titularidade" tone="info" className="h-full">
           <div className="px-5 pb-5">
             <InfoRow
               label="Tipo de conta"
@@ -443,16 +443,21 @@ export default function Perfil() {
               value={profile?.document_number ? `***${profile.document_number.slice(-4)}` : <span className="text-muted-foreground/50 font-medium">Não informado</span>}
             />
             <InfoRow
+              label="Nickname"
+              value={profile?.nickname || <span className="text-muted-foreground/50 font-medium">Não definido</span>}
+            />
+          </div>
+        </Panel>
+
+        <Panel icon={Fingerprint} title="Segurança e acesso" subtitle="Referências protegidas da conta" tone="success" className="h-full">
+          <div className="px-5 pb-5">
+            <InfoRow
               label="Chave PIX"
-              value={((profile as any)?.pix_key_masked ?? profile?.pix_key) ? ((profile as any)?.pix_key_masked ?? `***${profile!.pix_key!.slice(-4)}`) : <span className="text-muted-foreground/50 font-medium">Não cadastrada</span>}
+              value={((profile as { pix_key_masked?: string | null })?.pix_key_masked ?? profile?.pix_key) ? ((profile as { pix_key_masked?: string | null })?.pix_key_masked ?? `***${profile?.pix_key?.slice(-4)}`) : <span className="text-muted-foreground/50 font-medium">Não cadastrada</span>}
             />
             <InfoRow
               label="Membro desde"
               value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString("pt-BR") : "—"}
-            />
-            <InfoRow
-              label="Nickname"
-              value={profile?.nickname || <span className="text-muted-foreground/50 font-medium">Não definido</span>}
             />
             {user?.id && (
               <InfoRow
