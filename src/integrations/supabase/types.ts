@@ -3164,6 +3164,71 @@ export type Database = {
         }
         Relationships: []
       }
+      refund_requests: {
+        Row: {
+          amount: number
+          created_at: string
+          debited_amount: number
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          id: string
+          proof_ref: string | null
+          reason: string
+          requested_by: string
+          requested_role: string
+          seller_user_id: string
+          status: string
+          transaction_id: string
+          tx_status_before: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          debited_amount?: number
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          proof_ref?: string | null
+          reason: string
+          requested_by: string
+          requested_role: string
+          seller_user_id: string
+          status?: string
+          transaction_id: string
+          tx_status_before?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          debited_amount?: number
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          proof_ref?: string | null
+          reason?: string
+          requested_by?: string
+          requested_role?: string
+          seller_user_id?: string
+          status?: string
+          transaction_id?: string
+          tx_status_before?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refund_requests_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       retention_settings: {
         Row: {
           card_release_days: number
@@ -5190,6 +5255,15 @@ export type Database = {
         Args: { _approve: boolean; _request_id: string }
         Returns: Json
       }
+      admin_decide_refund: {
+        Args: {
+          _note?: string
+          _outcome: string
+          _proof?: string
+          _request_id: string
+        }
+        Returns: Json
+      }
       admin_decrypt_field: { Args: { _cipher: string }; Returns: string }
       admin_freeze_account: {
         Args: { _freeze: boolean; _reason?: string; _user_id: string }
@@ -5201,6 +5275,10 @@ export type Database = {
           balance: number
           user_id: string
         }[]
+      }
+      admin_list_refund_requests: {
+        Args: { _limit?: number; _offset?: number; _status?: string }
+        Returns: Json
       }
       admin_open_dispute: {
         Args: {
@@ -5280,6 +5358,7 @@ export type Database = {
         Args: { _dispute_id: string; _note?: string }
         Returns: undefined
       }
+      admin_set_manual_approval: { Args: { _value: Json }; Returns: Json }
       admin_set_payment_link_status: {
         Args: { _payment_link_id: string; _reason?: string; _status: string }
         Returns: Json
