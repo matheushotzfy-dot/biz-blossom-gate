@@ -19,6 +19,7 @@ import {
 import { InlineError, errorInputClass } from "@/components/ui/inline-error";
 import { friendlyError } from "@/lib/friendlyError";
 import { ReauthenticationDialog } from "@/components/security/ReauthenticationDialog";
+import { detectPixKeyType, formatPixKey, maskAccount, maskAgency, maskDocument, maskSensitivePixKey } from "@/lib/financial-input";
 
 const PIX_TYPES = [
   { value: "cpf" as const, label: "CPF", description: "Documento pessoal", icon: User },
@@ -190,7 +191,8 @@ export default function DadosBancarios() {
                 <Plus size={14} strokeWidth={3} className="mr-1.5" /> Nova Chave
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="w-[calc(100vw-1.5rem)] max-w-2xl max-h-[90vh] overflow-hidden p-0 rounded-3xl">
+              <div className="overflow-y-auto p-6 sm:p-7">
               <DialogHeader><DialogTitle>Adicionar Chave PIX</DialogTitle></DialogHeader>
               <form onSubmit={handleAddPix} className="space-y-4 pt-2" noValidate>
                 <div className="space-y-2">
@@ -207,8 +209,15 @@ export default function DadosBancarios() {
                   <Label>Chave</Label>
                   <Input
                     value={pixForm.key_value}
-                    onChange={(e) => { setPixForm({ ...pixForm, key_value: e.target.value }); clearPixError("key_value"); }}
+                    onChange={(e) => {
+                      const detected = detectPixKeyType(e.target.value);
+                      const nextType = detected ?? pixForm.key_type;
+                      setPixForm({ key_type: nextType, key_value: formatPixKey(e.target.value, nextType) });
+                      clearPixError("key_value");
+                    }}
                     placeholder="Digite sua chave PIX"
+                    inputMode={pixForm.key_type === "email" || pixForm.key_type === "random" ? "text" : "numeric"}
+                    autoComplete={pixForm.key_type === "email" ? "email" : pixForm.key_type === "phone" ? "tel" : "off"}
                     aria-invalid={!!pixErrors.key_value}
                     aria-describedby={pixErrors.key_value ? "pix-key-error" : undefined}
                     className={errorInputClass(!!pixErrors.key_value)}
@@ -219,6 +228,7 @@ export default function DadosBancarios() {
                   {busy ? "Adicionando..." : "Adicionar Chave PIX"}
                 </Button>
               </form>
+              </div>
             </DialogContent>
           </Dialog>
         </div>
@@ -232,7 +242,7 @@ export default function DadosBancarios() {
             {pixKeys.map((pk) => (
               <div key={pk.id} className="px-5 py-4 flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-black text-foreground truncate">{pk.key_value ?? (pk as any).key_value_masked ?? "•••"}</p>
+                  <p className="truncate font-mono text-sm font-bold text-foreground">{maskSensitivePixKey((pk as { key_value_masked?: string | null }).key_value_masked ?? pk.key_value, pk.key_type)}</p>
                   <p className="text-[11px] font-medium text-muted-foreground/70 mt-0.5">
                     {PIX_TYPES.find(t => t.value === pk.key_type)?.label || pk.key_type}
                   </p>
@@ -266,7 +276,8 @@ export default function DadosBancarios() {
                 <Plus size={14} strokeWidth={3} className="mr-1.5" /> Nova Conta
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="w-[calc(100vw-1.5rem)] max-w-2xl max-h-[90vh] overflow-hidden p-0 rounded-3xl">
+              <div className="overflow-y-auto p-6 sm:p-7">
               <DialogHeader><DialogTitle>Adicionar Conta Bancária</DialogTitle></DialogHeader>
               <form onSubmit={handleAddBank} className="space-y-3 pt-2" noValidate>
                 <div className="space-y-1.5">
@@ -292,8 +303,10 @@ export default function DadosBancarios() {
                     <Label>Agência</Label>
                     <Input
                       value={bankForm.agency}
-                      onChange={(e) => { setBankForm({ ...bankForm, agency: e.target.value }); clearBankError("agency"); }}
+                      onChange={(e) => { setBankForm({ ...bankForm, agency: maskAgency(e.target.value) }); clearBankError("agency"); }}
                       placeholder="0001"
+                      inputMode="numeric"
+                      maxLength={7}
                       aria-invalid={!!bankErrors.agency}
                       className={errorInputClass(!!bankErrors.agency)}
                     />
@@ -303,8 +316,10 @@ export default function DadosBancarios() {
                     <Label>Conta</Label>
                     <Input
                       value={bankForm.account_number}
-                      onChange={(e) => { setBankForm({ ...bankForm, account_number: e.target.value }); clearBankError("account_number"); }}
+                      onChange={(e) => { setBankForm({ ...bankForm, account_number: maskAccount(e.target.value) }); clearBankError("account_number"); }}
                       placeholder="12345-6"
+                      inputMode="numeric"
+                      maxLength={18}
                       aria-invalid={!!bankErrors.account_number}
                       className={errorInputClass(!!bankErrors.account_number)}
                     />
@@ -334,8 +349,10 @@ export default function DadosBancarios() {
                   <Label>CPF/CNPJ do titular</Label>
                   <Input
                     value={bankForm.holder_document}
-                    onChange={(e) => { setBankForm({ ...bankForm, holder_document: e.target.value }); clearBankError("holder_document"); }}
-                    placeholder="Somente números"
+                    onChange={(e) => { setBankForm({ ...bankForm, holder_document: maskDocument(e.target.value) }); clearBankError("holder_document"); }}
+                    placeholder="000.000.000-00"
+                    inputMode="numeric"
+                    maxLength={18}
                     aria-invalid={!!bankErrors.holder_document}
                     className={errorInputClass(!!bankErrors.holder_document)}
                   />
@@ -345,6 +362,7 @@ export default function DadosBancarios() {
                   {busy ? "Adicionando..." : "Salvar Conta Bancária"}
                 </Button>
               </form>
+              </div>
             </DialogContent>
           </Dialog>
         </div>
@@ -362,7 +380,7 @@ export default function DadosBancarios() {
                     {acc.bank_name} {acc.is_primary && <CheckCircle2 size={12} className="inline text-emerald-500 ml-1" />}
                   </p>
                   <p className="text-[11px] font-medium text-muted-foreground/70 mt-0.5 tabular-nums">
-                    Ag {acc.agency} · {acc.account_type === "poupanca" ? "Poup" : "CC"} {(acc as any).account_number_masked ?? acc.account_number ?? "••••"} · {acc.holder_name}
+                    Ag {acc.agency} · {acc.account_type === "poupanca" ? "Poup" : "CC"} {(acc as { account_number_masked?: string | null }).account_number_masked ?? "••••"} · {acc.holder_name}
                   </p>
                 </div>
                 <Button variant="ghost" size="icon" onClick={() => handleDeleteBank(acc.id)} className="text-muted-foreground hover:text-destructive">

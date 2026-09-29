@@ -64,7 +64,7 @@ export function GlobalSearchDialog({ open, onOpenChange }: { open: boolean; onOp
 
   const allItems = useMemo<SearchResult[]>(() => [
     ...results,
-    ...filteredPages.map(p => ({ id: p.href, label: p.label, href: p.href, icon: p.icon })),
+    ...filteredPages.map((p, index) => ({ id: `page:${p.href}:${index}`, label: p.label, href: p.href, icon: p.icon })),
   ], [results, filteredPages]);
 
   const search = useCallback(async (q: string) => {
@@ -135,7 +135,7 @@ export function GlobalSearchDialog({ open, onOpenChange }: { open: boolean; onOp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-visible p-0 border-none bg-transparent shadow-none w-[calc(100vw-2rem)] max-w-lg ring-0 outline-none focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:outline-none [&>button:last-child]:hidden top-[18%] translate-y-0">
+      <DialogContent className="overflow-visible p-0 border-none bg-transparent shadow-none w-[calc(100vw-2rem)] max-w-lg ring-0 outline-none focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:outline-none [&>button:last-child]:hidden">
         <DialogTitle className="sr-only">Busca global</DialogTitle>
         <motion.div
           initial={{ opacity: 0, y: -8 }}

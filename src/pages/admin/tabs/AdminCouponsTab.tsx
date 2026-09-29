@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { cn, isApprovedTransaction } from "@/lib/utils";
 
+type StatusFilter = "all" | "active" | "inactive" | "expired";
+
 interface Props {
   profiles: Tables<"profiles">[];
   products: Tables<"products">[];
@@ -22,6 +24,7 @@ interface Props {
 export default function AdminCouponsTab({ profiles, products, transactions, fmtCurrency }: Props) {
   const [coupons, setCoupons] = useState<Tables<"coupons">[]>([]);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [detail, setDetail] = useState<Tables<"coupons"> | null>(null);
 
   useEffect(() => {
@@ -68,6 +71,10 @@ export default function AdminCouponsTab({ profiles, products, transactions, fmtC
   const totalDiscount = coupons.reduce((a, c) => a + Number(c.total_discount_amount || 0), 0);
 
   const filtered = coupons.filter(c => {
+    const expiredCoupon = !!c.expires_at && new Date(c.expires_at) < new Date();
+    if (statusFilter === "active" && (!c.is_active || expiredCoupon)) return false;
+    if (statusFilter === "inactive" && c.is_active) return false;
+    if (statusFilter === "expired" && !expiredCoupon) return false;
     if (!search) return true;
     const s = search.toLowerCase();
     return c.code.toLowerCase().includes(s) || getSellerName(c.user_id).toLowerCase().includes(s);
@@ -87,10 +94,14 @@ export default function AdminCouponsTab({ profiles, products, transactions, fmtC
         <AdminKpi icon={<DollarSign className="h-5 w-5" />} label="Descontado" value={fmtCurrency(totalDiscount)} sub="Em campanhas" gradient="from-amber-500 to-orange-600" glowColor="rgba(245,158,11,0.15)" />
       </div>
 
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <input placeholder="Buscar cupom ou vendedor..." value={search} onChange={e => setSearch(e.target.value)}
-          className="w-full h-10 pl-10 pr-4 bg-muted/30 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30" />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div role="tablist" aria-label="Filtrar cupons por status" className="inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-xl border border-border/60 bg-card p-1">
+          {([['all','Todos',coupons.length],['active','Ativos',active],['inactive','Pausados',coupons.filter(c => !c.is_active).length],['expired','Expirados',expired]] as const).map(([id,label,count]) => <button key={id} type="button" role="tab" aria-selected={statusFilter === id} onClick={() => setStatusFilter(id)} className={cn("h-8 shrink-0 rounded-lg px-3 text-xs font-bold transition-colors", statusFilter === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>{label} <span className="ml-1 tabular-nums opacity-70">{count}</span></button>)}
+        </div>
+        <div className="relative w-full sm:max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input placeholder="Buscar cupom ou vendedor..." value={search} onChange={e => setSearch(e.target.value)} className="w-full h-10 pl-10 pr-4 bg-muted/30 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30" />
+        </div>
       </div>
 
       <AdminPanel>
@@ -135,7 +146,7 @@ export default function AdminCouponsTab({ profiles, products, transactions, fmtC
 
       {/* Detail dialog */}
       <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
-        <DialogContent className="max-w-3xl max-h-[88vh] overflow-y-auto">
+        <DialogContent className="w-[calc(100vw-1.5rem)] max-w-4xl max-h-[90vh] overflow-hidden flex flex-col rounded-3xl">
           {detail && (() => {
             const stats = getCouponStats(detail.id);
             const product = detail.product_id ? productMap.get(detail.product_id) : null;
@@ -147,7 +158,7 @@ export default function AdminCouponsTab({ profiles, products, transactions, fmtC
                     <span className="font-mono">{detail.code}</span>
                   </DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4">
+                <div className="space-y-4 overflow-y-auto pr-1">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <Kpi label="Tipo" value={detail.discount_type === "percentage" ? `${Number(detail.discount_value)}%` : fmtCurrency(Number(detail.discount_value))} />
                     <Kpi label="Usos" value={`${detail.current_uses}/${detail.max_uses || "∞"}`} />

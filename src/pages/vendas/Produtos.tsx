@@ -94,11 +94,18 @@ export default function Produtos() {
   const handleEditProduct = useCallback((product: Product) => navigate(`/vendas/produtos/${product.id}/editar`), [navigate]);
   const handleOpenMembers = useCallback((product: Product) => navigate(`/vendas/conteudo/${product.id}/builder`), [navigate]);
   const handleOpenCheckout = useCallback((product: Product) => {
-    if (!product.checkout_url) return;
-    window.open(getCheckoutLink(product.checkout_url), "_blank", "noopener,noreferrer");
+    if (!product.checkout_url || getEffectiveStatus(product) !== "active") {
+      toast.info("O checkout ficará público quando o produto estiver ativo.");
+      return;
+    }
+    const url = getCheckoutLink(product.checkout_url);
+    if (url) window.open(url, "_blank", "noopener,noreferrer");
   }, []);
   const handleCopyLink = useCallback(async (product: Product) => {
-    if (!product.checkout_url) return;
+    if (!product.checkout_url || getEffectiveStatus(product) !== "active") {
+      toast.info("O link ficará disponível quando o produto estiver ativo.");
+      return;
+    }
     try {
       await navigator.clipboard.writeText(getCheckoutLink(product.checkout_url));
       setCopiedId(product.id);
@@ -150,6 +157,9 @@ export default function Produtos() {
       display_name: product.display_name,
       delivery_type: product.delivery_type,
       checkout_url: checkoutUrl,
+      checkout_pix_enabled: product.checkout_pix_enabled,
+      checkout_credit_card_enabled: product.checkout_credit_card_enabled,
+      checkout_boleto_enabled: product.checkout_boleto_enabled,
     });
     if (error) { toast.error("Erro ao duplicar produto"); return; }
     toast.success("Produto duplicado! Aguardando revisão.");

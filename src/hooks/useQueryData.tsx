@@ -181,36 +181,29 @@ export async function fetchTransactionsForExport(
 ): Promise<Tables<"transactions">[]> {
   const CHUNK = 1000;
   const out: Tables<"transactions">[] = [];
-  let cursor = to.toISOString();
-  let guardId: string | null = null;
+  let offset = 0;
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    let query = supabase
+    const query = supabase
       .from("transactions")
       .select("*")
       .eq("user_id", userId)
       .gte("created_at", from.toISOString())
-      .lte("created_at", cursor)
+      .lte("created_at", to.toISOString())
       .order("created_at", { ascending: false })
       .order("id", { ascending: false })
-      .limit(CHUNK);
+      .range(offset, offset + CHUNK - 1);
 
     const { data, error } = await query;
     if (error) throw error;
     const rows = (data || []) as Tables<"transactions">[];
-    // Remove sobreposição do cursor (mesmo timestamp em páginas consecutivas).
-    const fresh = guardId ? rows.filter((r) => r.id !== guardId) : rows;
-    const seen = new Set(out.map((r) => r.id));
-    for (const r of fresh) if (!seen.has(r.id)) out.push(r);
+    out.push(...rows);
 
     onProgress?.(out.length);
     if (rows.length < CHUNK) break;
 
-    const last = rows[rows.length - 1];
-    if (!last?.created_at || last.created_at === cursor && last.id === guardId) break;
-    cursor = last.created_at;
-    guardId = last.id;
+    offset += CHUNK;
   }
 
   return out;

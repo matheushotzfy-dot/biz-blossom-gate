@@ -67,7 +67,7 @@ const ProductCard = memo(function ProductCard({ product, copied, ...handlers }: 
   const isDraft = effectiveStatus === "draft";
   const missingCount = isDraft ? getProductRequirements(product).filter((r) => !r.done).length : 0;
   const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
-  const linkPreview = product.checkout_url ? shortenLink(product.checkout_url) : null;
+  const linkPreview = effectiveStatus === "active" && product.checkout_url ? shortenLink(product.checkout_url) : null;
   const initial = (product.name || "?").charAt(0).toUpperCase();
 
   return (
@@ -145,7 +145,7 @@ const ProductCard = memo(function ProductCard({ product, copied, ...handlers }: 
             </button>
           ) : (
             <span className="inline-flex items-center rounded-full bg-muted/25 px-3 py-1.5 text-[11px] text-muted-foreground/45">
-              Checkout não publicado
+              {product.checkout_url ? "Disponível após publicação" : "Checkout não publicado"}
             </span>
           )}
         </div>
@@ -179,7 +179,7 @@ const ProductCard = memo(function ProductCard({ product, copied, ...handlers }: 
             >
               <Crosshair className="h-3.5 w-3.5" strokeWidth={2} />
             </button>
-            {product.checkout_url && (
+            {product.checkout_url && effectiveStatus === "active" && (
               <button
                 type="button"
                 onClick={() => handlers.onOpenCheckout(product)}

@@ -1,14 +1,9 @@
-- [x] Restringir acesso público de catálogo e validar linter
-- [x] Finalizar controles de métodos no admin, produtos, links e checkout
-- [x] Finalizar Perfil, Cupons, Premiações, Suporte e animações de janelas
-- [x] Validar chaves API sem limite e segurança mantida
-- [x] Executar testes funcionais, visuais, mobile e acessibilidade
-- [x] Classificar as 63 funções privilegiadas legadas por consumidor e papel mínimo
-- [x] Revogar execuções excessivas sem quebrar funções públicas, seller ou admin
-- [x] Validar linter, fluxos críticos e isolamento após o hardening
+# Execução aprovada
 
-- [x] Mapear alertas atuais do painel admin e os três achados de catálogo/armazenamento
-- [x] Corrigir causas dos achados preservando acessos legítimos
-- [x] Criar registro administrativo de achados e análise priorizada por IA
-- [x] Integrar a experiência no painel admin com estados de erro e histórico
-- [x] Validar segurança, build, testes e fluxos públicos/autenticados
+- [ ] Utilitários e testes: PIX, dados bancários, checkout e exportação segura
+- [ ] Saques, contas bancárias e saque automático
+- [ ] Exportação completa de vendas
+- [ ] Cupons seller/admin e janelas de integrações
+- [ ] Perfil simétrico e chave duplicada da busca global
+- [ ] Produtos, catálogo e checkout público fail-closed
+- [ ] Testes funcionais, segurança, mobile e temas

@@ -24,8 +24,16 @@ export const formatCompactDate = (value: string) =>
     year: "numeric",
   }).format(new Date(value));
 
-export const getCheckoutLink = (checkoutUrl: string) =>
-  `${window.location.origin}/pay/${checkoutUrl.split("/").pop()!}`;
+export function getCheckoutSlug(checkoutUrl: string): string {
+  const raw = checkoutUrl.trim().replace(/\/+$/, "");
+  const last = raw.split("/").pop() ?? "";
+  return last.replace(/[^a-zA-Z0-9_-]/g, "");
+}
+
+export const getCheckoutLink = (checkoutUrl: string) => {
+  const slug = getCheckoutSlug(checkoutUrl);
+  return slug ? `${window.location.origin}/pay/${slug}` : "";
+};
 
 /* ───────────────────────── Draft / completion helpers ───────────────────────── */
 
@@ -44,14 +52,14 @@ export function getProductRequirements(product: Product): ProductRequirement[] {
   const hasPrice = Number(product.price) >= 1;
   const hasDescription = !!product.description && product.description.trim().length >= 10;
   const hasImage = !!product.image_url;
-  const hasCheckout = !!product.checkout_url;
+  const hasCheckout = !!product.checkout_url && product.status === "active";
 
   return [
     { key: "name", label: "Nome do produto", done: hasName },
     { key: "price", label: "Preço de venda (mínimo R$ 1,00)", done: hasPrice },
     { key: "description", label: "Descrição (mín. 10 caracteres)", done: hasDescription },
     { key: "image", label: "Imagem de capa", done: hasImage },
-    { key: "checkout", label: "Link de checkout", done: hasCheckout },
+    { key: "checkout", label: "Checkout publicado", done: hasCheckout },
   ];
 }
 

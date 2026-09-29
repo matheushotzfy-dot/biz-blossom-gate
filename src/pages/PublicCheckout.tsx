@@ -5,7 +5,7 @@ import {
  CreditCard, QrCode, FileText, CheckCircle2, Copy, Clock, Loader2,
  RefreshCw, ShieldCheck, ChevronDown, User, Mail, FileDigit, Phone,
  Sparkles, Plus, Package, Lock, Eye, Zap, Star, TrendingUp,
- ArrowRight, Check, AlertCircle, Users, Timer, Heart, Ticket,
+ ArrowRight, Check, AlertCircle, Timer, Heart, Ticket,
  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -83,17 +83,6 @@ const formatExpiry = (v: string) => { const d = v.replace(/\D/g, "").slice(0, 4)
 const formatCep = (v: string) => { const d = v.replace(/\D/g, "").slice(0, 8); return d.length <= 5 ? d : `${d.slice(0,5)}-${d.slice(5)}`; };
 const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-/* ─── Fake names for social proof ─── */
-const BUYER_NAMES = ["Ana S.", "Carlos M.", "Juliana R.", "Pedro H.", "Mariana L.", "Lucas F.", "Fernanda A.", "Rafael B.", "Camila T.", "Bruno V.", "Patricia O.", "Diego N.", "Isabela C.", "Thiago P.", "Larissa D."];
-const CITIES = ["São Paulo", "Rio de Janeiro", "Belo Horizonte", "Curitiba", "Porto Alegre", "Salvador", "Brasília", "Fortaleza", "Recife", "Goiânia"];
-const AVATAR_URLS = [
- "https://i.pravatar.cc/80?img=1", "https://i.pravatar.cc/80?img=5", "https://i.pravatar.cc/80?img=10",
- "https://i.pravatar.cc/80?img=12", "https://i.pravatar.cc/80?img=16", "https://i.pravatar.cc/80?img=20",
- "https://i.pravatar.cc/80?img=23", "https://i.pravatar.cc/80?img=25", "https://i.pravatar.cc/80?img=32",
- "https://i.pravatar.cc/80?img=36", "https://i.pravatar.cc/80?img=41", "https://i.pravatar.cc/80?img=44",
- "https://i.pravatar.cc/80?img=47", "https://i.pravatar.cc/80?img=49", "https://i.pravatar.cc/80?img=53",
-];
-
 /* ═══ Premium Loading Screen ═══ */
 function PremiumLoader({ color }: { color?: string }) {
  const c = color || "#10b981";
@@ -131,63 +120,6 @@ function PremiumLoader({ color }: { color?: string }) {
  style={{ backgroundColor: c, animationDelay: `${i * 0.3}s` }}
  />
  ))}
- </div>
- </div>
- </div>
- );
-}
-
-/* ═══ Live Viewer Counter ═══ */
-function LiveViewers({ color }: { color: string }) {
- const [count, setCount] = useState(Math.floor(Math.random() * 30) + 15);
- useEffect(() => {
- const interval = setInterval(() => {
- setCount(c => Math.max(8, c + (Math.random() > 0.5 ? 1 : -1) * Math.floor(Math.random() * 3)));
- }, 4000 + Math.random() * 3000);
- return () => clearInterval(interval);
- }, []);
- return (
- <div className="flex items-center gap-2">
- <span className="relative flex h-2.5 w-2.5">
- <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: color }} />
- <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ backgroundColor: color }} />
- </span>
- <span className="text-[11px] font-semibold text-[hsl(var(--checkout-text-muted))]">
- <strong className="text-[hsl(var(--checkout-text))]">{count}</strong> pessoas vendo agora
- </span>
- </div>
- );
-}
-
-/* ═══ Recent Purchase Toast ═══ */
-function RecentPurchaseToast({ productName, color }: { productName: string; color: string }) {
- const [visible, setVisible] = useState(false);
- const [buyer, setBuyer] = useState({ name: "", city: "", ago: 0, avatar: "" });
-
- useEffect(() => {
- const show = () => {
- setBuyer({
- name: BUYER_NAMES[Math.floor(Math.random() * BUYER_NAMES.length)],
- city: CITIES[Math.floor(Math.random() * CITIES.length)],
- ago: Math.floor(Math.random() * 15) + 1,
- avatar: AVATAR_URLS[Math.floor(Math.random() * AVATAR_URLS.length)],
- });
- setVisible(true);
- setTimeout(() => setVisible(false), 4000);
- };
- const timeout = setTimeout(show, 5000 + Math.random() * 8000);
- const interval = setInterval(show, 18000 + Math.random() * 15000);
- return () => { clearTimeout(timeout); clearInterval(interval); };
- }, []);
-
- if (!visible) return null;
- return (
- <div className="fixed bottom-4 left-4 z-50 animate-slide-in-left max-w-[320px]">
- <div className="rounded-2xl border border-[hsl(var(--checkout-border))] bg-[hsl(var(--checkout-bg-elevated))] p-3.5 shadow-2xl shadow-black/10 flex items-center gap-3 backdrop-blur-xl">
- <img src={buyer.avatar} alt="" className="h-10 w-10 rounded-full object-cover border-2 border-white/20 shadow-md shrink-0" />
- <div className="min-w-0">
- <p className="text-[12px] font-bold text-[hsl(var(--checkout-text))] truncate">{buyer.name} de {buyer.city}</p>
- <p className="text-[10px] text-[hsl(var(--checkout-text-muted))]">Comprou há {buyer.ago} min • <span style={{ color }}>{productName}</span></p>
  </div>
  </div>
  </div>
@@ -264,7 +196,6 @@ export default function PublicCheckout() {
  const [city, setCity] = useState("");
  const [state, setState] = useState("");
  const [loadingCep, setLoadingCep] = useState(false);
- const [socialCount] = useState(Math.floor(Math.random() * 200) + 80);
   const [copiedPix, setCopiedPix] = useState(false);
 
   // Coupon
@@ -757,9 +688,6 @@ export default function PublicCheckout() {
    }}
  />
 
- {/* ═══ Social Proof Toast ═══ */}
- {product.checkout_social_proof && <RecentPurchaseToast productName={product.name} color={btnColor} />}
-
  {/* ═══ Timer Bar (Premium) ═══ */}
  {product.checkout_timer_enabled && (
  <div className="sticky top-0 z-50 backdrop-blur-2xl border-b border-gray-200/50" style={{ backgroundColor: isDark ? "hsla(220, 18%, 11%, 0.95)" : "rgba(255,255,255,0.95)" }}>
@@ -793,28 +721,6 @@ export default function PublicCheckout() {
  )}
 
  <div className="max-w-[660px] mx-auto px-4 py-6 md:py-10">
-
- {/* ═══ Social Proof Bar (Premium) ═══ */}
- {product.checkout_social_proof && (
- <div className="mb-5 rounded-2xl border border-gray-200/80 bg-white p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5 shadow-lg shadow-black/[0.03]">
- <div className="flex items-center gap-3 flex-1">
- <div className="flex -space-x-2.5">
- {AVATAR_URLS.slice(0, 6).map((url, i) => (
- <img key={i} src={url} alt="" className="h-9 w-9 rounded-full border-[2.5px] border-white object-cover shadow-md" style={{ zIndex: 6 - i }} />
- ))}
- </div>
- <div>
- <p className="text-[13px] font-bold text-gray-700">
- <span style={{ color: btnColor }}>{socialCount}+ compradores</span> nas últimas 24h
- </p>
- <p className="text-[10px] text-gray-400 mt-0.5">Produto verificado • Alta demanda</p>
- </div>
- </div>
- <div className="flex items-center gap-4">
- <LiveViewers color={btnColor} />
- </div>
- </div>
- )}
 
  {/* ═══ Product Card (Premium) ═══ */}
  <div className={`rounded-2xl border bg-white p-5 mb-5 shadow-lg shadow-black/[0.03] transition-all ${isWhite ? "border-gray-100" : "border-gray-200/80"}`}>

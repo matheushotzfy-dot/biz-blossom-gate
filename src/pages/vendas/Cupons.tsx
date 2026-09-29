@@ -191,7 +191,7 @@ export default function Cupons() {
                 Novo cupom
               </button>
             </DialogTrigger>
-          <DialogContent className="max-w-lg rounded-[12px] border border-border/40 bg-card p-0 overflow-hidden">
+          <DialogContent className="w-[calc(100vw-1.5rem)] max-w-3xl max-h-[92vh] rounded-3xl border border-border/40 bg-card p-0 overflow-hidden flex flex-col">
             <div className="px-6 pt-6 pb-4 border-b border-border/20">
               <DialogHeader>
                 <DialogTitle className="font-display text-lg flex items-center gap-2.5">
@@ -203,9 +203,9 @@ export default function Cupons() {
               </DialogHeader>
             </div>
 
-            <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+            <div className="grid flex-1 grid-cols-1 gap-5 overflow-y-auto p-6 md:grid-cols-2">
               {/* Step 1: Identification */}
-              <div className="space-y-4">
+              <div className="space-y-4 md:col-span-2">
                 <div className="flex items-center gap-2">
                   <span className="h-5 w-5 rounded-md bg-primary/10 text-primary text-[10px] font-black flex items-center justify-center">1</span>
                   <span className="text-[11px] font-medium text-muted-foreground/60">Identificação</span>
@@ -223,7 +223,7 @@ export default function Cupons() {
               </div>
 
               {/* Step 2: Discount */}
-              <div className="space-y-4 pt-4 border-t border-border/20">
+              <div className="space-y-4 border-t border-border/20 pt-4 md:border-t-0 md:pt-0">
                 <div className="flex items-center gap-2">
                   <span className="h-5 w-5 rounded-md bg-primary/10 text-primary text-[10px] font-black flex items-center justify-center">2</span>
                   <span className="text-[11px] font-medium text-muted-foreground/60">Valor do Desconto</span>
@@ -263,7 +263,7 @@ export default function Cupons() {
               </div>
 
               {/* Step 3: Restrictions */}
-              <div className="space-y-4 pt-4 border-t border-border/20">
+              <div className="space-y-4 border-t border-border/20 pt-4 md:border-t-0 md:pt-0">
                 <div className="flex items-center gap-2">
                   <span className="h-5 w-5 rounded-md bg-primary/10 text-primary text-[10px] font-black flex items-center justify-center">3</span>
                   <span className="text-[11px] font-medium text-muted-foreground/60">Restrições <span className="text-muted-foreground/30 font-medium normal-case tracking-normal">(opcional)</span></span>
