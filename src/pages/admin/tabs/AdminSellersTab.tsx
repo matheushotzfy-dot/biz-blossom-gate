@@ -477,13 +477,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     const sanitizedReason = adjustReason.replace(/[<>]/g, "").trim().slice(0, 500);
     if (sanitizedReason.length < 3) { toast.error("Justificativa muito curta (mín. 3 caracteres)"); return; }
     if (amount > 10000 && !window.confirm(`Confirma ajuste de R$ ${amount.toFixed(2)} (${adjustType})?`)) return;
-    const { error } = await supabase.from("balance_adjustments").insert({
-      user_id: selectedUser.user_id, admin_user_id: user.id,
-      amount, type: adjustType, reason: sanitizedReason,
+    if (sanitizedReason.length < 5) { toast.error("Justificativa muito curta (mín. 5 caracteres)"); return; }
+    // Audited server routine: large amounts become a request for a second admin.
+    const { data: adjRes, error } = await supabase.rpc("admin_request_balance_adjustment", {
+      _user_id: selectedUser.user_id, _type: adjustType, _amount: amount, _reason: sanitizedReason,
     });
-    if (error) { toast.error("Erro ao ajustar saldo"); return; }
-    toast.success(`Saldo ${adjustType === "credit" ? "creditado" : "debitado"}!`);
-    await logAdminAction(`balance_${adjustType}`, "balance_adjustment", selectedUser.user_id, { amount: adjustAmount, reason: sanitizedReason });
+    if (error) { toast.error(error.message?.slice(0, 160) || "Erro ao ajustar saldo"); return; }
+    const pendingApproval = (adjRes as { status?: string } | null)?.status === "pending_approval";
+    toast.success(pendingApproval ? "Pedido criado — outro admin precisa aprovar" : `Saldo ${adjustType === "credit" ? "creditado" : "debitado"}!`);
     setAdjustAmount(""); setAdjustReason("");
     const { data } = await supabase.from("balance_adjustments").select("*").eq("user_id", selectedUser.user_id).order("created_at", { ascending: false });
     if (data) setBalanceAdjustments(data);
@@ -988,9 +989,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                 <MiniKpi label={`Disputas (${userMedRate}%)`} value={`${userMedTotal} (${fmtCurrency(userMedAmount)})`} tone="warning" />
               </div>
 
-              <Tabs defaultValue="info" className="mt-4">
+              <Tabs defaultValue="overview" className="mt-4">
                 <TabsList className="bg-muted/30 border border-border rounded-xl p-1 flex-wrap h-auto gap-1">
                   {[
+                    { v: "overview", l: "Visão 360", i: Activity },
                     { v: "info", l: "Info & KYC", i: FileText },
                     { v: "notes", l: "Observações", i: MessageSquareText },
                     { v: "retention", l: "Rolling Reserve", i: Lock },
@@ -1007,6 +1009,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     </TabsTrigger>
                   ))}
                 </TabsList>
+
+                <TabsContent value="overview" className="mt-4">
+                  {selectedUser && <Seller360Panel userId={selectedUser.user_id} onChanged={onReload} />}
+                </TabsContent>
 
                 {/* ── Info & KYC ── */}
                 <TabsContent value="info" className="mt-4 space-y-4">

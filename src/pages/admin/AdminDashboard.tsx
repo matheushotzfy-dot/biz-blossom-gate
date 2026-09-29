@@ -30,7 +30,7 @@ import type { AdminFinancialOverview } from "./tabs/AdminOverviewTab";
 const AdminOverviewTab = lazy(() => import("./tabs/AdminOverviewTab"));
 const AdminSellersTab = lazy(() => import("./tabs/AdminSellersTab"));
 const AdminProductsTab = lazy(() => import("./tabs/AdminProductsTab"));
-const AdminDisputesTab = lazy(() => import("./tabs/AdminDisputesTab"));
+const DisputesCenter = lazy(() => import("@/features/admin-finance/DisputesCenter"));
 const AdminTransactionsTab = lazy(() => import("./tabs/AdminTransactionsTab"));
 const AdminWithdrawalsTab = lazy(() => import("./tabs/AdminWithdrawalsTab"));
 const AdminCouponsTab = lazy(() => import("./tabs/AdminCouponsTab"));
@@ -716,17 +716,11 @@ export default function AdminDashboard() {
                 <AdminRiskComplianceTab profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
               )}
               {activeTab === "abuse-metrics" && isAdmin && <AdminAbuseMetricsTab />}
-              {activeTab === "medpix" && isAdmin && (
-                <AdminDisputesTab type="medpix" title="MedPix" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
-              )}
-              {activeTab === "refunds" && isAdmin && (
-                <AdminDisputesTab type="refund" title="Reembolsos (Interno)" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
-              )}
-              {activeTab === "chargeback" && isAdmin && (
-                <AdminDisputesTab type="chargeback" title="Chargeback (Cartão)" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
-              )}
-              {activeTab === "premed" && isAdmin && (
-                <AdminDisputesTab type="pre_med_pix" title="Pre-Med PIX" profiles={profiles} transactions={transactions} products={products} fmtCurrency={fmtCurrency} />
+              {["medpix", "refunds", "chargeback", "premed"].includes(activeTab) && isAdmin && (
+                <DisputesCenter
+                  profiles={profiles}
+                  initialType={activeTab === "refunds" ? "refund" : activeTab === "premed" ? "pre_med_pix" : activeTab === "chargeback" ? "chargeback" : "medpix"}
+                />
               )}
               {activeTab === "employees" && isAdmin && <AdminEmployeesTab profiles={profiles} onReload={loadData} />}
               {activeTab === "managers" && isAdmin && <AdminManagersTab profiles={profiles} onReload={loadData} />}
