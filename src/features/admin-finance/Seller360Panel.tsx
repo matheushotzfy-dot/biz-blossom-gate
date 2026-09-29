@@ -4,6 +4,8 @@ import { Loader2, ShieldAlert, Wallet, TrendingUp, RotateCcw, AlertTriangle, Arr
 import { cn } from "@/lib/utils";
 import { brl, type Seller360 } from "./types";
 import { BalanceAdjustCard } from "./BalanceAdjustCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SellerAcquirersSection, SellerRewardsSection, SellerTransactionsSection, SellerWithdrawalsSection } from "./SellerDetailSections";
 
 interface Seller360PanelProps {
   userId: string;
@@ -96,8 +98,23 @@ export function Seller360Panel({ userId, onChanged }: Seller360PanelProps) {
         <Tile label="Recusados" value={String(w.rejected_count)} tone="muted" />
       </Section>
 
-      <div className="flex items-center gap-1.5 text-xs font-semibold"><AlertTriangle className="h-3.5 w-3.5 text-muted-foreground" />Ajuste de saldo</div>
-      <BalanceAdjustCard userId={userId} onDone={() => { void load(); onChanged?.(); }} />
+      <Tabs defaultValue="tx">
+        <TabsList className="h-auto flex-wrap gap-1">
+          <TabsTrigger value="tx">Transações</TabsTrigger>
+          <TabsTrigger value="wd">Saques</TabsTrigger>
+          <TabsTrigger value="acq">Adquirentes</TabsTrigger>
+          <TabsTrigger value="rw">Premiações</TabsTrigger>
+          <TabsTrigger value="adj">Ajuste de saldo</TabsTrigger>
+        </TabsList>
+        <TabsContent value="tx" className="mt-3"><SellerTransactionsSection userId={userId} /></TabsContent>
+        <TabsContent value="wd" className="mt-3"><SellerWithdrawalsSection userId={userId} onChanged={() => { void load(); onChanged?.(); }} /></TabsContent>
+        <TabsContent value="acq" className="mt-3"><SellerAcquirersSection userId={userId} /></TabsContent>
+        <TabsContent value="rw" className="mt-3"><SellerRewardsSection userId={userId} /></TabsContent>
+        <TabsContent value="adj" className="mt-3 space-y-2">
+          <div className="flex items-center gap-1.5 text-xs font-semibold"><AlertTriangle className="h-3.5 w-3.5 text-muted-foreground" />Ajuste de saldo</div>
+          <BalanceAdjustCard userId={userId} onDone={() => { void load(); onChanged?.(); }} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
