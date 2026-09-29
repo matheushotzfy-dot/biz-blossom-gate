@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { Seller360Panel } from "@/features/admin-finance/Seller360Panel";
 import { NumberInput } from "@/components/ui/number-input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -478,13 +479,13 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     if (sanitizedReason.length < 3) { toast.error("Justificativa muito curta (mín. 3 caracteres)"); return; }
     if (amount > 10000 && !window.confirm(`Confirma ajuste de R$ ${amount.toFixed(2)} (${adjustType})?`)) return;
     if (sanitizedReason.length < 5) { toast.error("Justificativa muito curta (mín. 5 caracteres)"); return; }
-    // Audited server routine: large amounts become a request for a second admin.
+    // Audited server routine: owner applies directly, staff requests need owner approval.
     const { data: adjRes, error } = await supabase.rpc("admin_request_balance_adjustment", {
       _user_id: selectedUser.user_id, _type: adjustType, _amount: amount, _reason: sanitizedReason,
     });
     if (error) { toast.error(error.message?.slice(0, 160) || "Erro ao ajustar saldo"); return; }
     const pendingApproval = (adjRes as { status?: string } | null)?.status === "pending_approval";
-    toast.success(pendingApproval ? "Pedido criado — outro admin precisa aprovar" : `Saldo ${adjustType === "credit" ? "creditado" : "debitado"}!`);
+    toast.success(pendingApproval ? "Pedido enviado para aprovação do dono" : `Saldo ${adjustType === "credit" ? "creditado" : "debitado"}!`);
     setAdjustAmount(""); setAdjustReason("");
     const { data } = await supabase.from("balance_adjustments").select("*").eq("user_id", selectedUser.user_id).order("created_at", { ascending: false });
     if (data) setBalanceAdjustments(data);
