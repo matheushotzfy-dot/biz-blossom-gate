@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { brl, rpcErrorMessage } from "./types";
 import { SellerSelect } from "./SellerSelect";
+import { FinancialCharts } from "./FinancialCharts";
 
 interface MethodRow { method: string; count: number; gross: number; fee: number; fee_percent: number; fee_fixed: number; acquirer_fee: number }
 interface Metrics {
@@ -78,6 +79,7 @@ export function FinancialMetricsPanel({ profiles, allowSellerFilter = true }: { 
           <Select value={acquirer} onValueChange={setAcquirer}><SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent><SelectItem value="all">Todas</SelectItem>{(acqs.data ?? []).map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent></Select></div>
       </div>
+      <FinancialCharts from={range.s} to={range.e} seller={seller} acquirer={acquirer === "all" ? undefined : acquirer} />
 
       {q.isLoading ? <div className="flex h-40 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-label="Carregando" /></div>
       : q.error ? <p className="rounded-xl border border-destructive/30 p-4 text-sm text-destructive">{(q.error as Error).message}</p>

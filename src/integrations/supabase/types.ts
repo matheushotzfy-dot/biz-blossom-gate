@@ -5609,6 +5609,15 @@ export type Database = {
         }
         Returns: Json
       }
+      get_financial_series: {
+        Args: {
+          _acquirer?: string
+          _from: string
+          _seller?: string
+          _to: string
+        }
+        Returns: Json
+      }
       get_global_payment_toggles: {
         Args: never
         Returns: {
@@ -5757,6 +5766,10 @@ export type Database = {
       }
       get_seller_balance_breakdown: {
         Args: { _user_id: string }
+        Returns: Json
+      }
+      get_seller_balance_by_acquirer: {
+        Args: { _seller: string }
         Returns: Json
       }
       get_seller_dashboard_stats: {
