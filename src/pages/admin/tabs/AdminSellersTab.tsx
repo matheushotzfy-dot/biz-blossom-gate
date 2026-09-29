@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { NumberInput } from "@/components/ui/number-input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -155,6 +155,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [impersonating, setImpersonating] = useState(false);
   const [ipHistory, setIpHistory] = useState<IpLog[]>([]);
   const [page, setPage] = useState(1);
+  const detailRequestRef = useRef(0);
   const PAGE_SIZE = 50;
 
 
@@ -195,13 +196,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   };
 
   const openUserDetail = async (profile: Tables<"profiles">) => {
+    const requestId = ++detailRequestRef.current;
     setSelectedUser(profile);
     setLoading(true);
     setEmailVerified(null);
     supabase.functions
       .invoke("admin-set-email-verified", { body: { targetUserId: profile.user_id, action: "status" } })
       .then(({ data }) => {
-        if (data?.success) setEmailVerified(!!data.verified);
+        if (requestId === detailRequestRef.current && data?.success) setEmailVerified(!!data.verified);
       })
       .catch(() => { /* silent */ });
     setUserLogs([]); setUserProducts([]); setUserWithdrawals([]);
@@ -223,6 +225,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days, card_release_days").eq("user_id", profile.user_id).maybeSingle(),
         supabase.from("ip_logs").select("ip, user_agent, country, source, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
       ]);
+      if (requestId !== detailRequestRef.current) return;
       if (logsRes.data) {
         const parsed = z.array(activityLogSchema).safeParse(logsRes.data);
         setUserLogs(parsed.success ? parsed.data : []);
@@ -281,10 +284,11 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         } else setKycImages([]);
       } catch { setKycImages([]); }
     } catch (e) {
+      if (requestId !== detailRequestRef.current) return;
       const msg = e instanceof Error ? e.message : "desconhecido";
       toast.error("Erro ao carregar dados do seller: " + msg);
     } finally {
-      setLoading(false);
+      if (requestId === detailRequestRef.current) setLoading(false);
     }
   };
 
@@ -536,17 +540,30 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       .slice(0, 8);
   })();
 
-  const getSellerStats = (userId: string) => {
-    const txs = transactions.filter(t => t.user_id === userId);
-    const completed = txs.filter(t => isApprovedTransaction(t.status));
-    const totalGross = completed.reduce((a, t) => a + Number(t.amount), 0);
-    const totalNet = completed.reduce((a, t) => a + Number(t.net_amount), 0);
-    const totalFees = completed.reduce((a, t) => a + Number(t.fee_amount), 0);
-    const wds = withdrawals.filter(w => w.user_id === userId);
-    const totalWithdrawn = wds.filter(w => w.status === "approved").reduce((a, w) => a + Number(w.amount), 0);
-    const conversionRate = txs.length > 0 ? (completed.length / txs.length) * 100 : 0;
-    return { totalGross, totalNet, totalFees, totalWithdrawn, txCount: txs.length, completedCount: completed.length, conversionRate };
-  };
+  const sellerStats = useMemo(() => {
+    const stats = new Map<string, { totalGross: number; totalNet: number; totalFees: number; totalWithdrawn: number; txCount: number; completedCount: number; conversionRate: number }>();
+    for (const transaction of transactions) {
+      const current = stats.get(transaction.user_id) ?? { totalGross: 0, totalNet: 0, totalFees: 0, totalWithdrawn: 0, txCount: 0, completedCount: 0, conversionRate: 0 };
+      current.txCount += 1;
+      if (isApprovedTransaction(transaction.status)) {
+        current.completedCount += 1;
+        current.totalGross += Number(transaction.amount);
+        current.totalNet += Number(transaction.net_amount);
+        current.totalFees += Number(transaction.fee_amount);
+      }
+      stats.set(transaction.user_id, current);
+    }
+    for (const withdrawal of withdrawals) {
+      if (withdrawal.status !== "approved") continue;
+      const current = stats.get(withdrawal.user_id) ?? { totalGross: 0, totalNet: 0, totalFees: 0, totalWithdrawn: 0, txCount: 0, completedCount: 0, conversionRate: 0 };
+      current.totalWithdrawn += Number(withdrawal.amount);
+      stats.set(withdrawal.user_id, current);
+    }
+    for (const current of stats.values()) current.conversionRate = current.txCount > 0 ? (current.completedCount / current.txCount) * 100 : 0;
+    return stats;
+  }, [transactions, withdrawals]);
+
+  const getSellerStats = (userId: string) => sellerStats.get(userId) ?? { totalGross: 0, totalNet: 0, totalFees: 0, totalWithdrawn: 0, txCount: 0, completedCount: 0, conversionRate: 0 };
 
   const deletedProducts = userLogs.filter(l => l.action === "product_deleted").map(l => {
     const od = deletedProductDataSchema.safeParse(l.old_data ?? {});
