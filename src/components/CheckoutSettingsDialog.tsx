@@ -213,15 +213,15 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
           <TabsContent value="payment" className="mt-5 space-y-4 pb-2">
             <Section title="Métodos de pagamento" subtitle="Formas de pagamento aceitas no checkout">
               <div className="rounded-xl border border-border/60 divide-y divide-border/60 overflow-hidden bg-card">
-                <Row icon={<QrCode className="h-4 w-4 text-success" />} title="PIX" description="Aprovação imediata · taxa baixa">
+                {allowedMethods.pix && <Row icon={<QrCode className="h-4 w-4 text-success" />} title="PIX" description="Aprovação imediata">
                   <Switch checked={pixEnabled} onCheckedChange={setPixEnabled} />
-                </Row>
-                <Row icon={<FileText className="h-4 w-4 text-warning" />} title="Boleto bancário" description="Compensação em 1–3 dias úteis">
+                </Row>}
+                {allowedMethods.boleto && <Row icon={<FileText className="h-4 w-4 text-warning" />} title="Boleto bancário" description="Compensação em 1–3 dias úteis">
                   <Switch checked={boletoEnabled} onCheckedChange={setBoletoEnabled} />
-                </Row>
-                <Row icon={<CreditCard className="h-4 w-4 text-primary" />} title="Cartão de crédito" description="Parcelamento em até 12x">
+                </Row>}
+                {allowedMethods.card && <Row icon={<CreditCard className="h-4 w-4 text-primary" />} title="Cartão de crédito" description="Parcelamento em até 12x">
                   <Switch checked={creditCardEnabled} onCheckedChange={setCreditCardEnabled} />
-                </Row>
+                </Row>}
               </div>
               <p className="text-[11px] text-muted-foreground/70 mt-2 px-1">Ao menos um método deve permanecer ativo.</p>
             </Section>
