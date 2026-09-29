@@ -6,4 +6,4 @@
 - [x] Cupons seller/admin e janelas de integrações
 - [x] Perfil simétrico e chave duplicada da busca global
 - [x] Produtos, catálogo e checkout público fail-closed
-- [ ] Testes funcionais, segurança, mobile e temas
+- [x] Testes funcionais, segurança, mobile e temas
