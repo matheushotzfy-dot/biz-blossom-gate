@@ -53,11 +53,11 @@ export function deriveTransactionStatus(transaction: TransactionStatusInput): st
     return isExpiredByTime ? "expired" : "pending";
   }
 
+  // Final outcome of a dispute decided in favor of the buyer. A PIX sale here is a lost MED,
+  // never an "expired" sale — the money was paid and then removed.
   if (raw === "chargeback" || raw === "chargedback" || raw === "charged_back") {
-    if (isCard) return "chargeback";
-    if (isPix && isExpiredByTime) return "expired";
-    if (isPix) return "med";
-    return "error";
+    if (isPix) return "med_lost";
+    return "chargeback";
   }
 
   if (raw === "med" || raw === "mediation" || raw === "dispute" || raw === "disputed" || raw === "in_protest") {
