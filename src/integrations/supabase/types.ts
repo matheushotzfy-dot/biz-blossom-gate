@@ -5226,6 +5226,37 @@ export type Database = {
           trial_days: number
         }[]
       }
+      get_public_products: {
+        Args: { _ids?: string[]; _slug?: string }
+        Returns: {
+          affiliate_commission: number
+          affiliate_enabled: boolean
+          checkout_address_required: boolean
+          checkout_banner_desktop_url: string
+          checkout_banner_mobile_url: string
+          checkout_boleto_enabled: boolean
+          checkout_button_color: string
+          checkout_credit_card_enabled: boolean
+          checkout_email_confirm: boolean
+          checkout_guarantee_enabled: boolean
+          checkout_pix_enabled: boolean
+          checkout_social_proof: boolean
+          checkout_theme: string
+          checkout_timer_enabled: boolean
+          checkout_timer_minutes: number
+          checkout_url: string
+          created_at: string
+          delivery_type: string
+          description: string
+          display_name: string
+          id: string
+          image_url: string
+          name: string
+          price: number
+          status: string
+          support_email: string
+        }[]
+      }
       get_quiz_questions_for_student: {
         Args: { _quiz_id: string }
         Returns: {
