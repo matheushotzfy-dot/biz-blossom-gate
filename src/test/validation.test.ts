@@ -10,6 +10,7 @@ import {
   flattenZodErrors,
 } from "@/lib/validation";
 import { detectPixKeyType, maskAccount, maskAgency, maskDocument, maskPhone, maskSensitivePixKey } from "@/lib/financial-input";
+import { spreadsheetSafe } from "@/lib/sales-export";
 
 /**
  * Onda 5 — Unit tests for the centralized validation lib.
@@ -201,5 +202,14 @@ describe("financial input formatting", () => {
   it("masks PII before rendering it", () => {
     expect(maskSensitivePixKey("52998224725", "cpf")).toBe("•••• 4725");
     expect(maskSensitivePixKey("seller@example.com", "email")).toBe("se•••@example.com");
+  });
+});
+
+describe("spreadsheet export safety", () => {
+  it("neutralizes formula-like customer data", () => {
+    expect(spreadsheetSafe("=HYPERLINK(\"https://evil.test\")")).toBe("'=HYPERLINK(\"https://evil.test\")");
+    expect(spreadsheetSafe("+1+1")).toBe("'+1+1");
+    expect(spreadsheetSafe("Cliente normal")).toBe("Cliente normal");
+    expect(spreadsheetSafe(197)).toBe(197);
   });
 });
