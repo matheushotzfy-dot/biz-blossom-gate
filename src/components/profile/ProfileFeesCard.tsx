@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { BadgePercent, Barcode, CreditCard, Wallet, type LucideIcon } from "lucide-react";
 import { useFees } from "@/hooks/useQueryData";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,7 +19,7 @@ export function ProfileFeesCard() {
   const { user } = useAuth();
   const { data: fees = [] } = useFees();
   const [custom, setCustom] = useState<CustomFees | null>(null);
-  const [amount, setAmount] = useState("100");
+  const [methods, setMethods] = useState({ pix: true, card: true, boleto: false });
 
   useEffect(() => {
     if (!user?.id) return;
@@ -29,6 +29,8 @@ export function ProfileFeesCard() {
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => setCustom((data as CustomFees) ?? null));
+    supabase.from("profiles").select("pix_enabled, credit_card_enabled, boleto_enabled").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => data && setMethods({ pix: data.pix_enabled, card: data.credit_card_enabled, boleto: data.boleto_enabled }));
   }, [user?.id]);
 
   const pf = (name: string, def = 0) => {
@@ -36,16 +38,13 @@ export function ProfileFeesCard() {
     return f ? Number(f.value) : def;
   };
 
-  const rows: { label: string; icon: LucideIcon; p: number; f: number; tone: string }[] = [
-    { label: "Pix", icon: PixLogoMark as unknown as LucideIcon, p: custom?.pix_percentage ?? pf("Taxa PIX"), f: custom?.pix_fixed ?? pf("Taxa Fixa PIX"), tone: "text-success bg-success/10" },
-    { label: "Cartão", icon: CreditCard, p: custom?.card_percentage ?? pf("Taxa Cartão"), f: custom?.card_fixed ?? pf("Taxa Fixa Cartão"), tone: "text-info bg-info/10" },
-    { label: "Boleto", icon: Barcode, p: custom?.boleto_percentage ?? pf("Taxa Boleto Percentual"), f: custom?.boleto_fixed ?? pf("Taxa Fixa Boleto", pf("Taxa Boleto")), tone: "text-warning bg-warning/10" },
+  const rows: { label: string; icon: LucideIcon; p: number; f: number; tone: string; enabled: boolean }[] = [
+    { label: "Pix", icon: PixLogoMark as unknown as LucideIcon, p: custom?.pix_percentage ?? pf("Taxa PIX"), f: custom?.pix_fixed ?? pf("Taxa Fixa PIX"), tone: "text-success bg-success/10", enabled: methods.pix },
+    { label: "Cartão", icon: CreditCard, p: custom?.card_percentage ?? pf("Taxa Cartão"), f: custom?.card_fixed ?? pf("Taxa Fixa Cartão"), tone: "text-info bg-info/10", enabled: methods.card },
+    { label: "Boleto", icon: Barcode, p: custom?.boleto_percentage ?? pf("Taxa Boleto Percentual"), f: custom?.boleto_fixed ?? pf("Taxa Fixa Boleto", pf("Taxa Boleto")), tone: "text-warning bg-warning/10", enabled: methods.boleto },
   ];
   const withdraw = custom?.withdrawal_fee ?? pf("Taxa de Saque", 5);
   const isCustom = !!custom;
-
-  const value = Math.max(0, Number(amount.replace(",", ".")) || 0);
-  const pixNet = useMemo(() => Math.max(0, value - (value * rows[0].p) / 100 - rows[0].f), [value, rows[0].p, rows[0].f]);
 
   return (
     <section className="flex h-full flex-col rounded-2xl border border-border bg-card p-5">
@@ -71,9 +70,8 @@ export function ProfileFeesCard() {
               <r.icon className="h-4 w-4" />
             </span>
             <span className="flex-1 text-[13px] font-semibold text-foreground">{r.label}</span>
-            <span className="text-right font-mono text-[13px] font-bold tabular-nums text-foreground">
-              {pct(r.p)}
-              {r.f > 0 && <span className="text-muted-foreground"> + {brl(r.f)}</span>}
+            <span className={cn("text-right font-mono text-[13px] font-bold tabular-nums", r.enabled ? "text-foreground" : "text-muted-foreground")}>
+              {r.enabled ? <>{pct(r.p)}{r.f > 0 && <span className="text-muted-foreground"> + {brl(r.f)}</span>}</> : "Desabilitado"}
             </span>
           </li>
         ))}
@@ -84,26 +82,6 @@ export function ProfileFeesCard() {
         </li>
       </ul>
 
-      <div className="mt-auto pt-4">
-        <div className="flex items-center gap-3 rounded-xl bg-secondary/60 p-3">
-          <label className="flex flex-1 items-center gap-1.5 text-[12px] text-muted-foreground">
-            Venda Pix de
-            <span className="font-semibold text-foreground">R$</span>
-            <input
-              inputMode="decimal"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value.replace(/[^\d.,]/g, "").slice(0, 10))}
-              aria-label="Valor da venda"
-              className="w-20 rounded-md border border-border bg-background px-2 py-1 font-mono text-[12px] text-foreground outline-none focus-visible:border-primary"
-            />
-          </label>
-          <div className="text-right">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Você recebe</p>
-            <p className="font-mono text-sm font-bold tabular-nums text-success">{brl(pixNet)}</p>
-          </div>
-        </div>
-        <p className="mt-2 text-center text-[11px] text-muted-foreground">Pix disponível na hora · Cartão D+30 · Boleto D+1</p>
-      </div>
     </section>
   );
 }

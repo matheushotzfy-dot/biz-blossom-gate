@@ -100,11 +100,11 @@ export default function Premiacoes() {
       onKeyDown={(e) => { if (e.key === "ArrowLeft") select(safeIndex - 1); if (e.key === "ArrowRight") select(safeIndex + 1); }}
     >
       <section className="venx-vault-bg relative isolate min-h-[calc(100dvh-5rem)] overflow-hidden border-y border-border">
-        <header className="relative z-10 grid gap-7 border-b border-border px-6 py-8 sm:px-10 lg:grid-cols-[1fr_auto] lg:items-end lg:px-14 lg:py-10">
+        <header className="relative z-10 grid gap-4 border-b border-border px-6 py-5 sm:px-10 lg:grid-cols-[1fr_auto] lg:items-end lg:px-14 lg:py-6">
           <div>
             <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-primary"><Trophy className="h-3.5 w-3.5" /> Hall de conquistas</p>
-            <h1 className="mt-3 max-w-4xl font-display text-4xl font-bold leading-tight text-foreground sm:text-5xl lg:text-6xl">Sua operação merece ser vista.</h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">Cada marco libera uma peça física VENXPAY, produzida para registrar o tamanho da sua operação.</p>
+            <h1 className="mt-2 max-w-4xl font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl lg:text-5xl">Sua operação merece ser vista.</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Cada marco libera uma peça física VENXPAY, produzida para registrar o tamanho da sua operação.</p>
           </div>
           <dl className="grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-border bg-border">
             {[
@@ -121,12 +121,12 @@ export default function Premiacoes() {
         </header>
 
         {/* Linha do tempo dos marcos com a posição atual */}
-        <div className="relative z-10 border-b border-border px-6 py-7 sm:px-10 lg:px-14">
+        <div className="relative z-10 border-b border-border px-6 py-4 sm:px-10 lg:px-14">
           <div className="flex justify-between font-mono text-[10px] uppercase text-muted-foreground">
             <span>{Math.round(targetProgress)}% até {next.label}</span>
             <span>{revenue >= next.value ? "Jornada concluída" : `Faltam ${formatMoney(Math.max(next.value - revenue, 0))}`}</span>
           </div>
-          <div className="relative mt-5 h-1 rounded-full bg-muted">
+          <div className="relative mt-3 h-1 rounded-full bg-muted">
             <motion.div
               className="absolute inset-y-0 left-0 rounded-full bg-primary"
               initial={reduceMotion ? false : { width: 0 }}
@@ -170,7 +170,7 @@ export default function Premiacoes() {
           </div>
         </div>
 
-        <div className="relative z-10 px-6 py-8 sm:px-10 lg:px-14">
+        <div className="relative z-10 px-6 py-5 sm:px-10 lg:px-14">
           <p className="mb-3 font-mono text-[10px] uppercase text-muted-foreground">Coleção VENXPAY · selecione uma peça</p>
           <AwardGallery awards={awards} activeIndex={safeIndex} revenue={revenue} onSelect={select} />
         </div>

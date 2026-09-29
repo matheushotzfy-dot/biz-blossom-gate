@@ -4,15 +4,15 @@
  * @version 8.0.0 — Premium redesign aligned with Minhas Vendas standard
  */
 
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import {
-  User, Camera, Trophy, Wallet, Shield, BadgeCheck,
+  User, Camera, Shield, BadgeCheck,
   Calendar, Fingerprint, Copy, Check, MapPin, Loader2,
-  AlertTriangle, Lock, Activity, Sparkles, CalendarDays, TrendingUp, Award, ShieldCheck, type LucideIcon,
+  AlertTriangle, Lock, Activity, Sparkles, CalendarDays, TrendingUp, ShieldCheck, type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,6 @@ import { cn } from "@/lib/utils";
 import { lazy, Suspense } from "react";
 import { BadgePercent } from "lucide-react";
 import { ProfileFeesCard } from "@/components/profile/ProfileFeesCard";
-import { MILESTONES, TIER_LABELS, getMilestone as getCurrentMilestone } from "@/lib/tiers";
 
 /* ─────────── Constants & helpers ─────────── */
 const fmtCurrency = (v: number) =>
@@ -185,18 +184,9 @@ export default function Perfil() {
       });
    }, [user]);
 
-  const [maxTicket, setMaxTicket] = useState<number | null>(null);
-  useEffect(() => {
-    if (!user) return;
-    supabase.rpc("get_my_max_ticket").then(({ data }) => {
-      if (typeof data === "number") setMaxTicket(data);
-    });
-  }, [user]);
-
   const isAddressLocked = !!profile?.address_locked;
   const hasAddress = !!profile?.zip_code && !!profile?.street
     && !!profile?.street_number && !!profile?.city && !!profile?.state;
-  const milestone = useMemo(() => getCurrentMilestone(allTimeRevenue), [allTimeRevenue]);
 
   const handleCepLookup = async (cep: string) => {
     const digits = cep.replace(/\D/g, "");
@@ -322,13 +312,6 @@ export default function Perfil() {
           sub={`${last30Sales} nos últimos 30d`}
           icon={TrendingUp}
           tone="success"
-        />
-        <HDStat
-          label="Tier"
-          value={tierLabel}
-          sub={`${milestone.pct.toFixed(0)}% até ${milestone.next.label}`}
-          icon={Award}
-          tone="warning"
         />
         <HDStat
           label="Status"
@@ -490,33 +473,6 @@ export default function Perfil() {
                 copyable={user.id}
               />
             )}
-          </div>
-        </Panel>
-
-        {/* LIMITES OPERACIONAIS */}
-        <Panel icon={Wallet} title="Limites operacionais" subtitle="Parâmetros vigentes da sua conta" tone="success">
-          <div className="px-5 pb-5">
-            {[
-              {
-                label: "Ticket máximo por transação",
-                value: maxTicket != null
-                  ? `R$ ${maxTicket.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                  : "—",
-                success: true,
-              },
-              { label: "Limite diário PIX", value: "Ilimitado", success: true },
-              { label: "Limite diário de saque", value: "Ilimitado", success: true },
-              { label: "Saques simultâneos", value: "3 pendentes" },
-              { label: "Chaves PIX cadastradas", value: "Até 3" },
-              { label: "Chaves API", value: "Até 5" },
-            ].map((item) => (
-              <InfoRow
-                key={item.label}
-                label={item.label}
-                value={item.value}
-                valueClass={item.success ? "text-success" : ""}
-              />
-            ))}
           </div>
         </Panel>
 
