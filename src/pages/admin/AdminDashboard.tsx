@@ -150,7 +150,6 @@ export default function AdminDashboard() {
   const lastLoadAtRef = useRef<number>(0);
   const loadRequestRef = useRef(0);
   const loadInFlightRef = useRef(false);
-  const loadQueuedRef = useRef(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEmployee, setIsEmployee] = useState(false);
   const [hasSupportPerm, setHasSupportPerm] = useState(false);
@@ -174,7 +173,6 @@ export default function AdminDashboard() {
 
   const loadData = useCallback(async () => {
     if (loadInFlightRef.current) {
-      loadQueuedRef.current = true;
       return;
     }
     loadInFlightRef.current = true;
@@ -219,10 +217,6 @@ export default function AdminDashboard() {
     } finally {
       loadInFlightRef.current = false;
       if (requestId === loadRequestRef.current) setSyncing(false);
-      if (loadQueuedRef.current) {
-        loadQueuedRef.current = false;
-        window.setTimeout(() => { void loadData(); }, 0);
-      }
     }
   }, [dateRange.from, dateRange.to]);
 

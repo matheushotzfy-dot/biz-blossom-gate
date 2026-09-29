@@ -158,7 +158,13 @@ export const paymentLinkFormSchema = z.object({
   expires_at: z.string(),
   pix_expiration_minutes: z.coerce.number().int().min(5).max(1440),
   instructions: z.string().trim().max(1000),
-  redirect_url: z.union([z.literal(""), z.string().trim().url("Informe uma URL completa e válida").max(500)]),
+  redirect_url: z.union([
+    z.literal(""),
+    z.string().trim().url("Informe uma URL completa e válida").max(500).refine(
+      (value) => value.startsWith("https://") || value.startsWith("http://"),
+      "Use um endereço iniciado por https:// ou http://",
+    ),
+  ]),
   accept_pix: z.boolean(),
   accept_card: z.boolean(),
   accept_boleto: z.boolean(),

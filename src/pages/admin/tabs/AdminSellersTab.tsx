@@ -284,10 +284,11 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         } else setKycImages([]);
       } catch { setKycImages([]); }
     } catch (e) {
+      if (requestId !== detailRequestRef.current) return;
       const msg = e instanceof Error ? e.message : "desconhecido";
       toast.error("Erro ao carregar dados do seller: " + msg);
     } finally {
-      setLoading(false);
+      if (requestId === detailRequestRef.current) setLoading(false);
     }
   };
 
