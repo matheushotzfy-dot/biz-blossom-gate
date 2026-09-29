@@ -170,8 +170,8 @@ export function useTransactionsPage({ from, to, page, pageSize, search }: Transa
 }
 
 /**
- * Exportação do período sem teto de linhas: pagina no servidor (keyset por
- * created_at + id) até esgotar o período. Suporta contas com milhões de vendas.
+ * Exportação do período sem teto de linhas: pagina no servidor em ordem estável
+ * por created_at + id até esgotar o período.
  */
 export async function fetchTransactionsForExport(
   userId: string,

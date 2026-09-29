@@ -19,7 +19,6 @@ import { ptBR } from "date-fns/locale";
 import type { DateRange } from "react-day-picker";
 import { HDShell, HDHeader, HDStat, HDStatGrid } from "@/components/hd/HDPage";
 import { PeriodPicker, buildPeriod, periodLabel, type PeriodValue, type PeriodPresetId } from "@/components/PeriodPicker";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import ExcelJS from "exceljs";
 import { toast } from "sonner";
 import { Seo } from "@/components/Seo";
@@ -248,6 +247,7 @@ export default function Vendas() {
       download(new Blob([csv], { type: "text/csv;charset=utf-8;" }), fileName("csv"));
       void logExport("csv", rows.length);
       toast.success(`${rows.length} transações exportadas (CSV)`);
+      setExportOpen(false);
     } catch (err) {
       console.error("[Vendas] export CSV failed:", err);
       toast.error("Falha ao exportar CSV");
@@ -282,6 +282,7 @@ export default function Vendas() {
       download(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), fileName("xlsx"));
       void logExport("xlsx", rows.length);
       toast.success(`${rows.length} transações exportadas (Excel)`);
+      setExportOpen(false);
     } catch (err) {
       console.error("[Vendas] export XLSX failed:", err);
       toast.error("Falha ao exportar Excel");

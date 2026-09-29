@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { maskSensitivePixKey } from "@/lib/financial-input";
 import { HDShell, HDHeader, HDStat, HDStatGrid } from "@/components/hd/HDPage";
 
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: LucideIcon }> = {
@@ -317,7 +318,7 @@ export default function Identidade() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-[11px] font-semibold text-primary ">{pixKeyLabels[pk.key_type] || pk.key_type}</p>
-                        <p className="font-mono text-[11px] text-foreground truncate font-bold">{pk.key_value ?? (pk as any).key_value_masked ?? "•••"}</p>
+                        <p className="font-mono text-[11px] text-foreground truncate font-bold">{maskSensitivePixKey((pk as { key_value_masked?: string | null }).key_value_masked ?? pk.key_value, pk.key_type)}</p>
                       </div>
                     </div>
                   ))}
