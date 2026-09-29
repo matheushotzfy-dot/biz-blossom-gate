@@ -68,7 +68,7 @@ function deriveCategory(e: ErrorLog): Category {
 
   if (/(webhook|hmac|signature)/.test(hay)) return "webhook";
   if (/(checkout|cart|order_bump|pix_qrcode|payment_intent|product_id)/.test(hay)) return "checkout";
-  if (/(payment|charge|refund|chargeback|acquirer|podpay|transaction)/.test(hay)) return "payment";
+  if (/(payment|charge|refund|chargeback|transaction)/.test(hay)) return "payment";
   if (/(withdraw|saque|payout|pix_key)/.test(hay)) return "withdrawal";
   if (/(auth|login|signup|signin|jwt|session|token|otp|2fa)/.test(hay)) return "auth";
   if (/(api[_-]?key|rate[_-]?limit|api\/v1|\/api\/|sk_live|pk_live)/.test(hay)) return "api";
