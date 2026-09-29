@@ -329,6 +329,10 @@ export default function ManagerDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
+        <details className="dark mb-8 rounded-xl border border-border bg-card p-4 text-foreground">
+          <summary className="cursor-pointer text-sm font-semibold">Pedidos ao dono (aprovação obrigatória)</summary>
+          <div className="mt-4"><StaffRequestForm /></div>
+        </details>
         {/* KPI Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
