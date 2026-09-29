@@ -1362,6 +1362,7 @@ export type Database = {
           buyer_phone: string | null
           created_at: string
           evidence_urls: Json
+          external_ref: string | null
           fee_amount: number
           id: string
           reason: string | null
@@ -1385,6 +1386,7 @@ export type Database = {
           buyer_phone?: string | null
           created_at?: string
           evidence_urls?: Json
+          external_ref?: string | null
           fee_amount?: number
           id?: string
           reason?: string | null
@@ -1408,6 +1410,7 @@ export type Database = {
           buyer_phone?: string | null
           created_at?: string
           evidence_urls?: Json
+          external_ref?: string | null
           fee_amount?: number
           id?: string
           reason?: string | null
@@ -5804,6 +5807,10 @@ export type Database = {
       }
       run_ledger_reconciliation: { Args: never; Returns: Json }
       run_monitoring_checks: { Args: never; Returns: Json }
+      seller_refund_transaction: {
+        Args: { _amount: number; _reason: string; _transaction_id: string }
+        Returns: Json
+      }
       seller_respond_dispute: {
         Args: { _dispute_id: string; _evidence?: string[]; _response: string }
         Returns: undefined
@@ -5816,6 +5823,15 @@ export type Database = {
       sync_public_product_catalog_row: {
         Args: { _product_id: string }
         Returns: undefined
+      }
+      system_open_med: {
+        Args: {
+          _deadline_days?: number
+          _external_ref: string
+          _reason: string
+          _transaction_id: string
+        }
+        Returns: string
       }
       touch_api_key: { Args: { _api_key_id: string }; Returns: undefined }
       validate_coupon: {
