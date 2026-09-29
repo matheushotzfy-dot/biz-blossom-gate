@@ -20,6 +20,7 @@ import type { Tables, TablesUpdate, Json } from "@/integrations/supabase/types";
 import { GlassPanel as Panel, GlassPanelTitle } from "./AdminOverviewTab";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid } from "./AdminPremium";
+import { SecurityFindingsPanel } from "./SecurityFindingsPanel";
 
 /* ── Types ── */
 interface BlacklistEntry { id: string; entry_type: string; entry_value: string; reason: string; added_by: string; is_active: boolean; created_at: string; }
@@ -27,7 +28,7 @@ interface VelocityRule { id: string; rule_name: string; rule_type: string; is_en
 type EditableVelocityField = "max_attempts" | "time_window_minutes" | "threshold_amount";
 interface FraudLog { id: string; block_type: string; block_reason: string; matched_value: string | null; matched_type: string | null; customer_email: string | null; customer_document: string | null; customer_ip: string | null; product_id: string | null; seller_user_id: string | null; metadata: Json; created_at: string; }
 
-type SubTab = "blacklist" | "chargeback-radar" | "velocity" | "fraud-trail";
+type SubTab = "blacklist" | "chargeback-radar" | "velocity" | "fraud-trail" | "security-findings";
 
 interface Props {
  profiles: Tables<"profiles">[];
@@ -203,6 +204,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
  { id: "chargeback-radar" as SubTab, label: "Radar Chargebacks", icon: AlertTriangle, count: highRiskSellers },
  { id: "velocity" as SubTab, label: "Velocity Checks", icon: Zap },
  { id: "fraud-trail" as SubTab, label: "Fraud Trail", icon: FileWarning, count: blockedToday },
+  { id: "security-findings" as SubTab, label: "Achados de Segurança", icon: Shield },
  ]).map(tab => (
  <button key={tab.id} onClick={() => setSubTab(tab.id)}
  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
@@ -430,6 +432,8 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
  </div>
  </Panel>
  )}
+
+  {subTab === "security-findings" && <SecurityFindingsPanel />}
 
  {/* ═══ ADD BLACKLIST DIALOG ═══ */}
  <Dialog open={addDialog} onOpenChange={setAddDialog}>
