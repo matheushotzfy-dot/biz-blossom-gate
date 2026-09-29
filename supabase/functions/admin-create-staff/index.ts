@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
     const password = String(body?.password ?? "");
     const sendInvite = body?.send_invite === true || !password;
     const full_name = String(body?.full_name ?? "").trim().slice(0, 120);
-    const role = body?.role === "manager" ? "manager" : "employee";
+    const role = body?.role === "manager" ? "manager" : body?.role === "partner" ? "partner" : "employee";
     const rawPerms: unknown[] = Array.isArray(body?.permissions) ? body.permissions : [];
     const permissions = Array.from(new Set(
       rawPerms.map((p) => String(p)).filter((p) => ALLOWED_PERMISSIONS.has(p))
@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
     // Profile (criado por trigger handle_new_user; complementamos)
     await admin.from("profiles").update({
       full_name,
-      staff_role_type: role === "manager" ? "manager" : "employee",
+      staff_role_type: role,
       created_by_admin: callerId,
       account_status: "active",
     }).eq("user_id", newId);
