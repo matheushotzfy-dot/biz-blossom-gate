@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { StaffRequestForm } from "@/features/staff/StaffRequestForm";
 
 type ManagerKycRpc = (
   fn: "manager_update_seller_kyc",
