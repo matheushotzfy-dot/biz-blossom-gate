@@ -113,7 +113,7 @@ export default function ProductEditor() {
  const { user } = useAuth();
   // Métodos bloqueados pelo admin ficam indisponíveis e também são validados no banco.
   const [adminPixEnabled, setAdminPixEnabled] = useState(true);
- const [adminBoletoEnabled, setAdminBoletoEnabled] = useState(true);
+ const [adminBoletoEnabled, setAdminBoletoEnabled] = useState(false);
  const [adminCardEnabled, setAdminCardEnabled] = useState(true);
  const invalidateAll = useInvalidateAll();
  const isNew = productId === "novo";
@@ -150,7 +150,7 @@ export default function ProductEditor() {
  const [socialProof, setSocialProof] = useState(false);
  const [guaranteeEnabled, setGuaranteeEnabled] = useState(true);
  const [pixEnabled, setPixEnabled] = useState(true);
- const [boletoEnabled, setBoletoEnabled] = useState(true);
+ const [boletoEnabled, setBoletoEnabled] = useState(false);
  const [creditCardEnabled, setCreditCardEnabled] = useState(true);
  const [addressRequired, setAddressRequired] = useState(false);
  const [emailConfirm, setEmailConfirm] = useState(true);
@@ -262,7 +262,7 @@ export default function ProductEditor() {
  setSocialProof(data.checkout_social_proof ?? false);
  setGuaranteeEnabled(data.checkout_guarantee_enabled ?? true);
  setPixEnabled(data.checkout_pix_enabled ?? true);
- setBoletoEnabled(data.checkout_boleto_enabled ?? true);
+ setBoletoEnabled(data.checkout_boleto_enabled ?? false);
  setCreditCardEnabled(data.checkout_credit_card_enabled ?? true);
  setAddressRequired(data.checkout_address_required ?? false);
  setEmailConfirm(data.checkout_email_confirm ?? true);
@@ -301,7 +301,8 @@ export default function ProductEditor() {
       .then(({ data }) => {
         if (!data) return;
          if (data.pix_enabled === false) { setAdminPixEnabled(false); setPixEnabled(false); }
-        if (data.boleto_enabled === false) { setAdminBoletoEnabled(false); setBoletoEnabled(false); }
+         setAdminBoletoEnabled(data.boleto_enabled === true);
+         if (data.boleto_enabled !== true) setBoletoEnabled(false);
         if (data.credit_card_enabled === false) { setAdminCardEnabled(false); setCreditCardEnabled(false); }
       });
   }, [user?.id]);
