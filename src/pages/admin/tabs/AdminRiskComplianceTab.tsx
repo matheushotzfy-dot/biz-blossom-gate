@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 import { logAdminAction } from "@/lib/auditLog";
 import { useAuth } from "@/hooks/useAuth";
-import type { Tables, Json } from "@/integrations/supabase/types";
+import type { Tables, TablesUpdate, Json } from "@/integrations/supabase/types";
 import { GlassPanel as Panel, GlassPanelTitle } from "./AdminOverviewTab";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid } from "./AdminPremium";
@@ -133,9 +133,7 @@ export default function AdminRiskComplianceTab({ profiles, transactions, fmtCurr
  };
 
  const handleUpdateRule = async (rule: VelocityRule, field: EditableVelocityField, value: number) => {
- const update: Tables<"velocity_rules"> extends infer _T
-  ? { max_attempts?: number; time_window_minutes?: number; threshold_amount?: number; updated_by?: string }
-  : never = { updated_by: user?.id };
+ const update: TablesUpdate<"velocity_rules"> = { updated_by: user?.id };
  update[field] = value;
  const { error } = await supabase.from("velocity_rules").update(update).eq("id", rule.id);
  if (error) { toast.error("Erro"); return; }
