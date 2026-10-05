@@ -25,6 +25,7 @@ input[type="number"]::-webkit-inner-spin-button {
     --card-elevated: 0 0% 100%;
     --card-inset: 220 14% 98%;
     --card-foreground: 0 0% 4%;
+    --logo-surface: 220 14% 98%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 4%;
     --primary: 160 100% 25%;
@@ -66,6 +67,7 @@ input[type="number"]::-webkit-inner-spin-button {
     --card-elevated: 222 47% 12%;
     --card-inset: 222 47% 8%;
     --card-foreground: 210 40% 98%;
+    --logo-surface: 0 0% 100%;
     --popover: 222 47% 10%;
     --popover-foreground: 210 40% 98%;
     --primary: 160 84% 50%;
@@ -201,6 +203,21 @@ input[type="number"]::-webkit-inner-spin-button {
 
 @layer utilities {
   .auth-shell {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --muted: 214 32% 96%;
+    --muted-foreground: 215 16% 42%;
+    --border: 214 24% 88%;
+    --input: 214 24% 88%;
+    --primary: 160 84% 34%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 160 84% 34%;
+    font-family: 'Manrope', system-ui, sans-serif;
+  }
+
+  .dark .auth-shell {
     --background: 0 0% 2%;
     --foreground: 0 0% 97%;
     --card: 0 0% 4%;
@@ -212,7 +229,6 @@ input[type="number"]::-webkit-inner-spin-button {
     --primary: 49 100% 55%;
     --primary-foreground: 0 0% 3%;
     --ring: 49 100% 55%;
-    font-family: 'Manrope', system-ui, sans-serif;
   }
 
   .auth-form-panel {
@@ -226,7 +242,7 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 
   .auth-network {
-    background: hsl(0 0% 3%);
+    background: hsl(var(--muted));
   }
 
   .auth-network-grid {

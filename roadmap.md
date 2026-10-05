@@ -13,3 +13,9 @@
 - [ ] Testes com venda real (bloqueado: sem adquirente e sem vendas)
 - [x] Base segura do checkout: validação compartilhada, CEP cancelável e entrega auditável/idempotente
 - [ ] Ativar PIX/cartão com tokenização e webhook assinado (bloqueado: adquirente e documentação ainda não definidos)
+- [x] Tema light por padrão salvo na conta; checkout continua com tema próprio
+- [x] Chaves PIX completas para o próprio seller e revelação admin auditada
+- [x] Logos de integrações com superfície legível, dimensões estáveis e fallback
+- [ ] Tornar permissões de staff/gerente efetivas no servidor e nas abas
+- [ ] Migrar segredos de integrações para escrita/leitura exclusivamente no servidor
+- [ ] Paginar cargas globais e históricos restantes do admin
