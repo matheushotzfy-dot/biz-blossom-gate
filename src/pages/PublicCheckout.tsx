@@ -512,10 +512,10 @@ export default function PublicCheckout() {
  const installmentOptions = Array.from({ length: 12 }, (_, i) => { const n = i + 1; const val = n === 1 ? totalPrice : totalPrice * (1 + 0.0199 * (n - 1)) / n; return { n, val, total: n === 1 ? totalPrice : val * n }; });
  const selectedInstallment = installmentOptions[parseInt(installments) - 1];
 
- const availableMethods: { id: PaymentMethod; icon: LucideIcon; label: string; badge?: string }[] = [];
- if (product.checkout_pix_enabled) availableMethods.push({ id: "pix", icon: QrCode, label: "PIX", badge: "Instantâneo" });
- if (product.checkout_credit_card_enabled) availableMethods.push({ id: "credit_card", icon: CreditCard, label: "Cartão", badge: "Até 12x" });
- if (product.checkout_boleto_enabled) availableMethods.push({ id: "boleto", icon: FileText, label: "Boleto", badge: "1-3 dias" });
+ const availableMethods: { id: PaymentMethod; icon: LucideIcon; label: string; description: string }[] = [];
+ if (product.checkout_pix_enabled) availableMethods.push({ id: "pix", icon: QrCode, label: "PIX", description: "Confirmação rápida" });
+ if (product.checkout_credit_card_enabled) availableMethods.push({ id: "credit_card", icon: CreditCard, label: "Cartão", description: "Até 12 parcelas" });
+ if (product.checkout_boleto_enabled) availableMethods.push({ id: "boleto", icon: FileText, label: "Boleto", description: "Compensa em 1–3 dias" });
 
  const totalSteps = product.checkout_address_required ? 3 : 2;
 
@@ -709,6 +709,7 @@ export default function PublicCheckout() {
  const sectionHeaderClass = "px-5 py-4 border-b border-[hsl(var(--checkout-border))]/60 flex items-center gap-3";
  const sectionBodyClass = "p-5 space-y-4";
  const labelClass = "text-[11px] text-[hsl(var(--checkout-text-muted))] font-semibold flex items-center gap-1.5 uppercase tracking-wider";
+ const errorClass = "mt-1 text-xs font-medium text-destructive";
 
  return (
  <div data-checkout-theme={themeMode} className={`min-h-screen selection:bg-emerald-500/20 ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : isWhite ? "bg-[hsl(210_20%_98%)] text-gray-900" : "bg-[hsl(210_16%_94%)] text-gray-900"}`} style={checkoutThemeStyle}>
@@ -816,28 +817,33 @@ export default function PublicCheckout() {
  <div className={sectionBodyClass}>
  <div>
  <Label className={labelClass}><User className="h-3 w-3" /> Nome completo</Label>
- <Input value={name} onChange={e => setName(e.target.value)} placeholder="Seu nome completo" required className={inputClass} autoComplete="name" />
+ <Input id="checkout-name" value={name} onChange={e => setName(e.target.value.slice(0, 120))} onBlur={validateCustomer} placeholder="Seu nome completo" required className={inputClass} autoComplete="name" aria-invalid={Boolean(formErrors.name)} aria-describedby={formErrors.name ? "checkout-name-error" : undefined} />
+ {formErrors.name && <p id="checkout-name-error" className={errorClass}>{formErrors.name}</p>}
  </div>
  <div className={product.checkout_email_confirm ? "grid grid-cols-1 sm:grid-cols-2 gap-4" : ""}>
  <div>
  <Label className={labelClass}><Mail className="h-3 w-3" /> E-mail</Label>
- <Input value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" required type="email" className={inputClass} autoComplete="email" />
+ <Input id="checkout-email" value={email} onChange={e => setEmail(e.target.value.slice(0, 255))} onBlur={validateCustomer} placeholder="seu@email.com" required type="email" className={inputClass} autoComplete="email" aria-invalid={Boolean(formErrors.email)} />
+ {formErrors.email && <p className={errorClass}>{formErrors.email}</p>}
  </div>
  {product.checkout_email_confirm && (
  <div>
  <Label className={labelClass}>Confirme o e-mail</Label>
- <Input value={emailConfirm} onChange={e => setEmailConfirm(e.target.value)} placeholder="Confirme seu e-mail" required type="email" className={inputClass} />
+ <Input id="checkout-email-confirm" value={emailConfirm} onChange={e => setEmailConfirm(e.target.value.slice(0, 255))} onBlur={validateCustomer} placeholder="Confirme seu e-mail" required type="email" className={inputClass} autoComplete="email" aria-invalid={Boolean(formErrors.emailConfirm)} />
+ {formErrors.emailConfirm && <p className={errorClass}>{formErrors.emailConfirm}</p>}
  </div>
  )}
  </div>
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div>
  <Label className={labelClass}><FileDigit className="h-3 w-3" /> CPF / CNPJ</Label>
- <Input value={document} onChange={e => setDocument(formatCpf(e.target.value))} placeholder="000.000.000-00" required className={inputClass} inputMode="numeric" autoComplete="off" />
+ <Input id="checkout-document" value={document} onChange={e => setDocument(formatCheckoutDocument(e.target.value))} onBlur={validateCustomer} placeholder="000.000.000-00" required className={inputClass} inputMode="numeric" autoComplete="off" aria-invalid={Boolean(formErrors.document)} />
+ {formErrors.document && <p className={errorClass}>{formErrors.document}</p>}
  </div>
  <div>
  <Label className={labelClass}><Phone className="h-3 w-3" /> WhatsApp</Label>
- <Input value={phone} onChange={e => setPhone(formatPhone(e.target.value))} placeholder="(00) 00000-0000" required className={inputClass} inputMode="tel" autoComplete="tel" />
+ <Input id="checkout-phone" value={phone} onChange={e => setPhone(formatCheckoutPhone(e.target.value))} onBlur={validateCustomer} placeholder="(00) 00000-0000" required className={inputClass} inputMode="tel" autoComplete="tel" aria-invalid={Boolean(formErrors.phone)} />
+ {formErrors.phone && <p className={errorClass}>{formErrors.phone}</p>}
  </div>
  </div>
  </div>
@@ -855,9 +861,10 @@ export default function PublicCheckout() {
  <div>
  <Label className={labelClass}>CEP</Label>
  <div className="relative">
- <Input value={cep} onChange={e => handleCepChange(e.target.value)} placeholder="00000-000" required className={inputClass} inputMode="numeric" />
+ <Input id="checkout-cep" value={cep} onChange={e => void handleCepChange(e.target.value)} onBlur={validateCustomer} placeholder="00000-000" required className={inputClass} inputMode="numeric" autoComplete="postal-code" aria-invalid={Boolean(formErrors.cep)} aria-describedby="checkout-cep-status" />
  {loadingCep && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-gray-400 mt-1" />}
  </div>
+ <p id="checkout-cep-status" aria-live="polite" className={formErrors.cep ? errorClass : "mt-1 text-xs text-[hsl(var(--checkout-text-muted))]"}>{formErrors.cep || cepMessage}</p>
  </div>
  <div>
  <Label className={labelClass}>Bairro</Label>
@@ -977,25 +984,7 @@ export default function PublicCheckout() {
  </div>
 
  <div className={sectionBodyClass}>
- {/* Method Tabs (Premium) */}
- {availableMethods.length > 1 && (
- <div className="grid gap-2.5 p-1 rounded-xl bg-gray-50 border border-gray-100" style={{ gridTemplateColumns: `repeat(${availableMethods.length}, 1fr)` }}>
- {availableMethods.map(m => {
- const active = method === m.id;
- return (
- <button key={m.id} type="button" onClick={() => { setMethod(m.id); setPixData(null); setBoletoData(null); }}
- className={`flex flex-col items-center gap-1.5 px-3 py-3.5 rounded-xl text-center transition-all duration-300 ${
- active ? "bg-white shadow-md shadow-black/5 text-gray-800" : "bg-transparent text-gray-400 hover:text-gray-500 hover:bg-white/50"
- }`}
- style={active ? { boxShadow: `0 2px 12px -2px ${btnColor}15` } : undefined}>
- <m.icon className={`h-5 w-5 transition-all ${active ? "" : "opacity-40"}`} style={active ? { color: btnColor } : undefined} />
- <span className="text-xs font-bold">{m.label}</span>
- {m.badge && <span className={`text-[8px] font-medium ${active ? "text-gray-400" : "text-gray-300"}`}>{m.badge}</span>}
- </button>
- );
- })}
- </div>
- )}
+ <PaymentMethodSelector options={availableMethods} value={method} onChange={(nextMethod) => { setMethod(nextMethod); setPixData(null); setBoletoData(null); }} />
 
  {/* PIX indicator */}
  {method === "pix" && (
@@ -1010,22 +999,10 @@ export default function PublicCheckout() {
  </div>
  )}
 
- {/* Credit Card fields */}
+ {/* Card fields are rendered only by the future acquirer tokenization widget. */}
  {method === "credit_card" && (
- <div className="space-y-4">
- <div>
- <Label className={labelClass}>Número do cartão</Label>
- <Input value={cardNumber} onChange={e => setCardNumber(formatCardNumber(e.target.value))} placeholder="0000 0000 0000 0000" required className={inputClass} inputMode="numeric" />
- </div>
- <div className="grid grid-cols-3 gap-3">
- <div>
- <Label className={labelClass}>Validade</Label>
- <Input value={cardExpiry} onChange={e => setCardExpiry(formatExpiry(e.target.value))} placeholder="MM/AA" required className={inputClass} inputMode="numeric" />
- </div>
- <div>
- <Label className={labelClass}>CVV</Label>
- <Input value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="000" required className={inputClass} inputMode="numeric" />
- </div>
+ <div className="space-y-4 rounded-lg border border-[hsl(var(--checkout-border))] bg-[hsl(var(--checkout-bg-soft))] p-4">
+ <div className="flex items-start gap-3"><Lock className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--checkout-text-muted))]" /><div><p className="text-sm font-bold text-[hsl(var(--checkout-text))]">Dados do cartão protegidos</p><p className="text-xs text-[hsl(var(--checkout-text-muted))]">Os campos seguros serão exibidos pela adquirente quando o cartão for habilitado. A VENXPAY não armazena número nem CVV.</p></div></div>
  <div>
  <Label className={labelClass}>Parcelas</Label>
  <div className="relative mt-1.5">
@@ -1033,12 +1010,6 @@ export default function PublicCheckout() {
  {installmentOptions.map(opt => <option key={opt.n} value={opt.n}>{opt.n}x R$ {opt.val.toFixed(2)}</option>)}
  </select>
  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 pointer-events-none" />
- </div>
- </div>
- </div>
- <div>
- <Label className={labelClass}>Nome do titular</Label>
- <Input value={cardName} onChange={e => setCardName(e.target.value.toUpperCase())} placeholder="NOME IMPRESSO NO CARTÃO" required className={inputClass} />
  </div>
  </div>
  )}
@@ -1182,7 +1153,7 @@ export default function PublicCheckout() {
  <div className="pt-1">
  <Button
  type="submit"
- disabled
+ disabled={processing}
  className="w-full h-[62px] text-base font-extrabold rounded-2xl text-white transition-all duration-300 hover:opacity-95 hover:scale-[1.008] active:scale-[0.995] disabled:opacity-50 disabled:hover:scale-100 relative overflow-hidden group"
  style={{ backgroundColor: btnColor, boxShadow: `0 12px 40px -12px ${btnColor}60, 0 4px 12px -4px ${btnColor}30` }}
  >
@@ -1191,7 +1162,7 @@ export default function PublicCheckout() {
  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
  </div>
  <span className="relative flex items-center gap-2.5">
- <><Lock className="h-4 w-4 opacity-80" /> Pagamentos indisponíveis</>
+ <><Lock className="h-4 w-4 opacity-80" /> Validar dados</>
  </span>
  </Button>
  </div>
@@ -1206,7 +1177,7 @@ export default function PublicCheckout() {
  <div className="h-3 w-px bg-gray-200" />
  <div className="flex items-center gap-1.5 text-gray-300">
  <ShieldCheck className="h-3.5 w-3.5" />
- <span className="text-[10px] font-semibold">Compra 100% segura</span>
+ <span className="text-[10px] font-semibold">Pagamento protegido</span>
  </div>
  <div className="h-3 w-px bg-gray-200" />
  <div className="flex items-center gap-1.5 text-gray-300">
