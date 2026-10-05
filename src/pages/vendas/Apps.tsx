@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -192,12 +192,14 @@ export default function Apps() {
  if (!formProductId && dialogApp.events.length > 0) { toast.error("Selecione um produto"); return; }
  setSaving(true);
  const events = formEventMode === "all" ? dialogApp.events : formSelectedEvents;
-  const payload: Record<string, unknown> = {
+  const basePayload: TablesInsert<"app_integrations"> = {
  user_id: user.id, app_name: dialogApp.id, product_id: formProductId || null,
   api_url: formFields["api_url"] || null, events, is_active: true, config: {},
  };
-  if (!editId || formFields["api_key"]?.trim()) payload.api_key = formFields["api_key"]?.trim() || null;
-  if (!editId || formFields["webhook_url"]?.trim()) payload.webhook_url = formFields["webhook_url"]?.trim() || null;
+  const secrets: TablesUpdate<"app_integrations"> = {};
+  if (!editId || formFields["api_key"]?.trim()) secrets.api_key = formFields["api_key"]?.trim() || null;
+  if (!editId || formFields["webhook_url"]?.trim()) secrets.webhook_url = formFields["webhook_url"]?.trim() || null;
+  const payload = { ...basePayload, ...secrets };
  let error;
  if (editId) {
  const { error: e } = await supabase.from("app_integrations").update(payload).eq("id", editId).eq("user_id", user.id);

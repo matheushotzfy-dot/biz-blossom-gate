@@ -46,6 +46,8 @@ interface Pixel {
   events: string[];
 }
 
+type PixelUpdate = Partial<Omit<Pixel, "has_api_token" | "api_token_masked">> & { api_token?: string | null };
+
 const ALL_EVENTS = [
   "PageView", "ViewContent", "InitiateCheckout", "AddToCart",
   "AddPaymentInfo", "Purchase", "Lead", "CompleteRegistration",
@@ -182,7 +184,7 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
     toast.success("Pixel removido");
   };
 
-  const updatePixelSettings = async (pixelId: string, updates: Partial<Pixel>) => {
+  const updatePixelSettings = async (pixelId: string, updates: PixelUpdate) => {
     await supabase.from("product_pixels").update(updates).eq("id", pixelId).eq("user_id", user!.id);
     setPixels(prev => prev.map(p => p.id === pixelId ? { ...p, ...updates } : p));
   };
