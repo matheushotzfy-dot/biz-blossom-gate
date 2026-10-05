@@ -2884,6 +2884,7 @@ export type Database = {
           state: string | null
           street: string | null
           street_number: string | null
+          theme_preference: string
           updated_at: string
           user_id: string
           zip_code: string | null
@@ -2927,6 +2928,7 @@ export type Database = {
           state?: string | null
           street?: string | null
           street_number?: string | null
+          theme_preference?: string
           updated_at?: string
           user_id: string
           zip_code?: string | null
@@ -2970,6 +2972,7 @@ export type Database = {
           state?: string | null
           street?: string | null
           street_number?: string | null
+          theme_preference?: string
           updated_at?: string
           user_id?: string
           zip_code?: string | null
@@ -6073,6 +6076,7 @@ export type Database = {
         Args: { _new_value: number }
         Returns: Json
       }
+      set_my_theme_preference: { Args: { _theme: string }; Returns: string }
       sync_public_product_catalog_row: {
         Args: { _product_id: string }
         Returns: undefined
