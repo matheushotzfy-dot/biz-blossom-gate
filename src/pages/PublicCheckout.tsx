@@ -640,7 +640,6 @@ export default function PublicCheckout() {
  <QRCodeSVG value={pixData.qrcode || pixData.qrCodeText || pixData.qrCode} size={220} />
  </div>
  </div>
- </div>
  )}
 
  <div className="flex items-center gap-3 text-xs text-gray-400 justify-center">
@@ -1011,6 +1010,7 @@ export default function PublicCheckout() {
  {installmentOptions.map(opt => <option key={opt.n} value={opt.n}>{opt.n}x R$ {opt.val.toFixed(2)}</option>)}
  </select>
  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 pointer-events-none" />
+ </div>
  </div>
  </div>
  )}
