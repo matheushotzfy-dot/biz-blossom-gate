@@ -63,13 +63,7 @@ export default function ManagerLogin() {
  };
 
  return (
- <div className="min-h-screen flex items-center justify-center bg-[#040404] relative overflow-hidden">
- {/* Background effects */}
- <div className="absolute inset-0">
- <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(135deg,#040404_0%,#041410_50%,#040404_100%)]" />
-
- <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.015) 0.5px, transparent 0)", backgroundSize: "40px 40px" }} />
- </div>
+ <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
 
  <motion.div
  initial={{ opacity: 0, y: 30 }}
@@ -85,25 +79,25 @@ export default function ManagerLogin() {
  transition={{ delay: 0.15, duration: 0.5 }}
  className="relative mb-6"
  >
- <div className="h-[72px] w-[72px] rounded-[20px] bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 flex items-center justify-center shadow-[0_20px_80px_rgba(16,185,129,0.25)]">
- <Flame className="h-9 w-9 text-white" />
+ <div className="h-[72px] w-[72px] rounded-[20px] bg-primary flex items-center justify-center">
+ <Flame className="h-9 w-9 text-primary-foreground" />
  </div>
- <div className="absolute -bottom-1.5 -right-1.5 h-7 w-7 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center border-[3px] border-[#040404] shadow-lg">
- <Users className="h-3 w-3 text-white" />
+ <div className="absolute -bottom-1.5 -right-1.5 h-7 w-7 rounded-full bg-accent flex items-center justify-center border-[3px] border-background">
+ <Users className="h-3 w-3 text-accent-foreground" />
  </div>
  </motion.div>
 
- <h1 className="text-[28px] font-bold text-white tracking-tight">Painel Gerente</h1>
- <p className="text-[13px] text-white/25 mt-1.5 font-medium tracking-wide">Gestão de Contas · VENXPAY</p>
+ <h1 className="text-[28px] font-bold text-foreground tracking-tight">Painel Gerente</h1>
+ <p className="text-[13px] text-muted-foreground mt-1.5 font-medium tracking-wide">Gestão de Contas · VENXPAY</p>
  </div>
 
  {/* Card */}
- <div className="bg-[#0A0A0F]/90 rounded-[28px] border border-white/[0.05] p-8 shadow-[0_40px_120px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+ <div className="bg-card rounded-[28px] border border-border p-8">
  {error && (
  <motion.div
  initial={{ opacity: 0, height: 0 }}
  animate={{ opacity: 1, height: "auto" }}
- className="flex items-center gap-2.5 bg-red-500/[0.06] border border-red-500/15 rounded-2xl p-4 mb-6 text-[13px] text-red-400 font-medium"
+ className="flex items-center gap-2.5 bg-destructive/5 border border-destructive/20 rounded-2xl p-4 mb-6 text-[13px] text-destructive font-medium"
  >
  <AlertTriangle className="h-4 w-4 shrink-0" />
  {error}
@@ -112,18 +106,18 @@ export default function ManagerLogin() {
 
  <form onSubmit={handleSubmit} className="space-y-5">
  <div>
- <Label className="text-[10px] text-white/30 uppercase tracking-[0.15em] font-semibold">E-mail</Label>
+ <Label className="text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-semibold">E-mail</Label>
  <Input
  value={email}
  onChange={(e) => setEmail(e.target.value)}
  type="email"
  required
- className="mt-2.5 bg-white/[0.03] border-white/[0.06] h-[52px] text-white placeholder:text-white/12 rounded-2xl text-[14px] focus:border-emerald-500/40 focus:ring-emerald-500/10 transition-all"
+ className="mt-2.5 bg-background border-border h-[52px] text-foreground placeholder:text-muted-foreground rounded-2xl text-[14px] focus:border-primary/40 focus:ring-primary/10 transition-all"
  placeholder="gerente@empresa.com"
  />
  </div>
  <div>
- <Label className="text-[10px] text-white/30 uppercase tracking-[0.15em] font-semibold">Senha</Label>
+ <Label className="text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-semibold">Senha</Label>
  <div className="relative mt-2.5">
  <Input
  value={password}
@@ -131,18 +125,18 @@ export default function ManagerLogin() {
  type={showPassword ? "text" : "password"}
  required
  minLength={6}
- className="bg-white/[0.03] border-white/[0.06] h-[52px] text-white placeholder:text-white/12 pr-12 rounded-2xl text-[14px] focus:border-emerald-500/40 focus:ring-emerald-500/10 transition-all"
+ className="bg-background border-border h-[52px] text-foreground placeholder:text-muted-foreground pr-12 rounded-2xl text-[14px] focus:border-primary/40 focus:ring-primary/10 transition-all"
  placeholder="••••••••"
  />
- <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/15 hover:text-white/40 transition-colors">
+ <Button type="button" variant="ghost" size="icon" aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground">
  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
- </button>
+ </Button>
  </div>
  </div>
 
  <Button
  type="submit"
- className="w-full h-[52px] bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold rounded-2xl shadow-[0_12px_40px_rgba(16,185,129,0.3)] hover:shadow-[0_16px_60px_rgba(16,185,129,0.4)] transition-all duration-300 text-[14px]"
+ className="w-full h-[52px] bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-2xl transition-colors duration-300 text-[14px]"
  disabled={loading}
  >
  <Lock className="h-4 w-4 mr-2" />
@@ -154,13 +148,13 @@ export default function ManagerLogin() {
  {/* Footer */}
  <div className="flex items-center justify-center gap-4 mt-8">
  <div className="flex items-center gap-1.5">
- <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.9)]" />
- <span className="text-[10px] text-white/15 font-medium">SSL Ativo</span>
+ <div className="h-1.5 w-1.5 rounded-full bg-success" />
+ <span className="text-[10px] text-muted-foreground font-medium">SSL Ativo</span>
  </div>
- <span className="text-white/[0.06]">•</span>
- <span className="text-[10px] text-white/15 font-medium">Rate Limit Backend</span>
- <span className="text-white/[0.06]">•</span>
- <span className="text-[10px] text-white/15 font-medium">Acessos monitorados</span>
+ <span className="text-border">•</span>
+ <span className="text-[10px] text-muted-foreground font-medium">Proteção ativa</span>
+ <span className="text-border">•</span>
+ <span className="text-[10px] text-muted-foreground font-medium">Acessos monitorados</span>
  </div>
  </motion.div>
  </div>

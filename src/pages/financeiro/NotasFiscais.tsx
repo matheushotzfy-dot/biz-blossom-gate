@@ -45,8 +45,8 @@ export default function NotasFiscais() {
     enabled: !!user?.id,
     queryFn: async () => {
       const { data } = await supabase
-        .from("app_integrations")
-        .select("id, is_active, api_key")
+        .from("app_integrations_safe")
+        .select("id, is_active, has_api_key")
         .eq("user_id", user!.id)
         .eq("app_name", "notazz")
         .maybeSingle();

@@ -34,7 +34,8 @@ interface Pixel {
   id: string;
   platform: Platform;
   pixel_id: string;
-  api_token: string;
+  api_token_masked: string | null;
+  has_api_token: boolean;
   domain: string;
   fire_on_pix_qr: boolean;
   fire_on_boleto: boolean;
@@ -44,6 +45,8 @@ interface Pixel {
   is_active: boolean;
   events: string[];
 }
+
+type PixelUpdate = Partial<Omit<Pixel, "has_api_token" | "api_token_masked">> & { api_token?: string | null };
 
 const ALL_EVENTS = [
   "PageView", "ViewContent", "InitiateCheckout", "AddToCart",
@@ -127,7 +130,7 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
   const loadPixels = async () => {
     setLoading(true);
     const { data } = await supabase
-      .from("product_pixels")
+      .from("product_pixels_safe")
       .select("*")
       .eq("product_id", product.id)
       .eq("user_id", user!.id);
@@ -181,7 +184,7 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
     toast.success("Pixel removido");
   };
 
-  const updatePixelSettings = async (pixelId: string, updates: Partial<Pixel>) => {
+  const updatePixelSettings = async (pixelId: string, updates: PixelUpdate) => {
     await supabase.from("product_pixels").update(updates).eq("id", pixelId).eq("user_id", user!.id);
     setPixels(prev => prev.map(p => p.id === pixelId ? { ...p, ...updates } : p));
   };
@@ -428,7 +431,7 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
                               </div>
                               <div className="mt-0.5 flex items-center gap-1.5 text-[10.5px] text-muted-foreground font-display">
                                 <span className="tabular-nums">{activeEvents} evento{activeEvents !== 1 ? "s" : ""}</span>
-                                {px.api_token && <><Dot /><span>API Token</span></>}
+                                {px.has_api_token && <><Dot /><span>API Token protegido</span></>}
                                 {px.fire_on_pix_qr && <><Dot /><span className="text-success font-bold">PIX QR</span></>}
                                 {px.fire_on_boleto && <><Dot /><span className="text-success font-bold">Boleto</span></>}
                               </div>

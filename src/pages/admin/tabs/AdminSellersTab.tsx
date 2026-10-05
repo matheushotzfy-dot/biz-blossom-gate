@@ -31,6 +31,7 @@ import { cn, isApprovedTransaction } from "@/lib/utils";
 import { z } from "zod";
 import { friendlyError } from "@/lib/friendlyError";
 import AdminPager from "@/components/admin/AdminPager";
+import { displayPixKey } from "@/lib/financial-input";
 
 type Dispute = Tables<"disputes"> & { buyer_name?: string | null };
 type BalanceAdjustment = Tables<"balance_adjustments">;
@@ -238,7 +239,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       if (adjRes.data) setBalanceAdjustments(adjRes.data);
       if (disputesRes.data) setUserDisputes(disputesRes.data as Dispute[]);
       if (ipRes.data) setIpHistory(ipRes.data as IpLog[]);
-      // Sensitive PIX keys are NOT auto-revealed; admin must click "Revelar dados".
       setUserPixKeys([]);
 
       setAdminNotes(profile.admin_notes || "");
@@ -1282,17 +1282,15 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                 {/* ── Chaves PIX ── */}
                 <TabsContent value="pix" className="mt-4 space-y-4">
                   <PremiumPanel
-                    title={`Chaves PIX${piiRevealed && revealedPixKeys ? ` (${revealedPixKeys.length})` : ""}`}
+                    title={`Chaves PIX${revealedPixKeys ? ` (${revealedPixKeys.length})` : ""}`}
                     icon={Key}
                     action={!piiRevealed ? (
                       <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={revealPii}>
-                        <Eye className="h-3.5 w-3.5 mr-1" /> Revelar PIX
+                        <Eye className="h-3.5 w-3.5 mr-1" /> Ver chaves e documento
                       </Button>
                     ) : null}
                   >
-                    {!piiRevealed ? (
-                      <PremiumEmpty icon={Lock} title="Chaves PIX ocultas" subtitle="Clique em 'Revelar PIX' para visualizar. A ação é registrada no audit log." />
-                    ) : !revealedPixKeys || revealedPixKeys.length === 0 ? (
+                    {!revealedPixKeys || revealedPixKeys.length === 0 ? (
                       <PremiumEmpty icon={Key} title="Nenhuma chave PIX cadastrada" />
                     ) : (
                       <div className="space-y-3">
@@ -1303,7 +1301,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                             </div>
                             <div className="flex-1">
                               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{pk.key_type}</p>
-                              <p className="text-sm font-mono text-foreground mt-0.5">{pk.key_value ?? "•••"}</p>
+                              <p className="break-all text-sm font-mono text-foreground mt-0.5">{displayPixKey(pk.key_value, pk.key_type)}</p>
                             </div>
                             <p className="text-[10px] text-muted-foreground">{new Date(pk.created_at).toLocaleDateString("pt-BR")}</p>
                             <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => handleDeletePixKey(pk.id)} title="Remover chave">

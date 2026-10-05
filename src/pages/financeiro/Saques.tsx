@@ -17,7 +17,7 @@ import { ptBR } from "date-fns/locale";
 import DadosBancarios from "./DadosBancarios";
 import AutoWithdrawalSettings from "@/components/financeiro/AutoWithdrawalSettings";
 import { friendlyError } from "@/lib/friendlyError";
-import { maskSensitivePixKey } from "@/lib/financial-input";
+import { displayPixKey } from "@/lib/financial-input";
 import { ReauthenticationDialog } from "@/components/security/ReauthenticationDialog";
 import { WithdrawDestinationPicker, getPixKeyLabel, getPixKeyMeta } from "@/components/financeiro/WithdrawDestinationPicker";
 
@@ -517,7 +517,7 @@ export default function Saques() {
                     {pixKeys.slice(0, 2).map((pk) => (
                       <div key={pk.id} className="p-3 rounded-xl bg-muted/30 border border-border/60 flex items-center justify-between group">
                         <div className="min-w-0">
-                          <p className="text-[11px] font-black text-foreground truncate">{maskSensitivePixKey((pk as { key_value_masked?: string | null }).key_value_masked ?? pk.key_value, pk.key_type)}</p>
+                          <p className="break-all text-[11px] font-black text-foreground">{displayPixKey(pk.key_value, pk.key_type, (pk as { key_value_masked?: string | null }).key_value_masked)}</p>
                           <p className="text-[11px] font-medium text-muted-foreground/60 ">{pk.key_type}</p>
                         </div>
                         <CheckCircle2 size={12} className="text-emerald-500" />

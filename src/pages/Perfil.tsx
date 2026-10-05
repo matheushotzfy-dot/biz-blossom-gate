@@ -23,6 +23,8 @@ import { cn } from "@/lib/utils";
 
 import { ProfileFeesCard } from "@/components/profile/ProfileFeesCard";
 import type { TablesUpdate } from "@/integrations/supabase/types";
+import { usePixKeys } from "@/hooks/useQueryData";
+import { displayPixKey } from "@/lib/financial-input";
 
 /* ─────────── Constants & helpers ─────────── */
 /* ─────────── Subcomponents ─────────── */
@@ -106,6 +108,7 @@ function FieldLabel({ children, locked }: { children: React.ReactNode; locked?: 
 export default function Perfil() {
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
+  const { data: pixKeys = [] } = usePixKeys();
   const [totalSales, setTotalSales] = useState(0);
   const [last30Sales, setLast30Sales] = useState(0);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "" });
@@ -453,7 +456,9 @@ export default function Perfil() {
           <div className="px-5 pb-5">
             <InfoRow
               label="Chave PIX"
-              value={((profile as { pix_key_masked?: string | null })?.pix_key_masked ?? profile?.pix_key) ? ((profile as { pix_key_masked?: string | null })?.pix_key_masked ?? `***${profile?.pix_key?.slice(-4)}`) : <span className="text-muted-foreground/50 font-medium">Não cadastrada</span>}
+              value={pixKeys[0] ? displayPixKey(pixKeys[0].key_value, pixKeys[0].key_type, pixKeys[0].key_value_masked) : <span className="text-muted-foreground/50 font-medium">Não cadastrada</span>}
+              copyable={pixKeys[0]?.key_value || undefined}
+              valueClass="max-w-[220px] whitespace-normal break-all text-right font-mono text-[11px]"
             />
             <InfoRow
               label="Membro desde"

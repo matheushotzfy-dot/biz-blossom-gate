@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Settings2, Zap, Shield, Sparkles, CheckCircle2, Clock } from "lucide-react";
+import { Settings2, Zap, Shield, Sparkles, CheckCircle2, Clock, ImageOff } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -141,7 +141,7 @@ const APPS: AppDef[] = [
 
 interface AppIntegration {
  id: string; user_id: string; app_name: string; product_id: string | null;
- api_key: string | null; api_url: string | null; webhook_url: string | null;
+ api_key_masked: string | null; has_api_key: boolean; api_url: string | null; webhook_url: string | null;
  events: string[]; is_active: boolean; config: Record<string, unknown>; created_at: string;
 }
 
@@ -161,6 +161,7 @@ export default function Apps() {
  const [formFields, setFormFields] = useState<Record<string, string>>({});
  const [formEventMode, setFormEventMode] = useState<"all" | "custom">("all");
  const [formSelectedEvents, setFormSelectedEvents] = useState<string[]>([]);
+ const [failedLogos, setFailedLogos] = useState<Set<string>>(() => new Set());
 
  const openDialog = (app: AppDef, existing?: AppIntegration) => {
  if (app.comingSoon) { toast.info(`${app.name} estará disponível em breve.`); return; }
@@ -170,9 +171,8 @@ export default function Apps() {
  setEditId(existing.id);
  setFormProductId(existing.product_id || "");
  const fields: Record<string, string> = {};
- if (existing.api_key) fields["api_key"] = existing.api_key;
  if (existing.api_url) fields["api_url"] = existing.api_url;
- if (existing.webhook_url) fields["webhook_url"] = existing.webhook_url;
+  if (existing.webhook_url && !existing.webhook_url.includes("*")) fields["webhook_url"] = existing.webhook_url;
  setFormFields(fields);
  setFormEventMode(existing.events?.length === app.events.length ? "all" : "custom");
  if (existing.events?.length !== app.events.length) setFormSelectedEvents(existing.events || []);
@@ -186,17 +186,20 @@ export default function Apps() {
 
  const handleSave = async () => {
  if (!user?.id || !dialogApp) return;
- for (const f of dialogApp.fields.filter(f => f.required)) {
+  for (const f of dialogApp.fields.filter(f => f.required && !(editId && f.type === "api_key"))) {
  if (!formFields[f.key]?.trim()) { toast.error(`Preencha: ${f.label}`); return; }
  }
  if (!formProductId && dialogApp.events.length > 0) { toast.error("Selecione um produto"); return; }
  setSaving(true);
  const events = formEventMode === "all" ? dialogApp.events : formSelectedEvents;
- const payload = {
+  const basePayload: TablesInsert<"app_integrations"> = {
  user_id: user.id, app_name: dialogApp.id, product_id: formProductId || null,
- api_key: formFields["api_key"] || null, api_url: formFields["api_url"] || null,
- webhook_url: formFields["webhook_url"] || null, events, is_active: true, config: {},
+  api_url: formFields["api_url"] || null, events, is_active: true, config: {},
  };
+  const secrets: TablesUpdate<"app_integrations"> = {};
+  if (!editId || formFields["api_key"]?.trim()) secrets.api_key = formFields["api_key"]?.trim() || null;
+  if (!editId || formFields["webhook_url"]?.trim()) secrets.webhook_url = formFields["webhook_url"]?.trim() || null;
+  const payload = { ...basePayload, ...secrets };
  let error;
  if (editId) {
  const { error: e } = await supabase.from("app_integrations").update(payload).eq("id", editId).eq("user_id", user.id);
@@ -242,7 +245,7 @@ export default function Apps() {
   </div>
 
  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
- {[...APPS].sort((a, b) => Number(!!a.comingSoon) - Number(!!b.comingSoon)).map((app, idx) => {
+  {[...APPS].sort((a, b) => Number(!!a.comingSoon) - Number(!!b.comingSoon)).map((app) => {
  const integration = getIntegration(app.id);
  const active = Boolean(integration?.is_active);
  const isComingSoon = Boolean(app.comingSoon);
@@ -253,14 +256,13 @@ export default function Apps() {
   onClick={() => openDialog(app, integration || undefined)}
   disabled={isComingSoon}
   className={cn(
- "group relative isolate flex h-32 items-center overflow-hidden rounded-[22px] border bg-card px-7 text-left transition-[transform,border-color,background-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] animate-fade-in md:h-[8.5rem] md:px-8",
+ "group relative isolate flex h-32 items-center overflow-hidden rounded-[22px] border bg-card px-7 text-left transition-[transform,border-color,background-color] duration-300 ease-out md:h-[8.5rem] md:px-8",
     isComingSoon
       ? "border-border/40 bg-card/50 cursor-not-allowed opacity-90"
       : active
       ? "border-primary/40 bg-card hover:-translate-y-0.5 hover:border-primary/70 hover:bg-primary/[0.045]"
       : "border-border/70 hover:-translate-y-0.5 hover:border-primary/60 hover:bg-primary/[0.035]"
   )}
-  style={{ animationDelay: `${idx * 35}ms`, animationFillMode: "backwards" }}
   >
   {!isComingSoon && (
     <>
@@ -278,17 +280,29 @@ export default function Apps() {
 
                <div className="relative z-[1] flex h-full w-full items-center justify-center">
                  <div className={cn(
- "flex h-20 w-40 items-center justify-center rounded-xl border border-border/50 bg-background px-4 md:h-24 md:w-44 transition-all",
+ "flex h-20 w-40 items-center justify-center rounded-xl border border-border bg-logo-surface px-4 md:h-24 md:w-44 transition-colors",
                    isComingSoon && "grayscale opacity-40"
                  )}>
-                   <img
-                     src={app.logo}
-                     alt={app.name}
-                     className={cn(
- "max-h-full max-w-full object-contain transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                       !isComingSoon && "group-hover:scale-105"
-                     )}
-                   />
+                    {failedLogos.has(app.id) ? (
+                      <div className="flex items-center gap-2 text-muted-foreground" role="img" aria-label={`Logo indisponível: ${app.name}`}>
+                        <ImageOff className="h-4 w-4" />
+                        <span className="text-xs font-semibold">{app.name}</span>
+                      </div>
+                    ) : (
+                      <img
+                        src={app.logo}
+                        alt={app.name}
+                        width={176}
+                        height={96}
+                        loading="eager"
+                        decoding="async"
+                        onError={() => setFailedLogos((current) => new Set(current).add(app.id))}
+                        className={cn(
+                          "max-h-full max-w-full object-contain transition-transform duration-300 ease-out",
+                          !isComingSoon && "group-hover:scale-105"
+                        )}
+                      />
+                    )}
                  </div>
                </div>
 

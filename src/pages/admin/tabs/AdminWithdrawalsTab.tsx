@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
  ArrowDownToLine, Search, CheckCircle2, XCircle, Clock, Wallet, UserCog,
@@ -24,6 +24,7 @@ import { PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented, Premi
 import { formatCurrency } from "@/lib/utils";
 import { friendlyError } from "@/lib/friendlyError";
 import AdminPager from "@/components/admin/AdminPager";
+import { displayPixKey } from "@/lib/financial-input";
 
 /* ── Types ── */
 interface AuditLog { id: string; admin_user_id: string; action: string; entity_id: string | null; created_at: string; }
@@ -91,6 +92,20 @@ function PayoutTarget({ withdrawal }: { withdrawal: Tables<"withdrawals"> }) {
     </button>
   );
 
+  const reveal = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.rpc("admin_reveal_pix_keys", { _user_id: withdrawal.user_id });
+      if (error) { toast.error("Sem permissão para revelar a chave"); return; }
+      const rows = (data as { id: string; key_type: string; key_value: string; is_default: boolean }[]) || [];
+      const match = rows.find(r => r.id === withdrawal.pix_key_id) || rows.find(r => r.is_default) || rows[0];
+      if (!match) { toast.error("Vendedor sem chave PIX cadastrada"); return; }
+      setRevealed({ type: match.key_type, value: match.key_value });
+    } finally {
+      setLoading(false);
+    }
+  }, [withdrawal.pix_key_id, withdrawal.user_id]);
+
   if (withdrawal.withdrawal_type === "crypto") {
     return (
       <div className="flex flex-col gap-1">
@@ -112,25 +127,11 @@ function PayoutTarget({ withdrawal }: { withdrawal: Tables<"withdrawals"> }) {
     );
   }
 
-  const reveal = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.rpc("admin_reveal_pix_keys", { _user_id: withdrawal.user_id });
-      if (error) { toast.error("Sem permissão para revelar a chave"); return; }
-      const rows = (data as { id: string; key_type: string; key_value: string; is_default: boolean }[]) || [];
-      const match = rows.find(r => r.id === withdrawal.pix_key_id) || rows.find(r => r.is_default) || rows[0];
-      if (!match) { toast.error("Vendedor sem chave PIX cadastrada"); return; }
-      setRevealed({ type: match.key_type, value: match.key_value });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (revealed) {
     return (
       <div className="flex flex-col gap-1">
         {chip(PIX_KEY_LABEL[revealed.type?.toLowerCase()] || revealed.type || "PIX", "primary")}
-        {copyBtn(revealed.value, "Chave PIX")}
+        {copyBtn(displayPixKey(revealed.value, revealed.type), "Chave PIX")}
       </div>
     );
   }
