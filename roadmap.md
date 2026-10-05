@@ -16,6 +16,6 @@
 - [x] Tema light por padrão salvo na conta; checkout continua com tema próprio
 - [x] Chaves PIX completas para o próprio seller e revelação admin auditada
 - [x] Logos de integrações com superfície legível, dimensões estáveis e fallback
-- [ ] Tornar permissões de staff/gerente efetivas no servidor e nas abas
-- [ ] Migrar segredos de integrações para escrita/leitura exclusivamente no servidor
+- [ ] Tornar permissões de staff/gerente efetivas em todas as rotinas antigas; concessão de permissões já restrita ao dono
+- [x] Migrar segredos de integrações para armazenamento criptografado e leitura mascarada no navegador
 - [ ] Paginar cargas globais e históricos restantes do admin

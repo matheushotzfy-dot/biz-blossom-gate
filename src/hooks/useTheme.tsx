@@ -22,6 +22,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("light");
   const [userId, setUserId] = useState<string | null>(null);
   const requestIdRef = useRef(0);
+  const saveIdRef = useRef(0);
   const checkoutOwnsTheme = /^\/(pay|checkout|pl)\//.test(location.pathname);
 
   useEffect(() => {
@@ -87,11 +88,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [userId]);
 
   const setTheme = useCallback((next: Theme) => {
+    const saveId = ++saveIdRef.current;
     setThemeState(next);
     if (!userId) return;
     const previous = theme;
     void supabase.rpc("set_my_theme_preference", { _theme: next }).then(({ error }) => {
-      if (error) {
+      if (error && saveId === saveIdRef.current) {
         console.error("[theme] preference update failed");
         setThemeState(previous);
       }

@@ -12,3 +12,4 @@
 - Admin global refreshes are serialized and coalesced; never allow focus, polling and realtime to run overlapping dashboard loads.
 - Confirmed checkout delivery is idempotent and audited in `checkout_delivery_attempts`; only server-confirmed payments may grant member access, and unresolved deliveries stay pending for owner review.
 - Theme preference is stored on the authenticated profile and defaults to light; never restore cookie/localStorage persistence for theme.
+- Integration credentials are encrypted at rest and decrypted only by service-role dispatch routines; browser queries use masked safe views.

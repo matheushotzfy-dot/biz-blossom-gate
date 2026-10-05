@@ -92,6 +92,20 @@ function PayoutTarget({ withdrawal }: { withdrawal: Tables<"withdrawals"> }) {
     </button>
   );
 
+  const reveal = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.rpc("admin_reveal_pix_keys", { _user_id: withdrawal.user_id });
+      if (error) { toast.error("Sem permissão para revelar a chave"); return; }
+      const rows = (data as { id: string; key_type: string; key_value: string; is_default: boolean }[]) || [];
+      const match = rows.find(r => r.id === withdrawal.pix_key_id) || rows.find(r => r.is_default) || rows[0];
+      if (!match) { toast.error("Vendedor sem chave PIX cadastrada"); return; }
+      setRevealed({ type: match.key_type, value: match.key_value });
+    } finally {
+      setLoading(false);
+    }
+  }, [withdrawal.pix_key_id, withdrawal.user_id]);
+
   if (withdrawal.withdrawal_type === "crypto") {
     return (
       <div className="flex flex-col gap-1">
@@ -112,24 +126,6 @@ function PayoutTarget({ withdrawal }: { withdrawal: Tables<"withdrawals"> }) {
       </div>
     );
   }
-
-  const reveal = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.rpc("admin_reveal_pix_keys", { _user_id: withdrawal.user_id });
-      if (error) { toast.error("Sem permissão para revelar a chave"); return; }
-      const rows = (data as { id: string; key_type: string; key_value: string; is_default: boolean }[]) || [];
-      const match = rows.find(r => r.id === withdrawal.pix_key_id) || rows.find(r => r.is_default) || rows[0];
-      if (!match) { toast.error("Vendedor sem chave PIX cadastrada"); return; }
-      setRevealed({ type: match.key_type, value: match.key_value });
-    } finally {
-      setLoading(false);
-    }
-  }, [withdrawal.pix_key_id, withdrawal.user_id]);
-
-  useEffect(() => {
-    if (withdrawal.withdrawal_type !== "crypto" && !withdrawal.pix_copy_paste_code) void reveal();
-  }, [reveal, withdrawal.pix_copy_paste_code, withdrawal.withdrawal_type]);
 
   if (revealed) {
     return (

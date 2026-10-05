@@ -63,6 +63,7 @@ export function displayPixKey(
   maskedFallback?: string | null,
 ): string {
   if (!value) return maskedFallback || "—";
+  if (value.includes("•") || value.includes("*")) return maskedFallback || value;
   const normalizedType = type === "telefone" ? "phone" : type;
   if (["cpf", "cnpj", "email", "phone", "random"].includes(normalizedType)) {
     return formatPixKey(value, normalizedType as PixKeyType);
