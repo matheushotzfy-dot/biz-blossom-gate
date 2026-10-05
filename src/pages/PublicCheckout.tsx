@@ -47,45 +47,7 @@ function getCheckoutSessionId(slug: string): string {
 }
 function clearCheckoutSession(slug: string) { sessionStorage.removeItem(`checkout_session_${slug}`); }
 
-function isValidCpf(cpf: string): boolean {
- const digits = cpf.replace(/\D/g, "");
- if (digits.length !== 11 || /^(\d)\1+$/.test(digits)) return false;
- let sum = 0;
- for (let i = 0; i < 9; i++) sum += parseInt(digits[i]) * (10 - i);
- let rest = (sum * 10) % 11; if (rest === 10) rest = 0;
- if (rest !== parseInt(digits[9])) return false;
- sum = 0;
- for (let i = 0; i < 10; i++) sum += parseInt(digits[i]) * (11 - i);
- rest = (sum * 10) % 11; if (rest === 10) rest = 0;
- return rest === parseInt(digits[10]);
-}
-function isValidCnpj(cnpj: string): boolean {
- const digits = cnpj.replace(/\D/g, "");
- if (digits.length !== 14 || /^(\d)\1+$/.test(digits)) return false;
- const w1 = [5,4,3,2,9,8,7,6,5,4,3,2], w2 = [6,5,4,3,2,9,8,7,6,5,4,3,2];
- let sum = 0;
- for (let i = 0; i < 12; i++) sum += parseInt(digits[i]) * w1[i];
- let rest = sum % 11; rest = rest < 2 ? 0 : 11 - rest;
- if (rest !== parseInt(digits[12])) return false;
- sum = 0;
- for (let i = 0; i < 13; i++) sum += parseInt(digits[i]) * w2[i];
- rest = sum % 11; rest = rest < 2 ? 0 : 11 - rest;
- return rest === parseInt(digits[13]);
-}
-
 /* ─── Formatters ─── */
-const formatCpf = (v: string) => {
- const d = v.replace(/\D/g, "").slice(0, 14);
- if (d.length <= 3) return d;
- if (d.length <= 6) return `${d.slice(0,3)}.${d.slice(3)}`;
- if (d.length <= 9) return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6)}`;
- if (d.length <= 11) return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}`;
- return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8,12)}-${d.slice(12)}`;
-};
-const formatPhone = (v: string) => { const d = v.replace(/\D/g, "").slice(0, 11); if (d.length <= 2) return d; if (d.length <= 7) return `(${d.slice(0,2)}) ${d.slice(2)}`; return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`; };
-const formatCardNumber = (v: string) => v.replace(/\D/g, "").slice(0, 16).replace(/(\d{4})(?=\d)/g, "$1 ");
-const formatExpiry = (v: string) => { const d = v.replace(/\D/g, "").slice(0, 4); return d.length <= 2 ? d : `${d.slice(0,2)}/${d.slice(2)}`; };
-const formatCep = (v: string) => { const d = v.replace(/\D/g, "").slice(0, 8); return d.length <= 5 ? d : `${d.slice(0,5)}-${d.slice(5)}`; };
 const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 /* ═══ Premium Loading Screen ═══ */
@@ -384,11 +346,6 @@ export default function PublicCheckout() {
  const toggleBump = (bumpId: string) => {
  setSelectedBumps(prev => { const next = new Set(prev); if (next.has(bumpId)) next.delete(bumpId); else next.add(bumpId); return next; });
  };
-
- // Rate Limiting
- const submitCountRef = useRef<number[]>([]);
- const RATE_LIMIT_WINDOW = 60_000;
- const RATE_LIMIT_MAX = 3;
 
  // Payment Handler
   const handlePay = async (e: React.FormEvent) => {
