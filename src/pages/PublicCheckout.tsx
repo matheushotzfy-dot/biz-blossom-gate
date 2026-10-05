@@ -309,11 +309,20 @@ export default function PublicCheckout() {
  cepAbortRef.current = controller;
  setLoadingCep(true);
  try {
- const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`, { signal: controller.signal });
- if (!res.ok) throw new Error("cep_service_unavailable");
- const data = await res.json();
- if (!data.erro) {
- setStreet(data.logradouro || ""); setNeighborhood(data.bairro || ""); setCity(data.localidade || ""); setState(data.uf || "");
+ const viaCepResponse = await fetch(`https://viacep.com.br/ws/${digits}/json/`, { signal: controller.signal });
+ const viaCepData = viaCepResponse.ok ? await viaCepResponse.json() : null;
+ let address = viaCepData && !viaCepData.erro ? {
+ street: viaCepData.logradouro, neighborhood: viaCepData.bairro, city: viaCepData.localidade, state: viaCepData.uf,
+ } : null;
+ if (!address) {
+ const brasilApiResponse = await fetch(`https://brasilapi.com.br/api/cep/v2/${digits}`, { signal: controller.signal });
+ if (brasilApiResponse.ok) {
+ const brasilApiData = await brasilApiResponse.json();
+ address = { street: brasilApiData.street, neighborhood: brasilApiData.neighborhood, city: brasilApiData.city, state: brasilApiData.state };
+ }
+ }
+ if (address) {
+ setStreet(address.street || ""); setNeighborhood(address.neighborhood || ""); setCity(address.city || ""); setState(address.state || "");
  setCepMessage("Endereço localizado. Confira o número e o complemento.");
  } else { setCepMessage("CEP não encontrado. Confira os números."); }
  } catch (error) {
@@ -841,9 +850,9 @@ export default function PublicCheckout() {
  <Label className={labelClass}>Complemento</Label>
  <Input value={complement} onChange={e => setComplement(e.target.value)} placeholder="Apto, sala..." className={inputClass} />
  </div>
- <div className="col-span-2 sm:col-span-1">
- <Label className={labelClass}>Cidade / UF</Label>
- <Input value={city && state ? `${city} - ${state}` : ""} readOnly placeholder="Preenchido via CEP" className={inputClass + " !bg-gray-100 !text-gray-400"} />
+ <div className="col-span-2 grid grid-cols-[1fr_80px] gap-3 sm:col-span-1">
+ <div><Label className={labelClass}>Cidade</Label><Input value={city} onChange={e => setCity(e.target.value.slice(0, 100))} placeholder="Cidade" required className={inputClass} autoComplete="address-level2" aria-invalid={Boolean(formErrors.city)} /></div>
+ <div><Label className={labelClass}>UF</Label><Input value={state} onChange={e => setState(e.target.value.replace(/[^a-z]/gi, "").toUpperCase().slice(0, 2))} placeholder="UF" required className={inputClass} autoComplete="address-level1" aria-invalid={Boolean(formErrors.state)} /></div>
  </div>
  </div>
  </div>
@@ -936,7 +945,7 @@ export default function PublicCheckout() {
  </div>
  <div className="ml-auto flex items-center gap-1.5">
  <Lock className="h-3 w-3 text-gray-300" />
- <span className="text-[8px] text-gray-300 font-bold tracking-wider">SSL 256-BIT</span>
+ <span className="text-[8px] text-gray-300 font-bold tracking-wider">CONEXÃO HTTPS</span>
  </div>
  </div>
 
@@ -1130,7 +1139,7 @@ export default function PublicCheckout() {
  <div className="flex items-center justify-center gap-5">
  <div className="flex items-center gap-1.5 text-gray-300">
  <Lock className="h-3.5 w-3.5" />
- <span className="text-[10px] font-semibold">SSL 256-bit</span>
+ <span className="text-[10px] font-semibold">Conexão HTTPS</span>
  </div>
  <div className="h-3 w-px bg-gray-200" />
  <div className="flex items-center gap-1.5 text-gray-300">
