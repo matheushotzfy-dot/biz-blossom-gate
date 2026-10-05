@@ -141,7 +141,7 @@ const APPS: AppDef[] = [
 
 interface AppIntegration {
  id: string; user_id: string; app_name: string; product_id: string | null;
- api_key: string | null; api_url: string | null; webhook_url: string | null;
+ api_key_masked: string | null; has_api_key: boolean; api_url: string | null; webhook_url: string | null;
  events: string[]; is_active: boolean; config: Record<string, unknown>; created_at: string;
 }
 
@@ -171,9 +171,8 @@ export default function Apps() {
  setEditId(existing.id);
  setFormProductId(existing.product_id || "");
  const fields: Record<string, string> = {};
- if (existing.api_key) fields["api_key"] = existing.api_key;
  if (existing.api_url) fields["api_url"] = existing.api_url;
- if (existing.webhook_url) fields["webhook_url"] = existing.webhook_url;
+  if (existing.webhook_url && !existing.webhook_url.includes("*")) fields["webhook_url"] = existing.webhook_url;
  setFormFields(fields);
  setFormEventMode(existing.events?.length === app.events.length ? "all" : "custom");
  if (existing.events?.length !== app.events.length) setFormSelectedEvents(existing.events || []);
@@ -187,17 +186,18 @@ export default function Apps() {
 
  const handleSave = async () => {
  if (!user?.id || !dialogApp) return;
- for (const f of dialogApp.fields.filter(f => f.required)) {
+  for (const f of dialogApp.fields.filter(f => f.required && !(editId && f.type === "api_key"))) {
  if (!formFields[f.key]?.trim()) { toast.error(`Preencha: ${f.label}`); return; }
  }
  if (!formProductId && dialogApp.events.length > 0) { toast.error("Selecione um produto"); return; }
  setSaving(true);
  const events = formEventMode === "all" ? dialogApp.events : formSelectedEvents;
- const payload = {
+  const payload: Record<string, unknown> = {
  user_id: user.id, app_name: dialogApp.id, product_id: formProductId || null,
- api_key: formFields["api_key"] || null, api_url: formFields["api_url"] || null,
- webhook_url: formFields["webhook_url"] || null, events, is_active: true, config: {},
+  api_url: formFields["api_url"] || null, events, is_active: true, config: {},
  };
+  if (!editId || formFields["api_key"]?.trim()) payload.api_key = formFields["api_key"]?.trim() || null;
+  if (!editId || formFields["webhook_url"]?.trim()) payload.webhook_url = formFields["webhook_url"]?.trim() || null;
  let error;
  if (editId) {
  const { error: e } = await supabase.from("app_integrations").update(payload).eq("id", editId).eq("user_id", user.id);

@@ -614,9 +614,7 @@ async function deliverCademi(integration: Integration, d: Delivery) {
 // ────────────────── Worker ──────────────────
 async function deliverOne(admin: ReturnType<typeof createClient>, d: Delivery) {
   const { data: integ } = await admin
-    .from("app_integrations")
-    .select("id, app_name, api_key, api_url, webhook_url, is_active, config")
-    .eq("id", d.integration_id)
+    .rpc("get_app_integration_for_dispatch", { _integration_id: d.integration_id })
     .maybeSingle<Integration>();
 
   if (!integ || !integ.is_active) {
@@ -718,9 +716,7 @@ Deno.serve(async (req) => {
 
   if (action === "test" && testIntegrationId) {
     const { data: integ } = await admin
-      .from("app_integrations")
-      .select("id, user_id, app_name, api_key, api_url, webhook_url, is_active, config")
-      .eq("id", testIntegrationId)
+      .rpc("get_app_integration_for_dispatch", { _integration_id: testIntegrationId })
       .maybeSingle<Integration & { user_id: string }>();
     if (!integ || (callerUserId && integ.user_id !== callerUserId)) {
       return new Response(JSON.stringify({ ok: false, error: "Integration not found" }),
