@@ -640,6 +640,7 @@ export default function PublicCheckout() {
  <QRCodeSVG value={pixData.qrcode || pixData.qrCodeText || pixData.qrCode} size={220} />
  </div>
  </div>
+ </div>
  )}
 
  <div className="flex items-center gap-3 text-xs text-gray-400 justify-center">
