@@ -338,19 +338,48 @@ export default function PublicCheckout() {
 
  // CEP handler
  const handleCepChange = useCallback(async (val: string) => {
- const formatted = formatCep(val); setCep(formatted);
+ const formatted = formatCheckoutCep(val); setCep(formatted);
+ setCepMessage(null);
+ cepAbortRef.current?.abort();
  const digits = formatted.replace(/\D/g, "");
  if (digits.length === 8) {
+ const controller = new AbortController();
+ cepAbortRef.current = controller;
  setLoadingCep(true);
  try {
- const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+ const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`, { signal: controller.signal });
+ if (!res.ok) throw new Error("cep_service_unavailable");
  const data = await res.json();
- if (!data.erro) { setStreet(data.logradouro || ""); setNeighborhood(data.bairro || ""); setCity(data.localidade || ""); setState(data.uf || ""); }
- else toast.error("CEP não encontrado");
- } catch { toast.error("Erro ao buscar CEP"); }
- finally { setLoadingCep(false); }
+ if (!data.erro) {
+ setStreet(data.logradouro || ""); setNeighborhood(data.bairro || ""); setCity(data.localidade || ""); setState(data.uf || "");
+ setCepMessage("Endereço localizado. Confira o número e o complemento.");
+ } else { setCepMessage("CEP não encontrado. Confira os números."); }
+ } catch (error) {
+ if (error instanceof DOMException && error.name === "AbortError") return;
+ setCepMessage("A busca automática falhou. Tente novamente.");
+ } finally { if (!controller.signal.aborted) setLoadingCep(false); }
  }
  }, []);
+
+ useEffect(() => () => cepAbortRef.current?.abort(), []);
+
+ const customerInput = (): CheckoutCustomerInput => ({
+ name, email, emailConfirm: product?.checkout_email_confirm ? emailConfirm : undefined,
+ document, phone, addressRequired: Boolean(product?.checkout_address_required),
+ cep, street, number: number_, complement, neighborhood, city, state,
+ });
+
+ const validateCustomer = () => {
+ const parsed = checkoutCustomerSchema.safeParse(customerInput());
+ if (parsed.success) { setFormErrors({}); return true; }
+ const nextErrors: Record<string, string> = {};
+ for (const issue of parsed.error.issues) {
+ const field = issue.path[0];
+ if (typeof field === "string" && !nextErrors[field]) nextErrors[field] = issue.message;
+ }
+ setFormErrors(nextErrors);
+ return false;
+ };
 
  const toggleBump = (bumpId: string) => {
  setSelectedBumps(prev => { const next = new Set(prev); if (next.has(bumpId)) next.delete(bumpId); else next.add(bumpId); return next; });
@@ -365,6 +394,7 @@ export default function PublicCheckout() {
   const handlePay = async (e: React.FormEvent) => {
  e.preventDefault();
   if (!product || processingRef.current) return;
+ if (!validateCustomer()) { toast.error("Revise os campos destacados"); return; }
   toast.error("Pagamentos temporariamente indisponíveis.");
  };
 
