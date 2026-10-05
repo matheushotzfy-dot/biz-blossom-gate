@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
  ArrowDownToLine, Search, CheckCircle2, XCircle, Clock, Wallet, UserCog,
@@ -24,6 +24,7 @@ import { PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented, Premi
 import { formatCurrency } from "@/lib/utils";
 import { friendlyError } from "@/lib/friendlyError";
 import AdminPager from "@/components/admin/AdminPager";
+import { displayPixKey } from "@/lib/financial-input";
 
 /* ── Types ── */
 interface AuditLog { id: string; admin_user_id: string; action: string; entity_id: string | null; created_at: string; }
@@ -112,7 +113,7 @@ function PayoutTarget({ withdrawal }: { withdrawal: Tables<"withdrawals"> }) {
     );
   }
 
-  const reveal = async () => {
+  const reveal = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.rpc("admin_reveal_pix_keys", { _user_id: withdrawal.user_id });
@@ -124,13 +125,17 @@ function PayoutTarget({ withdrawal }: { withdrawal: Tables<"withdrawals"> }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [withdrawal.pix_key_id, withdrawal.user_id]);
+
+  useEffect(() => {
+    if (withdrawal.withdrawal_type !== "crypto" && !withdrawal.pix_copy_paste_code) void reveal();
+  }, [reveal, withdrawal.pix_copy_paste_code, withdrawal.withdrawal_type]);
 
   if (revealed) {
     return (
       <div className="flex flex-col gap-1">
         {chip(PIX_KEY_LABEL[revealed.type?.toLowerCase()] || revealed.type || "PIX", "primary")}
-        {copyBtn(revealed.value, "Chave PIX")}
+        {copyBtn(displayPixKey(revealed.value, revealed.type), "Chave PIX")}
       </div>
     );
   }
