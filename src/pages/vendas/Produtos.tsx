@@ -21,7 +21,7 @@ import { HDShell, HDHeader } from "@/components/hd/HDPage";
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
 import { ProductGridView } from "@/components/products/ProductGridView";
 import type { Product } from "@/components/products/productPresentation";
-import { getCheckoutLink, getEffectiveStatus } from "@/components/products/productPresentation";
+import { getCheckoutLink, getEffectiveStatus, isCheckoutLive } from "@/components/products/productPresentation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -94,7 +94,7 @@ export default function Produtos() {
   const handleEditProduct = useCallback((product: Product) => navigate(`/vendas/produtos/${product.id}/editar`), [navigate]);
   const handleOpenMembers = useCallback((product: Product) => navigate(`/vendas/conteudo/${product.id}/builder`), [navigate]);
   const handleOpenCheckout = useCallback((product: Product) => {
-    if (!product.checkout_url || getEffectiveStatus(product) !== "active") {
+    if (!isCheckoutLive(product)) {
       toast.info("O checkout ficará público quando o produto estiver ativo.");
       return;
     }
@@ -102,7 +102,7 @@ export default function Produtos() {
     if (url) window.open(url, "_blank", "noopener,noreferrer");
   }, []);
   const handleCopyLink = useCallback(async (product: Product) => {
-    if (!product.checkout_url || getEffectiveStatus(product) !== "active") {
+    if (!isCheckoutLive(product)) {
       toast.info("O link ficará disponível quando o produto estiver ativo.");
       return;
     }

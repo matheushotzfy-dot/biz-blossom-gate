@@ -25,7 +25,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import type { Product } from "./productPresentation";
-import { getEffectiveStatus } from "./productPresentation";
+import { getEffectiveStatus, isCheckoutLive } from "./productPresentation";
 
 export type ProductMenuHandlers = {
   onCopyLink: (product: Product) => void;
@@ -78,7 +78,7 @@ export function ProductActionsMenu({
   ];
 
   const distribute: Row[] = [
-    ...(product.checkout_url && isActive
+    ...(isCheckoutLive(product)
       ? [
           { icon: copied ? CheckCircle2 : Copy, label: copied ? "Link copiado" : "Copiar checkout", action: () => onCopyLink(product) },
           { icon: ExternalLink, label: "Abrir checkout", action: () => onOpenCheckout(product) },
