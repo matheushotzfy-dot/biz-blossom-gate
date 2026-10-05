@@ -77,3 +77,8 @@ export function getEffectiveStatus(product: Product): "draft" | "active" | "pend
   if (isProductDraft(product)) return "draft";
   return (product.status as "draft" | "active" | "pending_review" | "inactive") || "active";
 }
+
+/** Mirrors the public catalog rule: the buyer page is live when status is active and a checkout URL exists. */
+export function isCheckoutLive(product: Product): boolean {
+  return product.status === "active" && !!product.checkout_url;
+}

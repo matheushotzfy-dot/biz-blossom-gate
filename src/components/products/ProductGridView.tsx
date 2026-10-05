@@ -18,6 +18,7 @@ import {
   getCheckoutLink,
   getEffectiveStatus,
   getProductRequirements,
+  isCheckoutLive,
   type Product,
 } from "./productPresentation";
 import { cn } from "@/lib/utils";
@@ -67,7 +68,7 @@ const ProductCard = memo(function ProductCard({ product, copied, ...handlers }: 
   const isDraft = effectiveStatus === "draft";
   const missingCount = isDraft ? getProductRequirements(product).filter((r) => !r.done).length : 0;
   const deliveryLabel = DELIVERY_LABELS[product.delivery_type] || product.delivery_type;
-  const linkPreview = effectiveStatus === "active" && product.checkout_url ? shortenLink(product.checkout_url) : null;
+  const linkPreview = isCheckoutLive(product) && product.checkout_url ? shortenLink(product.checkout_url) : null;
   const initial = (product.name || "?").charAt(0).toUpperCase();
 
   return (
@@ -179,7 +180,7 @@ const ProductCard = memo(function ProductCard({ product, copied, ...handlers }: 
             >
               <Crosshair className="h-3.5 w-3.5" strokeWidth={2} />
             </button>
-            {product.checkout_url && effectiveStatus === "active" && (
+            {isCheckoutLive(product) && (
               <button
                 type="button"
                 onClick={() => handlers.onOpenCheckout(product)}
