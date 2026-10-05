@@ -15,6 +15,11 @@ import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { initPixels, firePixelEvent, type PixelConfig } from "@/lib/pixelTracking";
 import { Seo } from "@/components/Seo";
+import {
+ checkoutCustomerSchema, formatCheckoutCep, formatCheckoutDocument, formatCheckoutPhone,
+ type CheckoutCustomerInput,
+} from "@/features/public-checkout/checkoutSchema";
+import { PaymentMethodSelector, type CheckoutPaymentMethod } from "@/features/public-checkout/PaymentMethodSelector";
 
 /* ─── Types ─── */
 type Product = {
@@ -30,7 +35,7 @@ type Product = {
  display_name?: string | null;
 };
 type OrderBump = { id: string; bump_product_id: string; bump_product: { id: string; name: string; description: string | null; price: number; image_url: string | null; }; };
-type PaymentMethod = "pix" | "credit_card" | "boleto";
+type PaymentMethod = CheckoutPaymentMethod;
 type CheckoutState = "form" | "pending" | "approved" | "failed" | "expired";
 
 /* ─── Utils ─── */
@@ -184,10 +189,6 @@ export default function PublicCheckout() {
  const [emailConfirm, setEmailConfirm] = useState("");
  const [document, setDocument] = useState("");
  const [phone, setPhone] = useState("");
- const [cardNumber, setCardNumber] = useState("");
- const [cardExpiry, setCardExpiry] = useState("");
- const [cardCvv, setCardCvv] = useState("");
- const [cardName, setCardName] = useState("");
  const [installments, setInstallments] = useState("1");
  const [cep, setCep] = useState("");
  const [street, setStreet] = useState("");
@@ -197,6 +198,9 @@ export default function PublicCheckout() {
  const [city, setCity] = useState("");
  const [state, setState] = useState("");
  const [loadingCep, setLoadingCep] = useState(false);
+ const [cepMessage, setCepMessage] = useState<string | null>(null);
+ const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+ const cepAbortRef = useRef<AbortController | null>(null);
   const [copiedPix, setCopiedPix] = useState(false);
 
   // Coupon
