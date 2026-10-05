@@ -11,3 +11,5 @@
 - [ ] Blindagem de formulários do seller
 - [ ] Saques: comprovante e lote; exportação; busca geral; relatórios; e-mails; saúde; menu enxuto; permissões aba por aba
 - [ ] Testes com venda real (bloqueado: sem adquirente e sem vendas)
+- [x] Base segura do checkout: validação compartilhada, CEP cancelável e entrega auditável/idempotente
+- [ ] Ativar PIX/cartão com tokenização e webhook assinado (bloqueado: adquirente e documentação ainda não definidos)

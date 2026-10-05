@@ -66,14 +66,14 @@ export default function AdminCheckoutDeliveriesTab() {
         eyebrow="Operações · Pós-venda"
         title="Entregas do checkout"
         subtitle="Acompanhe acessos liberados e corrija entregas pendentes sem duplicar o acesso."
-        status={{ tone: filtered.some((item) => item.status === "failed") ? "danger" : "info", label: `${filtered.length} entrega(s)`, pulse: false }}
+        status={{ tone: filtered.some((item) => item.status === "failed") ? "destructive" : "info", label: `${filtered.length} entrega(s)`, pulse: false }}
       />
       <div className="flex flex-col gap-3 md:flex-row md:items-center">
         <div className="relative max-w-md flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input value={search} onChange={(event) => setSearch(event.target.value)} className="pl-9" placeholder="Buscar por e-mail, produto ou ID" />
         </div>
-        <PremiumSegmented value={status} onChange={setStatus} options={[
+        <PremiumSegmented<DeliveryStatus> value={status} onChange={setStatus} options={[
           { value: "all", label: "Todas" }, { value: "pending", label: "Pendentes" },
           { value: "failed", label: "Falhas" }, { value: "delivered", label: "Entregues" },
         ]} />
