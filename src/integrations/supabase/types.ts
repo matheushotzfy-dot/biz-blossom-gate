@@ -1103,6 +1103,69 @@ export type Database = {
         }
         Relationships: []
       }
+      checkout_delivery_attempts: {
+        Row: {
+          attempt_count: number
+          buyer_user_id: string | null
+          created_at: string
+          customer_email: string
+          delivered_at: string | null
+          id: string
+          last_attempt_at: string | null
+          last_error: string | null
+          product_id: string | null
+          seller_user_id: string
+          status: string
+          transaction_id: string
+          updated_at: string
+        }
+        Insert: {
+          attempt_count?: number
+          buyer_user_id?: string | null
+          created_at?: string
+          customer_email: string
+          delivered_at?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          last_error?: string | null
+          product_id?: string | null
+          seller_user_id: string
+          status?: string
+          transaction_id: string
+          updated_at?: string
+        }
+        Update: {
+          attempt_count?: number
+          buyer_user_id?: string | null
+          created_at?: string
+          customer_email?: string
+          delivered_at?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          last_error?: string | null
+          product_id?: string | null
+          seller_user_id?: string
+          status?: string
+          transaction_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkout_delivery_attempts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkout_delivery_attempts_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       co_productions: {
         Row: {
           accepted_at: string | null
@@ -5376,6 +5439,10 @@ export type Database = {
           _outcome: string
         }
         Returns: undefined
+      }
+      admin_retry_checkout_delivery: {
+        Args: { _delivery_id: string }
+        Returns: Json
       }
       admin_reveal_bank_accounts: {
         Args: { _user_id: string }

@@ -15,6 +15,11 @@ import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { initPixels, firePixelEvent, type PixelConfig } from "@/lib/pixelTracking";
 import { Seo } from "@/components/Seo";
+import {
+ checkoutCustomerSchema, formatCheckoutCep, formatCheckoutDocument, formatCheckoutPhone,
+ type CheckoutCustomerInput,
+} from "@/features/public-checkout/checkoutSchema";
+import { PaymentMethodSelector, type CheckoutPaymentMethod } from "@/features/public-checkout/PaymentMethodSelector";
 
 /* ─── Types ─── */
 type Product = {
@@ -30,7 +35,7 @@ type Product = {
  display_name?: string | null;
 };
 type OrderBump = { id: string; bump_product_id: string; bump_product: { id: string; name: string; description: string | null; price: number; image_url: string | null; }; };
-type PaymentMethod = "pix" | "credit_card" | "boleto";
+type PaymentMethod = CheckoutPaymentMethod;
 type CheckoutState = "form" | "pending" | "approved" | "failed" | "expired";
 
 /* ─── Utils ─── */
@@ -42,45 +47,7 @@ function getCheckoutSessionId(slug: string): string {
 }
 function clearCheckoutSession(slug: string) { sessionStorage.removeItem(`checkout_session_${slug}`); }
 
-function isValidCpf(cpf: string): boolean {
- const digits = cpf.replace(/\D/g, "");
- if (digits.length !== 11 || /^(\d)\1+$/.test(digits)) return false;
- let sum = 0;
- for (let i = 0; i < 9; i++) sum += parseInt(digits[i]) * (10 - i);
- let rest = (sum * 10) % 11; if (rest === 10) rest = 0;
- if (rest !== parseInt(digits[9])) return false;
- sum = 0;
- for (let i = 0; i < 10; i++) sum += parseInt(digits[i]) * (11 - i);
- rest = (sum * 10) % 11; if (rest === 10) rest = 0;
- return rest === parseInt(digits[10]);
-}
-function isValidCnpj(cnpj: string): boolean {
- const digits = cnpj.replace(/\D/g, "");
- if (digits.length !== 14 || /^(\d)\1+$/.test(digits)) return false;
- const w1 = [5,4,3,2,9,8,7,6,5,4,3,2], w2 = [6,5,4,3,2,9,8,7,6,5,4,3,2];
- let sum = 0;
- for (let i = 0; i < 12; i++) sum += parseInt(digits[i]) * w1[i];
- let rest = sum % 11; rest = rest < 2 ? 0 : 11 - rest;
- if (rest !== parseInt(digits[12])) return false;
- sum = 0;
- for (let i = 0; i < 13; i++) sum += parseInt(digits[i]) * w2[i];
- rest = sum % 11; rest = rest < 2 ? 0 : 11 - rest;
- return rest === parseInt(digits[13]);
-}
-
 /* ─── Formatters ─── */
-const formatCpf = (v: string) => {
- const d = v.replace(/\D/g, "").slice(0, 14);
- if (d.length <= 3) return d;
- if (d.length <= 6) return `${d.slice(0,3)}.${d.slice(3)}`;
- if (d.length <= 9) return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6)}`;
- if (d.length <= 11) return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}`;
- return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8,12)}-${d.slice(12)}`;
-};
-const formatPhone = (v: string) => { const d = v.replace(/\D/g, "").slice(0, 11); if (d.length <= 2) return d; if (d.length <= 7) return `(${d.slice(0,2)}) ${d.slice(2)}`; return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`; };
-const formatCardNumber = (v: string) => v.replace(/\D/g, "").slice(0, 16).replace(/(\d{4})(?=\d)/g, "$1 ");
-const formatExpiry = (v: string) => { const d = v.replace(/\D/g, "").slice(0, 4); return d.length <= 2 ? d : `${d.slice(0,2)}/${d.slice(2)}`; };
-const formatCep = (v: string) => { const d = v.replace(/\D/g, "").slice(0, 8); return d.length <= 5 ? d : `${d.slice(0,5)}-${d.slice(5)}`; };
 const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 /* ═══ Premium Loading Screen ═══ */
@@ -184,10 +151,6 @@ export default function PublicCheckout() {
  const [emailConfirm, setEmailConfirm] = useState("");
  const [document, setDocument] = useState("");
  const [phone, setPhone] = useState("");
- const [cardNumber, setCardNumber] = useState("");
- const [cardExpiry, setCardExpiry] = useState("");
- const [cardCvv, setCardCvv] = useState("");
- const [cardName, setCardName] = useState("");
  const [installments, setInstallments] = useState("1");
  const [cep, setCep] = useState("");
  const [street, setStreet] = useState("");
@@ -197,6 +160,9 @@ export default function PublicCheckout() {
  const [city, setCity] = useState("");
  const [state, setState] = useState("");
  const [loadingCep, setLoadingCep] = useState(false);
+ const [cepMessage, setCepMessage] = useState<string | null>(null);
+ const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+ const cepAbortRef = useRef<AbortController | null>(null);
   const [copiedPix, setCopiedPix] = useState(false);
 
   // Coupon
@@ -334,33 +300,67 @@ export default function PublicCheckout() {
 
  // CEP handler
  const handleCepChange = useCallback(async (val: string) => {
- const formatted = formatCep(val); setCep(formatted);
+ const formatted = formatCheckoutCep(val); setCep(formatted);
+ setCepMessage(null);
+ cepAbortRef.current?.abort();
  const digits = formatted.replace(/\D/g, "");
  if (digits.length === 8) {
+ const controller = new AbortController();
+ cepAbortRef.current = controller;
  setLoadingCep(true);
  try {
- const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
- const data = await res.json();
- if (!data.erro) { setStreet(data.logradouro || ""); setNeighborhood(data.bairro || ""); setCity(data.localidade || ""); setState(data.uf || ""); }
- else toast.error("CEP não encontrado");
- } catch { toast.error("Erro ao buscar CEP"); }
- finally { setLoadingCep(false); }
+ const viaCepResponse = await fetch(`https://viacep.com.br/ws/${digits}/json/`, { signal: controller.signal });
+ const viaCepData = viaCepResponse.ok ? await viaCepResponse.json() : null;
+ let address = viaCepData && !viaCepData.erro ? {
+ street: viaCepData.logradouro, neighborhood: viaCepData.bairro, city: viaCepData.localidade, state: viaCepData.uf,
+ } : null;
+ if (!address) {
+ const brasilApiResponse = await fetch(`https://brasilapi.com.br/api/cep/v2/${digits}`, { signal: controller.signal });
+ if (brasilApiResponse.ok) {
+ const brasilApiData = await brasilApiResponse.json();
+ address = { street: brasilApiData.street, neighborhood: brasilApiData.neighborhood, city: brasilApiData.city, state: brasilApiData.state };
+ }
+ }
+ if (address) {
+ setStreet(address.street || ""); setNeighborhood(address.neighborhood || ""); setCity(address.city || ""); setState(address.state || "");
+ setCepMessage("Endereço localizado. Confira o número e o complemento.");
+ } else { setCepMessage("CEP não encontrado. Confira os números."); }
+ } catch (error) {
+ if (error instanceof DOMException && error.name === "AbortError") return;
+ setCepMessage("A busca automática falhou. Tente novamente.");
+ } finally { if (!controller.signal.aborted) setLoadingCep(false); }
  }
  }, []);
+
+ useEffect(() => () => cepAbortRef.current?.abort(), []);
+
+ const customerInput = (): CheckoutCustomerInput => ({
+ name, email, emailConfirm: product?.checkout_email_confirm ? emailConfirm : undefined,
+ document, phone, addressRequired: Boolean(product?.checkout_address_required),
+ cep, street, number: number_, complement, neighborhood, city, state,
+ });
+
+ const validateCustomer = () => {
+ const parsed = checkoutCustomerSchema.safeParse(customerInput());
+ if (parsed.success) { setFormErrors({}); return true; }
+ const nextErrors: Record<string, string> = {};
+ for (const issue of parsed.error.issues) {
+ const field = issue.path[0];
+ if (typeof field === "string" && !nextErrors[field]) nextErrors[field] = issue.message;
+ }
+ setFormErrors(nextErrors);
+ return false;
+ };
 
  const toggleBump = (bumpId: string) => {
  setSelectedBumps(prev => { const next = new Set(prev); if (next.has(bumpId)) next.delete(bumpId); else next.add(bumpId); return next; });
  };
 
- // Rate Limiting
- const submitCountRef = useRef<number[]>([]);
- const RATE_LIMIT_WINDOW = 60_000;
- const RATE_LIMIT_MAX = 3;
-
  // Payment Handler
   const handlePay = async (e: React.FormEvent) => {
  e.preventDefault();
   if (!product || processingRef.current) return;
+ if (!validateCustomer()) { toast.error("Revise os campos destacados"); return; }
   toast.error("Pagamentos temporariamente indisponíveis.");
  };
 
@@ -478,10 +478,10 @@ export default function PublicCheckout() {
  const installmentOptions = Array.from({ length: 12 }, (_, i) => { const n = i + 1; const val = n === 1 ? totalPrice : totalPrice * (1 + 0.0199 * (n - 1)) / n; return { n, val, total: n === 1 ? totalPrice : val * n }; });
  const selectedInstallment = installmentOptions[parseInt(installments) - 1];
 
- const availableMethods: { id: PaymentMethod; icon: LucideIcon; label: string; badge?: string }[] = [];
- if (product.checkout_pix_enabled) availableMethods.push({ id: "pix", icon: QrCode, label: "PIX", badge: "Instantâneo" });
- if (product.checkout_credit_card_enabled) availableMethods.push({ id: "credit_card", icon: CreditCard, label: "Cartão", badge: "Até 12x" });
- if (product.checkout_boleto_enabled) availableMethods.push({ id: "boleto", icon: FileText, label: "Boleto", badge: "1-3 dias" });
+ const availableMethods: { id: PaymentMethod; icon: LucideIcon; label: string; description: string }[] = [];
+ if (product.checkout_pix_enabled) availableMethods.push({ id: "pix", icon: QrCode, label: "PIX", description: "Confirmação rápida" });
+ if (product.checkout_credit_card_enabled) availableMethods.push({ id: "credit_card", icon: CreditCard, label: "Cartão", description: "Até 12 parcelas" });
+ if (product.checkout_boleto_enabled) availableMethods.push({ id: "boleto", icon: FileText, label: "Boleto", description: "Compensa em 1–3 dias" });
 
  const totalSteps = product.checkout_address_required ? 3 : 2;
 
@@ -675,6 +675,7 @@ export default function PublicCheckout() {
  const sectionHeaderClass = "px-5 py-4 border-b border-[hsl(var(--checkout-border))]/60 flex items-center gap-3";
  const sectionBodyClass = "p-5 space-y-4";
  const labelClass = "text-[11px] text-[hsl(var(--checkout-text-muted))] font-semibold flex items-center gap-1.5 uppercase tracking-wider";
+ const errorClass = "mt-1 text-xs font-medium text-destructive";
 
  return (
  <div data-checkout-theme={themeMode} className={`min-h-screen selection:bg-emerald-500/20 ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : isWhite ? "bg-[hsl(210_20%_98%)] text-gray-900" : "bg-[hsl(210_16%_94%)] text-gray-900"}`} style={checkoutThemeStyle}>
@@ -782,28 +783,33 @@ export default function PublicCheckout() {
  <div className={sectionBodyClass}>
  <div>
  <Label className={labelClass}><User className="h-3 w-3" /> Nome completo</Label>
- <Input value={name} onChange={e => setName(e.target.value)} placeholder="Seu nome completo" required className={inputClass} autoComplete="name" />
+ <Input id="checkout-name" value={name} onChange={e => setName(e.target.value.slice(0, 120))} onBlur={validateCustomer} placeholder="Seu nome completo" required className={inputClass} autoComplete="name" aria-invalid={Boolean(formErrors.name)} aria-describedby={formErrors.name ? "checkout-name-error" : undefined} />
+ {formErrors.name && <p id="checkout-name-error" className={errorClass}>{formErrors.name}</p>}
  </div>
  <div className={product.checkout_email_confirm ? "grid grid-cols-1 sm:grid-cols-2 gap-4" : ""}>
  <div>
  <Label className={labelClass}><Mail className="h-3 w-3" /> E-mail</Label>
- <Input value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" required type="email" className={inputClass} autoComplete="email" />
+ <Input id="checkout-email" value={email} onChange={e => setEmail(e.target.value.slice(0, 255))} onBlur={validateCustomer} placeholder="seu@email.com" required type="email" className={inputClass} autoComplete="email" aria-invalid={Boolean(formErrors.email)} />
+ {formErrors.email && <p className={errorClass}>{formErrors.email}</p>}
  </div>
  {product.checkout_email_confirm && (
  <div>
  <Label className={labelClass}>Confirme o e-mail</Label>
- <Input value={emailConfirm} onChange={e => setEmailConfirm(e.target.value)} placeholder="Confirme seu e-mail" required type="email" className={inputClass} />
+ <Input id="checkout-email-confirm" value={emailConfirm} onChange={e => setEmailConfirm(e.target.value.slice(0, 255))} onBlur={validateCustomer} placeholder="Confirme seu e-mail" required type="email" className={inputClass} autoComplete="email" aria-invalid={Boolean(formErrors.emailConfirm)} />
+ {formErrors.emailConfirm && <p className={errorClass}>{formErrors.emailConfirm}</p>}
  </div>
  )}
  </div>
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div>
  <Label className={labelClass}><FileDigit className="h-3 w-3" /> CPF / CNPJ</Label>
- <Input value={document} onChange={e => setDocument(formatCpf(e.target.value))} placeholder="000.000.000-00" required className={inputClass} inputMode="numeric" autoComplete="off" />
+ <Input id="checkout-document" value={document} onChange={e => setDocument(formatCheckoutDocument(e.target.value))} onBlur={validateCustomer} placeholder="000.000.000-00" required className={inputClass} inputMode="numeric" autoComplete="off" aria-invalid={Boolean(formErrors.document)} />
+ {formErrors.document && <p className={errorClass}>{formErrors.document}</p>}
  </div>
  <div>
  <Label className={labelClass}><Phone className="h-3 w-3" /> WhatsApp</Label>
- <Input value={phone} onChange={e => setPhone(formatPhone(e.target.value))} placeholder="(00) 00000-0000" required className={inputClass} inputMode="tel" autoComplete="tel" />
+ <Input id="checkout-phone" value={phone} onChange={e => setPhone(formatCheckoutPhone(e.target.value))} onBlur={validateCustomer} placeholder="(00) 00000-0000" required className={inputClass} inputMode="tel" autoComplete="tel" aria-invalid={Boolean(formErrors.phone)} />
+ {formErrors.phone && <p className={errorClass}>{formErrors.phone}</p>}
  </div>
  </div>
  </div>
@@ -821,9 +827,10 @@ export default function PublicCheckout() {
  <div>
  <Label className={labelClass}>CEP</Label>
  <div className="relative">
- <Input value={cep} onChange={e => handleCepChange(e.target.value)} placeholder="00000-000" required className={inputClass} inputMode="numeric" />
+ <Input id="checkout-cep" value={cep} onChange={e => void handleCepChange(e.target.value)} onBlur={validateCustomer} placeholder="00000-000" required className={inputClass} inputMode="numeric" autoComplete="postal-code" aria-invalid={Boolean(formErrors.cep)} aria-describedby="checkout-cep-status" />
  {loadingCep && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-gray-400 mt-1" />}
  </div>
+ <p id="checkout-cep-status" aria-live="polite" className={formErrors.cep ? errorClass : "mt-1 text-xs text-[hsl(var(--checkout-text-muted))]"}>{formErrors.cep || cepMessage}</p>
  </div>
  <div>
  <Label className={labelClass}>Bairro</Label>
@@ -843,9 +850,9 @@ export default function PublicCheckout() {
  <Label className={labelClass}>Complemento</Label>
  <Input value={complement} onChange={e => setComplement(e.target.value)} placeholder="Apto, sala..." className={inputClass} />
  </div>
- <div className="col-span-2 sm:col-span-1">
- <Label className={labelClass}>Cidade / UF</Label>
- <Input value={city && state ? `${city} - ${state}` : ""} readOnly placeholder="Preenchido via CEP" className={inputClass + " !bg-gray-100 !text-gray-400"} />
+ <div className="col-span-2 grid grid-cols-[1fr_80px] gap-3 sm:col-span-1">
+ <div><Label className={labelClass}>Cidade</Label><Input value={city} onChange={e => setCity(e.target.value.slice(0, 100))} placeholder="Cidade" required className={inputClass} autoComplete="address-level2" aria-invalid={Boolean(formErrors.city)} /></div>
+ <div><Label className={labelClass}>UF</Label><Input value={state} onChange={e => setState(e.target.value.replace(/[^a-z]/gi, "").toUpperCase().slice(0, 2))} placeholder="UF" required className={inputClass} autoComplete="address-level1" aria-invalid={Boolean(formErrors.state)} /></div>
  </div>
  </div>
  </div>
@@ -938,30 +945,12 @@ export default function PublicCheckout() {
  </div>
  <div className="ml-auto flex items-center gap-1.5">
  <Lock className="h-3 w-3 text-gray-300" />
- <span className="text-[8px] text-gray-300 font-bold tracking-wider">SSL 256-BIT</span>
+ <span className="text-[8px] text-gray-300 font-bold tracking-wider">CONEXÃO HTTPS</span>
  </div>
  </div>
 
  <div className={sectionBodyClass}>
- {/* Method Tabs (Premium) */}
- {availableMethods.length > 1 && (
- <div className="grid gap-2.5 p-1 rounded-xl bg-gray-50 border border-gray-100" style={{ gridTemplateColumns: `repeat(${availableMethods.length}, 1fr)` }}>
- {availableMethods.map(m => {
- const active = method === m.id;
- return (
- <button key={m.id} type="button" onClick={() => { setMethod(m.id); setPixData(null); setBoletoData(null); }}
- className={`flex flex-col items-center gap-1.5 px-3 py-3.5 rounded-xl text-center transition-all duration-300 ${
- active ? "bg-white shadow-md shadow-black/5 text-gray-800" : "bg-transparent text-gray-400 hover:text-gray-500 hover:bg-white/50"
- }`}
- style={active ? { boxShadow: `0 2px 12px -2px ${btnColor}15` } : undefined}>
- <m.icon className={`h-5 w-5 transition-all ${active ? "" : "opacity-40"}`} style={active ? { color: btnColor } : undefined} />
- <span className="text-xs font-bold">{m.label}</span>
- {m.badge && <span className={`text-[8px] font-medium ${active ? "text-gray-400" : "text-gray-300"}`}>{m.badge}</span>}
- </button>
- );
- })}
- </div>
- )}
+ <PaymentMethodSelector options={availableMethods} value={method} onChange={(nextMethod) => { setMethod(nextMethod); setPixData(null); setBoletoData(null); }} />
 
  {/* PIX indicator */}
  {method === "pix" && (
@@ -976,22 +965,10 @@ export default function PublicCheckout() {
  </div>
  )}
 
- {/* Credit Card fields */}
+ {/* Card fields are rendered only by the future acquirer tokenization widget. */}
  {method === "credit_card" && (
- <div className="space-y-4">
- <div>
- <Label className={labelClass}>Número do cartão</Label>
- <Input value={cardNumber} onChange={e => setCardNumber(formatCardNumber(e.target.value))} placeholder="0000 0000 0000 0000" required className={inputClass} inputMode="numeric" />
- </div>
- <div className="grid grid-cols-3 gap-3">
- <div>
- <Label className={labelClass}>Validade</Label>
- <Input value={cardExpiry} onChange={e => setCardExpiry(formatExpiry(e.target.value))} placeholder="MM/AA" required className={inputClass} inputMode="numeric" />
- </div>
- <div>
- <Label className={labelClass}>CVV</Label>
- <Input value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="000" required className={inputClass} inputMode="numeric" />
- </div>
+ <div className="space-y-4 rounded-lg border border-[hsl(var(--checkout-border))] bg-[hsl(var(--checkout-bg-soft))] p-4">
+ <div className="flex items-start gap-3"><Lock className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--checkout-text-muted))]" /><div><p className="text-sm font-bold text-[hsl(var(--checkout-text))]">Dados do cartão protegidos</p><p className="text-xs text-[hsl(var(--checkout-text-muted))]">Os campos seguros serão exibidos pela adquirente quando o cartão for habilitado. A VENXPAY não armazena número nem CVV.</p></div></div>
  <div>
  <Label className={labelClass}>Parcelas</Label>
  <div className="relative mt-1.5">
@@ -1000,11 +977,6 @@ export default function PublicCheckout() {
  </select>
  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 pointer-events-none" />
  </div>
- </div>
- </div>
- <div>
- <Label className={labelClass}>Nome do titular</Label>
- <Input value={cardName} onChange={e => setCardName(e.target.value.toUpperCase())} placeholder="NOME IMPRESSO NO CARTÃO" required className={inputClass} />
  </div>
  </div>
  )}
@@ -1148,7 +1120,7 @@ export default function PublicCheckout() {
  <div className="pt-1">
  <Button
  type="submit"
- disabled
+ disabled={processing}
  className="w-full h-[62px] text-base font-extrabold rounded-2xl text-white transition-all duration-300 hover:opacity-95 hover:scale-[1.008] active:scale-[0.995] disabled:opacity-50 disabled:hover:scale-100 relative overflow-hidden group"
  style={{ backgroundColor: btnColor, boxShadow: `0 12px 40px -12px ${btnColor}60, 0 4px 12px -4px ${btnColor}30` }}
  >
@@ -1157,7 +1129,7 @@ export default function PublicCheckout() {
  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
  </div>
  <span className="relative flex items-center gap-2.5">
- <><Lock className="h-4 w-4 opacity-80" /> Pagamentos indisponíveis</>
+ <><Lock className="h-4 w-4 opacity-80" /> Validar dados</>
  </span>
  </Button>
  </div>
@@ -1167,12 +1139,12 @@ export default function PublicCheckout() {
  <div className="flex items-center justify-center gap-5">
  <div className="flex items-center gap-1.5 text-gray-300">
  <Lock className="h-3.5 w-3.5" />
- <span className="text-[10px] font-semibold">SSL 256-bit</span>
+ <span className="text-[10px] font-semibold">Conexão HTTPS</span>
  </div>
  <div className="h-3 w-px bg-gray-200" />
  <div className="flex items-center gap-1.5 text-gray-300">
  <ShieldCheck className="h-3.5 w-3.5" />
- <span className="text-[10px] font-semibold">Compra 100% segura</span>
+ <span className="text-[10px] font-semibold">Pagamento protegido</span>
  </div>
  <div className="h-3 w-px bg-gray-200" />
  <div className="flex items-center gap-1.5 text-gray-300">

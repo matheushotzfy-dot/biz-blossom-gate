@@ -14,7 +14,7 @@ import {
   Package2, BarChart3, Calendar,
   PanelLeftClose, PanelLeft,
   Trophy, Search, ChevronDown, Sun, Moon, Target, Gauge, Lock, Clock, SearchX,
-  Link as LinkIcon,
+   Link as LinkIcon, PackageCheck,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -63,6 +63,7 @@ const AdminGoalsTab = lazy(() => import("./tabs/AdminGoalsTab"));
 const AdminCommandCenterTab = lazy(() => import("./tabs/AdminCommandCenterTab"));
 const AdminToolsTab = lazy(() => import("./tabs/AdminToolsTab"));
 const AdminPaymentLinksTab = lazy(() => import("./tabs/AdminPaymentLinksTab"));
+const AdminCheckoutDeliveriesTab = lazy(() => import("./tabs/AdminCheckoutDeliveriesTab"));
 
 const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
 
@@ -91,6 +92,7 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
       { id: "withdrawals", label: "Saques", icon: ArrowDownToLine, employeeAccess: false },
       { id: "transactions", label: "Transações", icon: CreditCard, employeeAccess: true },
       { id: "payment-links", label: "Links de Pagamento", icon: LinkIcon, employeeAccess: false },
+       { id: "checkout-deliveries", label: "Entregas", icon: PackageCheck, employeeAccess: false },
       { id: "financial-audit", label: "Auditoria Financeira", icon: Activity, employeeAccess: false },
     ],
   },
@@ -749,6 +751,7 @@ export default function AdminDashboard() {
               {activeTab === "subscriptions" && isAdmin && <AdminSubscriptionsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
               {activeTab === "referrals" && isAdmin && <AdminReferralsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
               {activeTab === "payment-links" && isAdmin && <AdminPaymentLinksTab fmtCurrency={fmtCurrency} />}
+              {activeTab === "checkout-deliveries" && isAdmin && <AdminCheckoutDeliveriesTab />}
               {activeTab === "support" && (isAdmin || hasSupportPerm) && <AdminSupportTab profiles={profiles} />}
               {activeTab === "rewards" && isAdmin && <AdminRewardsTab profiles={profiles} />}
               {activeTab === "corridas" && isAdmin && <AdminCorridasTab />}

@@ -12,6 +12,14 @@ import {
 } from "@/lib/validation";
 import { detectPixKeyType, maskAccount, maskAgency, maskDocument, maskPhone, maskSensitivePixKey } from "@/lib/financial-input";
 import { spreadsheetSafe } from "@/lib/sales-export";
+import {
+  checkoutCustomerSchema,
+  formatCheckoutCep,
+  formatCheckoutDocument,
+  formatCheckoutPhone,
+  isValidCardExpiry,
+  isValidCardNumber,
+} from "@/features/public-checkout/checkoutSchema";
 
 /**
  * Onda 5 — Unit tests for the centralized validation lib.
@@ -246,5 +254,45 @@ describe("spreadsheet export safety", () => {
     expect(spreadsheetSafe("+1+1")).toBe("'+1+1");
     expect(spreadsheetSafe("Cliente normal")).toBe("Cliente normal");
     expect(spreadsheetSafe(197)).toBe(197);
+  });
+});
+
+describe("public checkout validation", () => {
+  const validCustomer = {
+    name: "Maria da Silva",
+    email: "maria@example.com",
+    emailConfirm: "maria@example.com",
+    document: "529.982.247-25",
+    phone: "(11) 98765-4321",
+    addressRequired: false,
+  };
+
+  it("accepts normalized buyer data and matching email", () => {
+    const result = checkoutCustomerSchema.safeParse(validCustomer);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.email).toBe("maria@example.com");
+  });
+
+  it("rejects invalid documents, phones and email confirmation", () => {
+    expect(checkoutCustomerSchema.safeParse({ ...validCustomer, document: "123", phone: "123", emailConfirm: "outra@example.com" }).success).toBe(false);
+  });
+
+  it("requires a complete address only when configured", () => {
+    expect(checkoutCustomerSchema.safeParse({ ...validCustomer, addressRequired: true }).success).toBe(false);
+    expect(checkoutCustomerSchema.safeParse({ ...validCustomer, addressRequired: true, cep: "01310-100", street: "Avenida Paulista", number: "1000", neighborhood: "Bela Vista", city: "São Paulo", state: "SP" }).success).toBe(true);
+  });
+
+  it("formats document, phone and CEP without accepting extra digits", () => {
+    expect(formatCheckoutDocument("52998224725")).toBe("529.982.247-25");
+    expect(formatCheckoutDocument("11222333000181")).toBe("11.222.333/0001-81");
+    expect(formatCheckoutPhone("5511987654321")).toBe("(11) 98765-4321");
+    expect(formatCheckoutCep("01310100")).toBe("01310-100");
+  });
+
+  it("validates card metadata without retaining card data", () => {
+    expect(isValidCardNumber("4242 4242 4242 4242")).toBe(true);
+    expect(isValidCardNumber("4242 4242 4242 4241")).toBe(false);
+    expect(isValidCardExpiry("12/30", new Date("2026-10-05T00:00:00Z"))).toBe(true);
+    expect(isValidCardExpiry("09/26", new Date("2026-10-05T00:00:00Z"))).toBe(false);
   });
 });
