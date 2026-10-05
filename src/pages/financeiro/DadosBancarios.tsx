@@ -19,7 +19,7 @@ import {
 import { InlineError, errorInputClass } from "@/components/ui/inline-error";
 import { friendlyError } from "@/lib/friendlyError";
 import { ReauthenticationDialog } from "@/components/security/ReauthenticationDialog";
-import { detectPixKeyType, formatPixKey, maskAccount, maskAgency, maskDocument, maskSensitivePixKey } from "@/lib/financial-input";
+import { detectPixKeyType, displayPixKey, formatPixKey, maskAccount, maskAgency, maskDocument } from "@/lib/financial-input";
 
 const PIX_TYPES = [
   { value: "cpf" as const, label: "CPF", description: "Documento pessoal", icon: User },
@@ -242,7 +242,7 @@ export default function DadosBancarios() {
             {pixKeys.map((pk) => (
               <div key={pk.id} className="px-5 py-4 flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="truncate font-mono text-sm font-bold text-foreground">{maskSensitivePixKey((pk as { key_value_masked?: string | null }).key_value_masked ?? pk.key_value, pk.key_type)}</p>
+                  <p className="break-all font-mono text-sm font-bold text-foreground">{displayPixKey(pk.key_value, pk.key_type, (pk as { key_value_masked?: string | null }).key_value_masked)}</p>
                   <p className="text-[11px] font-medium text-muted-foreground/70 mt-0.5">
                     {PIX_TYPES.find(t => t.value === pk.key_type)?.label || pk.key_type}
                   </p>

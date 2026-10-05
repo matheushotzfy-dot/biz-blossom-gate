@@ -57,6 +57,19 @@ export function formatPixKey(value: string, type: PixKeyType): string {
   return value.trimStart().slice(0, type === "email" ? 254 : 77);
 }
 
+export function displayPixKey(
+  value: string | null | undefined,
+  type: string,
+  maskedFallback?: string | null,
+): string {
+  if (!value) return maskedFallback || "—";
+  const normalizedType = type === "telefone" ? "phone" : type;
+  if (["cpf", "cnpj", "email", "phone", "random"].includes(normalizedType)) {
+    return formatPixKey(value, normalizedType as PixKeyType);
+  }
+  return value;
+}
+
 export function maskSensitivePixKey(value: string | null | undefined, type: string): string {
   if (!value) return "••••";
   if (value.includes("•") || value.includes("*")) return value;

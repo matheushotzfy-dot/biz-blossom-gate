@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ReauthenticationDialog } from "@/components/security/ReauthenticationDialog";
 import { friendlyError } from "@/lib/friendlyError";
-import { maskSensitivePixKey } from "@/lib/financial-input";
+import { displayPixKey } from "@/lib/financial-input";
 
 type Config = {
   id: string;
@@ -81,7 +81,7 @@ export default function AutoWithdrawalSettings() {
   const canSave = !saving && (enabled ? formValid : true);
 
   const selectedKey = activeKeys.find(k => k.id === (config?.pix_key_id || ""));
-  const maskedKey = (k?: typeof selectedKey) => k ? maskSensitivePixKey(k.key_value_masked ?? k.key_value, k.key_type) : "";
+  const visibleKey = (k?: typeof selectedKey) => k ? displayPixKey(k.key_value, k.key_type, k.key_value_masked) : "";
 
   function handleSave() {
     if (!user?.id || !canSave) return;
@@ -148,7 +148,7 @@ export default function AutoWithdrawalSettings() {
           </div>
           <p className="text-[9px] font-bold text-muted-foreground/80 mt-1 truncate leading-none">
             {isActive
-              ? `${fmt(Number(config?.target_amount || 0))} para ${(selectedKey?.key_type || "chave").toUpperCase()} · ${maskedKey(selectedKey)}`
+              ? `${fmt(Number(config?.target_amount || 0))} para ${(selectedKey?.key_type || "chave").toUpperCase()} · ${visibleKey(selectedKey)}`
               : "Solicita saque sozinho ao atingir o valor alvo"}
           </p>
         </div>
@@ -283,7 +283,7 @@ export default function AutoWithdrawalSettings() {
                         : k.key_type === "telefone" || k.key_type === "phone" ? Phone
                         : k.key_type === "cpf" || k.key_type === "cnpj" ? Hash
                         : Fingerprint;
-                      const val = maskSensitivePixKey(k.key_value_masked ?? k.key_value, k.key_type);
+                      const val = displayPixKey(k.key_value, k.key_type, k.key_value_masked);
                       return (
                         <button
                           key={k.id}
