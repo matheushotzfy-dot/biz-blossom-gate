@@ -777,6 +777,8 @@ export type Database = {
       app_integrations: {
         Row: {
           api_key: string | null
+          api_key_enc: string | null
+          api_key_masked: string | null
           api_url: string | null
           app_name: string
           config: Json
@@ -787,10 +789,14 @@ export type Database = {
           product_id: string | null
           updated_at: string
           user_id: string
+          webhook_secret_enc: string | null
           webhook_url: string | null
+          webhook_url_masked: string | null
         }
         Insert: {
           api_key?: string | null
+          api_key_enc?: string | null
+          api_key_masked?: string | null
           api_url?: string | null
           app_name: string
           config?: Json
@@ -801,10 +807,14 @@ export type Database = {
           product_id?: string | null
           updated_at?: string
           user_id: string
+          webhook_secret_enc?: string | null
           webhook_url?: string | null
+          webhook_url_masked?: string | null
         }
         Update: {
           api_key?: string | null
+          api_key_enc?: string | null
+          api_key_masked?: string | null
           api_url?: string | null
           app_name?: string
           config?: Json
@@ -815,7 +825,9 @@ export type Database = {
           product_id?: string | null
           updated_at?: string
           user_id?: string
+          webhook_secret_enc?: string | null
           webhook_url?: string | null
+          webhook_url_masked?: string | null
         }
         Relationships: [
           {
@@ -2635,6 +2647,8 @@ export type Database = {
       product_pixels: {
         Row: {
           api_token: string | null
+          api_token_enc: string | null
+          api_token_masked: string | null
           boleto_conversion_value: number
           created_at: string
           disable_bump_events: boolean
@@ -2652,6 +2666,8 @@ export type Database = {
         }
         Insert: {
           api_token?: string | null
+          api_token_enc?: string | null
+          api_token_masked?: string | null
           boleto_conversion_value?: number
           created_at?: string
           disable_bump_events?: boolean
@@ -2669,6 +2685,8 @@ export type Database = {
         }
         Update: {
           api_token?: string | null
+          api_token_enc?: string | null
+          api_token_masked?: string | null
           boleto_conversion_value?: number
           created_at?: string
           disable_bump_events?: boolean
@@ -5050,7 +5068,7 @@ export type Database = {
           webhook_url: string | null
         }
         Insert: {
-          api_key_masked?: never
+          api_key_masked?: string | null
           api_url?: string | null
           app_name?: string | null
           config?: Json | null
@@ -5065,7 +5083,7 @@ export type Database = {
           webhook_url?: string | null
         }
         Update: {
-          api_key_masked?: never
+          api_key_masked?: string | null
           api_url?: string | null
           app_name?: string | null
           config?: Json | null
@@ -5187,6 +5205,71 @@ export type Database = {
           pixel_id?: string | null
           platform?: string | null
           product_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_pixels_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_pixels_safe: {
+        Row: {
+          api_token_masked: string | null
+          boleto_conversion_value: number | null
+          created_at: string | null
+          disable_bump_events: boolean | null
+          domain: string | null
+          events: Json | null
+          fire_on_boleto: boolean | null
+          fire_on_pix_qr: boolean | null
+          has_api_token: boolean | null
+          id: string | null
+          is_active: boolean | null
+          pix_conversion_value: number | null
+          pixel_id: string | null
+          platform: string | null
+          product_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          api_token_masked?: string | null
+          boleto_conversion_value?: number | null
+          created_at?: string | null
+          disable_bump_events?: boolean | null
+          domain?: string | null
+          events?: Json | null
+          fire_on_boleto?: boolean | null
+          fire_on_pix_qr?: boolean | null
+          has_api_token?: never
+          id?: string | null
+          is_active?: boolean | null
+          pix_conversion_value?: number | null
+          pixel_id?: string | null
+          platform?: string | null
+          product_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          api_token_masked?: string | null
+          boleto_conversion_value?: number | null
+          created_at?: string | null
+          disable_bump_events?: boolean | null
+          domain?: string | null
+          events?: Json | null
+          fire_on_boleto?: boolean | null
+          fire_on_pix_qr?: boolean | null
+          has_api_token?: never
+          id?: string | null
+          is_active?: boolean | null
+          pix_conversion_value?: number | null
+          pixel_id?: string | null
+          platform?: string | null
+          product_id?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
