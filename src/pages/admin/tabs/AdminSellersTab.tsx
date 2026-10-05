@@ -216,7 +216,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     setPiiRevealed(false); setRevealedDoc(null); setRevealedPixKeys(null); setRevealedLegacyPix(null);
 
     try {
-      const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, disputesRes, retRes, ipRes, pixRes] = await Promise.all([
+      const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, disputesRes, retRes, ipRes] = await Promise.all([
         supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(300),
         supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
         supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(500),
@@ -226,7 +226,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
         supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days, card_release_days").eq("user_id", profile.user_id).maybeSingle(),
         supabase.from("ip_logs").select("ip, user_agent, country, source, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
-        supabase.rpc("admin_reveal_pix_keys", { _user_id: profile.user_id }),
       ]);
       if (requestId !== detailRequestRef.current) return;
       if (logsRes.data) {
@@ -240,9 +239,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       if (adjRes.data) setBalanceAdjustments(adjRes.data);
       if (disputesRes.data) setUserDisputes(disputesRes.data as Dispute[]);
       if (ipRes.data) setIpHistory(ipRes.data as IpLog[]);
-      const visiblePixKeys = (pixRes.data || []) as PixKey[];
-      setUserPixKeys(visiblePixKeys);
-      setRevealedPixKeys(visiblePixKeys);
+      setUserPixKeys([]);
 
       setAdminNotes(profile.admin_notes || "");
       if (retRes.data) {
@@ -1289,7 +1286,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     icon={Key}
                     action={!piiRevealed ? (
                       <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={revealPii}>
-                        <Eye className="h-3.5 w-3.5 mr-1" /> Revelar documento
+                        <Eye className="h-3.5 w-3.5 mr-1" /> Ver chaves e documento
                       </Button>
                     ) : null}
                   >
