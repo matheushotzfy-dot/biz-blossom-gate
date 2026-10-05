@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { uniqueChannelName } from "@/lib/realtime";
 
@@ -17,9 +18,11 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
   const [theme, setThemeState] = useState<Theme>("light");
   const [userId, setUserId] = useState<string | null>(null);
-  const checkoutOwnsTheme = /^\/(pay|checkout|pl)\//.test(window.location.pathname);
+  const requestIdRef = useRef(0);
+  const checkoutOwnsTheme = /^\/(pay|checkout|pl)\//.test(location.pathname);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -36,17 +39,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     const loadPreference = async (nextUserId: string | null) => {
       if (!active) return;
+      const requestId = ++requestIdRef.current;
       setUserId(nextUserId);
       if (!nextUserId) {
         setThemeState("light");
         return;
       }
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("theme_preference")
         .eq("user_id", nextUserId)
         .maybeSingle();
-      if (!active) return;
+      if (!active || requestId !== requestIdRef.current) return;
+      if (error) {
+        console.error("[theme] preference load failed");
+        setThemeState("light");
+        return;
+      }
       setThemeState(data?.theme_preference === "dark" ? "dark" : "light");
     };
 
@@ -80,12 +89,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setTheme = useCallback((next: Theme) => {
     setThemeState(next);
     if (!userId) return;
+    const previous = theme;
     void supabase.rpc("set_my_theme_preference", { _theme: next }).then(({ error }) => {
       if (error) {
         console.error("[theme] preference update failed");
+        setThemeState(previous);
       }
     });
-  }, [userId]);
+  }, [theme, userId]);
 
   const toggleTheme = useCallback(() => {
     setTheme(theme === "dark" ? "light" : "dark");

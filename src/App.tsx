@@ -122,10 +122,10 @@ const App = () => (
         buster: "v1",
       }}
     >
-      <ThemeProvider>
-        <TooltipProvider>
-          <Sonner />
-          <BrowserRouter>
+      <BrowserRouter>
+        <ThemeProvider>
+          <TooltipProvider>
+            <Sonner />
             <ImpersonationBanner />
             <ScrollToTop />
             <CookieConsent />
@@ -227,9 +227,9 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
-          </BrowserRouter>
-        </TooltipProvider>
-      </ThemeProvider>
+          </TooltipProvider>
+        </ThemeProvider>
+      </BrowserRouter>
     </PersistQueryClientProvider>
   </ErrorBoundary>
 );
