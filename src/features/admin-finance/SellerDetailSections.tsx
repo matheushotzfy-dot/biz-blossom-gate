@@ -12,6 +12,7 @@ import { brl, rpcErrorMessage } from "./types";
 const Spinner = () => <div className="flex h-24 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-label="Carregando" /></div>;
 const Empty = ({ text }: { text: string }) => <p className="rounded-xl border border-dashed border-border p-6 text-center text-xs text-muted-foreground">{text}</p>;
 const fmt = (d: string | null) => (d ? new Date(d).toLocaleString("pt-BR") : "—");
+function LoadError({ retry }: { retry: () => void }) { return <div role="alert" className="flex flex-wrap items-center justify-between gap-3 border border-destructive/30 p-4 text-sm text-destructive">Não foi possível carregar os registros.<Button variant="outline" onClick={retry}>Tentar novamente</Button></div>; }
 
 interface AcqHistory {
   current: { id: string; name: string } | null;
@@ -21,16 +22,18 @@ interface AcqHistory {
 
 /** Current acquirer, every change and sales/balance split by the acquirer actually used. */
 export function SellerAcquirersSection({ userId }: { userId: string }) {
-  const q = useQuery({ queryKey: ["seller-acq", userId], queryFn: async () => {
+  const { user } = useAuth();
+  const q = useQuery({ queryKey: ["seller-acq", user?.id, userId], staleTime: 30000, queryFn: async () => {
     const { data, error } = await supabase.rpc("get_seller_acquirer_history", { _user_id: userId });
     if (error) throw new Error(rpcErrorMessage(error)); return data as unknown as AcqHistory;
   } });
   if (q.isLoading) return <Spinner />;
+  if (q.isError) return <LoadError retry={() => void q.refetch()} />;
   if (!q.data) return <Empty text="Não foi possível carregar" />;
   const d = q.data;
   return (
     <div className="space-y-4 text-xs">
-      <p>Adquirente atual: <span className="font-semibold">{d.current?.name ?? "Padrão da plataforma (com reserva automática)"}</span></p>
+      <p>Adquirente atual: <span className="font-semibold">{d.current?.name ?? "Padrão da plataforma"}</span></p>
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full"><thead className="bg-muted/40 text-left text-muted-foreground"><tr>{["Adquirente usada", "Vendas", "Conversão", "Volume", "Líquido (após reembolsos)", "Taxas", "Período"].map((h) => <th key={h} className="px-3 py-2 font-semibold">{h}</th>)}</tr></thead>
           <tbody>{d.usage.length === 0 ? <tr><td colSpan={7} className="px-3 py-4 text-center text-muted-foreground">Sem vendas</td></tr> : d.usage.map((u) => (
@@ -53,20 +56,27 @@ export function SellerWithdrawalsSection({ userId, onChanged }: { userId: string
   const { user } = useAuth();
   const qc = useQueryClient();
   const [reasons, setReasons] = useState<Record<string, string>>({});
-  const q = useQuery({ queryKey: ["seller-wd", userId], queryFn: async () => {
-    const { data, error } = await supabase.from("withdrawals").select("id,amount,fee_amount,net_amount,status,created_at,processed_at,rejection_reason,withdrawal_type,pix_key_id,pix_keys(key_type,key_value)").eq("user_id", userId).order("created_at", { ascending: false }).limit(200);
+  const [page, setPage] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const q = useQuery({ queryKey: ["seller-wd", user?.id, userId, page], staleTime: 30000, queryFn: async () => {
+    const { data, error } = await supabase.from("withdrawals").select("id,amount,fee_amount,net_amount,status,created_at,processed_at,rejection_reason,withdrawal_type,pix_key_id,pix_keys(key_type,key_value)").eq("user_id", userId).order("created_at", { ascending: false }).order("id").range(page * 25, page * 25 + 24);
     if (error) throw new Error(rpcErrorMessage(error)); return data;
   } });
   const reject = async (id: string) => {
+    if (!user || busy) return;
     const reason = reasons[id]?.trim() ?? "";
     if (reason.length < 5) { toast.error("Motivo da recusa obrigatório (mín. 5 caracteres)"); return; }
-    const { data, error } = await supabase.from("withdrawals").update({ status: "rejected", rejection_reason: reason.slice(0, 500), processed_by: user?.id }).eq("id", id).eq("status", "pending").select("id");
+    if (!window.confirm("Recusar este saque e devolver a reserva ao seller?")) return;
+    setBusy(true);
+    const { data, error } = await supabase.from("withdrawals").update({ status: "rejected", rejection_reason: reason.slice(0, 500), processed_by: user.id }).eq("id", id).eq("user_id", userId).eq("status", "pending").select("id");
+    setBusy(false);
     if (error || !data?.length) { toast.error(error ? rpcErrorMessage(error) : "Saque não está mais pendente"); return; }
-    toast.success("Saque recusado; saldo devolvido ao seller"); void qc.invalidateQueries({ queryKey: ["seller-wd", userId] }); onChanged?.();
+    toast.success("Saque recusado; saldo devolvido ao seller"); void qc.invalidateQueries({ queryKey: ["seller-wd", user.id, userId] }); onChanged?.();
   };
   if (q.isLoading) return <Spinner />;
+  if (q.isError) return <LoadError retry={() => void q.refetch()} />;
   const rows = q.data ?? [];
-  if (!rows.length) return <Empty text="Nenhum saque solicitado" />;
+  if (!rows.length && !page) return <Empty text="Nenhum saque solicitado" />;
   return (
     <div className="space-y-2 text-xs">
       {rows.map((w) => {
@@ -82,10 +92,11 @@ export function SellerWithdrawalsSection({ userId, onChanged }: { userId: string
             {w.status === "pending" && (
               <div className="flex flex-col gap-1 md:w-64">
                 <Input placeholder="Motivo da recusa" maxLength={500} value={reasons[w.id] ?? ""} onChange={(e) => setReasons((r) => ({ ...r, [w.id]: e.target.value }))} />
-                <Button size="sm" variant="outline" onClick={() => void reject(w.id)}>Recusar saque</Button>
+                <Button size="sm" variant="outline" disabled={busy || (reasons[w.id]?.trim().length ?? 0) < 5} onClick={() => void reject(w.id)}>Recusar saque</Button>
               </div>)}
           </div>);
       })}
+      <div className="flex justify-between"><Button variant="outline" size="sm" disabled={!page || q.isFetching} onClick={() => setPage(value => value - 1)}>Anterior</Button><span>Página {page + 1}</span><Button variant="outline" size="sm" disabled={rows.length < 25 || q.isFetching} onClick={() => setPage(value => value + 1)}>Próxima</Button></div>
     </div>
   );
 }
@@ -94,9 +105,10 @@ const REWARD_STATUS = [{ v: "pending", l: "Solicitada" }, { v: "preparing", l: "
 
 /** Award claims with editable status and tracking. */
 export function SellerRewardsSection({ userId }: { userId: string }) {
+  const { user } = useAuth();
   const qc = useQueryClient();
   const [edit, setEdit] = useState<Record<string, { status: string; code: string; carrier: string }>>({});
-  const q = useQuery({ queryKey: ["seller-rewards", userId], queryFn: async () => {
+  const q = useQuery({ queryKey: ["seller-rewards", user?.id, userId], staleTime: 30000, queryFn: async () => {
     const { data, error } = await supabase.from("reward_claims").select("id,tier_label,tier_value,status,tracking_code,tracking_carrier,shipping_city,shipping_state,created_at,delivered_at").eq("user_id", userId).order("created_at", { ascending: false });
     if (error) throw new Error(rpcErrorMessage(error)); return data;
   } });
@@ -105,11 +117,12 @@ export function SellerRewardsSection({ userId }: { userId: string }) {
     const { error } = await supabase.from("reward_claims").update({
       status: e.status, tracking_code: e.code.trim().slice(0, 100) || null, tracking_carrier: e.carrier.trim().slice(0, 60) || null,
       delivered_at: e.status === "delivered" ? new Date().toISOString() : null,
-    }).eq("id", id);
+    }).eq("id", id).eq("user_id", userId);
     if (error) { toast.error(rpcErrorMessage(error)); return; }
-    toast.success("Premiação atualizada"); void qc.invalidateQueries({ queryKey: ["seller-rewards", userId] });
+    toast.success("Premiação atualizada"); void qc.invalidateQueries({ queryKey: ["seller-rewards", user?.id, userId] });
   };
   if (q.isLoading) return <Spinner />;
+  if (q.isError) return <LoadError retry={() => void q.refetch()} />;
   const rows = q.data ?? [];
   if (!rows.length) return <Empty text="Nenhuma premiação solicitada" />;
   return (
@@ -121,7 +134,7 @@ export function SellerRewardsSection({ userId }: { userId: string }) {
           <div key={r.id} className="space-y-2 rounded-xl border border-border p-3">
             <p><span className="font-semibold">{r.tier_label}</span> · meta {brl(r.tier_value)} · pedido {fmt(r.created_at)} · {r.shipping_city ?? "—"}/{r.shipping_state ?? ""}</p>
             <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
-              <Select value={e.status} onValueChange={(v) => set({ status: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{REWARD_STATUS.map((s) => <SelectItem key={s.v} value={s.v}>{s.l}</SelectItem>)}</SelectContent></Select>
+              <Select value={e.status} onValueChange={(v) => set({ status: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent className="z-[130]">{REWARD_STATUS.map((s) => <SelectItem key={s.v} value={s.v}>{s.l}</SelectItem>)}</SelectContent></Select>
               <Input placeholder="Transportadora" maxLength={60} value={e.carrier} onChange={(ev) => set({ carrier: ev.target.value })} />
               <Input placeholder="Código de rastreio" maxLength={100} value={e.code} onChange={(ev) => set({ code: ev.target.value })} />
               <Button size="sm" onClick={() => void save(r.id)}>Salvar</Button>
@@ -136,14 +149,17 @@ const TX_LABEL: Record<string, string> = { approved: "Aprovada", paid: "Paga", c
 
 /** Latest 100 seller transactions with acquirer and fee split. */
 export function SellerTransactionsSection({ userId }: { userId: string }) {
+  const { user } = useAuth();
+  const [page, setPage] = useState(0);
   const acqs = useQuery({ queryKey: ["acq-basic"], staleTime: 300_000, queryFn: async () => (await supabase.rpc("list_acquirers_basic")).data ?? [] });
-  const q = useQuery({ queryKey: ["seller-tx", userId], queryFn: async () => {
-    const { data, error } = await supabase.from("transactions").select("id,amount,fee_amount,fee_percent_amount,fee_fixed_amount,net_amount,refunded_amount,status,payment_method,customer_name,customer_email,buyer_ip,acquirer_id,created_at").eq("user_id", userId).eq("is_simulated", false).order("created_at", { ascending: false }).limit(100);
+  const q = useQuery({ queryKey: ["seller-tx", user?.id, userId, page], staleTime: 30000, queryFn: async () => {
+    const { data, error } = await supabase.from("transactions").select("id,amount,fee_amount,fee_percent_amount,fee_fixed_amount,net_amount,refunded_amount,status,payment_method,customer_name,customer_email,buyer_ip,acquirer_id,created_at").eq("user_id", userId).eq("is_simulated", false).order("created_at", { ascending: false }).order("id").range(page * 25, page * 25 + 24);
     if (error) throw new Error(rpcErrorMessage(error)); return data;
   } });
   if (q.isLoading) return <Spinner />;
+  if (q.isError) return <LoadError retry={() => void q.refetch()} />;
   const rows = q.data ?? [];
-  if (!rows.length) return <Empty text="Nenhuma transação" />;
+  if (!rows.length && !page) return <Empty text="Nenhuma transação" />;
   return (
     <div className="overflow-x-auto rounded-xl border border-border text-xs">
       <table className="w-full"><thead className="bg-muted/40 text-left text-muted-foreground"><tr>{["Data", "Status", "Método", "Valor", "Taxa %", "Taxa fixa", "Líquido", "Reemb.", "Comprador", "IP", "Adquirente"].map((h) => <th key={h} className="whitespace-nowrap px-3 py-2 font-semibold">{h}</th>)}</tr></thead>
@@ -155,6 +171,7 @@ export function SellerTransactionsSection({ userId }: { userId: string }) {
             <td className="px-3 py-2">{t.customer_name ?? "—"}<span className="block text-muted-foreground">{t.customer_email}</span></td>
             <td className="px-3 py-2 font-mono">{t.buyer_ip ?? "—"}</td><td className="px-3 py-2">{acqs.data?.find((a) => a.id === t.acquirer_id)?.name ?? "—"}</td>
           </tr>))}</tbody></table>
+      <div className="flex items-center justify-between gap-3 border-t border-border p-3"><Button variant="outline" size="sm" disabled={!page || q.isFetching} onClick={() => setPage(value => value - 1)}>Anterior</Button><span>Página {page + 1}</span><Button variant="outline" size="sm" disabled={rows.length < 25 || q.isFetching} onClick={() => setPage(value => value + 1)}>Próxima</Button></div>
     </div>
   );
 }

@@ -4967,3 +4967,13 @@ html body .lp .lp-progress {
     transition-duration: 1ms !important;
   }
 }
+
+/* Seller records stay centered independently of pointer-origin animations. */
+.seller-detail-dialog[data-state] {
+  animation: none;
+  transform: translate(-50%, -50%);
+  box-shadow: none;
+}
+.seller-detail-dialog .seller-detail-tabs { flex-wrap: nowrap; }
+.seller-detail-dialog [role="tabpanel"] { min-width: 0; }
+.seller-detail-dialog [role="tabpanel"] > * { max-width: 100%; }

@@ -1,4 +1,5 @@
 # Admin total — controle manual, métricas, adquirentes e ficha do seller
+- [x] Sellers: lista paginada com ranking e filtros por período/vendas/MED/chargeback/reembolsos, ficha estável e navegação nas onze opções verificadas; opções da reserva visíveis, confirmação financeira e recuperação de falha testadas, sem movimentar dinheiro. 18 testes aprovados e sem erros de navegação; operações reais e históricos com vendas dependem de autorização/dados.
 - [x] Analytics: agregados por período, atividade diária de sellers/clientes/cadastros, riscos, pendências atuais e lista paginada por seller; busca, ordenação, filtro de vendas, ficha, período de um ano e recuperação de falha verificados. 60 testes aprovados; sem vendas reais para validação financeira de ponta a ponta.
 
 - [x] Centro de comando: agregados exatos, busca validada, oito atalhos, período, atualização e recuperação de falha verificados; 102 testes aprovados. Reduzidas consultas recorrentes, adicionados índices e corrigida chamada autenticada dentro do listener. Registros históricos preservados: ausência de reprodução atual não comprova correção de todas as causas; pagamentos reais continuam sem adquirente configurado.
@@ -13,7 +14,7 @@
 - [ ] Métricas financeiras separadas (taxa %, fixa, adquirente, saque, por método, MED, reembolso, chargeback) + conciliação
 - [ ] Transações em abas + filtros (adquirente, código Pix, CPF, IP)
 - [ ] Adquirentes: padrão + fallback, por seller, histórico de trocas, conversão por adquirente
-- [ ] Ficha completa do seller (todas as abas, saques com recusa e motivo, premiações com status/rastreio)
+- [ ] Ficha do seller: validação financeira ponta a ponta de recusa de saques, disputas e premiações com históricos reais (bloqueado: autorização para mutações e dados reais; navegação das onze abas já validada).
 - [ ] Blindagem de formulários do seller
 - [ ] Saques: comprovante e lote; exportação; busca geral; relatórios; e-mails; saúde; menu enxuto; permissões aba por aba
 - [ ] Testes com venda real (bloqueado: sem adquirente e sem vendas)

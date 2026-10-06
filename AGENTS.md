@@ -1,4 +1,5 @@
 # Architecture Decisions
+- Sellers directory uses admin-only period aggregates and server pagination; seller records keep fixed positioning, scoped caches and explicit history limits, while money actions use audited manual-approval routines and reinforced confirmation.
 - Analytics uses admin-only aggregate RPCs with São Paulo date boundaries and paginated seller rows; account activity, paid-sales cohorts and dated risk events stay explicitly separate, and client counts use normalized purchase emails rather than exposing buyer identities.
 
 - Command center uses account-scoped, abortable aggregate RPCs for exact queues and period metrics; failed loads never report healthy status, and reviewing an error is distinct from fixing its cause.

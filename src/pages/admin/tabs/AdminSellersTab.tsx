@@ -1,4 +1,10 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useRef } from "react";
+import { SellersDirectory } from "@/features/admin-finance/SellersDirectory";
+import { BalanceAdjustCard } from "@/features/admin-finance/BalanceAdjustCard";
+import { useSensitiveConfirm } from "@/features/admin-finance/useSensitiveConfirm";
+import { validateSellerNumbers } from "@/features/admin-finance/sellersModel";
+import { useQueryClient } from "@tanstack/react-query";
+import { SellerWithdrawalsSection } from "@/features/admin-finance/SellerDetailSections";
 import { Seller360Panel } from "@/features/admin-finance/Seller360Panel";
 import { NumberInput } from "@/components/ui/number-input";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +38,7 @@ import { z } from "zod";
 import { friendlyError } from "@/lib/friendlyError";
 import AdminPager from "@/components/admin/AdminPager";
 import { displayPixKey } from "@/lib/financial-input";
+import { dateKey } from "@/features/admin-finance/overviewModel";
 
 type Dispute = Tables<"disputes"> & { buyer_name?: string | null };
 type BalanceAdjustment = Tables<"balance_adjustments">;
@@ -41,6 +48,11 @@ type IpLog = { ip: string; user_agent: string | null; country: string | null; so
 // Falls back to null when the payload doesn't match the expected shape,
 // preventing fragile reads of missing fields.
 const jsonRecordSchema = z.record(z.unknown()).nullable();
+function displayLogValue(key: string, value: unknown): string {
+  if (/cpf|cnpj|document|pix|bank|account_number|password|secret|token|api_key/i.test(key)) return "••••";
+  if (value !== null && typeof value === "object") return "[dados estruturados]";
+  return String(value ?? "—");
+}
 const activityLogSchema = z.object({
   id: z.string(),
   user_id: z.string(),
@@ -120,12 +132,16 @@ interface Props {
   onReload: () => void;
   fmtCurrency: (v: number) => string;
   isAdmin?: boolean;
+  dateRange: { from: Date; to: Date };
 }
 
-export default function AdminSellersTab({ profiles, transactions, withdrawals, onReload, fmtCurrency, isAdmin = false }: Props) {
+export default function AdminSellersTab({ profiles, transactions, withdrawals, onReload, fmtCurrency, isAdmin = false, dateRange }: Props) {
   const { user } = useAuth();
-  const [search, setSearch] = useState("");
-  const [sellerFilter, setSellerFilter] = useState<"all" | "white" | "black" | "unset" | "kyc" | "frozen" | "blocked" | "rejected" | "approved">("all");
+  const queryClient = useQueryClient();
+  const { confirm, dialog: sensitiveDialog } = useSensitiveConfirm();
+  const [detailError, setDetailError] = useState<string | null>(null);
+  const [detailTab, setDetailTab] = useState("overview");
+  const reloadSeller = () => { void queryClient.invalidateQueries({ queryKey: ["admin-sellers-page"] }); onReload(); };
   const [selectedUser, setSelectedUser] = useState<Tables<"profiles"> | null>(null);
   const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
   const [emailVerifyLoading, setEmailVerifyLoading] = useState(false);
@@ -133,7 +149,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [revealedDoc, setRevealedDoc] = useState<string | null>(null);
   const [revealedPixKeys, setRevealedPixKeys] = useState<PixKey[] | null>(null);
   const [revealedLegacyPix, setRevealedLegacyPix] = useState<string | null>(null);
-  const [sellerBalances, setSellerBalances] = useState<Map<string, number>>(new Map());
   const [userLogs, setUserLogs] = useState<ActivityLog[]>([]);
   const [userProducts, setUserProducts] = useState<Tables<"products">[]>([]);
   const [userWithdrawals, setUserWithdrawals] = useState<Tables<"withdrawals">[]>([]);
@@ -141,9 +156,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [userPixKeys, setUserPixKeys] = useState<PixKey[]>([]);
   const [customFees, setCustomFees] = useState({ pix_percentage: "", pix_fixed: "", card_percentage: "", card_fixed: "", boleto_percentage: "", boleto_fixed: "", withdrawal_fee: "", max_ticket: "" });
   const [effectiveMaxTicket, setEffectiveMaxTicket] = useState<number | null>(null);
-  const [adjustAmount, setAdjustAmount] = useState("");
-  const [adjustType, setAdjustType] = useState<"credit" | "debit">("credit");
-  const [adjustReason, setAdjustReason] = useState("");
   const [balanceAdjustments, setBalanceAdjustments] = useState<BalanceAdjustment[]>([]);
   const [loading, setLoading] = useState(false);
   const [kycImages, setKycImages] = useState<string[]>([]);
@@ -156,30 +168,19 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [retentionForm, setRetentionForm] = useState({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
   const [impersonating, setImpersonating] = useState(false);
   const [ipHistory, setIpHistory] = useState<IpLog[]>([]);
-  const [page, setPage] = useState(1);
   const detailRequestRef = useRef(0);
-  const PAGE_SIZE = 50;
 
-
-  useEffect(() => {
-    // Canonical seller balances (same fórmula do painel do vendedor)
-    supabase.rpc("admin_get_seller_balances").then(({ data, error }) => {
-      if (error) { console.warn("[AdminSellersTab] balances RPC failed", error.message); return; }
-      const m = new Map<string, number>();
-      (data || []).forEach((row: { user_id: string; balance: number | string }) =>
-        m.set(row.user_id, Number(row.balance) || 0)
-      );
-      setSellerBalances(m);
-    });
-  }, []);
 
   const revealPii = async () => {
-    if (!selectedUser) return;
+    if (!selectedUser || !isAdmin) return;
+    const requestId = detailRequestRef.current;
     try {
-      const [{ data: revealed }, { data: pixData }] = await Promise.all([
+      const [{ data: revealed, error: profileError }, { data: pixData, error: pixError }] = await Promise.all([
         supabase.rpc("admin_reveal_profile", { _user_id: selectedUser.user_id }),
         supabase.rpc("admin_reveal_pix_keys", { _user_id: selectedUser.user_id }),
       ]);
+      if (requestId !== detailRequestRef.current) return;
+      if (profileError || pixError) throw profileError || pixError;
       const r = Array.isArray(revealed) ? revealed[0] : revealed;
       if (r) {
         setRevealedDoc(r.document_number ?? null);
@@ -198,7 +199,11 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   };
 
   const openUserDetail = async (profile: Tables<"profiles">) => {
+    if (!isAdmin) return;
     const requestId = ++detailRequestRef.current;
+    setDetailError(null);
+    setDetailTab("overview");
+    setEffectiveMaxTicket(null);
     setSelectedUser(profile);
     setLoading(true);
     setEmailVerified(null);
@@ -220,7 +225,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(300),
         supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
         supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(500),
-        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, customer_phone, customer_document, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(1000),
+        supabase.from("transactions").select("id, user_id, product_id, amount, fee_amount, net_amount, status, payment_method, customer_name, customer_email, customer_phone, customer_document, created_at").eq("user_id", profile.user_id).eq("is_simulated", false).order("created_at", { ascending: false }).limit(1000),
         supabase.from("custom_user_fees").select("id, user_id, pix_percentage, pix_fixed, card_percentage, card_fixed, boleto_percentage, boleto_fixed, withdrawal_fee, max_ticket, admin_user_id").eq("user_id", profile.user_id).maybeSingle(),
         supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
         supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
@@ -228,6 +233,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         supabase.from("ip_logs").select("ip, user_agent, country, source, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
       ]);
       if (requestId !== detailRequestRef.current) return;
+      const failed = [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, disputesRes, retRes, ipRes].find(result => result.error);
+      if (failed?.error) throw failed.error;
       if (logsRes.data) {
         const parsed = z.array(activityLogSchema).safeParse(logsRes.data);
         setUserLogs(parsed.success ? parsed.data : []);
@@ -270,6 +277,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       }
       try {
         const { data: eff } = await supabase.rpc("get_user_max_ticket", { _user_id: profile.user_id });
+        if (requestId !== detailRequestRef.current) return;
         setEffectiveMaxTicket(eff != null ? Number(eff) : null);
       } catch { setEffectiveMaxTicket(null); }
       try {
@@ -281,12 +289,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
               return data?.signedUrl || null;
             })
           );
+          if (requestId !== detailRequestRef.current) return;
           setKycImages(signedUrls.filter(Boolean) as string[]);
         } else setKycImages([]);
       } catch { setKycImages([]); }
     } catch (e) {
       if (requestId !== detailRequestRef.current) return;
       const msg = e instanceof Error ? e.message : "desconhecido";
+      setDetailError("Não foi possível carregar a ficha completa. Tente novamente.");
       toast.error("Erro ao carregar dados do seller: " + msg);
     } finally {
       if (requestId === detailRequestRef.current) setLoading(false);
@@ -294,32 +304,40 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   };
 
   const handleApproveKyc = async (userId: string) => {
+    if (!isAdmin) return;
     const { error } = await supabase.rpc("admin_approve_kyc", { _user_id: userId });
     if (error) { toast.error("Erro ao aprovar KYC"); return; }
     toast.success("KYC aprovado! Seller liberado.");
-    onReload();
+    reloadSeller();
     if (selectedUser?.user_id === userId) setSelectedUser(null);
   };
 
   const handleRejectKyc = async () => {
+    if (!isAdmin) return;
     if (!kycRejectReason.trim()) { toast.error("Informe o motivo da recusa"); return; }
     const { error } = await supabase.rpc("admin_reject_kyc", { _user_id: rejectTargetUserId, _reason: kycRejectReason.trim() });
     if (error) { toast.error("Erro ao recusar KYC"); return; }
     toast.success("KYC recusado. Motivo registrado.");
     setShowRejectDialog(false);
     setKycRejectReason("");
-    onReload();
+    reloadSeller();
     if (selectedUser?.user_id === rejectTargetUserId) setSelectedUser(null);
   };
 
-  const handleFreezeBalance = async (userId: string, freeze: boolean) => {
-    const { error } = await supabase.rpc("admin_freeze_account", { _user_id: userId, _freeze: freeze, _reason: null });
-    if (error) { toast.error("Erro ao alterar status"); return; }
-    toast.success(freeze ? "Saldo congelado! Saques bloqueados." : "Saldo descongelado! Saques liberados.");
-    onReload();
+  const handleFreezeBalance = (userId: string, freeze: boolean) => {
+    if (!isAdmin) return;
+    const reason = window.prompt("Justificativa (mínimo 5 caracteres)");
+    if (!reason || reason.trim().length < 5) return;
+    confirm(freeze ? "Congelar a conta e bloquear saques deste seller." : "Descongelar a conta e liberar saques deste seller.", async () => {
+      const { error } = await supabase.rpc("admin_freeze_account", { _user_id: userId, _freeze: freeze, _reason: reason.trim() });
+      if (error) { toast.error(friendlyError(error)); return; }
+      setSelectedUser(previous => previous?.user_id === userId ? { ...previous, balance_frozen: freeze } : previous);
+      toast.success(freeze ? "Saldo congelado. Saques bloqueados." : "Saldo descongelado."); reloadSeller();
+    });
   };
 
   const handleSetEmailVerified = async (userId: string, verified: boolean) => {
+    if (!isAdmin) return;
     setEmailVerifyLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("admin-set-email-verified", {
@@ -334,16 +352,19 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     }
   };
 
-  const handleBanSeller = async (userId: string) => {
-    const { data, error } = await supabase.functions.invoke("admin-ban-seller", { body: { targetUserId: userId } });
-    if (error || !data?.success) { toast.error(data?.error || "Erro ao banir seller"); return; }
-    toast.success("Seller banido! Conta bloqueada, saldo congelado e checkouts suspensos.");
-    await logAdminAction("ban_seller", "profile", userId, { action: "atomic_block+freeze+suspend" });
-    onReload();
-    if (selectedUser?.user_id === userId) setSelectedUser(null);
+  const handleBanSeller = (userId: string) => {
+    if (!isAdmin) return;
+    confirm("Banir este seller, congelar seu saldo e suspender seus checkouts.", async () => {
+      const { data, error } = await supabase.functions.invoke("admin-ban-seller", { body: { targetUserId: userId } });
+      if (error || !data?.success) { toast.error(data?.error || "Erro ao banir seller"); return; }
+      toast.success("Seller banido. Conta bloqueada, saldo congelado e checkouts suspensos.");
+      await logAdminAction("ban_seller", "profile", userId, { action: "atomic_block+freeze+suspend" });
+      reloadSeller(); ++detailRequestRef.current; setSelectedUser(null);
+    });
   };
 
   const handleImpersonate = async (userId: string) => {
+    if (!isAdmin) return;
     setImpersonating(true);
     try {
       const { data, error } = await supabase.functions.invoke("admin-impersonate", { body: { targetUserId: userId } });
@@ -384,7 +405,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   };
 
   const handleSaveRetention = async () => {
-    if (!selectedUser || !user) return;
+    if (!selectedUser || !user || !isAdmin) return;
+    if (!validateSellerNumbers(retentionForm, ["pix_pct", "card_pct"], ["days", "card_release_days"])) { toast.error("Informe percentuais de 0 a 100 e dias inteiros de 1 a 365"); return; }
     const payload = {
       user_id: selectedUser.user_id,
       pix_retention_pct: retentionForm.pix_pct ? Number(retentionForm.pix_pct) : 0,
@@ -396,12 +418,13 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     };
     const { error } = await supabase.from("retention_settings").upsert(payload, { onConflict: "user_id" });
     if (error) { toast.error("Erro ao salvar retenção"); return; }
+    setUserRetention({ ...payload });
     toast.success("Rolling Reserve atualizado!");
     await logAdminAction("update_retention", "retention_settings", selectedUser.user_id, payload);
   };
 
   const handleSaveAdminNotes = async () => {
-    if (!selectedUser) return;
+    if (!selectedUser || !isAdmin) return;
     const sanitized = adminNotes.replace(/[<>]/g, "").replace(/javascript:/gi, "").trim().slice(0, 5000);
     const { error } = await supabase.from("profiles").update({ admin_notes: sanitized }).eq("user_id", selectedUser.user_id);
     if (error) { toast.error("Erro ao salvar notas"); return; }
@@ -415,19 +438,22 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     if (error) { toast.error("Erro ao atualizar"); return; }
     toast.success(`Conta ${status === "approved" ? "aprovada" : "bloqueada"}!`);
     await logAdminAction(status === "approved" ? "approve_user" : "block_user", "profile", userId, { new_status: status });
-    onReload();
+    reloadSeller();
   };
 
   const handleSetSellerType = async (userId: string, sellerType: string | null) => {
+    if (!isAdmin) return;
     const { error } = await supabase.from("profiles").update({ seller_type: sellerType }).eq("user_id", userId);
     if (error) { toast.error("Erro ao classificar seller"); return; }
     toast.success(`Seller classificado como ${sellerType || "sem classificação"}!`);
+    setSelectedUser(previous => previous?.user_id === userId ? { ...previous, seller_type: sellerType } : previous);
     await logAdminAction("set_seller_type", "profile", userId, { seller_type: sellerType });
-    onReload();
+    reloadSeller();
   };
 
   const handleSaveCustomFees = async () => {
-    if (!selectedUser || !user) return;
+    if (!selectedUser || !user || !isAdmin) return;
+    if (!validateSellerNumbers(customFees, ["pix_percentage", "card_percentage", "boleto_percentage"])) { toast.error("Informe valores válidos e percentuais de 0 a 100"); return; }
     const payload: TablesInsert<"custom_user_fees"> = {
       user_id: selectedUser.user_id, admin_user_id: user.id,
       pix_percentage:    customFees.pix_percentage    ? Number(customFees.pix_percentage)    : null,
@@ -446,126 +472,29 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     await logAdminAction("update_custom_fees", "custom_user_fees", selectedUser.user_id, payload);
   };
 
-  const handleResolveDispute = async (disputeId: string, side: "seller" | "buyer") => {
-    const status = side === "seller" ? "resolved_seller" : "resolved_buyer";
-    const label = side === "seller" ? "Vitória do seller — saldo devolvido." : "Vitória do comprador — débito mantido.";
-    if (!window.confirm(side === "seller" ? "Confirmar vitória do seller? O saldo retido será devolvido." : "Confirmar vitória do comprador? O débito será mantido e a transação marcada como chargeback.")) return;
-    const { error } = await supabase.from("disputes").update({ status, resolved_at: new Date().toISOString() }).eq("id", disputeId);
-    if (error) { toast.error("Erro ao resolver disputa: " + friendlyError(error)); return; }
-    toast.success(label);
-    await logAdminAction(`resolve_dispute_${side}`, "dispute", disputeId, { status });
-    if (selectedUser) {
-      const { data } = await supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", selectedUser.user_id).order("created_at", { ascending: false }).limit(50);
-      if (data) setUserDisputes(data as Dispute[]);
-    }
-    onReload();
+  const handleResolveDispute = (disputeId: string, side: "seller" | "buyer") => {
+    if (!isAdmin || !selectedUser) return;
+    const profile = selectedUser;
+    const reason = window.prompt("Justificativa da decisão (mínimo 5 caracteres)");
+    if (!reason || reason.trim().length < 5) { toast.error("Informe uma justificativa válida"); return; }
+    confirm(side === "seller" ? "Liberar o saldo retido desta disputa para o seller." : "Confirmar a perda da disputa, mantendo o débito do seller.", async () => {
+      const { error } = await supabase.rpc("admin_resolve_dispute", { _dispute_id: disputeId, _outcome: side, _fee: 0, _note: reason.trim() });
+      if (error) { toast.error(friendlyError(error)); return; }
+      toast.success("Decisão registrada e saldo conciliado");
+      reloadSeller(); await openUserDetail(profile);
+    });
   };
 
   const handleDeletePixKey = async (pixKeyId: string) => {
+    if (!isAdmin) return;
     if (!window.confirm("Remover esta chave PIX do seller?")) return;
     const { error } = await supabase.from("pix_keys").delete().eq("id", pixKeyId);
     if (error) { toast.error("Erro ao remover chave: " + friendlyError(error)); return; }
     toast.success("Chave PIX removida.");
     await logAdminAction("delete_pix_key", "pix_key", pixKeyId);
     setUserPixKeys(prev => prev.filter(k => k.id !== pixKeyId));
+    setRevealedPixKeys(prev => prev?.filter(k => k.id !== pixKeyId) ?? null);
   };
-
-  const handleBalanceAdjustment = async () => {
-    if (!selectedUser || !user || !adjustAmount || !adjustReason) { toast.error("Preencha todos os campos"); return; }
-    const amount = Number(adjustAmount);
-    if (isNaN(amount) || amount <= 0) { toast.error("Valor deve ser positivo"); return; }
-    if (amount > 1000000) { toast.error("Valor máximo excedido (R$ 1.000.000)"); return; }
-    const sanitizedReason = adjustReason.replace(/[<>]/g, "").trim().slice(0, 500);
-    if (sanitizedReason.length < 3) { toast.error("Justificativa muito curta (mín. 3 caracteres)"); return; }
-    if (amount > 10000 && !window.confirm(`Confirma ajuste de R$ ${amount.toFixed(2)} (${adjustType})?`)) return;
-    if (sanitizedReason.length < 5) { toast.error("Justificativa muito curta (mín. 5 caracteres)"); return; }
-    // Audited server routine: owner applies directly, staff requests need owner approval.
-    const { data: adjRes, error } = await supabase.rpc("admin_request_balance_adjustment", {
-      _user_id: selectedUser.user_id, _type: adjustType, _amount: amount, _reason: sanitizedReason,
-    });
-    if (error) { toast.error(error.message?.slice(0, 160) || "Erro ao ajustar saldo"); return; }
-    const pendingApproval = (adjRes as { status?: string } | null)?.status === "pending_approval";
-    toast.success(pendingApproval ? "Pedido enviado para aprovação do dono" : `Saldo ${adjustType === "credit" ? "creditado" : "debitado"}!`);
-    setAdjustAmount(""); setAdjustReason("");
-    const { data } = await supabase.from("balance_adjustments").select("*").eq("user_id", selectedUser.user_id).order("created_at", { ascending: false });
-    if (data) setBalanceAdjustments(data);
-    onReload();
-  };
-
-  // ── Filtering ──
-  const kycPendingProfiles = profiles.filter(p => p.account_status === "pending_review" || p.account_status === "pending");
-  const filtered = profiles.filter((p) => {
-    const st = p.seller_type;
-    if (sellerFilter === "kyc" && !(p.account_status === "pending_review" || p.account_status === "pending")) return false;
-    if (sellerFilter === "white" && st !== "white") return false;
-    if (sellerFilter === "black" && st !== "black") return false;
-    if (sellerFilter === "unset" && st != null) return false;
-    if (sellerFilter === "frozen" && p.balance_frozen !== true) return false;
-    if (sellerFilter === "blocked" && p.account_status !== "blocked") return false;
-    if (sellerFilter === "rejected" && p.account_status !== "rejected") return false;
-    if (sellerFilter === "approved" && p.account_status !== "approved") return false;
-    if (!search) return true;
-    const s = search.toLowerCase();
-    const digits = search.replace(/\D/g, "");
-    const docDigits = (p.document_number || "").replace(/\D/g, "");
-    return (p.full_name?.toLowerCase().includes(s))
-      || (p.email?.toLowerCase().includes(s))
-      || (digits.length > 0 && docDigits.includes(digits));
-  });
-
-  useEffect(() => { setPage(1); }, [sellerFilter, search]);
-  const pagedFiltered = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  const whiteCount = profiles.filter(p => p.seller_type === "white").length;
-  const blackCount = profiles.filter(p => p.seller_type === "black").length;
-  const unsetCount = profiles.filter(p => p.seller_type == null).length;
-  const frozenCount = profiles.filter(p => p.balance_frozen === true).length;
-  const blockedCount = profiles.filter(p => p.account_status === "blocked").length;
-  const rejectedCount = profiles.filter(p => p.account_status === "rejected").length;
-  const approvedCount = profiles.filter(p => p.account_status === "approved").length;
-
-  // Top movers do dia (sellers que mais movimentaram hoje)
-  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-  const todayMovers = (() => {
-    const byUser = new Map<string, { gross: number; count: number }>();
-    for (const t of transactions) {
-      if (!t.created_at || new Date(t.created_at) < todayStart) continue;
-      if (!isApprovedTransaction(t.status)) continue;
-      const cur = byUser.get(t.user_id) || { gross: 0, count: 0 };
-      cur.gross += Number(t.amount); cur.count += 1;
-      byUser.set(t.user_id, cur);
-    }
-    return Array.from(byUser.entries())
-      .map(([user_id, s]) => ({ user_id, ...s, profile: profiles.find(p => p.user_id === user_id) }))
-      .filter(m => m.profile)
-      .sort((a, b) => b.gross - a.gross)
-      .slice(0, 8);
-  })();
-
-  const sellerStats = useMemo(() => {
-    const stats = new Map<string, { totalGross: number; totalNet: number; totalFees: number; totalWithdrawn: number; txCount: number; completedCount: number; conversionRate: number }>();
-    for (const transaction of transactions) {
-      const current = stats.get(transaction.user_id) ?? { totalGross: 0, totalNet: 0, totalFees: 0, totalWithdrawn: 0, txCount: 0, completedCount: 0, conversionRate: 0 };
-      current.txCount += 1;
-      if (isApprovedTransaction(transaction.status)) {
-        current.completedCount += 1;
-        current.totalGross += Number(transaction.amount);
-        current.totalNet += Number(transaction.net_amount);
-        current.totalFees += Number(transaction.fee_amount);
-      }
-      stats.set(transaction.user_id, current);
-    }
-    for (const withdrawal of withdrawals) {
-      if (withdrawal.status !== "approved") continue;
-      const current = stats.get(withdrawal.user_id) ?? { totalGross: 0, totalNet: 0, totalFees: 0, totalWithdrawn: 0, txCount: 0, completedCount: 0, conversionRate: 0 };
-      current.totalWithdrawn += Number(withdrawal.amount);
-      stats.set(withdrawal.user_id, current);
-    }
-    for (const current of stats.values()) current.conversionRate = current.txCount > 0 ? (current.completedCount / current.txCount) * 100 : 0;
-    return stats;
-  }, [transactions, withdrawals]);
-
-  const getSellerStats = (userId: string) => sellerStats.get(userId) ?? { totalGross: 0, totalNet: 0, totalFees: 0, totalWithdrawn: 0, txCount: 0, completedCount: 0, conversionRate: 0 };
 
   const deletedProducts = userLogs.filter(l => l.action === "product_deleted").map(l => {
     const od = deletedProductDataSchema.safeParse(l.old_data ?? {});
@@ -577,18 +506,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   });
 
   const userApproved = userTransactions.filter(t => isApprovedTransaction(t.status));
-  const userTotalGross = userApproved.reduce((a, t) => a + Number(t.amount), 0);
-  const userTotalNet = userApproved.reduce((a, t) => a + Number(t.net_amount), 0);
-  const userTotalFees = userApproved.reduce((a, t) => a + Number(t.fee_amount), 0);
-  const userTotalWithdrawn = userWithdrawals.filter(w => w.status === "approved").reduce((a, w) => a + Number(w.amount), 0);
-  const userTotalWdFees = userWithdrawals.reduce((a, w) => a + Number(w.fee_amount), 0);
-  const userPendingWd = userWithdrawals.filter(w => w.status === "pending").reduce((a, w) => a + Number(w.amount), 0);
-  const adjustmentsTotal = balanceAdjustments.reduce((a, adj) => a + (adj.type === "credit" ? Number(adj.amount) : -Number(adj.amount)), 0);
-  const userAvailableBalance = userTotalNet - userTotalWithdrawn - userPendingWd + adjustmentsTotal;
-  const userConversion = userTransactions.length > 0 ? ((userApproved.length / userTransactions.length) * 100).toFixed(1) : "0.0";
-
   const userMedTotal = userDisputes.length;
-  const userMedOpen = userDisputes.filter(d => d.status === "open" || d.status === "in_review").length;
+  const userMedOpen = userDisputes.filter(d => ["open", "in_review", "pending_recorrer"].includes(d.status)).length;
   const userMedResolved = userDisputes.filter(d => d.status.startsWith("resolved") || d.status === "closed").length;
   const userMedAmount = userDisputes.reduce((a, d) => a + Number(d.amount || 0), 0);
   const userMedRate = userApproved.length > 0 ? ((userMedTotal / userApproved.length) * 100).toFixed(2) : "0.00";
@@ -596,9 +515,9 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   type BuyerEntry = { name: string; email: string; phone: string; document: string; total: number; count: number; txs: Tables<"transactions">[]; lastAt: string };
   const buyersMap = new Map<string, BuyerEntry>();
   userTransactions.forEach(t => {
-    const key = t.customer_email || t.customer_document || t.customer_name || "unknown";
+    const key = t.customer_email?.trim().toLowerCase() || t.customer_document || t.id;
     const existing: BuyerEntry = buyersMap.get(key) || { name: t.customer_name || "", email: t.customer_email || "", phone: t.customer_phone || "", document: t.customer_document || "", total: 0, count: 0, txs: [], lastAt: "" };
-    existing.total += Number(t.amount); existing.count += 1;
+    if (isApprovedTransaction(t.status)) { existing.total += Number(t.amount); existing.count += 1; }
     existing.txs.push(t);
     if (!existing.lastAt || new Date(t.created_at) > new Date(existing.lastAt)) existing.lastAt = t.created_at;
     buyersMap.set(key, existing);
@@ -616,259 +535,16 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <FinanceiroHero
-        eyebrow="Plataforma · Sellers"
-        title="Vendedores"
-        subtitle="Aprove KYC, classifique tiers, monitore saldo e gerencie acesso da base."
-        status={{ tone: kycPendingProfiles.length > 0 ? "warning" : "success", label: `${profiles.length} cadastrados`, pulse: kycPendingProfiles.length > 0 }}
-      />
-
-      {/* ── KPI strip · clickable filters ── */}
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60 sm:grid-cols-4 xl:grid-cols-8 animate-fade-in stagger-1">
-        <SellerKpi icon={Users}          label="Total"          value={String(profiles.length)}            sub="Base ativa"          tone="neutral"     active={sellerFilter === "all"}   onClick={() => setSellerFilter("all")} />
-        <SellerKpi icon={FileText}       label="KYC Pendente"   value={String(kycPendingProfiles.length)}  sub="Aguardando análise"  tone="warning"     active={sellerFilter === "kyc"}   onClick={() => setSellerFilter("kyc")} />
-        <SellerKpi icon={Shield}         label="Black"          value={String(blackCount)}                 sub="High-volume"          tone="neutral"     active={sellerFilter === "black"} onClick={() => setSellerFilter("black")} />
-        <SellerKpi icon={CheckCircle2}   label="White"          value={String(whiteCount)}                 sub="Tier regulado"        tone="info"        active={sellerFilter === "white"} onClick={() => setSellerFilter("white")} />
-        <SellerKpi icon={AlertTriangle}  label="Sem Tier"       value={String(unsetCount)}                 sub="Não classificados"    tone="warning"     active={sellerFilter === "unset"} onClick={() => setSellerFilter("unset")} />
-        <SellerKpi icon={Snowflake}      label="Congelados"     value={String(frozenCount)}                sub="Saldo bloqueado"      tone="destructive" active={sellerFilter === "frozen"}  onClick={() => setSellerFilter("frozen")} />
-        <SellerKpi icon={Ban}            label="Bloqueados"     value={String(blockedCount)}               sub="Conta banida"         tone="destructive" active={sellerFilter === "blocked"} onClick={() => setSellerFilter("blocked")} />
-        <SellerKpi icon={TrendingUp}     label="Transações"     value={String(transactions.length)}        sub="Total registrado"     tone="primary" />
-        <SellerKpi icon={ArrowDownToLine} label="Saques"        value={String(withdrawals.length)}         sub="Total registrado"     tone="neutral" />
-      </div>
-
-
-      {/* ── KYC Alert Banner ── */}
-      {kycPendingProfiles.length > 0 && sellerFilter !== "kyc" && (
-        <div className="rounded-xl border border-warning/20 bg-warning/5 p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-warning/10 flex items-center justify-center">
-              <FileText className="h-5 w-5 text-warning" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-foreground">{kycPendingProfiles.length} sellers aguardando aprovação KYC</p>
-              <p className="text-xs text-muted-foreground">Documentos pendentes de revisão</p>
-            </div>
-          </div>
-          <Button size="sm" variant="outline" className="rounded-xl text-xs border-warning/30 text-warning" onClick={() => setSellerFilter("kyc")}>
-            Ver Fila KYC
-          </Button>
-        </div>
-      )}
-
-      {/* ── Top movers do dia ── */}
-      {todayMovers.length > 0 && (
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-success" />
-              <p className="text-[11px] font-black uppercase tracking-widest text-foreground">Top Movers · Hoje</p>
-            </div>
-            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-              {todayMovers.length} ativos · {fmtCurrency(todayMovers.reduce((a, m) => a + m.gross, 0))}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {todayMovers.map(m => (
-              <button
-                key={m.user_id}
-                onClick={() => openUserDetail(m.profile!)}
-                className="group inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-border bg-muted/20 hover:border-primary/40 hover:bg-primary/5 transition-colors"
-              >
-                <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center text-[11px] font-black text-primary shrink-0">
-                  {(m.profile!.full_name || m.profile!.email || "?")[0].toUpperCase()}
-                </div>
-                <div className="text-left">
-                  <p className="text-[11px] font-bold text-foreground leading-tight max-w-[160px] truncate">
-                    {m.profile!.full_name || m.profile!.email}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground tabular-nums">
-                    {m.count} venda{m.count > 1 ? "s" : ""} · <span className="font-black text-success">{fmtCurrency(m.gross)}</span>
-                  </p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Filter tabs + search */}
-      <div className="flex items-center gap-4 flex-wrap">
-        <div className="inline-flex flex-wrap gap-1 rounded-xl border border-border/60 bg-muted/30 p-1">
-          {[
-            { id: "all" as const, label: "Todos", count: profiles.length },
-            { id: "kyc" as const, label: "Fila KYC", count: kycPendingProfiles.length },
-            { id: "black" as const, label: "Black", count: blackCount },
-            { id: "white" as const, label: "White", count: whiteCount },
-            { id: "unset" as const, label: "Sem tipo", count: unsetCount },
-            { id: "approved" as const, label: "Aprovados", count: approvedCount },
-            { id: "frozen" as const, label: "Congelados", count: frozenCount },
-            { id: "blocked" as const, label: "Bloqueados", count: blockedCount },
-            { id: "rejected" as const, label: "Rejeitados", count: rejectedCount },
-          ].map(f => (
-            <button key={f.id} onClick={() => setSellerFilter(f.id)}
-              className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors ${
-                sellerFilter === f.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-card hover:text-foreground"
-              }`}>
-              {f.label} <span className="opacity-50 ml-1">{f.count}</span>
-            </button>
-          ))}
-        </div>
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input placeholder="Buscar por nome, e-mail ou CPF..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-10 pl-10 pr-4 bg-card border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30" />
-        </div>
-      </div>
-
-      {/* ── KYC Queue Mode ── */}
-      {sellerFilter === "kyc" ? (
-        <PremiumPanel title={`Fila de Aprovação KYC`} eyebrow={`${filtered.length} pendentes`} icon={FileText}>
-          <div className="space-y-3">
-            {pagedFiltered.map(p => (
-              <div key={p.id} className="group rounded-xl border border-border bg-card p-4 flex items-center gap-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-muted/20">
-                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
-                  {(p.full_name || "U")[0].toUpperCase()}
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-foreground">{p.full_name || "Sem nome"}</p>
-                  <p className="text-xs text-muted-foreground">{p.email} • {p.phone || "Sem tel"}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] text-muted-foreground font-mono">{p.document_type?.toUpperCase()}: {maskDoc(p.document_number)}</span>
-                    <span className="text-[10px] text-muted-foreground">• {new Date(p.created_at).toLocaleDateString("pt-BR")}</span>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="ghost" className="text-xs rounded-xl" onClick={() => openUserDetail(p)}>
-                    <Eye className="h-3 w-3 mr-1" /> Detalhes
-                  </Button>
-                  <Button size="sm" variant="outline" className="rounded-xl text-xs border-primary/30 text-primary" onClick={() => handleApproveKyc(p.user_id)}>
-                    <CheckCircle2 className="h-3 w-3 mr-1" /> Aprovar KYC
-                  </Button>
-                  <Button size="sm" variant="outline" className="rounded-xl text-xs border-destructive/30 text-destructive"
-                    onClick={() => { setRejectTargetUserId(p.user_id); setShowRejectDialog(true); }}>
-                    <XCircle className="h-3 w-3 mr-1" /> Recusar
-                  </Button>
-                </div>
-              </div>
-            ))}
-            {filtered.length === 0 && (
-              <PremiumEmpty icon={CheckCircle2} title="Nenhum KYC pendente" subtitle="Todos os sellers foram revisados." />
-            )}
-          </div>
-          {filtered.length > 0 && <AdminPager page={page} pageSize={PAGE_SIZE} totalCount={filtered.length} onPageChange={setPage} className="mt-3" />}
-        </PremiumPanel>
-      ) : (
-        /* ── Sellers Table ── */
-        <PremiumPanel title="Vendedores" eyebrow={`${filtered.length} registros`} icon={Users}>
-          <div className={premiumTable.wrapper}>
-            <table className={premiumTable.table}>
-              <thead>
-                <tr className={premiumTable.headRow}>
-                  {["Vendedor", "Tipo", "Status", "Saldo", "Transações", "Conversão", "Ações"].map(h => (
-                    <th key={h} className={premiumTable.th}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {pagedFiltered.map((p) => {
-                  const stats = getSellerStats(p.user_id);
-                  const frozen = isFrozen(p);
-                  return (
-                    <tr
-                      key={p.id}
-                      onClick={() => openUserDetail(p)}
-                      className={cn(premiumTable.row, "cursor-pointer")}
-                    >
-                      <td className={premiumTable.td}>
-                        <div className="flex items-center gap-3">
-                          <div className="relative shrink-0">
-                            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 ring-1 ring-primary/20 flex items-center justify-center text-[12px] font-black text-primary transition-transform duration-300 group-hover:scale-[1.06]">
-                              {(p.full_name || "U")[0].toUpperCase()}
-                            </div>
-                            {frozen && (
-                              <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-info text-background flex items-center justify-center ring-2 ring-background">
-                                <Snowflake className="h-2 w-2" />
-                              </span>
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-[12.5px] font-bold text-foreground truncate max-w-[220px]">{p.full_name || "Sem nome"}</p>
-                            <p className="text-[10.5px] text-muted-foreground truncate max-w-[220px]">{p.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className={premiumTable.td}><SellerTypeBadge type={p.seller_type} /></td>
-                      <td className={premiumTable.td}><StatusBadge status={p.account_status || "pending_review"} /></td>
-                      <td className={premiumTable.td}>
-                        <span className="font-display text-[13px] font-black tabular-nums text-primary">{fmtCurrency(sellerBalances.get(p.user_id) ?? (stats.totalNet - stats.totalWithdrawn))}</span>
-                      </td>
-                      <td className={premiumTable.td}>
-                        <span className="text-[11px] tabular-nums text-muted-foreground">
-                          <span className="text-foreground font-bold">{stats.completedCount}</span>
-                          <span className="text-muted-foreground/50">/{stats.txCount}</span>
-                        </span>
-                      </td>
-                      <td className={premiumTable.td}>
-                        <span className={cn(
-                          "inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-black tabular-nums border",
-                          stats.conversionRate >= 50 ? "text-success bg-success/10 border-success/25"
-                            : stats.conversionRate >= 20 ? "text-warning bg-warning/10 border-warning/25"
-                            : "text-destructive bg-destructive/10 border-destructive/25"
-                        )}>
-                          {stats.conversionRate.toFixed(1)}%
-                        </span>
-                      </td>
-                      <td className={premiumTable.td} onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 rounded-lg opacity-60 group-hover:opacity-100 hover:bg-muted hover:text-foreground transition-all"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56">
-                            <DropdownMenuItem className="gap-2" onClick={() => openUserDetail(p)}><Eye className="h-3.5 w-3.5" /> Ver detalhes</DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2" onClick={() => handleImpersonate(p.user_id)} disabled={impersonating}>
-                              <LogIn className="h-3.5 w-3.5" /> Login as User
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="gap-2 text-primary" onClick={() => handleApproveKyc(p.user_id)}><CheckCircle2 className="h-3.5 w-3.5" /> Aprovar KYC</DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2 text-warning" onClick={() => { setRejectTargetUserId(p.user_id); setShowRejectDialog(true); }}>
-                              <XCircle className="h-3.5 w-3.5" /> Recusar KYC
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            {frozen ? (
-                              <DropdownMenuItem className="gap-2 text-info" onClick={() => handleFreezeBalance(p.user_id, false)}><Unlock className="h-3.5 w-3.5" /> Descongelar Saldo</DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem className="gap-2 text-info" onClick={() => handleFreezeBalance(p.user_id, true)}><Snowflake className="h-3.5 w-3.5" /> Congelar Saldo</DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem className="gap-2 text-destructive" onClick={() => handleBanSeller(p.user_id)}><UserX className="h-3.5 w-3.5" /> Banir Seller</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="gap-2" onClick={() => handleSetSellerType(p.user_id, "black")}><Shield className="h-3.5 w-3.5" /> Black</DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2" onClick={() => handleSetSellerType(p.user_id, "white")}><Globe className="h-3.5 w-3.5" /> White</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </td>
-                    </tr>
-                  );
-
-                })}
-                {filtered.length === 0 && (
-                  <tr><td colSpan={7} className="p-10 text-center text-muted-foreground text-xs">Nenhum vendedor encontrado</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-          {filtered.length > 0 && <AdminPager page={page} pageSize={PAGE_SIZE} totalCount={filtered.length} onPageChange={setPage} className="mt-3" />}
-        </PremiumPanel>
-      )}
+      {isAdmin ? <SellersDirectory key={`${dateKey(dateRange.from)}:${dateKey(dateRange.to)}`} range={dateRange} enabled={isAdmin} money={fmtCurrency} onOpen={async userId => {
+        const { data, error } = await supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle();
+        if (error || !data) { toast.error("Não foi possível abrir este seller"); return; }
+        await openUserDetail(data);
+      }} /> : <p className="p-6 text-muted-foreground">A gestão de sellers é exclusiva do dono.</p>}
+      {sensitiveDialog}
 
       {/* ═══ KYC Reject Dialog ═══ */}
       <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="z-[120] max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <XCircle className="h-5 w-5" /> Recusar KYC
@@ -881,7 +557,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
               className="w-full px-4 py-3 bg-muted/30 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30 resize-none" />
             <div className="flex gap-2 justify-end">
               <Button variant="ghost" size="sm" onClick={() => setShowRejectDialog(false)}>Cancelar</Button>
-              <Button size="sm" variant="destructive" className="rounded-xl" onClick={handleRejectKyc}>
+              <Button size="sm" variant="destructive" className="rounded-xl" disabled={!kycRejectReason.trim()} onClick={handleRejectKyc}>
                 <Send className="h-3 w-3 mr-1" /> Enviar Recusa
               </Button>
             </div>
@@ -890,9 +566,9 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       </Dialog>
 
       {/* ═══ Seller Detail Dialog ═══ */}
-      <Dialog open={!!selectedUser} onOpenChange={v => { if (!v) setSelectedUser(null); }}>
-        <DialogContent className="max-w-5xl w-[96vw] max-h-[92vh] overflow-y-auto p-0 gap-0 rounded-2xl border border-border">
-          <DialogHeader className="sticky top-0 z-10 bg-card/95 backdrop-blur border-b border-border pl-4 pr-14 sm:pl-6 sm:pr-16 pt-5 pb-4 space-y-0">
+      <Dialog open={!!selectedUser} onOpenChange={v => { if (!v) { ++detailRequestRef.current; setSelectedUser(null); } }}>
+        <DialogContent className="seller-detail-dialog z-[100] flex h-[min(92dvh,1000px)] w-[calc(100vw-32px)] max-w-6xl flex-col overflow-hidden rounded-lg border border-border p-0 gap-0">
+          <DialogHeader className="shrink-0 bg-card border-b border-border pl-4 pr-14 sm:pl-6 sm:pr-16 pt-5 pb-4 space-y-0">
             <DialogTitle className="sr-only">
               Detalhes do seller {selectedUser?.full_name || selectedUser?.email || ""}
             </DialogTitle>
@@ -920,13 +596,13 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     {selectedUser?.email}{selectedUser?.phone ? <> · <span className="font-mono">{selectedUser.phone}</span></> : null}
                   </p>
                   <p className="text-[10px] text-muted-foreground/60 font-mono mt-0.5 break-all">
-                    <button
+                    <Button variant="link"
                       onClick={() => { if (selectedUser?.user_id) { navigator.clipboard.writeText(selectedUser.user_id); toast.success("ID copiado"); } }}
-                      className="hover:text-foreground transition-colors"
+                      className="h-auto p-0 text-[10px] text-muted-foreground"
                       title="Clique para copiar o ID completo"
                     >
                       ID {selectedUser?.user_id || "—"}
-                    </button>
+                    </Button>
                     <span className="text-muted-foreground/40"> · IP {selectedUser?.last_ip || "—"}</span>
                   </p>
 
@@ -946,10 +622,11 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   </Button>
                 )}
                 {selectedUser?.account_status !== "approved" && (
-                  <Button size="sm" variant="outline" className="h-8 rounded-lg text-[11px] gap-1.5 border-success/30 text-success hover:bg-success/10" onClick={() => handleApproveKyc(selectedUser!.user_id)}>
+                  <Button size="sm" variant="outline" className="h-8 rounded-lg text-[11px] gap-1.5 border-success/30 text-success hover:bg-success/10" onClick={() => handleApproveKyc(selectedUser?.user_id ?? "")}>
                     <CheckCircle2 className="h-3 w-3" /> Aprovar
                   </Button>
                 )}
+                {selectedUser && ["pending", "pending_review"].includes(selectedUser.account_status || "") && <Button size="sm" variant="outline" className="h-8 gap-1.5 text-destructive" onClick={() => { setRejectTargetUserId(selectedUser.user_id); setKycRejectReason(""); setShowRejectDialog(true); }}><XCircle className="h-3 w-3" />Recusar KYC</Button>}
                 {selectedUser && emailVerified !== true && (
                   <Button size="sm" variant="outline" disabled={emailVerifyLoading} className="h-8 rounded-lg text-[11px] gap-1.5 border-success/30 text-success hover:bg-success/10" onClick={() => handleSetEmailVerified(selectedUser.user_id, true)}>
                     <CheckCircle2 className="h-3 w-3" /> Verificar e-mail
@@ -967,31 +644,16 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
             </div>
           </DialogHeader>
 
-          <div className="px-6 pb-6 pt-4">
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-4 sm:px-6">
 
 
-          {loading ? (
+          {detailError ? <div role="alert" className="space-y-3 border border-destructive/30 p-5 text-sm text-destructive">{detailError}<Button variant="outline" onClick={() => selectedUser && openUserDetail(selectedUser)}>Tentar novamente</Button></div> : loading ? (
             <div className="text-center py-12 text-muted-foreground">Carregando...</div>
           ) : (
             <>
-              {/* Financial KPIs */}
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mt-4">
-                <MiniKpi label="Transacionou" value={fmtCurrency(userTotalGross)} tone="info" />
-                <MiniKpi label="Receita Líquida" value={fmtCurrency(userTotalNet)} tone="success" />
-                <MiniKpi label="Lucro c/ Taxas" value={fmtCurrency(userTotalFees)} tone="warning" />
-                <MiniKpi label="Saldo Disponível" value={fmtCurrency(userAvailableBalance)} tone="primary" />
-                <MiniKpi label="Conversão" value={`${userConversion}%`} tone="info" />
-              </div>
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mt-2">
-                <MiniKpi label="Total Sacado" value={fmtCurrency(userTotalWithdrawn)} tone="warning" />
-                <MiniKpi label="Taxa Saque Paga" value={fmtCurrency(userTotalWdFees)} tone="warning" />
-                <MiniKpi label="Saque Pendente" value={fmtCurrency(userPendingWd)} tone="info" />
-                <MiniKpi label="Clientes" value={String(buyers.length)} tone="primary" />
-                <MiniKpi label={`Disputas (${userMedRate}%)`} value={`${userMedTotal} (${fmtCurrency(userMedAmount)})`} tone="warning" />
-              </div>
-
-              <Tabs defaultValue="overview" className="mt-4">
-                <TabsList className="bg-muted/30 border border-border rounded-xl p-1 flex-wrap h-auto gap-1">
+              {(userTransactions.length >= 1000 || userWithdrawals.length >= 500 || userProducts.length >= 200 || userDisputes.length >= 200 || userLogs.length >= 300) && <p role="status" className="mb-4 text-xs text-warning">Históricos exibem os registros mais recentes: até 1.000 transações, 500 saques, 200 produtos/disputas e 300 logs. Os totais da Visão 360 usam todos os registros.</p>}
+              <Tabs value={detailTab} onValueChange={setDetailTab} className="min-w-0">
+                <TabsList className="seller-detail-tabs sticky top-0 z-10 flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-none border-b border-border bg-card p-1">
                   {[
                     { v: "overview", l: "Visão 360", i: Activity },
                     { v: "info", l: "Info & KYC", i: FileText },
@@ -1005,14 +667,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     { v: "logs", l: "Logs", i: Activity },
                     { v: "fees", l: "Taxas", i: CreditCard },
                   ].map(t => (
-                    <TabsTrigger key={t.v} value={t.v} className="gap-1.5 text-[11px] rounded-lg">
+                    <TabsTrigger key={t.v} value={t.v} className="shrink-0 gap-1.5 rounded-md px-3 py-2 text-xs">
                       <t.i className="h-3 w-3" />{t.l}
                     </TabsTrigger>
                   ))}
                 </TabsList>
 
                 <TabsContent value="overview" className="mt-4">
-                  {selectedUser && <Seller360Panel userId={selectedUser.user_id} onChanged={onReload} />}
+                  {selectedUser && <Seller360Panel userId={selectedUser.user_id} onChanged={reloadSeller} />}
                 </TabsContent>
 
                 {/* ── Info & KYC ── */}
@@ -1063,13 +725,13 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   <div className="rounded-xl border border-border bg-muted/20 p-4">
                     <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-3">Classificação do Seller</p>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={() => handleSetSellerType(selectedUser!.user_id, "black")}>
+                      <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={() => handleSetSellerType(selectedUser?.user_id ?? "", "black")}>
                         <Shield className="h-3 w-3 mr-1" /> Black
                       </Button>
-                      <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={() => handleSetSellerType(selectedUser!.user_id, "white")}>
+                      <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={() => handleSetSellerType(selectedUser?.user_id ?? "", "white")}>
                         <Globe className="h-3 w-3 mr-1" /> White
                       </Button>
-                      <Button size="sm" variant="ghost" className="text-warning text-xs" onClick={() => handleSetSellerType(selectedUser!.user_id, null)}>
+                      <Button size="sm" variant="ghost" className="text-warning text-xs" onClick={() => handleSetSellerType(selectedUser?.user_id ?? "", null)}>
                         <XCircle className="h-3 w-3 mr-1" /> Remover
                       </Button>
                     </div>
@@ -1087,11 +749,11 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       ] as const).map(opt => {
                         const enabled = selectedUser?.[opt.key] !== false;
                         return (
-                          <button
+                          <Button variant="outline"
                             key={opt.key}
                             type="button"
                             onClick={async () => {
-                              if (!selectedUser) return;
+                              if (!selectedUser || !isAdmin) return;
                               const next = !enabled;
                               const previous = selectedUser;
                               setSelectedUser({ ...selectedUser, [opt.key]: next });
@@ -1103,7 +765,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                                 .eq("user_id", selectedUser.user_id);
                                if (error) { setSelectedUser(previous); toast.error("Erro ao atualizar método"); return; }
                               toast.success(`${opt.label} ${next ? "ativado" : "desativado"}`);
-                               onReload();
+                               reloadSeller();
                             }}
                             className={cn(
                               "flex items-center justify-between rounded-lg border px-3 py-2.5 transition-colors",
@@ -1119,7 +781,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                             )}>
                               {enabled ? "Ativo" : "Bloqueado"}
                             </span>
-                          </button>
+                          </Button>
                         );
                       })}
                     </div>
@@ -1194,7 +856,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                         <Label className="text-[10px] text-muted-foreground">Liberação Cartão</Label>
                         <Select value={retentionForm.card_release_days} onValueChange={v => setRetentionForm(p => ({ ...p, card_release_days: v }))}>
                           <SelectTrigger className="mt-1 h-9 text-xs rounded-xl bg-muted/30 border-border"><SelectValue /></SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="z-[130]">
                             <SelectItem value="1">D+1</SelectItem>
                             <SelectItem value="7">D+7 (padrão)</SelectItem>
                             <SelectItem value="15">D+15</SelectItem>
@@ -1221,7 +883,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <MiniKpi label="Abertas" value={String(userMedOpen)} tone="warning" />
                     <MiniKpi label="Resolvidas" value={String(userMedResolved)} tone="success" />
                     <MiniKpi label="Valor Total" value={fmtCurrency(userMedAmount)} tone="warning" />
-                    <MiniKpi label="Taxa Med (%)" value={`${userMedRate}%`} tone="info" />
+                    <MiniKpi label="Ocorrências (%)" value={`${userMedRate}%`} tone="info" />
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     {[
@@ -1290,7 +952,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       </Button>
                     ) : null}
                   >
-                    {!revealedPixKeys || revealedPixKeys.length === 0 ? (
+                    {!piiRevealed ? <p className="text-sm text-muted-foreground">Chaves protegidas. Revele os dados para consultar.</p> : !revealedPixKeys || revealedPixKeys.length === 0 ? (
                       <PremiumEmpty icon={Key} title="Nenhuma chave PIX cadastrada" />
                     ) : (
                       <div className="space-y-3">
@@ -1325,34 +987,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
                 {/* ── Financeiro ── */}
                 <TabsContent value="financial" className="mt-4 space-y-4">
-                  <PremiumPanel title="Ajustar Saldo Manualmente" icon={DollarSign}>
-                    <div className="grid grid-cols-4 gap-3">
-                      <div>
-                        <Label className="text-[10px] text-muted-foreground">Tipo</Label>
-                        <Select value={adjustType} onValueChange={(v: "credit" | "debit") => setAdjustType(v)}>
-                          <SelectTrigger className="h-9 text-xs rounded-xl bg-muted/30 border-border"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="credit">Crédito (+)</SelectItem>
-                            <SelectItem value="debit">Débito (-)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="text-[10px] text-muted-foreground">Valor (R$)</Label>
-                        <NumberInput step={0.01} min={0} value={adjustAmount} onChange={v => setAdjustAmount(v)} placeholder="0.00" className="text-xs" />
-                      </div>
-                      <div className="col-span-2">
-                        <Label className="text-[10px] text-muted-foreground">Motivo (obrigatório)</Label>
-                        <div className="flex gap-2">
-                          <input value={adjustReason} onChange={e => setAdjustReason(e.target.value)} placeholder="Motivo do ajuste..."
-                            className="flex-1 h-9 px-3 bg-muted/30 border border-border rounded-xl text-xs text-foreground" />
-                          <Button size="sm" variant="outline" className="h-9 rounded-xl text-xs border-primary/30 text-primary" onClick={handleBalanceAdjustment}>
-                            <Save className="h-3 w-3 mr-1" /> Aplicar
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </PremiumPanel>
+                  {selectedUser && <BalanceAdjustCard userId={selectedUser.user_id} onDone={() => { reloadSeller(); if (selectedUser) void openUserDetail(selectedUser); }} />}
                   {balanceAdjustments.length > 0 && (
                     <PremiumPanel title="Histórico de Ajustes" icon={DollarSign}>
                       <div className="space-y-2 max-h-[200px] overflow-y-auto">
@@ -1370,28 +1005,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       </div>
                     </PremiumPanel>
                   )}
-                  <PremiumPanel title={`Histórico de Saques (${userWithdrawals.length})`} icon={ArrowDownToLine}>
-                    <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                      {userWithdrawals.map(w => (
-                        <div key={w.id} className="flex items-center justify-between text-[11px] py-2 border-b border-border/50">
-                          <div className="flex items-center gap-3">
-                            <StatusBadge status={w.status} />
-                            <span className="font-bold text-foreground">R$ {Number(w.amount).toFixed(2)}</span>
-                            <span className="text-muted-foreground">Taxa: R$ {Number(w.fee_amount).toFixed(2)}</span>
-                          </div>
-                          <span className="text-muted-foreground">{new Date(w.created_at).toLocaleString("pt-BR")}</span>
-                        </div>
-                      ))}
-                      {userWithdrawals.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">Sem saques</p>}
-                    </div>
-                  </PremiumPanel>
+                  {selectedUser && <SellerWithdrawalsSection userId={selectedUser.user_id} onChanged={reloadSeller} />}
                 </TabsContent>
 
                 {/* ── Compliance ── */}
                 <TabsContent value="compliance" className="mt-4 space-y-5">
-                  <PremiumPanel title={`Produtos Ativos (${userProducts.length})`} icon={Package}>
+                  <PremiumPanel title={`Produtos cadastrados (${userProducts.length})`} icon={Package}>
                     <div className="space-y-3">
-                      {userProducts.length === 0 && <PremiumEmpty icon={Package} title="Nenhum produto ativo" />}
+                      {userProducts.length === 0 && <PremiumEmpty icon={Package} title="Nenhum produto cadastrado" />}
                       {userProducts.map(p => {
                         const prodTxs = userTransactions.filter(t => t.product_id === p.id);
                         const prodApproved = prodTxs.filter(t => isApprovedTransaction(t.status));
@@ -1449,7 +1070,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
                   <PremiumPanel title="Resumo de Compliance" icon={BarChart3}>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                      <MiniKpi label="Produtos Ativos" value={String(userProducts.length)} tone="success" />
+                      <MiniKpi label="Produtos Ativos" value={String(userProducts.filter(product => product.status === "active").length)} tone="success" />
                       <MiniKpi label="Produtos Excluídos" value={String(deletedProducts.length)} tone="warning" />
                       <MiniKpi label="Transações Totais" value={String(userTransactions.length)} tone="info" />
                       <MiniKpi label="Taxa Estorno" value={`${userTransactions.length > 0 ? ((userTransactions.filter(t => t.status === "refunded" || t.status === "chargeback").length / userTransactions.length) * 100).toFixed(2) : "0.00"}%`} tone="warning" />
@@ -1492,13 +1113,15 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                                     <DropdownMenuItem
                                       disabled={!lastCompleted}
                                       onClick={async () => {
-                                        if (!lastCompleted || !selectedUser) return;
-                                        if (!window.confirm(`Estornar a última transação aprovada (${fmtCurrency(Number(lastCompleted.amount))}) deste cliente?`)) return;
-                                        const { error } = await supabase.from("transactions").update({ status: "refunded" }).eq("id", lastCompleted.id);
-                                        if (error) { toast.error("Erro ao estornar: " + friendlyError(error)); return; }
-                                        toast.success("Transação estornada.");
-                                        await logAdminAction("manual_refund", "transaction", lastCompleted.id, { amount: lastCompleted.amount, buyer: b.email });
-                                        openUserDetail(selectedUser);
+                                        if (!lastCompleted || !selectedUser || !isAdmin) return;
+                                        const profile = selectedUser;
+                                        const reason = window.prompt("Motivo do reembolso (mínimo 5 caracteres)");
+                                        if (!reason || reason.trim().length < 5) return;
+                                        confirm(`Reservar ${fmtCurrency(Number(lastCompleted.amount))} do saldo do seller e enviar à fila de aprovação manual. Nenhum dinheiro será enviado automaticamente.`, async () => {
+                                          const { error } = await supabase.rpc("admin_refund_transaction", { _transaction_id: lastCompleted.id, _amount: Number(lastCompleted.amount), _reason: reason.trim() });
+                                          if (error) { toast.error(friendlyError(error)); return; }
+                                          toast.success("Reembolso enviado à aprovação manual"); reloadSeller(); await openUserDetail(profile);
+                                        });
                                       }}
                                       className="text-warning"
                                     >
@@ -1507,24 +1130,19 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                                     <DropdownMenuItem
                                       disabled={!lastCompleted}
                                       onClick={async () => {
-                                        if (!lastCompleted || !selectedUser || !user) return;
-                                        if (!window.confirm(`Abrir MED/Chargeback nesta transação (${fmtCurrency(Number(lastCompleted.amount))})?`)) return;
-                                        const { error } = await supabase.from("disputes").insert({
-                                          transaction_id: lastCompleted.id,
-                                          seller_user_id: selectedUser.user_id,
-                                          buyer_name: b.name, buyer_email: b.email, buyer_phone: b.phone,
-                                          type: "med", status: "open",
-                                          amount: lastCompleted.amount,
-                                          reason: "Aberto manualmente pelo admin",
-                                          admin_user_id: user.id,
+                                        if (!lastCompleted || !selectedUser || !isAdmin) return;
+                                        const profile = selectedUser;
+                                        const reason = window.prompt("Motivo da reclamação da adquirente (mínimo 5 caracteres)");
+                                        if (!reason || reason.trim().length < 5) return;
+                                        const type = lastCompleted.payment_method === "pix" ? "medpix" : "chargeback";
+                                        confirm(`Abrir ${type === "medpix" ? "MED PIX" : "chargeback"} e congelar o valor desta venda, sem devolução automática.`, async () => {
+                                          const { error } = await supabase.rpc("admin_open_dispute", { _transaction_id: lastCompleted.id, _type: type, _reason: reason.trim(), _deadline_days: 7 });
+                                          if (error) { toast.error(friendlyError(error)); return; }
+                                          toast.success("Disputa registrada com retenção auditada"); reloadSeller(); await openUserDetail(profile);
                                         });
-                                        if (error) { toast.error("Erro ao abrir MED: " + friendlyError(error)); return; }
-                                        toast.success("MED aberto. Saldo retido até resolução.");
-                                        await logAdminAction("open_dispute", "transaction", lastCompleted.id, { amount: lastCompleted.amount });
-                                        openUserDetail(selectedUser);
                                       }}
                                     >
-                                      <AlertTriangle className="h-3.5 w-3.5 mr-2" /> Abrir MED na última
+                                      <AlertTriangle className="h-3.5 w-3.5 mr-2" /> Abrir MED / chargeback
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
@@ -1575,7 +1193,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       </tbody>
                     </table>
                   </div>
-                  <p className="text-[10px] text-muted-foreground/60 mt-2 px-1">Estornos e MEDs disparam automaticamente os ajustes de saldo via triggers do ledger.</p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-2 px-1">Reembolsos seguem para aprovação manual; MED PIX e chargebacks retêm o valor da venda com registro auditável.</p>
                 </TabsContent>
 
 
@@ -1596,20 +1214,20 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                               </div>
                               {log.old_data && log.action.includes("deleted") && (
                                 <div className="mt-2 rounded-lg bg-destructive/5 border border-destructive/10 p-2 text-[10px]">
-                                  {Object.entries(log.old_data).map(([k, v]) => (<div key={k}><span className="text-muted-foreground">{k}:</span> <span className="text-foreground">{String(v)}</span></div>))}
+                                  {Object.entries(log.old_data).map(([k, v]) => (<div key={k}><span className="text-muted-foreground">{k}:</span> <span className="text-foreground">{displayLogValue(k, v)}</span></div>))}
                                 </div>
                               )}
                               {log.old_data && log.new_data && log.action.includes("updated") && (
                                 <div className="mt-2 rounded-lg bg-info/5 border border-info/10 p-2 text-[10px] space-y-0.5">
                                   {Object.keys(log.new_data).map(k => {
-                                    if (log.old_data![k] === log.new_data![k]) return null;
-                                    return (<div key={k}><span className="text-muted-foreground">{k}:</span> <span className="line-through text-destructive/50">{String(log.old_data![k] ?? "—")}</span> → <span className="text-primary">{String(log.new_data![k] ?? "—")}</span></div>);
+                                    if (log.old_data?.[k] === log.new_data?.[k]) return null;
+                                    return (<div key={k}><span className="text-muted-foreground">{k}:</span> <span className="line-through text-destructive/50">{displayLogValue(k, log.old_data?.[k])}</span> → <span className="text-primary">{displayLogValue(k, log.new_data?.[k])}</span></div>);
                                   })}
                                 </div>
                               )}
                               {log.new_data && log.action.includes("created") && (
                                 <div className="mt-2 rounded-lg bg-primary/5 border border-primary/10 p-2 text-[10px]">
-                                  {Object.entries(log.new_data).map(([k, v]) => (<div key={k}><span className="text-muted-foreground">{k}:</span> <span className="text-foreground">{String(v)}</span></div>))}
+                                  {Object.entries(log.new_data).map(([k, v]) => (<div key={k}><span className="text-muted-foreground">{k}:</span> <span className="text-foreground">{displayLogValue(k, v)}</span></div>))}
                                 </div>
                               )}
                             </div>
@@ -1724,7 +1342,7 @@ function InfoRow({ label, value, mono }: { label: string; value?: string | null;
     <div className="group/info relative overflow-hidden rounded-xl border border-border bg-card p-3 transition-all duration-200 hover:border-primary/40 hover:-translate-y-px hover:bg-muted/20">
       <span className="absolute inset-y-0 left-0 w-0.5 bg-primary scale-y-0 group-hover/info:scale-y-100 transition-transform duration-300 origin-top" />
       <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/80 mb-1">{label}</p>
-      <p className={`text-[12px] font-semibold ${mono ? "font-mono" : ""} ${value ? "text-foreground" : "text-muted-foreground/50 italic"}`}>{value || "Não informado"}</p>
+      <p className={`break-words text-[12px] font-semibold ${mono ? "font-mono" : ""} ${value ? "text-foreground" : "text-muted-foreground/50 italic"}`}>{value || "Não informado"}</p>
     </div>
   );
 }

@@ -5747,6 +5747,19 @@ export type Database = {
         }
         Returns: Json
       }
+      get_admin_sellers_page: {
+        Args: {
+          _from: string
+          _page?: number
+          _risk?: string
+          _search?: string
+          _selling_only?: boolean
+          _sort?: string
+          _state?: string
+          _to: string
+        }
+        Returns: Json
+      }
       get_admin_top_sellers: { Args: { _period_days?: number }; Returns: Json }
       get_admin_transactions_page: {
         Args: {
