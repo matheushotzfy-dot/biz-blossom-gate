@@ -1,6 +1,6 @@
 # Admin total — controle manual, métricas, adquirentes e ficha do seller
 
-- [x] Reconstruir suporte compacto e clean: direção Conversa em destaque, caixa compacta, chamados/conversas preservados; busca, FAQ, prioridades e navegação móvel verificadas.
+- [ ] Ampliar e refinar suporte: ocupar toda a área disponível, controles enxutos, tipografia legível e composição sem caixa pequena; preservar chamados e anexos.
 
 - [x] Motor de saldo, disputas reais, central de disputas, visão 360, auditoria financeira, IA de risco
 - [x] Reembolso (seller/suporte) e MED PIX com congelamento exato
