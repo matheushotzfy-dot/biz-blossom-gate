@@ -4,6 +4,57 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Scoped support surfaces: account theme remains authoritative elsewhere. */
+.support-surface {
+  --background: 0 0% 100%;
+  --foreground: 220 42% 16%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 42% 16%;
+  --muted: 210 38% 97%;
+  --muted-foreground: 216 16% 44%;
+  --primary: 210 67% 47%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 210 55% 96%;
+  --accent-foreground: 220 42% 16%;
+  --border: 214 25% 90%;
+  --input: 212 33% 85%;
+  --ring: 210 67% 47%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 42% 16%;
+  font-family: 'Manrope', sans-serif;
+  color: hsl(var(--foreground));
+  letter-spacing: 0;
+}
+.dark .support-surface {
+  --background: 222 47% 6%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 10%;
+  --card-foreground: 210 40% 98%;
+  --muted: 222 35% 12%;
+  --muted-foreground: 215 25% 75%;
+  --primary: 210 67% 47%;
+  --accent: 214 40% 18%;
+  --border: 222 25% 22%;
+  --input: 214 30% 30%;
+  --popover: 222 47% 10%;
+  --popover-foreground: 210 40% 98%;
+}
+.support-surface h1, .support-surface h2, .support-surface [role='dialog'] h2 {
+  font-family: 'Sora', sans-serif;
+}
+.support-surface *, .support-surface button { letter-spacing: 0; }
+.support-workspace { display: flex; height: min(680px, calc(100dvh - 150px)); min-height: 400px; }
+.support-inbox { width: 100%; flex-shrink: 0; }
+.support-surface button { box-shadow: none; }
+.support-message.bg-primary { color: hsl(var(--primary-foreground)); }
+@media (min-width: 768px) {
+  .support-inbox { width: 280px; border-right: 1px solid hsl(var(--border)); }
+}
+@media (max-width: 767px) {
+  .support-workspace { height: calc(100dvh - 150px); min-height: 360px; }
+  .support-surface input, .support-surface textarea { font-size: 16px; }
+}
+
 /* Custom styled number inputs */
 input[type="number"] {
   -moz-appearance: textfield;

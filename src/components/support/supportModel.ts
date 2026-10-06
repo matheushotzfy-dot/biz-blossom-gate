@@ -38,7 +38,11 @@ export const formatTime = (iso: string): string => {
   return `${Math.floor(minutes / 1440)}d`;
 };
 export function toMessage(row: Tables<'ticket_messages'>): SupportMessage {
-  const attachments = Array.isArray(row.attachments) ? row.attachments.filter((a): a is Attachment =>
-    typeof a === 'object' && a !== null && !Array.isArray(a) && typeof a.path === 'string' && typeof a.name === 'string' && typeof a.size === 'number' && typeof a.type === 'string') : [];
+  const attachments: Attachment[] = [];
+  for (const a of Array.isArray(row.attachments) ? row.attachments : []) {
+    if (typeof a === 'object' && a !== null && !Array.isArray(a) && typeof a.path === 'string' && typeof a.name === 'string' && typeof a.size === 'number' && typeof a.type === 'string') {
+      attachments.push({ path: a.path, name: a.name, size: a.size, type: a.type });
+    }
+  }
   return { ...row, attachments };
 }
