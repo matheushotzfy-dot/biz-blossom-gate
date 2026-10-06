@@ -162,10 +162,17 @@ html.vx-scroll body { overflow: visible !important; }
 .vx-terms-list strong { font: 700 18px "JetBrains Mono", monospace; }
 .vx-terms-list p { color: hsl(var(--muted-foreground)); font-size: 13px; }
 
-/* FAQ inherited markup */
+/* FAQ */
 .vx-land #perguntas { padding-block: 140px; border-top: 1px solid hsl(var(--border)); }
 .vx-land #perguntas > div { width: min(100% - 40px, 1280px); }
 .vx-land #perguntas h2 { font-size: clamp(42px, 5.5vw, 76px); line-height: 1; }
+.vx-faq-layout { display: grid; grid-template-columns: .8fr 1.2fr; gap: 10vw; }
+.vx-faq-layout h2 { margin-top: 28px; font-weight: 700; }
+.vx-faq-list { border-top: 1px solid hsl(var(--foreground)); }
+.vx-faq-item { border-bottom: 1px solid hsl(var(--border)); }
+.vx-faq-trigger { width: 100%; height: auto; min-height: 82px; justify-content: space-between; border-radius: 0; padding: 20px 0; text-align: left; white-space: normal; font-family: "Sora", sans-serif; font-size: 16px; color: hsl(var(--foreground)); }
+.vx-faq-trigger svg { color: hsl(var(--primary)); }
+.vx-faq-item p { max-width: 620px; padding: 0 40px 26px 0; font-size: 13px; line-height: 1.75; color: hsl(var(--muted-foreground)); }
 
 /* Closing */
 .vx-closing { position: relative; padding-top: 140px; background: hsl(var(--foreground)); color: hsl(var(--background)); overflow: hidden; }
@@ -237,6 +244,8 @@ html.vx-scroll body { overflow: visible !important; }
   .vx-terms-list { margin-top: 58px; }
   .vx-terms-list > div { grid-template-columns: 34px 1fr auto; gap: 12px; padding-block: 18px; }
   .vx-terms-list p { grid-column: 2 / 4; }
+  .vx-land #perguntas { padding-block: 92px; }
+  .vx-faq-layout { grid-template-columns: 1fr; gap: 48px; }
   .vx-closing { padding-top: 96px; }
   .vx-closing-title { font-size: clamp(52px, 17vw, 76px); }
   .vx-closing-action { grid-template-columns: 1fr; padding: 44px 0 82px; }

@@ -2,10 +2,10 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Check } from "lucide-react";
 
 const SALES = [
-  ["21:04:08", "PIX", "R$ 297,00", "APROVADO"],
-  ["21:04:11", "CARTÃO 3X", "R$ 1.497,00", "APROVADO"],
-  ["21:04:17", "PIX", "R$ 47,90", "APROVADO"],
-  ["21:04:24", "CARTÃO 6X", "R$ 897,00", "APROVADO"],
+  { id: "a", time: "21:04:08", method: "PIX", value: "R$ 297,00", status: "APROVADO" },
+  { id: "b", time: "21:04:11", method: "CARTÃO 3X", value: "R$ 1.497,00", status: "APROVADO" },
+  { id: "c", time: "21:04:17", method: "PIX", value: "R$ 47,90", status: "APROVADO" },
+  { id: "d", time: "21:04:24", method: "CARTÃO 6X", value: "R$ 897,00", status: "APROVADO" },
 ];
 
 export function ApprovalStrip() {
@@ -19,9 +19,9 @@ export function ApprovalStrip() {
           <p>atualização contínua / dados ilustrativos</p>
         </div>
         <div className="vx-ledger-track">
-          {[...SALES, ...SALES].map(([time, method, value, status], index) => (
+          {SALES.map(({ id, time, method, value, status }, index) => (
             <motion.div
-              key={`${time}-${index}`}
+              key={id}
               initial={reduce ? false : { opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

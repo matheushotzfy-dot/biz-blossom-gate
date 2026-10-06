@@ -16,7 +16,7 @@ const ROWS = [
   { id: "TX 2A66", produto: "Formação Copy Avançada", valor: "R$ 897,00", metodo: "Cartão" },
 ];
 
-const BARS = [38, 52, 44, 66, 58, 74, 62, 86, 71, 94, 82, 100];
+const BARS = ["h-[38%]", "h-[52%]", "h-[44%]", "h-[66%]", "h-[58%]", "h-[74%]", "h-[62%]", "h-[86%]", "h-[71%]", "h-[94%]", "h-[82%]", "h-full"];
 
 export function ConsoleReplica() {
   const [tick, setTick] = useState(0);
@@ -84,13 +84,13 @@ export function ConsoleReplica() {
 
           {/* gráfico */}
           <div className="mt-4 flex h-[104px] items-end gap-[5px] border border-border p-3">
-            {BARS.map((h, i) => (
+            {BARS.map((heightClass, barIndex) => (
               <span
-                key={i}
-                style={{ height: `${h}%`, transitionDelay: `${i * 22}ms` }}
+                key={heightClass}
                 className={cn(
                   "flex-1 rounded-t-[2px] transition-[height] duration-700",
-                  i > 8 ? "bg-primary" : "bg-primary/35",
+                  heightClass,
+                  barIndex > 8 ? "bg-primary" : "bg-primary/35",
                 )}
               />
             ))}
