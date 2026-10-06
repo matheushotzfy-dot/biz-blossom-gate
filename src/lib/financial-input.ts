@@ -43,6 +43,9 @@ export function detectPixKeyType(value: string): PixKeyType | null {
   const clean = value.trim();
   if (!clean) return null;
   if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) return "email";
+  // Chave aleatória (UUID ou parcial com letras hex/hífens) vem antes de qualquer regra numérica.
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clean)) return "random";
+  if (/^[0-9a-f-]+$/i.test(clean) && /[a-f]/i.test(clean) && (clean.includes("-") || clean.length >= 8)) return "random";
   const numeric = digits(clean);
   if (numeric.length === 11 && isValidCPF(numeric)) return "cpf";
   if (numeric.length === 14 && isValidCNPJ(numeric)) return "cnpj";
@@ -54,6 +57,7 @@ export function detectPixKeyType(value: string): PixKeyType | null {
 export function formatPixKey(value: string, type: PixKeyType): string {
   if (type === "cpf" || type === "cnpj") return maskDocument(value);
   if (type === "phone") return maskPhone(value);
+  if (type === "random") return value.replace(/\s/g, "").toLowerCase().slice(0, 77);
   return value.trimStart().slice(0, type === "email" ? 254 : 77);
 }
 

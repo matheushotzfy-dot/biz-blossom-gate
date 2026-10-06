@@ -210,7 +210,10 @@ export default function DadosBancarios() {
                   <Input
                     value={pixForm.key_value}
                     onChange={(e) => {
-                      const detected = detectPixKeyType(e.target.value);
+                      // Tipo escolhido manualmente como aleatória/e-mail é respeitado:
+                      // nunca troca para celular/CPF ao colar ou digitar.
+                      const locked = pixForm.key_type === "random" || pixForm.key_type === "email";
+                      const detected = locked ? null : detectPixKeyType(e.target.value);
                       const nextType = detected ?? pixForm.key_type;
                       setPixForm({ key_type: nextType, key_value: formatPixKey(e.target.value, nextType) });
                       clearPixError("key_value");
