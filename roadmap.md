@@ -1,6 +1,8 @@
 # Admin total — controle manual, métricas, adquirentes e ficha do seller
 - [x] Staff: criação com 20 permissões permitidas, configuração atômica auditada de comissão/pisos individuais, vínculo de sellers, bloqueio separado de saques e liberação só pelo dono; exclusão removida e banimento de seller restrito ao dono. 42 testes passaram; formulário e rejeições autenticadas de permissão perigosa, piso inválido e exclusão verificados; build OK.
 - [ ] Staff: validar criação/persistência e isolamento ponta a ponta com funcionário/gerente (bloqueado: nenhuma conta staff/gerente existente; exige conta de teste autorizada). Permissões em rotinas antigas permanecem na tarefa específica abaixo; não afirmar que todas as 20 opções já habilitam fluxos completos.
+- [x] Gerentes: vínculo temporal exclusivo, transferência auditada, gerente padrão, aprovação com atribuição, carteira paginada por período, comissões presas ao crédito original e bloqueios de ex-gerente aplicados no banco; linter limpo, 17 testes e build OK.
+- [ ] Gerentes: validar login, transferência entre dois gerentes e extrato histórico ponta a ponta com contas controladas (bloqueado: não existe conta manager no banco e criar identidades sem autorização adicionaria usuários reais).
 - [x] Inativos: direção Lista precisa aplicada, ficha lateral estável, atividade e histórico separados, consulta admin-only paginada, filtros de dias/busca/ordenação e CSV seguro. 25 testes aprovados; busca vazia, ficha, exportação e recuperação de falha verificadas em computador/tablet/celular sem erros de execução ou movimentações financeiras. Conciliação com vendas e paginação multipágina real dependem de dados.
 - [x] Top Sellers: ranking paginado com vendas/clientes/taxas/custos/MED/chargebacks/reembolsos, ficha e CSV da página filtrada; Hoje/Ontem/7d/30d/1 ano e período personalizado, busca, ordenação e recuperação de falhas verificados. 22 testes aprovados; sem vendas reais para conciliação ponta a ponta e sem movimentações financeiras.
 - [x] Sellers: lista paginada com ranking e filtros por período/vendas/MED/chargeback/reembolsos, ficha estável e navegação nas onze opções verificadas; opções da reserva visíveis, confirmação financeira e recuperação de falha testadas, sem movimentar dinheiro. 18 testes aprovados e sem erros de navegação; operações reais e históricos com vendas dependem de autorização/dados.
@@ -27,6 +29,6 @@
 - [x] Tema light por padrão salvo na conta; checkout continua com tema próprio
 - [x] Chaves PIX completas para o próprio seller e revelação admin auditada
 - [x] Logos de integrações com superfície legível, dimensões estáveis e fallback
-- [ ] Tornar permissões de staff/gerente efetivas em todas as rotinas antigas; concessão de permissões já restrita ao dono
+- [ ] Tornar permissões de staff/gerente efetivas nas rotinas antigas fora de carteira, taxas, notas, saques e transações; estes fluxos críticos já estão temporalmente protegidos.
 - [x] Migrar segredos de integrações para armazenamento criptografado e leitura mascarada no navegador
 - [ ] Paginar cargas globais e históricos restantes do admin

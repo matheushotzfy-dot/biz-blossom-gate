@@ -25,3 +25,4 @@
 - Integration credentials are encrypted at rest and decrypted only by service-role dispatch routines; browser queries use masked safe views.
 
 - Staff policy changes are atomically audited through owner-only routines; individual fee floors fail closed, and assigned staff can only place separate withdrawal blocks, never block/delete seller accounts or release holds.
+- Manager portfolios use one temporal active assignment per seller; operational access starts at assignment, ends on transfer, while immutable commission history remains tied to the original accrual.

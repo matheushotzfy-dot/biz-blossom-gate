@@ -1,5 +1,5 @@
 import { WithdrawalBlockControl } from "@/features/staff/WithdrawalBlockControl";
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { SellersDirectory } from "@/features/admin-finance/SellersDirectory";
 import { BalanceAdjustCard } from "@/features/admin-finance/BalanceAdjustCard";
 import { useSensitiveConfirm } from "@/features/admin-finance/useSensitiveConfirm";
@@ -165,11 +165,24 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [kycRejectReason, setKycRejectReason] = useState("");
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectTargetUserId, setRejectTargetUserId] = useState<string>("");
+  const [managerOptions, setManagerOptions] = useState<{ user_id: string; label: string }[]>([]);
+  const [approvalManager, setApprovalManager] = useState("default");
   const [userRetention, setUserRetention] = useState<RetentionSettings | null>(null);
   const [retentionForm, setRetentionForm] = useState({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
   const [impersonating, setImpersonating] = useState(false);
   const [ipHistory, setIpHistory] = useState<IpLog[]>([]);
   const detailRequestRef = useRef(0);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    void (async () => {
+      const { data: roles } = await supabase.from("user_roles").select("user_id").eq("role", "manager");
+      const ids = (roles ?? []).map(row => row.user_id);
+      if (!ids.length) { setManagerOptions([]); return; }
+      const { data } = await supabase.from("profiles").select("user_id,full_name,email").in("user_id", ids);
+      setManagerOptions((data ?? []).map(row => ({ user_id: row.user_id, label: row.full_name || row.email || row.user_id })));
+    })();
+  }, [isAdmin]);
 
 
   const revealPii = async () => {
@@ -306,9 +319,11 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
   const handleApproveKyc = async (userId: string) => {
     if (!isAdmin) return;
-    const { error } = await supabase.rpc("admin_approve_kyc", { _user_id: userId });
-    if (error) { toast.error("Erro ao aprovar KYC"); return; }
-    toast.success("KYC aprovado! Seller liberado.");
+    const managerId = approvalManager === "default" || approvalManager === "none" ? null : approvalManager;
+    const { error } = await supabase.rpc("admin_approve_seller_with_manager" as never, { _seller: userId, _manager: managerId } as never);
+    if (error) { toast.error(friendlyError(error)); return; }
+    toast.success(approvalManager === "none" ? "KYC aprovado sem gerente." : "KYC aprovado e carteira atribuída.");
+    setApprovalManager("default");
     reloadSeller();
     if (selectedUser?.user_id === userId) setSelectedUser(null);
   };
@@ -623,11 +638,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <Unlock className="h-3 w-3" /> Descongelar
                   </Button>
                 )}
-                {selectedUser?.account_status !== "approved" && (
-                  <Button size="sm" variant="outline" className="h-8 rounded-lg text-[11px] gap-1.5 border-success/30 text-success hover:bg-success/10" onClick={() => handleApproveKyc(selectedUser?.user_id ?? "")}>
-                    <CheckCircle2 className="h-3 w-3" /> Aprovar
-                  </Button>
-                )}
+                {selectedUser?.account_status !== "approved" && <div className="flex gap-1.5"><Select value={approvalManager} onValueChange={setApprovalManager}><SelectTrigger className="h-8 w-48 text-[11px]" aria-label="Gerente na aprovação"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="default">Gerente padrão</SelectItem><SelectItem value="none">Sem gerente</SelectItem>{managerOptions.map(manager => <SelectItem key={manager.user_id} value={manager.user_id}>{manager.label}</SelectItem>)}</SelectContent></Select><Button size="sm" variant="outline" className="h-8 gap-1.5 border-success/30 text-success hover:bg-success/10" onClick={() => handleApproveKyc(selectedUser?.user_id ?? "")}><CheckCircle2 className="h-3 w-3" /> Aprovar</Button></div>}
                 {selectedUser && ["pending", "pending_review"].includes(selectedUser.account_status || "") && <Button size="sm" variant="outline" className="h-8 gap-1.5 text-destructive" onClick={() => { setRejectTargetUserId(selectedUser.user_id); setKycRejectReason(""); setShowRejectDialog(true); }}><XCircle className="h-3 w-3" />Recusar KYC</Button>}
                 {selectedUser && emailVerified !== true && (
                   <Button size="sm" variant="outline" disabled={emailVerifyLoading} className="h-8 rounded-lg text-[11px] gap-1.5 border-success/30 text-success hover:bg-success/10" onClick={() => handleSetEmailVerified(selectedUser.user_id, true)}>

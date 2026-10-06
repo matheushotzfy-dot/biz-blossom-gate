@@ -7,7 +7,8 @@ import { Shield } from "lucide-react";
 export function useManagerGuard() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [isManager, setIsManager] = useState(false);
+  const [isStaff, setIsStaff] = useState(false);
+  const [role, setRole] = useState<"manager" | "employee" | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,13 +21,17 @@ export function useManagerGuard() {
     let cancelled = false;
     (async () => {
       try {
-        const { data, error } = await supabase.rpc("current_user_has_role", { _role: "manager" });
+        const [{ data: manager, error: managerError }, { data: employee, error: employeeError }] = await Promise.all([
+          supabase.rpc("current_user_has_role", { _role: "manager" }),
+          supabase.rpc("current_user_has_role", { _role: "employee" }),
+        ]);
         if (cancelled) return;
-        if (error || data !== true) {
+        if (managerError || employeeError || (manager !== true && employee !== true)) {
           navigate("/gerentes", { replace: true });
           return;
         }
-        setIsManager(true);
+        setRole(manager === true ? "manager" : "employee");
+        setIsStaff(true);
       } catch {
         if (!cancelled) navigate("/gerentes", { replace: true });
       } finally {
@@ -37,20 +42,20 @@ export function useManagerGuard() {
     return () => { cancelled = true; };
   }, [user, authLoading, navigate]);
 
-  return { isManager, loading, user };
+  return { isStaff, role, loading, user };
 }
 
 export function RequireManager({ children }: { children: React.ReactNode }) {
-  const { isManager, loading } = useManagerGuard();
+  const { isStaff, loading } = useManagerGuard();
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-14 w-14 rounded-[18px] bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-[0_0_60px_rgba(16,185,129,0.3)] animate-pulse">
-            <Shield className="h-7 w-7 text-white" />
+          <div className="flex h-14 w-14 animate-pulse items-center justify-center rounded-lg border border-primary/30 bg-primary/10">
+            <Shield className="h-7 w-7 text-primary" />
           </div>
-          <p className="text-[11px] text-white/20 font-medium tracking-wider uppercase">
+          <p className="text-[11px] font-medium uppercase text-muted-foreground">
             Verificando permissões...
           </p>
         </div>
@@ -58,6 +63,6 @@ export function RequireManager({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!isManager) return null;
+  if (!isStaff) return null;
   return <>{children}</>;
 }
