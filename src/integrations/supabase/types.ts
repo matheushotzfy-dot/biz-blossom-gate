@@ -2074,26 +2074,62 @@ export type Database = {
         Row: {
           assigned_by: string
           created_at: string
+          end_reason: string | null
+          ended_at: string | null
+          ended_by: string | null
           id: string
           manager_user_id: string
           notes: string | null
           seller_user_id: string
+          started_at: string
         }
         Insert: {
           assigned_by: string
           created_at?: string
+          end_reason?: string | null
+          ended_at?: string | null
+          ended_by?: string | null
           id?: string
           manager_user_id: string
           notes?: string | null
           seller_user_id: string
+          started_at?: string
         }
         Update: {
           assigned_by?: string
           created_at?: string
+          end_reason?: string | null
+          ended_at?: string | null
+          ended_by?: string | null
           id?: string
           manager_user_id?: string
           notes?: string | null
           seller_user_id?: string
+          started_at?: string
+        }
+        Relationships: []
+      }
+      manager_settings: {
+        Row: {
+          auto_assign_new_sellers: boolean
+          created_at: string
+          manager_user_id: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          auto_assign_new_sellers?: boolean
+          created_at?: string
+          manager_user_id: string
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          auto_assign_new_sellers?: boolean
+          created_at?: string
+          manager_user_id?: string
+          updated_at?: string
+          updated_by?: string
         }
         Relationships: []
       }
@@ -5493,6 +5529,10 @@ export type Database = {
     }
     Functions: {
       admin_approve_kyc: { Args: { _user_id: string }; Returns: undefined }
+      admin_approve_seller_with_manager: {
+        Args: { _manager?: string; _seller: string }
+        Returns: undefined
+      }
       admin_broadcast_notification: {
         Args: {
           _message: string
@@ -6092,6 +6132,14 @@ export type Database = {
         Args: { _staff: string }
         Returns: number
       }
+      get_staff_portfolio_dashboard: {
+        Args: { _from: string; _page?: number; _search?: string; _to: string }
+        Returns: Json
+      }
+      get_staff_portfolio_transactions: {
+        Args: { _from: string; _page?: number; _search?: string; _to: string }
+        Returns: Json
+      }
       get_thank_you_summary: {
         Args: { _tx_id: string }
         Returns: {
@@ -6218,6 +6266,10 @@ export type Database = {
         Returns: Json
       }
       release_due_card_holds: { Args: never; Returns: number }
+      remove_seller_manager: {
+        Args: { _reason: string; _seller: string }
+        Returns: undefined
+      }
       request_anticipation: {
         Args: { _idempotency_key: string; _max_days: number; _user_id: string }
         Returns: {
@@ -6303,6 +6355,10 @@ export type Database = {
         Args: { _dispute_id: string; _evidence?: string[]; _response: string }
         Returns: undefined
       }
+      set_default_manager: {
+        Args: { _enabled: boolean; _manager: string }
+        Returns: undefined
+      }
       set_max_ticket_for_all: { Args: { _new_value: number }; Returns: Json }
       set_max_ticket_new_users_only: {
         Args: { _new_value: number }
@@ -6336,6 +6392,10 @@ export type Database = {
         Returns: string
       }
       touch_api_key: { Args: { _api_key_id: string }; Returns: undefined }
+      transfer_seller_manager: {
+        Args: { _new_manager: string; _reason: string; _seller: string }
+        Returns: string
+      }
       validate_coupon: {
         Args: { _amount: number; _code: string; _product_id: string }
         Returns: {
