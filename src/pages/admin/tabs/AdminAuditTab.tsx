@@ -54,12 +54,12 @@ export default function AdminAuditTab({ profiles }: Props) {
     (async () => {
       const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
       const [adminRes, staffRes, activityRes, adminTodayRes, staffTodayRes, activityTodayRes] = await Promise.all([
-        supabase.from("audit_logs").select("id", { count: "exact", head: true }),
-        supabase.from("staff_audit_log").select("id", { count: "exact", head: true }),
-        supabase.from("activity_logs").select("id", { count: "exact", head: true }),
-        supabase.from("audit_logs").select("id", { count: "exact", head: true }).gte("created_at", todayStart.toISOString()),
-        supabase.from("staff_audit_log").select("id", { count: "exact", head: true }).gte("created_at", todayStart.toISOString()),
-        supabase.from("activity_logs").select("id", { count: "exact", head: true }).gte("created_at", todayStart.toISOString()),
+        supabase.from("audit_logs").select("id", { count: "estimated", head: true }),
+        supabase.from("staff_audit_log").select("id", { count: "estimated", head: true }),
+        supabase.from("activity_logs").select("id", { count: "estimated", head: true }),
+        supabase.from("audit_logs").select("id", { count: "estimated", head: true }).gte("created_at", todayStart.toISOString()),
+        supabase.from("staff_audit_log").select("id", { count: "estimated", head: true }).gte("created_at", todayStart.toISOString()),
+        supabase.from("activity_logs").select("id", { count: "estimated", head: true }).gte("created_at", todayStart.toISOString()),
       ]);
       if (cancelled) return;
       setCounts({
@@ -83,7 +83,7 @@ export default function AdminAuditTab({ profiles }: Props) {
         // True server-side pagination for a single source table.
         const table = source === "admin" ? "audit_logs" : source === "staff" ? "staff_audit_log" : "activity_logs";
         const from = (page - 1) * PAGE_SIZE;
-        let query = supabase.from(table).select("*", { count: "exact" }).order("created_at", { ascending: false });
+        let query = supabase.from(table).select("*", { count: "estimated" }).order("created_at", { ascending: false }).order("id", { ascending: false });
         if (q) query = query.or(`action.ilike.%${q}%,entity_type.ilike.%${q}%,entity_id.ilike.%${q}%`);
         const { data, error, count } = await query.range(from, from + PAGE_SIZE - 1);
         if (cancelled) return;

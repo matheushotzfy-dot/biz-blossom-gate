@@ -5564,6 +5564,17 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_search_transactions: {
+        Args: { _query: string }
+        Returns: {
+          amount: number
+          created_at: string
+          customer_email: string
+          customer_name: string
+          id: string
+          status: string
+        }[]
+      }
       admin_set_acquirer_active: {
         Args: { _acquirer_id: string; _active: boolean; _reason?: string }
         Returns: Json
@@ -5688,6 +5699,10 @@ export type Database = {
         Returns: Json
       }
       get_admin_analytics: { Args: { _period_days?: number }; Returns: Json }
+      get_admin_command_center: {
+        Args: { _from: string; _to: string }
+        Returns: Json
+      }
       get_admin_dashboard_data: {
         Args: {
           _from: string

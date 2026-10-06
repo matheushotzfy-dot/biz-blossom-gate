@@ -1,5 +1,7 @@
 # Architecture Decisions
 
+- Command center uses account-scoped, abortable aggregate RPCs for exact queues and period metrics; failed loads never report healthy status, and reviewing an error is distinct from fixing its cause.
+
 - Admin overview KPIs and charts use account-scoped aggregate queries across real records with São Paulo date boundaries; capped lists serve operational previews only, and fee margin is never presented as full company profit.
 
 - Customer support fills the authenticated shell's available space using a flex inbox/conversation layout, not viewport-height caps; account-scoped caches, unique realtime subscriptions and scoped theme tokens preserve isolation, while human ticket messages retain existing attachment primitives.
