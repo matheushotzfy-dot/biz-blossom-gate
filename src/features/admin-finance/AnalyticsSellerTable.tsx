@@ -10,25 +10,25 @@ import { ratio } from "./overviewModel";
 import { sellerPageCount, type AnalyticsData, type AnalyticsFilters, type AnalyticsSort } from "./analyticsModel";
 
 const Seller360 = lazy(() => import("./Seller360Panel").then(module => ({ default: module.Seller360Panel })));
-export interface AnalyticsSellerTableProps { data: AnalyticsData; filters: AnalyticsFilters; onFilters: (filters: AnalyticsFilters) => void; fmtCurrency: (value: number) => string; busy: boolean }
-export function AnalyticsSellerTable({ data, filters, onFilters, fmtCurrency: money, busy }: AnalyticsSellerTableProps) {
+export interface AnalyticsSellerTableProps { data: AnalyticsData; filters: AnalyticsFilters; onFilters: (filters: AnalyticsFilters) => void; fmtCurrency: (value: number) => string; busy: boolean; ranked?: boolean }
+export function AnalyticsSellerTable({ data, filters, onFilters, fmtCurrency: money, busy, ranked = false }: AnalyticsSellerTableProps) {
   const [search, setSearch] = useState(filters.search);
   const [selected, setSelected] = useState<{ userId: string; name: string } | null>(null);
   const pages = sellerPageCount(data.seller_count, data.page_size);
   const change = (next: Partial<AnalyticsFilters>) => onFilters({ ...filters, ...next, page: 0 });
   return <>
-    <PremiumPanel title="Desempenho de cada seller" eyebrow={`${data.seller_count.toLocaleString("pt-BR")} contas · período selecionado`}>
+    <PremiumPanel title={ranked ? "Ranking de sellers" : "Desempenho de cada seller"} eyebrow={`${data.seller_count.toLocaleString("pt-BR")} contas · período selecionado`}>
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <form className="flex min-w-0 flex-1 gap-2" onSubmit={event => { event.preventDefault(); change({ search: search.trim() }); }}>
           <Input value={search} onChange={event => setSearch(event.target.value)} maxLength={120} aria-label="Buscar seller" placeholder="Nome, e-mail ou ID do seller" className="min-w-0" />
           <Button type="submit" variant="outline" size="icon" aria-label="Aplicar busca"><Search className="h-4 w-4" /></Button>
         </form>
-        <Select value={filters.sort} onValueChange={value => change({ sort: value as AnalyticsSort })}><SelectTrigger className="w-[170px]" aria-label="Ordenar sellers"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="volume">Maior volume</SelectItem><SelectItem value="sales">Mais vendas</SelectItem><SelectItem value="risk">Mais ocorrências</SelectItem><SelectItem value="newest">Mais recentes</SelectItem></SelectContent></Select>
+        <Select value={filters.sort} onValueChange={value => change({ sort: value as AnalyticsSort })}><SelectTrigger className="w-[170px]" aria-label="Ordenar sellers"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="volume">Maior volume</SelectItem><SelectItem value="sales">Mais vendas</SelectItem><SelectItem value="risk">Mais ocorrências</SelectItem>{!ranked && <SelectItem value="newest">Mais recentes</SelectItem>}</SelectContent></Select>
         <label className="flex items-center gap-2 text-xs"><Checkbox checked={filters.sellingOnly} onCheckedChange={value => change({ sellingOnly: value === true })} />Só quem vendeu</label>
       </div>
       <div className={premiumTable.wrapper}><table className={premiumTable.table}><thead><tr className={premiumTable.headRow}>{["Seller", "Situação atual", "Vendas", "Movimentado", "Clientes", "Ticket médio", "Conversão", "Taxas", "Adquirente", "Resultado de taxas", "Reembolsos", "Chargebacks", "MED PIX", "Ficha"].map(label => <th key={label} className={premiumTable.th}>{label}</th>)}</tr></thead><tbody>
-        {data.sellers.map(seller => <tr key={seller.user_id} className={premiumTable.row}>
-          <td className={premiumTable.td}><p className="max-w-[220px] truncate text-sm font-semibold">{seller.name}</p><p className="max-w-[220px] truncate text-xs text-muted-foreground">{seller.email}</p><p className="mt-1 font-mono text-[10px] text-muted-foreground">{seller.user_id}</p></td>
+        {data.sellers.map((seller, index) => <tr key={seller.user_id} className={premiumTable.row}>
+          <td className={premiumTable.td}><p className="max-w-[220px] truncate text-sm font-semibold">{ranked && <span className="mr-2 font-mono text-primary">#{data.page * data.page_size + index + 1}</span>}{seller.name}</p><p className="max-w-[220px] truncate text-xs text-muted-foreground">{seller.email}</p><p className="mt-1 font-mono text-[10px] text-muted-foreground">{seller.user_id}</p></td>
           <td className={premiumTable.td}><span className="whitespace-nowrap text-xs">{seller.active ? "Ativa" : "Não ativa"}</span></td>
           <td className={premiumTable.td}>{seller.sales.toLocaleString("pt-BR")}</td>
           <td className={premiumTable.td}>{money(seller.volume)}</td><td className={premiumTable.td}>{seller.clients}</td>
