@@ -296,3 +296,16 @@ describe("public checkout validation", () => {
     expect(isValidCardExpiry("09/26", new Date("2026-10-05T00:00:00Z"))).toBe(false);
   });
 });
+
+import { detectPixKeyType as detectPix, formatPixKey as fmtPix } from "@/lib/financial-input";
+describe("chave PIX aleatória", () => {
+  it("reconhece UUID colado como aleatória", () => {
+    expect(detectPix("123e4567-e89b-12d3-a456-426614174000")).toBe("random");
+  });
+  it("reconhece UUID parcial com hífen", () => {
+    expect(detectPix("123e4567-e89b")).toBe("random");
+  });
+  it("mantém formato original sem máscara", () => {
+    expect(fmtPix(" 123E4567-E89B-12D3-A456-426614174000 ", "random")).toBe("123e4567-e89b-12d3-a456-426614174000");
+  });
+});
