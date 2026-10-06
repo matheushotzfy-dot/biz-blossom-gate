@@ -190,6 +190,8 @@ export default function AdminDashboard() {
   });
   const [datePreset, setDatePreset] = useState<DatePresetId | "custom">("today");
   const [calOpen, setCalOpen] = useState(false);
+  const latestRangeRef = useRef(dateRange);
+  latestRangeRef.current = dateRange;
 
   const loadData = useCallback(async () => {
     if (loadInFlightRef.current) {
@@ -218,7 +220,7 @@ export default function AdminDashboard() {
         products?: Tables<"products">[];
         withdrawals?: Tables<"withdrawals">[];
       };
-      if (requestId !== loadRequestRef.current) return;
+      if (requestId !== loadRequestRef.current || latestRangeRef.current !== dateRange) return;
       setTransactions(payload.transactions ?? []);
       setProfiles(payload.profiles ?? []);
       setProducts(payload.products ?? []);
@@ -604,7 +606,9 @@ export default function AdminDashboard() {
             ))}
             <Popover open={calOpen} onOpenChange={setCalOpen}>
               <PopoverTrigger asChild>
-                <button
+                <Button
+                  variant="ghost"
+                  aria-label="Período personalizado"
                   title="Período personalizado"
                   className={cn(
                     "flex items-center gap-1.5 px-2 py-1.5 rounded transition-colors shrink-0",
@@ -617,7 +621,7 @@ export default function AdminDashboard() {
                       {dateRange.from.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}–{dateRange.to.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
                     </span>
                   )}
-                </button>
+                </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0 af-surface af-border border rounded-md shadow-lg" align="end">
                 <CalendarComponent
