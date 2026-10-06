@@ -5707,6 +5707,10 @@ export type Database = {
         Args: { _days_threshold?: number }
         Returns: Json
       }
+      get_admin_overview_metrics: {
+        Args: { _from: string; _to: string }
+        Returns: Json
+      }
       get_admin_payment_links_page: {
         Args: {
           _billing_type?: string

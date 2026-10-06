@@ -23,6 +23,7 @@ import { logAdminAction } from "@/lib/auditLog";
 import { cn, isApprovedTransaction } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
 import { subDays, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { AdminFinancialOverview } from "./tabs/AdminOverviewTab";
@@ -136,14 +137,18 @@ const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: str
 ];
 
 type TabId = string;
-type DatePresetId = "today" | "yesterday" | "7d" | "14d" | "40d";
+type DatePresetId = "today" | "yesterday" | "7d" | "14d" | "30d" | "40d" | "90d" | "180d" | "365d";
 
 const DATE_PRESETS: { id: DatePresetId; label: string }[] = [
   { id: "today", label: "Hoje" },
   { id: "yesterday", label: "Ontem" },
   { id: "7d", label: "7d" },
   { id: "14d", label: "14d" },
+  { id: "30d", label: "30d" },
   { id: "40d", label: "40d" },
+  { id: "90d", label: "90d" },
+  { id: "180d", label: "180d" },
+  { id: "365d", label: "1 ano" },
 ];
 
 const ALL_TAB_IDS = new Set(NAV_SECTIONS.flatMap((s) => s.items.map((i) => i.id)));
@@ -163,6 +168,8 @@ export default function AdminDashboard() {
   const lastLoadAtRef = useRef<number>(0);
   const loadRequestRef = useRef(0);
   const loadInFlightRef = useRef(false);
+  const reloadQueuedRef = useRef(false);
+  const latestLoadRef = useRef<() => Promise<void>>(async () => {});
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEmployee, setIsEmployee] = useState(false);
   const [hasSupportPerm, setHasSupportPerm] = useState(false);
@@ -183,9 +190,12 @@ export default function AdminDashboard() {
   });
   const [datePreset, setDatePreset] = useState<DatePresetId | "custom">("today");
   const [calOpen, setCalOpen] = useState(false);
+  const latestRangeRef = useRef(dateRange);
+  latestRangeRef.current = dateRange;
 
   const loadData = useCallback(async () => {
     if (loadInFlightRef.current) {
+      reloadQueuedRef.current = true;
       return;
     }
     loadInFlightRef.current = true;
@@ -210,7 +220,7 @@ export default function AdminDashboard() {
         products?: Tables<"products">[];
         withdrawals?: Tables<"withdrawals">[];
       };
-      if (requestId !== loadRequestRef.current) return;
+      if (requestId !== loadRequestRef.current || latestRangeRef.current !== dateRange) return;
       setTransactions(payload.transactions ?? []);
       setProfiles(payload.profiles ?? []);
       setProducts(payload.products ?? []);
@@ -230,8 +240,14 @@ export default function AdminDashboard() {
     } finally {
       loadInFlightRef.current = false;
       if (requestId === loadRequestRef.current) setSyncing(false);
+      if (reloadQueuedRef.current) {
+        reloadQueuedRef.current = false;
+        void latestLoadRef.current();
+      }
     }
   }, [dateRange.from, dateRange.to]);
+
+  latestLoadRef.current = loadData;
 
   // ── Role check (runs ONCE when user is available) ──
   useEffect(() => {
@@ -574,7 +590,8 @@ export default function AdminDashboard() {
           {/* Date picker */}
           <div className="flex items-center gap-px p-0.5 rounded-md af-surface-2 af-border border max-w-[50vw] overflow-x-auto scrollbar-thin md:max-w-none md:overflow-visible">
             {DATE_PRESETS.map(p => (
-              <button
+              <Button
+                variant="ghost"
                 key={p.label}
                 onClick={() => handleDatePreset(p.id)}
                 className={cn(
@@ -585,11 +602,13 @@ export default function AdminDashboard() {
                 )}
               >
                 {p.label}
-              </button>
+              </Button>
             ))}
             <Popover open={calOpen} onOpenChange={setCalOpen}>
               <PopoverTrigger asChild>
-                <button
+                <Button
+                  variant="ghost"
+                  aria-label="Período personalizado"
                   title="Período personalizado"
                   className={cn(
                     "flex items-center gap-1.5 px-2 py-1.5 rounded transition-colors shrink-0",
@@ -602,15 +621,16 @@ export default function AdminDashboard() {
                       {dateRange.from.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}–{dateRange.to.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
                     </span>
                   )}
-                </button>
+                </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 af-surface af-border border rounded-md shadow-lg" align="end">
+              <PopoverContent className="w-auto p-0 bg-popover text-popover-foreground border-border border rounded-md" align="end">
                 <CalendarComponent
                   mode="range"
+                  disabled={{ after: new Date(), before: subDays(new Date(), 365) }}
                   selected={{ from: dateRange.from, to: dateRange.to }}
                   onSelect={(range) => {
                     if (range?.from && range?.to) {
-                      setDateRange({ from: range.from, to: range.to });
+                      setDateRange({ from: startOfDay(range.from), to: endOfDay(range.to) });
                       setDatePreset("custom");
                       setCalOpen(false);
                     }

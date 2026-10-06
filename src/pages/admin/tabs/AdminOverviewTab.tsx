@@ -22,6 +22,7 @@ import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import {
   PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumSegmented, premiumTable,
 } from "./AdminPremium";
+import { AdminOverviewMetrics } from "@/features/admin-finance/AdminOverviewMetrics";
 import { AdminAlertsBanner } from "@/components/admin/AdminAlertsBanner";
 
 interface Dispute {
@@ -137,7 +138,6 @@ export default function AdminOverviewTab({
 }: Props) {
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [realtimeTx, setRealtimeTx] = useState<Tables<"transactions">[]>([]);
-  const [chartPeriod, setChartPeriod] = useState<"7d" | "30d">("7d");
   const [fraudLogs, setFraudLogs] = useState<Tables<"fraud_logs">[]>([]);
   const [kycReview, setKycReview] = useState<Tables<"profiles"> | null>(null);
   const [selectedTx, setSelectedTx] = useState<Tables<"transactions"> | null>(null);
@@ -206,120 +206,12 @@ export default function AdminOverviewTab({
   }, [allTx, dateRange]);
   const filteredApproved = useMemo(() => filteredTx.filter(t => isApprovedTransaction(t.status)), [filteredTx]);
 
-  // Fuso São Paulo (America/Sao_Paulo) — normaliza "hoje" para o dia comercial brasileiro
-  const spDayKey = (d: Date) =>
-    new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
-  const spMonthKey = (d: Date) =>
-    new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit" }).format(d);
-  const today = new Date();
-  const todayStr = spDayKey(today);
-  const thisMonthKey = spMonthKey(today);
-  const todayTx = useMemo(() => approved.filter(t => spDayKey(new Date(t.created_at)) === todayStr), [approved, todayStr]);
-  const monthTx = useMemo(() => approved.filter(t => spMonthKey(new Date(t.created_at)) === thisMonthKey), [approved, thisMonthKey]);
-
-  const tpvToday = todayTx.reduce((a, t) => a + Number(t.amount), 0);
-  const tpvMonth = Number(financialOverview?.month?.gross_volume ?? monthTx.reduce((a, t) => a + Number(t.amount), 0));
-  const totalVolume = Number(financialOverview?.summary?.gross_volume ?? filteredApproved.reduce((a, t) => a + Number(t.amount), 0));
-  const takeRateToday = todayTx.reduce((a, t) => a + Number(t.fee_amount), 0);
-  const takeRateTotal = Number(financialOverview?.summary?.platform_fees ?? filteredApproved.reduce((a, t) => a + Number(t.fee_amount), 0));
-  const takeRatePct = totalVolume > 0 ? ((takeRateTotal / totalVolume) * 100).toFixed(2) : "0.00";
-
   const pendingWd = withdrawals.filter(w => w.status === "pending");
-  const pendingWdAmount = Number(financialOverview?.operations?.pending_withdrawals_amount ?? pendingWd.reduce((a, w) => a + Number(w.amount), 0));
-  const totalRetained = Number(financialOverview?.summary?.retained_amount ?? filteredApproved
-    .filter(t => !t.retention_released && Number(t.retained_amount) > 0)
-    .reduce((a, t) => a + Number(t.retained_amount), 0));
-
-  // Contagens autoritativas do servidor (RPC) — a lista carregada no cliente é paginada
-  // e não pode ser usada como denominador de conversão/ticket sob alto volume.
-  const summaryTotalCount = financialOverview?.summary?.total_count != null
-    ? Number(financialOverview.summary.total_count)
-    : filteredTx.length;
-  const summaryApprovedCount = financialOverview?.summary?.approved_count != null
-    ? Number(financialOverview.summary.approved_count)
-    : filteredApproved.length;
-  const summaryChargebackCount = financialOverview?.summary?.chargeback_count != null
-    ? Number(financialOverview.summary.chargeback_count)
-    : filteredTx.filter(t => t.status === "chargeback").length;
-
-  const chargebackRate = summaryApprovedCount > 0 ? ((summaryChargebackCount / summaryApprovedCount) * 100) : 0;
-  const chargebackAlert = chargebackRate > 1;
-
-  const activeSellersToday = new Set(todayTx.map(t => t.user_id)).size;
-  const conversionRate = summaryTotalCount > 0 ? ((summaryApprovedCount / summaryTotalCount) * 100).toFixed(1) : "0.0";
-  const ticketMedio = summaryApprovedCount > 0 ? totalVolume / summaryApprovedCount : 0;
-
-  const last30Start = useMemo(() => { const d = new Date(); d.setDate(d.getDate() - 30); return d; }, []);
-  const last30Tx = useMemo(() => approved.filter(t => new Date(t.created_at) >= last30Start), [approved, last30Start]);
-  const profit30d = last30Tx.reduce((a, t) => a + Number(t.fee_amount), 0);
-
-  const pendingMeds = useMemo(() => disputes.filter(d => d.status === "open" || d.status === "in_review"), [disputes]);
-  const pendingMedsAmount = pendingMeds.reduce((a, d) => a + Number(d.amount), 0);
-
-  const methodApproval = useMemo(() => {
-    const methods: Record<string, { total: number; approved: number; volume: number }> = {};
-    filteredTx.forEach(t => {
-      const m = t.payment_method || "other";
-      if (!methods[m]) methods[m] = { total: 0, approved: 0, volume: 0 };
-      methods[m].total++;
-      if (isApprovedTransaction(t.status)) {
-        methods[m].approved++; methods[m].volume += Number(t.amount);
-      }
-    });
-    return Object.entries(methods).map(([method, stats]) => ({
-      method: method === "pix" ? "PIX" : method === "credit_card" ? "Cartão" : method === "boleto" ? "Boleto" : method,
-      total: stats.total, approved: stats.approved, volume: stats.volume,
-      rate: stats.total > 0 ? ((stats.approved / stats.total) * 100) : 0,
-    }));
-  }, [filteredTx]);
-
-  const days = chartPeriod === "7d" ? 7 : 30;
-  const chartData = useMemo(() => Array.from({ length: days }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() - (days - 1 - i));
-    const key = spDayKey(d);
-    const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" });
-    const dayTx = approved.filter(t => spDayKey(new Date(t.created_at)) === key);
-    return {
-      name: dayStr,
-      tpv: dayTx.reduce((a, t) => a + Number(t.amount), 0),
-      takeRate: dayTx.reduce((a, t) => a + Number(t.fee_amount), 0),
-      vendas: dayTx.length,
-    };
-  }), [approved, days]);
-
-  const refundTrend = useMemo(() => Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() - (6 - i));
-    const key = spDayKey(d);
-    const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" });
-    const dayTx = allTx.filter(t => spDayKey(new Date(t.created_at)) === key);
-    return {
-      name: dayStr,
-      chargebacks: dayTx.filter(t => t.status === "chargeback").length,
-      refunds: dayTx.filter(t => t.status === "refunded").length,
-    };
-  }), [allTx]);
-
-  const kycPending = profiles.filter(p => p.account_status === "pending_review" || p.account_status === "pending");
-  const highValueWd = pendingWd.filter(w => Number(w.amount) >= 5000);
-  const newUsersInRange = useMemo(() => profiles.filter(p => {
-    if (!dateRange) return spDayKey(new Date(p.created_at)) === todayStr;
-    const d = new Date(p.created_at); return d >= dateRange.from && d <= dateRange.to;
-  }), [profiles, dateRange, todayStr]);
-  const rangeLabel = useMemo(() => {
-    if (!dateRange) return "Período selecionado";
-    const sameDay = dateRange.from.toDateString() === dateRange.to.toDateString();
-    const fmt = (d: Date) => d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
-    return sameDay ? `${fmt(dateRange.from)} · por horário` : `${fmt(dateRange.from)} → ${fmt(dateRange.to)}`;
-  }, [dateRange]);
-  const hourlyData = useMemo(() => Array.from({ length: 24 }, (_, hour) => {
-    const txs = filteredApproved.filter(t => new Date(t.created_at).getHours() === hour);
-    return {
-      hour: `${String(hour).padStart(2, "0")}h`,
-      tpv: txs.reduce((a, t) => a + Number(t.amount), 0),
-      lucro: txs.reduce((a, t) => a + Number(t.fee_amount), 0),
-      vendas: txs.length,
-    };
-  }), [filteredApproved]);
+  const pendingMeds = useMemo(() => disputes.filter(d => ["medpix", "pre_med_pix"].includes(d.type) && ["open", "in_review"].includes(d.status)), [disputes]);
+  const summaryTotalCount = Number(financialOverview?.summary?.total_count ?? filteredTx.length);
+  const summaryApprovedCount = Number(financialOverview?.summary?.approved_count ?? filteredApproved.length);
+  const conversionRate = summaryTotalCount > 0 ? (summaryApprovedCount / summaryTotalCount * 100).toFixed(1) : "0.0";
+  const rangeLabel = dateRange ? `${dateRange.from.toLocaleDateString("pt-BR")} → ${dateRange.to.toLocaleDateString("pt-BR")}` : "Período selecionado";
 
   const statusLabelMap: Record<string, string> = {
     completed: "Pago", approved: "Pago", pending: "Pendente",
@@ -330,7 +222,6 @@ export default function AdminOverviewTab({
     failed: "destructive", expired: "neutral", refunded: "info", chargeback: "destructive",
   };
 
-  const openDisputes = disputes.filter(d => d.status === "open" || d.status === "in_review").length;
 
   /* ── Employee view ── */
   if (isEmployee) {
@@ -362,7 +253,7 @@ export default function AdminOverviewTab({
         eyebrow="Admin · Command Center"
         title="Visão Geral"
         subtitle={`Operação em tempo real · ${rangeLabel}`}
-        status={{ tone: chargebackAlert ? "destructive" : "success", label: chargebackAlert ? "Alerta de risco" : "Tudo sob controle", pulse: true }}
+        status={{ tone: "info", label: "Dados reais", pulse: false }}
       />
 
       {/* ── Alertas críticos abertos ── */}
@@ -370,170 +261,11 @@ export default function AdminOverviewTab({
 
 
 
-      {/* ── Hero KPI strip · 1px divider grid ── */}
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60 lg:grid-cols-6">
-        <HeroBigStat label="Volume no período" value={fmtCurrency(totalVolume)} sub={`${summaryApprovedCount.toLocaleString("pt-BR")}/${summaryTotalCount.toLocaleString("pt-BR")} tx`} tone="primary" wide />
-        <HeroBigStat label="Lucro líquido" value={fmtCurrency(takeRateTotal)} sub={`Take ${takeRatePct}%`} tone="success" />
-        <HeroBigStat label="Ticket médio" value={fmtCurrency(ticketMedio)} sub="por venda" tone="info" />
-        <HeroBigStat label="Conversão" value={`${conversionRate}%`} sub="aprovação geral" tone="warning" />
-        <HeroBigStat label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} sub="meta < 1%" tone={chargebackAlert ? "destructive" : "neutral"} />
-      </div>
-
-      {/* ── Pulse chart ── */}
-      <PremiumPanel
-        title="Pulso de Volume"
-        eyebrow={chartPeriod === "7d" ? "Últimos 7 dias" : "Últimos 30 dias"}
-        icon={Activity}
-        action={
-          <PremiumSegmented<"7d" | "30d">
-            value={chartPeriod}
-            onChange={setChartPeriod}
-            options={[{ value: "7d", label: "7d" }, { value: "30d", label: "30d" }]}
-          />
-        }
-      >
-        <div className="h-[180px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>
-              <defs>
-                <linearGradient id="heroSpark" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" vertical={false} />
-              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false}
-                     tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
-              <Tooltip cursor={{ stroke: "hsl(var(--border))" }} content={<ChartTip fmtCurrency={fmtCurrency} />} />
-              <Area type="monotone" dataKey="tpv" name="TPV" stroke="hsl(var(--primary))" strokeWidth={2.5}
-                    fill="url(#heroSpark)" dot={false} isAnimationActive={false} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </PremiumPanel>
-
-      {/* ── KPI Grid (clickable, with tactile hover) ── */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <DashboardKpi icon={Flame}        label="Movimentado Hoje"  value={fmtCurrency(tpvToday)}        sub={`${todayTx.length} vendas aprovadas`} tone={todayTx.length > 0 ? "success" : "neutral"} onClick={() => onNavigate?.("transactions")} />
-        <DashboardKpi icon={DollarSign}   label="Lucro Hoje"         value={fmtCurrency(takeRateToday)}   sub={`${activeSellersToday} sellers venderam`} tone="primary" onClick={() => onNavigate?.("transactions")} />
-        <DashboardKpi icon={Hourglass}    label="Saques Pendentes"   value={fmtCurrency(pendingWdAmount)} sub={`${pendingWd.length} solicitações · ${highValueWd.length} altos`} tone={pendingWd.length > 5 ? "warning" : "neutral"} onClick={() => onNavigate?.("withdrawals")} />
-        <DashboardKpi icon={UserPlus}     label="Novos Usuários"     value={String(newUsersInRange.length)} sub="cadastros no período" tone="info" onClick={() => onNavigate?.("sellers")} />
-        <DashboardKpi icon={TrendingUp}   label="Lucro · 30 dias"    value={fmtCurrency(profit30d)}       sub={`${last30Tx.length} vendas · take ${takeRatePct}%`} tone="success" onClick={() => onNavigate?.("transactions")} />
-        <DashboardKpi icon={AlertCircle}  label="MEDs Pendentes"     value={String(pendingMeds.length)}   sub={pendingMeds.length > 0 ? `${fmtCurrency(pendingMedsAmount)} em disputa` : "Nenhum em aberto"} tone={pendingMeds.length > 0 ? "destructive" : "neutral"} onClick={() => onNavigate?.("medpix")} />
-        <DashboardKpi icon={UserCheck}    label="Aprovações KYC"     value={String(kycPending.length)}    sub="aguardando análise" tone={kycPending.length > 0 ? "warning" : "neutral"} onClick={() => onNavigate?.("sellers")} />
-        <DashboardKpi icon={Lock}         label="Saldo Retido"       value={fmtCurrency(totalRetained)}   sub="aguardando liberação" tone="warning" onClick={() => onNavigate?.("transactions")} />
-      </div>
-
-      {/* ── Hourly + Methods ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        <div className="xl:col-span-2">
-          <PremiumPanel title="Movimento por horário" eyebrow={rangeLabel} icon={Clock3}>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={hourlyData} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" vertical={false} />
-                <XAxis dataKey="hour" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} interval={1} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false}
-                       tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
-                <Tooltip cursor={{ fill: "hsl(var(--muted) / 0.3)" }} content={<ChartTip fmtCurrency={fmtCurrency} />} />
-                <Bar dataKey="tpv" name="TPV" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} isAnimationActive={false} />
-                <Bar dataKey="lucro" name="Lucro" fill="hsl(var(--success))" radius={[6, 6, 0, 0]} isAnimationActive={false} />
-              </BarChart>
-            </ResponsiveContainer>
-          </PremiumPanel>
-        </div>
-
-        <PremiumPanel title="Métodos de Pagamento" icon={CreditCard}>
-          <div className="space-y-4">
-            {methodApproval.sort((a, b) => b.volume - a.volume).map(m => {
-              const tone: Tone = m.rate >= 85 ? "success" : m.rate >= 60 ? "warning" : "destructive";
-              return (
-                <div key={m.method}>
-                  <div className="mb-1.5 flex items-center justify-between text-xs">
-                    <span className="font-black text-foreground">{m.method}</span>
-                    <span className={cn("font-black tabular-nums", TONE_TEXT[tone])}>{m.rate.toFixed(1)}%</span>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-muted/40">
-                    <div className={cn("h-full rounded-full transition-all duration-500", TONE_BAR[tone])}
-                         style={{ width: `${Math.max(m.rate, 2)}%` }} />
-                  </div>
-                  <div className="mt-1.5 flex justify-between text-[10px] font-bold text-muted-foreground tabular-nums">
-                    <span>{fmtCurrency(m.volume)}</span>
-                    <span>{m.approved}/{m.total} tx</span>
-                  </div>
-                </div>
-              );
-            })}
-            {methodApproval.length === 0 && (
-              <p className="py-8 text-center text-xs font-bold text-muted-foreground">Sem dados no período</p>
-            )}
-          </div>
-        </PremiumPanel>
-      </div>
-
-      {/* ── Volume chart + Refund trend ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-        <PremiumPanel
-          title="Volume & Take Rate"
-          icon={TrendingUp}
-          action={
-            <PremiumSegmented<"7d" | "30d">
-              value={chartPeriod}
-              onChange={setChartPeriod}
-              options={[{ value: "7d", label: "7d" }, { value: "30d", label: "30d" }]}
-            />
-          }
-        >
-          <ResponsiveContainer width="100%" height={240}>
-            <AreaChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
-              <defs>
-                <linearGradient id="tpvArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.25} />
-                  <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" vertical={false} />
-              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false}
-                     tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
-              <Tooltip cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }} content={<ChartTip fmtCurrency={fmtCurrency} />} />
-              <Area type="monotone" dataKey="tpv" name="TPV" stroke="hsl(var(--success))" strokeWidth={2.5}
-                    fill="url(#tpvArea)" dot={false} isAnimationActive={false} />
-              <Area type="monotone" dataKey="takeRate" name="Take Rate" stroke="hsl(var(--warning))" fillOpacity={0}
-                    strokeWidth={1.75} strokeDasharray="4 2" dot={false} isAnimationActive={false} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </PremiumPanel>
-
-        <PremiumPanel title="Devoluções · 7 dias" icon={RotateCcw}>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={refundTrend} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" vertical={false} />
-              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} allowDecimals={false} />
-              <Tooltip cursor={{ stroke: "hsl(var(--border))" }} content={<ChartTip fmtCurrency={fmtCurrency} />} />
-              <Line type="monotone" dataKey="chargebacks" name="Chargebacks" stroke="hsl(var(--destructive))"
-                    strokeWidth={2.5} dot={{ r: 3, fill: "hsl(var(--destructive))" }} isAnimationActive={false} />
-              <Line type="monotone" dataKey="refunds" name="Reembolsos" stroke="hsl(var(--warning))"
-                    strokeWidth={2.5} dot={{ r: 3, fill: "hsl(var(--warning))" }} isAnimationActive={false} />
-            </LineChart>
-          </ResponsiveContainer>
-          <div className="mt-3 flex items-center gap-5 border-t border-border/40 pt-3 text-[10.5px] font-bold">
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
-              <span className="text-muted-foreground">Chargebacks</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-warning" />
-              <span className="text-muted-foreground">Reembolsos</span>
-            </span>
-          </div>
-        </PremiumPanel>
-      </div>
+      <AdminOverviewMetrics dateRange={dateRange} refreshSignal={financialOverview} onNavigate={onNavigate} />
 
       {/* ── Live activity + Risk alerts ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        <div className="xl:col-span-2">
+      <div className="grid grid-cols-1 gap-5">
+        <div>
           <PremiumPanel
             title="Atividade ao vivo"
             icon={Radio}
@@ -580,62 +312,10 @@ export default function AdminOverviewTab({
           </PremiumPanel>
         </div>
 
-        <PremiumPanel title="Alertas de Risco" icon={ShieldAlert}>
-          <div className="space-y-2.5">
-            <RiskRow label="Taxa de Chargeback" value={`${chargebackRate.toFixed(2)}%`} threshold="Meta < 1%" alert={chargebackAlert} />
-            <RiskRow label="Disputas Abertas" value={String(openDisputes)} threshold="Meta < 5" alert={openDisputes > 5} />
-            <RiskRow label="Saques Pendentes" value={fmtCurrency(pendingWdAmount)} threshold={`${pendingWd.length} na fila`} alert={pendingWd.length > 10} />
-            <RiskRow label="KYC Pendente" value={String(kycPending.length)} threshold="aguardando aprovação" alert={kycPending.length > 0} />
-          </div>
-        </PremiumPanel>
       </div>
 
       {/* ── KYC queue + Pending withdrawals ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <PremiumPanel
-          title={`Aprovações KYC (${kycPending.length})`}
-          icon={UserCheck}
-          action={onNavigate && (
-            <button onClick={() => onNavigate("sellers")}
-                    className="inline-flex items-center gap-1 text-[10.5px] font-black uppercase tracking-wider text-primary hover:underline">
-              Ver todos <ArrowUpRight className="h-3 w-3" />
-            </button>
-          )}
-        >
-          {kycPending.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-2 py-10 text-muted-foreground">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border/60 bg-muted/30">
-                <CheckCircle2 className="h-5 w-5 opacity-50" />
-              </div>
-              <p className="text-xs font-bold">Nenhum KYC pendente</p>
-            </div>
-          ) : (
-            <div className="max-h-[340px] overflow-y-auto -mx-2">
-              {kycPending.slice(0, 10).map(p => (
-                <div key={p.id} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-muted/30">
-                  <button type="button" onClick={() => setKycReview(p)} className="flex-1 min-w-0 text-left">
-                    <p className="truncate text-xs font-black text-foreground">{p.full_name || "Sem nome"}</p>
-                    <p className="truncate text-[10.5px] font-bold text-muted-foreground">{p.email}</p>
-                    <p className="mt-0.5 truncate font-mono text-[10px] text-muted-foreground/70">
-                      {p.document_number || "Sem documento"}
-                    </p>
-                  </button>
-                  <div className="flex shrink-0 gap-1.5">
-                    <button onClick={() => handleKycApprove(p.user_id)}
-                            className="inline-flex h-8 items-center gap-1 rounded-lg border border-success/30 bg-success/10 px-2.5 text-[10.5px] font-black text-success hover:bg-success/15">
-                      <CheckCircle2 className="h-3 w-3" /> Aprovar
-                    </button>
-                    <button onClick={() => setKycReview(p)}
-                            className="inline-flex h-8 items-center gap-1 rounded-lg border border-warning/30 bg-warning/10 px-2.5 text-[10.5px] font-black text-warning hover:bg-warning/15">
-                      <Eye className="h-3 w-3" /> Analisar
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </PremiumPanel>
-
+      <div className="grid grid-cols-1 gap-5">
         <PremiumPanel
           title={`Saques em revisão (${pendingWd.length})`}
           icon={Wallet}
