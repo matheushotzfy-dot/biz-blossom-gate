@@ -1,6 +1,6 @@
 # Architecture Decisions
 
-- Public marketing uses an editorial light system with monumental typography and architectural product framing; authentication defaults light with account-synced dark mode, while checkout keeps its product-defined theme.
+- Public marketing (`src/components/landing3`) is an always-dark tech system with tokens scoped to `.vx3`, a 2D canvas background that pauses off-tab and goes static under reduced motion, and purely illustrative simulated data (never database queries); authentication defaults light with account-synced dark mode, while checkout keeps its product-defined theme.
 
 - Dashboard revenue card is minimal: title, subtitle, period chip and a single approved-revenue area chart; value details only in the hover tooltip — no summary metrics, big totals or metric switcher (user wants it clean).
 - Payment operations must fail closed when no acquirer is configured; never leave UI actions calling removed gateway functions.
