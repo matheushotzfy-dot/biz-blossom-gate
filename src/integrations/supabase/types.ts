@@ -5733,6 +5733,15 @@ export type Database = {
         Args: { _days_threshold?: number }
         Returns: Json
       }
+      get_admin_inactive_sellers_page: {
+        Args: {
+          _days?: number
+          _page?: number
+          _search?: string
+          _sort?: string
+        }
+        Returns: Json
+      }
       get_admin_overview_metrics: {
         Args: { _from: string; _to: string }
         Returns: Json
