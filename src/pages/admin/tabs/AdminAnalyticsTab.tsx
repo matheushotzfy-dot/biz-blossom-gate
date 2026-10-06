@@ -1,413 +1,78 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  TrendingDown, Users, Activity, Target, ArrowUpRight, ArrowDownRight, Loader2,
-  type LucideIcon,
-} from "lucide-react";
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, Cell, Line, ComposedChart,
-} from "recharts";
-import type { Tables } from "@/integrations/supabase/types";
-import { cn, isApprovedTransaction } from "@/lib/utils";
+import { useState } from "react";
+import { RefreshCw, Loader2, Users, TrendingUp, ShieldAlert, Wallet } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
-import { PremiumPanel, PremiumSegmented } from "./AdminPremium";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { PremiumMetric, PremiumMetricGrid, PremiumPanel } from "./AdminPremium";
+import { useAnalytics } from "@/features/admin-finance/useAnalytics";
+import { initialAnalyticsFilters } from "@/features/admin-finance/analyticsModel";
+import { AnalyticsActivity } from "@/features/admin-finance/AnalyticsActivity";
+import { AnalyticsSellerTable } from "@/features/admin-finance/AnalyticsSellerTable";
+import { OverviewCharts } from "@/features/admin-finance/OverviewCharts";
+import { dateKey, ratio } from "@/features/admin-finance/overviewModel";
 
-interface Props {
-  transactions: Tables<"transactions">[];
-  profiles: Tables<"profiles">[];
-  products: Tables<"products">[];
-  withdrawals: Tables<"withdrawals">[];
-  fmtCurrency: (v: number) => string;
+interface Props { dateRange: { from: Date; to: Date }; fmtCurrency: (value: number) => string }
+export default function AdminAnalyticsTab(props: Props) {
+  return <AnalyticsContent key={`${dateKey(props.dateRange.from)}:${dateKey(props.dateRange.to)}`} {...props} />;
 }
-
-type Period = "7d" | "30d" | "90d" | "ytd";
-const PERIOD_DAYS: Record<Period, number> = { "7d": 7, "30d": 30, "90d": 90, "ytd": 365 };
-
-type AnalyticsPayload = {
-  period_days: number;
-  totals: {
-    tx_count: number; approved: number; failed: number; refunded: number; pending: number;
-    tpv: number; profit: number; active_sellers: number;
-  };
-  previous: { tx_count: number; approved: number; tpv: number; profit: number; active_sellers: number };
-  daily: { name: string; tpv: number; profit: number; vendas: number; prev: number }[];
-  methods: { method: string; total: number; approved: number; volume: number; profit: number }[];
-  status_mix: { status: string; count: number }[];
-  top_sellers: { user_id: string; name: string; volume: number; vendas: number }[];
-  heatmap: { dow: number; hour: number; volume: number }[];
-  funnel: { unique_buyers: number; repeat_buyers: number };
-};
-
-/* ── Sigma Tooltip ── */
-type TooltipEntry = { dataKey: string; name?: string; value: number | string; color?: string };
-function SigmaTooltip({ active, payload, label, fmtCurrency }: {
-  active?: boolean;
-  payload?: TooltipEntry[];
-  label?: string | number;
-  fmtCurrency: (v: number) => string;
-}) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="rounded-md border border-border bg-card px-3 py-2 font-mono shadow-lg">
-      {label !== undefined && <p className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{label}</p>}
-      <div className="space-y-1">
-        {payload.map((p) => (
-          <div key={p.dataKey} className="flex items-center justify-between gap-6 text-[11px]">
-            <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-sm" style={{ background: p.color }} />
-              <span className="text-muted-foreground">{p.name}</span>
-            </div>
-            <span className="font-black tabular-nums text-foreground">
-              {typeof p.value === "number" && p.dataKey !== "vendas" && Math.abs(p.value) > 10 ? fmtCurrency(p.value) : p.value}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function BigMetric({ label, value, delta, sub, tone = "neutral" }: {
-  label: string; value: string; delta?: number; sub?: string;
-  tone?: "neutral" | "primary" | "success" | "destructive";
-}) {
-  const isUp = (delta ?? 0) >= 0;
-  const barCls = { neutral: "bg-foreground/40", primary: "bg-primary", success: "bg-success", destructive: "bg-destructive" }[tone];
-  return (
-    <div className="group relative bg-card px-5 py-4 transition-colors hover:bg-muted/20">
-      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">{label}</p>
-      <p className="mt-4 font-display text-[26px] font-black leading-none tabular-nums tracking-tight break-words text-foreground">
-        {value}
-      </p>
-      <div className="mt-2 flex items-center gap-2 text-[10.5px]">
-        {delta !== undefined && Number.isFinite(delta) && (
-          <span className={cn(
-            "inline-flex items-center gap-0.5 font-bold tabular-nums",
-            isUp ? "text-success" : "text-destructive"
-          )}>
-            {isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-            {Math.abs(delta).toFixed(1)}%
-          </span>
-        )}
-        {sub && <span className="text-muted-foreground/75 truncate">{sub}</span>}
-      </div>
-      <span className={cn("absolute inset-x-0 bottom-0 h-[1.5px] origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100", barCls)} />
-    </div>
-  );
-}
-
-export default function AdminAnalyticsTab({ fmtCurrency }: Props) {
-  const [period, setPeriod] = useState<Period>("30d");
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<AnalyticsPayload | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    (async () => {
-      try {
-        const { data: res, error } = await supabase.rpc("get_admin_analytics", {
-          _period_days: PERIOD_DAYS[period],
-        });
-        if (error) throw error;
-        if (!cancelled) setData(res as unknown as AnalyticsPayload);
-      } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : "desconhecido";
-        toast.error("Erro ao carregar analytics: " + msg);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [period]);
-
-  const t  = data?.totals;
-  const pv = data?.previous;
-
-  const pct = (cur: number, prev: number) => (prev > 0 ? ((cur - prev) / prev) * 100 : 0);
-
-  const tpv         = t?.tpv ?? 0;
-  const profit      = t?.profit ?? 0;
-  const approved    = t?.approved ?? 0;
-  const txCount     = t?.tx_count ?? 0;
-  const failedTx    = t?.failed ?? 0;
-  const refunded    = t?.refunded ?? 0;
-  const activeSellers = t?.active_sellers ?? 0;
-
-  const tpvDelta      = pct(tpv,         pv?.tpv         ?? 0);
-  const profitDelta   = pct(profit,      pv?.profit      ?? 0);
-  const sellersDelta  = pct(activeSellers, pv?.active_sellers ?? 0);
-
-  const takeRate      = tpv > 0 ? (profit / tpv) * 100 : 0;
-  const prevTakeRate  = (pv?.tpv ?? 0) > 0 ? ((pv!.profit / pv!.tpv) * 100) : 0;
-  const takeRateDelta = pct(takeRate, prevTakeRate);
-
-  const ticket        = approved > 0 ? tpv / approved : 0;
-  const prevTicket    = (pv?.approved ?? 0) > 0 ? (pv!.tpv / pv!.approved) : 0;
-  const ticketDelta   = pct(ticket, prevTicket);
-
-  const conv          = txCount > 0 ? (approved / txCount) * 100 : 0;
-  const prevConv      = (pv?.tx_count ?? 0) > 0 ? ((pv!.approved / pv!.tx_count) * 100) : 0;
-  const convDelta     = pct(conv, prevConv);
-
-  const heatmap = useMemo(() => {
-    const grid: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
-    (data?.heatmap ?? []).forEach(h => {
-      if (h.dow >= 0 && h.dow < 7 && h.hour >= 0 && h.hour < 24) grid[h.dow][h.hour] = Number(h.volume);
-    });
-    const max = Math.max(1, ...grid.flat());
-    return { grid, max };
-  }, [data?.heatmap]);
-
-  const methods = useMemo(() => (data?.methods ?? []).map(m => ({
-    ...m,
-    method: m.method === "pix" ? "PIX" : m.method === "credit_card" ? "Cartão" : m.method === "boleto" ? "Boleto" : m.method,
-    rate: m.total > 0 ? (m.approved / m.total) * 100 : 0,
-  })), [data?.methods]);
-
-  const topSellers   = data?.top_sellers ?? [];
-  const statusMix    = data?.status_mix  ?? [];
-  const dailySeries  = data?.daily       ?? [];
-  const buyerCount   = data?.funnel?.unique_buyers ?? 0;
-  const repeatBuyers = data?.funnel?.repeat_buyers ?? 0;
-  const repeatRate   = buyerCount > 0 ? (repeatBuyers / buyerCount) * 100 : 0;
-
-  return (
-    <div className="space-y-6 animate-fade-in">
-      <FinanceiroHero
-        eyebrow="Admin · Analytics"
-        title="Performance da Plataforma"
-        subtitle={loading
-          ? "Calculando métricas no servidor..."
-          : `Métricas comparativas — período atual vs anterior · ${approved.toLocaleString("pt-BR")} transações aprovadas`}
-        status={{ tone: tpvDelta >= 0 ? "success" : "warning", label: tpvDelta >= 0 ? "Crescimento positivo" : "Atenção", pulse: true }}
-        actions={
-          <PremiumSegmented<Period>
-            value={period}
-            onChange={setPeriod}
-            options={[
-              { value: "7d", label: "7d" },
-              { value: "30d", label: "30d" },
-              { value: "90d", label: "90d" },
-              { value: "ytd", label: "YTD" },
-            ]}
-          />
-        }
-      />
-
-      {loading && !data ? (
-        <div className="flex items-center justify-center py-24 text-muted-foreground gap-2">
-          <Loader2 className="h-5 w-5 animate-spin" /> Carregando analytics...
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60 sm:grid-cols-3 lg:grid-cols-6 animate-fade-in stagger-1">
-            <BigMetric label="Volume"        value={fmtCurrency(tpv)}              delta={tpvDelta}      sub="vs período anterior" tone="primary" />
-            <BigMetric label="Lucro"         value={fmtCurrency(profit)}           delta={profitDelta}   sub="receita líquida"     tone="success" />
-            <BigMetric label="Take Rate"     value={`${takeRate.toFixed(2)}%`}     delta={takeRateDelta} sub="margem efetiva" />
-            <BigMetric label="Ticket Médio"  value={fmtCurrency(ticket)}           delta={ticketDelta}   sub={`${approved.toLocaleString("pt-BR")} vendas`} />
-            <BigMetric label="Conversão"     value={`${conv.toFixed(1)}%`}         delta={convDelta}     sub={`${approved.toLocaleString("pt-BR")}/${txCount.toLocaleString("pt-BR")}`} />
-            <BigMetric label="Sellers Ativos" value={String(activeSellers)}        delta={sellersDelta}  sub="únicos no período" />
-          </div>
-
-          <PremiumPanel
-            title="Volume diário · atual vs anterior"
-            action={
-              <div className="flex items-center gap-3 text-[10px]">
-                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-primary" /><span className="text-muted-foreground">Atual</span></span>
-                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-muted-foreground/40" /><span className="text-muted-foreground">Anterior</span></span>
-                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-success" /><span className="text-muted-foreground">Lucro</span></span>
-              </div>
-            }
-          >
-            <ResponsiveContainer width="100%" height={280}>
-              <ComposedChart data={dailySeries} margin={{ top: 8, right: 12, bottom: 0, left: -8 }}>
-                <defs>
-                  <linearGradient id="sigmaVol" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" vertical={false} />
-                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} />
-                <Tooltip content={<SigmaTooltip fmtCurrency={fmtCurrency} />} cursor={{ stroke: "hsl(var(--primary))", strokeOpacity: 0.3 }} />
-                <Area type="monotone" dataKey="prev" name="Anterior" stroke="hsl(var(--muted-foreground))" strokeWidth={1.5} strokeDasharray="4 3" fill="transparent" dot={false} isAnimationActive={false} />
-                <Area type="monotone" dataKey="tpv"  name="Atual"    stroke="hsl(var(--primary))"          strokeWidth={2}   fill="url(#sigmaVol)" dot={false} isAnimationActive={false} />
-                <Line type="monotone" dataKey="profit" name="Lucro"  stroke="hsl(var(--success))"          strokeWidth={1.5} dot={false} isAnimationActive={false} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </PremiumPanel>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <PremiumPanel title="Heatmap · dia × hora" className="lg:col-span-2">
-              <div className="overflow-x-auto">
-                <div className="min-w-[680px]">
-                  <div className="grid grid-cols-[40px_repeat(24,1fr)] gap-px text-[8.5px] mb-1">
-                    <div />
-                    {Array.from({ length: 24 }, (_, h) => (
-                      <div key={h} className="text-center text-muted-foreground/60 font-mono">{h % 3 === 0 ? `${String(h).padStart(2, "0")}` : ""}</div>
-                    ))}
-                  </div>
-                  {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((label, day) => (
-                    <div key={day} className="grid grid-cols-[40px_repeat(24,1fr)] gap-px mb-px">
-                      <div className="text-[9px] font-bold uppercase text-muted-foreground flex items-center">{label}</div>
-                      {heatmap.grid[day].map((v, h) => {
-                        const intensity = v / heatmap.max;
-                        return (
-                          <div
-                            key={h}
-                            title={`${label} ${h}h · ${fmtCurrency(v)}`}
-                            className="aspect-square rounded-[2px] border border-border/40 transition-transform hover:scale-110"
-                            style={{
-                              background: intensity > 0
-                                ? `hsl(var(--primary) / ${0.08 + intensity * 0.85})`
-                                : "hsl(var(--muted) / 0.3)"
-                            }}
-                          />
-                        );
-                      })}
-                    </div>
-                  ))}
-                  <div className="flex items-center justify-end gap-1.5 mt-3 text-[9px] text-muted-foreground/70">
-                    <span>Menos</span>
-                    {[0.1, 0.3, 0.5, 0.75, 1].map(i => (
-                      <span key={i} className="h-3 w-3 rounded-[2px] border border-border/40" style={{ background: `hsl(var(--primary) / ${i})` }} />
-                    ))}
-                    <span>Mais</span>
-                  </div>
-                </div>
-              </div>
-            </PremiumPanel>
-
-            <PremiumPanel title="Status das transações">
-              <div className="space-y-2.5">
-                {statusMix.map(({ status, count }) => {
-                  const pctVal = txCount > 0 ? (count / txCount) * 100 : 0;
-                  const tone = isApprovedTransaction(status) ? "success"
-                    : status === "pending" ? "warning"
-                    : status === "failed" || status === "expired" ? "destructive"
-                    : status === "refunded" || status === "chargeback" ? "destructive"
-                    : "info";
-                  const labelMap: Record<string, string> = {
-                    approved: "Aprovada", completed: "Concluída", pending: "Pendente",
-                    failed: "Recusada", expired: "Expirada", refunded: "Reembolsada",
-                    chargeback: "Chargeback", disputed: "Em disputa",
-                  };
-                  const label = labelMap[status] || status;
-                  const cls = { success: "bg-success", warning: "bg-warning", destructive: "bg-destructive", info: "bg-info" }[tone];
-                  const txt = { success: "text-success", warning: "text-warning", destructive: "text-destructive", info: "text-info" }[tone];
-                  return (
-                    <div key={status}>
-                      <div className="flex items-center justify-between text-[11px] mb-1">
-                        <span className="font-semibold text-foreground/85">{label}</span>
-                        <span className="font-mono tabular-nums">
-                          <span className={cn("font-black", txt)}>{count.toLocaleString("pt-BR")}</span>
-                          <span className="text-muted-foreground/60 ml-1.5">{pctVal.toFixed(1)}%</span>
-                        </span>
-                      </div>
-                      <div className="h-1.5 rounded-sm bg-muted/40 overflow-hidden">
-                        <div className={cn("h-full transition-all", cls)} style={{ width: `${pctVal}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
-                {statusMix.length === 0 && <p className="text-center text-[11px] text-muted-foreground py-6">Sem dados</p>}
-              </div>
-            </PremiumPanel>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <PremiumPanel title="Métodos de pagamento">
-              <div className="overflow-x-auto">
-                <table className="w-full font-mono">
-                  <thead>
-                    <tr className="border-b border-border">
-                      {["Método", "Volume", "Vendas", "Aprov.", "Lucro"].map(h => (
-                        <th key={h} className="text-left py-2 text-[9px] font-bold uppercase tracking-wider text-muted-foreground/70">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {methods.map(m => (
-                      <tr key={m.method} className="border-b border-border/40 hover:bg-muted/20">
-                        <td className="py-2.5 text-[12px] font-bold text-foreground">{m.method}</td>
-                        <td className="py-2.5 text-[11px] tabular-nums text-foreground">{fmtCurrency(Number(m.volume))}</td>
-                        <td className="py-2.5 text-[11px] tabular-nums text-muted-foreground">{m.approved}/{m.total}</td>
-                        <td className={cn(
-                          "py-2.5 text-[11px] font-black tabular-nums",
-                          m.rate >= 85 ? "text-success" : m.rate >= 60 ? "text-warning" : "text-destructive"
-                        )}>{m.rate.toFixed(1)}%</td>
-                        <td className="py-2.5 text-[11px] tabular-nums text-success">{fmtCurrency(Number(m.profit))}</td>
-                      </tr>
-                    ))}
-                    {methods.length === 0 && (
-                      <tr><td colSpan={5} className="py-8 text-center text-[11px] text-muted-foreground">Sem dados</td></tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </PremiumPanel>
-
-            <PremiumPanel title="Top sellers · volume">
-              {topSellers.length === 0 ? (
-                <p className="text-center text-[11px] text-muted-foreground py-12">Sem dados</p>
-              ) : (
-                <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={topSellers.slice(0, 8).map(s => ({ name: s.name, volume: Number(s.volume) }))} layout="vertical" margin={{ top: 0, right: 16, bottom: 0, left: 0 }}>
-                    <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" horizontal={false} />
-                    <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} />
-                    <YAxis type="category" dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} width={120} />
-                    <Tooltip content={<SigmaTooltip fmtCurrency={fmtCurrency} />} cursor={{ fill: "hsl(var(--primary) / 0.06)" }} />
-                    <Bar dataKey="volume" name="Volume" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} isAnimationActive={false}>
-                      {topSellers.slice(0, 8).map((_, i) => (
-                        <Cell key={i} fill={i === 0 ? "hsl(var(--success))" : i === 1 ? "hsl(var(--primary))" : "hsl(var(--info))"} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </PremiumPanel>
-          </div>
-
-          <PremiumPanel title="Funil & qualidade">
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-              <FunnelStep label="Tentativas"   value={txCount.toLocaleString("pt-BR")}  icon={Activity} />
-              <FunnelStep label="Aprovadas"    value={approved.toLocaleString("pt-BR")} icon={Target} tone="success" pct={txCount > 0 ? (approved / txCount) * 100 : 0} />
-              <FunnelStep label="Recusadas"    value={failedTx.toLocaleString("pt-BR")} icon={TrendingDown} tone="destructive" pct={txCount > 0 ? (failedTx / txCount) * 100 : 0} />
-              <FunnelStep label="Devolvidas"   value={refunded.toLocaleString("pt-BR")} icon={TrendingDown} tone="warning"     pct={txCount > 0 ? (refunded / txCount) * 100 : 0} />
-              <FunnelStep label="Repeat Buyer" value={`${repeatRate.toFixed(1)}%`}      icon={Users} tone="primary" sub={`${buyerCount.toLocaleString("pt-BR")} únicos`} />
-            </div>
-          </PremiumPanel>
-        </>
-      )}
-    </div>
-  );
-}
-
-function FunnelStep({ label, value, icon: Icon, tone = "neutral", pct, sub }: {
-  label: string; value: string; icon: LucideIcon;
-  tone?: "neutral" | "success" | "destructive" | "warning" | "primary";
-  pct?: number; sub?: string;
-}) {
-  const toneCls = {
-    neutral: "text-foreground border-border",
-    success: "text-success border-success/30",
-    destructive: "text-destructive border-destructive/30",
-    warning: "text-warning border-warning/30",
-    primary: "text-primary border-primary/30",
-  }[tone];
-  return (
-    <div className={cn("group relative overflow-hidden border rounded-xl p-4 bg-card transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-muted/20", toneCls)}>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-[9.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/80">{label}</span>
-        <Icon className="h-3.5 w-3.5 opacity-60" />
-      </div>
-      <p className={cn("font-display text-[22px] font-black leading-none tabular-nums", toneCls.split(" ")[0])}>{value}</p>
-      {pct !== undefined && <p className="text-[10px] text-muted-foreground/75 mt-1.5 font-mono tabular-nums">{pct.toFixed(1)}% do total</p>}
-      {sub && <p className="text-[10px] text-muted-foreground/75 mt-1.5">{sub}</p>}
-    </div>
-  );
+function AnalyticsContent({ dateRange, fmtCurrency: money }: Props) {
+  const [filters, setFilters] = useState(initialAnalyticsFilters);
+  const { details, overview } = useAnalytics(dateRange, filters);
+  const data = details.data, metrics = overview.data;
+  const busy = details.isFetching || overview.isFetching;
+  const failed = details.isError || overview.isError;
+  const refresh = () => { void details.refetch(); void overview.refetch(); };
+  const period = `${dateKey(dateRange.from).split("-").reverse().join("/")} — ${dateKey(dateRange.to).split("-").reverse().join("/")}`;
+  return <div className="space-y-5">
+    <FinanceiroHero eyebrow="Admin · Analytics" title="Visão completa da operação" subtitle={`${period} · Brasília · apenas transações reais`} status={{ tone: failed ? "warning" : "neutral", label: failed ? "Consulta incompleta" : busy ? "Atualizando" : "Dados consultados", pulse: false }} actions={<Button variant="outline" onClick={refresh} disabled={busy}><RefreshCw className="mr-2 h-4 w-4" />Atualizar</Button>} />
+    {failed && <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-card p-4 text-sm"><p>Não foi possível carregar todos os indicadores. Não interprete dados ausentes como zero.</p><Button variant="outline" onClick={refresh} disabled={busy}>Tentar novamente</Button></div>}
+    {!failed && (!data || !metrics) && <div role="status" className="flex items-center justify-center gap-2 py-16 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" />Carregando Analytics…</div>}
+    {data && metrics && <>
+      <section className="space-y-3"><h2 className="flex items-center gap-2 font-display text-base font-semibold"><TrendingUp className="h-4 w-4 text-primary" />Vendas e resultado do período</h2>
+        <PremiumMetricGrid cols={4}>
+          <PremiumMetric label="Volume transacionado" value={money(metrics.summary.gross)} subtitle="Total das vendas atualmente pagas" tone="primary" />
+          <PremiumMetric label="Vendas pagas" value={String(metrics.summary.sales)} subtitle={`${metrics.summary.attempts} tentativas no período`} />
+          <PremiumMetric label="Ticket médio" value={money(metrics.summary.sales ? metrics.summary.gross / metrics.summary.sales : 0)} subtitle="Volume ÷ vendas pagas" />
+          <PremiumMetric label="Conversão geral" value={`${ratio(metrics.summary.sales, metrics.summary.attempts).toFixed(1)}%`} subtitle="Pagas ÷ tentativas; não visitas" />
+          <PremiumMetric label="Taxas arrecadadas" value={money(metrics.summary.fees)} />
+          <PremiumMetric label="Custo das adquirentes" value={money(metrics.summary.acquirer)} />
+          <PremiumMetric label="Resultado líquido de taxas" value={money(metrics.summary.profit)} subtitle="Não inclui despesas e impostos" tone="success" />
+          <PremiumMetric label="Recusas e expirações" value={String(data.summary.failed_transactions)} subtitle={`${data.summary.pending_transactions} tentativas ainda pendentes`} tone="warning" />
+        </PremiumMetricGrid>
+      </section>
+      <section className="space-y-3"><h2 className="flex items-center gap-2 font-display text-base font-semibold"><Users className="h-4 w-4 text-info" />Sellers e clientes</h2>
+        <PremiumMetricGrid cols={4}>
+          <PremiumMetric label="Sellers cadastrados" value={String(data.summary.registered_sellers)} subtitle="Base atual, excluindo equipe" />
+          <PremiumMetric label="Contas ativas" value={String(data.summary.active_sellers)} subtitle="Aprovadas/ativas e não congeladas" tone="success" />
+          <PremiumMetric label="Sellers vendendo hoje" value={String(data.summary.selling_today)} subtitle="Hoje em Brasília, independente do filtro" tone="primary" />
+          <PremiumMetric label="Sellers vendendo no período" value={String(data.summary.selling_sellers)} subtitle="Ao menos uma venda paga" tone="primary" />
+          <PremiumMetric label="Clientes únicos" value={String(data.summary.clients)} subtitle="E-mails distintos em vendas pagas" />
+          <PremiumMetric label="Clientes recorrentes" value={String(data.summary.repeat_clients)} subtitle={`${ratio(data.summary.repeat_clients, data.summary.clients).toFixed(1)}% compraram mais de uma vez no período`} />
+          <PremiumMetric label="Novos cadastros" value={String(data.summary.new_registrations)} subtitle="Contas de sellers criadas no período" />
+          <PremiumMetric label="Vendas sem identificação" value={String(data.summary.unidentified_sales)} subtitle="Sem e-mail; fora da contagem de clientes" tone="warning" />
+        </PremiumMetricGrid>
+      </section>
+      <AnalyticsActivity daily={data.daily} />
+      <AnalyticsSellerTable data={data} filters={filters} onFilters={setFilters} fmtCurrency={money} busy={busy} />
+      <section className="space-y-3"><h2 className="flex items-center gap-2 font-display text-base font-semibold"><ShieldAlert className="h-4 w-4 text-destructive" />Reembolsos e disputas no período</h2>
+        <PremiumMetricGrid cols={3}>
+          <PremiumMetric label="Reembolsos efetivados" value={String(data.summary.refunds)} subtitle={money(data.summary.refund_amount)} tone="warning" />
+          <PremiumMetric label="Chargebacks" value={String(data.summary.chargebacks)} subtitle={money(data.summary.chargeback_amount)} tone="destructive" />
+          <PremiumMetric label="MED PIX / pré-MED" value={String(data.summary.med)} subtitle={money(data.summary.med_amount)} tone="warning" />
+        </PremiumMetricGrid>
+        <p className="text-xs text-muted-foreground">Reembolsos pela data de confirmação da devolução; disputas pela data de abertura. Valores de MED representam reclamações, não perda confirmada.</p>
+      </section>
+      <section className="space-y-3"><h2 className="flex items-center gap-2 font-display text-base font-semibold"><Wallet className="h-4 w-4 text-warning" />Pendências atuais · independente do período</h2>
+        <PremiumMetricGrid cols={3}>
+          <PremiumMetric label="Reembolsos aguardando aprovação" value={String(data.operations.pending_refunds)} subtitle={`${money(data.operations.refunds_reserved)} já descontados dos sellers`} tone="warning" />
+          <PremiumMetric label="Saques pendentes/em processamento" value={String(data.operations.pending_withdrawals)} subtitle={money(data.operations.withdrawal_amount)} tone="warning" />
+          <PremiumMetric label="MED PIX em análise" value={String(data.operations.open_med)} tone="warning" />
+          <PremiumMetric label="KYC pendente" value={String(data.operations.kyc_pending)} />
+          <PremiumMetric label="Contas congeladas" value={String(data.operations.frozen_sellers)} tone="destructive" />
+        </PremiumMetricGrid>
+      </section>
+      <OverviewCharts data={metrics} />
+      <PremiumPanel title="Pagamentos por método"><div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="border-b border-border text-xs text-muted-foreground"><tr>{["Método", "Tentativas", "Vendas pagas", "Conversão", "Movimentado"].map(label => <th key={label} className="whitespace-nowrap p-3">{label}</th>)}</tr></thead><tbody>{metrics.methods.map(method => <tr key={method.method} className="border-b border-border"><td className="p-3">{method.method === "pix" ? "PIX" : method.method === "credit_card" ? "Cartão" : method.method}</td><td className="p-3">{method.total}</td><td className="p-3">{method.sales}</td><td className="p-3">{ratio(method.sales, method.total).toFixed(1)}%</td><td className="whitespace-nowrap p-3">{money(method.gross)}</td></tr>)}{!metrics.methods.length && <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">Nenhuma transação no período.</td></tr>}</tbody></table></div></PremiumPanel>
+      <p className="text-xs text-muted-foreground">Consultado em {new Date(data.checked_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })} (Brasília). Totais independem da busca e paginação dos sellers.</p>
+    </>}
+  </div>;
 }
