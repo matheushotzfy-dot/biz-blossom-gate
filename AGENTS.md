@@ -23,3 +23,5 @@
 - Confirmed checkout delivery is idempotent and audited in `checkout_delivery_attempts`; only server-confirmed payments may grant member access, and unresolved deliveries stay pending for owner review.
 - Theme preference is stored on the authenticated profile and defaults to light; never restore cookie/localStorage persistence for theme.
 - Integration credentials are encrypted at rest and decrypted only by service-role dispatch routines; browser queries use masked safe views.
+
+- Staff policy changes are atomically audited through owner-only routines; individual fee floors fail closed, and assigned staff can only place separate withdrawal blocks, never block/delete seller accounts or release holds.

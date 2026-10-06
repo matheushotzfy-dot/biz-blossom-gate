@@ -1,3 +1,4 @@
+import { StaffAssignment } from "@/features/staff/StaffAssignment";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -7,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
-  Plus, Search, Shield, Snowflake, Sun, KeyRound, Trash2, History, ArrowUpDown,
+  Plus, Search, Shield, Snowflake, Sun, KeyRound, History, ArrowUpDown,
   UserCog, Users, RefreshCw, Copy, Eye, EyeOff, Activity, Percent, UsersRound,
   X, CheckCircle2, Briefcase, Loader2,
   type LucideIcon,
@@ -19,23 +20,8 @@ import { PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumEmpty, premiumTa
 import { friendlyError } from "@/lib/friendlyError";
 import { logAdminAction } from "@/lib/auditLog";
 
-export const STAFF_PERMISSIONS: { key: string; label: string; group: string }[] = [
-  { key: "view_sellers", label: "Ver vendedores", group: "Visualização" },
-  { key: "view_transactions", label: "Ver transações", group: "Visualização" },
-  { key: "view_financial", label: "Ver financeiro (lucros/taxas)", group: "Visualização" },
-  { key: "view_disputes", label: "Ver disputas / MED", group: "Visualização" },
-  { key: "view_withdrawals", label: "Ver saques", group: "Visualização" },
-  { key: "approve_kyc", label: "Aprovar KYC de sellers", group: "Aprovações" },
-  { key: "approve_product", label: "Aprovar produtos", group: "Aprovações" },
-  { key: "edit_fees", label: "Alterar taxas (respeita mínimo)", group: "Edição" },
-  { key: "edit_seller_notes", label: "Editar observações de seller", group: "Edição" },
-  { key: "request_refund", label: "Solicitar reembolso (admin aprova)", group: "Operações" },
-  { key: "manage_med", label: "Trabalhar MED (admin finaliza)", group: "Operações" },
-  { key: "login_as_user", label: "Login as user (impersonate)", group: "Operações" },
-  { key: "freeze_seller_balance", label: "Congelar saldo de seller", group: "Operações" },
-  { key: "view_support", label: "Ver aba de Suporte / Tickets", group: "Suporte" },
-  { key: "respond_support", label: "Responder tickets de clientes", group: "Suporte" },
-];
+import { STAFF_PERMISSIONS, DEFAULT_STAFF_LIMITS, validStaffLimits, type StaffFeeLimits } from "@/features/staff/staffPolicy";
+export { STAFF_PERMISSIONS };
 
 interface Props {
   profiles: Tables<"profiles">[];
@@ -52,6 +38,7 @@ interface StaffRow {
   pct: number;
   permissions: string[];
   assignedCount: number;
+  limits: StaffFeeLimits;
 }
 
 type SortKey = "name" | "pct" | "permissions" | "assigned" | "status";
@@ -78,18 +65,21 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
 
   const load = async () => {
     setLoading(true);
-    const { data: ur } = await supabase.from("user_roles").select("user_id").eq("role", role);
+    const { data: ur, error: roleError } = await supabase.from("user_roles").select("user_id").eq("role", role);
+    if (roleError) { toast.error("Não foi possível consultar a equipe"); setLoading(false); return; }
     const ids = (ur ?? []).map((r) => r.user_id);
     if (ids.length === 0) { setRows([]); setLoading(false); return; }
 
-    const [{ data: cfg }, { data: perms }, { data: assigns }] = await Promise.all([
+    const [{ data: cfg, error: cfgError }, { data: perms, error: permsError }, { data: assigns }, { data: limits, error: limitsError }] = await Promise.all([
       supabase.from("staff_commission_config").select("user_id, base_pct").in("user_id", ids),
       supabase.from("staff_permissions").select("user_id, permission_key").in("user_id", ids),
       isManager
         ? supabase.from("manager_seller_assignments").select("manager_user_id").in("manager_user_id", ids)
         : Promise.resolve({ data: [] as { manager_user_id: string }[] }),
+      supabase.from("staff_fee_limits").select("*").in("user_id", ids),
     ]);
 
+    if (cfgError || permsError || limitsError) { toast.error("Não foi possível carregar a configuração da equipe"); setLoading(false); return; }
     const cfgMap = new Map((cfg ?? []).map((c) => [c.user_id, Number(c.base_pct)]));
     const permMap = new Map<string, string[]>();
     (perms ?? []).forEach((p) => {
@@ -113,6 +103,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
         pct: cfgMap.get(uid) ?? 0,
         permissions: permMap.get(uid) ?? [],
         assignedCount: assignMap.get(uid) ?? 0,
+        limits: limits?.find(l => l.user_id === uid) ?? DEFAULT_STAFF_LIMITS,
       };
     });
     setRows(list);
@@ -175,31 +166,14 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
       toast.error((data as { error?: string })?.error ?? error?.message ?? "Erro");
       return;
     }
-    await navigator.clipboard.writeText(pw).catch(() => {});
-    toast.success("Senha redefinida (copiada).");
+    const copied = await navigator.clipboard.writeText(pw).then(() => true).catch(() => false);
+    toast.success(copied ? "Senha redefinida e copiada." : "Senha redefinida; cópia indisponível neste navegador.");
     await logAdminAction("reset_staff_password", "staff", row.user_id);
   };
 
-  const removeStaff = async (row: StaffRow) => {
-    if (!confirm(`Excluir conta de ${row.email}? Esta ação é irreversível.`)) return;
-    const { data, error } = await supabase.functions.invoke("admin-manage-staff", {
-      body: { action: "delete", target_user_id: row.user_id },
-    });
-    if (error || (data as { error?: string })?.error) {
-      toast.error((data as { error?: string })?.error ?? error?.message ?? "Erro");
-      return;
-    }
-    toast.success("Conta excluída.");
-    await logAdminAction("delete_staff", "staff", row.user_id, { email: row.email });
-    load();
-    onReload?.();
-  };
-
   const setPct = async (row: StaffRow, value: number) => {
-    if (!Number.isFinite(value) || value < 0 || value > 100) return;
-    const { error } = await supabase.from("staff_commission_config").upsert({
-      user_id: row.user_id, base_pct: value, base: "net_amount", is_active: true,
-    });
+    if (!Number.isFinite(value) || value < 0 || value > 50) return;
+    const { error } = await supabase.rpc("admin_configure_staff", { _user_id: row.user_id, _permissions: row.permissions.filter(k => STAFF_PERMISSIONS.some(p => p.key === k)), _percentage: row.limits.min_transaction_percentage, _fixed: row.limits.min_transaction_fixed, _withdrawal: row.limits.min_withdrawal_fee, _commission: value });
     if (error) { toast.error(friendlyError(error)); return; }
     toast.success("% atualizada.");
     await logAdminAction("update_staff_commission_pct", "staff", row.user_id, { pct: value });
@@ -249,6 +223,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
         )}
       </PremiumMetricGrid>
 
+      <StaffAssignment staff={rows} sellers={profiles} />
       {/* Toolbar unificada */}
       <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-1 flex-wrap items-center gap-3">
@@ -333,7 +308,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
                   <td className={cn(premiumTable.td, "text-right")}>
                     <div className="inline-flex items-center gap-1 rounded-md border border-border bg-muted/30 px-1.5 py-0.5 focus-within:border-primary">
                       <input
-                        type="number" step="0.01" min="0" max="100"
+                        type="number" step="0.01" min="0" max="50"
                         defaultValue={row.pct}
                         onBlur={(e) => {
                           const v = parseFloat(e.target.value);
@@ -373,8 +348,8 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
                       <ActionBtn icon={Shield} label="Permissões" onClick={() => setShowPerm(row)} hoverTone="primary" />
                       <ActionBtn icon={History} label="Auditoria" onClick={() => openAudit(row)} hoverTone="primary" />
                       <ActionBtn icon={KeyRound} label="Resetar senha" onClick={() => resetPassword(row)} hoverTone="warning" />
-                      <ActionBtn icon={row.frozen ? Sun : Snowflake} label={row.frozen ? "Descongelar" : "Congelar"} onClick={() => toggleFreeze(row)} hoverTone="info" />
-                      <ActionBtn icon={Trash2} label="Excluir" onClick={() => removeStaff(row)} hoverTone="destructive" />
+                      <ActionBtn icon={row.frozen ? Sun : Snowflake} label={row.frozen ? "Restaurar acesso staff" : "Suspender acesso staff"} onClick={() => toggleFreeze(row)} hoverTone="info" />
+                      
                     </div>
                   </td>
                 </tr>
@@ -465,17 +440,15 @@ function CreateStaffDialog({ open, onOpenChange, role, onCreated }: {
   const [password, setPassword] = useState(genPassword());
   const [pct, setPct] = useState(role === "manager" ? 0.20 : 0.10);
   const [showPw, setShowPw] = useState(false);
-  const [perms, setPerms] = useState<Set<string>>(new Set(
-    role === "manager"
-      ? ["view_sellers","view_transactions","view_disputes","view_withdrawals","approve_kyc","approve_product","edit_fees","edit_seller_notes","request_refund","manage_med"]
-      : ["view_sellers","view_transactions","view_disputes","edit_seller_notes"]
-  ));
+  const [perms, setPerms] = useState<Set<string>>(new Set());
+  const [limits, setLimits] = useState<StaffFeeLimits>(DEFAULT_STAFF_LIMITS);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (open) {
       setEmail(""); setName(""); setPassword(genPassword()); setSubmitting(false);
       setPct(role === "manager" ? 0.20 : 0.10);
+      setPerms(new Set()); setLimits(DEFAULT_STAFF_LIMITS);
     }
   }, [open, role]);
 
@@ -486,20 +459,22 @@ function CreateStaffDialog({ open, onOpenChange, role, onCreated }: {
   };
 
   const submit = async () => {
-    if (!email || !name || password.length < 8) {
+    if (submitting) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) || name.trim().length < 2 || password.length < 8 || password.length > 128 || !validStaffLimits(limits, pct)) {
       toast.error("Preencha todos os campos. Senha mín. 8."); return;
     }
     setSubmitting(true);
     const { data, error } = await supabase.functions.invoke("admin-create-staff", {
-      body: { email, password, full_name: name, role, permissions: Array.from(perms), commission_pct: pct },
+      body: { email, password, full_name: name, role, permissions: Array.from(perms), commission_pct: pct, fee_limits: limits },
     });
     setSubmitting(false);
     if (error || (data as { error?: string })?.error) {
       toast.error((data as { error?: string })?.error ?? error?.message ?? "Falha");
       return;
     }
-    await navigator.clipboard.writeText(`Email: ${email}\nSenha: ${password}`).catch(() => {});
-    toast.success("Conta criada. Credenciais copiadas.");
+    const copied = await navigator.clipboard.writeText(`Email: ${email}\nSenha: ${password}`).then(() => true).catch(() => false);
+    toast.success(copied ? "Conta criada. Credenciais copiadas." : "Conta criada; cópia indisponível. Anote a senha antes de fechar.");
+    if (!copied) { onCreated(); return; }
     await logAdminAction("create_staff", "staff", (data as { user_id?: string })?.user_id ?? email, { email, role, permissions: Array.from(perms), commission_pct: pct });
     onOpenChange(false);
     onCreated();
@@ -559,7 +534,7 @@ function CreateStaffDialog({ open, onOpenChange, role, onCreated }: {
               <div>
                 <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">% comissão (sobre net)</Label>
                 <div className="mt-1 flex items-center gap-1 rounded-md border border-border bg-card px-3 focus-within:border-primary">
-                  <Input type="number" step="0.01" min="0" max="100" value={pct}
+                  <Input type="number" step="0.01" min="0" max="50" value={pct}
                     onChange={(e) => setPct(parseFloat(e.target.value) || 0)}
                     className="h-9 border-0 bg-transparent px-0 font-mono text-sm focus-visible:ring-0" />
                   <Percent className="h-3.5 w-3.5 text-muted-foreground" />
@@ -568,6 +543,7 @@ function CreateStaffDialog({ open, onOpenChange, role, onCreated }: {
             </div>
           </div>
 
+          <StaffLimitsFields limits={limits} onChange={setLimits} />
           <div className="rounded-lg border border-border bg-muted/20 p-4">
             <div className="mb-3 flex items-center justify-between">
               <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
@@ -595,7 +571,9 @@ function PermissionsDialog({ row, onClose, onSaved }: {
   row: StaffRow | null; onClose: () => void; onSaved: () => void;
 }) {
   const [perms, setPerms] = useState<Set<string>>(new Set());
-  useEffect(() => { setPerms(new Set(row?.permissions ?? [])); }, [row]);
+  const [limits, setLimits] = useState<StaffFeeLimits>(DEFAULT_STAFF_LIMITS);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => { setPerms(new Set((row?.permissions ?? []).filter(k => STAFF_PERMISSIONS.some(p => p.key === k)))); setLimits(row?.limits ?? DEFAULT_STAFF_LIMITS); }, [row]);
 
   const grouped = useMemo(() => {
     const g: Record<string, typeof STAFF_PERMISSIONS> = {};
@@ -606,14 +584,12 @@ function PermissionsDialog({ row, onClose, onSaved }: {
   if (!row) return null;
 
   const save = async () => {
-    await supabase.from("staff_permissions").delete().eq("user_id", row.user_id);
-    if (perms.size > 0) {
-      await supabase.from("staff_permissions").insert(
-        Array.from(perms).map((k) => ({ user_id: row.user_id, permission_key: k }))
-      );
-    }
-    toast.success("Permissões salvas.");
-    await logAdminAction("update_staff_permissions", "staff", row.user_id, { permissions: Array.from(perms) });
+    if (saving || !validStaffLimits(limits, row.pct)) { toast.error("Revise os limites e a comissão (0–50%)"); return; }
+    setSaving(true);
+    const { error } = await supabase.rpc("admin_configure_staff", { _user_id: row.user_id, _permissions: Array.from(perms), _percentage: limits.min_transaction_percentage, _fixed: limits.min_transaction_fixed, _withdrawal: limits.min_withdrawal_fee, _commission: row.pct });
+    setSaving(false);
+    if (error) { toast.error(friendlyError(error)); return; }
+    toast.success("Permissões e limites salvos.");
     onSaved();
     onClose();
   };
@@ -631,7 +607,8 @@ function PermissionsDialog({ row, onClose, onSaved }: {
             <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Permissões</p>
             <span className="text-[10px] font-black tabular-nums text-foreground">{perms.size}/{STAFF_PERMISSIONS.length} ativas</span>
           </div>
-          <div className="max-h-[60vh] overflow-y-auto">
+          <div className="max-h-[60vh] overflow-y-auto space-y-4">
+            <StaffLimitsFields limits={limits} onChange={setLimits} />
             <PermissionsGrid grouped={grouped} perms={perms} onToggle={(k) => {
               const n = new Set(perms);
               if (n.has(k)) n.delete(k); else n.add(k);
@@ -641,7 +618,7 @@ function PermissionsDialog({ row, onClose, onSaved }: {
         </div>
         <div className="flex justify-end gap-2 border-t border-border bg-card p-4">
           <Button size="sm" variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button size="sm" onClick={save} className="gap-1.5">
+          <Button size="sm" onClick={save} disabled={saving} className="gap-1.5">
             <CheckCircle2 className="h-3.5 w-3.5" /> Salvar permissões
           </Button>
         </div>
@@ -667,7 +644,7 @@ function PermissionsGrid({ grouped, perms, onToggle }: {
                 <label key={p.key}
                   className={cn("flex cursor-pointer items-center gap-2 rounded-md border px-2.5 py-2 text-xs font-bold transition-all duration-150",
                     active ? "border-primary/40 bg-primary/5 text-foreground" : "border-border bg-muted/20 text-muted-foreground hover:border-primary/30 hover:text-foreground")}>
-                  <Switch checked={active} onCheckedChange={() => onToggle(p.key)} />
+                  <Switch checked={active} aria-label={p.label} onCheckedChange={() => onToggle(p.key)} />
                   <span className="flex-1">{p.label}</span>
                 </label>
               );
@@ -727,4 +704,13 @@ function AuditDialog({ row, rows, onClose }: {
       </DialogContent>
     </Dialog>
   );
+}
+
+function StaffLimitsFields({ limits, onChange }: { limits: StaffFeeLimits; onChange: (v: StaffFeeLimits) => void }) {
+  const fields: { key: keyof StaffFeeLimits; label: string; max: number }[] = [
+    { key: "min_transaction_percentage", label: "Taxa percentual mínima (%)", max: 100 },
+    { key: "min_transaction_fixed", label: "Taxa fixa mínima (R$)", max: 1000000 },
+    { key: "min_withdrawal_fee", label: "Taxa de saque mínima (R$)", max: 1000000 },
+  ];
+  return <section className="space-y-3 border-t border-border pt-4"><h3 className="text-sm font-semibold">Pisos de taxas por seller</h3><div className="grid grid-cols-1 gap-3 sm:grid-cols-3">{fields.map(f => <div key={f.key} className="space-y-1"><Label htmlFor={f.key}>{f.label}</Label><Input id={f.key} type="number" min={0} max={f.max} step="0.01" value={Number.isNaN(limits[f.key]) ? "" : limits[f.key]} onChange={e => onChange({ ...limits, [f.key]: e.target.value === "" ? NaN : Number(e.target.value) })} /></div>)}</div></section>;
 }

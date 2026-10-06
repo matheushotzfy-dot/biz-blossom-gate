@@ -1,3 +1,4 @@
+import { WithdrawalBlockControl } from "@/features/staff/WithdrawalBlockControl";
 import { useState, useRef } from "react";
 import { SellersDirectory } from "@/features/admin-finance/SellersDirectory";
 import { BalanceAdjustCard } from "@/features/admin-finance/BalanceAdjustCard";
@@ -539,7 +540,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         const { data, error } = await supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle();
         if (error || !data) { toast.error("Não foi possível abrir este seller"); return; }
         await openUserDetail(data);
-      }} /> : <p className="p-6 text-muted-foreground">A gestão de sellers é exclusiva do dono.</p>}
+      }} /> : <WithdrawalBlockControl sellers={profiles} />}
+      {isAdmin && <WithdrawalBlockControl sellers={profiles} owner />}
       {sensitiveDialog}
 
       {/* ═══ KYC Reject Dialog ═══ */}

@@ -3863,6 +3863,33 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_withdrawal_blocks: {
+        Row: {
+          active: boolean
+          blocked_by: string
+          created_at: string
+          reason: string
+          seller_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          blocked_by: string
+          created_at?: string
+          reason: string
+          seller_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          blocked_by?: string
+          created_at?: string
+          reason?: string
+          seller_user_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       staff_action_requests: {
         Row: {
           created_at: string
@@ -4082,6 +4109,36 @@ export type Database = {
           staff_user_id?: string
           transaction_id?: string | null
           type?: string
+        }
+        Relationships: []
+      }
+      staff_fee_limits: {
+        Row: {
+          created_at: string
+          min_transaction_fixed: number
+          min_transaction_percentage: number
+          min_withdrawal_fee: number
+          updated_at: string
+          updated_by: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          min_transaction_fixed?: number
+          min_transaction_percentage?: number
+          min_withdrawal_fee?: number
+          updated_at?: string
+          updated_by: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          min_transaction_fixed?: number
+          min_transaction_percentage?: number
+          min_withdrawal_fee?: number
+          updated_at?: string
+          updated_by?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -5457,6 +5514,17 @@ export type Database = {
           success: boolean
         }[]
       }
+      admin_configure_staff: {
+        Args: {
+          _commission: number
+          _fixed: number
+          _percentage: number
+          _permissions: string[]
+          _user_id: string
+          _withdrawal: number
+        }
+        Returns: undefined
+      }
       admin_decide_balance_adjustment: {
         Args: { _approve: boolean; _request_id: string }
         Returns: Json
@@ -5598,6 +5666,10 @@ export type Database = {
       }
       admin_unverify_email: { Args: { _user_id: string }; Returns: undefined }
       apply_transaction_splits: { Args: { _tx_id: string }; Returns: undefined }
+      assign_staff_seller: {
+        Args: { _seller: string; _staff: string }
+        Returns: undefined
+      }
       backfill_financial_ledger_for_completed_tx: {
         Args: { _limit?: number }
         Returns: {
@@ -5684,6 +5756,18 @@ export type Database = {
         }[]
       }
       cleanup_simulated_transactions_batch: { Args: never; Returns: number }
+      configure_staff_service: {
+        Args: {
+          _actor: string
+          _commission: number
+          _fixed: number
+          _percentage: number
+          _permissions: string[]
+          _user_id: string
+          _withdrawal: number
+        }
+        Returns: undefined
+      }
       current_user_email: { Args: never; Returns: string }
       current_user_has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
@@ -6225,6 +6309,19 @@ export type Database = {
         Returns: Json
       }
       set_my_theme_preference: { Args: { _theme: string }; Returns: string }
+      set_seller_withdrawal_block: {
+        Args: { _block: boolean; _reason: string; _seller: string }
+        Returns: undefined
+      }
+      set_staff_seller_fees: {
+        Args: {
+          _fixed: number
+          _percentage: number
+          _seller: string
+          _withdrawal: number
+        }
+        Returns: undefined
+      }
       sync_public_product_catalog_row: {
         Args: { _product_id: string }
         Returns: undefined
