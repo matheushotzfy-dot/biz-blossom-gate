@@ -1,6 +1,6 @@
 # Admin total — controle manual, métricas, adquirentes e ficha do seller
 
-- [ ] Centro de comando: investigar erros registrados, corrigir causas e conferir contadores, atualização, busca e atalhos; não encerrar alertas sem verificação.
+- [x] Centro de comando: agregados exatos, busca validada, oito atalhos, período, atualização e recuperação de falha verificados; 102 testes aprovados. Reduzidas consultas recorrentes, adicionados índices e corrigida chamada autenticada dentro do listener. Registros históricos preservados: ausência de reprodução atual não comprova correção de todas as causas; pagamentos reais continuam sem adquirente configurado.
 
 - [x] Dashboard admin: totais financeiros consistentes, MED/chargeback separados, cadastros/KYC, filtros longos e personalizados, gráficos diários e por hora utilizáveis; testes de modelo, calendário, atalhos e troca rápida verificados. Lucro contábil completo depende de despesas/impostos registrados e validação com vendas reais.
 - [x] Ampliar e refinar suporte: ocupa toda a área disponível, controles enxutos e tipografia legível; verificado em 1183×680 e celular, com novo chamado, navegação e 3 testes aprovados.

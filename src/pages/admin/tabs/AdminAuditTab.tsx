@@ -231,10 +231,10 @@ export default function AdminAuditTab({ profiles }: Props) {
       />
 
       <FinanceiroKpiGrid cols={4}>
-        <FinanceiroKpi label="Admin Audit" value={String(counts.admin)} sub="Ações privilegiadas" icon={Shield} tone="primary" />
-        <FinanceiroKpi label="Staff Log" value={String(counts.staff)} sub="Gerentes / Funcionários" icon={Briefcase} tone="info" />
-        <FinanceiroKpi label="Atividade" value={String(counts.activity)} sub="Usuários finais" icon={UserIcon} tone="warning" />
-        <FinanceiroKpi label="Hoje" value={String(counts.today)} sub="Eventos nas últimas 24h" icon={Clock} tone="success" />
+        <FinanceiroKpi label="Admin Audit" value={String(counts.admin)} sub="Ações privilegiadas · total estimado" icon={Shield} tone="primary" />
+        <FinanceiroKpi label="Staff Log" value={String(counts.staff)} sub="Equipe · total estimado" icon={Briefcase} tone="info" />
+        <FinanceiroKpi label="Atividade" value={String(counts.activity)} sub="Usuários · total estimado" icon={UserIcon} tone="warning" />
+        <FinanceiroKpi label="Hoje" value={String(counts.today)} sub="Desde meia-noite · total estimado" icon={Clock} tone="success" />
       </FinanceiroKpiGrid>
 
 
