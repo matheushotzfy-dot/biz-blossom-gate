@@ -1,4 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ShieldAlert, Wallet, TrendingUp, RotateCcw, AlertTriangle, ArrowDownToLine } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,9 +24,9 @@ const RISK_LABEL: Record<Seller360["risk_level"], string> = { low: "Risco baixo"
 
 function Tile({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone?: "danger" | "muted" }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-3">
+    <div className="min-w-0 rounded-lg border border-border bg-card p-3">
       <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className={cn("mt-1 font-mono text-base font-semibold tabular-nums", tone === "danger" && "text-destructive", tone === "muted" && "text-muted-foreground")}>{value}</p>
+      <p className={cn("mt-1 break-words font-mono text-base font-semibold tabular-nums", tone === "danger" && "text-destructive", tone === "muted" && "text-muted-foreground")}>{value}</p>
       {sub && <p className="mt-0.5 text-[11px] text-muted-foreground">{sub}</p>}
     </div>
   );
@@ -40,19 +43,18 @@ function Section({ icon: Icon, title, children }: { icon: typeof Wallet; title: 
 
 /** Complete one-screen view of a seller: balances, sales, disputes, withdrawals, risk and balance actions. */
 export function Seller360Panel({ userId, onChanged }: Seller360PanelProps) {
-  const [data, setData] = useState<Seller360 | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    setError(null);
-    const { data: res, error: err } = await supabase.rpc("get_seller_360", { _user_id: userId });
-    if (err) { setError("Não foi possível carregar a visão do seller"); return; }
-    setData(res as unknown as Seller360);
-  }, [userId]);
-
-  useEffect(() => { setData(null); void load(); }, [load]);
-
-  if (error) return <p className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">{error}</p>;
+  const { user } = useAuth();
+  const query = useQuery({
+    queryKey: ["seller-360", user?.id, userId], enabled: Boolean(user), staleTime: 30000,
+    queryFn: async ({ signal }) => {
+      const { data, error } = await supabase.rpc("get_seller_360", { _user_id: userId }).abortSignal(signal);
+      if (error || !data) throw new Error("Não foi possível carregar a visão do seller");
+      return data as unknown as Seller360;
+    },
+  });
+  const load = useCallback(() => query.refetch(), [query.refetch]);
+  const data = query.data;
+  if (query.isError) return <div role="alert" className="space-y-3 border border-destructive/30 p-4 text-sm text-destructive">Não foi possível carregar a visão do seller.<Button variant="outline" onClick={() => void load()}>Tentar novamente</Button></div>;
   if (!data) return <div className="flex h-40 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-label="Carregando" /></div>;
 
   const { balance: b, sales: s, disputes: d, withdrawals: w } = data;

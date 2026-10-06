@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useRef } from "react";
 import { SellersDirectory } from "@/features/admin-finance/SellersDirectory";
 import { BalanceAdjustCard } from "@/features/admin-finance/BalanceAdjustCard";
 import { useSensitiveConfirm } from "@/features/admin-finance/useSensitiveConfirm";
 import { validateSellerNumbers } from "@/features/admin-finance/sellersModel";
 import { useQueryClient } from "@tanstack/react-query";
+import { SellerWithdrawalsSection } from "@/features/admin-finance/SellerDetailSections";
 import { Seller360Panel } from "@/features/admin-finance/Seller360Panel";
 import { NumberInput } from "@/components/ui/number-input";
 import { supabase } from "@/integrations/supabase/client";
@@ -135,8 +136,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [detailError, setDetailError] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState("overview");
   const reloadSeller = () => { void queryClient.invalidateQueries({ queryKey: ["admin-sellers-page"] }); onReload(); };
-  const [search, setSearch] = useState("");
-  const [sellerFilter, setSellerFilter] = useState<"all" | "white" | "black" | "unset" | "kyc" | "frozen" | "blocked" | "rejected" | "approved">("all");
   const [selectedUser, setSelectedUser] = useState<Tables<"profiles"> | null>(null);
   const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
   const [emailVerifyLoading, setEmailVerifyLoading] = useState(false);
@@ -144,7 +143,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [revealedDoc, setRevealedDoc] = useState<string | null>(null);
   const [revealedPixKeys, setRevealedPixKeys] = useState<PixKey[] | null>(null);
   const [revealedLegacyPix, setRevealedLegacyPix] = useState<string | null>(null);
-  const [sellerBalances, setSellerBalances] = useState<Map<string, number>>(new Map());
   const [userLogs, setUserLogs] = useState<ActivityLog[]>([]);
   const [userProducts, setUserProducts] = useState<Tables<"products">[]>([]);
   const [userWithdrawals, setUserWithdrawals] = useState<Tables<"withdrawals">[]>([]);
@@ -152,9 +150,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [userPixKeys, setUserPixKeys] = useState<PixKey[]>([]);
   const [customFees, setCustomFees] = useState({ pix_percentage: "", pix_fixed: "", card_percentage: "", card_fixed: "", boleto_percentage: "", boleto_fixed: "", withdrawal_fee: "", max_ticket: "" });
   const [effectiveMaxTicket, setEffectiveMaxTicket] = useState<number | null>(null);
-  const [adjustAmount, setAdjustAmount] = useState("");
-  const [adjustType, setAdjustType] = useState<"credit" | "debit">("credit");
-  const [adjustReason, setAdjustReason] = useState("");
   const [balanceAdjustments, setBalanceAdjustments] = useState<BalanceAdjustment[]>([]);
   const [loading, setLoading] = useState(false);
   const [kycImages, setKycImages] = useState<string[]>([]);
@@ -167,22 +162,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [retentionForm, setRetentionForm] = useState({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
   const [impersonating, setImpersonating] = useState(false);
   const [ipHistory, setIpHistory] = useState<IpLog[]>([]);
-  const [page, setPage] = useState(1);
   const detailRequestRef = useRef(0);
-  const PAGE_SIZE = 50;
 
-
-  useEffect(() => {
-    // Canonical seller balances (same fórmula do painel do vendedor)
-    supabase.rpc("admin_get_seller_balances").then(({ data, error }) => {
-      if (error) { console.warn("[AdminSellersTab] balances RPC failed", error.message); return; }
-      const m = new Map<string, number>();
-      (data || []).forEach((row: { user_id: string; balance: number | string }) =>
-        m.set(row.user_id, Number(row.balance) || 0)
-      );
-      setSellerBalances(m);
-    });
-  }, []);
 
   const revealPii = async () => {
     if (!selectedUser || !isAdmin) return;
@@ -317,32 +298,40 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   };
 
   const handleApproveKyc = async (userId: string) => {
+    if (!isAdmin) return;
     const { error } = await supabase.rpc("admin_approve_kyc", { _user_id: userId });
     if (error) { toast.error("Erro ao aprovar KYC"); return; }
     toast.success("KYC aprovado! Seller liberado.");
-    onReload();
+    reloadSeller();
     if (selectedUser?.user_id === userId) setSelectedUser(null);
   };
 
   const handleRejectKyc = async () => {
+    if (!isAdmin) return;
     if (!kycRejectReason.trim()) { toast.error("Informe o motivo da recusa"); return; }
     const { error } = await supabase.rpc("admin_reject_kyc", { _user_id: rejectTargetUserId, _reason: kycRejectReason.trim() });
     if (error) { toast.error("Erro ao recusar KYC"); return; }
     toast.success("KYC recusado. Motivo registrado.");
     setShowRejectDialog(false);
     setKycRejectReason("");
-    onReload();
+    reloadSeller();
     if (selectedUser?.user_id === rejectTargetUserId) setSelectedUser(null);
   };
 
-  const handleFreezeBalance = async (userId: string, freeze: boolean) => {
-    const { error } = await supabase.rpc("admin_freeze_account", { _user_id: userId, _freeze: freeze, _reason: null });
-    if (error) { toast.error("Erro ao alterar status"); return; }
-    toast.success(freeze ? "Saldo congelado! Saques bloqueados." : "Saldo descongelado! Saques liberados.");
-    onReload();
+  const handleFreezeBalance = (userId: string, freeze: boolean) => {
+    if (!isAdmin) return;
+    const reason = window.prompt("Justificativa (mínimo 5 caracteres)");
+    if (!reason || reason.trim().length < 5) return;
+    confirm(freeze ? "Congelar a conta e bloquear saques deste seller." : "Descongelar a conta e liberar saques deste seller.", async () => {
+      const { error } = await supabase.rpc("admin_freeze_account", { _user_id: userId, _freeze: freeze, _reason: reason.trim() });
+      if (error) { toast.error(friendlyError(error)); return; }
+      setSelectedUser(previous => previous?.user_id === userId ? { ...previous, balance_frozen: freeze } : previous);
+      toast.success(freeze ? "Saldo congelado. Saques bloqueados." : "Saldo descongelado."); reloadSeller();
+    });
   };
 
   const handleSetEmailVerified = async (userId: string, verified: boolean) => {
+    if (!isAdmin) return;
     setEmailVerifyLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("admin-set-email-verified", {
@@ -357,16 +346,19 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     }
   };
 
-  const handleBanSeller = async (userId: string) => {
-    const { data, error } = await supabase.functions.invoke("admin-ban-seller", { body: { targetUserId: userId } });
-    if (error || !data?.success) { toast.error(data?.error || "Erro ao banir seller"); return; }
-    toast.success("Seller banido! Conta bloqueada, saldo congelado e checkouts suspensos.");
-    await logAdminAction("ban_seller", "profile", userId, { action: "atomic_block+freeze+suspend" });
-    onReload();
-    if (selectedUser?.user_id === userId) setSelectedUser(null);
+  const handleBanSeller = (userId: string) => {
+    if (!isAdmin) return;
+    confirm("Banir este seller, congelar seu saldo e suspender seus checkouts.", async () => {
+      const { data, error } = await supabase.functions.invoke("admin-ban-seller", { body: { targetUserId: userId } });
+      if (error || !data?.success) { toast.error(data?.error || "Erro ao banir seller"); return; }
+      toast.success("Seller banido. Conta bloqueada, saldo congelado e checkouts suspensos.");
+      await logAdminAction("ban_seller", "profile", userId, { action: "atomic_block+freeze+suspend" });
+      reloadSeller(); ++detailRequestRef.current; setSelectedUser(null);
+    });
   };
 
   const handleImpersonate = async (userId: string) => {
+    if (!isAdmin) return;
     setImpersonating(true);
     try {
       const { data, error } = await supabase.functions.invoke("admin-impersonate", { body: { targetUserId: userId } });
@@ -426,7 +418,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   };
 
   const handleSaveAdminNotes = async () => {
-    if (!selectedUser) return;
+    if (!selectedUser || !isAdmin) return;
     const sanitized = adminNotes.replace(/[<>]/g, "").replace(/javascript:/gi, "").trim().slice(0, 5000);
     const { error } = await supabase.from("profiles").update({ admin_notes: sanitized }).eq("user_id", selectedUser.user_id);
     if (error) { toast.error("Erro ao salvar notas"); return; }
@@ -440,15 +432,17 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     if (error) { toast.error("Erro ao atualizar"); return; }
     toast.success(`Conta ${status === "approved" ? "aprovada" : "bloqueada"}!`);
     await logAdminAction(status === "approved" ? "approve_user" : "block_user", "profile", userId, { new_status: status });
-    onReload();
+    reloadSeller();
   };
 
   const handleSetSellerType = async (userId: string, sellerType: string | null) => {
+    if (!isAdmin) return;
     const { error } = await supabase.from("profiles").update({ seller_type: sellerType }).eq("user_id", userId);
     if (error) { toast.error("Erro ao classificar seller"); return; }
     toast.success(`Seller classificado como ${sellerType || "sem classificação"}!`);
+    setSelectedUser(previous => previous?.user_id === userId ? { ...previous, seller_type: sellerType } : previous);
     await logAdminAction("set_seller_type", "profile", userId, { seller_type: sellerType });
-    onReload();
+    reloadSeller();
   };
 
   const handleSaveCustomFees = async () => {
@@ -486,6 +480,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   };
 
   const handleDeletePixKey = async (pixKeyId: string) => {
+    if (!isAdmin) return;
     if (!window.confirm("Remover esta chave PIX do seller?")) return;
     const { error } = await supabase.from("pix_keys").delete().eq("id", pixKeyId);
     if (error) { toast.error("Erro ao remover chave: " + friendlyError(error)); return; }
@@ -494,103 +489,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     setUserPixKeys(prev => prev.filter(k => k.id !== pixKeyId));
     setRevealedPixKeys(prev => prev?.filter(k => k.id !== pixKeyId) ?? null);
   };
-
-  const handleBalanceAdjustment = async () => {
-    if (!selectedUser || !user || !adjustAmount || !adjustReason) { toast.error("Preencha todos os campos"); return; }
-    const amount = Number(adjustAmount);
-    if (isNaN(amount) || amount <= 0) { toast.error("Valor deve ser positivo"); return; }
-    if (amount > 1000000) { toast.error("Valor máximo excedido (R$ 1.000.000)"); return; }
-    const sanitizedReason = adjustReason.replace(/[<>]/g, "").trim().slice(0, 500);
-    if (sanitizedReason.length < 3) { toast.error("Justificativa muito curta (mín. 3 caracteres)"); return; }
-    if (amount > 10000 && !window.confirm(`Confirma ajuste de R$ ${amount.toFixed(2)} (${adjustType})?`)) return;
-    if (sanitizedReason.length < 5) { toast.error("Justificativa muito curta (mín. 5 caracteres)"); return; }
-    // Audited server routine: owner applies directly, staff requests need owner approval.
-    const { data: adjRes, error } = await supabase.rpc("admin_request_balance_adjustment", {
-      _user_id: selectedUser.user_id, _type: adjustType, _amount: amount, _reason: sanitizedReason,
-    });
-    if (error) { toast.error(error.message?.slice(0, 160) || "Erro ao ajustar saldo"); return; }
-    const pendingApproval = (adjRes as { status?: string } | null)?.status === "pending_approval";
-    toast.success(pendingApproval ? "Pedido enviado para aprovação do dono" : `Saldo ${adjustType === "credit" ? "creditado" : "debitado"}!`);
-    setAdjustAmount(""); setAdjustReason("");
-    const { data } = await supabase.from("balance_adjustments").select("*").eq("user_id", selectedUser.user_id).order("created_at", { ascending: false });
-    if (data) setBalanceAdjustments(data);
-    onReload();
-  };
-
-  // ── Filtering ──
-  const kycPendingProfiles = profiles.filter(p => p.account_status === "pending_review" || p.account_status === "pending");
-  const filtered = profiles.filter((p) => {
-    const st = p.seller_type;
-    if (sellerFilter === "kyc" && !(p.account_status === "pending_review" || p.account_status === "pending")) return false;
-    if (sellerFilter === "white" && st !== "white") return false;
-    if (sellerFilter === "black" && st !== "black") return false;
-    if (sellerFilter === "unset" && st != null) return false;
-    if (sellerFilter === "frozen" && p.balance_frozen !== true) return false;
-    if (sellerFilter === "blocked" && p.account_status !== "blocked") return false;
-    if (sellerFilter === "rejected" && p.account_status !== "rejected") return false;
-    if (sellerFilter === "approved" && p.account_status !== "approved") return false;
-    if (!search) return true;
-    const s = search.toLowerCase();
-    const digits = search.replace(/\D/g, "");
-    const docDigits = (p.document_number || "").replace(/\D/g, "");
-    return (p.full_name?.toLowerCase().includes(s))
-      || (p.email?.toLowerCase().includes(s))
-      || (digits.length > 0 && docDigits.includes(digits));
-  });
-
-  useEffect(() => { setPage(1); }, [sellerFilter, search]);
-  const pagedFiltered = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  const whiteCount = profiles.filter(p => p.seller_type === "white").length;
-  const blackCount = profiles.filter(p => p.seller_type === "black").length;
-  const unsetCount = profiles.filter(p => p.seller_type == null).length;
-  const frozenCount = profiles.filter(p => p.balance_frozen === true).length;
-  const blockedCount = profiles.filter(p => p.account_status === "blocked").length;
-  const rejectedCount = profiles.filter(p => p.account_status === "rejected").length;
-  const approvedCount = profiles.filter(p => p.account_status === "approved").length;
-
-  // Top movers do dia (sellers que mais movimentaram hoje)
-  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-  const todayMovers = (() => {
-    const byUser = new Map<string, { gross: number; count: number }>();
-    for (const t of transactions) {
-      if (!t.created_at || new Date(t.created_at) < todayStart) continue;
-      if (!isApprovedTransaction(t.status)) continue;
-      const cur = byUser.get(t.user_id) || { gross: 0, count: 0 };
-      cur.gross += Number(t.amount); cur.count += 1;
-      byUser.set(t.user_id, cur);
-    }
-    return Array.from(byUser.entries())
-      .map(([user_id, s]) => ({ user_id, ...s, profile: profiles.find(p => p.user_id === user_id) }))
-      .filter(m => m.profile)
-      .sort((a, b) => b.gross - a.gross)
-      .slice(0, 8);
-  })();
-
-  const sellerStats = useMemo(() => {
-    const stats = new Map<string, { totalGross: number; totalNet: number; totalFees: number; totalWithdrawn: number; txCount: number; completedCount: number; conversionRate: number }>();
-    for (const transaction of transactions) {
-      const current = stats.get(transaction.user_id) ?? { totalGross: 0, totalNet: 0, totalFees: 0, totalWithdrawn: 0, txCount: 0, completedCount: 0, conversionRate: 0 };
-      current.txCount += 1;
-      if (isApprovedTransaction(transaction.status)) {
-        current.completedCount += 1;
-        current.totalGross += Number(transaction.amount);
-        current.totalNet += Number(transaction.net_amount);
-        current.totalFees += Number(transaction.fee_amount);
-      }
-      stats.set(transaction.user_id, current);
-    }
-    for (const withdrawal of withdrawals) {
-      if (withdrawal.status !== "approved") continue;
-      const current = stats.get(withdrawal.user_id) ?? { totalGross: 0, totalNet: 0, totalFees: 0, totalWithdrawn: 0, txCount: 0, completedCount: 0, conversionRate: 0 };
-      current.totalWithdrawn += Number(withdrawal.amount);
-      stats.set(withdrawal.user_id, current);
-    }
-    for (const current of stats.values()) current.conversionRate = current.txCount > 0 ? (current.completedCount / current.txCount) * 100 : 0;
-    return stats;
-  }, [transactions, withdrawals]);
-
-  const getSellerStats = (userId: string) => sellerStats.get(userId) ?? { totalGross: 0, totalNet: 0, totalFees: 0, totalWithdrawn: 0, txCount: 0, completedCount: 0, conversionRate: 0 };
 
   const deletedProducts = userLogs.filter(l => l.action === "product_deleted").map(l => {
     const od = deletedProductDataSchema.safeParse(l.old_data ?? {});
@@ -602,16 +500,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   });
 
   const userApproved = userTransactions.filter(t => isApprovedTransaction(t.status));
-  const userTotalGross = userApproved.reduce((a, t) => a + Number(t.amount), 0);
-  const userTotalNet = userApproved.reduce((a, t) => a + Number(t.net_amount), 0);
-  const userTotalFees = userApproved.reduce((a, t) => a + Number(t.fee_amount), 0);
-  const userTotalWithdrawn = userWithdrawals.filter(w => w.status === "approved").reduce((a, w) => a + Number(w.amount), 0);
-  const userTotalWdFees = userWithdrawals.reduce((a, w) => a + Number(w.fee_amount), 0);
-  const userPendingWd = userWithdrawals.filter(w => w.status === "pending").reduce((a, w) => a + Number(w.amount), 0);
-  const adjustmentsTotal = balanceAdjustments.reduce((a, adj) => a + (adj.type === "credit" ? Number(adj.amount) : -Number(adj.amount)), 0);
-  const userAvailableBalance = userTotalNet - userTotalWithdrawn - userPendingWd + adjustmentsTotal;
-  const userConversion = userTransactions.length > 0 ? ((userApproved.length / userTransactions.length) * 100).toFixed(1) : "0.0";
-
   const userMedTotal = userDisputes.length;
   const userMedOpen = userDisputes.filter(d => ["open", "in_review", "pending_recorrer"].includes(d.status)).length;
   const userMedResolved = userDisputes.filter(d => d.status.startsWith("resolved") || d.status === "closed").length;
@@ -641,7 +529,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {isAdmin ? <SellersDirectory range={dateRange} enabled={isAdmin} refreshKey={profiles} money={fmtCurrency} onOpen={async userId => {
+      {isAdmin ? <SellersDirectory range={dateRange} enabled={isAdmin} money={fmtCurrency} onOpen={async userId => {
         const { data, error } = await supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle();
         if (error || !data) { toast.error("Não foi possível abrir este seller"); return; }
         await openUserDetail(data);
@@ -673,7 +561,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
       {/* ═══ Seller Detail Dialog ═══ */}
       <Dialog open={!!selectedUser} onOpenChange={v => { if (!v) { ++detailRequestRef.current; setSelectedUser(null); } }}>
-        <DialogContent className="seller-detail-dialog z-[100] flex h-[92dvh] w-[calc(100vw-32px)] max-w-6xl flex-col overflow-hidden rounded-lg border border-border p-0 gap-0">
+        <DialogContent className="seller-detail-dialog z-[100] flex h-[min(92dvh,1000px)] w-[calc(100vw-32px)] max-w-6xl flex-col overflow-hidden rounded-lg border border-border p-0 gap-0">
           <DialogHeader className="shrink-0 bg-card border-b border-border pl-4 pr-14 sm:pl-6 sm:pr-16 pt-5 pb-4 space-y-0">
             <DialogTitle className="sr-only">
               Detalhes do seller {selectedUser?.full_name || selectedUser?.email || ""}
@@ -702,13 +590,13 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     {selectedUser?.email}{selectedUser?.phone ? <> · <span className="font-mono">{selectedUser.phone}</span></> : null}
                   </p>
                   <p className="text-[10px] text-muted-foreground/60 font-mono mt-0.5 break-all">
-                    <button
+                    <Button variant="link"
                       onClick={() => { if (selectedUser?.user_id) { navigator.clipboard.writeText(selectedUser.user_id); toast.success("ID copiado"); } }}
-                      className="hover:text-foreground transition-colors"
+                      className="h-auto p-0 text-[10px] text-muted-foreground"
                       title="Clique para copiar o ID completo"
                     >
                       ID {selectedUser?.user_id || "—"}
-                    </button>
+                    </Button>
                     <span className="text-muted-foreground/40"> · IP {selectedUser?.last_ip || "—"}</span>
                   </p>
 
@@ -779,7 +667,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                 </TabsList>
 
                 <TabsContent value="overview" className="mt-4">
-                  {selectedUser && <Seller360Panel userId={selectedUser.user_id} onChanged={onReload} />}
+                  {selectedUser && <Seller360Panel userId={selectedUser.user_id} onChanged={reloadSeller} />}
                 </TabsContent>
 
                 {/* ── Info & KYC ── */}
@@ -854,11 +742,11 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       ] as const).map(opt => {
                         const enabled = selectedUser?.[opt.key] !== false;
                         return (
-                          <button
+                          <Button variant="outline"
                             key={opt.key}
                             type="button"
                             onClick={async () => {
-                              if (!selectedUser) return;
+                              if (!selectedUser || !isAdmin) return;
                               const next = !enabled;
                               const previous = selectedUser;
                               setSelectedUser({ ...selectedUser, [opt.key]: next });
@@ -870,7 +758,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                                 .eq("user_id", selectedUser.user_id);
                                if (error) { setSelectedUser(previous); toast.error("Erro ao atualizar método"); return; }
                               toast.success(`${opt.label} ${next ? "ativado" : "desativado"}`);
-                               onReload();
+                               reloadSeller();
                             }}
                             className={cn(
                               "flex items-center justify-between rounded-lg border px-3 py-2.5 transition-colors",
@@ -886,7 +774,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                             )}>
                               {enabled ? "Ativo" : "Bloqueado"}
                             </span>
-                          </button>
+                          </Button>
                         );
                       })}
                     </div>
@@ -961,7 +849,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                         <Label className="text-[10px] text-muted-foreground">Liberação Cartão</Label>
                         <Select value={retentionForm.card_release_days} onValueChange={v => setRetentionForm(p => ({ ...p, card_release_days: v }))}>
                           <SelectTrigger className="mt-1 h-9 text-xs rounded-xl bg-muted/30 border-border"><SelectValue /></SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="z-[130]">
                             <SelectItem value="1">D+1</SelectItem>
                             <SelectItem value="7">D+7 (padrão)</SelectItem>
                             <SelectItem value="15">D+15</SelectItem>
@@ -1057,7 +945,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       </Button>
                     ) : null}
                   >
-                    {!revealedPixKeys || revealedPixKeys.length === 0 ? (
+                    {!piiRevealed ? <p className="text-sm text-muted-foreground">Chaves protegidas. Revele os dados para consultar.</p> : !revealedPixKeys || revealedPixKeys.length === 0 ? (
                       <PremiumEmpty icon={Key} title="Nenhuma chave PIX cadastrada" />
                     ) : (
                       <div className="space-y-3">
@@ -1110,21 +998,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       </div>
                     </PremiumPanel>
                   )}
-                  <PremiumPanel title={`Histórico de Saques (${userWithdrawals.length})`} icon={ArrowDownToLine}>
-                    <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                      {userWithdrawals.map(w => (
-                        <div key={w.id} className="flex items-center justify-between text-[11px] py-2 border-b border-border/50">
-                          <div className="flex items-center gap-3">
-                            <StatusBadge status={w.status} />
-                            <span className="font-bold text-foreground">R$ {Number(w.amount).toFixed(2)}</span>
-                            <span className="text-muted-foreground">Taxa: R$ {Number(w.fee_amount).toFixed(2)}</span>
-                          </div>
-                          <span className="text-muted-foreground">{new Date(w.created_at).toLocaleString("pt-BR")}</span>
-                        </div>
-                      ))}
-                      {userWithdrawals.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">Sem saques</p>}
-                    </div>
-                  </PremiumPanel>
+                  {selectedUser && <SellerWithdrawalsSection userId={selectedUser.user_id} onChanged={reloadSeller} />}
                 </TabsContent>
 
                 {/* ── Compliance ── */}

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { useSellersPage } from "./useSellersPage";
 import { initialSellerFilters, type SellerFilters } from "./sellersModel";
 
-export interface SellersDirectoryProps { range: { from: Date; to: Date }; onOpen: (userId: string) => void; money: (value: number) => string; enabled: boolean; refreshKey: unknown }
+export interface SellersDirectoryProps { range: { from: Date; to: Date }; onOpen: (userId: string) => void; money: (value: number) => string; enabled: boolean }
 const STATES = [["all", "Todas as contas"], ["kyc", "KYC pendente"], ["approved", "Aprovadas"], ["frozen", "Saldo congelado"], ["blocked", "Bloqueadas"], ["rejected", "KYC recusado"], ["white", "White"], ["black", "Black"], ["unset", "Sem classificação"]];
 const RISKS = [["all", "Todos os riscos"], ["med", "Com MED PIX"], ["chargeback", "Com chargeback"], ["refund", "Com reembolso"], ["any", "Com ocorrências"]];
 const SORTS = [["volume", "Maior volume"], ["sales", "Mais vendas"], ["med", "Mais MED PIX"], ["chargeback", "Mais chargebacks"], ["refund", "Mais reembolsos"], ["newest", "Cadastros recentes"]];
@@ -22,7 +22,7 @@ export function SellersDirectory({ range, onOpen, money, enabled }: SellersDirec
   const query = useSellersPage(range, filters, enabled);
   const change = (next: Partial<SellerFilters>) => setFilters(previous => ({ ...previous, ...next, page: 0 }));
   const summary = query.data?.summary;
-  const pages = Math.max(1, Math.ceil((query.data?.total ?? 0) / 25));
+  const pages = Math.max(1, Math.ceil((query.data?.total ?? 0) / (query.data?.page_size ?? 25)));
   return <section className="space-y-5" aria-label="Gestão de sellers">
     <header className="flex items-start justify-between gap-4 border-b border-border pb-5">
       <div><div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground"><Users className="h-4 w-4" />Operação / Sellers</div><h1 className="font-display text-2xl font-semibold">Sellers</h1></div>

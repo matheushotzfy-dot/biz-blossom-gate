@@ -39,7 +39,7 @@ export function ReauthenticationDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="z-[150] max-w-sm">
         <DialogHeader>
           <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
             <LockKeyhole className="h-4 w-4" />
