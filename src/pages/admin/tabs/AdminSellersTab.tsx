@@ -48,6 +48,11 @@ type IpLog = { ip: string; user_agent: string | null; country: string | null; so
 // Falls back to null when the payload doesn't match the expected shape,
 // preventing fragile reads of missing fields.
 const jsonRecordSchema = z.record(z.unknown()).nullable();
+function displayLogValue(key: string, value: unknown): string {
+  if (/cpf|cnpj|document|pix|bank|account_number|password|secret|token|api_key/i.test(key)) return "••••";
+  if (value !== null && typeof value === "object") return "[dados estruturados]";
+  return String(value ?? "—");
+}
 const activityLogSchema = z.object({
   id: z.string(),
   user_id: z.string(),
@@ -1209,20 +1214,20 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                               </div>
                               {log.old_data && log.action.includes("deleted") && (
                                 <div className="mt-2 rounded-lg bg-destructive/5 border border-destructive/10 p-2 text-[10px]">
-                                  {Object.entries(log.old_data).map(([k, v]) => (<div key={k}><span className="text-muted-foreground">{k}:</span> <span className="text-foreground">{String(v)}</span></div>))}
+                                  {Object.entries(log.old_data).map(([k, v]) => (<div key={k}><span className="text-muted-foreground">{k}:</span> <span className="text-foreground">{displayLogValue(k, v)}</span></div>))}
                                 </div>
                               )}
                               {log.old_data && log.new_data && log.action.includes("updated") && (
                                 <div className="mt-2 rounded-lg bg-info/5 border border-info/10 p-2 text-[10px] space-y-0.5">
                                   {Object.keys(log.new_data).map(k => {
                                     if (log.old_data?.[k] === log.new_data?.[k]) return null;
-                                    return (<div key={k}><span className="text-muted-foreground">{k}:</span> <span className="line-through text-destructive/50">{String(log.old_data?.[k] ?? "—")}</span> → <span className="text-primary">{String(log.new_data?.[k] ?? "—")}</span></div>);
+                                    return (<div key={k}><span className="text-muted-foreground">{k}:</span> <span className="line-through text-destructive/50">{displayLogValue(k, log.old_data?.[k])}</span> → <span className="text-primary">{displayLogValue(k, log.new_data?.[k])}</span></div>);
                                   })}
                                 </div>
                               )}
                               {log.new_data && log.action.includes("created") && (
                                 <div className="mt-2 rounded-lg bg-primary/5 border border-primary/10 p-2 text-[10px]">
-                                  {Object.entries(log.new_data).map(([k, v]) => (<div key={k}><span className="text-muted-foreground">{k}:</span> <span className="text-foreground">{String(v)}</span></div>))}
+                                  {Object.entries(log.new_data).map(([k, v]) => (<div key={k}><span className="text-muted-foreground">{k}:</span> <span className="text-foreground">{displayLogValue(k, v)}</span></div>))}
                                 </div>
                               )}
                             </div>
