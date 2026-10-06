@@ -62,7 +62,7 @@ export function TopBar({ onLogin, onSignup }: TopBarProps) {
           {LINKS.map((link) => (
             <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>{link.label}</a>
           ))}
-          <button type="button" onClick={onLogin}>Entrar</button>
+          <Button type="button" variant="ghost" onClick={onLogin} className="justify-start px-0">Entrar</Button>
         </nav>
       )}
     </header>

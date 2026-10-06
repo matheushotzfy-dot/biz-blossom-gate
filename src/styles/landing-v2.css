@@ -70,6 +70,7 @@ html.vx-scroll body { overflow: visible !important; }
 
 /* Live ledger */
 .vx-ledger { padding-block: 34px 46px; background: hsl(var(--foreground)); color: hsl(var(--background)); }
+.vx-ledger h2 { max-width: 760px; padding: 40px 0 58px; font-size: clamp(42px, 6.5vw, 88px); line-height: .96; font-weight: 700; }
 .vx-ledger-head { display: flex; justify-content: space-between; gap: 20px; padding-bottom: 20px; font: 600 9px/1 "JetBrains Mono", monospace; letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--background) / .55); }
 .vx-ledger-head p:first-child { display: flex; align-items: center; gap: 8px; color: hsl(var(--background)); }
 .vx-ledger-head span { width: 6px; height: 6px; border-radius: 999px; background: hsl(var(--primary)); animation: vx-pulse 1.6s ease-in-out infinite; }

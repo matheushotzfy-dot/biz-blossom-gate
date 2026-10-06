@@ -14,6 +14,7 @@ export function ApprovalStrip() {
   return (
     <section className="vx-ledger" aria-label="Pulso de vendas ilustrativo">
       <div className="vx-shell">
+        <h2>Sua operação, em uma visão.</h2>
         <div className="vx-ledger-head">
           <p><span /> operação em movimento</p>
           <p>atualização contínua / dados ilustrativos</p>
