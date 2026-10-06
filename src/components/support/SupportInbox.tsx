@@ -1,4 +1,4 @@
-import { Inbox, Plus, Search, CircleHelp, Loader2 } from 'lucide-react';
+import { Inbox, Search, CircleHelp, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { STATUS_MAP, formatTime, type SupportTicket, type SupportFilter } from './supportModel';
