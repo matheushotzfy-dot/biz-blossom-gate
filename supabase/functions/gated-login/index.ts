@@ -186,13 +186,17 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Registros pós-login (auditoria/IP) rodam em segundo plano para não
+    // atrasar a entrada do usuário; falhas são apenas registradas.
+    const userId = authData.user.id;
+    const bookkeeping = (async () => {
     await adminClient.from("admin_login_attempts").insert({
       email: trimmedEmail, success: true, scope,
     });
     await logSecurityEvent({
       supabaseUrl, serviceKey: serviceRoleKey, req,
       event_type: "login_success", endpoint: "gated-login",
-      user_id: authData.user.id, actor_role: scope, status_code: 200,
+      user_id: userId, actor_role: scope, status_code: 200,
     });
 
     // ===== Capture IP for audit / anti-fraud (server-side, always) =====
@@ -203,23 +207,27 @@ Deno.serve(async (req) => {
         || "0.0.0.0";
       const country = req.headers.get("cf-ipcountry") || null;
       const ua = req.headers.get("user-agent") || null;
-      await adminClient.from("profiles").update({ last_ip: ip } as any).eq("user_id", authData.user.id);
+      await adminClient.from("profiles").update({ last_ip: ip } as any).eq("user_id", userId);
       const { data: last } = await adminClient
         .from("ip_logs")
         .select("ip")
-        .eq("user_id", authData.user.id)
+        .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
       if (!last || last.ip !== ip) {
         await adminClient.from("ip_logs").insert({
-          user_id: authData.user.id, ip, user_agent: ua, country, source: `login:${scope}`,
+          user_id: userId, ip, user_agent: ua, country, source: `login:${scope}`,
         });
       }
     } catch (e) {
       console.warn("[gated-login] ip capture failed:", (e as Error)?.message);
     }
 
+    })().catch((e) => console.warn("[gated-login] bookkeeping failed:", (e as Error)?.message));
+    // deno-lint-ignore no-explicit-any
+    const rt = (globalThis as any).EdgeRuntime;
+    if (rt?.waitUntil) rt.waitUntil(bookkeeping); else await bookkeeping;
 
     return new Response(
       JSON.stringify({
