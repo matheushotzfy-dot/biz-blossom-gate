@@ -15,7 +15,7 @@ export function Hero({ onSignup }: HeroProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end start"] });
   const tiltX = useTransform(scrollYProgress, [0, 0.6], [22, 0]);
-  const lift = useTransform(scrollYProgress, [0, 1], [0, -120]);
+  const lift = useTransform(scrollYProgress, [0, 1], [0, -40]);
   const fade = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
 
   const mx = useMotionValue(0);
