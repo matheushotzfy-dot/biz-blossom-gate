@@ -74,7 +74,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
       supabase.from("staff_commission_config").select("user_id, base_pct").in("user_id", ids),
       supabase.from("staff_permissions").select("user_id, permission_key").in("user_id", ids),
       isManager
-        ? supabase.from("manager_seller_assignments").select("manager_user_id").in("manager_user_id", ids)
+        ? supabase.from("manager_seller_assignments").select("manager_user_id").in("manager_user_id", ids).is("ended_at", null)
         : Promise.resolve({ data: [] as { manager_user_id: string }[] }),
       supabase.from("staff_fee_limits").select("*").in("user_id", ids),
     ]);
@@ -223,7 +223,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
         )}
       </PremiumMetricGrid>
 
-      <StaffAssignment staff={rows} sellers={profiles} />
+      {isManager && <StaffAssignment staff={rows} sellers={profiles} />}
       {/* Toolbar unificada */}
       <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-1 flex-wrap items-center gap-3">

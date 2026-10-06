@@ -52,7 +52,7 @@ export default function ManagerLogin() {
 
  if (sessionError) throw sessionError;
 
- toast.success("Bem-vindo ao painel de gerente!");
+ toast.success("Acesso à equipe confirmado.");
  navigate("/gerentes/dashboard");
  } catch {
  setError("Credenciais inválidas ou acesso não autorizado.");
@@ -87,7 +87,7 @@ export default function ManagerLogin() {
  </div>
  </motion.div>
 
- <h1 className="text-[28px] font-bold text-foreground tracking-tight">Painel Gerente</h1>
+ <h1 className="text-[28px] font-bold text-foreground tracking-tight">Painel da Equipe</h1>
  <p className="text-[13px] text-muted-foreground mt-1.5 font-medium tracking-wide">Gestão de Contas · VENXPAY</p>
  </div>
 
@@ -113,7 +113,7 @@ export default function ManagerLogin() {
  type="email"
  required
  className="mt-2.5 bg-background border-border h-[52px] text-foreground placeholder:text-muted-foreground rounded-2xl text-[14px] focus:border-primary/40 focus:ring-primary/10 transition-all"
- placeholder="gerente@empresa.com"
+ placeholder="equipe@empresa.com"
  />
  </div>
  <div>
