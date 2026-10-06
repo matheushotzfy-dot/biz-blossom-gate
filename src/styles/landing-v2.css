@@ -58,6 +58,7 @@ html.vx-scroll body { overflow: visible !important; }
 .vx-hero-rail { position: absolute; inset: 72px 0 auto; display: flex; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid hsl(var(--border)); font: 600 9px/1 "JetBrains Mono", monospace; letter-spacing: .16em; color: hsl(var(--muted-foreground)); }
 .vx-opening-inner { position: relative; min-height: calc(100svh - 72px); display: flex; flex-direction: column; padding-top: 76px; }
 .vx-opening-brand { display: flex; align-items: center; gap: 12px; font: 800 13px/1 "Sora", sans-serif; }
+.vx-opening-brand h1 { font: inherit; }
 .vx-opening-title { margin: auto 0 40px; font-size: clamp(64px, 10.5vw, 154px); font-weight: 750; line-height: .81; }
 .vx-opening-title span { padding-left: 12vw; }
 .vx-opening-title em { color: hsl(var(--primary)); font-style: normal; }

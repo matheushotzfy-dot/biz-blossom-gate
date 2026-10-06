@@ -29,10 +29,11 @@ export function Opening({ onSignup, onLogin }: OpeningProps) {
           className="vx-opening-brand"
         >
           <VenxpayLogo size={34} plate={false} animated={false} />
-          <span>VENXPAY</span>
+          <h1>VENXPAY</h1>
         </motion.div>
 
         <CutLines
+          as="h2"
           className="vx-opening-title"
           lines={[<>CONTROLE</>, <><span>PARA QUEM</span></>, <><em>VENDE.</em></>]}
         />
