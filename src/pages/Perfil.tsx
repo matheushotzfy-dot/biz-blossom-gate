@@ -424,6 +424,9 @@ export default function Perfil() {
                 disabled={!!profile?.phone}
               />
             </div>
+            {profile?.full_name && profile?.email && profile?.phone ? (
+              <p className="text-xs text-muted-foreground">Dados verificados. Para alterá-los, fale com o suporte.</p>
+            ) : (
             <Button
               type="submit"
               className="w-full h-10 rounded-lg text-sm font-bold"
@@ -431,6 +434,7 @@ export default function Perfil() {
             >
               {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Salvando...</> : "Salvar alterações"}
             </Button>
+            )}
           </form>
         </Panel>
 
