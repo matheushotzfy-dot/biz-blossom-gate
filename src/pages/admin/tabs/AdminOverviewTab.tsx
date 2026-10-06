@@ -22,6 +22,7 @@ import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import {
   PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumSegmented, premiumTable,
 } from "./AdminPremium";
+import { AdminOverviewMetrics } from "@/features/admin-finance/AdminOverviewMetrics";
 import { AdminAlertsBanner } from "@/components/admin/AdminAlertsBanner";
 
 interface Dispute {
@@ -253,7 +254,7 @@ export default function AdminOverviewTab({
   const last30Tx = useMemo(() => approved.filter(t => new Date(t.created_at) >= last30Start), [approved, last30Start]);
   const profit30d = last30Tx.reduce((a, t) => a + Number(t.fee_amount), 0);
 
-  const pendingMeds = useMemo(() => disputes.filter(d => d.status === "open" || d.status === "in_review"), [disputes]);
+  const pendingMeds = useMemo(() => disputes.filter(d => ["medpix", "pre_med_pix"].includes(d.type) && ["open", "in_review"].includes(d.status)), [disputes]);
   const pendingMedsAmount = pendingMeds.reduce((a, d) => a + Number(d.amount), 0);
 
   const methodApproval = useMemo(() => {
@@ -362,7 +363,7 @@ export default function AdminOverviewTab({
         eyebrow="Admin · Command Center"
         title="Visão Geral"
         subtitle={`Operação em tempo real · ${rangeLabel}`}
-        status={{ tone: chargebackAlert ? "destructive" : "success", label: chargebackAlert ? "Alerta de risco" : "Tudo sob controle", pulse: true }}
+        status={{ tone: "info", label: "Dados reais", pulse: false }}
       />
 
       {/* ── Alertas críticos abertos ── */}
@@ -370,166 +371,7 @@ export default function AdminOverviewTab({
 
 
 
-      {/* ── Hero KPI strip · 1px divider grid ── */}
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60 lg:grid-cols-6">
-        <HeroBigStat label="Volume no período" value={fmtCurrency(totalVolume)} sub={`${summaryApprovedCount.toLocaleString("pt-BR")}/${summaryTotalCount.toLocaleString("pt-BR")} tx`} tone="primary" wide />
-        <HeroBigStat label="Lucro líquido" value={fmtCurrency(takeRateTotal)} sub={`Take ${takeRatePct}%`} tone="success" />
-        <HeroBigStat label="Ticket médio" value={fmtCurrency(ticketMedio)} sub="por venda" tone="info" />
-        <HeroBigStat label="Conversão" value={`${conversionRate}%`} sub="aprovação geral" tone="warning" />
-        <HeroBigStat label="Chargeback" value={`${chargebackRate.toFixed(2)}%`} sub="meta < 1%" tone={chargebackAlert ? "destructive" : "neutral"} />
-      </div>
-
-      {/* ── Pulse chart ── */}
-      <PremiumPanel
-        title="Pulso de Volume"
-        eyebrow={chartPeriod === "7d" ? "Últimos 7 dias" : "Últimos 30 dias"}
-        icon={Activity}
-        action={
-          <PremiumSegmented<"7d" | "30d">
-            value={chartPeriod}
-            onChange={setChartPeriod}
-            options={[{ value: "7d", label: "7d" }, { value: "30d", label: "30d" }]}
-          />
-        }
-      >
-        <div className="h-[180px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>
-              <defs>
-                <linearGradient id="heroSpark" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" vertical={false} />
-              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false}
-                     tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
-              <Tooltip cursor={{ stroke: "hsl(var(--border))" }} content={<ChartTip fmtCurrency={fmtCurrency} />} />
-              <Area type="monotone" dataKey="tpv" name="TPV" stroke="hsl(var(--primary))" strokeWidth={2.5}
-                    fill="url(#heroSpark)" dot={false} isAnimationActive={false} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </PremiumPanel>
-
-      {/* ── KPI Grid (clickable, with tactile hover) ── */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <DashboardKpi icon={Flame}        label="Movimentado Hoje"  value={fmtCurrency(tpvToday)}        sub={`${todayTx.length} vendas aprovadas`} tone={todayTx.length > 0 ? "success" : "neutral"} onClick={() => onNavigate?.("transactions")} />
-        <DashboardKpi icon={DollarSign}   label="Lucro Hoje"         value={fmtCurrency(takeRateToday)}   sub={`${activeSellersToday} sellers venderam`} tone="primary" onClick={() => onNavigate?.("transactions")} />
-        <DashboardKpi icon={Hourglass}    label="Saques Pendentes"   value={fmtCurrency(pendingWdAmount)} sub={`${pendingWd.length} solicitações · ${highValueWd.length} altos`} tone={pendingWd.length > 5 ? "warning" : "neutral"} onClick={() => onNavigate?.("withdrawals")} />
-        <DashboardKpi icon={UserPlus}     label="Novos Usuários"     value={String(newUsersInRange.length)} sub="cadastros no período" tone="info" onClick={() => onNavigate?.("sellers")} />
-        <DashboardKpi icon={TrendingUp}   label="Lucro · 30 dias"    value={fmtCurrency(profit30d)}       sub={`${last30Tx.length} vendas · take ${takeRatePct}%`} tone="success" onClick={() => onNavigate?.("transactions")} />
-        <DashboardKpi icon={AlertCircle}  label="MEDs Pendentes"     value={String(pendingMeds.length)}   sub={pendingMeds.length > 0 ? `${fmtCurrency(pendingMedsAmount)} em disputa` : "Nenhum em aberto"} tone={pendingMeds.length > 0 ? "destructive" : "neutral"} onClick={() => onNavigate?.("medpix")} />
-        <DashboardKpi icon={UserCheck}    label="Aprovações KYC"     value={String(kycPending.length)}    sub="aguardando análise" tone={kycPending.length > 0 ? "warning" : "neutral"} onClick={() => onNavigate?.("sellers")} />
-        <DashboardKpi icon={Lock}         label="Saldo Retido"       value={fmtCurrency(totalRetained)}   sub="aguardando liberação" tone="warning" onClick={() => onNavigate?.("transactions")} />
-      </div>
-
-      {/* ── Hourly + Methods ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        <div className="xl:col-span-2">
-          <PremiumPanel title="Movimento por horário" eyebrow={rangeLabel} icon={Clock3}>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={hourlyData} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" vertical={false} />
-                <XAxis dataKey="hour" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} interval={1} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false}
-                       tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
-                <Tooltip cursor={{ fill: "hsl(var(--muted) / 0.3)" }} content={<ChartTip fmtCurrency={fmtCurrency} />} />
-                <Bar dataKey="tpv" name="TPV" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} isAnimationActive={false} />
-                <Bar dataKey="lucro" name="Lucro" fill="hsl(var(--success))" radius={[6, 6, 0, 0]} isAnimationActive={false} />
-              </BarChart>
-            </ResponsiveContainer>
-          </PremiumPanel>
-        </div>
-
-        <PremiumPanel title="Métodos de Pagamento" icon={CreditCard}>
-          <div className="space-y-4">
-            {methodApproval.sort((a, b) => b.volume - a.volume).map(m => {
-              const tone: Tone = m.rate >= 85 ? "success" : m.rate >= 60 ? "warning" : "destructive";
-              return (
-                <div key={m.method}>
-                  <div className="mb-1.5 flex items-center justify-between text-xs">
-                    <span className="font-black text-foreground">{m.method}</span>
-                    <span className={cn("font-black tabular-nums", TONE_TEXT[tone])}>{m.rate.toFixed(1)}%</span>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-muted/40">
-                    <div className={cn("h-full rounded-full transition-all duration-500", TONE_BAR[tone])}
-                         style={{ width: `${Math.max(m.rate, 2)}%` }} />
-                  </div>
-                  <div className="mt-1.5 flex justify-between text-[10px] font-bold text-muted-foreground tabular-nums">
-                    <span>{fmtCurrency(m.volume)}</span>
-                    <span>{m.approved}/{m.total} tx</span>
-                  </div>
-                </div>
-              );
-            })}
-            {methodApproval.length === 0 && (
-              <p className="py-8 text-center text-xs font-bold text-muted-foreground">Sem dados no período</p>
-            )}
-          </div>
-        </PremiumPanel>
-      </div>
-
-      {/* ── Volume chart + Refund trend ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-        <PremiumPanel
-          title="Volume & Take Rate"
-          icon={TrendingUp}
-          action={
-            <PremiumSegmented<"7d" | "30d">
-              value={chartPeriod}
-              onChange={setChartPeriod}
-              options={[{ value: "7d", label: "7d" }, { value: "30d", label: "30d" }]}
-            />
-          }
-        >
-          <ResponsiveContainer width="100%" height={240}>
-            <AreaChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
-              <defs>
-                <linearGradient id="tpvArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.25} />
-                  <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" vertical={false} />
-              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false}
-                     tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} />
-              <Tooltip cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }} content={<ChartTip fmtCurrency={fmtCurrency} />} />
-              <Area type="monotone" dataKey="tpv" name="TPV" stroke="hsl(var(--success))" strokeWidth={2.5}
-                    fill="url(#tpvArea)" dot={false} isAnimationActive={false} />
-              <Area type="monotone" dataKey="takeRate" name="Take Rate" stroke="hsl(var(--warning))" fillOpacity={0}
-                    strokeWidth={1.75} strokeDasharray="4 2" dot={false} isAnimationActive={false} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </PremiumPanel>
-
-        <PremiumPanel title="Devoluções · 7 dias" icon={RotateCcw}>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={refundTrend} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" vertical={false} />
-              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} allowDecimals={false} />
-              <Tooltip cursor={{ stroke: "hsl(var(--border))" }} content={<ChartTip fmtCurrency={fmtCurrency} />} />
-              <Line type="monotone" dataKey="chargebacks" name="Chargebacks" stroke="hsl(var(--destructive))"
-                    strokeWidth={2.5} dot={{ r: 3, fill: "hsl(var(--destructive))" }} isAnimationActive={false} />
-              <Line type="monotone" dataKey="refunds" name="Reembolsos" stroke="hsl(var(--warning))"
-                    strokeWidth={2.5} dot={{ r: 3, fill: "hsl(var(--warning))" }} isAnimationActive={false} />
-            </LineChart>
-          </ResponsiveContainer>
-          <div className="mt-3 flex items-center gap-5 border-t border-border/40 pt-3 text-[10.5px] font-bold">
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
-              <span className="text-muted-foreground">Chargebacks</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-warning" />
-              <span className="text-muted-foreground">Reembolsos</span>
-            </span>
-          </div>
-        </PremiumPanel>
-      </div>
+      <AdminOverviewMetrics dateRange={dateRange} refreshSignal={financialOverview} onNavigate={onNavigate} />
 
       {/* ── Live activity + Risk alerts ── */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
@@ -580,14 +422,6 @@ export default function AdminOverviewTab({
           </PremiumPanel>
         </div>
 
-        <PremiumPanel title="Alertas de Risco" icon={ShieldAlert}>
-          <div className="space-y-2.5">
-            <RiskRow label="Taxa de Chargeback" value={`${chargebackRate.toFixed(2)}%`} threshold="Meta < 1%" alert={chargebackAlert} />
-            <RiskRow label="Disputas Abertas" value={String(openDisputes)} threshold="Meta < 5" alert={openDisputes > 5} />
-            <RiskRow label="Saques Pendentes" value={fmtCurrency(pendingWdAmount)} threshold={`${pendingWd.length} na fila`} alert={pendingWd.length > 10} />
-            <RiskRow label="KYC Pendente" value={String(kycPending.length)} threshold="aguardando aprovação" alert={kycPending.length > 0} />
-          </div>
-        </PremiumPanel>
       </div>
 
       {/* ── KYC queue + Pending withdrawals ── */}
