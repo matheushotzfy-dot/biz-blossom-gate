@@ -1,5 +1,5 @@
 /**
- * LandingPage — página pública da VENXPAY (v2).
+ * LandingPage — página pública editorial da VENXPAY.
  *
  * Composição de cenas independentes, todas apresentacionais: nenhuma consulta a
  * banco, nenhuma regra de negócio. A navegação leva para /auth.
@@ -45,8 +45,8 @@ export default function LandingPage() {
   return (
     <div id="topo" className="vx-land relative min-h-dvh bg-background text-foreground">
       <Seo
-        title="VENXPAY — o dinheiro entra e não some no caminho"
-        description="Checkout, antifraude, split e liquidação no mesmo núcleo. Saque quando quiser, área de membros, afiliados e API para vender produtos digitais no Brasil."
+        title="VENXPAY — controle para quem vende"
+        description="Checkout, pagamentos, split e liquidação em uma infraestrutura financeira clara para operações digitais no Brasil."
         path="/"
         jsonLd={FAQ_JSONLD}
       />

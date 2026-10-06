@@ -1,42 +1,30 @@
-/**
- * Included — lista tipográfica densa em duas colunas, sem cards.
- */
+import { ArrowUpRight } from "lucide-react";
 import { Rise } from "./bits";
 
-const ITEMS: [string, string][] = [
-  ["Checkout personalizável", "Order bump, upsell, cupom, prova social e recuperação de Pix."],
-  ["Área de membros", "Módulos, aulas, progresso, comentários e certificado automático."],
-  ["Afiliados e coprodução", "Percentuais definidos uma vez, crédito automático na aprovação."],
-  ["API REST e webhooks", "Cobrança, consulta, reembolso e estorno com assinatura HMAC-SHA256."],
-  ["Antifraude e disputas", "Score por transação e acompanhamento assistido de MED e chargeback."],
-  ["Nota fiscal", "Emissão integrada para cada venda aprovada, sem trabalho manual."],
-  ["Saques quando quiser", "Pix a qualquer hora, sem janela fixa e sem valor mínimo escondido."],
-  ["Suporte humano", "Atendimento em português, por gente que conhece a operação."],
+const ITEMS = [
+  ["Checkout", "Personalização, ofertas e recuperação de pedidos."],
+  ["Membros", "Conteúdo, progresso, acesso e certificação."],
+  ["Afiliados", "Comissão e coprodução ligadas à aprovação."],
+  ["Integração", "API e webhooks para operações próprias."],
+  ["Proteção", "Antifraude, disputas e histórico operacional."],
+  ["Financeiro", "Saldo, extrato, recebíveis e saques."],
 ];
 
 export function Included() {
   return (
-    <section id="incluso" className="vx-cv relative py-28 sm:py-36">
-      <div className="mx-auto max-w-[1280px] px-5">
-        <span className="vx-mono">o que já vem ligado</span>
-        <h2 className="mt-5 max-w-[20ch] text-[38px] font-extrabold text-foreground sm:text-[58px]">
-          Nada disso é módulo pago à parte
-        </h2>
-
-        <div className="mt-14 grid gap-x-14 border-t border-border md:grid-cols-2">
-          {ITEMS.map(([title, copy], i) => (
-            <Rise key={title} delay={(i % 2) * 0.05}>
-              <div className="group border-b border-border py-7 transition-colors duration-300 hover:border-primary/50">
-                <div className="flex items-baseline gap-4">
-                  <span className="vx-mono w-7 shrink-0">{String(i + 1).padStart(2, "0")}</span>
-                  <div>
-                    <h3 className="text-[20px] font-bold text-foreground transition-colors duration-300 group-hover:text-primary sm:text-[24px]">
-                      {title}
-                    </h3>
-                    <p className="mt-2 max-w-[46ch] text-[13.5px] leading-[1.7] text-muted-foreground">{copy}</p>
-                  </div>
-                </div>
-              </div>
+    <section id="incluso" className="vx-section vx-included">
+      <div className="vx-shell">
+        <div className="vx-section-intro vx-section-intro-wide">
+          <span className="vx-kicker">04 / A ESTRUTURA</span>
+          <h2>O essencial já nasce conectado.</h2>
+        </div>
+        <div className="vx-capability-list">
+          {ITEMS.map(([title, copy], index) => (
+            <Rise key={title} delay={index * 0.04} className="vx-capability-row">
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <h3>{title}</h3>
+              <p>{copy}</p>
+              <ArrowUpRight />
             </Rise>
           ))}
         </div>
