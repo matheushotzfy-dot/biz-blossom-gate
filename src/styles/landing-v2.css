@@ -33,7 +33,7 @@ html.vx-scroll body { overflow: visible !important; }
 .vx-land h1, .vx-land h2, .vx-land h3 { font-family: "Sora", system-ui, sans-serif; letter-spacing: 0; text-wrap: balance; }
 .vx-land section { scroll-margin-top: 80px; }
 .vx-shell { width: min(100% - 40px, 1280px); margin-inline: auto; }
-.vx-line-clip { display: block; overflow: hidden; }
+.vx-line-clip { display: block; overflow: hidden; padding-bottom: .08em; margin-bottom: -.08em; }
 .vx-kicker { display: block; font: 700 10px/1 "JetBrains Mono", monospace; letter-spacing: .18em; color: hsl(var(--primary)); text-transform: uppercase; }
 .vx-num { font-family: "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; }
 .vx-mono { font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
@@ -218,6 +218,9 @@ html.vx-scroll body { overflow: visible !important; }
   .vx-signal-line a { display: none; }
   .vx-ledger-head p:last-child { display: none; }
   .vx-ledger-track { grid-template-columns: repeat(4, minmax(240px, 1fr)); overflow-x: auto; }
+  .vx-scroll-hint { scrollbar-color: hsl(var(--primary)) transparent; scrollbar-width: thin; }
+  .vx-scroll-hint::after { content: "deslize →"; position: sticky; right: 10px; align-self: start; padding: 5px 7px; background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); font: 600 8px/1 "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; pointer-events: none; }
+  .vx-flow-map.vx-scroll-hint::after { top: 10px; }
   .vx-section-intro, .vx-section-intro-wide { grid-template-columns: 1fr; gap: 28px; margin-bottom: 58px; }
   .vx-section-intro h2 { font-size: 43px; }
   .vx-flow-map { margin-right: -16px; }

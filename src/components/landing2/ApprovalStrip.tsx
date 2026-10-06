@@ -19,7 +19,7 @@ export function ApprovalStrip() {
           <p><span /> operação em movimento</p>
           <p>atualização contínua / dados ilustrativos</p>
         </div>
-        <div className="vx-ledger-track">
+        <div className="vx-scroll-hint vx-ledger-track">
           {SALES.map(({ id, time, method, value, status }, index) => (
             <motion.div
               key={id}

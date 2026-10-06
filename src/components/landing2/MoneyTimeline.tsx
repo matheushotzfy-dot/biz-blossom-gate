@@ -22,7 +22,7 @@ export function MoneyTimeline() {
           <p>Cada etapa deixa um sinal. Cada sinal pode ser acompanhado.</p>
         </div>
 
-        <div className="vx-flow-map">
+        <div className="vx-scroll-hint vx-flow-map">
           <motion.div
             className="vx-flow-progress"
             initial={reduce ? false : { scaleX: 0 }}

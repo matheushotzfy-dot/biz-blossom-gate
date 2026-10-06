@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ export interface TopBarProps {
 export function TopBar({ onLogin, onSignup }: TopBarProps) {
   const [compact, setCompact] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const onScroll = () => setCompact(window.scrollY > 20);
@@ -26,6 +28,32 @@ export function TopBar({ onLogin, onSignup }: TopBarProps) {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const menu = menuRef.current;
+    const focusable = menu?.querySelectorAll<HTMLElement>("a, button");
+    focusable?.item(0).focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+        return;
+      }
+      if (event.key !== "Tab" || !focusable?.length) return;
+      const first = focusable.item(0);
+      const last = focusable.item(focusable.length - 1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
 
   return (
     <header className={cn("vx-nav", compact && "vx-nav-compact")}>
@@ -45,6 +73,7 @@ export function TopBar({ onLogin, onSignup }: TopBarProps) {
           <Button variant="ghost" onClick={onLogin} className="hidden sm:inline-flex">Entrar</Button>
           <Button onClick={onSignup}>Criar conta</Button>
           <Button
+            ref={menuButtonRef}
             variant="outline"
             size="icon"
             className="lg:hidden"
@@ -58,7 +87,7 @@ export function TopBar({ onLogin, onSignup }: TopBarProps) {
       </div>
 
       {menuOpen && (
-        <nav className="vx-mobile-nav" aria-label="Navegação móvel">
+        <nav ref={menuRef} className="vx-mobile-nav" aria-label="Navegação móvel">
           {LINKS.map((link) => (
             <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>{link.label}</a>
           ))}

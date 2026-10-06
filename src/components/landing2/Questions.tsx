@@ -29,6 +29,7 @@ export function Questions() {
                   type="button"
                   variant="ghost"
                   aria-expanded={isOpen}
+                  aria-controls={`vx-faq-answer-${itemIndex}`}
                   onClick={() => setOpen(isOpen ? null : itemIndex)}
                   className="vx-faq-trigger"
                 >
@@ -37,6 +38,9 @@ export function Questions() {
                 <AnimatePresence initial={false}>
                   {isOpen && (
                     <motion.div
+                      id={`vx-faq-answer-${itemIndex}`}
+                      role="region"
+                      aria-label={item.q}
                       initial={reduce ? false : { height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={reduce ? undefined : { height: 0, opacity: 0 }}
