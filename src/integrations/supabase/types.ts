@@ -5735,6 +5735,19 @@ export type Database = {
         Args: { _product_id: string }
         Returns: string
       }
+      get_app_integration_for_dispatch: {
+        Args: { _integration_id: string }
+        Returns: {
+          api_key: string
+          api_url: string
+          app_name: string
+          config: Json
+          id: string
+          is_active: boolean
+          user_id: string
+          webhook_url: string
+        }[]
+      }
       get_auth_abuse_stats: { Args: { _hours?: number }; Returns: Json }
       get_card_release_days: { Args: { _user_id: string }; Returns: number }
       get_checkout_status: {
