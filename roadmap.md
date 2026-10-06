@@ -1,4 +1,5 @@
 # Admin total — controle manual, métricas, adquirentes e ficha do seller
+- [ ] Top Sellers: revisar dados reais, ranking paginado, busca/exportação e filtros por dia/período; validar falhas e navegação sem movimentações financeiras.
 - [x] Sellers: lista paginada com ranking e filtros por período/vendas/MED/chargeback/reembolsos, ficha estável e navegação nas onze opções verificadas; opções da reserva visíveis, confirmação financeira e recuperação de falha testadas, sem movimentar dinheiro. 18 testes aprovados e sem erros de navegação; operações reais e históricos com vendas dependem de autorização/dados.
 - [x] Analytics: agregados por período, atividade diária de sellers/clientes/cadastros, riscos, pendências atuais e lista paginada por seller; busca, ordenação, filtro de vendas, ficha, período de um ano e recuperação de falha verificados. 60 testes aprovados; sem vendas reais para validação financeira de ponta a ponta.
 
