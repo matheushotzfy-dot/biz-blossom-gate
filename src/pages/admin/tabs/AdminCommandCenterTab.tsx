@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Activity, AlertTriangle, ArrowDownToLine, ArrowRight, Bug, CheckCircle2,
   Clock, CreditCard, Gauge, LifeBuoy, RefreshCw, Search, ShieldAlert, ShieldCheck,
@@ -7,27 +7,20 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import type { Tables } from "@/integrations/supabase/types";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useCommandCenter } from "@/features/admin-finance/useCommandCenter";
+import { validateCommandSearch } from "@/features/admin-finance/commandCenterModel";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 
-/**
- * Centro de Comando — visão operacional única do admin.
- *
- * Agrega, em tempo quase real, as filas que exigem ação humana, a saúde da
- * infraestrutura de pagamento/webhooks e alertas de anomalia calculados a
- * partir das transações já carregadas pelo dashboard (sem round-trip extra).
- */
-
 interface Props {
-  transactions: Tables<"transactions">[];
-  profiles: Tables<"profiles">[];
-  withdrawals: Tables<"withdrawals">[];
+  dateRange: { from: Date; to: Date };
   fmtCurrency: (v: number) => string;
   onNavigate: (tabId: string) => void;
 }
 
 type QueueKey =
-  | "withdrawals" | "disputes" | "support" | "kyc" | "errors" | "webhooks";
+  | "withdrawals" | "disputes" | "support" | "kyc" | "errors" | "webhooks" | "refunds" | "chargebacks";
 
 interface QueueItem {
   key: QueueKey;
@@ -37,21 +30,6 @@ interface QueueItem {
   count: number;
   tab: string;
   tone: "neutral" | "warning" | "danger";
-}
-
-interface ErrorRow {
-  id: string;
-  error_type: string;
-  message: string;
-  created_at: string;
-}
-
-interface FraudRow {
-  id: string;
-  block_type: string;
-  block_reason: string;
-  matched_value: string | null;
-  created_at: string;
 }
 
 interface SearchHit {
@@ -96,87 +74,36 @@ const TONE_TEXT: Record<"neutral" | "warning" | "danger" | "success", string> = 
 };
 
 export default function AdminCommandCenterTab({
-  transactions, profiles, withdrawals, fmtCurrency, onNavigate,
+  dateRange, fmtCurrency, onNavigate,
 }: Props) {
-  const [loading, setLoading] = useState(true);
-  const [disputesOpen, setDisputesOpen] = useState(0);
-  const [ticketsOpen, setTicketsOpen] = useState(0);
-  const [errors, setErrors] = useState<ErrorRow[]>([]);
-  const [fraud, setFraud] = useState<FraudRow[]>([]);
-  const [webhookStats, setWebhookStats] = useState({ delivered: 0, failed: 0, pending: 0 });
+  const command = useCommandCenter(dateRange);
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<SearchHit[] | null>(null);
   const [searching, setSearching] = useState(false);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const [dRes, tRes, eRes, fRes, wRes] = await Promise.all([
-        supabase.from("disputes").select("id", { count: "exact", head: true }).eq("status", "open"),
-        supabase.from("support_tickets").select("id", { count: "exact", head: true }).neq("status", "closed"),
-        supabase.from("error_logs").select("id, error_type, message, created_at")
-          .eq("resolved", false).order("created_at", { ascending: false }).limit(6),
-        supabase.from("fraud_logs").select("id, block_type, block_reason, matched_value, created_at")
-          .order("created_at", { ascending: false }).limit(6),
-        supabase.from("webhook_deliveries").select("status").gte("created_at", since).limit(2000),
-      ]);
-
-      setDisputesOpen(dRes.count ?? 0);
-      setTicketsOpen(tRes.count ?? 0);
-      setErrors((eRes.data ?? []) as ErrorRow[]);
-      setFraud((fRes.data ?? []) as FraudRow[]);
-
-      const rows = (wRes.data ?? []) as { status: string }[];
-      setWebhookStats({
-        delivered: rows.filter(r => r.status === "delivered").length,
-        failed: rows.filter(r => r.status === "failed").length,
-        pending: rows.filter(r => r.status === "pending" || r.status === "retrying").length,
-      });
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "desconhecido";
-      toast.error("Erro ao carregar centro de comando: " + msg);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { void load(); }, [load]);
-
-  /* ── Métricas derivadas (sem useEffect) ── */
-  const pendingWithdrawals = useMemo(
-    () => withdrawals.filter(w => w.status === "pending"),
-    [withdrawals],
-  );
-
-  const oldestWithdrawalHours = useMemo(() => {
-    if (pendingWithdrawals.length === 0) return 0;
-    const oldest = Math.min(...pendingWithdrawals.map(w => +new Date(w.created_at)));
-    return Math.max(0, (Date.now() - oldest) / 3_600_000);
-  }, [pendingWithdrawals]);
-
-  const pendingKyc = useMemo(
-    () => profiles.filter(p => p.account_status === "pending").length,
-    [profiles],
-  );
-
-  const stats = useMemo(() => {
-    const total = transactions.length;
-    const approved = transactions.filter(t => t.status === "approved");
-    const refunded = transactions.filter(t => t.status === "refunded").length;
-    const chargeback = transactions.filter(t => t.status === "chargeback").length;
-    const tpv = approved.reduce((s, t) => s + Number(t.amount || 0), 0);
-    return {
-      total,
-      approvedCount: approved.length,
-      approvalRate: total > 0 ? (approved.length / total) * 100 : 0,
-      refundRate: approved.length > 0 ? (refunded / approved.length) * 100 : 0,
-      chargebackRate: approved.length > 0 ? (chargeback / approved.length) * 100 : 0,
-      tpv,
-      ticket: approved.length > 0 ? tpv / approved.length : 0,
-      pendingVolume: pendingWithdrawals.reduce((s, w) => s + Number(w.amount || 0), 0),
-    };
-  }, [transactions, pendingWithdrawals]);
+  const searchRequest = useRef(0);
+  const errors = command.data?.operations.errors ?? [];
+  const fraud = command.data?.operations.fraud ?? [];
+  const webhookStats = command.data?.operations.webhooks ?? { delivered: 0, failed: 0, pending: 0 };
+  const appStats = command.data?.operations.apps ?? { delivered: 0, failed: 0, pending: 0 };
+  const operations = command.data?.operations;
+  const metrics = command.data?.metrics;
+  const errorCount = operations?.error_count ?? 0;
+  const oldestWithdrawalHours = operations?.withdrawals.oldest ? Math.max(0, (Date.now() - Date.parse(operations.withdrawals.oldest)) / 3600000) : 0;
+  const stats = {
+    total: metrics?.summary.attempts ?? 0,
+    approvedCount: metrics?.summary.sales ?? 0,
+    approvalRate: metrics?.summary.attempts ? metrics.summary.sales / metrics.summary.attempts * 100 : 0,
+    chargebackRate: metrics?.summary.attempts ? metrics.risk.chargebacks / metrics.summary.attempts * 100 : 0,
+    tpv: metrics?.summary.gross ?? 0,
+    ticket: metrics?.summary.sales ? metrics.summary.gross / metrics.summary.sales : 0,
+    pendingVolume: operations?.withdrawals.amount ?? 0,
+  };
+  const pendingWithdrawalCount = operations?.withdrawals.count ?? 0;
+  const pendingKyc = operations?.kyc ?? 0;
+  const disputesOpen = operations?.med ?? 0;
+  const ticketsOpen = operations?.support ?? 0;
+  const riskySellers = operations?.risky_sellers ?? [];
+  const loading = command.isFetching;
 
   const alerts = useMemo(() => {
     const list: { id: string; label: string; detail: string; tone: "warning" | "danger" }[] = [];
@@ -184,10 +111,7 @@ export default function AdminCommandCenterTab({
       list.push({ id: "approval", tone: "danger", label: "Conversão abaixo do esperado", detail: `${stats.approvalRate.toFixed(1)}% de aprovação no período` });
     }
     if (stats.chargebackRate > 1) {
-      list.push({ id: "cb", tone: "danger", label: "Chargeback acima de 1%", detail: `${stats.chargebackRate.toFixed(2)}% das vendas aprovadas` });
-    }
-    if (stats.refundRate > 5) {
-      list.push({ id: "refund", tone: "warning", label: "Reembolsos elevados", detail: `${stats.refundRate.toFixed(2)}% das vendas aprovadas` });
+      list.push({ id: "cb", tone: "danger", label: "Chargeback acima de 1%", detail: `${stats.chargebackRate.toFixed(2)}% das tentativas reais` });
     }
     if (oldestWithdrawalHours > 24) {
       list.push({ id: "wd", tone: "warning", label: "Saque parado há mais de 24h", detail: `Mais antigo: ${oldestWithdrawalHours.toFixed(0)}h na fila` });
@@ -195,82 +119,53 @@ export default function AdminCommandCenterTab({
     if (webhookStats.failed > 0) {
       list.push({ id: "wh", tone: "warning", label: "Webhooks falhando", detail: `${webhookStats.failed} entregas com falha nas últimas 24h` });
     }
-    if (errors.length >= 5) {
-      list.push({ id: "err", tone: "warning", label: "Erros não resolvidos acumulando", detail: `${errors.length}+ erros abertos no log` });
+    if (errorCount > 0) {
+      list.push({ id: "err", tone: "warning", label: "Erros não resolvidos acumulando", detail: `${errorCount} registros abertos; revisar a causa antes de encerrar` });
     }
+    if (appStats.failed > 0) list.push({ id: "apps", tone: "warning", label: "Integrações com falha", detail: `${appStats.failed} eventos não entregues nas últimas 24h` });
     return list;
-  }, [stats, oldestWithdrawalHours, webhookStats.failed, errors.length]);
+  }, [stats.total, stats.approvalRate, stats.chargebackRate, oldestWithdrawalHours, webhookStats.failed, appStats.failed, errorCount]);
 
   const queues: QueueItem[] = useMemo(() => [
-    { key: "withdrawals", label: "Saques pendentes", hint: fmtCurrency(stats.pendingVolume), icon: ArrowDownToLine, count: pendingWithdrawals.length, tab: "withdrawals", tone: pendingWithdrawals.length > 0 ? "warning" : "neutral" },
+    { key: "withdrawals", label: "Saques pendentes", hint: fmtCurrency(stats.pendingVolume), icon: ArrowDownToLine, count: pendingWithdrawalCount, tab: "withdrawals", tone: pendingWithdrawalCount > 0 ? "warning" : "neutral" },
     { key: "kyc", label: "Contas aguardando aprovação", hint: "Verificação de cadastro", icon: UserCheck, count: pendingKyc, tab: "sellers", tone: pendingKyc > 0 ? "warning" : "neutral" },
-    { key: "disputes", label: "Disputas abertas", hint: "Medpix / chargeback", icon: ShieldAlert, count: disputesOpen, tab: "medpix", tone: disputesOpen > 0 ? "danger" : "neutral" },
+    { key: "disputes", label: "MED PIX em análise", hint: "MED e pré-MED em aberto", icon: ShieldAlert, count: disputesOpen, tab: "medpix", tone: disputesOpen > 0 ? "danger" : "neutral" },
+    { key: "chargebacks", label: "Chargebacks abertos", hint: "Contestação de cartão", icon: CreditCard, count: operations?.chargebacks ?? 0, tab: "chargeback", tone: "warning" },
+    { key: "refunds", label: "Reembolsos para confirmar", hint: "Aprovação manual do dono", icon: ArrowDownToLine, count: operations?.refunds ?? 0, tab: "refund-approvals", tone: "warning" },
     { key: "support", label: "Tickets em aberto", hint: "Atendimento ao seller", icon: LifeBuoy, count: ticketsOpen, tab: "support", tone: ticketsOpen > 0 ? "warning" : "neutral" },
-    { key: "errors", label: "Erros não resolvidos", hint: "Log de aplicação", icon: Bug, count: errors.length, tab: "error-logs", tone: errors.length > 0 ? "warning" : "neutral" },
+    { key: "errors", label: "Erros não resolvidos", hint: "Log de aplicação", icon: Bug, count: errorCount, tab: "error-logs", tone: errorCount > 0 ? "warning" : "neutral" },
     { key: "webhooks", label: "Webhooks com falha (24h)", hint: "Entregas para sellers", icon: Webhook, count: webhookStats.failed, tab: "settings", tone: webhookStats.failed > 0 ? "danger" : "neutral" },
-  ], [pendingWithdrawals.length, stats.pendingVolume, pendingKyc, disputesOpen, ticketsOpen, errors.length, webhookStats.failed, fmtCurrency]);
-
-  const riskySellers = useMemo(() => {
-    const map = new Map<string, { name: string; approved: number; bad: number; volume: number }>();
-    transactions.forEach(t => {
-      const uid = t.user_id;
-      if (!uid) return;
-      const entry = map.get(uid) ?? {
-        name: profiles.find(p => p.user_id === uid)?.full_name || uid.slice(0, 8),
-        approved: 0, bad: 0, volume: 0,
-      };
-      if (t.status === "approved") { entry.approved += 1; entry.volume += Number(t.amount || 0); }
-      if (t.status === "refunded" || t.status === "chargeback") entry.bad += 1;
-      map.set(uid, entry);
-    });
-    return Array.from(map.values())
-      .filter(s => s.approved >= 5 && s.bad > 0)
-      .map(s => ({ ...s, rate: (s.bad / s.approved) * 100 }))
-      .sort((a, b) => b.rate - a.rate)
-      .slice(0, 5);
-  }, [transactions, profiles]);
+  ], [pendingWithdrawalCount, stats.pendingVolume, pendingKyc, disputesOpen, ticketsOpen, errorCount, webhookStats.failed, operations?.chargebacks, operations?.refunds, fmtCurrency]);
 
   const runSearch = async () => {
-    const q = query.trim();
-    if (q.length < 3) { toast.error("Digite ao menos 3 caracteres"); return; }
-    setSearching(true);
+    if (searching) return;
+    const request = ++searchRequest.current;
     try {
-      const isUuid = /^[0-9a-f-]{20,}$/i.test(q);
-      const filter = isUuid
-        ? `id.eq.${q}`
-        : `customer_email.ilike.%${q}%,customer_name.ilike.%${q}%,customer_document.ilike.%${q}%`;
-      const { data, error } = await supabase
-        .from("transactions")
-        .select("id, amount, status, customer_email, customer_name, created_at")
-        .or(filter)
-        .order("created_at", { ascending: false })
-        .limit(15);
+      const q = validateCommandSearch(query);
+      setSearching(true);
+      setHits(null);
+      const { data, error } = await supabase.rpc("admin_search_transactions", { _query: q });
       if (error) throw error;
-      setHits((data ?? []) as SearchHit[]);
+      if (request === searchRequest.current) setHits(data ?? []);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "desconhecido";
-      toast.error("Busca falhou: " + msg);
+      toast.error(e instanceof Error ? e.message : "Não foi possível buscar a transação");
     } finally {
-      setSearching(false);
+      if (request === searchRequest.current) setSearching(false);
     }
   };
 
-  const resolveError = async (id: string) => {
-    const { error } = await supabase.from("error_logs").update({ resolved: true }).eq("id", id);
-    if (error) { toast.error("Não foi possível resolver"); return; }
-    setErrors(prev => prev.filter(e => e.id !== id));
-    toast.success("Erro marcado como resolvido");
-  };
+  if (command.isPending) return <div role="status" aria-label="Carregando Centro de comando" className="space-y-4"><Skeleton className="h-28" /><Skeleton className="h-64" /></div>;
+  if (command.isError || !command.data) return <div role="alert" className="space-y-3 rounded-lg border border-destructive p-5"><h2 className="font-semibold text-destructive">Centro de comando indisponível</h2><p className="text-sm text-muted-foreground">Não foi possível verificar as filas. O estado da operação não foi confirmado.</p><Button variant="outline" disabled={loading} onClick={() => void command.refetch()}>Tentar novamente</Button></div>;
 
   return (
     <div className="space-y-5 animate-fade-in">
       <FinanceiroHero
         eyebrow="Admin · Operações"
         title="Centro de Comando"
-        subtitle="Filas pendentes, saúde da infraestrutura e alertas em uma única tela."
+        subtitle={`Período: ${dateRange.from.toLocaleDateString("pt-BR")} a ${dateRange.to.toLocaleDateString("pt-BR")} · Filas atuais · Atualizado ${new Date(command.data.operations.checked_at).toLocaleTimeString("pt-BR")}`}
         status={{
           tone: alerts.length > 0 ? "warning" : "success",
-          label: alerts.length > 0 ? `${alerts.length} alerta(s) ativo(s)` : "Tudo operacional",
+          label: alerts.length > 0 ? `${alerts.length} alerta(s) ativo(s)` : "Sem alertas nos dados consultados",
           pulse: alerts.length > 0,
         }}
       />
@@ -281,7 +176,7 @@ export default function AdminCommandCenterTab({
           { label: "TPV aprovado", value: fmtCurrency(stats.tpv), sub: `${stats.approvedCount} vendas` },
           { label: "Taxa de aprovação", value: `${stats.approvalRate.toFixed(1)}%`, sub: `${stats.total} tentativas` },
           { label: "Ticket médio", value: fmtCurrency(stats.ticket), sub: "por venda aprovada" },
-          { label: "Fila de saques", value: fmtCurrency(stats.pendingVolume), sub: `${pendingWithdrawals.length} pedidos` },
+          { label: "Fila de saques", value: fmtCurrency(stats.pendingVolume), sub: `${pendingWithdrawalCount} pedidos` },
         ].map(m => (
           <div key={m.label} className="bg-card px-4 py-3.5">
             <p className="text-[11.5px] text-muted-foreground">{m.label}</p>
@@ -296,9 +191,9 @@ export default function AdminCommandCenterTab({
         title="Alertas de anomalia"
         icon={AlertTriangle}
         action={
-          <button onClick={() => void load()} className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-[11.5px] font-medium text-muted-foreground hover:text-foreground">
+          <Button variant="outline" size="sm" disabled={loading} onClick={() => void command.refetch()} className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-[11.5px] font-medium text-muted-foreground hover:text-foreground">
             <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} /> Atualizar
-          </button>
+          </Button>
         }
       >
         {alerts.length === 0 ? (
@@ -324,10 +219,11 @@ export default function AdminCommandCenterTab({
       <Panel title="Filas que exigem ação" icon={Activity}>
         <div className="grid gap-px overflow-hidden rounded-[12px] border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
           {queues.map(q => (
-            <button
+            <Button
               key={q.key}
+              variant="ghost"
               onClick={() => onNavigate(q.tab)}
-              className="group flex items-center gap-3 bg-card px-4 py-3 text-left transition-colors hover:bg-muted/40"
+              className="group flex h-auto min-h-16 items-center justify-start gap-3 whitespace-normal rounded-none bg-card px-4 py-3 text-left transition-colors hover:bg-muted/40"
             >
               <q.icon className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={2} />
               <div className="min-w-0 flex-1">
@@ -338,7 +234,7 @@ export default function AdminCommandCenterTab({
                 {q.count}
               </span>
               <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-            </button>
+            </Button>
           ))}
         </div>
       </Panel>
@@ -374,11 +270,11 @@ export default function AdminCommandCenterTab({
 
         {/* Sellers em risco */}
         <Panel title="Sellers em risco" icon={ShieldCheck}
-          action={<button onClick={() => onNavigate("sellers")} className="text-[11.5px] font-medium text-muted-foreground hover:text-foreground">Ver sellers</button>}>
+          action={<Button onClick={() => onNavigate("sellers")} className="text-[11.5px] font-medium text-muted-foreground hover:text-foreground">Ver sellers</Button>}>
           {riskySellers.length === 0 ? <Empty label="Nenhum seller com reembolso/chargeback relevante." /> : (
             <ul className="divide-y divide-border">
               {riskySellers.map(s => (
-                <li key={s.name} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                <li key={s.user_id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[12.5px] font-medium text-foreground">{s.name}</p>
                     <p className="text-[11px] text-muted-foreground">{s.approved} aprovadas · {fmtCurrency(s.volume)}</p>
@@ -394,7 +290,7 @@ export default function AdminCommandCenterTab({
 
         {/* Bloqueios anti-fraude */}
         <Panel title="Últimos bloqueios anti-fraude" icon={ShieldAlert}
-          action={<button onClick={() => onNavigate("risk-compliance")} className="text-[11.5px] font-medium text-muted-foreground hover:text-foreground">Anti-fraude</button>}>
+          action={<Button onClick={() => onNavigate("risk-compliance")} className="text-[11.5px] font-medium text-muted-foreground hover:text-foreground">Anti-fraude</Button>}>
           {fraud.length === 0 ? <Empty label="Nenhum bloqueio registrado." /> : (
             <ul className="divide-y divide-border">
               {fraud.map(f => (
@@ -415,9 +311,12 @@ export default function AdminCommandCenterTab({
         </Panel>
       </div>
 
+      <Panel title="Entregas de integrações (24h)" icon={Webhook}>
+        <div className="flex flex-wrap gap-6 text-sm tabular-nums"><span>Entregues: {appStats.delivered}</span><span>Na fila: {appStats.pending}</span><span className={cn(appStats.failed > 0 && "text-destructive")}>Falhas: {appStats.failed}</span></div>
+      </Panel>
       {/* Erros abertos */}
       <Panel title="Erros de aplicação em aberto" icon={Bug}
-        action={<button onClick={() => onNavigate("error-logs")} className="text-[11.5px] font-medium text-muted-foreground hover:text-foreground">Ver todos</button>}>
+        action={<Button onClick={() => onNavigate("error-logs")} className="text-[11.5px] font-medium text-muted-foreground hover:text-foreground">Ver todos</Button>}>
         {errors.length === 0 ? <Empty label="Nenhum erro pendente." /> : (
           <ul className="divide-y divide-border">
             {errors.map(e => (
@@ -430,12 +329,12 @@ export default function AdminCommandCenterTab({
                   <Clock className="mr-1 inline h-3 w-3" />
                   {new Date(e.created_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
                 </span>
-                <button
-                  onClick={() => void resolveError(e.id)}
+                <Button
+                  variant="outline" size="sm" onClick={() => onNavigate("error-logs")}
                   className="shrink-0 rounded-md border border-border px-2 py-1 text-[11px] font-medium text-muted-foreground hover:text-foreground"
                 >
-                  Resolver
-                </button>
+                  Investigar
+                </Button>
               </li>
             ))}
           </ul>
@@ -446,19 +345,21 @@ export default function AdminCommandCenterTab({
       <Panel title="Busca rápida de transação" icon={Search}>
         <div className="flex flex-col gap-2 sm:flex-row">
           <input
+            aria-label="Buscar transação"
+            maxLength={120}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); searchRequest.current += 1; setHits(null); setSearching(false); }}
             onKeyDown={(e) => { if (e.key === "Enter") void runSearch(); }}
             placeholder="ID da transação, e-mail, nome ou documento do cliente"
             className="h-9 flex-1 rounded-md border border-border bg-background px-3 text-[12.5px] text-foreground outline-none focus:ring-1 focus:ring-ring"
           />
-          <button
+          <Button
             onClick={() => void runSearch()}
             disabled={searching}
             className="h-9 rounded-md border border-border bg-primary px-4 text-[12.5px] font-semibold text-primary-foreground disabled:opacity-60"
           >
             {searching ? "Buscando..." : "Buscar"}
-          </button>
+          </Button>
         </div>
         {hits !== null && (
           hits.length === 0 ? <Empty label="Nenhuma transação encontrada." /> : (

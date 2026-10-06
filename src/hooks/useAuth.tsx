@@ -36,20 +36,27 @@ export function useAuth() {
       setUser(session?.user ?? null);
       setLoading(false);
       if (session?.user && (event === "SIGNED_IN" || event === "TOKEN_REFRESHED")) {
-        trackIp(session.user.id, event === "SIGNED_IN" ? "login" : "refresh");
+        // Supabase calls listeners while holding its auth lock. Never invoke
+        // another authenticated request synchronously from this callback.
+        const uid = session.user.id;
+        setTimeout(() => trackIp(uid, event === "SIGNED_IN" ? "login" : "refresh"), 0);
       }
     });
 
     // Initial session check (impersonation handled via /impersonate-receiver postMessage flow,
     // no tokens are ever stored in localStorage)
+    let active = true;
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!active) return;
       setUser(session?.user ?? null);
       setLoading(false);
       if (session?.user) trackIp(session.user.id, "session");
+    }).catch(() => {
+      if (active) setLoading(false);
     });
 
 
-    return () => subscription.unsubscribe();
+    return () => { active = false; subscription.unsubscribe(); };
   }, []);
 
   return { user, loading };

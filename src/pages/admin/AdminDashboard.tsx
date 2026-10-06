@@ -716,9 +716,7 @@ export default function AdminDashboard() {
               )}
               {activeTab === "command-center" && isAdmin && (
                 <AdminCommandCenterTab
-                  transactions={transactions}
-                  profiles={profiles}
-                  withdrawals={withdrawals}
+                  dateRange={dateRange}
                   fmtCurrency={fmtCurrency}
                   onNavigate={(id) => handleTabChange(id as TabId)}
                 />

@@ -137,12 +137,13 @@ export function useTransactionsPage({ from, to, page, pageSize, search }: Transa
 
   return useQuery({
     queryKey: ["transactions_page", user?.id, fromIso, toIso, page, pageSize, term],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
+      if (!user) throw new Error("Sessão necessária");
       const offset = (page - 1) * pageSize;
       let query = supabase
         .from("transactions")
-        .select("*", { count: "exact" })
-        .eq("user_id", user!.id)
+        .select("*", { count: "estimated" })
+        .eq("user_id", user.id)
         .gte("created_at", fromIso)
         .lte("created_at", toIso);
 
@@ -156,13 +157,16 @@ export function useTransactionsPage({ from, to, page, pageSize, search }: Transa
 
       const { data, error, count } = await query
         .order("created_at", { ascending: false })
+        .order("id", { ascending: false })
+        .abortSignal(signal)
         .range(offset, offset + pageSize - 1);
       if (error) throw error;
       return { rows: (data || []) as Tables<"transactions">[], total: count ?? 0 };
     },
     enabled: !!user?.id,
-    staleTime: 15 * 1000,
-    refetchInterval: 45 * 1000,
+    staleTime: 60 * 1000,
+    retry: 1,
+    refetchInterval: false,
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: true,
     placeholderData: (prev) => prev,

@@ -1,0 +1,12 @@
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action_trgm ON public.audit_logs USING gin(action extensions.gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_entity_type_trgm ON public.audit_logs USING gin(entity_type extensions.gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_entity_id_trgm ON public.audit_logs USING gin(entity_id extensions.gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_staff_audit_action_trgm ON public.staff_audit_log USING gin(action extensions.gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_staff_audit_entity_type_trgm ON public.staff_audit_log USING gin(entity_type extensions.gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_staff_audit_entity_id_trgm ON public.staff_audit_log USING gin(entity_id extensions.gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_action_trgm ON public.activity_logs USING gin(action extensions.gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_entity_type_trgm ON public.activity_logs USING gin(entity_type extensions.gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_entity_id_trgm ON public.activity_logs USING gin(entity_id extensions.gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created_id ON public.audit_logs(created_at DESC,id DESC);
+CREATE INDEX IF NOT EXISTS idx_staff_audit_created_id ON public.staff_audit_log(created_at DESC,id DESC);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_created_id ON public.activity_logs(created_at DESC,id DESC);
