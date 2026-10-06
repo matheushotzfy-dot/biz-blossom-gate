@@ -7,9 +7,9 @@ Deno.serve(async (req) => {
   const corsHeaders = buildCorsHeaders(req);
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
@@ -38,9 +38,13 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "target_user_id required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    const { data: targetRoles, error: targetError } = await admin.from("user_roles").select("role").eq("user_id", target_user_id);
+    if (targetError || target_user_id === callerId || !(targetRoles ?? []).some(r => ["employee","manager"].includes(r.role)) || (targetRoles ?? []).some(r => r.role === "admin")) return new Response(JSON.stringify({ error: "Conta staff inválida." }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     if (action === "freeze" || action === "unfreeze") {
       const frozen = action === "freeze";
-      await admin.from("profiles").update({ frozen }).eq("user_id", target_user_id);
+      const { error: banError } = await admin.auth.admin.updateUserById(target_user_id, { ban_duration: frozen ? "876000h" : "none" });
+      const { error: profileError } = banError ? { error: banError } : await admin.from("profiles").update({ frozen }).eq("user_id", target_user_id);
+      if (profileError) return new Response(JSON.stringify({ error: "Falha ao atualizar acesso staff." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       // Force-invalidate all active sessions when freezing so revocation is immediate
       if (frozen) {
         try { await admin.auth.admin.signOut(target_user_id, "global"); } catch (_) {}
@@ -56,7 +60,7 @@ Deno.serve(async (req) => {
 
     if (action === "reset_password") {
       const newPassword = String(body.password ?? "");
-      if (newPassword.length < 8) {
+      if (newPassword.length < 8 || newPassword.length > 128) {
         return new Response(JSON.stringify({ error: "Senha mínima 8 caracteres." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       const { error } = await admin.auth.admin.updateUserById(target_user_id, { password: newPassword });
@@ -68,20 +72,6 @@ Deno.serve(async (req) => {
       await admin.from("staff_audit_log").insert({
         staff_user_id: callerId,
         action: "reset_staff_password",
-        entity_type: "user",
-        entity_id: target_user_id,
-      });
-      return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-
-    if (action === "delete") {
-      const { error } = await admin.auth.admin.deleteUser(target_user_id);
-      if (error) {
-        return new Response(JSON.stringify({ error: "Não foi possível concluir a ação. Tente novamente." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      }
-      await admin.from("staff_audit_log").insert({
-        staff_user_id: callerId,
-        action: "delete_staff",
         entity_type: "user",
         entity_id: target_user_id,
       });

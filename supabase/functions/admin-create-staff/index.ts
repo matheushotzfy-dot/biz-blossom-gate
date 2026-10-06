@@ -7,9 +7,9 @@ Deno.serve(async (req) => {
   const corsHeaders = buildCorsHeaders(req);
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
@@ -36,19 +36,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Apenas admin pode criar staff." }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Whitelist de permissões aceitas (qualquer chave fora disso é descartada)
-    const ALLOWED_PERMISSIONS = new Set([
-      "sellers.view", "sellers.edit", "sellers.freeze", "sellers.ban",
-      "products.view", "products.review", "products.suspend",
-      "transactions.view", "transactions.refund",
-      "withdrawals.view", "withdrawals.approve", "withdrawals.reject",
-      "kyc.review", "kyc.approve", "kyc.reject",
-      "support.view", "support.reply",
-      "fees.edit", "rewards.manage", "rewards.ship",
-      "disputes.view", "disputes.manage",
-      "analytics.view",
-    ]);
-
+    const ALLOWED_PERMISSIONS = new Set(["view_sellers","view_transactions","view_financial","view_disputes","view_withdrawals","approve_kyc","reject_kyc","approve_product","review_products","suspend_products","edit_fees","edit_seller_notes","request_refund","manage_med","freeze_seller_withdrawals","view_support","respond_support","view_analytics","view_rewards","ship_rewards"]);
     const body = await req.json().catch(() => ({}));
     const email = String(body?.email ?? "").trim().toLowerCase();
     const password = String(body?.password ?? "");
@@ -56,14 +44,12 @@ Deno.serve(async (req) => {
     const full_name = String(body?.full_name ?? "").trim().slice(0, 120);
     const role = body?.role === "manager" ? "manager" : body?.role === "partner" ? "partner" : "employee";
     const rawPerms: unknown[] = Array.isArray(body?.permissions) ? body.permissions : [];
-    const permissions = Array.from(new Set(
-      rawPerms.map((p) => String(p)).filter((p) => ALLOWED_PERMISSIONS.has(p))
-    )).slice(0, 50);
-    const commissionRaw = Number(body?.commission_pct ?? 0.1);
-    const commission_pct = Number.isFinite(commissionRaw)
-      ? Math.min(Math.max(commissionRaw, 0), 50)
-      : 0.1;
-
+    if (rawPerms.some(p => typeof p !== "string" || !ALLOWED_PERMISSIONS.has(p))) return new Response(JSON.stringify({ error: "Permissão inválida." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const permissions = Array.from(new Set(rawPerms as string[]));
+    const commission_pct = Number(body?.commission_pct ?? 0.1);
+    const limits = body?.fee_limits ?? { min_transaction_percentage: 2, min_transaction_fixed: 1, min_withdrawal_fee: 3 };
+    const percentage = Number(limits.min_transaction_percentage), fixed = Number(limits.min_transaction_fixed), withdrawal = Number(limits.min_withdrawal_fee);
+    if (![commission_pct,percentage,fixed,withdrawal].every(Number.isFinite) || commission_pct<0 || commission_pct>50 || percentage<0 || percentage>100 || fixed<0 || fixed>1000000 || withdrawal<0 || withdrawal>1000000 || (role === "partner" && permissions.length)) return new Response(JSON.stringify({ error: "Limites ou permissões inválidos." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       return new Response(JSON.stringify({ error: "E-mail inválido." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     if (!sendInvite && (password.length < 8 || password.length > 128))
@@ -95,41 +81,17 @@ Deno.serve(async (req) => {
       newId = created.user.id;
     }
 
-    // Profile (criado por trigger handle_new_user; complementamos)
-    await admin.from("profiles").update({
-      full_name,
-      staff_role_type: role,
-      created_by_admin: callerId,
-      account_status: "active",
-    }).eq("user_id", newId);
-
-    // Role
-    await admin.from("user_roles").upsert({ user_id: newId, role }, { onConflict: "user_id,role" });
-
-    // Permissions
-    if (permissions.length > 0) {
-      await admin.from("staff_permissions").insert(
-        permissions.map((k) => ({ user_id: newId, permission_key: k, granted_by: callerId }))
-      );
+    // Never leave an operational account with a partially applied policy.
+    const profileResult = await admin.from("profiles").update({ full_name, staff_role_type: role, created_by_admin: callerId, account_status: "active" }).eq("user_id", newId).select("user_id").single();
+    const roleResult = profileResult.error ? profileResult : await admin.from("user_roles").upsert({ user_id: newId, role }, { onConflict: "user_id,role" });
+    const configured = roleResult.error ? roleResult : role === "partner"
+      ? await admin.from("staff_audit_log").insert({ staff_user_id: callerId, action: "create_partner", entity_type: "user", entity_id: newId })
+      : await admin.rpc("configure_staff_service", { _actor: callerId, _user_id: newId, _permissions: permissions, _percentage: percentage, _fixed: fixed, _withdrawal: withdrawal, _commission: commission_pct });
+    if (configured.error) {
+      await admin.auth.admin.updateUserById(newId, { ban_duration: "876000h" });
+      await admin.from("user_roles").delete().eq("user_id", newId).in("role", ["employee","manager","partner"]);
+      return new Response(JSON.stringify({ error: "Configuração incompleta; acesso bloqueado. Consulte a equipe antes de tentar novamente." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-
-    // Commission config
-    await admin.from("staff_commission_config").upsert({
-      user_id: newId,
-      base_pct: commission_pct,
-      base: "net_amount",
-      is_active: true,
-    });
-
-    // Audit
-    await admin.from("staff_audit_log").insert({
-      staff_user_id: callerId,
-      action: "create_staff",
-      entity_type: "user",
-      entity_id: newId,
-      after: { email, full_name, role, permissions, commission_pct, invited: sendInvite },
-    });
-
     return new Response(JSON.stringify({ success: true, user_id: newId, invited: sendInvite }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

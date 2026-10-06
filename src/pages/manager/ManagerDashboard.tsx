@@ -1,3 +1,4 @@
+import { WithdrawalBlockControl } from "@/features/staff/WithdrawalBlockControl";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -95,13 +96,14 @@ export default function ManagerDashboard() {
   }, [user]);
 
   const loadData = async () => {
+    if (!user) return;
     setLoading(true);
     try {
       // Load assigned sellers via assignments → profiles
       const { data: assignments } = await supabase
         .from("manager_seller_assignments")
         .select("seller_user_id, notes")
-        .eq("manager_user_id", user!.id);
+        .eq("manager_user_id", user?.id ?? "");
 
       if (!assignments || assignments.length === 0) {
         setSellers([]);
@@ -114,7 +116,7 @@ export default function ManagerDashboard() {
       const [profilesRes, txRes, feeLimitsRes] = await Promise.all([
         supabase.from("profiles").select("id,user_id,full_name,email,phone,account_status,seller_type,created_at").in("user_id", sellerIds),
         supabase.from("transactions").select("id,amount,net_amount,status,payment_method,customer_name,created_at,user_id").in("user_id", sellerIds).order("created_at", { ascending: false }).limit(200),
-        supabase.from("manager_fee_limits").select("*").limit(1),
+        supabase.from("staff_fee_limits").select("*").eq("user_id", user.id).limit(1),
       ]);
 
       setSellers((profilesRes.data || []) as Profile[]);
@@ -199,7 +201,7 @@ export default function ManagerDashboard() {
     if (!selectedSeller || !noteContent.trim()) return;
     const { error } = await supabase.from("seller_notes").insert({
       seller_user_id: selectedSeller.user_id,
-      author_user_id: user!.id,
+      author_user_id: user?.id ?? "",
       author_role: "manager",
       content: noteContent.trim(),
     });
@@ -211,7 +213,7 @@ export default function ManagerDashboard() {
   };
 
   const handleUpdateFees = async () => {
-    if (!selectedSeller) return;
+    if (!selectedSeller || !user) return;
     const pct = feeForm.percentage ? Number(feeForm.percentage) : null;
     const fixed = feeForm.fixed ? Number(feeForm.fixed) : null;
     const withdrawal = feeForm.withdrawal ? Number(feeForm.withdrawal) : null;
@@ -230,30 +232,9 @@ export default function ManagerDashboard() {
       return;
     }
 
-    const existing = customFees[selectedSeller.user_id];
-    if (existing) {
-      const { error } = await supabase
-        .from("custom_user_fees")
-        .update({
-          transaction_percentage: pct,
-          transaction_fixed: fixed,
-          withdrawal_fee: withdrawal,
-          admin_user_id: user!.id,
-        })
-        .eq("id", existing.id);
-      if (error) { toast.error("Erro ao atualizar taxas"); return; }
-    } else {
-      const { error } = await supabase
-        .from("custom_user_fees")
-        .insert({
-          user_id: selectedSeller.user_id,
-          transaction_percentage: pct,
-          transaction_fixed: fixed,
-          withdrawal_fee: withdrawal,
-          admin_user_id: user!.id,
-        });
-      if (error) { toast.error("Erro ao criar taxas"); return; }
-    }
+    if (pct === null || fixed === null || withdrawal === null || ![pct,fixed,withdrawal].every(Number.isFinite)) { toast.error("Informe todas as taxas"); return; }
+    const { error } = await supabase.rpc("set_staff_seller_fees", { _seller: selectedSeller.user_id, _percentage: pct, _fixed: fixed, _withdrawal: withdrawal });
+    if (error) { toast.error("Não foi possível alterar taxas. Verifique permissão, vínculo e pisos."); return; }
 
     toast.success("Taxas atualizadas!");
     setShowFeeDialog(false);
@@ -289,6 +270,7 @@ export default function ManagerDashboard() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white">
+      <div className="mx-auto max-w-7xl px-6"><WithdrawalBlockControl sellers={sellers} /></div>
       {/* Top Nav */}
       <div className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#050505]/90 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
