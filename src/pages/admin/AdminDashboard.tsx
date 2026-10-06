@@ -777,7 +777,7 @@ export default function AdminDashboard() {
               {activeTab === "audit" && isAdmin && <AdminAuditTab profiles={profiles} />}
               {activeTab === "error-logs" && isAdmin && <AdminErrorLogsTab profiles={profiles} />}
               {activeTab === "inactive-sellers" && isAdmin && (
-                <AdminInactiveSellersTab profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
+                <AdminInactiveSellersTab fmtCurrency={fmtCurrency} />
               )}
               {activeTab === "settings" && isAdmin && <AdminSettingsTab />}
               </Suspense>
