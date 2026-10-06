@@ -51,7 +51,7 @@
   .support-inbox { width: 280px; border-right: 1px solid hsl(var(--border)); }
 }
 @media (max-width: 767px) {
-  .support-workspace { height: calc(100dvh - 150px); min-height: 360px; }
+  .support-workspace { height: calc(100dvh - 230px); min-height: 320px; }
   .support-surface input, .support-surface textarea { font-size: 16px; }
 }
 

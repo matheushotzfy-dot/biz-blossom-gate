@@ -50,7 +50,13 @@ export function useSupportTickets(userId: string | undefined) {
     }).subscribe();
     return () => { void supabase.removeChannel(channel); };
   }, [effectiveId, userId, client]);
-  useEffect(() => { endRef.current?.scrollIntoView({ block: 'nearest', behavior: 'instant' }); }, [effectiveId, thread.data]);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      const transcript = endRef.current?.parentElement;
+      if (transcript) transcript.scrollTop = transcript.scrollHeight;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [effectiveId, thread.data]);
   const sendReply = async (body: string, files: File[]): Promise<boolean> => {
     if (!userId || !effectiveId || operation.current || (body.trim().length < 2 && !files.length)) return false;
     operation.current = true; setSending(true);
