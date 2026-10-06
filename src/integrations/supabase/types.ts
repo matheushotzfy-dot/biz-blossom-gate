@@ -5699,6 +5699,17 @@ export type Database = {
         Returns: Json
       }
       get_admin_analytics: { Args: { _period_days?: number }; Returns: Json }
+      get_admin_analytics_detail: {
+        Args: {
+          _from: string
+          _page?: number
+          _search?: string
+          _selling_only?: boolean
+          _sort?: string
+          _to: string
+        }
+        Returns: Json
+      }
       get_admin_command_center: {
         Args: { _from: string; _to: string }
         Returns: Json
