@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Managers view assigned seller transactions" ON public.transactions;
