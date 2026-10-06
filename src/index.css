@@ -2062,10 +2062,8 @@ button svg, a svg, [role="button"] svg {
 }
 
 /* Prevent Radix popper flash at top-left before positioning */
-[data-radix-popper-content-wrapper] {
-  opacity: 0;
-  animation: radix-popper-appear 0s 1ms forwards;
-}
+/* (removido: o truque de opacity 0 deixava listas invisíveis quando a
+   animação era desligada por reduced-motion/overrides globais) */
 
 @keyframes radix-popper-appear {
   to { opacity: 1; }
@@ -4393,7 +4391,6 @@ html body .lp .lp-progress {
   backface-visibility: hidden;
   -webkit-font-smoothing: antialiased;
   will-change: opacity;
-  contain: paint;
 }
 
 .overlay-surface:hover,
