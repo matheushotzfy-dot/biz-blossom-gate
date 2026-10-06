@@ -38,6 +38,7 @@ import { z } from "zod";
 import { friendlyError } from "@/lib/friendlyError";
 import AdminPager from "@/components/admin/AdminPager";
 import { displayPixKey } from "@/lib/financial-input";
+import { dateKey } from "@/features/admin-finance/overviewModel";
 
 type Dispute = Tables<"disputes"> & { buyer_name?: string | null };
 type BalanceAdjustment = Tables<"balance_adjustments">;
@@ -529,7 +530,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {isAdmin ? <SellersDirectory range={dateRange} enabled={isAdmin} money={fmtCurrency} onOpen={async userId => {
+      {isAdmin ? <SellersDirectory key={`${dateKey(dateRange.from)}:${dateKey(dateRange.to)}`} range={dateRange} enabled={isAdmin} money={fmtCurrency} onOpen={async userId => {
         const { data, error } = await supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle();
         if (error || !data) { toast.error("Não foi possível abrir este seller"); return; }
         await openUserDetail(data);
@@ -620,6 +621,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <CheckCircle2 className="h-3 w-3" /> Aprovar
                   </Button>
                 )}
+                {selectedUser && ["pending", "pending_review"].includes(selectedUser.account_status || "") && <Button size="sm" variant="outline" className="h-8 gap-1.5 text-destructive" onClick={() => { setRejectTargetUserId(selectedUser.user_id); setKycRejectReason(""); setShowRejectDialog(true); }}><XCircle className="h-3 w-3" />Recusar KYC</Button>}
                 {selectedUser && emailVerified !== true && (
                   <Button size="sm" variant="outline" disabled={emailVerifyLoading} className="h-8 rounded-lg text-[11px] gap-1.5 border-success/30 text-success hover:bg-success/10" onClick={() => handleSetEmailVerified(selectedUser.user_id, true)}>
                     <CheckCircle2 className="h-3 w-3" /> Verificar e-mail

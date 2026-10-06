@@ -36,7 +36,7 @@ export function BalanceAdjustCard({ userId, onDone }: BalanceAdjustCardProps) {
 
   const submit = async () => {
     const value = Number(amount.replace(",", "."));
-    if (!Number.isFinite(value) || value <= 0) { toast.error("Informe um valor válido"); return; }
+    if (!Number.isFinite(value) || value <= 0 || value > 1000000) { toast.error("Informe um valor entre R$ 0,01 e R$ 1.000.000"); return; }
     if (reason.trim().length < 5) { toast.error("Motivo obrigatório (mín. 5 caracteres)"); return; }
     confirm(`${type === "credit" ? "Creditar" : "Debitar"} ${brl(value)} no saldo do seller.`, () => execute(value));
   };
@@ -70,16 +70,16 @@ export function BalanceAdjustCard({ userId, onDone }: BalanceAdjustCardProps) {
     <div className="space-y-3 rounded-xl border border-border bg-card p-4">
       <div className="grid grid-cols-2 gap-2">
         {(["credit", "debit"] as const).map((t) => (
-          <button key={t} type="button" onClick={() => setType(t)}
+          <Button variant="outline" key={t} type="button" onClick={() => setType(t)}
             className={cn("rounded-lg border px-3 py-2 text-xs font-semibold transition-colors",
               type === t ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:text-foreground")}>
             {t === "credit" ? "Creditar" : "Debitar"}
-          </button>
+          </Button>
         ))}
       </div>
       <Input inputMode="decimal" placeholder="Valor (R$)" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label="Valor do ajuste" />
       <Textarea rows={2} maxLength={1000} placeholder="Motivo (fica registrado na auditoria)" value={reason} onChange={(e) => setReason(e.target.value)} aria-label="Motivo" />
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-[11px] text-muted-foreground">Como dono, seu ajuste é aplicado na hora. Pedidos da equipe aparecem abaixo para você aprovar.</p>
         <Button size="sm" onClick={submit} disabled={busy}>{busy ? "Enviando..." : "Confirmar ajuste"}</Button>
       </div>
