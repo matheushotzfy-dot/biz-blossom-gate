@@ -1,4 +1,5 @@
 # Architecture Decisions
+- Top Sellers reuses validated admin analytics aggregates and the shared date filter; ranked rows are server-paginated, exports explicitly cover the current filtered page and never expose documents.
 - Sellers directory uses admin-only period aggregates and server pagination; seller records keep fixed positioning, scoped caches and explicit history limits, while money actions use audited manual-approval routines and reinforced confirmation.
 - Analytics uses admin-only aggregate RPCs with São Paulo date boundaries and paginated seller rows; account activity, paid-sales cohorts and dated risk events stay explicitly separate, and client counts use normalized purchase emails rather than exposing buyer identities.
 
