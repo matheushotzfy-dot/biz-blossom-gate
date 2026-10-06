@@ -1,6 +1,6 @@
 # Architecture Decisions
 
-- Public marketing and authentication surfaces use Kinetic Light by default with an optional account-synced dark mode; checkout keeps its product-defined theme.
+- Public marketing uses an editorial light system with monumental typography and architectural product framing; authentication defaults light with account-synced dark mode, while checkout keeps its product-defined theme.
 
 - Dashboard revenue card is minimal: title, subtitle, period chip and a single approved-revenue area chart; value details only in the hover tooltip — no summary metrics, big totals or metric switcher (user wants it clean).
 - Payment operations must fail closed when no acquirer is configured; never leave UI actions calling removed gateway functions.

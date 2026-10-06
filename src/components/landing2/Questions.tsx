@@ -1,35 +1,15 @@
-/**
- * Questions — acordeão minimalista de linhas.
- */
 import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { Minus, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const QA = [
-  {
-    q: "Quanto tempo leva para o dinheiro ficar disponível?",
-    a: "Vendas no Pix ficam disponíveis no mesmo dia. Cartão segue o prazo padrão de recebíveis, com antecipação opcional direto no painel.",
-  },
-  {
-    q: "Preciso ter CNPJ para vender?",
-    a: "Não. Pessoa física opera normalmente. O CNPJ é opcional e traz benefícios adicionais na emissão de nota fiscal.",
-  },
-  {
-    q: "Como funciona o split com afiliados e coprodutores?",
-    a: "Você define os percentuais uma vez no produto. Na aprovação, cada parte é creditada automaticamente no próprio saldo.",
-  },
-  {
-    q: "Existe mensalidade ou taxa de adesão?",
-    a: "Não existe mensalidade, adesão nem custo por produto criado. A plataforma é remunerada apenas pela taxa da transação aprovada.",
-  },
-  {
-    q: "Posso integrar a VENXPAY na minha própria aplicação?",
-    a: "Sim. A API REST cobre criação de cobrança, consulta, reembolso e estorno, com webhooks assinados em HMAC-SHA256.",
-  },
-  {
-    q: "A área de membros está inclusa?",
-    a: "Está. Você publica módulos, aulas e certificados, e o acesso do aluno é liberado no instante em que o pagamento é aprovado.",
-  },
+  { q: "Quanto tempo leva para o dinheiro ficar disponível?", a: "Vendas no Pix ficam disponíveis conforme as condições da conta. Cartão segue o prazo dos recebíveis, com acompanhamento direto no painel." },
+  { q: "Preciso ter CNPJ para vender?", a: "Não. Pessoa física pode operar normalmente. O CNPJ é opcional e habilita recursos empresariais adicionais." },
+  { q: "Como funciona o split com afiliados e coprodutores?", a: "Você define os percentuais no produto. Após a confirmação, cada parte é destinada ao saldo correto com registro da divisão." },
+  { q: "Existe mensalidade ou taxa de adesão?", a: "Não existe mensalidade, adesão ou custo por produto criado. As condições aplicáveis ficam visíveis antes da operação." },
+  { q: "Posso integrar a VENXPAY na minha aplicação?", a: "Sim. A API cobre cobranças e consultas, enquanto webhooks assinados informam as mudanças relevantes." },
+  { q: "A área de membros está inclusa?", a: "Sim. Módulos, aulas e certificados ficam ligados ao produto, e o acesso depende da confirmação do pagamento." },
 ];
 
 export function Questions() {
@@ -37,51 +17,37 @@ export function Questions() {
   const reduce = useReducedMotion();
 
   return (
-    <section id="perguntas" className="vx-cv relative py-28 sm:py-36">
-      <div className="mx-auto max-w-[1280px] px-5">
-        <span className="vx-mono">perguntas</span>
-        <h2 className="mt-5 max-w-[16ch] text-[38px] font-extrabold text-foreground sm:text-[58px]">
-          Respostas diretas, sem letra miúda
-        </h2>
-
-        <div className="mt-14 border-t border-border">
-          {QA.map((item, i) => {
-            const isOpen = open === i;
+    <section id="perguntas">
+      <div className="vx-shell vx-faq-layout">
+        <div><span className="vx-kicker">07 / PERGUNTAS</span><h2>Direto ao ponto.</h2></div>
+        <div className="vx-faq-list">
+          {QA.map((item, itemIndex) => {
+            const isOpen = open === itemIndex;
             return (
-              <div key={item.q} className="border-b border-border">
-                <button
+              <div key={item.q} className="vx-faq-item">
+                <Button
                   type="button"
+                  variant="ghost"
                   aria-expanded={isOpen}
-                  onClick={() => setOpen(isOpen ? null : i)}
-                  className="flex w-full items-center justify-between gap-8 py-6 text-left"
+                  aria-controls={`vx-faq-answer-${itemIndex}`}
+                  onClick={() => setOpen(isOpen ? null : itemIndex)}
+                  className="vx-faq-trigger"
                 >
-                  <span
-                    className={cn(
-                      "text-[16px] font-bold transition-colors duration-300 sm:text-[19px]",
-                      isOpen ? "text-primary" : "text-foreground",
-                    )}
-                  >
-                    {item.q}
-                  </span>
-                  <span
-                    className={cn(
-                      "vx-mono shrink-0 transition-colors duration-300",
-                      isOpen && "vx-mono-on",
-                    )}
-                  >
-                    {isOpen ? "fechar" : "abrir"}
-                  </span>
-                </button>
+                  <span>{item.q}</span>{isOpen ? <Minus /> : <Plus />}
+                </Button>
                 <AnimatePresence initial={false}>
                   {isOpen && (
                     <motion.div
+                      id={`vx-faq-answer-${itemIndex}`}
+                      role="region"
+                      aria-label={item.q}
                       initial={reduce ? false : { height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={reduce ? undefined : { height: 0, opacity: 0 }}
-                      transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
+                      transition={{ duration: .32, ease: [0.16, 1, 0.3, 1] }}
                       className="overflow-hidden"
                     >
-                      <p className="max-w-[70ch] pb-7 text-[14px] leading-[1.8] text-muted-foreground">{item.a}</p>
+                      <p>{item.a}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>

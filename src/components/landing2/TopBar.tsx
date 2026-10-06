@@ -1,70 +1,99 @@
-/**
- * TopBar — barra fixa fina, com regra inferior que ganha opacidade no scroll.
- */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Menu, X } from "lucide-react";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
   { href: "#fluxo", label: "Fluxo" },
-  { href: "#painel", label: "Painel" },
+  { href: "#painel", label: "Produto" },
   { href: "#checkout", label: "Checkout" },
-  { href: "#incluso", label: "Incluso" },
-  { href: "#condicoes", label: "Condições" },
+  { href: "#incluso", label: "Estrutura" },
 ];
 
-export function TopBar({ onLogin, onSignup }: { onLogin: () => void; onSignup: () => void }) {
-  const [solid, setSolid] = useState(false);
+export interface TopBarProps {
+  onLogin: () => void;
+  onSignup: () => void;
+}
+
+export function TopBar({ onLogin, onSignup }: TopBarProps) {
+  const [compact, setCompact] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setSolid(window.scrollY > 24);
+    const onScroll = () => setCompact(window.scrollY > 20);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    const menu = menuRef.current;
+    const focusable = menu?.querySelectorAll<HTMLElement>("a, button");
+    focusable?.item(0).focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+        return;
+      }
+      if (event.key !== "Tab" || !focusable?.length) return;
+      const first = focusable.item(0);
+      const last = focusable.item(focusable.length - 1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
+
   return (
-    <header
-      className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-colors duration-300",
-        solid ? "border-b border-border bg-background/92 backdrop-blur-md" : "border-b border-transparent",
-      )}
-    >
-      <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-5">
-        <a href="#topo" className="flex items-center gap-2.5">
-          <VenxpayLogo size={26} plate={false} animated={false} />
-          <span className="font-heading text-[15px] font-extrabold text-foreground">VENX<span className="text-primary">PAY</span></span>
+    <header className={cn("vx-nav", compact && "vx-nav-compact")}>
+      <div className="vx-shell flex h-[72px] items-center justify-between">
+        <a href="#topo" className="flex items-center gap-3" aria-label="VENXPAY — início">
+          <VenxpayLogo size={28} plate={false} animated={false} />
+          <span className="font-heading text-sm font-extrabold text-foreground">VENXPAY</span>
         </a>
 
-        <nav className="hidden items-center gap-8 lg:flex">
-          {LINKS.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {l.label}
-            </a>
+        <nav className="hidden items-center gap-8 lg:flex" aria-label="Navegação principal">
+          {LINKS.map((link) => (
+            <a key={link.href} href={link.href} className="vx-nav-link">{link.label}</a>
           ))}
         </nav>
 
-        <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={onLogin}
-            className="hidden h-10 px-4 text-[13px] font-bold text-muted-foreground transition-colors hover:text-foreground sm:block"
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" onClick={onLogin} className="hidden sm:inline-flex">Entrar</Button>
+          <Button onClick={onSignup}>Criar conta</Button>
+          <Button
+            ref={menuButtonRef}
+            variant="outline"
+            size="icon"
+            className="lg:hidden"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+            aria-expanded={menuOpen}
           >
-            Entrar
-          </button>
-          <button
-            type="button"
-            onClick={onSignup}
-            className="h-10 rounded-[8px] bg-primary px-5 text-[13px] font-extrabold text-primary-foreground transition-all hover:-translate-y-0.5 hover:bg-primary/88"
-          >
-            Criar conta
-          </button>
+            {menuOpen ? <X /> : <Menu />}
+          </Button>
         </div>
       </div>
+
+      {menuOpen && (
+        <nav ref={menuRef} className="vx-mobile-nav" aria-label="Navegação móvel">
+          {LINKS.map((link) => (
+            <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>{link.label}</a>
+          ))}
+          <Button type="button" variant="ghost" onClick={onLogin} className="justify-start px-0">Entrar</Button>
+        </nav>
+      )}
     </header>
   );
 }
