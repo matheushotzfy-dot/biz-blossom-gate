@@ -301,38 +301,78 @@ export default function Suporte() {
     <div className="space-y-4 animate-in fade-in duration-300 pb-8">
       <Seo title="Suporte | Venxpay" description="Central de ajuda — abra tickets e converse com o time de suporte." path="/suporte" noindex />
 
-      {/* Premium Hero */}
-      <section className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 md:p-8">
-        <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-primary" />
-        <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="min-w-0 space-y-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-success/30 bg-success/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-success">
-              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Equipe online agora
+      {/* Cabeçalho da central */}
+      <section className="relative overflow-hidden rounded-2xl border border-border bg-card">
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.10),transparent_60%)]" />
+        <div className="relative p-6 md:p-8 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+          <div className="min-w-0 space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-success/30 bg-success/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-success">
+              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Equipe online · resposta em até 24h úteis
             </div>
-            <h1 className="font-display font-black text-2xl md:text-4xl tracking-[-0.02em] leading-tight flex items-center gap-3">
-              <Headphones className="h-8 w-8 text-primary shrink-0" />
+            <h1 className="font-display font-black text-3xl md:text-4xl tracking-[-0.03em] leading-[1.05] flex items-center gap-3">
+              <span className="h-11 w-11 rounded-xl border border-primary/25 bg-primary/10 flex items-center justify-center shrink-0">
+                <Headphones className="h-5 w-5 text-primary" />
+              </span>
               Central de Suporte
             </h1>
-            <p className="text-sm text-muted-foreground max-w-lg">
-              Resposta em até 24h úteis · {stats.total} tickets · {stats.answered} respondidos · {stats.open} em andamento
+            <p className="text-sm text-muted-foreground max-w-xl">
+              Abra um chamado, acompanhe cada resposta em tempo real e encontre soluções rápidas para saques, vendas, integrações e conta.
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => setShowFaq(v => !v)}
-              className="h-12 px-4 rounded-xl border border-border/60 bg-card text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+              className="h-11 px-4 rounded-xl border border-border bg-background text-xs font-bold text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors flex items-center gap-2"
             >
-              <HelpCircle className="h-4 w-4" /> FAQ
+              <HelpCircle className="h-4 w-4" /> Perguntas frequentes
             </button>
             <button
               onClick={() => { setShowComposer(true); setSelectedId(null); }}
-              className="h-12 px-5 rounded-xl border border-primary bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-colors flex items-center gap-2"
+              className="h-11 px-5 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 active:scale-[0.98] transition-all flex items-center gap-2"
             >
-              <Plus size={16} strokeWidth={3} /> Novo Ticket
+              <Plus size={16} strokeWidth={3} /> Novo chamado
             </button>
           </div>
         </div>
+        <div className="relative grid grid-cols-2 lg:grid-cols-4 border-t border-border">
+          {[
+            { label: "Total de chamados", value: stats.total, tone: "text-foreground" },
+            { label: "Em andamento", value: stats.open, tone: "text-warning" },
+            { label: "Respondidos", value: stats.answered, tone: "text-primary" },
+            { label: "Resolvidos", value: stats.closed, tone: "text-success" },
+          ].map((k, i) => (
+            <div key={k.label} className={`px-6 py-4 ${i % 2 === 1 ? "border-l border-border" : ""} ${i >= 2 ? "border-t lg:border-t-0 border-border" : ""} ${i === 2 ? "lg:border-l" : ""}`}>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{k.label}</p>
+              <p className={`mt-1 font-display text-2xl font-black tabular-nums ${k.tone}`}>{k.value}</p>
+            </div>
+          ))}
+        </div>
       </section>
+
+      {/* Atalhos por assunto */}
+      {!showComposer && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {HELP_CATEGORIES.map(c => {
+            const Icon = c.icon;
+            return (
+              <button
+                key={c.label}
+                onClick={() => openCategory(c.subject)}
+                className="group flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3.5 text-left hover:border-primary/40 hover:-translate-y-0.5 transition-all"
+              >
+                <span className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                  <Icon className="h-4 w-4 text-primary" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[13px] font-bold text-foreground truncate">{c.label}</span>
+                  <span className="block text-[11px] text-muted-foreground">Abrir chamado</span>
+                </span>
+                <ArrowUpRight className="ml-auto h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* FAQ (collapsible) */}
       {showFaq && (
