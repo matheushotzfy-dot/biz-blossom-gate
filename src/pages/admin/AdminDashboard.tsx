@@ -623,7 +623,7 @@ export default function AdminDashboard() {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 af-surface af-border border rounded-md shadow-lg" align="end">
+              <PopoverContent className="w-auto p-0 bg-popover text-popover-foreground border-border border rounded-md" align="end">
                 <CalendarComponent
                   mode="range"
                   disabled={{ after: new Date(), before: subDays(new Date(), 365) }}

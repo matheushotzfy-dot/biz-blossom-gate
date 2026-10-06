@@ -138,7 +138,6 @@ export default function AdminOverviewTab({
 }: Props) {
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [realtimeTx, setRealtimeTx] = useState<Tables<"transactions">[]>([]);
-  const [chartPeriod, setChartPeriod] = useState<"7d" | "30d">("7d");
   const [fraudLogs, setFraudLogs] = useState<Tables<"fraud_logs">[]>([]);
   const [kycReview, setKycReview] = useState<Tables<"profiles"> | null>(null);
   const [selectedTx, setSelectedTx] = useState<Tables<"transactions"> | null>(null);
@@ -207,120 +206,12 @@ export default function AdminOverviewTab({
   }, [allTx, dateRange]);
   const filteredApproved = useMemo(() => filteredTx.filter(t => isApprovedTransaction(t.status)), [filteredTx]);
 
-  // Fuso São Paulo (America/Sao_Paulo) — normaliza "hoje" para o dia comercial brasileiro
-  const spDayKey = (d: Date) =>
-    new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
-  const spMonthKey = (d: Date) =>
-    new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit" }).format(d);
-  const today = new Date();
-  const todayStr = spDayKey(today);
-  const thisMonthKey = spMonthKey(today);
-  const todayTx = useMemo(() => approved.filter(t => spDayKey(new Date(t.created_at)) === todayStr), [approved, todayStr]);
-  const monthTx = useMemo(() => approved.filter(t => spMonthKey(new Date(t.created_at)) === thisMonthKey), [approved, thisMonthKey]);
-
-  const tpvToday = todayTx.reduce((a, t) => a + Number(t.amount), 0);
-  const tpvMonth = Number(financialOverview?.month?.gross_volume ?? monthTx.reduce((a, t) => a + Number(t.amount), 0));
-  const totalVolume = Number(financialOverview?.summary?.gross_volume ?? filteredApproved.reduce((a, t) => a + Number(t.amount), 0));
-  const takeRateToday = todayTx.reduce((a, t) => a + Number(t.fee_amount), 0);
-  const takeRateTotal = Number(financialOverview?.summary?.platform_fees ?? filteredApproved.reduce((a, t) => a + Number(t.fee_amount), 0));
-  const takeRatePct = totalVolume > 0 ? ((takeRateTotal / totalVolume) * 100).toFixed(2) : "0.00";
-
   const pendingWd = withdrawals.filter(w => w.status === "pending");
-  const pendingWdAmount = Number(financialOverview?.operations?.pending_withdrawals_amount ?? pendingWd.reduce((a, w) => a + Number(w.amount), 0));
-  const totalRetained = Number(financialOverview?.summary?.retained_amount ?? filteredApproved
-    .filter(t => !t.retention_released && Number(t.retained_amount) > 0)
-    .reduce((a, t) => a + Number(t.retained_amount), 0));
-
-  // Contagens autoritativas do servidor (RPC) — a lista carregada no cliente é paginada
-  // e não pode ser usada como denominador de conversão/ticket sob alto volume.
-  const summaryTotalCount = financialOverview?.summary?.total_count != null
-    ? Number(financialOverview.summary.total_count)
-    : filteredTx.length;
-  const summaryApprovedCount = financialOverview?.summary?.approved_count != null
-    ? Number(financialOverview.summary.approved_count)
-    : filteredApproved.length;
-  const summaryChargebackCount = financialOverview?.summary?.chargeback_count != null
-    ? Number(financialOverview.summary.chargeback_count)
-    : filteredTx.filter(t => t.status === "chargeback").length;
-
-  const chargebackRate = summaryApprovedCount > 0 ? ((summaryChargebackCount / summaryApprovedCount) * 100) : 0;
-  const chargebackAlert = chargebackRate > 1;
-
-  const activeSellersToday = new Set(todayTx.map(t => t.user_id)).size;
-  const conversionRate = summaryTotalCount > 0 ? ((summaryApprovedCount / summaryTotalCount) * 100).toFixed(1) : "0.0";
-  const ticketMedio = summaryApprovedCount > 0 ? totalVolume / summaryApprovedCount : 0;
-
-  const last30Start = useMemo(() => { const d = new Date(); d.setDate(d.getDate() - 30); return d; }, []);
-  const last30Tx = useMemo(() => approved.filter(t => new Date(t.created_at) >= last30Start), [approved, last30Start]);
-  const profit30d = last30Tx.reduce((a, t) => a + Number(t.fee_amount), 0);
-
   const pendingMeds = useMemo(() => disputes.filter(d => ["medpix", "pre_med_pix"].includes(d.type) && ["open", "in_review"].includes(d.status)), [disputes]);
-  const pendingMedsAmount = pendingMeds.reduce((a, d) => a + Number(d.amount), 0);
-
-  const methodApproval = useMemo(() => {
-    const methods: Record<string, { total: number; approved: number; volume: number }> = {};
-    filteredTx.forEach(t => {
-      const m = t.payment_method || "other";
-      if (!methods[m]) methods[m] = { total: 0, approved: 0, volume: 0 };
-      methods[m].total++;
-      if (isApprovedTransaction(t.status)) {
-        methods[m].approved++; methods[m].volume += Number(t.amount);
-      }
-    });
-    return Object.entries(methods).map(([method, stats]) => ({
-      method: method === "pix" ? "PIX" : method === "credit_card" ? "Cartão" : method === "boleto" ? "Boleto" : method,
-      total: stats.total, approved: stats.approved, volume: stats.volume,
-      rate: stats.total > 0 ? ((stats.approved / stats.total) * 100) : 0,
-    }));
-  }, [filteredTx]);
-
-  const days = chartPeriod === "7d" ? 7 : 30;
-  const chartData = useMemo(() => Array.from({ length: days }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() - (days - 1 - i));
-    const key = spDayKey(d);
-    const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" });
-    const dayTx = approved.filter(t => spDayKey(new Date(t.created_at)) === key);
-    return {
-      name: dayStr,
-      tpv: dayTx.reduce((a, t) => a + Number(t.amount), 0),
-      takeRate: dayTx.reduce((a, t) => a + Number(t.fee_amount), 0),
-      vendas: dayTx.length,
-    };
-  }), [approved, days]);
-
-  const refundTrend = useMemo(() => Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() - (6 - i));
-    const key = spDayKey(d);
-    const dayStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" });
-    const dayTx = allTx.filter(t => spDayKey(new Date(t.created_at)) === key);
-    return {
-      name: dayStr,
-      chargebacks: dayTx.filter(t => t.status === "chargeback").length,
-      refunds: dayTx.filter(t => t.status === "refunded").length,
-    };
-  }), [allTx]);
-
-  const kycPending = profiles.filter(p => p.account_status === "pending_review" || p.account_status === "pending");
-  const highValueWd = pendingWd.filter(w => Number(w.amount) >= 5000);
-  const newUsersInRange = useMemo(() => profiles.filter(p => {
-    if (!dateRange) return spDayKey(new Date(p.created_at)) === todayStr;
-    const d = new Date(p.created_at); return d >= dateRange.from && d <= dateRange.to;
-  }), [profiles, dateRange, todayStr]);
-  const rangeLabel = useMemo(() => {
-    if (!dateRange) return "Período selecionado";
-    const sameDay = dateRange.from.toDateString() === dateRange.to.toDateString();
-    const fmt = (d: Date) => d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
-    return sameDay ? `${fmt(dateRange.from)} · por horário` : `${fmt(dateRange.from)} → ${fmt(dateRange.to)}`;
-  }, [dateRange]);
-  const hourlyData = useMemo(() => Array.from({ length: 24 }, (_, hour) => {
-    const txs = filteredApproved.filter(t => new Date(t.created_at).getHours() === hour);
-    return {
-      hour: `${String(hour).padStart(2, "0")}h`,
-      tpv: txs.reduce((a, t) => a + Number(t.amount), 0),
-      lucro: txs.reduce((a, t) => a + Number(t.fee_amount), 0),
-      vendas: txs.length,
-    };
-  }), [filteredApproved]);
+  const summaryTotalCount = Number(financialOverview?.summary?.total_count ?? filteredTx.length);
+  const summaryApprovedCount = Number(financialOverview?.summary?.approved_count ?? filteredApproved.length);
+  const conversionRate = summaryTotalCount > 0 ? (summaryApprovedCount / summaryTotalCount * 100).toFixed(1) : "0.0";
+  const rangeLabel = dateRange ? `${dateRange.from.toLocaleDateString("pt-BR")} → ${dateRange.to.toLocaleDateString("pt-BR")}` : "Período selecionado";
 
   const statusLabelMap: Record<string, string> = {
     completed: "Pago", approved: "Pago", pending: "Pendente",
@@ -331,7 +222,6 @@ export default function AdminOverviewTab({
     failed: "destructive", expired: "neutral", refunded: "info", chargeback: "destructive",
   };
 
-  const openDisputes = disputes.filter(d => d.status === "open" || d.status === "in_review").length;
 
   /* ── Employee view ── */
   if (isEmployee) {
@@ -374,8 +264,8 @@ export default function AdminOverviewTab({
       <AdminOverviewMetrics dateRange={dateRange} refreshSignal={financialOverview} onNavigate={onNavigate} />
 
       {/* ── Live activity + Risk alerts ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        <div className="xl:col-span-2">
+      <div className="grid grid-cols-1 gap-5">
+        <div>
           <PremiumPanel
             title="Atividade ao vivo"
             icon={Radio}
@@ -425,51 +315,7 @@ export default function AdminOverviewTab({
       </div>
 
       {/* ── KYC queue + Pending withdrawals ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <PremiumPanel
-          title={`Aprovações KYC (${kycPending.length})`}
-          icon={UserCheck}
-          action={onNavigate && (
-            <button onClick={() => onNavigate("sellers")}
-                    className="inline-flex items-center gap-1 text-[10.5px] font-black uppercase tracking-wider text-primary hover:underline">
-              Ver todos <ArrowUpRight className="h-3 w-3" />
-            </button>
-          )}
-        >
-          {kycPending.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-2 py-10 text-muted-foreground">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border/60 bg-muted/30">
-                <CheckCircle2 className="h-5 w-5 opacity-50" />
-              </div>
-              <p className="text-xs font-bold">Nenhum KYC pendente</p>
-            </div>
-          ) : (
-            <div className="max-h-[340px] overflow-y-auto -mx-2">
-              {kycPending.slice(0, 10).map(p => (
-                <div key={p.id} className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-muted/30">
-                  <button type="button" onClick={() => setKycReview(p)} className="flex-1 min-w-0 text-left">
-                    <p className="truncate text-xs font-black text-foreground">{p.full_name || "Sem nome"}</p>
-                    <p className="truncate text-[10.5px] font-bold text-muted-foreground">{p.email}</p>
-                    <p className="mt-0.5 truncate font-mono text-[10px] text-muted-foreground/70">
-                      {p.document_number || "Sem documento"}
-                    </p>
-                  </button>
-                  <div className="flex shrink-0 gap-1.5">
-                    <button onClick={() => handleKycApprove(p.user_id)}
-                            className="inline-flex h-8 items-center gap-1 rounded-lg border border-success/30 bg-success/10 px-2.5 text-[10.5px] font-black text-success hover:bg-success/15">
-                      <CheckCircle2 className="h-3 w-3" /> Aprovar
-                    </button>
-                    <button onClick={() => setKycReview(p)}
-                            className="inline-flex h-8 items-center gap-1 rounded-lg border border-warning/30 bg-warning/10 px-2.5 text-[10.5px] font-black text-warning hover:bg-warning/15">
-                      <Eye className="h-3 w-3" /> Analisar
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </PremiumPanel>
-
+      <div className="grid grid-cols-1 gap-5">
         <PremiumPanel
           title={`Saques em revisão (${pendingWd.length})`}
           icon={Wallet}
