@@ -1,4 +1,5 @@
 # Admin total — controle manual, métricas, adquirentes e ficha do seller
+- [ ] Analytics: totais completos por período, atividade diária de sellers, clientes, cadastros, riscos e lista paginada por seller; validar autorização e cálculos.
 
 - [x] Centro de comando: agregados exatos, busca validada, oito atalhos, período, atualização e recuperação de falha verificados; 102 testes aprovados. Reduzidas consultas recorrentes, adicionados índices e corrigida chamada autenticada dentro do listener. Registros históricos preservados: ausência de reprodução atual não comprova correção de todas as causas; pagamentos reais continuam sem adquirente configurado.
 
