@@ -1,6 +1,6 @@
 # Architecture Decisions
 
-- Customer support uses a bounded inbox/conversation layout with account-scoped React Query caches and unique realtime subscriptions; scoped theme tokens keep its presentation isolated, and human ticket messages retain existing attachment primitives rather than AI chat elements.
+- Customer support fills the authenticated shell's available space using a flex inbox/conversation layout, not viewport-height caps; account-scoped caches, unique realtime subscriptions and scoped theme tokens preserve isolation, while human ticket messages retain existing attachment primitives.
 
 - Public marketing (`src/components/landing3`) is an always-dark tech system with tokens scoped to `.vx3`, a 2D canvas background that pauses off-tab and goes static under reduced motion, and purely illustrative simulated data (never database queries); authentication defaults light with account-synced dark mode, while checkout keeps its product-defined theme.
 
