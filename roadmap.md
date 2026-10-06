@@ -1,5 +1,7 @@
 # Admin total — controle manual, métricas, adquirentes e ficha do seller
 
+- [ ] Reconstruir suporte compacto e clean: definir direção visual com referência da tela atual e preservar chamados/conversas.
+
 - [x] Motor de saldo, disputas reais, central de disputas, visão 360, auditoria financeira, IA de risco
 - [x] Reembolso (seller/suporte) e MED PIX com congelamento exato
 - [x] Modo manual (padrão): reembolso desconta do seller na hora e cai em "Pendentes de aprovação" (efetivada / não efetivada devolve saldo)
