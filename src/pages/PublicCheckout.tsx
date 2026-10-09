@@ -39,12 +39,6 @@ type PaymentMethod = CheckoutPaymentMethod;
 type CheckoutState = "form" | "pending" | "approved" | "failed" | "expired";
 
 /* ─── Utils ─── */
-function getCheckoutSessionId(slug: string): string {
- const key = `checkout_session_${slug}`;
- let sessionId = sessionStorage.getItem(key);
- if (!sessionId) { sessionId = crypto.randomUUID(); sessionStorage.setItem(key, sessionId); }
- return sessionId;
-}
 function clearCheckoutSession(slug: string) { sessionStorage.removeItem(`checkout_session_${slug}`); }
 
 /* ─── Formatters ─── */
