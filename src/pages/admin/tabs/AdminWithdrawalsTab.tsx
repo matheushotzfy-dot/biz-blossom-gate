@@ -334,12 +334,10 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  if (!user) return;
  const amount = Number(adjustAmount);
  if (amount <= 0) { toast.error("Valor deve ser positivo"); return; }
- const { error } = await supabase.from("balance_adjustments").insert({
- user_id: adjustUserId,
- amount,
- type: adjustType,
- reason: adjustReason.trim(),
- admin_user_id: user.id,
+ if (!Number.isFinite(amount) || amount > 1_000_000) { toast.error("Valor inválido"); return; }
+ // Audited server routine (same as the seller record): validates role and writes the ledger.
+ const { error } = await supabase.rpc("admin_request_balance_adjustment", {
+ _user_id: adjustUserId, _type: adjustType, _amount: amount, _reason: adjustReason.trim(),
  });
  if (error) { toast.error("Erro ao salvar ajuste"); return; }
  toast.success(`Ajuste de ${adjustType === "credit" ? "+" : "-"}${formatCurrency(amount)} aplicado`);

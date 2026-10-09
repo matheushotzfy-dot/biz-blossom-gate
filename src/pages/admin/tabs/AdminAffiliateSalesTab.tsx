@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -33,9 +34,10 @@ export default function AdminAffiliateSalesTab({
 
   useEffect(() => {
     Promise.all([
-      supabase.from("affiliate_sales").select("*").order("created_at", { ascending: false }),
-      supabase.from("affiliate_links").select("*"),
+      supabase.from("affiliate_sales").select("*").order("created_at", { ascending: false }).limit(2000),
+      supabase.from("affiliate_links").select("*").limit(2000),
     ]).then(([salesRes, linksRes]) => {
+      if (salesRes.error || linksRes.error) toast.error("Erro ao carregar afiliados");
       if (salesRes.data) setSales(salesRes.data);
       if (linksRes.data) setLinks(linksRes.data);
     });

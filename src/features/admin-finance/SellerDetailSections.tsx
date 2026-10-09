@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { brl, rpcErrorMessage } from "./types";
+import { logAdminAction } from "@/lib/auditLog";
 
 const Spinner = () => <div className="flex h-24 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-label="Carregando" /></div>;
 const Empty = ({ text }: { text: string }) => <p className="rounded-xl border border-dashed border-border p-6 text-center text-xs text-muted-foreground">{text}</p>;
@@ -71,6 +72,7 @@ export function SellerWithdrawalsSection({ userId, onChanged }: { userId: string
     const { data, error } = await supabase.from("withdrawals").update({ status: "rejected", rejection_reason: reason.slice(0, 500), processed_by: user.id }).eq("id", id).eq("user_id", userId).eq("status", "pending").select("id");
     setBusy(false);
     if (error || !data?.length) { toast.error(error ? rpcErrorMessage(error) : "Saque não está mais pendente"); return; }
+    await logAdminAction("reject_withdrawal", "withdrawal", id, { reason: reason.slice(0, 500) });
     toast.success("Saque recusado; saldo devolvido ao seller"); void qc.invalidateQueries({ queryKey: ["seller-wd", user.id, userId] }); onChanged?.();
   };
   if (q.isLoading) return <Spinner />;

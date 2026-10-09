@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -28,8 +29,8 @@ export default function AdminCouponsTab({ profiles, products, transactions, fmtC
   const [detail, setDetail] = useState<Tables<"coupons"> | null>(null);
 
   useEffect(() => {
-    supabase.from("coupons").select("*").order("created_at", { ascending: false })
-      .then(({ data }) => { if (data) setCoupons(data); });
+    supabase.from("coupons").select("*").order("created_at", { ascending: false }).limit(1000)
+      .then(({ data, error }) => { if (error) { toast.error("Erro ao carregar cupons"); return; } if (data) setCoupons(data); });
   }, []);
 
   const sellerMap = useMemo(() => {
