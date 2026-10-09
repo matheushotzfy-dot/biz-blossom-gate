@@ -664,7 +664,6 @@ export default function CheckoutBuilder() {
  <>
  <SectionHeader icon={Mail} title="Formulário" desc="Campos do formulário do checkout" />
  <ToggleRow icon={Mail} title="Confirmação de e-mail" desc="Pede e-mail 2 vezes" checked={emailConfirm} onChange={setEmailConfirm} />
- <ToggleRow icon={Phone} title="Telefone / WhatsApp" desc="Solicita número" checked={phoneRequired} onChange={setPhoneRequired} />
  <div className="group relative flex items-center justify-between p-3 rounded-xl border border-primary/25 bg-primary/[0.04]">
  <div className="absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-full bg-primary/60" />
  <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -679,7 +678,6 @@ export default function CheckoutBuilder() {
  <span className="text-[11px] font-medium bg-primary/10 text-primary px-2 py-1 rounded-full border border-primary/15">Obrigatório</span>
  </div>
  <ToggleRow icon={MapPin} title="Endereço completo" desc="CEP com auto-preenchimento" checked={addressRequired} onChange={setAddressRequired} />
- <ToggleRow icon={CreditCard} title="Nome no cartão" desc="Campo separado" checked={nameOnCardRequired} onChange={setNameOnCardRequired} badge="Novo" />
  <ConversionTip text="Menos campos = mais conversão. Peça apenas o essencial." icon={MousePointerClick} />
  </>
  )}
@@ -776,38 +774,18 @@ export default function CheckoutBuilder() {
  {/* ── CRO TAB ── */}
  {activeTab === "cro" && (
  <>
- <SectionHeader icon={Zap} title="Conversão" desc="Ferramentas avançadas de CRO" badge="Pro" />
-
- <ToggleRow icon={Video} title="Vídeo de vendas (VSL)" desc="Player no topo do checkout" checked={vslEnabled} onChange={setVslEnabled} />
- {vslEnabled && (
- <Input value={vslUrl} onChange={(e) => setVslUrl(e.target.value)} placeholder="https://youtube.com/embed/..." className="h-9 rounded-lg bg-muted/20 border-border/30 text-xs" />
- )}
-
- <ToggleRow icon={BarChart3} title="Barra de progresso" desc="Mostra etapa atual da compra" checked={progressBarEnabled} onChange={setProgressBarEnabled} />
- <ToggleRow icon={Users} title="Compradores em tempo real" desc="Quantidade fictícia de compradores" checked={fakeViewersEnabled} onChange={setFakeViewersEnabled} />
- <ToggleRow icon={Star} title="Depoimentos" desc="Testemunhos de compradores" checked={testimonialEnabled} onChange={setTestimonialEnabled} />
-
- <ToggleRow icon={Clock} title="Escassez de vagas" desc="Vagas limitadas" checked={scarcityEnabled} onChange={setScarcityEnabled}
- extra={scarcityEnabled ? (
- <Input type="number" min="1" max="999" value={scarcityUnits} onChange={(e) => setScarcityUnits(e.target.value)} className="w-14 h-7 text-center text-[11px] rounded-md bg-muted/20 border-border/30 font-bold" />
- ) : undefined}
- />
-
- <ToggleRow icon={Percent} title="Badge de desconto" desc="Preço original riscado" checked={discountBadgeEnabled} onChange={setDiscountBadgeEnabled} />
- {discountBadgeEnabled && (
- <div className="flex items-center gap-2">
- <span className="text-xs text-muted-foreground shrink-0">De R$</span>
- <Input type="number" value={discountOriginalPrice} onChange={(e) => setDiscountOriginalPrice(e.target.value)} placeholder="297.00" className="h-9 rounded-lg bg-muted/20 border-border/30 text-xs font-bold" />
+ <SectionHeader icon={Zap} title="Conversão" desc="Ferramentas avançadas de CRO" />
+ <div className="rounded-xl border border-dashed border-border/40 bg-muted/10 p-5 text-center space-y-2">
+ <div className="h-9 w-9 mx-auto rounded-lg bg-primary/10 flex items-center justify-center">
+ <Clock className="h-4 w-4 text-primary" />
  </div>
- )}
-
- <ToggleRow icon={ExitIcon} title="Exit intent" desc="Popup ao tentar sair" checked={exitIntentEnabled} onChange={setExitIntentEnabled} badge="Pro" />
- <ToggleRow icon={MessageSquare} title="Botão WhatsApp" desc="Suporte via WhatsApp" checked={whatsappEnabled} onChange={setWhatsappEnabled} />
- {whatsappEnabled && (
- <Input value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} placeholder="5511999999999" className="h-9 rounded-lg bg-muted/20 border-border/30 text-xs" />
- )}
-
- <ToggleRow icon={Lock} title="Selos de confiança" desc="SSL, compra segura, dados criptografados" checked={trustBadgesEnabled} onChange={setTrustBadgesEnabled} badge="Novo" />
+ <p className="text-xs font-semibold text-foreground">Em breve</p>
+ <p className="text-[11px] text-muted-foreground leading-relaxed">
+ Estamos desenvolvendo as ferramentas de CRO (vídeo de vendas, escassez,
+ depoimentos, badges de confiança e mais) com persistência real e
+ aplicação no checkout publicado. Avisaremos quando estiverem disponíveis.
+ </p>
+ </div>
  </>
  )}
  </motion.div>

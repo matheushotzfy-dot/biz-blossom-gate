@@ -402,7 +402,7 @@ export default function CourseBuilder() {
  if (failed) {
  toast.error("Falha ao reordenar aulas. Recarregando...");
  setSaveStatus("idle");
- await loadCourse();
+ await loadAll();
  return;
  }
  setSaveStatus("saved");
