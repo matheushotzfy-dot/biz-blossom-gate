@@ -100,7 +100,7 @@ export default function SaquesCrypto() {
   const [prices, setPrices] = useState<Record<string, CoinPrice>>({});
   const [hidden, setHidden] = useState(() => { try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; } });
   const [search, setSearch] = useState("");
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  __MARK__ = useState<Date | null>(null);
   const [reauthOpen, setReauthOpen] = useState(false);
   const [pendingWithdrawal, setPendingWithdrawal] = useState<Record<string, unknown> | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -123,8 +123,11 @@ export default function SaquesCrypto() {
           }
           setPrices(mapped);
           setLastUpdate(new Date());
+          setPricesError(false);
+        } else {
+          setPricesError(true);
         }
-      } catch { /* silent */ }
+      } catch { setPricesError(true); }
     };
     fetchPrices();
     const interval = setInterval(fetchPrices, 60000);
