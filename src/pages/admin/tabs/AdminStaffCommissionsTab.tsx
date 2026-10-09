@@ -16,6 +16,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid, PremiumPanel, premiumTable, PremiumEmpty } from "./AdminPremium";
 import { friendlyError } from "@/lib/friendlyError";
+import { useSensitiveConfirm } from "@/features/admin-finance/useSensitiveConfirm";
 
 const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -318,6 +319,7 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
   const [newOverrideSeller, setNewOverrideSeller] = useState("");
   const [newOverridePct, setNewOverridePct] = useState("");
   const [newPct, setNewPct] = useState("");
+  const { confirm, dialog: confirmDialog } = useSensitiveConfirm();
 
   useEffect(() => {
     if (!selected) return;
@@ -337,7 +339,7 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
 
   const saveBasePct = async () => {
     const v = parseFloat(newPct);
-    if (!Number.isFinite(v)) return;
+    if (!Number.isFinite(v) || v < 0 || v > 100) { toast.error("% deve estar entre 0 e 100"); return; }
     const { error } = await supabase.from("staff_commission_config").upsert({
       user_id: selected.user_id, base_pct: v, base: "net_amount", is_active: true,
     });
@@ -348,8 +350,10 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
 
   const addOverride = async () => {
     if (!newOverrideSeller || !newOverridePct) return;
+    const pctValue = parseFloat(newOverridePct);
+    if (!Number.isFinite(pctValue) || pctValue < 0 || pctValue > 100) { toast.error("% override deve estar entre 0 e 100"); return; }
     const { error } = await supabase.from("staff_commission_overrides").insert({
-      staff_user_id: selected.user_id, seller_user_id: newOverrideSeller, pct: parseFloat(newOverridePct),
+      staff_user_id: selected.user_id, seller_user_id: newOverrideSeller, pct: pctValue,
     });
     if (error) { toast.error(friendlyError(error)); return; }
     setNewOverrideSeller(""); setNewOverridePct("");
@@ -364,9 +368,14 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
     toast.success("Override removido");
   };
 
-  const createPayout = async () => {
+  const createPayout = () => {
     const v = parseFloat(payoutAmount);
     if (!Number.isFinite(v) || v <= 0) { toast.error("Valor inválido"); return; }
+    if (v > selected.balance) { toast.error("Valor não pode exceder o saldo a pagar"); return; }
+    confirm(`Registrar pagamento de ${fmt(v)} para ${selected.full_name}.`, () => executeCreatePayout(v));
+  };
+
+  const executeCreatePayout = async (v: number) => {
     const { error } = await supabase.from("staff_commission_payouts").insert({
       staff_user_id: selected.user_id, amount: v, method: payoutMethod, notes: payoutNotes, status: "pending",
     });
@@ -632,6 +641,7 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
           )}
         </div>
       </DialogContent>
+      {confirmDialog}
     </Dialog>
   );
 }

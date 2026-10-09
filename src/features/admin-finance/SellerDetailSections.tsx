@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { brl, rpcErrorMessage } from "./types";
 import { logAdminAction } from "@/lib/auditLog";
+import { useSensitiveConfirm } from "./useSensitiveConfirm";
 
 const Spinner = () => <div className="flex h-24 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-label="Carregando" /></div>;
 const Empty = ({ text }: { text: string }) => <p className="rounded-xl border border-dashed border-border p-6 text-center text-xs text-muted-foreground">{text}</p>;
@@ -59,15 +60,19 @@ export function SellerWithdrawalsSection({ userId, onChanged }: { userId: string
   const [reasons, setReasons] = useState<Record<string, string>>({});
   const [page, setPage] = useState(0);
   const [busy, setBusy] = useState(false);
+  const { confirm, dialog } = useSensitiveConfirm();
   const q = useQuery({ queryKey: ["seller-wd", user?.id, userId, page], staleTime: 30000, queryFn: async () => {
     const { data, error } = await supabase.from("withdrawals").select("id,amount,fee_amount,net_amount,status,created_at,processed_at,rejection_reason,withdrawal_type,pix_key_id,pix_keys(key_type,key_value)").eq("user_id", userId).order("created_at", { ascending: false }).order("id").range(page * 25, page * 25 + 24);
     if (error) throw new Error(rpcErrorMessage(error)); return data;
   } });
-  const reject = async (id: string) => {
+  const reject = (id: string) => {
     if (!user || busy) return;
     const reason = reasons[id]?.trim() ?? "";
     if (reason.length < 5) { toast.error("Motivo da recusa obrigatório (mín. 5 caracteres)"); return; }
-    if (!window.confirm("Recusar este saque e devolver a reserva ao seller?")) return;
+    confirm("Recusar este saque e devolver a reserva ao seller?", () => executeReject(id, reason));
+  };
+  const executeReject = async (id: string, reason: string) => {
+    if (!user) return;
     setBusy(true);
     const { data, error } = await supabase.from("withdrawals").update({ status: "rejected", rejection_reason: reason.slice(0, 500), processed_by: user.id }).eq("id", id).eq("user_id", userId).eq("status", "pending").select("id");
     setBusy(false);
@@ -94,11 +99,12 @@ export function SellerWithdrawalsSection({ userId, onChanged }: { userId: string
             {w.status === "pending" && (
               <div className="flex flex-col gap-1 md:w-64">
                 <Input placeholder="Motivo da recusa" maxLength={500} value={reasons[w.id] ?? ""} onChange={(e) => setReasons((r) => ({ ...r, [w.id]: e.target.value }))} />
-                <Button size="sm" variant="outline" disabled={busy || (reasons[w.id]?.trim().length ?? 0) < 5} onClick={() => void reject(w.id)}>Recusar saque</Button>
+                <Button size="sm" variant="outline" disabled={busy || (reasons[w.id]?.trim().length ?? 0) < 5} onClick={() => reject(w.id)}>Recusar saque</Button>
               </div>)}
           </div>);
       })}
       <div className="flex justify-between"><Button variant="outline" size="sm" disabled={!page || q.isFetching} onClick={() => setPage(value => value - 1)}>Anterior</Button><span>Página {page + 1}</span><Button variant="outline" size="sm" disabled={rows.length < 25 || q.isFetching} onClick={() => setPage(value => value + 1)}>Próxima</Button></div>
+      {dialog}
     </div>
   );
 }

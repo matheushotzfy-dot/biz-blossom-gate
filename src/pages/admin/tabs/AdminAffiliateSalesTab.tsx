@@ -31,6 +31,7 @@ export default function AdminAffiliateSalesTab({
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"affiliates" | "products">("affiliates");
   const [affiliateDetail, setAffiliateDetail] = useState<string | null>(null);
+  const [truncated, setTruncated] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -40,6 +41,7 @@ export default function AdminAffiliateSalesTab({
       if (salesRes.error || linksRes.error) toast.error("Erro ao carregar afiliados");
       if (salesRes.data) setSales(salesRes.data);
       if (linksRes.data) setLinks(linksRes.data);
+      setTruncated((salesRes.data?.length === 2000) || (linksRes.data?.length === 2000));
     });
   }, []);
 
@@ -176,6 +178,11 @@ export default function AdminAffiliateSalesTab({
         subtitle={`${uniqueAffiliates} afiliados cadastrados · ${activeAffiliates} com vendas · ${fmtCurrency(totalCommissions)} em comissões`}
       />
 
+      {truncated && (
+        <div className="rounded-xl border border-warning/30 bg-warning/10 px-4 py-2 text-xs font-semibold text-warning">
+          Mostrando os 2000 registros mais recentes; totais podem estar incompletos
+        </div>
+      )}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <AdminKpi icon={<Users className="h-4 w-4" />} label="Afiliados" value={String(uniqueAffiliates)} sub={`${activeAffiliates} vendendo`} gradient="from-violet-600 to-purple-700" glowColor="rgba(139,92,246,0.2)" />
         <AdminKpi icon={<Link2 className="h-4 w-4" />} label="Links Ativos" value={String(links.filter(l => l.is_active).length)} sub={`${links.length} total`} gradient="from-indigo-600 to-indigo-700" glowColor="rgba(99,102,241,0.2)" />

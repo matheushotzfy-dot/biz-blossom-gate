@@ -145,6 +145,7 @@ export default function Assinaturas() {
   const pastDueCount = subs.filter(s => s.status === "past_due").length;
   const canceledCount = subs.filter(s => s.status === "canceled").length;
   const activePlans = plans.filter(p => p.is_active).length;
+  const orphanSubsCount = subs.filter(s => !plans.some(p => p.id === s.plan_id)).length;
 
   const mrr = activeSubs.reduce((acc, s) => {
     const plan = plans.find(p => p.id === s.plan_id);
@@ -286,6 +287,13 @@ export default function Assinaturas() {
           tone={pastDueCount > 0 ? "warning" : "neutral"}
         />
       </div>
+
+      {orphanSubsCount > 0 && (
+        <div className="flex items-center gap-2 rounded-xl border border-warning/30 bg-warning/10 px-4 py-2.5 text-[12px] font-medium text-warning animate-fade-in">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+          {orphanSubsCount} {orphanSubsCount === 1 ? "assinatura está" : "assinaturas estão"} vinculada{orphanSubsCount === 1 ? "" : "s"} a um plano que não existe mais.
+        </div>
+      )}
 
       {/* ═══════ SEGMENT CONTROL + SEARCH ═══════ */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 animate-fade-in stagger-2">

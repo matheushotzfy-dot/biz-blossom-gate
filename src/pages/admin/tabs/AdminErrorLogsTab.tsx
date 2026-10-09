@@ -133,12 +133,20 @@ export default function AdminErrorLogsTab({ profiles }: Props) {
 
   const clearAll = async () => {
     setBusy(true);
-    // delete-all needs a where clause
-    const { error } = await supabase.from("error_logs").delete().gte("created_at", "1970-01-01");
+    let totalDeleted = 0;
+    for (;;) {
+      const { data: ids, error: selErr } = await supabase.from("error_logs").select("id").limit(1000);
+      if (selErr) { toast.error("Erro: " + friendlyError(selErr)); break; }
+      if (!ids || ids.length === 0) break;
+      const { error: delErr } = await supabase.from("error_logs").delete().in("id", ids.map((r) => r.id));
+      if (delErr) { toast.error("Erro ao apagar lote: " + friendlyError(delErr)); break; }
+      totalDeleted += ids.length;
+      toast.message(`${totalDeleted} log(s) apagados até agora…`);
+      if (ids.length < 1000) break;
+    }
     setBusy(false); setConfirmAction(null);
-    if (error) { toast.error("Erro: " + friendlyError(error)); return; }
-    toast.success("Todos os logs foram apagados");
-    await logAdminAction("error_logs_clear_all", "error_logs", null, { count: errors.length });
+    toast.success(`${totalDeleted} log(s) apagados`);
+    await logAdminAction("error_logs_clear_all", "error_logs", null, { count: totalDeleted });
     load();
   };
 

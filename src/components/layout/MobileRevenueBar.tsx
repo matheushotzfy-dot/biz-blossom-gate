@@ -20,7 +20,10 @@ export function MobileRevenueBar() {
  const { profile } = useProfile();
  const navigate = useNavigate();
  const unreadCount = useNotificationCount();
- const range = useMemo(() => ({ from: new Date(0), to: new Date() }), []);
+ const range = useMemo(() => {
+  const now = new Date();
+  return { from: new Date(now.getFullYear(), now.getMonth(), 1), to: now };
+ }, []);
  const { data: stats, isLoading: loading } = useDashboardStats(range.from, range.to, "month");
  const revenue = Number(stats?.current?.revenue || 0);
  const [notifOpen, setNotifOpen] = useState(false);
