@@ -911,52 +911,9 @@ export default function CheckoutBuilder() {
  <img src={previewMode === "desktop" ? bannerDesktopPreview : bannerMobilePreview} alt="Banner" className="w-full h-32 object-cover" />
  )}
 
- {/* VSL */}
- {vslEnabled && vslUrl && (
- <div className="p-5 pb-0">
- <div className="aspect-video rounded-xl bg-gray-900 flex items-center justify-center">
- <div className="flex flex-col items-center gap-2 text-gray-400">
- <Video className="h-8 w-8" />
- <span className="text-[10px]">Vídeo de vendas</span>
- </div>
- </div>
- </div>
- )}
 
- {/* Progress bar */}
- {progressBarEnabled && (
- <div className="px-5 pt-5">
- <div className="flex items-center gap-2 text-[11px] font-semibold text-gray-700 mb-2">
- <span className="h-5 w-5 rounded-full text-white flex items-center justify-center text-[9px] font-bold" style={{ backgroundColor: buttonColor }}>1</span>
- Você está a 1 passo da sua vaga
- </div>
- <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
- <motion.div initial={{ width: 0 }} animate={{ width: "66%" }} transition={{ duration: 1.2 }} className="h-full rounded-full" style={{ background: `linear-gradient(90deg, ${buttonColor}, ${buttonColor}99)` }} />
- </div>
- </div>
- )}
 
- {/* Fake viewers */}
- {fakeViewersEnabled && (
- <div className="px-5 pt-4">
- <div className="inline-flex items-center gap-2 text-[11px] font-bold rounded-lg bg-orange-500/10 text-orange-600 px-3 py-2 border border-orange-500/15">
- <span className="relative flex h-2 w-2">
- <span className="animate-ping absolute h-full w-full rounded-full bg-orange-500 opacity-75" />
- <span className="relative rounded-full h-2 w-2 bg-orange-500" />
- </span>
- 14 pessoas comprando agora
- </div>
- </div>
- )}
 
- {/* Scarcity */}
- {scarcityEnabled && (
- <div className="px-5 pt-4">
- <div className="flex items-center gap-2 text-[11px] font-bold text-red-600 bg-red-500/10 rounded-lg py-2 px-3 border border-red-500/15">
- <Clock className="h-3.5 w-3.5" /> Apenas {scarcityUnits} vagas restantes
- </div>
- </div>
- )}
 
  {/* Timer */}
  {timerEnabled && (
@@ -967,15 +924,6 @@ export default function CheckoutBuilder() {
  </div>
  )}
 
- {/* Discount badge */}
- {discountBadgeEnabled && discountOriginalPrice && (
- <div className="px-5 pt-4">
- <div className="inline-flex items-center gap-2 text-[11px] font-bold bg-emerald-500/10 text-emerald-600 px-3 py-2 rounded-lg border border-emerald-500/15">
- <Percent className="h-3 w-3" />
- De <span className="line-through text-gray-400">R$ {Number(discountOriginalPrice).toFixed(2)}</span> por <span className="font-black">R$ {Number(product?.price || 0).toFixed(2)}</span>
- </div>
- </div>
- )}
 
  <div className="p-5 space-y-4">
  {/* Product info */}
@@ -993,26 +941,6 @@ export default function CheckoutBuilder() {
  </div>
  </div>
 
- {/* Testimonials */}
- {testimonialEnabled && (
- <div className="space-y-2">
- {[
- { name: "Maria S.", text: "Melhor investimento que fiz!", rating: 5 },
- { name: "João P.", text: "Conteúdo incrível, recomendo!", rating: 5 },
- ].map((t, i) => (
- <div key={i} className="p-3 rounded-lg bg-white border border-gray-100 ">
- <div className="flex items-center gap-2 mb-1">
- <div className="h-5 w-5 rounded-full bg-amber-400/15 flex items-center justify-center text-[8px] font-bold text-amber-500">{t.name[0]}</div>
- <div className="flex gap-0.5">
- {Array.from({ length: t.rating }).map((_, j) => <Star key={j} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />)}
- </div>
- <span className="text-[10px] font-medium text-gray-500">{t.name}</span>
- </div>
- <p className="text-[11px] text-gray-500 italic pl-7">"{t.text}"</p>
- </div>
- ))}
- </div>
- )}
 
  {/* Social proof */}
  {socialProof && (
@@ -1031,9 +959,7 @@ export default function CheckoutBuilder() {
  <PreviewField label="Nome completo" theme={checkoutTheme} />
  <PreviewField label="E-mail" theme={checkoutTheme} />
  {emailConfirm && <PreviewField label="Confirme seu e-mail" theme={checkoutTheme} />}
- {phoneRequired && <PreviewField label="WhatsApp" theme={checkoutTheme} />}
  {cpfRequired && <PreviewField label="CPF / CNPJ" theme={checkoutTheme} />}
- {nameOnCardRequired && creditCardEnabled && <PreviewField label="Nome impresso no cartão" theme={checkoutTheme} />}
  {addressRequired && (
  <div className="grid grid-cols-3 gap-2">
  <PreviewField label="CEP" theme={checkoutTheme} />
@@ -1097,23 +1023,6 @@ export default function CheckoutBuilder() {
  <Lock className="h-4 w-4" /> COMPRAR AGORA
  </button>
 
- {/* Trust badges */}
- {trustBadgesEnabled && (
- <div className="flex items-center justify-center gap-5 py-2">
- {[
- { icon: Lock, label: "SSL Seguro" },
- { icon: ShieldCheck, label: "Compra Protegida" },
- { icon: CreditCard, label: "Dados Criptografados" },
- ].map((b, i) => (
- <div key={i} className="flex flex-col items-center gap-1">
- <div className="h-6 w-6 rounded-md bg-gray-100 flex items-center justify-center border border-gray-200">
- <b.icon className="h-3 w-3 text-gray-400" />
- </div>
- <span className="text-[11px] font-medium text-gray-400 ">{b.label}</span>
- </div>
- ))}
- </div>
- )}
 
  {/* Guarantee */}
  {guaranteeEnabled && (
@@ -1122,24 +1031,8 @@ export default function CheckoutBuilder() {
  </div>
  )}
 
- {/* WhatsApp */}
- {whatsappEnabled && (
- <div className="flex items-center justify-center">
- <div className="inline-flex items-center gap-2 text-[11px] font-bold text-emerald-600 bg-emerald-500/10 px-4 py-2 rounded-lg border border-emerald-500/15">
- <MessageSquare className="h-3.5 w-3.5" /> Dúvidas? Fale no WhatsApp
- </div>
- </div>
- )}
  </div>
 
- {/* Exit intent indicator */}
- {exitIntentEnabled && (
- <div className="border-t border-gray-200 p-3 bg-gray-50 text-center">
- <p className="text-[10px] text-gray-400 font-medium flex items-center justify-center gap-1.5">
- <ExitIcon className="h-3 w-3" /> Exit Intent ativo
- </p>
- </div>
- )}
  </div>
  </motion.div>
  </div>
