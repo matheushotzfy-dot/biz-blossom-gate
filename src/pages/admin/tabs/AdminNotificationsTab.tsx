@@ -57,9 +57,9 @@ export default function AdminNotificationsTab({ profiles }: Props) {
 
   const loadStats = async () => {
     const [totalRes, globalRes, readRes] = await Promise.all([
-      supabase.from("notifications").select("id", { count: "exact", head: true }),
-      supabase.from("notifications").select("id", { count: "exact", head: true }).is("user_id", null),
-      supabase.from("notifications").select("id", { count: "exact", head: true }).eq("is_read", true),
+      supabase.from("notifications").select("id", { count: "estimated", head: true }),
+      supabase.from("notifications").select("id", { count: "estimated", head: true }).is("user_id", null),
+      supabase.from("notifications").select("id", { count: "estimated", head: true }).eq("is_read", true),
     ]);
     const total = totalRes.count || 0;
     const global = globalRes.count || 0;
@@ -69,7 +69,7 @@ export default function AdminNotificationsTab({ profiles }: Props) {
   const loadNotifications = async () => {
   setLoading(true);
   const from = (page - 1) * PAGE_SIZE;
-  let query = supabase.from("notifications").select("*", { count: "exact" }).order("created_at", { ascending: false });
+  let query = supabase.from("notifications").select("*", { count: "estimated" }).order("created_at", { ascending: false });
   const q = search.trim().replace(/[%,()*\\]/g, " ").trim();
   if (q) query = query.or(`title.ilike.%${q}%,message.ilike.%${q}%`);
   const { data, error, count } = await query.range(from, from + PAGE_SIZE - 1);

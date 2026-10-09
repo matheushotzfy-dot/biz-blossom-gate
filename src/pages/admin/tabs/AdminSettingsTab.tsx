@@ -343,6 +343,7 @@ export default function AdminSettingsTab() {
  created_by: user.id,
  });
  if (error) { toast.error("Erro ao enviar"); return; }
+ await logAdminAction("send_notification", "notification", notifTarget === "all" ? null : notifTarget, { title: notifTitle, type: notifType, target: notifTarget });
  toast.success("Notificação enviada!");
  setNotifTitle("");
  setNotifMessage("");

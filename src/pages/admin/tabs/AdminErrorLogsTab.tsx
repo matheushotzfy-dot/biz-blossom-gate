@@ -110,25 +110,24 @@ export default function AdminErrorLogsTab({ profiles }: Props) {
 
   const resolveAll = async () => {
     setBusy(true);
-    const openIds = errors.filter(e => !e.resolved).map(e => e.id);
-    if (openIds.length === 0) { setBusy(false); setConfirmAction(null); return; }
-    const { error } = await supabase.from("error_logs").update({ resolved: true }).in("id", openIds);
+    // Server-side scope: resolves every open error, not only the rows loaded on screen.
+    const { data, error } = await supabase.from("error_logs").update({ resolved: true }).eq("resolved", false).select("id");
     setBusy(false); setConfirmAction(null);
     if (error) { toast.error("Erro: " + friendlyError(error)); return; }
-    toast.success(`${openIds.length} erro(s) resolvido(s)`);
-    await logAdminAction("error_logs_resolve_all", "error_logs", null, { count: openIds.length });
+    const n = data?.length ?? 0;
+    toast.success(`${n} erro(s) resolvido(s)`);
+    await logAdminAction("error_logs_resolve_all", "error_logs", null, { count: n });
     load();
   };
 
   const clearResolved = async () => {
     setBusy(true);
-    const ids = errors.filter(e => e.resolved).map(e => e.id);
-    if (ids.length === 0) { setBusy(false); setConfirmAction(null); return; }
-    const { error } = await supabase.from("error_logs").delete().in("id", ids);
+    const { data, error } = await supabase.from("error_logs").delete().eq("resolved", true).select("id");
     setBusy(false); setConfirmAction(null);
     if (error) { toast.error("Erro: " + friendlyError(error)); return; }
-    toast.success(`${ids.length} resolvido(s) apagado(s)`);
-    await logAdminAction("error_logs_clear_resolved", "error_logs", null, { count: ids.length });
+    const n = data?.length ?? 0;
+    toast.success(`${n} resolvido(s) apagado(s)`);
+    await logAdminAction("error_logs_clear_resolved", "error_logs", null, { count: n });
     load();
   };
 
