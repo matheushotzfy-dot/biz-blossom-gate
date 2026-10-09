@@ -207,7 +207,8 @@ Deno.serve(async (req) => {
         || "0.0.0.0";
       const country = req.headers.get("cf-ipcountry") || null;
       const ua = req.headers.get("user-agent") || null;
-      await adminClient.from("profiles").update({ last_ip: ip } as any).eq("user_id", userId);
+      // Only write when the IP actually changed (avoids a profile row lock on every login).
+      await adminClient.from("profiles").update({ last_ip: ip } as any).eq("user_id", userId).or(`last_ip.is.null,last_ip.neq.${ip}`);
       const { data: last } = await adminClient
         .from("ip_logs")
         .select("ip")

@@ -32,3 +32,5 @@
 - [ ] Tornar permissões de staff/gerente efetivas nas rotinas antigas fora de carteira, taxas, notas, saques e transações; estes fluxos críticos já estão temporalmente protegidos.
 - [x] Migrar segredos de integrações para armazenamento criptografado e leitura mascarada no navegador
 - [ ] Paginar cargas globais e históricos restantes do admin
+
+- [ ] Revisão aba por aba do admin (Etapa 2 do plano) — em lotes, a fazer
