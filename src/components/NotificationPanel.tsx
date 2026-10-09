@@ -245,18 +245,21 @@ export function useNotificationCount() {
 
   useEffect(() => {
     if (!user) return;
-    const load = () => {
+    // Debounced: bursts of inserts trigger one count, not one per event.
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const run = () => {
       Promise.all([
         supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false),
         supabase.from("notifications").select("id", { count: "exact", head: true }).is("user_id", null).eq("is_read", false),
       ]).then(([a, b]) => setCount((a.count || 0) + (b.count || 0)));
     };
-    load();
+    const load = () => { clearTimeout(timer); timer = setTimeout(run, 800); };
+    run();
     const channel = supabase
       .channel(uniqueChannelName(`notif-count-${user.id}`))
-      .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, () => load())
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { clearTimeout(timer); supabase.removeChannel(channel); };
   }, [user]);
 
   return count;

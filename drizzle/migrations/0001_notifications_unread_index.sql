@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_notifications_unread_user ON public.notifications (user_id) WHERE is_read = false;

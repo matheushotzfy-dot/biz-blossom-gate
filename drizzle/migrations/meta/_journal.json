@@ -8,6 +8,13 @@
       "when": 1791577967281,
       "tag": "0000_staff_review_kyc_and_notes_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791578495258,
+      "tag": "0001_notifications_unread_index",
+      "breakpoints": true
     }
   ]
 }
