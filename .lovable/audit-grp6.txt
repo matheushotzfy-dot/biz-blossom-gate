@@ -1,0 +1,11 @@
+src/pages/vendas/CheckoutBuilder.tsx
+src/pages/vendas/CheckoutWhatsApp.tsx
+src/pages/vendas/Conteudo.tsx
+src/pages/vendas/Coproducoes.tsx
+src/pages/vendas/CourseBuilder.tsx
+src/pages/vendas/Cupons.tsx
+src/pages/vendas/DashboardAfiliado.tsx
+src/pages/vendas/Documentacao.tsx
+src/pages/vendas/FunilVendas.tsx
+src/pages/vendas/LinkPagamento.tsx
+src/pages/vendas/ProductEditor.tsx
