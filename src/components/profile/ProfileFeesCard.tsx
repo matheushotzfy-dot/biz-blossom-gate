@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { PixLogoMark } from "@/components/icons/PixLogoMark";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 /** Compact fees card sized to one profile grid cell. Read-only; mirrors Taxas fee resolution. */
 type CustomFees = Record<
@@ -28,9 +29,15 @@ export function ProfileFeesCard() {
       .select("pix_percentage, pix_fixed, card_percentage, card_fixed, boleto_percentage, boleto_fixed, withdrawal_fee")
       .eq("user_id", user.id)
       .maybeSingle()
-      .then(({ data }) => setCustom((data as CustomFees) ?? null));
+      .then(({ data, error }) => {
+        if (error) { toast.error("Não foi possível carregar suas taxas personalizadas"); return; }
+        setCustom((data as CustomFees) ?? null);
+      });
     supabase.from("profiles").select("pix_enabled, credit_card_enabled, boleto_enabled").eq("user_id", user.id).maybeSingle()
-      .then(({ data }) => data && setMethods({ pix: data.pix_enabled, card: data.credit_card_enabled, boleto: data.boleto_enabled }));
+      .then(({ data, error }) => {
+        if (error) { toast.error("Não foi possível carregar seus métodos de pagamento"); return; }
+        if (data) setMethods({ pix: data.pix_enabled, card: data.credit_card_enabled, boleto: data.boleto_enabled });
+      });
   }, [user?.id]);
 
   const pf = (name: string, def = 0) => {

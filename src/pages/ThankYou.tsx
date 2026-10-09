@@ -185,7 +185,7 @@ export default function ThankYou() {
  <p className="text-sm font-bold text-foreground truncate">{offer.name}</p>
  <p className="text-xs text-warning font-bold">{fmt(offer.price)}</p>
  </div>
- <a href={offer.checkout_url || `/pay/${offer.id}`}
+ <a href={offer.checkout_url && (offer.checkout_url.startsWith("https://") || offer.checkout_url.startsWith("/")) ? offer.checkout_url : `/pay/${offer.id}`}
  className={cn("shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all", "bg-warning text-warning-foreground hover:opacity-90 shadow-sm")}>
  Quero!
  </a>

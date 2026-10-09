@@ -37,6 +37,7 @@ export default function DashboardAfiliado() {
  supabase.from("affiliate_links").select("*").eq("affiliate_user_id", user.id),
  supabase.from("affiliate_sales").select("*").eq("affiliate_user_id", user.id).order("created_at", { ascending: false }),
  ]);
+ if (linksRes.error || salesRes.error) toast.error("Não foi possível carregar seus dados de afiliado");
  const myLinks = (linksRes.data || []) as AffLink[];
  setLinks(myLinks);
  setSales((salesRes.data || []) as AffSale[]);

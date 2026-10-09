@@ -101,6 +101,7 @@ export default function SaquesCrypto() {
   const [hidden, setHidden] = useState(() => { try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; } });
   const [search, setSearch] = useState("");
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [pricesError, setPricesError] = useState(false);
   const [reauthOpen, setReauthOpen] = useState(false);
   const [pendingWithdrawal, setPendingWithdrawal] = useState<Record<string, unknown> | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -123,8 +124,11 @@ export default function SaquesCrypto() {
           }
           setPrices(mapped);
           setLastUpdate(new Date());
+          setPricesError(false);
+        } else {
+          setPricesError(true);
         }
-      } catch { /* silent */ }
+      } catch { setPricesError(true); }
     };
     fetchPrices();
     const interval = setInterval(fetchPrices, 60000);
@@ -537,7 +541,7 @@ export default function SaquesCrypto() {
               <h2 className="text-[12px] font-display font-black text-foreground tracking-[-0.01em]">Cotações ao vivo</h2>
             </div>
             <p className="text-[10px] text-muted-foreground font-medium tabular-nums">
-              {lastUpdate ? `Atualizado às ${format(lastUpdate, "HH:mm:ss")}` : "Carregando..."}
+              {pricesError && !lastUpdate ? "Cotação indisponível no momento. Nova tentativa em 1 minuto." : lastUpdate ? `Atualizado às ${format(lastUpdate, "HH:mm:ss")}` : "Carregando..."}
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

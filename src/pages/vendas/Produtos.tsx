@@ -135,7 +135,7 @@ export default function Produtos() {
     if (!user || draftIds.length === 0) return;
     setClearingDrafts(true);
     // Drafts can be hard-deleted (no sales history)
-    const { error } = await supabase.from("products").delete().in("id", draftIds).eq("user_id", user.id);
+    const { error } = await supabase.from("products").delete().in("id", draftIds).eq("user_id", user.id).eq("status", "draft");
     setClearingDrafts(false);
     setClearDraftsOpen(false);
     if (error) { toast.error("Erro ao limpar rascunhos"); return; }

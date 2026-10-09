@@ -627,27 +627,27 @@ export default function Vendas() {
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              {Array.from({ length: totalPages }).slice(0, 7).map((_, idx) => {
-                let pageNum = idx + 1;
-                if (totalPages > 7) {
-                  if (currentPage > 4) pageNum = currentPage - 3 + idx;
-                  if (pageNum > totalPages) pageNum = totalPages - (6 - idx);
-                }
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setPage(pageNum)}
-                    className={cn(
- "h-8 min-w-8 px-2.5 rounded-md text-[11px] font-black tabular-nums transition-colors border",
-                      pageNum === currentPage
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-card text-foreground/70 border-border/60 hover:bg-muted/50"
-                    )}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
+              {(() => {
+                const start = Math.max(1, Math.min(currentPage - 3, totalPages - 6));
+                return Array.from({ length: 7 }).map((_, idx) => {
+                  const pageNum = start + idx;
+                  if (pageNum > totalPages) return null;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setPage(pageNum)}
+                      className={cn(
+   "h-8 min-w-8 px-2.5 rounded-md text-[11px] font-black tabular-nums transition-colors border",
+                        pageNum === currentPage
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-card text-foreground/70 border-border/60 hover:bg-muted/50"
+                      )}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                });
+              })()}
               <Button
                 variant="outline"
                 size="sm"

@@ -59,7 +59,10 @@ export default function AdminReferralsTab({ profiles = [], fmtCurrency }: Props)
     const to = from + PAGE_SIZE - 1;
     let query = supabase.from("referrals").select("*", { count: "exact" }).order("created_at", { ascending: false });
     if (statusFilter !== "all") query = query.eq("status", statusFilter);
-    if (debouncedSearch) query = query.ilike("referred_email", `%${debouncedSearch}%`);
+    if (debouncedSearch) {
+      const safe = debouncedSearch.replace(/[%,()*\\]/g, "");
+      query = query.ilike("referred_email", `%${safe}%`);
+    }
     const { data, error: err, count } = await query.range(from, to);
     if (err) { setError(err.message); setLoading(false); return; }
     setItems(data || []);

@@ -1,0 +1,17 @@
+src/pages/admin/tabs/AdminRiskComplianceTab.tsx
+src/pages/admin/tabs/AdminSellersTab.tsx
+src/pages/admin/tabs/AdminSettingsTab.tsx
+src/pages/admin/tabs/AdminStaffCommissionsTab.tsx
+src/pages/admin/tabs/AdminSubscriptionsTab.tsx
+src/pages/admin/tabs/AdminSupportTab.tsx
+src/pages/admin/tabs/AdminToolsTab.tsx
+src/pages/admin/tabs/AdminTopProductsTab.tsx
+src/pages/admin/tabs/AdminTopSellersTab.tsx
+src/pages/admin/tabs/AdminTransactionsTab.tsx
+src/pages/admin/tabs/AdminWithdrawalsTab.tsx
+src/pages/admin/tabs/SecurityFindingsPanel.tsx
+src/pages/admin/tabs/StaffManagementTab.tsx
+src/pages/financeiro/Antecipacao.tsx
+src/pages/financeiro/ConfigFinanceiro.tsx
+src/pages/financeiro/ControleGastos.tsx
+src/pages/financeiro/DadosBancarios.tsx

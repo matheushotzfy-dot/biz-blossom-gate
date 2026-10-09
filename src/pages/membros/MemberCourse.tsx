@@ -10,13 +10,14 @@ import {
   Play, CheckCircle2, ChevronDown, BookOpen, Clock,
   ArrowLeft, ArrowRight, FileText, Video, ChevronLeft, List,
   Award, X, Check, Layers, GraduationCap, Maximize2, Minimize2,
-  Trophy, Download, Paperclip, ExternalLink, MessageCircle, StickyNote,
+  Download, Paperclip, ExternalLink, MessageCircle, StickyNote,
   Keyboard, Settings, Share2, Heart, SkipForward, Volume2, ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { LessonComments } from "@/components/member/LessonComments";
+import { extractYouTubeId, extractVimeoId, isAllowedVideoUrl } from "@/lib/videoUrl";
 import { LessonQuiz } from "@/components/member/LessonQuiz";
 import { LessonNotes } from "@/components/member/LessonNotes";
 
@@ -28,29 +29,13 @@ type Attachment = { id: string; file_name: string; file_url: string; file_size: 
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-function extractYouTubeId(url: string): string | null {
-  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?\s]+)/);
-  return m ? m[1] : null;
-}
-function extractVimeoId(url: string): string | null {
-  const m = url.match(/vimeo\.com\/(\d+)/);
-  return m ? m[1] : null;
-}
-function isAllowedVideoUrl(url: string): boolean {
-  try {
-    const u = new URL(url);
-    const allowed = ['youtube.com', 'www.youtube.com', 'youtu.be', 'player.vimeo.com', 'vimeo.com', 'www.vimeo.com', 'fast.wistia.net', 'player.hotmart.com', 'cdn.embedly.com', 'iframe.mediadelivery.net'];
-    return u.protocol === 'https:' && allowed.some(d => u.hostname === d || u.hostname.endsWith('.' + d));
-  } catch { return false; }
-}
-
 function VideoPlayer({ url }: { url: string }) {
   const ytId = extractYouTubeId(url);
   if (ytId) return <iframe src={`https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&autoplay=1`} className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />;
   const vimeoId = extractVimeoId(url);
   if (vimeoId) return <iframe src={`https://player.vimeo.com/video/${vimeoId}?byline=0&portrait=0&autoplay=1`} className="w-full h-full" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />;
-  if (!isAllowedVideoUrl(url)) return <div className="w-full h-full flex items-center justify-center bg-zinc-950 text-zinc-500 text-sm font-display font-bold">URL de vídeo não suportada</div>;
-  return <iframe src={url} className="w-full h-full" allowFullScreen sandbox="allow-scripts allow-same-origin" />;
+  if (!isAllowedVideoUrl(url)) return <div className="w-full h-full flex items-center justify-center bg-zinc-950 text-zinc-500 text-sm font-display font-bold">Vídeo indisponível</div>;
+  return <iframe src={url} className="w-full h-full" allowFullScreen sandbox="allow-scripts allow-same-origin allow-presentation" />;
 }
 
 export default function MemberCourse() {
@@ -65,9 +50,6 @@ export default function MemberCourse() {
   const [theaterMode, setTheaterMode] = useState(false);
   const [activeTab, setActiveTab] = useState<"aula" | "materiais" | "comentarios" | "anotacoes">("aula");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const [showCelebration, setShowCelebration] = useState(false);
-  const [certificate, setCertificate] = useState<{ code: string } | null>(null);
-
   useEffect(() => { if (courseId && user) loadCourse(); }, [courseId, user]);
 
   useEffect(() => {
@@ -462,21 +444,6 @@ export default function MemberCourse() {
         </div>
       </main>
 
-      {/* Celebration Overlay */}
-      <AnimatePresence>
-        {showCelebration && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-10 text-center">
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
-              <Trophy className="h-32 w-32 text-emerald-400 mx-auto mb-10" />
-              <h2 className="text-6xl font-display font-bold mb-4">Incrível!</h2>
-              <p className="text-zinc-400 text-xl max-w-md mx-auto mb-12">Você acaba de concluir mais um passo na sua jornada. Continue focado!</p>
-              <button onClick={() => setShowCelebration(false)} className="px-12 py-5 bg-white text-black font-bold rounded-2xl hover:scale-105 transition-transform">
-                Continuar Estudando
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

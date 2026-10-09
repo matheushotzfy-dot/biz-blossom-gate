@@ -190,7 +190,7 @@ export default function AdminCorridasTab() {
 
   const uploadAsset = async (file: File, field: "banner_url" | "logo_url") => {
     if (!selected) return;
-    const path = `${selected.id}/${field}-${Date.now()}-${file.name}`;
+    const path = `${selected.id}/${field}-${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
     const { error } = await supabase.storage.from("race-assets").upload(path, file, { upsert: true });
     if (error) { toast.error(error.message); return; }
     const { data } = supabase.storage.from("race-assets").getPublicUrl(path);
@@ -199,7 +199,7 @@ export default function AdminCorridasTab() {
 
   const uploadPrizeImage = async (file: File, prize: Prize) => {
     if (!selected) return;
-    const path = `${selected.id}/prize-${prize.id}-${Date.now()}-${file.name}`;
+    const path = `${selected.id}/prize-${prize.id}-${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
     const { error } = await supabase.storage.from("race-assets").upload(path, file, { upsert: true });
     if (error) { toast.error(error.message); return; }
     const { data } = supabase.storage.from("race-assets").getPublicUrl(path);

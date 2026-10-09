@@ -58,7 +58,7 @@ const sections = [
  id: "geral",
  icon: FileText,
  title: "9. Disposições Gerais",
- content: `9.1. Estes Termos são regidos pela legislação brasileira.\n\n9.2. Fica eleito o foro da Comarca de São Paulo/SP para dirimir quaisquer controvérsias.\n\n9.3. A ${COMPANY_NAME} reserva-se o direito de alterar estes Termos a qualquer momento, notificando os usuários através da Plataforma.\n\n9.4. A invalidade de qualquer cláusula não afeta a validade das demais.\n\n9.5. Dúvidas ou reclamações podem ser direcionadas ao e-mail: suporte@hotzfy.com`,
+ content: `9.1. Estes Termos são regidos pela legislação brasileira.\n\n9.2. Fica eleito o foro da Comarca de São Paulo/SP para dirimir quaisquer controvérsias.\n\n9.3. A ${COMPANY_NAME} reserva-se o direito de alterar estes Termos a qualquer momento, notificando os usuários através da Plataforma.\n\n9.4. A invalidade de qualquer cláusula não afeta a validade das demais.\n\n9.5. Dúvidas ou reclamações podem ser direcionadas ao e-mail: suporte@venxpay.com.br`,
  },
 ];
 

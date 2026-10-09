@@ -96,7 +96,7 @@ export function KycOnboardingPopup() {
  });
  }
  setUploading(null);
- }, [user]);
+ }, [user, isCnpj, STEPS]);
 
  const handleDismiss = useCallback(() => {
  if (user?.id) localStorage.setItem(`venxpay_kyc_popup_dismissed_${user.id}`, "true");

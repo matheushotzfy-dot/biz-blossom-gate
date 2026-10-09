@@ -109,12 +109,14 @@ export default function NotasFiscais() {
   const integrationConnected = Boolean(integration?.is_active);
 
   const retryFailed = async () => {
+    if (!user) return;
     const failed = invoices.filter(i => i.status === "exhausted");
     if (!failed.length) { toast.info("Nenhuma nota falhada para reprocessar."); return; }
     const { error } = await supabase
       .from("app_deliveries")
       .update({ status: "pending", attempt: 0, next_retry_at: new Date().toISOString(), error: null })
-      .in("id", failed.map(f => f.id));
+      .in("id", failed.map(f => f.id))
+      .eq("user_id", user.id);
     if (error) toast.error("Falha ao reprocessar"); else { toast.success(`${failed.length} notas reenfileiradas`); refetch(); }
   };
 

@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { LogOut, Search, Settings } from "lucide-react";
+import { LogOut, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { MemberSidebar } from "@/components/member/MemberSidebar";
@@ -152,10 +152,6 @@ export default function MemberLayout() {
                     <p className="font-bold text-white truncate">{displayName}</p>
                   </div>
                   <div className="py-2">
-                    <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl transition-colors text-zinc-400 hover:text-white">
-                      <Settings className="h-4 w-4" />
-                      <span className="text-[13px] font-bold">Configurações</span>
-                    </button>
                     <button
                       onClick={handleLogout}
                       className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-400/5 rounded-xl transition-colors text-zinc-400 hover:text-red-400"

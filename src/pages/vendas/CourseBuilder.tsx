@@ -397,7 +397,14 @@ export default function CourseBuilder() {
  const reorderLessons = async (moduleId: string, newOrder: Lesson[]) => {
  setModules(prev => prev.map(m => m.id === moduleId ? { ...m, lessons: newOrder } : m));
  setSaveStatus("saving");
- await Promise.all(newOrder.map((l, i) => supabase.from("lessons").update({ sort_order: i }).eq("id", l.id)));
+ const results = await Promise.all(newOrder.map((l, i) => supabase.from("lessons").update({ sort_order: i }).eq("id", l.id)));
+ const failed = results.some(r => r.error);
+ if (failed) {
+ toast.error("Falha ao reordenar aulas. Recarregando...");
+ setSaveStatus("idle");
+ await loadAll();
+ return;
+ }
  setSaveStatus("saved");
  setTimeout(() => setSaveStatus("idle"), 2000);
  };

@@ -84,7 +84,7 @@ export function LessonComments({ lessonId, currentUserId }: { lessonId: string; 
   };
 
   const remove = async (id: string) => {
-    const { error } = await supabase.from("lesson_comments").delete().eq("id", id);
+    const { error } = await supabase.from("lesson_comments").delete().eq("id", id).eq("user_id", currentUserId);
     if (error) {
       toast.error("Não foi possível excluir.");
       return;

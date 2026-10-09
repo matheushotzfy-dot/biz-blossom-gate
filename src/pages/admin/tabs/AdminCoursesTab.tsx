@@ -48,7 +48,8 @@ export default function AdminCoursesTab({ profiles = [], products = [] }: Props)
     const to = from + PAGE_SIZE - 1;
     let query = supabase.from("courses").select("*", { count: "exact" }).order("created_at", { ascending: false });
     if (debouncedSearch) {
-      query = query.or(`title.ilike.%${debouncedSearch}%,category.ilike.%${debouncedSearch}%`);
+      const safe = debouncedSearch.replace(/[%,()*\\]/g, "");
+      query = query.or(`title.ilike.%${safe}%,category.ilike.%${safe}%`);
     }
     const { data, error: err, count } = await query.range(from, to);
     if (err) { setError(err.message); setLoading(false); return; }

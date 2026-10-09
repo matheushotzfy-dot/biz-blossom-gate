@@ -39,12 +39,6 @@ type PaymentMethod = CheckoutPaymentMethod;
 type CheckoutState = "form" | "pending" | "approved" | "failed" | "expired";
 
 /* ─── Utils ─── */
-function getCheckoutSessionId(slug: string): string {
- const key = `checkout_session_${slug}`;
- let sessionId = sessionStorage.getItem(key);
- if (!sessionId) { sessionId = crypto.randomUUID(); sessionStorage.setItem(key, sessionId); }
- return sessionId;
-}
 function clearCheckoutSession(slug: string) { sessionStorage.removeItem(`checkout_session_${slug}`); }
 
 /* ─── Formatters ─── */
@@ -1119,10 +1113,13 @@ export default function PublicCheckout() {
  )}
 
  {/* ═══════ CTA BUTTON (Ultra Premium) ═══════ */}
+ <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm font-semibold text-amber-700 mb-3">
+ Pagamentos temporariamente indisponíveis para este produto
+ </div>
  <div className="pt-1">
  <Button
  type="submit"
- disabled={processing}
+ disabled={true}
  className="w-full h-[62px] text-base font-extrabold rounded-2xl text-white transition-all duration-300 hover:opacity-95 hover:scale-[1.008] active:scale-[0.995] disabled:opacity-50 disabled:hover:scale-100 relative overflow-hidden group"
  style={{ backgroundColor: btnColor, boxShadow: `0 12px 40px -12px ${btnColor}60, 0 4px 12px -4px ${btnColor}30` }}
  >

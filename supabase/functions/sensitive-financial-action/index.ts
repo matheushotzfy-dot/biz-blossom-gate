@@ -2,30 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { z } from "npm:zod@3.23.8";
 import { json, preflight, safeError } from "../_shared/security.ts";
 
-const digitsOnly = (value: string) => value.replace(/\D/g, "");
-const validCpf = (value: string) => {
-  const d = digitsOnly(value);
-  if (d.length !== 11 || /^(\d)\1+$/.test(d)) return false;
-  const digit = (length: number) => {
-    let sum = 0;
-    for (let i = 0; i < length; i++) sum += Number(d[i]) * (length + 1 - i);
-    const result = (sum * 10) % 11;
-    return result === 10 ? 0 : result;
-  };
-  return digit(9) === Number(d[9]) && digit(10) === Number(d[10]);
-};
-const validCnpj = (value: string) => {
-  const d = digitsOnly(value);
-  if (d.length !== 14 || /^(\d)\1+$/.test(d)) return false;
-  const calculate = (base: string, weights: number[]) => {
-    const sum = base.split("").reduce((total, n, index) => total + Number(n) * weights[index], 0);
-    const remainder = sum % 11;
-    return remainder < 2 ? 0 : 11 - remainder;
-  };
-  const first = calculate(d.slice(0, 12), [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
-  const second = calculate(`${d.slice(0, 12)}${first}`, [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
-  return first === Number(d[12]) && second === Number(d[13]);
-};
+import { validCpf, validCnpj } from "../_shared/documents.ts";
 
 const PixSchema = z.object({
   action: z.literal("add_pix_key"),
