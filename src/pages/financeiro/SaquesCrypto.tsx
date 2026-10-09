@@ -100,7 +100,8 @@ export default function SaquesCrypto() {
   const [prices, setPrices] = useState<Record<string, CoinPrice>>({});
   const [hidden, setHidden] = useState(() => { try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; } });
   const [search, setSearch] = useState("");
-  __MARK__ = useState<Date | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [pricesError, setPricesError] = useState(false);
   const [reauthOpen, setReauthOpen] = useState(false);
   const [pendingWithdrawal, setPendingWithdrawal] = useState<Record<string, unknown> | null>(null);
   const [submitting, setSubmitting] = useState(false);
