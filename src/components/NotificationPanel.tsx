@@ -259,9 +259,7 @@ export function useNotificationCount() {
       .channel(uniqueChannelName(`notif-count-${user.id}`))
       .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, () => load())
       .subscribe();
-    const cleanupTimer = () => clearTimeout(timer);
-    void cleanupTimer;
-    return () => { supabase.removeChannel(channel); };
+    return () => { clearTimeout(timer); supabase.removeChannel(channel); };
   }, [user]);
 
   return count;
