@@ -7,6 +7,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { isInternalCall, unauthorizedResponse } from "../_shared/cron-auth.ts";
 import { buildCorsHeaders } from "../_shared/security.ts";
+import { ssrfSafeFetch } from "../_shared/ssrf.ts";
 
 const RETRY_DELAYS_SECONDS = [10, 30, 120, 600, 3600]; // 5 attempts
 const MAX_ATTEMPTS = RETRY_DELAYS_SECONDS.length;
@@ -76,15 +77,12 @@ async function deliverOne(
   const signedPayload = `${timestamp}.${body}`;
   const signature = await hmacSha256Hex(wc.secret, signedPayload);
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), DELIVERY_TIMEOUT_MS);
-
   let respStatus = 0;
   let respBody = "";
   let errMsg: string | null = null;
 
   try {
-    const resp = await fetch(wc.url, {
+    const resp = await ssrfSafeFetch(wc.url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -95,14 +93,13 @@ async function deliverOne(
         "X-Venxpay-Signature": `t=${timestamp},v1=${signature}`,
       },
       body,
-      signal: controller.signal,
+      timeoutMs: DELIVERY_TIMEOUT_MS,
+      requireHttps: true,
     });
     respStatus = resp.status;
     respBody = (await resp.text().catch(() => "")).slice(0, 2000);
   } catch (e) {
     errMsg = e instanceof Error ? e.message : "unknown_error";
-  } finally {
-    clearTimeout(timer);
   }
 
   const success = respStatus >= 200 && respStatus < 300;

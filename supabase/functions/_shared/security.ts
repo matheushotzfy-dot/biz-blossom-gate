@@ -9,23 +9,24 @@ const ALLOWED_ORIGINS = new Set<string>([
   "https://hotzfy.com.br",
   "https://www.hotzfy.com.br",
   "https://biz-blossom-gate.lovable.app",
-  "https://id-preview--8b85380d-bbad-44c2-8000-ac99dd36affb.lovable.app",
   "http://localhost:8080",
-  "http://localhost:5173",
 ]);
 
-// Allow any *.lovable.app preview/sandbox host.
+// Project-specific preview id — only this project's sandbox/preview hosts
+// are trusted, not every *.lovable.app tenant.
+const PREVIEW_PROJECT_ID = "8b85380d-bbad-44c2-8000-ac99dd36affb";
+
 function isAllowedOrigin(origin: string | null): boolean {
   if (!origin) return false;
   if (ALLOWED_ORIGINS.has(origin)) return true;
   try {
     const u = new URL(origin);
-    if (u.hostname.endsWith(".lovable.app")) return true;
-    if (u.hostname.endsWith(".lovableproject.com")) return true;
+    if (u.protocol !== "https:") return false;
+    if (!u.hostname.includes(PREVIEW_PROJECT_ID)) return false;
+    return u.hostname.endsWith(".lovable.app") || u.hostname.endsWith(".lovableproject.com");
   } catch {
     return false;
   }
-  return false;
 }
 
 export const SECURITY_HEADERS: Record<string, string> = {
