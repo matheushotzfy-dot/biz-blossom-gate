@@ -704,7 +704,7 @@ export default function AdminDashboard() {
                 <AdminOverviewTab
                   transactions={transactions} profiles={profiles} products={products}
                   withdrawals={withdrawals} onWithdrawalAction={handleWithdrawalAction}
-                  onUserStatus={handleUserStatus} fmtCurrency={fmtCurrency}
+                  onUserStatus={handleUserStatus} onReload={loadData} fmtCurrency={fmtCurrency}
                   isEmployee={isEmployee} dateRange={dateRange}
                    financialOverview={financialOverview}
                   onNavigate={(id) => handleTabChange(id as TabId)}

@@ -37,6 +37,7 @@ interface Props {
   withdrawals: Tables<"withdrawals">[];
   onWithdrawalAction: (id: string, action: "approved" | "rejected") => void;
   onUserStatus: (userId: string, status: string) => void;
+  onReload?: () => void;
   fmtCurrency: (v: number) => string;
   isEmployee?: boolean;
   dateRange?: { from: Date; to: Date };
@@ -133,7 +134,7 @@ function ChartTip({ active, payload, label, fmtCurrency }: ChartTipProps) {
 
 export default function AdminOverviewTab({
   transactions, profiles, products, withdrawals,
-  onWithdrawalAction, onUserStatus, fmtCurrency,
+  onWithdrawalAction, onReload, fmtCurrency,
   isEmployee = false, dateRange, onNavigate, financialOverview,
 }: Props) {
   const [disputes, setDisputes] = useState<Dispute[]>([]);
@@ -152,27 +153,25 @@ export default function AdminOverviewTab({
     return p ? { full_name: p.full_name, email: p.email, nickname: p.nickname } : null;
   };
 
+  // KYC decisions go through the audited owner routines (same as the Sellers tab):
+  // approval also assigns the default manager; never write account_status directly here.
   const handleKycApprove = async (userId: string) => {
-    const { error } = await supabase.from("profiles").update({
-      account_status: "approved", kyc_rejection_reason: null,
-    }).eq("user_id", userId);
+    const { error } = await supabase.rpc("admin_approve_seller_with_manager", { _seller: userId });
     if (error) { toast.error("Erro ao aprovar KYC"); return; }
     toast.success("KYC aprovado!");
-    onUserStatus(userId, "approved");
+    onReload?.();
   };
 
   const handleKycReject = async (userId: string, reason: string) => {
-    const { error } = await supabase.from("profiles").update({
-      account_status: "rejected", kyc_rejection_reason: reason,
-    }).eq("user_id", userId);
+    const { error } = await supabase.rpc("admin_reject_kyc", { _user_id: userId, _reason: reason });
     if (error) { toast.error("Erro ao recusar KYC"); return; }
     toast.success("KYC recusado");
-    onUserStatus(userId, "rejected");
+    onReload?.();
   };
 
   useEffect(() => {
     Promise.all([
-      supabase.from("disputes").select("id,type,status,seller_user_id,amount,created_at,transaction_id"),
+      supabase.from("disputes").select("id,type,status,seller_user_id,amount,created_at,transaction_id").order("created_at", { ascending: false }).limit(500),
       supabase.from("fraud_logs").select("*").order("created_at", { ascending: false }).limit(20),
     ]).then(([dRes, fRes]) => {
       if (dRes.data) setDisputes(dRes.data as Dispute[]);
