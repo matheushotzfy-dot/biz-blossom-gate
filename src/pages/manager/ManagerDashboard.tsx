@@ -73,7 +73,9 @@ export default function ManagerDashboard() {
 
   const logout = async () => { await supabase.auth.signOut(); navigate("/gerentes"); };
   const metrics = data?.metrics;
-  const canViewTransactions = data?.permissions.includes("transactions.view") ?? false;
+  const flags = staffActionFlags(data?.permissions);
+  const canViewTransactions = flags.viewTransactions;
+  const selectedSeller = data?.sellers.find(s => s.seller_user_id === selectedId) ?? null;
   const totalPages = Math.max(1, Math.ceil((data?.total_sellers ?? 0) / (data?.page_size ?? 25)));
   const riskTotal = Number(metrics?.refunds ?? 0) + Number(metrics?.chargebacks ?? 0) + Number(metrics?.medpix ?? 0);
 
