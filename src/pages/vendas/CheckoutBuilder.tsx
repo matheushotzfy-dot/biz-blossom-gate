@@ -11,9 +11,9 @@ import { useAuth } from "@/hooks/useAuth";
 import {
  Palette, CreditCard, Mail, Package, Plus, Trash2, ArrowLeft,
  Timer, ShieldCheck, QrCode, FileText, MapPin, X, Upload,
- Zap, Video, Users, LogOut as ExitIcon, BarChart3, Monitor, Smartphone, Check, Eye,
- MessageSquare, Clock, Star, Lock, Percent,
- Sparkles, Phone, Hash, MousePointerClick,
+ Zap, Users, Monitor, Smartphone, Check, Eye,
+ Clock, Lock,
+ Sparkles, Hash, MousePointerClick,
  RotateCcw, Copy, ExternalLink, Wand2, TrendingUp,
  ChevronRight, Grip, Settings2
 } from "lucide-react";
@@ -217,25 +217,8 @@ export default function CheckoutBuilder() {
  const desktopRef = useRef<HTMLInputElement>(null);
  const mobileRef = useRef<HTMLInputElement>(null);
 
- // CRO state
- const [vslEnabled, setVslEnabled] = useState(false);
- const [vslUrl, setVslUrl] = useState("");
- const [fakeViewersEnabled, setFakeViewersEnabled] = useState(false);
- const [exitIntentEnabled, setExitIntentEnabled] = useState(false);
- const [progressBarEnabled, setProgressBarEnabled] = useState(false);
- const [testimonialEnabled, setTestimonialEnabled] = useState(false);
- const [scarcityEnabled, setScarcityEnabled] = useState(false);
- const [scarcityUnits, setScarcityUnits] = useState("17");
- const [whatsappEnabled, setWhatsappEnabled] = useState(false);
- const [whatsappNumber, setWhatsappNumber] = useState("");
- const [discountBadgeEnabled, setDiscountBadgeEnabled] = useState(false);
- const [discountOriginalPrice, setDiscountOriginalPrice] = useState("");
- const [trustBadgesEnabled, setTrustBadgesEnabled] = useState(false);
-
  // Form extras
- const [phoneRequired, setPhoneRequired] = useState(true);
- const [cpfRequired, setCpfRequired] = useState(true);
- const [nameOnCardRequired, setNameOnCardRequired] = useState(false);
+ const [cpfRequired] = useState(true);
 
  // Order bumps
  const [allProducts, setAllProducts] = useState<Tables<"products">[]>([]);
@@ -245,17 +228,13 @@ export default function CheckoutBuilder() {
  // Optimization score
  const optimizationScore = (() => {
  let s = 0;
- const max = 12;
+ const max = 8;
  if (pixEnabled) s++;
  if (creditCardEnabled) s++;
  if (boletoEnabled) s++;
  if (timerEnabled) s++;
  if (socialProof) s++;
  if (guaranteeEnabled) s++;
- if (trustBadgesEnabled) s++;
- if (progressBarEnabled) s++;
- if (testimonialEnabled) s++;
- if (scarcityEnabled) s++;
  if (orderBumps.length > 0) s++;
  if (bannerDesktopPreview || bannerMobilePreview) s++;
  return { score: s, max };
@@ -266,9 +245,9 @@ export default function CheckoutBuilder() {
  switch (tabId) {
  case "visual": return [timerEnabled, socialProof, guaranteeEnabled, !!bannerDesktopPreview, !!bannerMobilePreview].filter(Boolean).length;
  case "payment": return [pixEnabled, boletoEnabled, creditCardEnabled].filter(Boolean).length;
- case "form": return [emailConfirm, phoneRequired, cpfRequired, addressRequired, nameOnCardRequired].filter(Boolean).length;
+ case "form": return [emailConfirm, cpfRequired, addressRequired].filter(Boolean).length;
  case "bumps": return orderBumps.length;
- case "cro": return [vslEnabled, fakeViewersEnabled, exitIntentEnabled, progressBarEnabled, testimonialEnabled, scarcityEnabled, whatsappEnabled, discountBadgeEnabled, trustBadgesEnabled].filter(Boolean).length;
+ case "cro": return 0;
  default: return 0;
  }
  };

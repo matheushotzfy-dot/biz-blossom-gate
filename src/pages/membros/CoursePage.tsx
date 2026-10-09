@@ -7,21 +7,12 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { extractYouTubeId, extractVimeoId, isAllowedVideoUrl } from "@/lib/videoUrl";
 
 type Course = { id: string; title: string; description: string | null; thumbnail_url: string | null };
 type Module = { id: string; title: string; description: string | null; banner_url: string | null; sort_order: number; lessons: Lesson[] };
 type Lesson = { id: string; title: string; description: string | null; video_url: string | null; duration_minutes: number; is_free: boolean; sort_order: number; module_id: string };
 type Progress = { lesson_id: string; completed: boolean; progress_seconds: number };
-
-function extractYouTubeId(url: string): string | null {
- const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?\s]+)/);
- return m ? m[1] : null;
-}
-
-function extractVimeoId(url: string): string | null {
- const m = url.match(/vimeo\.com\/(\d+)/);
- return m ? m[1] : null;
-}
 
 function VideoPlayer({ url }: { url: string }) {
  const ytId = extractYouTubeId(url);
@@ -48,9 +39,17 @@ function VideoPlayer({ url }: { url: string }) {
  );
  }
 
- // Generic embed fallback
+ if (!isAllowedVideoUrl(url)) {
  return (
- <iframe src={url} className="w-full h-full" allowFullScreen />
+ <div className="w-full h-full flex items-center justify-center bg-black text-muted-foreground text-sm font-display font-bold">
+ Vídeo indisponível
+ </div>
+ );
+ }
+
+ // Generic embed fallback (allow-listed hosts only)
+ return (
+ <iframe src={url} className="w-full h-full" allowFullScreen sandbox="allow-scripts allow-same-origin allow-presentation" />
  );
 }
 

@@ -79,17 +79,25 @@ export function NotificationPanel({ open, onClose }: Props) {
     return () => { supabase.removeChannel(channel); };
   }, [user, loadNotifications]);
 
-  const markAsRead = async (id: string) => {
-    await supabase.from("notifications").update({ is_read: true }).eq("id", id);
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+  const markAsRead = async (notif: Notification) => {
+    if (!user) return;
+    // Global notifications (user_id null) are shared across all users — they must
+    // never be mutated in the DB by a single reader, only flipped locally.
+    if (notif.user_id === null) {
+      setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, is_read: true } : n));
+      return;
+    }
+    await supabase.from("notifications").update({ is_read: true }).eq("id", notif.id).eq("user_id", user.id);
+    setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, is_read: true } : n));
   };
 
   const markAllAsRead = async () => {
     if (!user) return;
     const unreadUserIds = notifications.filter(n => !n.is_read && n.user_id === user.id).map(n => n.id);
     if (unreadUserIds.length > 0) {
-      await supabase.from("notifications").update({ is_read: true }).in("id", unreadUserIds);
+      await supabase.from("notifications").update({ is_read: true }).in("id", unreadUserIds).eq("user_id", user.id);
     }
+    // Global notifications are only flipped locally; user-owned ones are now persisted above.
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
   };
 
@@ -109,7 +117,7 @@ export function NotificationPanel({ open, onClose }: Props) {
     return (
       <button
         key={notif.id}
-        onClick={() => !notif.is_read && markAsRead(notif.id)}
+        onClick={() => !notif.is_read && markAsRead(notif)}
         className={cn(
           "w-full text-left px-5 py-3.5 transition-all hover:bg-muted/8 active:scale-[0.995] group relative",
           !notif.is_read && !opts.important && "bg-primary/[0.02]",

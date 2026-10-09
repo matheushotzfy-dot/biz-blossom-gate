@@ -768,7 +768,19 @@ Deno.serve(async (req) => {
   }
 
   const list = (pending ?? []) as Delivery[];
-  await Promise.allSettled(list.map((d) => deliverOne(admin, d)));
+  await Promise.allSettled(list.map(async (d) => {
+    try {
+      await deliverOne(admin, d);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Unexpected error";
+      console.error(`[apps-dispatcher] delivery ${d.id} failed unexpectedly:`, msg);
+      await admin.from("app_deliveries").update({
+        status: "pending",
+        error: `Unexpected error: ${msg}`,
+        next_retry_at: new Date(Date.now() + 30_000).toISOString(),
+      }).eq("id", d.id).then(() => undefined, () => undefined);
+    }
+  }));
 
   return new Response(JSON.stringify({ ok: true, processed: list.length }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } });

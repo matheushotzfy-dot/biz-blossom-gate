@@ -177,7 +177,17 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   // A aba ativa vive na URL (?tab=...) para sobreviver a refresh e voltar/avançar.
   const urlTab = searchParams.get("tab") ?? "";
-  const activeTab: TabId = ALL_TAB_IDS.has(urlTab) ? urlTab : "god-mode";
+  const isTabAllowedForEmployee = useCallback(
+    (tabId: string) => EMPLOYEE_ALLOWED_TABS.has(tabId) || (tabId === "support" && hasSupportPerm),
+    [hasSupportPerm]
+  );
+  const activeTab: TabId = (() => {
+    if (!ALL_TAB_IDS.has(urlTab)) return "god-mode";
+    if (isEmployee && !isTabAllowedForEmployee(urlTab)) {
+      return [...EMPLOYEE_ALLOWED_TABS][0] ?? "god-mode";
+    }
+    return urlTab;
+  })();
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<Date | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

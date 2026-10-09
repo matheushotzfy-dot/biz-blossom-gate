@@ -3,28 +3,8 @@
 // that could partially fail and leave the seller in an inconsistent state.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { buildCorsHeaders, preflight } from "../_shared/security.ts";
 
-const ALLOWED_ORIGINS = new Set([
-  "https://hotzfy.com.br",
-  "https://www.hotzfy.com.br",
-  "https://biz-blossom-gate.lovable.app",
-  "https://id-preview--8b85380d-bbad-44c2-8000-ac99dd36affb.lovable.app",
-  "https://8b85380d-bbad-44c2-8000-ac99dd36affb.lovableproject.com",
-]);
-
-function buildCors(req: Request) {
-  const origin = req.headers.get("origin") ?? "";
-  const isAllowed = ALLOWED_ORIGINS.has(origin);
-  const headers: Record<string, string> = {
-    "Vary": "Origin",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "X-Content-Type-Options": "nosniff",
-    "Referrer-Policy": "no-referrer",
-  };
-  if (isAllowed) headers["Access-Control-Allow-Origin"] = origin;
-  return headers;
-}
 
 function json(body: unknown, corsHeaders: Record<string, string>, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -34,8 +14,9 @@ function json(body: unknown, corsHeaders: Record<string, string>, status = 200) 
 }
 
 Deno.serve(async (req) => {
-  const corsHeaders = buildCors(req);
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const pre = preflight(req);
+  if (pre) return pre;
+  const corsHeaders = buildCorsHeaders(req);
   if (req.method !== "POST") return json({ success: false, error: "Method not allowed" }, corsHeaders, 405);
 
   try {

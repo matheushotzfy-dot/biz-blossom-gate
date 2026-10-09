@@ -104,8 +104,21 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
     load();
   };
 
+ const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
+   open: ["in_review", "resolved_seller", "resolved_buyer", "closed"],
+   in_review: ["resolved_seller", "resolved_buyer", "closed"],
+   resolved_seller: [],
+   resolved_buyer: [],
+   closed: [],
+ };
+
  const handleUpdate = async () => {
  if (!editing || !user) return;
+ const allowed = VALID_STATUS_TRANSITIONS[editing.status];
+ if (allowed && !allowed.includes(editStatus) && editStatus !== editing.status) {
+   toast.error(`Não é possível mudar de "${editing.status}" para "${editStatus}"`);
+   return;
+ }
  const update: { status: string; admin_notes: string; updated_at: string; resolved_at?: string; admin_user_id?: string; won_by_seller?: boolean } = { status: editStatus, admin_notes: editNotes, updated_at: new Date().toISOString() };
  if (editStatus === "resolved_seller" || editStatus === "resolved_buyer" || editStatus === "closed") {
  update.resolved_at = new Date().toISOString();
@@ -333,11 +346,16 @@ export default function AdminDisputesTab({ type, title, profiles, transactions, 
  <Select value={editStatus} onValueChange={setEditStatus}>
  <SelectTrigger className="text-xs mt-1"><SelectValue /></SelectTrigger>
  <SelectContent>
- <SelectItem value="open">Aberta</SelectItem>
- <SelectItem value="in_review">Em Análise</SelectItem>
- <SelectItem value="resolved_seller">Resolvida (Vendedor)</SelectItem>
- <SelectItem value="resolved_buyer">Resolvida (Comprador)</SelectItem>
- <SelectItem value="closed">Fechada</SelectItem>
+ {editStatus === editing.status && (
+   <SelectItem value={editing.status}>
+     {{ open: "Aberta", in_review: "Em Análise", resolved_seller: "Resolvida (Vendedor)", resolved_buyer: "Resolvida (Comprador)", closed: "Fechada" }[editing.status] || editing.status}
+   </SelectItem>
+ )}
+ {(VALID_STATUS_TRANSITIONS[editing.status] || []).map((s) => (
+   <SelectItem key={s} value={s}>
+     {{ open: "Aberta", in_review: "Em Análise", resolved_seller: "Resolvida (Vendedor)", resolved_buyer: "Resolvida (Comprador)", closed: "Fechada" }[s] || s}
+   </SelectItem>
+ ))}
  </SelectContent>
  </Select>
  </div>

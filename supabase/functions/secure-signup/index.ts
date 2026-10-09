@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { buildCorsHeaders, preflight } from "../_shared/security.ts";
+import { validCpfOrCnpj } from "../_shared/documents.ts";
 
 interface SignupPayload {
   email?: unknown;
@@ -80,7 +81,8 @@ Deno.serve(async (req) => {
 
     if (!EMAIL_PATTERN.test(email) || email.length > 254 || !metadata
       || !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,128}$/.test(password)
-      || ![11, 14].includes(documentNumber.length) || phone.length < 10 || phone.length > 13) {
+      || ![11, 14].includes(documentNumber.length) || !validCpfOrCnpj(documentNumber)
+      || phone.length < 10 || phone.length > 13) {
       return json({ success: false, error: "Não foi possível criar a conta com os dados informados." }, 400, corsHeaders);
     }
     metadata.document_number = documentNumber;

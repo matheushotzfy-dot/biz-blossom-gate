@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { MessageSquare, Copy, ExternalLink, QrCode, Settings2, Phone, Link2, Smartphone, CheckCircle2, Zap, Globe } from "lucide-react";
+import { MessageSquare, Copy, ExternalLink, Settings2, Link2, Smartphone, CheckCircle2, Zap, Globe, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,10 +18,6 @@ export default function CheckoutWhatsApp() {
  const [whatsappNumber, setWhatsappNumber] = useState("");
  const [autoMessage, setAutoMessage] = useState(
  "Olá! Quero comprar *{{produto}}* por R$ {{preco}}. Segue meu link de pagamento: {{link}}"
- );
- const [botEnabled, setBotEnabled] = useState(false);
- const [autoReply, setAutoReply] = useState(
- "Oi {{nome}}! 🎉 Aqui está seu link de pagamento seguro:\n\n{{link}}\n\nÉ só clicar e escolher PIX ou Cartão. Qualquer dúvida, estou aqui!"
  );
 
  const { data: products = [] } = useQuery({
@@ -60,27 +55,20 @@ export default function CheckoutWhatsApp() {
 
  return (
  <div className="mx-auto w-full max-w-[1180px] space-y-6 p-4 md:p-6">
- {/* KPIs */}
- <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
- {[
- { label: "Links Gerados", value: "0", icon: Link2, color: "text-primary" },
- { label: "Cliques WhatsApp", value: "0", icon: Smartphone, color: "text-emerald-500" },
- { label: "Conversões", value: "0", icon: CheckCircle2, color: "text-amber-500" },
- { label: "Receita via WhatsApp", value: "R$ 0", icon: Zap, color: "text-primary" },
- ].map((kpi) => (
- <Card key={kpi.label} className="border-border/40 bg-card/60 backdrop-blur-xl">
+ {/* Tracking notice */}
+ <Card className="border-border/40 bg-card/60 backdrop-blur-xl">
  <CardContent className="flex items-center gap-3 p-4">
- <div className={`flex h-10 w-10 items-center justify-center rounded-[12px] bg-muted/50 ${kpi.color}`}>
- <kpi.icon className="h-5 w-5" />
+ <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-muted/50 text-muted-foreground">
+ <Clock className="h-5 w-5" />
  </div>
  <div>
- <p className="text-[11px] font-medium text-muted-foreground">{kpi.label}</p>
- <p className="text-lg font-black">{kpi.value}</p>
+ <p className="text-sm font-semibold">Métricas de links e conversões via WhatsApp</p>
+ <p className="text-[12px] text-muted-foreground">
+ O rastreamento de cliques, conversões e receita por este canal chega em breve.
+ </p>
  </div>
  </CardContent>
  </Card>
- ))}
- </div>
 
  <div className="grid gap-6 lg:grid-cols-2">
  {/* Generator */}
@@ -173,44 +161,16 @@ export default function CheckoutWhatsApp() {
  </CardTitle>
  </CardHeader>
  <CardContent className="space-y-4">
- <div className="flex items-center justify-between rounded-xl border border-border/40 bg-muted/30 p-4">
+ <div className="flex items-start gap-3 rounded-xl border border-border/40 bg-muted/30 p-4">
+ <Clock className="h-4 w-4 shrink-0 text-muted-foreground mt-0.5" />
  <div>
- <p className="font-semibold text-sm">Resposta automática</p>
+ <p className="font-semibold text-sm">Em breve</p>
  <p className="text-[11px] text-muted-foreground">
- Quando alguém enviar mensagem, responder automaticamente com link de pagamento
- </p>
- </div>
- <Switch checked={botEnabled} onCheckedChange={setBotEnabled} />
- </div>
-
- {botEnabled && (
- <>
- <div className="space-y-2">
- <Label className="text-sm">Mensagem de resposta automática</Label>
- <Textarea
- value={autoReply}
- onChange={(e) => setAutoReply(e.target.value)}
- className="min-h-[100px] rounded-xl text-sm"
- />
- <p className="text-[11px] text-muted-foreground">
- Variáveis: {"{{nome}}"}, {"{{link}}"}, {"{{produto}}"}, {"{{preco}}"}
- </p>
- </div>
-
- <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
- <div className="flex gap-2">
- <Phone className="h-4 w-4 shrink-0 text-amber-500 mt-0.5" />
- <div>
- <p className="text-sm font-semibold text-amber-600">Integração via API</p>
- <p className="text-[11px] text-muted-foreground">
- Para ativar o bot automatizado, você precisa conectar sua conta da API do WhatsApp Business.
- Vá em Integrações → Apps para configurar.
+ A resposta automática via bot exigirá conectar a API oficial do WhatsApp Business.
+ Estamos preparando essa integração.
  </p>
  </div>
  </div>
- </div>
- </>
- )}
 
  <div className="space-y-3">
  <p className="text-xs font-semibold text-muted-foreground">FLUXO DO CHECKOUT</p>

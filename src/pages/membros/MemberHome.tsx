@@ -257,12 +257,12 @@ export default function MemberHome() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-[11px] font-bold uppercase tracking-widest text-zinc-500">
                       <span>Seu progresso</span>
-                      <span className="text-emerald-400">{Math.round((featured.completedLessons / featured.totalLessons) * 100)}%</span>
+                      <span className="text-emerald-400">{featured.totalLessons > 0 ? Math.round((featured.completedLessons / featured.totalLessons) * 100) : 0}%</span>
                     </div>
                     <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-emerald-500 transition-all duration-1000" 
-                        style={{ width: `${(featured.completedLessons / featured.totalLessons) * 100}%` }} 
+                        style={{ width: `${featured.totalLessons > 0 ? (featured.completedLessons / featured.totalLessons) * 100 : 0}%` }} 
                       />
                     </div>
                   </div>
@@ -345,7 +345,7 @@ export default function MemberHome() {
 
 
 function CourseCard({ course, index }: { course: Course; index: number }) {
-  const pct = Math.round((course.completedLessons / course.totalLessons) * 100) || 0;
+  const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
   
   return (
     <motion.div
@@ -410,7 +410,7 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
 }
 
 function CourseListRow({ course, index }: { course: Course; index: number }) {
-  const pct = Math.round((course.completedLessons / course.totalLessons) * 100) || 0;
+  const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
 
   return (
     <motion.div

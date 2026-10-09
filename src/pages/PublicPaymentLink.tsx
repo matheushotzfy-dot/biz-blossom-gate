@@ -138,6 +138,9 @@ export default function PublicPaymentLink() {
                   <p className="font-display font-black text-3xl text-primary tabular-nums mt-1">{fmt(link.amount)}</p>
                 </div>
 
+                <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm font-semibold text-amber-700 mb-4">
+                  Pagamentos temporariamente indisponíveis para este produto
+                </div>
                 <form onSubmit={handleGenerate} className="space-y-3">
                   <div>
                     <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Nome completo</label>
