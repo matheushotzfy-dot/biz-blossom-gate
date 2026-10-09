@@ -178,6 +178,11 @@ Deno.serve(async (req) => {
         const { data: key } = await admin.from("pix_keys").select("id").eq("id", payload.pix_key_id).eq("user_id", user.id).maybeSingle();
         if (!key) return json(req, { success: false, error: "Chave PIX inválida." }, 400);
       }
+      // NOTE: this endpoint is seller self-service only (caller is always the
+      // seller themselves, authenticated via their own JWT). `admin_user_id`
+      // is NOT NULL in the schema, so it cannot be nulled out here; it is set
+      // to the seller's own id to satisfy the constraint. If this column is
+      // ever meant to track an acting admin, it must be made nullable first.
       const result = await admin.from("seller_auto_withdraw").upsert({
         user_id: user.id,
         admin_user_id: user.id,
