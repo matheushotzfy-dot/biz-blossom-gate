@@ -7,6 +7,9 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StaffRequestForm } from "@/features/staff/StaffRequestForm";
+import { StaffSellerPanel } from "@/features/staff/StaffSellerPanel";
+import { StaffTransactions } from "@/features/staff/StaffTransactions";
+import { staffActionFlags } from "@/features/staff/staffActions";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +58,7 @@ export default function ManagerDashboard() {
   const [submittedSearch, setSubmittedSearch] = useState("");
   const [page, setPage] = useState(1);
   const [days, setDays] = useState(30);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const range = useMemo(() => ({ from: startOfDay(subDays(new Date(), days - 1)), to: endOfDay(new Date()) }), [days]);
 
@@ -112,16 +116,18 @@ export default function ManagerDashboard() {
         <section className="grid gap-4 lg:grid-cols-[1fr_320px]">
           <div className="min-w-0 border border-border bg-card">
             <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between"><div><h3 className="font-display font-bold">Sellers da carteira</h3><p className="text-xs text-muted-foreground">Ranking pelo período selecionado</p></div><form className="flex gap-2" onSubmit={event => { event.preventDefault(); setPage(1); setSubmittedSearch(search.trim()); }}><div className="relative"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={event => setSearch(event.target.value)} className="pl-9" placeholder="Nome, e-mail ou ID" /></div><Button type="submit">Buscar</Button></form></div>
-            <div className="overflow-x-auto"><table className="w-full min-w-[700px] text-sm"><thead className="bg-muted/30 text-left text-xs text-muted-foreground"><tr><th className="p-3">Seller</th><th className="p-3">Vínculo</th><th className="p-3 text-right">Vendas</th><th className="p-3 text-right">Movimentado</th><th className="p-3 text-right">Líquido</th></tr></thead><tbody>{(data?.sellers ?? []).map(seller => <tr key={seller.seller_user_id} className="border-t border-border"><td className="p-3"><p className="font-medium">{seller.full_name || "Sem nome"}</p><p className="text-xs text-muted-foreground">{seller.email || seller.seller_user_id}</p></td><td className="p-3 text-xs text-muted-foreground">desde {format(new Date(seller.started_at), "dd/MM/yyyy HH:mm")}</td><td className="p-3 text-right font-mono tabular-nums">{seller.sales_count}</td><td className="p-3 text-right font-mono tabular-nums">{money(seller.volume)}</td><td className="p-3 text-right font-mono tabular-nums">{money(seller.net_volume)}</td></tr>)}</tbody></table></div>
+            <div className="overflow-x-auto"><table className="w-full min-w-[700px] text-sm"><thead className="bg-muted/30 text-left text-xs text-muted-foreground"><tr><th className="p-3">Seller</th><th className="p-3">Vínculo</th><th className="p-3 text-right">Vendas</th><th className="p-3 text-right">Movimentado</th><th className="p-3 text-right">Líquido</th></tr></thead><tbody>{(data?.sellers ?? []).map(seller => <tr key={seller.seller_user_id} tabIndex={0} onClick={() => setSelectedId(seller.seller_user_id)} onKeyDown={e => { if (e.key === "Enter") setSelectedId(seller.seller_user_id); }} className={cn("cursor-pointer border-t border-border hover:bg-muted/40", selectedId === seller.seller_user_id && "bg-muted/40")}><td className="p-3"><p className="font-medium">{seller.full_name || "Sem nome"}</p><p className="text-xs text-muted-foreground">{seller.email || seller.seller_user_id}</p></td><td className="p-3 text-xs text-muted-foreground">desde {format(new Date(seller.started_at), "dd/MM/yyyy HH:mm")}</td><td className="p-3 text-right font-mono tabular-nums">{seller.sales_count}</td><td className="p-3 text-right font-mono tabular-nums">{money(seller.volume)}</td><td className="p-3 text-right font-mono tabular-nums">{money(seller.net_volume)}</td></tr>)}</tbody></table></div>
             {!loading && !(data?.sellers.length) && <p className="p-10 text-center text-sm text-muted-foreground">Nenhum seller ativo encontrado.</p>}
             <div className="flex items-center justify-between border-t border-border p-3"><p className="text-xs text-muted-foreground">Página {page} de {totalPages}</p><div className="flex gap-2"><Button variant="outline" size="icon" disabled={page <= 1} onClick={() => setPage(value => value - 1)} aria-label="Página anterior"><ArrowLeft className="h-4 w-4" /></Button><Button variant="outline" size="icon" disabled={page >= totalPages} onClick={() => setPage(value => value + 1)} aria-label="Próxima página"><ArrowRight className="h-4 w-4" /></Button></div></div>
           </div>
           <aside className="space-y-4">
+            {selectedSeller ? <StaffSellerPanel key={selectedSeller.seller_user_id} seller={selectedSeller} flags={flags} onClose={() => setSelectedId(null)} onChanged={() => void load()} /> : <p className="border border-border bg-card p-4 text-xs text-muted-foreground">Selecione um seller para ver as ações disponíveis.</p>}
             <div className="border border-border bg-card p-4"><h3 className="text-sm font-semibold">Risco no período</h3><p className="mt-3 font-mono text-3xl font-bold tabular-nums">{riskTotal}</p><p className="mt-1 text-xs text-muted-foreground">Reembolsos, chargebacks e MED PIX da carteira atual.</p></div>
             <details className="border border-border bg-card p-4"><summary className="cursor-pointer text-sm font-semibold">Solicitar ação ao dono</summary><div className="mt-4"><StaffRequestForm /></div></details>
             {!canViewTransactions && <div className="border border-warning/40 bg-warning/10 p-4 text-xs text-warning">A visualização detalhada de transações não foi concedida para esta conta.</div>}
           </aside>
         </section>
+        {canViewTransactions && <StaffTransactions from={range.from} to={range.to} />}
       </main>
     </div>
   );
