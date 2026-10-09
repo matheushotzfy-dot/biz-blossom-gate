@@ -6378,6 +6378,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      staff_review_kyc: {
+        Args: { _approve: boolean; _reason?: string; _seller: string }
+        Returns: undefined
+      }
       sync_public_product_catalog_row: {
         Args: { _product_id: string }
         Returns: undefined
