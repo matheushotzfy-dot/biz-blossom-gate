@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791577967281,
+      "tag": "0000_staff_review_kyc_and_notes_fix",
+      "breakpoints": true
+    }
+  ]
+}
