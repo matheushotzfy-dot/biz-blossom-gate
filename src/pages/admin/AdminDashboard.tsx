@@ -332,11 +332,13 @@ export default function AdminDashboard() {
       toast.error("Saques estão indisponíveis sem uma adquirente configurada.");
       return;
     } else {
-      const { error, data: updated } = await supabase.from("withdrawals").update({ status: "rejected" }).eq("id", id).eq("status", "pending").select("id");
+      const reason = window.prompt("Motivo da recusa (mínimo 5 caracteres):")?.trim() ?? "";
+      if (reason.length < 5) { toast.error("Informe um motivo com pelo menos 5 caracteres."); return; }
+      const { error, data: updated } = await supabase.from("withdrawals").update({ status: "rejected", rejection_reason: reason.slice(0, 500), processed_by: user?.id ?? null }).eq("id", id).eq("status", "pending").select("id");
       if (error) { toast.error("Erro ao recusar"); return; }
       if (!updated || updated.length === 0) { toast.error("Saque já foi processado"); loadData(); return; }
       toast.success("Saque recusado");
-      await logAdminAction("reject_withdrawal", "withdrawal", id);
+      await logAdminAction("reject_withdrawal", "withdrawal", id, { reason });
     }
     loadData();
   };
@@ -344,6 +346,7 @@ export default function AdminDashboard() {
   const handleUserStatus = async (userId: string, status: string) => {
     // Alterar status de conta é ação privilegiada: apenas admin.
     if (!isAdmin) { toast.error("Sem permissão"); return; }
+    if (!window.confirm(status === "approved" ? "Confirmar aprovação desta conta?" : "Confirmar bloqueio desta conta?")) return;
     const { error } = await supabase.from("profiles").update({ account_status: status }).eq("user_id", userId);
     if (error) { toast.error("Erro ao atualizar"); return; }
     toast.success(`Conta ${status === "approved" ? "aprovada" : "bloqueada"}!`);

@@ -450,6 +450,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
   const handleUserStatus = async (userId: string, status: string) => {
     if (!isAdmin) { toast.error("Sem permissão"); return; }
+    if (!window.confirm(status === "approved" ? "Confirmar aprovação desta conta?" : "Confirmar bloqueio desta conta?")) return;
     const { error } = await supabase.from("profiles").update({ account_status: status }).eq("user_id", userId);
     if (error) { toast.error("Erro ao atualizar"); return; }
     toast.success(`Conta ${status === "approved" ? "aprovada" : "bloqueada"}!`);
@@ -459,6 +460,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
   const handleSetSellerType = async (userId: string, sellerType: string | null) => {
     if (!isAdmin) return;
+    if (!window.confirm(`Classificar seller como ${sellerType || "sem classificação"}?`)) return;
     const { error } = await supabase.from("profiles").update({ seller_type: sellerType }).eq("user_id", userId);
     if (error) { toast.error("Erro ao classificar seller"); return; }
     toast.success(`Seller classificado como ${sellerType || "sem classificação"}!`);

@@ -82,6 +82,7 @@ export default function Afiliados() {
       supabase.from("affiliate_links").select("*").or(`affiliate_user_id.eq.${user.id},owner_user_id.eq.${user.id}`).order("created_at", { ascending: false }),
       supabase.from("affiliate_sales").select("*").or(`affiliate_user_id.eq.${user.id},seller_user_id.eq.${user.id}`).order("created_at", { ascending: false }),
     ]);
+    if (linksRes.error || salesRes.error) toast.error("Não foi possível carregar todos os dados de afiliados. Tente novamente.");
     if (linksRes.data) setLinks(linksRes.data as unknown as AffiliateLink[]);
     if (salesRes.data) setSales(salesRes.data as unknown as AffiliateSale[]);
   };

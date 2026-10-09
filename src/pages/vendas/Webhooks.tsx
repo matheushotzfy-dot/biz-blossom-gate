@@ -113,7 +113,7 @@ export default function Webhooks() {
 
   const toggleActive = async (id: string, current: boolean) => {
     if (!user) return;
-    const { error } = await supabase.from("webhook_configs").update({ is_active: !current }).eq("id", id);
+    const { error } = await supabase.from("webhook_configs").update({ is_active: !current }).eq("id", id).eq("user_id", user.id);
     if (error) { toast.error(friendlyError(error)); return; }
     invalidateAll(["webhooks"]);
     await refetchWebhooks();
@@ -121,8 +121,8 @@ export default function Webhooks() {
   };
 
   const deleteWebhook = async (id: string) => {
-    if (!confirm("Excluir este endpoint? Os eventos pendentes serão cancelados.")) return;
-    const { error } = await supabase.from("webhook_configs").delete().eq("id", id);
+    if (!user || !confirm("Excluir este endpoint? Os eventos pendentes serão cancelados.")) return;
+    const { error } = await supabase.from("webhook_configs").delete().eq("id", id).eq("user_id", user.id);
     if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Removido");
     invalidateAll(["webhooks"]);
