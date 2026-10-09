@@ -1,25 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const ALLOWED_ORIGINS = new Set([
-  "https://hotzfy.com.br",
-  "https://www.hotzfy.com.br",
-  "https://biz-blossom-gate.lovable.app",
-  "https://id-preview--8b85380d-bbad-44c2-8000-ac99dd36affb.lovable.app",
-  "https://8b85380d-bbad-44c2-8000-ac99dd36affb.lovableproject.com",
-]);
-
-function buildCors(req: Request) {
-  const origin = req.headers.get("origin") ?? "";
-  const isAllowed = ALLOWED_ORIGINS.has(origin);
-  const headers: Record<string, string> = {
-    "Vary": "Origin",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-    "X-Content-Type-Options": "nosniff",
-    "Referrer-Policy": "no-referrer",
-  };
-  if (isAllowed) headers["Access-Control-Allow-Origin"] = origin;
-  return headers;
-}
+import { buildCorsHeaders as buildCors, safeError, clientIp } from "../_shared/security.ts";
 
 Deno.serve(async (req) => {
   const corsHeaders = buildCors(req);
@@ -62,18 +42,22 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Rate limiting via admin_login_attempts table
-    const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
-    const { data: recentAttempts } = await adminClient
-      .from("admin_login_attempts")
-      .select("id, success")
-      .eq("email", trimmedEmail)
-      .eq("scope", "manager")
-      .gte("created_at", fifteenMinAgo)
-      .eq("success", false);
-
-    if (recentAttempts && recentAttempts.length >= 5) {
-      await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: false, scope: "manager" });
+    // Rate limiting — atomic per-email + per-IP buckets (same pattern as admin-login).
+    const [emailLimit, ipLimit] = await Promise.all([
+      adminClient.rpc("bump_rate_limit", {
+        _bucket_key: `manager_login_email:${trimmedEmail}`,
+        _window_seconds: 900,
+        _max_count: 5,
+      }),
+      adminClient.rpc("bump_rate_limit", {
+        _bucket_key: `manager_login_ip:${clientIp(req)}`,
+        _window_seconds: 900,
+        _max_count: 20,
+      }),
+    ]);
+    const emailRow = Array.isArray(emailLimit.data) ? emailLimit.data[0] : null;
+    const ipRow = Array.isArray(ipLimit.data) ? ipLimit.data[0] : null;
+    if (emailLimit.error || ipLimit.error || emailRow?.allowed !== true || ipRow?.allowed !== true) {
       return new Response(
         JSON.stringify({ success: false, error: "Muitas tentativas. Aguarde 15 minutos.", locked: true }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -146,7 +130,7 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("[manager-login] Error:", error instanceof Error ? error.message : "unknown");
+    safeError("manager-login", error);
     return new Response(
       JSON.stringify({ success: false, error: "Erro interno." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
