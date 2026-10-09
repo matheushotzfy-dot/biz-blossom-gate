@@ -4,30 +4,7 @@
 // the only goal here is to stop brute-force / credential stuffing.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SECURITY_HEADERS, logAbuseEvent, abuseGuard, logSecurityEvent } from "../_shared/security.ts";
-
-const ALLOWED_ORIGINS = new Set([
-  "https://hotzfy.com.br",
-  "https://www.hotzfy.com.br",
-  "https://biz-blossom-gate.lovable.app",
-  "http://localhost:5173",
-  "http://localhost:8080",
-]);
-const LOVABLE_PREVIEW_RE = /^https:\/\/[a-z0-9-]+\.(lovable\.app|lovableproject\.com|lovable\.dev)$/i;
-const CORS_BASE_HEADERS: Record<string, string> = {
-  ...SECURITY_HEADERS,
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  Vary: "Origin",
-};
-function buildCors(req: Request): Record<string, string> {
-  const origin = req.headers.get("Origin") ?? "";
-  const allowed = !origin || ALLOWED_ORIGINS.has(origin) || LOVABLE_PREVIEW_RE.test(origin);
-  return allowed && origin
-    ? { ...CORS_BASE_HEADERS, "Access-Control-Allow-Origin": origin }
-    : CORS_BASE_HEADERS;
-}
+import { buildCorsHeaders as buildCors, logAbuseEvent, abuseGuard, logSecurityEvent, safeError, clientIp } from "../_shared/security.ts";
 
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 const RATE_LIMIT_MAX_FAILS = 5;
@@ -107,25 +84,27 @@ Deno.serve(async (req) => {
       );
     }
 
-    // ===== Per-email rate limit (same bucket as admin/manager, scoped) =====
-    const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
-    const { data: recentAttempts } = await adminClient
-      .from("admin_login_attempts")
-      .select("id")
-      .eq("email", trimmedEmail)
-      .eq("scope", scope)
-      .eq("success", false)
-      .gte("created_at", windowStart);
-
-    if (recentAttempts && recentAttempts.length >= RATE_LIMIT_MAX_FAILS) {
-      await adminClient.from("admin_login_attempts").insert({
-        email: trimmedEmail, success: false, scope,
-      });
+    // ===== Rate limit — atomic per-email + per-IP buckets =====
+    const [emailLimit, ipLimit] = await Promise.all([
+      adminClient.rpc("bump_rate_limit", {
+        _bucket_key: `gated_login_email:${scope}:${trimmedEmail}`,
+        _window_seconds: 900,
+        _max_count: RATE_LIMIT_MAX_FAILS,
+      }),
+      adminClient.rpc("bump_rate_limit", {
+        _bucket_key: `gated_login_ip:${clientIp(req)}`,
+        _window_seconds: 900,
+        _max_count: 20,
+      }),
+    ]);
+    const emailRow = Array.isArray(emailLimit.data) ? emailLimit.data[0] : null;
+    const ipRow = Array.isArray(ipLimit.data) ? ipLimit.data[0] : null;
+    if (emailLimit.error || ipLimit.error || emailRow?.allowed !== true || ipRow?.allowed !== true) {
       await logAbuseEvent({
         supabaseUrl, serviceKey: serviceRoleKey,
         event_type: "login_rate_limited", endpoint: "gated-login",
         status_code: 429, identifier: trimmedEmail, req,
-        metadata: { scope, attempts: recentAttempts.length },
+        metadata: { scope },
       });
       return new Response(
         JSON.stringify({
@@ -222,10 +201,10 @@ Deno.serve(async (req) => {
         });
       }
     } catch (e) {
-      console.warn("[gated-login] ip capture failed:", (e as Error)?.message);
+      safeError("gated-login:ip-capture", e);
     }
 
-    })().catch((e) => console.warn("[gated-login] bookkeeping failed:", (e as Error)?.message));
+    })().catch((e) => safeError("gated-login:bookkeeping", e));
     // deno-lint-ignore no-explicit-any
     const rt = (globalThis as any).EdgeRuntime;
     if (rt?.waitUntil) rt.waitUntil(bookkeeping); else await bookkeeping;
@@ -239,7 +218,7 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error) {
-    console.error("[gated-login] Error:", error instanceof Error ? error.message : "unknown");
+    safeError("gated-login", error);
     return new Response(
       JSON.stringify({ success: false, error: "Erro interno." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },

@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { buildCorsHeaders, preflight } from "../_shared/security.ts";
+import { buildCorsHeaders, preflight, safeError } from "../_shared/security.ts";
 
 Deno.serve(async (req) => {
   const pre = preflight(req);
@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify({ error: "Ação desconhecida." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
-    console.error("[admin-manage-staff]", e);
+    safeError("admin-manage-staff", e);
     return new Response(JSON.stringify({ error: "Erro interno." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });

@@ -1,9 +1,13 @@
 // Receives MED PIX notices from the acquirer. Fails closed: without ACQUIRER_WEBHOOK_SECRET
 // configured, or with an invalid HMAC-SHA256 signature / stale timestamp, nothing is recorded.
 // Idempotent by the acquirer's MED id (external_ref).
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@3";
+
+// No CORS needed: this endpoint is only called server-to-server by the
+// acquirer, authenticated via HMAC signature. No browser origin is ever
+// allowed to call it, so we never emit Access-Control-Allow-Origin.
+const jsonHeaders: Record<string, string> = { "Content-Type": "application/json" };
 
 const Body = z.object({
   event: z.literal("med.opened"),
@@ -15,7 +19,7 @@ const Body = z.object({
 }).refine((b) => b.transaction_id || b.external_transaction_id, { message: "transaction reference required" });
 
 const json = (data: unknown, status = 200) =>
-  new Response(JSON.stringify(data), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  new Response(JSON.stringify(data), { status, headers: jsonHeaders });
 
 async function hmacHex(secret: string, msg: string) {
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
@@ -30,7 +34,7 @@ function safeEqual(a: string, b: string) {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method === "OPTIONS") return new Response(null, { status: 204 });
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
   try {
     const secret = Deno.env.get("ACQUIRER_WEBHOOK_SECRET");

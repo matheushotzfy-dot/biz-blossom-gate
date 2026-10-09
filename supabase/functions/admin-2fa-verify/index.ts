@@ -1,23 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const ALLOWED_ORIGINS = new Set([
-  "https://hotzfy.com.br",
-  "https://www.hotzfy.com.br",
-  "https://biz-blossom-gate.lovable.app",
-  "http://localhost:5173",
-  "http://localhost:8080",
-]);
-const LOVABLE_PREVIEW_RE = /^https:\/\/[a-z0-9-]+\.(lovable\.app|lovableproject\.com|lovable\.dev)$/i;
-const BASE: Record<string, string> = {
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Vary": "Origin",
-};
-function cors(req: Request): Record<string, string> {
-  const o = req.headers.get("Origin") ?? "";
-  const ok = !o || ALLOWED_ORIGINS.has(o) || LOVABLE_PREVIEW_RE.test(o);
-  return ok && o ? { ...BASE, "Access-Control-Allow-Origin": o } : BASE;
-}
+import { buildCorsHeaders as cors, safeError } from "../_shared/security.ts";
 
 const MAX_ATTEMPTS = 5;
 
@@ -102,7 +84,7 @@ Deno.serve(async (req) => {
       role,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
-    console.error("[admin-2fa-verify]", e instanceof Error ? e.message : e);
+    safeError("admin-2fa-verify", e);
     return new Response(JSON.stringify({ success: false, error: "Erro interno." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
