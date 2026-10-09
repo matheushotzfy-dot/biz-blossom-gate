@@ -22,6 +22,13 @@
       "when": 1791578916920,
       "tag": "0002_notifications_created_index",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791579377378,
+      "tag": "0003_migration",
+      "breakpoints": true
     }
   ]
 }
