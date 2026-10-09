@@ -1,3 +1,4 @@
+import { isInternalCall } from "../_shared/cron-auth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders: Record<string, string> = {
@@ -24,7 +25,7 @@ Deno.serve(async (req) => {
 
     // Require service-role bearer auth (cron-only).
     const authHeader = req.headers.get("authorization") ?? "";
-    if (authHeader !== `Bearer ${serviceKey}`) {
+    if (!isInternalCall(req)) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

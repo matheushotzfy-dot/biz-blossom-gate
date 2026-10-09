@@ -290,6 +290,7 @@ export default function PublicCheckout() {
  return;
  }
  } catch { /* network error, retry */ }
+ if (pollCount > 300) return; // ~1h: para de consultar em abas abandonadas
  const delay = pollCount > 60 ? 15000 : 5000;
  timer = setTimeout(poll, delay);
  };
@@ -304,6 +305,7 @@ export default function PublicCheckout() {
  setCepMessage(null);
  cepAbortRef.current?.abort();
  const digits = formatted.replace(/\D/g, "");
+ setStreet(""); setNeighborhood(""); setCity(""); setState("");
  if (digits.length === 8) {
  const controller = new AbortController();
  cepAbortRef.current = controller;

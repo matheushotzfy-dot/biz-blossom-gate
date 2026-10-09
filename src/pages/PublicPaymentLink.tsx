@@ -142,18 +142,18 @@ export default function PublicPaymentLink() {
                   <div>
                     <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Nome completo</label>
                     <input required minLength={3} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-                      className="mt-1.5 w-full h-11 rounded-xl border border-border/60 bg-background px-3.5 text-sm focus:border-primary/50 focus:outline-none" />
+                      className="mt-1.5 w-full h-11 rounded-xl border border-border/60 bg-background px-3.5 text-base focus:border-primary/50 focus:outline-none" />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">E-mail</label>
                     <input type="email" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
-                      className="mt-1.5 w-full h-11 rounded-xl border border-border/60 bg-background px-3.5 text-sm focus:border-primary/50 focus:outline-none" />
+                      className="mt-1.5 w-full h-11 rounded-xl border border-border/60 bg-background px-3.5 text-base focus:border-primary/50 focus:outline-none" />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">CPF ou CNPJ</label>
                     <input required inputMode="numeric" value={form.document}
                       onChange={e => setForm({ ...form, document: maskCpfCnpj(e.target.value) })}
-                      className="mt-1.5 w-full h-11 rounded-xl border border-border/60 bg-background px-3.5 text-sm focus:border-primary/50 focus:outline-none tabular-nums" />
+                      className="mt-1.5 w-full h-11 rounded-xl border border-border/60 bg-background px-3.5 text-base focus:border-primary/50 focus:outline-none tabular-nums" />
                   </div>
                   <button type="submit" disabled
                     className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-black uppercase tracking-widest text-xs mt-2 flex items-center justify-center gap-2 hover:bg-primary/90 disabled:opacity-60">
