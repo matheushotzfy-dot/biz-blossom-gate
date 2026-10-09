@@ -541,7 +541,7 @@ export default function SaquesCrypto() {
               <h2 className="text-[12px] font-display font-black text-foreground tracking-[-0.01em]">Cotações ao vivo</h2>
             </div>
             <p className="text-[10px] text-muted-foreground font-medium tabular-nums">
-              {lastUpdate ? `Atualizado às ${format(lastUpdate, "HH:mm:ss")}` : "Carregando..."}
+              {pricesError && !lastUpdate ? "Cotação indisponível no momento. Nova tentativa em 1 minuto." : lastUpdate ? `Atualizado às ${format(lastUpdate, "HH:mm:ss")}` : "Carregando..."}
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
