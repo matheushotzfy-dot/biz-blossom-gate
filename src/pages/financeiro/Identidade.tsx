@@ -97,9 +97,12 @@ export default function Identidade() {
     await Promise.all(types.map(async (t, i) => {
       const data = results[i].data;
       if (data && data.length > 0) {
+        // Pick the most recently uploaded file for this doc type, in case
+        // older duplicates were not cleaned up for any reason.
+        const sorted = [...data].sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""));
         const { data: signed } = await supabase.storage
           .from("kyc-documents")
-          .createSignedUrl(`${user.id}/${data[0].name}`, 3600);
+          .createSignedUrl(`${user.id}/${sorted[0].name}`, 3600);
         docs[t] = signed?.signedUrl || null;
       }
     }));
@@ -113,9 +116,21 @@ export default function Identidade() {
     setUploading(type);
     const mimeExt: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/heic": "heic" };
     const ext = mimeExt[file.type] || "bin";
-    const path = `${user.id}/${type}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
+    const newFileName = `${type}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
+    const path = `${user.id}/${newFileName}`;
     const { error } = await supabase.storage.from("kyc-documents").upload(path, file, { upsert: true });
-    if (error) toast.error("Erro no upload"); else { toast.success("Documento enviado"); await loadKycDocs(); }
+    if (error) { toast.error("Erro no upload"); setUploading(null); return; }
+    toast.success("Documento enviado");
+    // Clean up older files of the same doc type so only the newest remains.
+    const { data: existing } = await supabase.storage.from("kyc-documents").list(`${user.id}`, { search: type });
+    const oldPaths = (existing || [])
+      .filter(f => f.name !== newFileName)
+      .map(f => `${user.id}/${f.name}`);
+    if (oldPaths.length > 0) {
+      const { error: removeError } = await supabase.storage.from("kyc-documents").remove(oldPaths);
+      if (removeError) console.error("Falha ao remover documentos KYC antigos:", removeError);
+    }
+    await loadKycDocs();
     setUploading(null);
   };
 
@@ -359,7 +374,9 @@ export default function Identidade() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-[12px] font-black text-foreground tracking-tight">{acc.bank_name}</p>
-                        <p className="text-[10px] font-bold font-mono text-muted-foreground/70">Ag. {acc.agency} · Cc. {(acc as any).account_number_masked ?? acc.account_number ?? "••••"}</p>
+                        <p className="text-[10px] font-bold font-mono text-muted-foreground/70">
+                          Ag. {acc.agency} · Cc. {acc.account_number_masked ?? (acc.account_number ? `••••${acc.account_number.slice(-4)}` : "••••")}
+                        </p>
                       </div>
                     </div>
                   ))}

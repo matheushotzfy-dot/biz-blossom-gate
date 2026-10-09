@@ -27,10 +27,11 @@ export default function AdminCouponsTab({ profiles, products, transactions, fmtC
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [detail, setDetail] = useState<Tables<"coupons"> | null>(null);
+  const [truncated, setTruncated] = useState(false);
 
   useEffect(() => {
     supabase.from("coupons").select("*").order("created_at", { ascending: false }).limit(1000)
-      .then(({ data, error }) => { if (error) { toast.error("Erro ao carregar cupons"); return; } if (data) setCoupons(data); });
+      .then(({ data, error }) => { if (error) { toast.error("Erro ao carregar cupons"); return; } if (data) { setCoupons(data); setTruncated(data.length === 1000); } });
   }, []);
 
   const sellerMap = useMemo(() => {
@@ -88,6 +89,11 @@ export default function AdminCouponsTab({ profiles, products, transactions, fmtC
         title="Cupons da plataforma"
         subtitle={`${coupons.length} cupons · ${active} ativos · ${totalUses} utilizações · ${fmtCurrency(totalDiscount)} descontados`}
       />
+      {truncated && (
+        <div className="rounded-xl border border-warning/30 bg-warning/10 px-4 py-2 text-xs font-semibold text-warning">
+          Mostrando os 1000 registros mais recentes; totais podem estar incompletos
+        </div>
+      )}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <AdminKpi icon={<Tag className="h-5 w-5" />} label="Total Cupons" value={String(coupons.length)} sub="Criados" gradient="from-violet-500 to-purple-600" glowColor="rgba(139,92,246,0.15)" />
         <AdminKpi icon={<ToggleLeft className="h-5 w-5" />} label="Ativos" value={String(active)} sub={`${expired} expirados`} gradient="from-emerald-500 to-emerald-600" glowColor="rgba(52,211,153,0.15)" />

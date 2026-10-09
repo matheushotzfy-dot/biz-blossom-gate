@@ -81,6 +81,7 @@ export default function Saques() {
   const [pickedKey, setPickedKey] = useState<string>("");
   const [copyPasteCode, setCopyPasteCode] = useState("");
   const [availableBalance, setAvailableBalance] = useState<number>(0);
+  const [balanceUnknown, setBalanceUnknown] = useState<boolean>(true);
   const [retainedAmount, setRetainedAmount] = useState<number>(0);
   const [withdrawFee, setWithdrawFee] = useState<number>(DEFAULT_WITHDRAW_FEE);
   const [search, setSearch] = useState("");
@@ -94,23 +95,39 @@ export default function Saques() {
 
   useEffect(() => {
     if (!user?.id) return;
+    let ignore = false;
     const fetchBalance = async () => {
-      const { data } = await supabase.rpc("get_ledger_balance", { _user_id: user.id });
-      if (data !== null) setAvailableBalance(Number(data));
+      setBalanceUnknown(true);
+      const { data, error } = await supabase.rpc("get_ledger_balance", { _user_id: user.id });
+      if (ignore) return;
+      if (error) {
+        toast.error("Não foi possível carregar seu saldo disponível. Tente novamente.");
+      } else if (data !== null) {
+        setAvailableBalance(Number(data));
+        setBalanceUnknown(false);
+      }
 
-      const { data: tx } = await supabase
+      const { data: tx, error: txError } = await supabase
         .from("transactions")
         .select("retained_amount")
         .eq("user_id", user.id)
         .in("status", ["approved", "paid", "completed"])
         .eq("retention_released", false);
-      if (tx) setRetainedAmount(tx.reduce((acc, t) => acc + Number(t.retained_amount || 0), 0));
+      if (ignore) return;
+      if (txError) toast.error("Não foi possível carregar os valores retidos.");
+      else if (tx) setRetainedAmount(tx.reduce((acc, t) => acc + Number(t.retained_amount || 0), 0));
 
-      const { data: feeRows } = await supabase.rpc("get_platform_fees");
-      const feeRow = feeRows?.find((fee) => fee.name === "Taxa de Saque");
-      if (feeRow?.value != null) setWithdrawFee(Number(feeRow.value));
+      const { data: feeRows, error: feeError } = await supabase.rpc("get_platform_fees");
+      if (ignore) return;
+      if (feeError) {
+        toast.error("Não foi possível carregar as taxas de saque.");
+      } else {
+        const feeRow = feeRows?.find((fee) => fee.name === "Taxa de Saque");
+        if (feeRow?.value != null) setWithdrawFee(Number(feeRow.value));
+      }
     };
     fetchBalance();
+    return () => { ignore = true; };
   }, [user?.id]);
 
   const filtered = useMemo(() => {
@@ -298,9 +315,14 @@ export default function Saques() {
                 </div>
                 <button
                   type="submit"
-                  className="h-14 w-full rounded-2xl bg-primary px-8 text-sm font-bold text-primary-foreground transition-all hover:opacity-90 active:scale-[0.98] sm:w-auto sm:min-w-[260px]"
+                  disabled={balanceUnknown}
+                  className="h-14 w-full rounded-2xl bg-primary px-8 text-sm font-bold text-primary-foreground transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none sm:w-auto sm:min-w-[260px]"
                 >
-                  {netPreview > 0 ? `Confirmar saque de ${fmt(parsedAmount)}` : "Confirmar solicitação"}
+                  {balanceUnknown
+                    ? "Carregando saldo…"
+                    : netPreview > 0
+                    ? `Confirmar saque de ${fmt(parsedAmount)}`
+                    : "Confirmar solicitação"}
                 </button>
               </div>
             </form>
@@ -446,7 +468,7 @@ export default function Saques() {
                               <p className="font-mono text-[11px] font-bold text-muted-foreground group-hover:text-primary transition-colors">
                                 #{w.id.slice(0, 8).toUpperCase()}
                               </p>
-                              {(w as any).origin === "auto" && (
+                              {w.origin === "auto" && (
                                 <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-semibold bg-primary/10 text-primary border border-primary/20">
                                   Auto
                                 </span>

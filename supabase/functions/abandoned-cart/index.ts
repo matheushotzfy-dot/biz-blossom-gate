@@ -1,11 +1,6 @@
 import { isInternalCall } from "../_shared/cron-auth.ts";
+import { buildCorsHeaders } from "../_shared/security.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
 
 /**
  * Abandoned Cart Recovery
@@ -15,6 +10,7 @@ const corsHeaders: Record<string, string> = {
  * Run via pg_cron every 15 minutes.
  */
 Deno.serve(async (req) => {
+  const corsHeaders = buildCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }

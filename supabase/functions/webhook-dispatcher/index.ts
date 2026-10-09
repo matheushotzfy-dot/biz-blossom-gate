@@ -6,11 +6,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { isInternalCall, unauthorizedResponse } from "../_shared/cron-auth.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, content-type, x-cron-secret",
-};
+import { buildCorsHeaders } from "../_shared/security.ts";
 
 const RETRY_DELAYS_SECONDS = [10, 30, 120, 600, 3600]; // 5 attempts
 const MAX_ATTEMPTS = RETRY_DELAYS_SECONDS.length;
@@ -161,6 +157,7 @@ async function processQueue(admin: ReturnType<typeof createClient>) {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = buildCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

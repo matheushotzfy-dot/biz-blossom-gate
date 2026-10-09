@@ -93,7 +93,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
     });
 
     const list: StaffRow[] = ids.map((uid) => {
-      const p = profiles.find((x) => x.user_id === uid) as (Tables<"profiles"> & { frozen?: boolean }) | undefined;
+      const p = profiles.find((x) => x.user_id === uid);
       return {
         user_id: uid,
         email: p?.email ?? null,

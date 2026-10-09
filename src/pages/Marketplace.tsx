@@ -46,6 +46,8 @@ export default function Marketplace() {
   .select("id, name, description, price, image_url, affiliate_commission, affiliate_enabled, display_name, delivery_type")
   .eq("status", "active")
   .eq("affiliate_enabled", true)
+  .order("created_at", { ascending: false })
+  .limit(200)
   .then(({ data }) => {
   if (data) setProducts(data as unknown as MarketplaceProduct[]);
   setLoading(false);

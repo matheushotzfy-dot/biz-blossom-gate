@@ -37,17 +37,21 @@ export default function CourseAnalytics() {
     setData(analytics as unknown as Analytics);
 
     // Top students
-    const { data: lessonIds } = await supabase
+    const { data: lessonIds, error: lessonsError } = await supabase
       .from("lessons")
       .select("id, modules!inner(course_id)")
-      .eq("modules.course_id", courseId!);
+      .eq("modules.course_id", courseId!)
+      .limit(5000);
+    if (lessonsError) toast.error("Erro ao carregar aulas do curso");
     const ids = (lessonIds || []).map((l) => l.id);
     if (ids.length > 0) {
-      const { data: prog } = await supabase
+      const { data: prog, error: progError } = await supabase
         .from("user_progress")
         .select("user_id, completed, updated_at")
         .in("lesson_id", ids)
-        .eq("completed", true);
+        .eq("completed", true)
+        .limit(5000);
+      if (progError) toast.error("Erro ao carregar progresso dos alunos");
       const map = new Map<string, StudentRow>();
       (prog || []).forEach((p) => {
         const r = map.get(p.user_id) || { user_id: p.user_id, lessons_completed: 0, last_activity: p.updated_at };

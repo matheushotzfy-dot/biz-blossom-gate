@@ -23,6 +23,7 @@ import { VenxpayLogo } from "@/components/VenxpayLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupportUnread } from "@/hooks/useSupportUnread";
 import { supabase } from "@/integrations/supabase/client";
+import { useDashboardStats } from "@/hooks/useQueryData";
 import { cn } from "@/lib/utils";
 import { prefetchRoute } from "@/lib/routePrefetch";
 
@@ -239,28 +240,23 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
   const overlaying = !pinned && !collapsed && !isMobile;
 
   const { user } = useAuth();
-  const [revenue, setRevenue] = useState(0);
-  const [todayRevenue, setTodayRevenue] = useState(0);
-  const [salesToday, setSalesToday] = useState(0);
   const [counts, setCounts] = useState({ products: 0, courses: 0, subscriptions: 0, coupons: 0 });
   const supportUnread = useSupportUnread();
+
+  // Lifetime range so the all-time revenue milestone stays correct, backed by
+  // the seller dashboard aggregate RPC (cached 5min, not refetched per-route).
+  const lifetimeRange = useMemo(() => ({ from: new Date(0), to: new Date() }), []);
+  const { data: dashboardStats } = useDashboardStats(lifetimeRange.from, lifetimeRange.to, "month");
+  const revenue = Number(dashboardStats?.current?.revenue ?? 0);
 
   useEffect(() => {
     let ignore = false;
     if (!user?.id) {
-      setRevenue(0);
-      setTodayRevenue(0);
-      setSalesToday(0);
       setCounts({ products: 0, courses: 0, subscriptions: 0, coupons: 0 });
       return;
     }
     const load = async () => {
-      const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
-      const startISO = startOfDay.toISOString();
-
-      const [{ data: tx }, { count: products }, { count: courses }, { count: subscriptions }, { count: coupons }] = await Promise.all([
-        supabase.from("transactions").select("net_amount, created_at").eq("user_id", user.id).eq("status", "completed"),
+      const [{ count: products }, { count: courses }, { count: subscriptions }, { count: coupons }] = await Promise.all([
         supabase.from("products").select("id", { count: "exact", head: true }).eq("user_id", user.id).is("deleted_at", null),
         supabase.from("courses").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("subscriptions").select("id", { count: "exact", head: true }).eq("seller_user_id", user.id).eq("status", "active"),
@@ -269,14 +265,6 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
 
       if (ignore) return;
 
-      if (tx) {
-        const total = tx.reduce((sum, t) => sum + Number(t.net_amount ?? 0), 0);
-        const todayTx = tx.filter((t) => t.created_at >= startISO);
-        const today = todayTx.reduce((sum, t) => sum + Number(t.net_amount ?? 0), 0);
-        setRevenue(total);
-        setTodayRevenue(today);
-        setSalesToday(todayTx.length);
-      }
       setCounts({
         products: products ?? 0,
         courses: courses ?? 0,
@@ -286,7 +274,7 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
     };
     void load();
     return () => { ignore = true; };
-  }, [user?.id, location.pathname]);
+  }, [user?.id]);
 
   const milestone = useMemo(() => getMilestone(revenue), [revenue]);
 

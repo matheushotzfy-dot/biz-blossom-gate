@@ -297,19 +297,66 @@ export default function CourseBuilder() {
  setDeleteTarget({ type: "module", id, label: mod?.title || "Módulo" });
  };
 
+ // Extract the storage path (relative to the "course-content" bucket) from a
+ // public URL produced by supabase.storage.from("course-content").getPublicUrl().
+ // External URLs (e.g. YouTube/Vimeo links) are ignored.
+ const courseContentPathFromUrl = (url: string | null | undefined): string | null => {
+ if (!url) return null;
+ const marker = "/storage/v1/object/public/course-content/";
+ const idx = url.indexOf(marker);
+ if (idx === -1) return null;
+ try {
+ return decodeURIComponent(url.slice(idx + marker.length));
+ } catch {
+ return url.slice(idx + marker.length);
+ }
+ };
+
+ const removeCourseContentFiles = async (paths: string[]) => {
+ const unique = Array.from(new Set(paths.filter(Boolean)));
+ if (unique.length === 0) return;
+ const { error } = await supabase.storage.from("course-content").remove(unique);
+ if (error) console.error("Falha ao remover arquivos do storage course-content:", error);
+ };
+
  const confirmDelete = async () => {
  if (!deleteTarget) return;
  setDeletingItem(true);
  if (deleteTarget.type === "module") {
+ const mod = modules.find(m => m.id === deleteTarget.id);
+ const lessonIds = (mod?.lessons || []).map(l => l.id);
+ const storagePaths: string[] = [];
+ (mod?.lessons || []).forEach(l => {
+ const videoPath = courseContentPathFromUrl(l.video_url);
+ if (videoPath) storagePaths.push(videoPath);
+ });
+ if (lessonIds.length > 0) {
+ const { data: atts } = await supabase.from("lesson_attachments").select("file_url").in("lesson_id", lessonIds);
+ (atts || []).forEach(a => {
+ const attPath = courseContentPathFromUrl(a.file_url);
+ if (attPath) storagePaths.push(attPath);
+ });
+ }
  await supabase.from("lessons").delete().in("module_id", [deleteTarget.id]);
  await supabase.from("modules").delete().eq("id", deleteTarget.id);
+ await removeCourseContentFiles(storagePaths);
  if (selectedLesson && modules.find(m => m.id === deleteTarget.id)?.lessons.some(l => l.id === selectedLesson.id)) {
  setSelectedLesson(null);
  }
  toast.success("Módulo excluído");
  } else {
+ const lesson = modules.flatMap(m => m.lessons).find(l => l.id === deleteTarget.id);
+ const storagePaths: string[] = [];
+ const videoPath = courseContentPathFromUrl(lesson?.video_url);
+ if (videoPath) storagePaths.push(videoPath);
+ const { data: atts } = await supabase.from("lesson_attachments").select("file_url").eq("lesson_id", deleteTarget.id);
+ (atts || []).forEach(a => {
+ const attPath = courseContentPathFromUrl(a.file_url);
+ if (attPath) storagePaths.push(attPath);
+ });
  await supabase.from("lesson_attachments").delete().eq("lesson_id", deleteTarget.id);
  await supabase.from("lessons").delete().eq("id", deleteTarget.id);
+ await removeCourseContentFiles(storagePaths);
  if (selectedLesson?.id === deleteTarget.id) setSelectedLesson(null);
  toast.success("Aula excluída");
  }

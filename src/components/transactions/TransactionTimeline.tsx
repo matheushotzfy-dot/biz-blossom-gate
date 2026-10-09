@@ -233,7 +233,9 @@ export function TransactionTimeline({ transactionId, variant = "seller", classNa
                 <span className={cn("text-[12px] font-semibold ", tone.text)}>
                   {v.label}
                 </span>
-                {(variant === "admin" ? ev.acquirer_slug : true) && (
+                {(variant === "admin"
+                  ? !!ev.acquirer_slug
+                  : !!ev.acquirer_slug || ev.event_type === "created" || ev.event_type === "acquirer_routed") && (
                   <span className="inline-flex items-center rounded-full border border-border/50 bg-background/60 px-2 py-0.5 text-[11px] font-semibold text-foreground/80">
                     {variant === "admin" ? ev.acquirer_slug : BRAND_LABEL}
                   </span>

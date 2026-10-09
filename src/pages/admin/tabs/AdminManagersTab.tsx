@@ -44,6 +44,11 @@ export default function AdminManagersTab({ profiles, onReload }: Props) {
   }, []);
 
   const saveLimits = async () => {
+    if (limits.min_transaction_percentage < 0 || limits.min_transaction_percentage > 100) {
+      toast.error("% mínima de taxa deve estar entre 0 e 100"); return;
+    }
+    if (limits.min_transaction_fixed < 0) { toast.error("Taxa fixa mínima não pode ser negativa"); return; }
+    if (limits.min_withdrawal_fee < 0) { toast.error("Taxa de saque mínima não pode ser negativa"); return; }
     setSaving(true);
     const payload = { ...limits, updated_by: user?.id ?? null, updated_at: new Date().toISOString() };
     const { error } = limitsId
@@ -83,7 +88,15 @@ export default function AdminManagersTab({ profiles, onReload }: Props) {
               <div className="flex items-baseline gap-2">
                 <span className="text-[11px] font-bold text-muted-foreground">{f.suffix}</span>
                 <Input type="number" step="0.01" min="0" value={f.value}
-                  onChange={(e) => setLimits((s) => ({ ...s, [f.key]: parseFloat(e.target.value) || 0 }))}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    if (raw === "") return;
+                    const v = parseFloat(raw);
+                    if (Number.isNaN(v)) { toast.error("Valor inválido"); return; }
+                    if (v < 0) { toast.error("Valor não pode ser negativo"); return; }
+                    if (f.key === "min_transaction_percentage" && v > 100) { toast.error("% não pode ser maior que 100"); return; }
+                    setLimits((s) => ({ ...s, [f.key]: v }));
+                  }}
                   className="h-10 text-lg font-display font-black tabular-nums bg-transparent border-0 border-b border-border/40 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary" />
               </div>
             </div>

@@ -559,8 +559,9 @@ export default function ProductEditor() {
 
  const removeBump = async (id: string) => {
  if (!user) return;
+ if (!effectiveProductId) { toast.error("Salve o produto antes de remover order bumps."); return; }
  // Defense-in-depth: only delete bumps whose parent product belongs to the caller
- const { error } = await supabase.from("order_bumps").delete().eq("id", id).eq("product_id", effectiveProductId ?? "");
+ const { error } = await supabase.from("order_bumps").delete().eq("id", id).eq("product_id", effectiveProductId);
  if (error) { toast.error("Erro ao remover order bump"); return; }
  setOrderBumps(prev => prev.filter(b => b.id !== id));
  toast.success("Order bump removido");

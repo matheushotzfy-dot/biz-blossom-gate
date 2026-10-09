@@ -27,7 +27,7 @@ export default function StatusPage() {
  { name: "Gateway de Pagamento", icon: CreditCard, status: "checking", description: "Processamento de pagamentos PIX, cartão e boleto" },
  { name: "Autenticação", icon: Shield, status: "checking", description: "Login, registro e gerenciamento de sessões" },
  { name: "Área de Membros", icon: Zap, status: "checking", description: "Acesso a cursos, vídeos e conteúdo digital" },
- { name: "API & Webhooks", icon: Activity, status: "checking", description: "Endpoints de integração e callbacks de postback" },
+ { name: "Banco de dados público", icon: Activity, status: "checking", description: "Disponibilidade da base de dados pública de produtos" },
  ]);
  const [lastChecked, setLastChecked] = useState<Date | null>(null);
  const [overallStatus, setOverallStatus] = useState<ServiceStatus>("checking");
@@ -45,7 +45,7 @@ export default function StatusPage() {
  newServices[0] = { ...newServices[0], status: "down" };
  }
 
-  newServices[1] = { ...newServices[1], status: "down", latency: undefined, description: "Temporariamente indisponível durante a troca da integração" };
+  newServices[1] = { ...newServices[1], status: "degraded", latency: undefined, description: "Sem adquirente configurada" };
 
  // Check auth
  try {

@@ -27,9 +27,13 @@ export function AdminAwardTiersEditor() {
   const patch = (id: string, p: Partial<Tier>) => setTiers((t) => t.map((x) => (x.id === id ? { ...x, ...p } : x)));
 
   const save = async (t: Tier) => {
-    if (!t.title.trim() || !(Number(t.value) > 0)) { toast.error("Informe nome e meta válida"); return; }
+    const value = Number(t.value);
+    if (!t.title.trim() || !Number.isFinite(value) || value <= 0 || value > 100_000_000) {
+      toast.error("Informe nome e meta válida (até 100.000.000)");
+      return;
+    }
     setSaving(t.id);
-    const { error } = await supabase.from("award_tiers").upsert({ ...t, value: Number(t.value), rewards: t.rewards.filter(Boolean) });
+    const { error } = await supabase.from("award_tiers").upsert({ ...t, value, rewards: t.rewards.filter(Boolean) });
     setSaving(null);
     if (error) { toast.error("Erro ao salvar marco"); return; }
     void logAdminAction("award_tier_saved", "award_tiers", t.id, { value: t.value, active: t.is_active });
@@ -65,7 +69,11 @@ export function AdminAwardTiersEditor() {
             <Input type="number" aria-label="Ordem" value={t.sort_order} onChange={(e) => patch(t.id, { sort_order: Number(e.target.value) })} />
             <Input aria-label="Nome" value={t.title} onChange={(e) => patch(t.id, { title: e.target.value })} />
             <Input aria-label="Nível" placeholder="Nível (ex. Elite)" value={t.tier} onChange={(e) => patch(t.id, { tier: e.target.value })} />
-            <Input type="number" aria-label="Meta em reais" value={t.value} onChange={(e) => patch(t.id, { value: Number(e.target.value) })} />
+            <Input type="number" min={0} max={100_000_000} aria-label="Meta em reais" value={t.value} onChange={(e) => {
+              const raw = Number(e.target.value);
+              const clamped = Number.isFinite(raw) ? Math.min(Math.max(raw, 0), 100_000_000) : 0;
+              patch(t.id, { value: clamped });
+            }} />
             <Input aria-label="Recompensas" placeholder="Recompensas separadas por vírgula" value={t.rewards.join(", ")} onChange={(e) => patch(t.id, { rewards: e.target.value.split(",").map((s) => s.trim()) })} />
             <Input aria-label="URL da imagem" placeholder="URL da imagem (opcional)" value={t.image_url ?? ""} onChange={(e) => patch(t.id, { image_url: e.target.value || null })} />
             <div className="flex items-center gap-2">

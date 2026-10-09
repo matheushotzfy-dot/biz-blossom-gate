@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumEmpty, PremiumPanel, PremiumSegmented, premiumTable } from "./AdminPremium";
+import AdminPager from "@/components/admin/AdminPager";
 import { toast } from "sonner";
 
 type Delivery = Tables<"checkout_delivery_attempts"> & {
@@ -27,21 +28,28 @@ export default function AdminCheckoutDeliveriesTab() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [retrying, setRetrying] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 50;
 
   const load = useCallback(async () => {
     setLoading(true);
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
     let query = supabase
       .from("checkout_delivery_attempts")
-      .select("*, product:products(name), transaction:transactions(amount,status)")
+      .select("*, product:products(name), transaction:transactions(amount,status)", { count: "exact" })
       .order("created_at", { ascending: false })
-      .limit(500);
+      .range(from, to);
     if (status !== "all") query = query.eq("status", status);
-    const { data, error } = await query;
+    const { data, error, count } = await query;
     if (error) toast.error("Não foi possível carregar as entregas");
     setItems((data ?? []) as unknown as Delivery[]);
+    setTotalCount(count ?? 0);
     setLoading(false);
-  }, [status]);
+  }, [status, page]);
 
+  useEffect(() => { setPage(1); }, [status]);
   useEffect(() => { void load(); }, [load]);
 
   const filtered = useMemo(() => {
@@ -66,7 +74,7 @@ export default function AdminCheckoutDeliveriesTab() {
         eyebrow="Operações · Pós-venda"
         title="Entregas do checkout"
         subtitle="Acompanhe acessos liberados e corrija entregas pendentes sem duplicar o acesso."
-        status={{ tone: filtered.some((item) => item.status === "failed") ? "destructive" : "info", label: `${filtered.length} entrega(s)`, pulse: false }}
+        status={{ tone: filtered.some((item) => item.status === "failed") ? "destructive" : "info", label: `${totalCount} entrega(s)`, pulse: false }}
       />
       <div className="flex flex-col gap-3 md:flex-row md:items-center">
         <div className="relative max-w-md flex-1">
@@ -104,6 +112,7 @@ export default function AdminCheckoutDeliveriesTab() {
             </table>
           </div>
         )}
+        <AdminPager page={page} pageSize={pageSize} totalCount={totalCount} onPageChange={setPage} loading={loading} />
       </PremiumPanel>
     </div>
   );
