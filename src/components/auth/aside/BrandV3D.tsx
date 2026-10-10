@@ -34,7 +34,7 @@ function Mark({ animated }: { animated: boolean }) {
   });
 
   return (
-    <group ref={ref} rotation={[0, -0.25, 0]} scale={0.82} position={[0, 0.12, 0]}>
+    <group ref={ref} rotation={[0, -0.25, 0]} scale={0.5} position={[0, 0.22, 0]}>
       {/* trilho esquerdo — cromado */}
       <mesh position={[-0.47, -0.03, 0]} rotation-z={RAIL_ANGLE} castShadow>
         <capsuleGeometry args={[RAIL_R, RAIL_LEN, 16, 48]} />
@@ -48,7 +48,7 @@ function Mark({ animated }: { animated: boolean }) {
       {/* barra de liquidação */}
       <mesh position={[0, 0.125, 0.26]} rotation-z={Math.PI / 2}>
         <capsuleGeometry args={[0.045, 0.82, 8, 24]} />
-        <meshStandardMaterial color={EMERALD} emissive={EMERALD} emissiveIntensity={1.2} toneMapped={false} />
+        <meshStandardMaterial color={EMERALD} emissive={EMERALD} emissiveIntensity={0.55} toneMapped={false} />
       </mesh>
       {/* nó de liquidação no vértice */}
       <mesh position={[0, -1.02, 0.18]}>
