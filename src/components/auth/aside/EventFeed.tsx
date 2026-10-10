@@ -35,8 +35,8 @@ export function EventFeed() {
         <span>stream · eventos</span>
         <span className="auth-aside-border rounded-sm border px-1.5 py-px">demonstração</span>
       </div>
-      <ul className="space-y-1.5">
-        <AnimatePresence initial={false}>
+      <ul className="relative space-y-1.5 overflow-hidden">
+        <AnimatePresence initial={false} mode="popLayout">
           {rows.map((r) => (
             <motion.li
               key={r.id}
