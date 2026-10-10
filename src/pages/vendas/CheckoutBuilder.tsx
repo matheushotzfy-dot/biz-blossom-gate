@@ -229,10 +229,10 @@ export default function CheckoutBuilder() {
  // Optimization score
  const optimizationScore = (() => {
  let s = 0;
- const max = 8;
+ // Boleto está desativado na plataforma e a prova social fictícia foi removida.
+ const max = 6;
  if (pixEnabled) s++;
  if (creditCardEnabled) s++;
- if (boletoEnabled) s++;
  if (timerEnabled) s++;
  if (guaranteeEnabled) s++;
  if (orderBumps.length > 0) s++;
