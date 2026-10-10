@@ -48,7 +48,7 @@ export function AuthAside({ className }: AuthAsideProps) {
         width={1536}
         height={1920}
         decoding="async"
-        fetchPriority="high"
+        {...{ fetchpriority: "high" }}
         style={reduced ? undefined : { x, y, rotateX: rotX, rotateY: rotY }}
         initial={reduced ? false : { opacity: 0, scale: 1.12 }}
         animate={{ opacity: 1, scale: 1.08 }}
