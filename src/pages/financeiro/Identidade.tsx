@@ -120,6 +120,10 @@ export default function Identidade() {
     const path = `${user.id}/${newFileName}`;
     const { error } = await supabase.storage.from("kyc-documents").upload(path, file, { upsert: true });
     if (error) { toast.error("Erro no upload"); setUploading(null); return; }
+    // Documento real no bucket → conta entra oficialmente em análise.
+    supabase.rpc("mark_kyc_submitted").then(({ error: rpcErr }) => {
+      if (rpcErr) console.warn("[kyc] mark_kyc_submitted failed", rpcErr.message);
+    });
     toast.success("Documento enviado");
     // Clean up older files of the same doc type so only the newest remains.
     const { data: existing } = await supabase.storage.from("kyc-documents").list(`${user.id}`, { search: type });

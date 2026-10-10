@@ -69,6 +69,11 @@ export function KycOnboardingPopup() {
     const { error } = await supabase.storage.from("kyc-documents").upload(path, file, { upsert: true, contentType: file.type });
     setUploading(null);
     if (error) { toast.error("Não foi possível enviar. Verifique a conexão e tente de novo."); return; }
+    // Documento real no bucket → conta entra oficialmente em análise.
+    // Falha aqui não bloqueia o envio (a equipe ainda vê os arquivos).
+    supabase.rpc("mark_kyc_submitted").then(({ error: rpcErr }) => {
+      if (rpcErr) console.warn("[kyc] mark_kyc_submitted failed", rpcErr.message);
+    });
     setDocs((prev) => {
       const next = { ...prev, [step.type]: true };
       const nextMissing = steps.findIndex((s) => !next[s.type]);
