@@ -171,7 +171,7 @@ export default function Identidade() {
     { icon: Fingerprint, label: "Verificação",  value: isApproved ? "100%" : `${pct}%`, sub: isApproved ? "Identidade confirmada" : `${doneCount}/${completionSteps.length} etapas` },
     { icon: Wallet,      label: "Chaves PIX",   value: `${pixKeys.length}/3`, sub: pixKeys.length ? "Cadastradas" : "Nenhuma" },
     { icon: Building2,   label: "Contas Bancárias", value: bankAccounts.length, sub: bankAccounts.length ? "Vinculadas" : "Nenhuma" },
-    { icon: Shield,      label: "Status",       value: status.label,          sub: isApproved ? "Saques liberados" : "Aguardando aprovação" },
+    { icon: Shield,      label: "Status",       value: status.label,          sub: isApproved ? "Saques liberados" : profile?.account_status === "pending_review" ? "Aguardando aprovação" : "Envie seus documentos" },
   ];
 
   return (

@@ -308,7 +308,7 @@ export default function Perfil() {
         <HDStat
           label="Status"
           value={accStatus.label}
-          sub="Conta verificada via KYC"
+          sub={profile?.account_status === "approved" ? "Conta verificada via KYC" : profile?.account_status === "pending_review" ? "Documentos em análise" : "Envie seus documentos"}
           icon={ShieldCheck}
           tone={accStatus.tone === "success" ? "success" : accStatus.tone === "warning" ? "warning" : "danger"}
         />
