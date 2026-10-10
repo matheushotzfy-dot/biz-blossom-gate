@@ -234,7 +234,6 @@ export default function CheckoutBuilder() {
  if (creditCardEnabled) s++;
  if (boletoEnabled) s++;
  if (timerEnabled) s++;
- if (socialProof) s++;
  if (guaranteeEnabled) s++;
  if (orderBumps.length > 0) s++;
  if (bannerDesktopPreview || bannerMobilePreview) s++;
@@ -244,7 +243,7 @@ export default function CheckoutBuilder() {
  // Tab feature counts
  const getTabFeatureCount = (tabId: TabId): number => {
  switch (tabId) {
- case "visual": return [timerEnabled, socialProof, guaranteeEnabled, !!bannerDesktopPreview, !!bannerMobilePreview].filter(Boolean).length;
+ case "visual": return [timerEnabled, guaranteeEnabled, !!bannerDesktopPreview, !!bannerMobilePreview].filter(Boolean).length;
  case "payment": return [pixEnabled, boletoEnabled, creditCardEnabled].filter(Boolean).length;
  case "form": return [emailConfirm, cpfRequired, addressRequired].filter(Boolean).length;
  case "bumps": return orderBumps.length;
