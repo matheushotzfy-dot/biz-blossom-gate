@@ -1,0 +1,1 @@
+ALTER POLICY "Owners manage order bumps" ON public.order_bumps TO authenticated;
