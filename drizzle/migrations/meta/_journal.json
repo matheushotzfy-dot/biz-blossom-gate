@@ -50,6 +50,13 @@
       "when": 1791659237689,
       "tag": "0006_kyc_snooze_and_signup_codes",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791659474751,
+      "tag": "0007_kyc_pending_until_docs_sent",
+      "breakpoints": true
     }
   ]
 }
