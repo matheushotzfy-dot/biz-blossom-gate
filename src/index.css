@@ -319,6 +319,11 @@ input[type="number"]::-webkit-inner-spin-button {
       radial-gradient(ellipse 55% 45% at 50% 46%, hsl(var(--auth-aside-accent) / .14), transparent 70%),
       radial-gradient(ellipse 40% 30% at 30% 60%, hsl(160 84% 45% / .08), transparent 70%);
   }
+  .auth-stage-vignette {
+    background:
+      linear-gradient(180deg, hsl(var(--auth-aside-bg) / .55) 0%, transparent 22%, transparent 58%, hsl(var(--auth-aside-bg) / .92) 100%),
+      radial-gradient(ellipse 90% 80% at 50% 45%, transparent 55%, hsl(var(--auth-aside-bg) / .6) 100%);
+  }
   .auth-stage-grain {
     opacity: .07; mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
