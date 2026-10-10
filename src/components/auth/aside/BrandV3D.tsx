@@ -47,12 +47,12 @@ function Mark({ animated }: { animated: boolean }) {
   });
 
   return (
-    <group ref={ref} rotation={[0, -0.25, 0]} scale={0.62}>
+    <group ref={ref} rotation={[0, -0.25, 0]} scale={0.5}>
       <mesh geometry={geometry} castShadow>
         <meshPhysicalMaterial
-          color="#0d1b33"
+          color="#1a2c4d"
           metalness={0.85}
-          roughness={0.16}
+          roughness={0.28}
           clearcoat={1}
           clearcoatRoughness={0.08}
           envMapIntensity={1.6}
@@ -88,6 +88,8 @@ export default function BrandV3D({ animated }: BrandV3DProps) {
         <Lightformer form="rect" intensity={3} color="#ffffff" position={[0, 4, 2]} scale={[6, 0.6, 1]} />
         <Lightformer form="rect" intensity={4} color={EMERALD} position={[-4, 0.5, 1]} rotation-y={Math.PI / 2} scale={[8, 0.5, 1]} />
         <Lightformer form="rect" intensity={4} color={STEEL} position={[4, -0.5, 1]} rotation-y={-Math.PI / 2} scale={[8, 0.5, 1]} />
+        <Lightformer form="rect" intensity={1.2} color="#9fc4ff" position={[2, 2, 7]} scale={[10, 6, 1]} />
+        <Lightformer form="rect" intensity={0.8} color={EMERALD} position={[-3, -2, 6]} scale={[6, 3, 1]} />
         <Lightformer form="ring" intensity={1.5} color={STEEL} position={[0, 0, -6]} scale={4} />
       </Environment>
     </Canvas>
