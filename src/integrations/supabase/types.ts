@@ -6227,6 +6227,17 @@ export type Database = {
       }
       mask_pix: { Args: { _kind: string; _v: string }; Returns: string }
       mask_tail: { Args: { _keep?: number; _v: string }; Returns: string }
+      peek_rate_limit: {
+        Args: {
+          _bucket_key: string
+          _max_count: number
+          _window_seconds: number
+        }
+        Returns: {
+          allowed: boolean
+          current_count: number
+        }[]
+      }
       pick_failover_acquirer: {
         Args: { _current_acquirer_id: string }
         Returns: string

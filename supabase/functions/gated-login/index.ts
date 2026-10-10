@@ -84,14 +84,16 @@ Deno.serve(async (req) => {
       );
     }
 
-    // ===== Rate limit — atomic per-email + per-IP buckets =====
+    // ===== Rate limit — read-only check (peek) per-email + per-IP =====
+    // Successful logins must NOT consume the lockout budget; the counters are
+    // only incremented (bump_rate_limit) when the password check fails below.
     const [emailLimit, ipLimit] = await Promise.all([
-      adminClient.rpc("bump_rate_limit", {
+      adminClient.rpc("peek_rate_limit", {
         _bucket_key: `gated_login_email:${scope}:${trimmedEmail}`,
         _window_seconds: 900,
         _max_count: RATE_LIMIT_MAX_FAILS,
       }),
-      adminClient.rpc("bump_rate_limit", {
+      adminClient.rpc("peek_rate_limit", {
         _bucket_key: `gated_login_ip:${clientIp(req)}`,
         _window_seconds: 900,
         _max_count: 20,
@@ -125,6 +127,19 @@ Deno.serve(async (req) => {
 
     if (authError || !authData.user || !authData.session) {
       const failure = getLoginFailure(authError);
+      // Count the failed attempt against both buckets (email + IP).
+      await Promise.all([
+        adminClient.rpc("bump_rate_limit", {
+          _bucket_key: `gated_login_email:${scope}:${trimmedEmail}`,
+          _window_seconds: 900,
+          _max_count: RATE_LIMIT_MAX_FAILS,
+        }),
+        adminClient.rpc("bump_rate_limit", {
+          _bucket_key: `gated_login_ip:${clientIp(req)}`,
+          _window_seconds: 900,
+          _max_count: 20,
+        }),
+      ]);
       if (failure.internalCode !== "email_not_confirmed") {
         await adminClient.from("admin_login_attempts").insert({
           email: trimmedEmail, success: false, scope,

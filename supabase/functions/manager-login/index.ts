@@ -42,14 +42,16 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Rate limiting — atomic per-email + per-IP buckets (same pattern as admin-login).
+    // Rate limiting — read-only check (peek) per-email + per-IP.
+    // Successful logins must NOT consume the lockout budget; the counters are
+    // only incremented (bump_rate_limit) when the password check fails below.
     const [emailLimit, ipLimit] = await Promise.all([
-      adminClient.rpc("bump_rate_limit", {
+      adminClient.rpc("peek_rate_limit", {
         _bucket_key: `manager_login_email:${trimmedEmail}`,
         _window_seconds: 900,
         _max_count: 5,
       }),
-      adminClient.rpc("bump_rate_limit", {
+      adminClient.rpc("peek_rate_limit", {
         _bucket_key: `manager_login_ip:${clientIp(req)}`,
         _window_seconds: 900,
         _max_count: 20,
@@ -71,6 +73,19 @@ Deno.serve(async (req) => {
     });
 
     if (authError || !authData.user || !authData.session) {
+      // Count the failed attempt against both buckets (email + IP).
+      await Promise.all([
+        adminClient.rpc("bump_rate_limit", {
+          _bucket_key: `manager_login_email:${trimmedEmail}`,
+          _window_seconds: 900,
+          _max_count: 5,
+        }),
+        adminClient.rpc("bump_rate_limit", {
+          _bucket_key: `manager_login_ip:${clientIp(req)}`,
+          _window_seconds: 900,
+          _max_count: 20,
+        }),
+      ]);
       await adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: false, scope: "manager" });
       return new Response(
         JSON.stringify({ success: false, error: "Credenciais inválidas ou acesso não autorizado." }),
