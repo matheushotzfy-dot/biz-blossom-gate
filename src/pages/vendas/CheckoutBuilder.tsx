@@ -1,3 +1,4 @@
+import { formatCurrency } from "@/components/products/productPresentation";
 /**
  * Checkout Builder — Premium immersive checkout customizer
  * @module CheckoutBuilder
@@ -505,9 +506,9 @@ export default function CheckoutBuilder() {
  <Label className="text-[11px] font-medium text-muted-foreground block">Tema Visual</Label>
  <div className="grid grid-cols-3 gap-2.5">
  {[
- { key: "gray" as const, name: "Cinza Suave", preview: "bg-gradient-to-b from-gray-100 to-gray-200", ring: "border-gray-300" },
- { key: "white" as const, name: "Branco", preview: "bg-gradient-to-b from-white to-gray-50", ring: "border-gray-200" },
- { key: "dark" as const, name: "Escuro", preview: "bg-gradient-to-b from-[hsl(220_16%_18%)] to-[hsl(220_18%_10%)]", ring: "border-[hsl(220_12%_28%)]" },
+ { key: "gray" as const, name: "Cinza Suave", swatch: "linear-gradient(180deg,#f3f4f6,#e5e7eb)", ring: "border-border" },
+ { key: "white" as const, name: "Branco", swatch: "linear-gradient(180deg,#ffffff,#f9fafb)", ring: "border-border" },
+ { key: "dark" as const, name: "Escuro", swatch: "linear-gradient(180deg,hsl(220 16% 18%),hsl(220 18% 10%))", ring: "border-border" },
  ].map(theme => (
  <button
  key={theme.key}
@@ -525,7 +526,7 @@ export default function CheckoutBuilder() {
  <Check className="h-2.5 w-2.5 text-primary-foreground" />
  </div>
  )}
- <div className={cn("h-10 rounded-md mb-2 border", theme.preview, theme.ring)} />
+ <div className={cn("h-10 rounded-md mb-2 border", theme.ring)} style={{ background: theme.swatch }} />
  <p className="text-[10px] font-bold text-foreground">{theme.name}</p>
  </button>
  ))}
@@ -569,7 +570,7 @@ export default function CheckoutBuilder() {
  className="h-11 rounded-lg flex items-center justify-center text-white text-sm font-bold gap-2 cursor-pointer transition-transform "
  style={{ backgroundColor: buttonColor, boxShadow: `0 8px 24px -6px ${buttonColor}40` }}
  >
- <Sparkles className="h-4 w-4" /> COMPRAR AGORA — R$ {Number(product?.price || 0).toFixed(2)}
+ <Sparkles className="h-4 w-4" /> COMPRAR AGORA — {formatCurrency(Number(product?.price || 0))}
  </div>
  </SectionCard>
 
@@ -623,8 +624,7 @@ export default function CheckoutBuilder() {
  ))}
  </SectionCard>
 
- <ToggleRow icon={Users} title="Prova social" desc="Mostra compradores recentes" checked={socialProof} onChange={setSocialProof} />
- <ToggleRow icon={ShieldCheck} title="Selo de garantia" desc="Garantia com ícone de proteção" checked={guaranteeEnabled} onChange={setGuaranteeEnabled} />
+  <ToggleRow icon={ShieldCheck} title="Selo de garantia" desc="Garantia com ícone de proteção" checked={guaranteeEnabled} onChange={setGuaranteeEnabled} />
  <ConversionTip text="Banners de qualidade aumentam a conversão em até 32%. Use imagens claras e diretas." icon={TrendingUp} />
  </>
  )}
@@ -709,7 +709,7 @@ export default function CheckoutBuilder() {
  )}
  <div className="min-w-0 flex-1">
  <p className="text-xs font-semibold truncate">{prod?.name || "Produto"}</p>
- <p className="text-xs font-bold text-primary">+ R$ {Number(prod?.price || 0).toFixed(2)}</p>
+ <p className="text-xs font-bold text-primary">+ {formatCurrency(Number(prod?.price || 0))}</p>
  </div>
  <Button variant="ghost" size="icon" onClick={() => removeBump(bump.id)} className="h-7 w-7 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-all">
  <Trash2 className="h-3.5 w-3.5" />
@@ -748,7 +748,7 @@ export default function CheckoutBuilder() {
  )}
  <div className="min-w-0 flex-1">
  <p className="text-xs font-medium truncate">{p.name}</p>
- <p className="text-[11px] font-bold text-primary">R$ {Number(p.price).toFixed(2)}</p>
+ <p className="text-[11px] font-bold text-primary">{formatCurrency(Number(p.price))}</p>
  </div>
  </button>
  ))}
@@ -937,22 +937,10 @@ export default function CheckoutBuilder() {
  )}
  <div>
  <p className="text-sm font-bold text-gray-900">{product?.name}</p>
- <p className="text-xl font-black tracking-tight" style={{ color: buttonColor }}>R$ {Number(product?.price || 0).toFixed(2)}</p>
+ <p className="text-xl font-black tracking-tight" style={{ color: buttonColor }}>{formatCurrency(Number(product?.price || 0))}</p>
  </div>
  </div>
 
-
- {/* Social proof */}
- {socialProof && (
- <div className="flex items-center gap-2 text-[11px] text-gray-600">
- <div className="flex -space-x-1.5">
- {[1,2,3,4].map(i => (
- <div key={i} className="h-6 w-6 rounded-full border-2 border-white " style={{ backgroundColor: buttonColor + (20 + i * 10).toString(16) }} />
- ))}
- </div>
- <span className="font-semibold">+127 compraram nas últimas 24h</span>
- </div>
- )}
 
  {/* Form fields */}
  <div className="space-y-2.5">
@@ -1003,7 +991,7 @@ export default function CheckoutBuilder() {
  <div className="flex-1 min-w-0">
  <p className="text-xs font-bold text-gray-800 truncate">{prod?.name || "Bump"}</p>
  <p className="text-[10px] text-gray-400 mt-0.5">Adicione ao seu pedido</p>
- <p className="text-sm font-extrabold mt-0.5" style={{ color: buttonColor }}>+ R$ {Number(prod?.price || 0).toFixed(2)}</p>
+ <p className="text-sm font-extrabold mt-0.5" style={{ color: buttonColor }}>+ {formatCurrency(Number(prod?.price || 0))}</p>
  </div>
  <div className="h-8 w-8 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all" style={{ borderColor: buttonColor + "40", backgroundColor: buttonColor + "08" }}>
  <Plus className="h-3.5 w-3.5" style={{ color: buttonColor }} />
