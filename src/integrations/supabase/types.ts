@@ -6267,6 +6267,7 @@ export type Database = {
         }
         Returns: string
       }
+      mark_kyc_submitted: { Args: never; Returns: undefined }
       mask_pix: { Args: { _kind: string; _v: string }; Returns: string }
       mask_tail: { Args: { _keep?: number; _v: string }; Returns: string }
       peek_rate_limit: {
