@@ -2922,6 +2922,7 @@ export type Database = {
           frozen: boolean
           full_name: string | null
           id: string
+          kyc_popup_snoozed_until: string | null
           kyc_rejection_reason: string | null
           last_ip: string | null
           last_login_at: string | null
@@ -2966,6 +2967,7 @@ export type Database = {
           frozen?: boolean
           full_name?: string | null
           id?: string
+          kyc_popup_snoozed_until?: string | null
           kyc_rejection_reason?: string | null
           last_ip?: string | null
           last_login_at?: string | null
@@ -3010,6 +3012,7 @@ export type Database = {
           frozen?: boolean
           full_name?: string | null
           id?: string
+          kyc_popup_snoozed_until?: string | null
           kyc_rejection_reason?: string | null
           last_ip?: string | null
           last_login_at?: string | null
@@ -3923,6 +3926,45 @@ export type Database = {
           reason?: string
           seller_user_id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      signup_verification_codes: {
+        Row: {
+          attempts: number
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          salt: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          salt: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          salt?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -6389,6 +6431,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      snooze_my_kyc_popup: { Args: never; Returns: string }
       staff_review_kyc: {
         Args: { _approve: boolean; _reason?: string; _seller: string }
         Returns: undefined

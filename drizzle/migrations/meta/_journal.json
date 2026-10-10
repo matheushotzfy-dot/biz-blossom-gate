@@ -43,6 +43,13 @@
       "when": 1791657968717,
       "tag": "0005_peek_rate_limit_readonly",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791659237689,
+      "tag": "0006_kyc_snooze_and_signup_codes",
+      "breakpoints": true
     }
   ]
 }
