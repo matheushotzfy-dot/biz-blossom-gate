@@ -26,6 +26,7 @@ import { HDShell, HDHeader, HDStat, HDStatGrid } from "@/components/hd/HDPage";
 
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: LucideIcon }> = {
   approved:       { label: "Conta Verificada", color: "text-emerald-500", bg: "bg-emerald-500/10", icon: BadgeCheck },
+  pending:        { label: "Pendente",         color: "text-muted-foreground", bg: "bg-muted", icon: Shield },
   pending_review: { label: "Em Análise",       color: "text-amber-500",   bg: "bg-amber-500/10",   icon: Shield },
   rejected:       { label: "Reprovada",        color: "text-red-500",     bg: "bg-red-500/10",     icon: Shield },
   blocked:        { label: "Bloqueada",        color: "text-red-500",     bg: "bg-red-500/10",     icon: Shield },
@@ -147,7 +148,7 @@ export default function Identidade() {
   };
 
   const isCnpj = profile?.document_type === "cnpj";
-  const status = STATUS_MAP[profile?.account_status || "pending_review"] || STATUS_MAP.pending_review;
+  const status = STATUS_MAP[profile?.account_status || "pending"] || STATUS_MAP.pending;
   const StatusIcon = status.icon;
   const completionSteps = [
     { label: "Dados pessoais", done: !!(profile?.full_name && profile?.email) },

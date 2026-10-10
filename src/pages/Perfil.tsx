@@ -257,11 +257,12 @@ export default function Perfil() {
 
   const statusMap: Record<string, { label: string; tone: "success" | "warning" | "destructive" | "info" }> = {
     approved: { label: "Verificada", tone: "success" },
+    pending: { label: "Verificação pendente", tone: "info" },
     pending_review: { label: "Em análise", tone: "warning" },
     rejected: { label: "Reprovada", tone: "destructive" },
     blocked: { label: "Bloqueada", tone: "destructive" },
   };
-  const accStatus = statusMap[profile?.account_status || "pending_review"] || statusMap.pending_review;
+  const accStatus = statusMap[profile?.account_status || "pending"] || statusMap.pending;
 
   const memberDays = profile?.created_at
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
