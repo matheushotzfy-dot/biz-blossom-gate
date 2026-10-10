@@ -978,7 +978,7 @@ export default function PublicCheckout() {
  <Label className={labelClass}>Parcelas</Label>
  <div className="relative mt-1.5">
  <select value={installments} onChange={e => setInstallments(e.target.value)} className="w-full h-12 rounded-xl border bg-[hsl(var(--checkout-bg-soft))] border-[hsl(var(--checkout-border))] text-[hsl(var(--checkout-text))] text-[16px] px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:border-[color:var(--btn-color)] font-medium transition-all duration-300" >
- {installmentOptions.map(opt => <option key={opt.n} value={opt.n}>{opt.n}x R$ {opt.val.toFixed(2)}</option>)}
+ {installmentOptions.map(opt => <option key={opt.n} value={opt.n}>{opt.n}x {formatCurrency(opt.val)}</option>)}
  </select>
  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 pointer-events-none" />
  </div>
