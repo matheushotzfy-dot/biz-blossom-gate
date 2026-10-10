@@ -1,3 +1,4 @@
+import { formatCurrency } from "@/components/products/productPresentation";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -464,6 +465,14 @@ export default function PublicCheckout() {
  }
  [data-checkout-theme="dark"] input::placeholder {
  color: hsl(215 12% 48%) !important;
+ }
+ /* O painel aplica cor global aos campos com !important; o checkout usa o tema do produto. */
+ [data-checkout-theme] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+ [data-checkout-theme] select,
+ [data-checkout-theme] textarea {
+ background-color: hsl(var(--checkout-bg-soft)) !important;
+ border-color: hsl(var(--checkout-border)) !important;
+ color: hsl(var(--checkout-text)) !important;
  }
  [data-checkout-theme="dark"] select option {
  background: hsl(var(--checkout-bg-elevated));
@@ -969,7 +978,7 @@ export default function PublicCheckout() {
  <Label className={labelClass}>Parcelas</Label>
  <div className="relative mt-1.5">
  <select value={installments} onChange={e => setInstallments(e.target.value)} className="w-full h-12 rounded-xl border bg-[hsl(var(--checkout-bg-soft))] border-[hsl(var(--checkout-border))] text-[hsl(var(--checkout-text))] text-[16px] px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:border-[color:var(--btn-color)] font-medium transition-all duration-300" >
- {installmentOptions.map(opt => <option key={opt.n} value={opt.n}>{opt.n}x R$ {opt.val.toFixed(2)}</option>)}
+ {installmentOptions.map(opt => <option key={opt.n} value={opt.n}>{opt.n}x {formatCurrency(opt.val)}</option>)}
  </select>
  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 pointer-events-none" />
  </div>

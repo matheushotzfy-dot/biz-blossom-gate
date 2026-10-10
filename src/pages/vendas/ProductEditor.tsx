@@ -439,18 +439,26 @@ export default function ProductEditor() {
  setActiveTab("configuracoes");
  window.history.replaceState(null, "", `/vendas/produtos/${newProduct.id}/editar`);
   } else {
-  // Auto-promove de 'draft' para 'active' quando todos os campos essenciais foram preenchidos.
-  // Não toca em status definidos pelo admin (pending_review/inactive).
+  // Rascunho completo vai para análise (o servidor só permite ao seller: draft → pending_review).
+  // Não toca em status definidos pelo admin (pending_review/inactive/active).
   const updatePayload: TablesUpdate<"products"> = { ...productData };
   const currentStatus = product?.status;
   const hasAllEssentials = name.trim().length > 1 && priceNum >= 1 && (description.trim().length >= 10) && !!imageUrl;
-  if (currentStatus === "draft" && hasAllEssentials) {
-    updatePayload.status = "active";
+  const submittingForReview = currentStatus === "draft" && hasAllEssentials;
+  if (submittingForReview) {
+    updatePayload.status = "pending_review";
   } else {
     delete updatePayload.status; // preserva status do admin
   }
   const { error } = await supabase.from("products").update(updatePayload).eq("id", effectiveProductId!).eq("user_id", user.id);
-  if (error) { toast.error("Erro ao salvar"); return; }
+  if (error) {
+    toast.error(error.hint === "product_status_restricted" ? "Esse status só pode ser alterado pela equipe VENXPAY." : "Erro ao salvar");
+    return;
+  }
+  if (submittingForReview) {
+    setStatus("pending_review");
+    toast.success("Produto enviado para análise da equipe.");
+  }
 
  if (deliveryType === "digital") {
  const { data: existingCourse } = await supabase.from("courses").select("id").eq("product_id", effectiveProductId!).eq("user_id", user.id).limit(1).maybeSingle();

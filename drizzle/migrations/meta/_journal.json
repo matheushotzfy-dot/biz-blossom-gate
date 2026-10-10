@@ -78,6 +78,20 @@
       "when": 1791660216289,
       "tag": "0010_fix_profile_status_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791663416325,
+      "tag": "0011_product_images_owner_select",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791663775068,
+      "tag": "0012_order_bumps_owner_policy_authenticated",
+      "breakpoints": true
     }
   ]
 }

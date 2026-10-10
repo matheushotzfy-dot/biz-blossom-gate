@@ -507,6 +507,11 @@ export default function Vendas() {
                         <span className={cn("h-1 w-1 rounded-full", status.dot)} />
                         {status.label}
                       </span>
+                      {(t as { is_simulated?: boolean }).is_simulated && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border border-border bg-muted text-muted-foreground">
+                          Simulação
+                        </span>
+                      )}
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-muted/40 border border-border/60 text-muted-foreground/80">
                         {t.payment_method === "pix" ? <PixLogoMark className="h-2.5 w-2.5" /> : <MethodIcon className="h-2.5 w-2.5" />}
                         {method.label}
@@ -569,6 +574,11 @@ export default function Vendas() {
                             <span className={cn("h-1.5 w-1.5 rounded-full", status.dot)} />
                             {status.label}
                           </span>
+                          {(t as { is_simulated?: boolean }).is_simulated && (
+                            <span className="ml-1.5 inline-flex items-center px-2 py-1 rounded-full text-[10px] font-semibold border border-border bg-muted text-muted-foreground" title="Venda de teste: não entra no saldo nem nos totais">
+                              Simulação
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="px-8 py-5">
