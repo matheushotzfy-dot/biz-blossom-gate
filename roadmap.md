@@ -34,3 +34,6 @@
 - [ ] Paginar cargas globais e históricos restantes do admin
 
 - [ ] Revisão aba por aba do admin (Etapa 2 do plano) — em lotes, a fazer
+
+- [x] Novo popup de verificação de documentos (KYC)
+- [ ] Código de 4 números no cadastro com login automático — aguardando o domínio de e-mail ser conectado

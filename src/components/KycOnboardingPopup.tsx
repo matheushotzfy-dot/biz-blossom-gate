@@ -5,7 +5,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, Clock, ShieldCheck, X } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -23,7 +22,6 @@ export function KycOnboardingPopup() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const kyc = useKycStatus();
-  const qc = useQueryClient();
   const isCnpj = profile?.document_type === "cnpj";
   const steps = useMemo(() => (isCnpj ? [...BASE_STEPS, CNPJ_STEP] : [...BASE_STEPS]), [isCnpj]);
   const [open, setOpen] = useState(false);
@@ -32,7 +30,7 @@ export function KycOnboardingPopup() {
   const [uploading, setUploading] = useState<KycDocType | null>(null);
   const [finished, setFinished] = useState(false);
 
-  const snoozedUntil = (profile as { kyc_popup_snoozed_until?: string | null } | null)?.kyc_popup_snoozed_until;
+  const snoozedUntil = profile?.kyc_popup_snoozed_until ?? null;
 
   useEffect(() => {
     if (!user?.id || !profile || !kyc.resolved) return;
@@ -83,8 +81,8 @@ export function KycOnboardingPopup() {
   const later = useCallback(async () => {
     setOpen(false);
     const { error } = await supabase.rpc("snooze_my_kyc_popup");
-    if (!error) qc.invalidateQueries({ queryKey: ["profile"] });
-  }, [qc]);
+    if (error) console.warn("[kyc] snooze failed", error.message);
+  }, []);
 
   if (!open || !step) return null;
 
