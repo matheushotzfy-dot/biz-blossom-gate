@@ -1,3 +1,4 @@
+import { formatCurrency } from "@/components/products/productPresentation";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
