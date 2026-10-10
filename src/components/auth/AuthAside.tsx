@@ -31,7 +31,7 @@ const METRICS = [
 
 function BrandMark() {
   return (
-    <svg viewBox="0 0 400 400" fill="none" aria-hidden="true" className="auth-aside-mark absolute -right-24 top-1/2 h-[560px] w-[560px] -translate-y-1/2">
+    <svg viewBox="0 0 400 400" fill="none" aria-hidden="true" className="auth-aside-mark absolute -right-40 top-1/2 h-[560px] w-[560px] opacity-50 -translate-y-1/2">
       <path d="M60 70 L200 340 L340 70" stroke="currentColor" strokeWidth="1.5" />
       <path d="M110 70 L200 245 L290 70" stroke="currentColor" strokeWidth="1" />
     </svg>
@@ -46,7 +46,7 @@ export function AuthAside({ className }: AuthAsideProps) {
       : { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] as const } };
 
   return (
-    <aside className={cn("auth-aside relative isolate flex h-full flex-col overflow-hidden px-12 py-10 xl:px-16", className)} aria-label="Sobre a VENXPAY">
+    <aside className={cn("auth-aside relative isolate flex h-full flex-col overflow-hidden px-12 py-8 xl:px-16", className)} aria-label="Sobre a VENXPAY">
       <div className="auth-aside-grid pointer-events-none absolute inset-0 -z-10" aria-hidden="true" />
       <div className="pointer-events-none absolute inset-0 -z-10"><BrandMark /></div>
 
@@ -60,17 +60,17 @@ export function AuthAside({ className }: AuthAsideProps) {
         </span>
       </header>
 
-      <div className="flex flex-1 flex-col justify-center py-8">
+      <div className="flex flex-1 flex-col justify-center py-6">
         <motion.p {...fade(0)} className="text-[11px] font-semibold uppercase tracking-[0.18em] auth-aside-accent">
           Gateway de pagamentos
         </motion.p>
-        <motion.h2 {...fade(0.08)} className="mt-4 max-w-[460px] font-heading text-[34px] font-semibold leading-[1.15] xl:text-[40px]">
+        <motion.h2 {...fade(0.08)} className="mt-4 max-w-[460px] font-heading text-[30px] font-semibold leading-[1.15] [@media(min-height:820px)]:text-[38px]">
           A infraestrutura de pagamentos para quem vende online.
         </motion.h2>
 
-        <ul className="mt-10 max-w-[440px]">
+        <ul className="mt-7 max-w-[440px] [@media(min-height:820px)]:mt-10">
           {PILLARS.map((p, i) => (
-            <motion.li key={p.title} {...fade(0.16 + i * 0.07)} className="auth-aside-border flex gap-4 border-t py-5 last:border-b">
+            <motion.li key={p.title} {...fade(0.16 + i * 0.07)} className="auth-aside-border flex gap-4 border-t py-3.5 last:border-b [@media(min-height:820px)]:py-5">
               <p.icon className="mt-0.5 h-[18px] w-[18px] shrink-0 auth-aside-accent" strokeWidth={1.6} />
               <div>
                 <p className="text-[14px] font-semibold">{p.title}</p>
