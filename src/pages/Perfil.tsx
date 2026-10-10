@@ -375,9 +375,9 @@ export default function Perfil() {
                 <Fingerprint className="h-3 w-3" />
                 {profile?.seller_type === "empresa" ? "Pessoa Jurídica" : "Pessoa Física"}
               </span>
-              {profile?.document_number && (
+              {(profile?.document_number || profile?.document_number_masked) && (
                 <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-secondary border border-border/40 text-[10px] font-bold text-muted-foreground tabular-nums">
-                  <Shield className="h-3 w-3" /> ***{profile.document_number.slice(-4)}
+                  <Shield className="h-3 w-3" /> {profile.document_number ? `***${profile.document_number.slice(-4)}` : profile.document_number_masked}
                 </span>
               )}
               {profile?.nickname && (
@@ -447,7 +447,7 @@ export default function Perfil() {
             />
             <InfoRow
               label="Documento"
-              value={profile?.document_number ? `***${profile.document_number.slice(-4)}` : <span className="text-muted-foreground/50 font-medium">Não informado</span>}
+              value={profile?.document_number ? `***${profile.document_number.slice(-4)}` : profile?.document_number_masked ? profile.document_number_masked : <span className="text-muted-foreground/50 font-medium">Não informado</span>}
             />
             <InfoRow
               label="Nickname"

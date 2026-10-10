@@ -62,7 +62,7 @@ export function SellerOnboarding() {
   }, [user?.id, approved]);
 
   const steps = useMemo<Step[]>(() => {
-    const profileDone = Boolean(profile?.full_name && (profile?.phone || profile?.document_number));
+    const profileDone = Boolean(profile?.full_name && (profile?.phone || profile?.document_number || profile?.document_number_masked));
     const inReview = profile?.account_status === "pending_review";
     return [
       {

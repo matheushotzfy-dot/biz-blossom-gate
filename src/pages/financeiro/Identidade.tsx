@@ -151,7 +151,7 @@ export default function Identidade() {
   const StatusIcon = status.icon;
   const completionSteps = [
     { label: "Dados pessoais", done: !!(profile?.full_name && profile?.email) },
-    { label: "Documento",      done: !!profile?.document_number },
+    { label: "Documento",      done: !!(profile?.document_number || profile?.document_number_masked) },
     { label: "Telefone",       done: !!profile?.phone },
     { label: "Chave PIX",      done: pixKeys.length > 0 },
     { label: "Doc. frente",    done: !!kycDocs.front },
@@ -164,7 +164,7 @@ export default function Identidade() {
   const isApproved = kyc.approved;
   const formattedDoc = profile?.document_number
     ? formatDoc(profile.document_number, profile.document_type || "cpf")
-    : "Não informado";
+    : profile?.document_number_masked || "Não informado";
 
   const KPIS = [
     { icon: Fingerprint, label: "Verificação",  value: isApproved ? "100%" : `${pct}%`, sub: isApproved ? "Identidade confirmada" : `${doneCount}/${completionSteps.length} etapas` },
