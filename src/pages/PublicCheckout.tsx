@@ -465,6 +465,14 @@ export default function PublicCheckout() {
  [data-checkout-theme="dark"] input::placeholder {
  color: hsl(215 12% 48%) !important;
  }
+ /* O painel aplica cor global aos campos com !important; o checkout usa o tema do produto. */
+ [data-checkout-theme] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+ [data-checkout-theme] select,
+ [data-checkout-theme] textarea {
+ background-color: hsl(var(--checkout-bg-soft)) !important;
+ border-color: hsl(var(--checkout-border)) !important;
+ color: hsl(var(--checkout-text)) !important;
+ }
  [data-checkout-theme="dark"] select option {
  background: hsl(var(--checkout-bg-elevated));
  color: hsl(var(--checkout-text));
