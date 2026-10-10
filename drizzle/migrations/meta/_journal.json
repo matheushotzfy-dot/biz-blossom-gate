@@ -64,6 +64,20 @@
       "when": 1791659502239,
       "tag": "0008_mark_kyc_submitted_rpc",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791659900846,
+      "tag": "0009_fix_safe_views_access",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791660216289,
+      "tag": "0010_fix_profile_status_guard",
+      "breakpoints": true
     }
   ]
 }
