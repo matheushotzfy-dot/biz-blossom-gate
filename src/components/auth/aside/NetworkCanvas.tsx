@@ -67,9 +67,8 @@ export function NetworkCanvas() {
         ctx.fillStyle = `hsl(${col})`; ctx.fillRect(p.x - 3, p.y - 3, 6, 6);
         ctx.strokeStyle = `hsl(${col} / .5)`; ctx.strokeRect(p.x - 7, p.y - 7, 14, 14);
         ctx.fillStyle = `hsl(${fg})`; ctx.font = "600 9px 'JetBrains Mono', monospace";
-        ctx.textAlign = n.x > 0.6 ? "right" : n.x < 0.4 ? "left" : "center";
-        const ox = n.x > 0.6 ? 12 : n.x < 0.4 ? -12 : 0;
-        ctx.fillText(n.label, p.x - ox * -1 * (n.x < 0.4 ? -1 : 1) + (n.x < 0.4 ? 0 : 0), p.y + (n.y < 0.5 ? -14 : 22));
+        ctx.textAlign = "center";
+        ctx.fillText(n.label, p.x, p.y + (n.y < 0.5 ? -14 : 22));
       });
       // núcleo
       const pulse = reduced ? 0 : (Math.sin(t / 600) + 1) / 2;
