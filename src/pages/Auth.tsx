@@ -340,7 +340,7 @@ export default function Auth() {
   };
 
   const inputCls =
-    "h-[48px] rounded-md border-border bg-card px-4 text-[14px] text-foreground placeholder:text-muted-foreground/60 hover:border-foreground/25 focus-visible:border-primary focus-visible:bg-card focus-visible:ring-2 focus-visible:ring-primary/10";
+    "h-11 rounded-md border-border bg-card px-4 text-base sm:text-[14px] text-foreground placeholder:text-muted-foreground/60 hover:border-foreground/25 focus-visible:border-primary focus-visible:bg-card focus-visible:ring-2 focus-visible:ring-primary/10";
   const labelCls = "mb-2 block text-[11px] font-semibold text-foreground/80";
 
   const heading = isLogin
@@ -348,7 +348,7 @@ export default function Auth() {
     : STEP_TITLES[step - 1];
 
   return (
-    <div className="auth-shell relative h-[100dvh] overflow-y-auto bg-background text-foreground">
+    <div className="auth-shell relative min-h-[100dvh] bg-background text-foreground lg:h-[100dvh] lg:overflow-hidden">
       <div className="auth-mobile-ambient pointer-events-none fixed inset-0 lg:hidden" aria-hidden="true" />
       <Seo
         title={isLogin ? "Entrar — VENXPAY" : "Criar conta grátis — VENXPAY"}
@@ -356,15 +356,16 @@ export default function Auth() {
         path="/auth"
       />
 
-      <div className="relative grid min-h-screen lg:grid-cols-[minmax(0,48%)_minmax(0,52%)]">
+      <div className="relative grid min-h-[100dvh] lg:h-full lg:min-h-0 lg:grid-cols-[minmax(0,50%)_minmax(0,50%)]">
         {/* ═══ LEFT — form ═══ */}
-        <div className="auth-form-panel relative z-10 flex min-h-screen flex-col justify-between border-r border-border px-5 py-7 sm:px-10 sm:py-9 lg:px-16 lg:py-10 xl:px-24">
+        <div className="auth-form-panel relative z-10 flex min-h-[100dvh] flex-col px-5 py-6 sm:px-10 lg:h-full lg:min-h-0 lg:px-14 lg:py-7 xl:px-20">
           <a href="/" className="inline-flex w-fit items-center gap-2.5 opacity-95 transition-opacity hover:opacity-100">
             <VenxpayLogo size={32} plate={false} />
             <span className="text-[18px] font-heading font-bold text-foreground">VENX<span className="text-primary">PAY</span></span>
           </a>
 
-          <div className="mx-auto w-full max-w-[390px] py-10 sm:py-12">
+          <div className="flex flex-1 flex-col lg:min-h-0 lg:overflow-y-auto">
+          <div className="m-auto w-full max-w-[390px] py-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={isLogin ? "login-h" : `signup-h-${step}`}
@@ -373,7 +374,7 @@ export default function Auth() {
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.22 }}
               >
-                <h1 className="text-[26px] font-heading font-semibold leading-[1.12] text-foreground sm:text-[30px]">
+                <h1 className="text-[24px] font-heading font-semibold leading-[1.15] text-foreground sm:text-[26px]">
                   {recoveryMode !== "idle" && isLogin ? "Recuperar acesso" : heading.title}
                 </h1>
                 <p className="mt-2 max-w-[390px] text-[13px] leading-relaxed text-muted-foreground">
@@ -384,7 +385,7 @@ export default function Auth() {
 
             {/* Step rail */}
             {!isLogin && (
-              <div className="mt-6 border-y border-border py-4">
+              <div className="mt-5 border-y border-border py-3">
                 <div className="flex items-center gap-2">
                   {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((s) => (
                     <div key={s} className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
@@ -405,7 +406,7 @@ export default function Auth() {
             )}
 
 
-            <div className="mt-6">
+            <div className="mt-5">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={isLogin ? `login-${recoveryMode}` : `signup-${step}`}
@@ -417,7 +418,7 @@ export default function Auth() {
                   {isLogin ? (
                     <form onSubmit={handleSubmit}>
                       {recoveryMode === "idle" && (
-                        <div className="space-y-5">
+                        <div className="space-y-4">
                           <div>
                             <Label htmlFor="email" className={labelCls}>E-mail</Label>
                             <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className={inputCls} required />
@@ -436,7 +437,7 @@ export default function Auth() {
                               Esqueceu a senha?
                             </button>
                           </div>
-                          <Button type="submit" disabled={loading} className="h-[48px] w-full rounded-md bg-primary text-[14px] font-semibold text-primary-foreground hover:brightness-105">
+                          <Button type="submit" disabled={loading} className="h-11 w-full rounded-md bg-primary text-[14px] font-semibold text-primary-foreground hover:brightness-105">
                             {loading ? <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" /> : "Entrar"}
                           </Button>
                           <p className="text-center text-[13px] text-muted-foreground">
@@ -447,16 +448,16 @@ export default function Auth() {
                       )}
 
                       {recoveryMode === "email" && (
-                        <div className="space-y-5">
+                        <div className="space-y-4">
                           <div>
                             <Label htmlFor="recovery-email" className={labelCls}>E-mail da conta</Label>
                             <Input id="recovery-email" type="email" value={recoveryEmail} onChange={(e) => setRecoveryEmail(e.target.value)} placeholder="seu@email.com" className={inputCls} required />
                           </div>
                           <div className="flex gap-3">
-                            <Button type="button" variant="outline" onClick={() => setRecoveryMode("idle")} className="h-[52px] flex-1 rounded-[10px] border-border/70 bg-transparent text-[15px] font-medium text-muted-foreground hover:text-foreground">
+                            <Button type="button" variant="outline" onClick={() => setRecoveryMode("idle")} className="h-11 flex-1 rounded-[10px] border-border/70 bg-transparent text-[15px] font-medium text-muted-foreground hover:text-foreground">
                               Voltar
                             </Button>
-                            <Button type="button" onClick={handleRecoveryStart} disabled={recoveryLoading} className="h-[52px] flex-[1.4] rounded-[10px] bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
+                            <Button type="button" onClick={handleRecoveryStart} disabled={recoveryLoading} className="h-11 flex-[1.4] rounded-[10px] bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
                               {recoveryLoading ? <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" /> : <>Enviar código <ArrowRight className="ml-2 h-4 w-4" /></>}
                             </Button>
                           </div>
@@ -464,7 +465,7 @@ export default function Auth() {
                       )}
 
                       {recoveryMode === "code" && (
-                        <div className="space-y-5">
+                        <div className="space-y-4">
                           <div className="flex items-center gap-3 rounded-[10px] border border-border/60 px-4 py-3">
                             <KeyRound className="h-4 w-4 shrink-0 text-primary" />
                             <p className="text-[13px] text-muted-foreground">Código enviado para <span className="text-foreground">{recoveryEmail}</span></p>
@@ -504,10 +505,10 @@ export default function Auth() {
                             <RotateCcw className="h-3.5 w-3.5" /> Reenviar código
                           </button>
                           <div className="flex gap-3">
-                            <Button type="button" variant="outline" onClick={() => { setRecoveryMode("idle"); setRecoveryCode(""); setNewPassword(""); setConfirmNewPassword(""); setRecoveryError(""); }} className="h-[52px] flex-1 rounded-[10px] border-border/70 bg-transparent text-[15px] font-medium text-muted-foreground hover:text-foreground">
+                            <Button type="button" variant="outline" onClick={() => { setRecoveryMode("idle"); setRecoveryCode(""); setNewPassword(""); setConfirmNewPassword(""); setRecoveryError(""); }} className="h-11 flex-1 rounded-[10px] border-border/70 bg-transparent text-[15px] font-medium text-muted-foreground hover:text-foreground">
                               Cancelar
                             </Button>
-                            <Button type="button" onClick={handleRecoveryVerify} disabled={recoveryLoading || recoveryCode.length < 6} className="h-[52px] flex-[1.4] rounded-[10px] bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
+                            <Button type="button" onClick={handleRecoveryVerify} disabled={recoveryLoading || recoveryCode.length < 6} className="h-11 flex-[1.4] rounded-[10px] bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
                               {recoveryLoading ? <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" /> : "Alterar senha"}
                             </Button>
                           </div>
@@ -527,7 +528,7 @@ export default function Auth() {
                       )}
                     </form>
                   ) : (
-                    <div className="space-y-5">
+                    <div className="space-y-4">
                       {step === 1 && (
                         <>
                           <div className="grid grid-cols-2 gap-3">
@@ -750,17 +751,17 @@ export default function Auth() {
 
                       <div className="flex gap-3 pt-1">
                         {step > 1 && (
-                          <Button type="button" variant="outline" onClick={() => setStep((c) => c - 1)} className="h-[54px] flex-1 rounded-xl border-border/70 bg-transparent text-[15px] font-medium text-muted-foreground hover:text-foreground">
+                          <Button type="button" variant="outline" onClick={() => setStep((c) => c - 1)} className="h-11 flex-1 rounded-xl border-border/70 bg-transparent text-[15px] font-medium text-muted-foreground hover:text-foreground">
                             Voltar
                           </Button>
                         )}
                         {step < TOTAL_STEPS ? (
-                          <Button type="button" onClick={() => setStep((c) => c + 1)} disabled={!canAdvanceStep(step)} className="h-[54px] flex-[1.6] rounded-xl bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
+                          <Button type="button" onClick={() => setStep((c) => c + 1)} disabled={!canAdvanceStep(step)} className="h-11 flex-[1.6] rounded-xl bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
                             Continuar <ArrowRight className="ml-2 h-4 w-4" />
                           </Button>
 
                         ) : (
-                          <Button type="button" onClick={() => handleSubmit()} disabled={loading || !acceptTerms} className="h-[54px] flex-[1.6] rounded-xl bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
+                          <Button type="button" onClick={() => handleSubmit()} disabled={loading || !acceptTerms} className="h-11 flex-[1.6] rounded-xl bg-primary text-[15px] font-semibold text-primary-foreground hover:brightness-105">
                             {loading ? <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" /> : "Criar conta"}
                           </Button>
                         )}
@@ -777,14 +778,15 @@ export default function Auth() {
             </div>
           </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5 text-[10px] text-muted-foreground">
+          </div>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4 text-[10px] text-muted-foreground">
             <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5" /> Conexão protegida com SSL 256-bit</span>
             <span className="inline-flex items-center gap-1.5"><Shield className="h-3.5 w-3.5" /> LGPD</span>
           </div>
         </div>
 
         {/* ═══ RIGHT — painel autoral (sem fotos de terceiros) ═══ */}
-        <AuthAside className="hidden min-h-screen lg:block" />
+        <AuthAside className="hidden lg:flex" />
 
       </div>
     </div>
