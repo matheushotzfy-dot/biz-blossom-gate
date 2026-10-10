@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { ContactShadows, Environment, Float, Lightformer } from "@react-three/drei";
 import * as THREE from "three";
@@ -13,28 +13,14 @@ const STEEL = "#3aa8ff";
 const TILT = 0.35; // radianos máximos
 const DAMP = 4;
 
-function useVGeometry() {
-  return useMemo(() => {
-    const s = new THREE.Shape();
-    s.moveTo(-1.25, 1);
-    s.lineTo(-0.66, 1);
-    s.lineTo(0, -0.32);
-    s.lineTo(0.66, 1);
-    s.lineTo(1.25, 1);
-    s.lineTo(0.3, -1);
-    s.lineTo(-0.3, -1);
-    s.closePath();
-    const g = new THREE.ExtrudeGeometry(s, {
-      depth: 0.42, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.06, bevelSegments: 6, curveSegments: 8,
-    });
-    g.center();
-    return g;
-  }, []);
-}
+/** Geometria fiel à logo: dois trilhos arredondados, barra de liquidação e nó no vértice. */
+const RAIL_R = 0.22;
+const RAIL_LEN = 2.155;
+const RAIL_ANGLE = Math.atan2(0.94, 1.94);
 
 function Mark({ animated }: { animated: boolean }) {
   const ref = useRef<THREE.Group>(null);
-  const geometry = useVGeometry();
+  const node = useRef<THREE.MeshStandardMaterial>(null);
 
   useFrame(({ pointer, clock }, raw) => {
     const g = ref.current;
@@ -44,22 +30,32 @@ function Mark({ animated }: { animated: boolean }) {
     const spin = Math.sin(clock.elapsedTime * 0.35) * 0.35;
     g.rotation.y += (pointer.x * TILT + spin - g.rotation.y) * k;
     g.rotation.x += (-pointer.y * TILT * 0.6 - g.rotation.x) * k;
+    if (node.current) node.current.emissiveIntensity = 1.6 + Math.sin(clock.elapsedTime * 2.4) * 0.8;
   });
 
   return (
-    <group ref={ref} rotation={[0, -0.25, 0]} scale={0.5}>
-      <mesh geometry={geometry} castShadow>
-        <meshPhysicalMaterial
-          color="#1a2c4d"
-          metalness={0.85}
-          roughness={0.28}
-          clearcoat={1}
-          clearcoatRoughness={0.08}
-          envMapIntensity={1.6}
-          iridescence={0.35}
-          iridescenceIOR={1.3}
-        />
+    <group ref={ref} rotation={[0, -0.25, 0]} scale={0.82} position={[0, 0.12, 0]}>
+      {/* trilho esquerdo — cromado */}
+      <mesh position={[-0.47, -0.03, 0]} rotation-z={RAIL_ANGLE} castShadow>
+        <capsuleGeometry args={[RAIL_R, RAIL_LEN, 16, 48]} />
+        <meshPhysicalMaterial color="#eef3fa" metalness={1} roughness={0.14} clearcoat={1} clearcoatRoughness={0.05} envMapIntensity={1.8} />
       </mesh>
+      {/* trilho direito — esmeralda polida */}
+      <mesh position={[0.47, -0.03, 0]} rotation-z={-RAIL_ANGLE} castShadow>
+        <capsuleGeometry args={[RAIL_R, RAIL_LEN, 16, 48]} />
+        <meshPhysicalMaterial color={EMERALD} metalness={0.55} roughness={0.18} clearcoat={1} clearcoatRoughness={0.04} envMapIntensity={1.5} iridescence={0.4} />
+      </mesh>
+      {/* barra de liquidação */}
+      <mesh position={[0, 0.125, 0.26]} rotation-z={Math.PI / 2}>
+        <capsuleGeometry args={[0.045, 0.82, 8, 24]} />
+        <meshStandardMaterial color={EMERALD} emissive={EMERALD} emissiveIntensity={1.2} toneMapped={false} />
+      </mesh>
+      {/* nó de liquidação no vértice */}
+      <mesh position={[0, -1.02, 0.18]}>
+        <sphereGeometry args={[0.2, 48, 48]} />
+        <meshStandardMaterial ref={node} color={EMERALD} emissive={EMERALD} emissiveIntensity={1.6} toneMapped={false} />
+      </mesh>
+      <pointLight position={[0, -1.02, 0.6]} color={EMERALD} intensity={2.5} distance={2.5} />
     </group>
   );
 }
