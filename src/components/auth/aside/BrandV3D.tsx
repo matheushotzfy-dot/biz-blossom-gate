@@ -30,7 +30,7 @@ function Mark({ animated }: { animated: boolean }) {
     const spin = Math.sin(clock.elapsedTime * 0.35) * 0.35;
     g.rotation.y += (pointer.x * TILT + spin - g.rotation.y) * k;
     g.rotation.x += (-pointer.y * TILT * 0.6 - g.rotation.x) * k;
-    if (node.current) node.current.emissiveIntensity = 1.6 + Math.sin(clock.elapsedTime * 2.4) * 0.8;
+    if (node.current) node.current.emissiveIntensity = 0.7 + Math.sin(clock.elapsedTime * 2.4) * 0.3;
   });
 
   return (
@@ -53,7 +53,7 @@ function Mark({ animated }: { animated: boolean }) {
       {/* nó de liquidação no vértice */}
       <mesh position={[0, -1.02, 0.18]}>
         <sphereGeometry args={[0.2, 48, 48]} />
-        <meshStandardMaterial ref={node} color={EMERALD} emissive={EMERALD} emissiveIntensity={1.6} toneMapped={false} />
+        <meshStandardMaterial ref={node} color={EMERALD} emissive={EMERALD} emissiveIntensity={0.7} toneMapped={false} roughness={0.2} metalness={0.3} />
       </mesh>
       <pointLight position={[0, -1.02, 0.6]} color={EMERALD} intensity={2.5} distance={2.5} />
     </group>
