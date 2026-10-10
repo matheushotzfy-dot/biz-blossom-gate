@@ -1,6 +1,6 @@
 import { useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { ContactShadows, Environment, Float, Lightformer, MeshTransmissionMaterial } from "@react-three/drei";
+import { ContactShadows, Environment, Float, Lightformer } from "@react-three/drei";
 import * as THREE from "three";
 
 /**
@@ -47,22 +47,17 @@ function Mark({ animated }: { animated: boolean }) {
   });
 
   return (
-    <group ref={ref} rotation={[0, -0.25, 0]}>
+    <group ref={ref} rotation={[0, -0.25, 0]} scale={0.62}>
       <mesh geometry={geometry} castShadow>
-        <MeshTransmissionMaterial
-          samples={6}
-          resolution={512}
-          thickness={0.6}
-          roughness={0.08}
-          transmission={1}
-          ior={1.45}
-          chromaticAberration={0.06}
-          anisotropy={0.2}
+        <meshPhysicalMaterial
+          color="#0d1b33"
+          metalness={0.85}
+          roughness={0.16}
           clearcoat={1}
-          attenuationDistance={0.9}
-          attenuationColor="#0b2a3a"
-          color="#d8f3ff"
-          backside
+          clearcoatRoughness={0.08}
+          envMapIntensity={1.6}
+          iridescence={0.35}
+          iridescenceIOR={1.3}
         />
       </mesh>
     </group>
@@ -87,7 +82,7 @@ export default function BrandV3D({ animated }: BrandV3DProps) {
       <Float enabled={animated} speed={1.4} rotationIntensity={0.15} floatIntensity={0.5}>
         <Mark animated={animated} />
       </Float>
-      <ContactShadows position={[0, -1.45, 0]} opacity={0.55} scale={7} blur={2.6} far={3} color="#000814" />
+      <ContactShadows position={[0, -0.95, 0]} opacity={0.55} scale={7} blur={2.6} far={3} color="#000814" />
       <Environment resolution={256}>
         <color attach="background" args={["#060d1f"]} />
         <Lightformer form="rect" intensity={3} color="#ffffff" position={[0, 4, 2]} scale={[6, 0.6, 1]} />
