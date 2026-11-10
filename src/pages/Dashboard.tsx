@@ -48,7 +48,6 @@ import { Seo } from "@/components/Seo";
 import { useKycStatus } from "@/hooks/useKycStatus";
 import { PeriodPicker, buildPeriod, type PeriodValue, type PeriodPresetId } from "@/components/PeriodPicker";
 import { toast } from "sonner";
-import { PromoBanner } from "@/components/dashboard/PromoBanner";
 import { SellerOnboarding } from "@/components/dashboard/SellerOnboarding";
 import { Button } from "@/components/ui/button";
 
@@ -517,113 +516,100 @@ export default function Dashboard() {
 
         <SellerOnboarding />
 
-        {/* ═══════════ GREETING ═══════════ */}
-        <header className="-mt-3 min-w-0 md:-mt-4">
-          <h1 className="font-display font-bold text-[22px] md:text-[28px] leading-[1.15] truncate">
-            Seja bem-vindo, {nickname}
-            <button
-              onClick={privacy.toggle}
-              aria-label={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
-              className="ml-2 inline-flex h-6 w-6 items-center justify-center rounded-[8px] align-middle text-muted-foreground/45 transition-colors hover:text-primary"
-            >
-              {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" strokeWidth={2} /> : <Eye className="h-3.5 w-3.5" strokeWidth={2} />}
-            </button>
-          </h1>
-          <p className="text-muted-foreground text-[13px] font-medium mt-1.5">Que essa jornada seja leve, produtiva e cheia de conquistas!</p>
-        </header>
-
-        {/* ═══════════ HERO — BRAND BANNER (com dial de período) ═══════════ */}
-        <PromoBanner
-          periodControl={
-            <PeriodDial
-              open={datePickerOpen}
-              setOpen={setDatePickerOpen}
-              label={isCustom ? "Período" : selectedPeriod.label}
-              goalPct={goalPct}
-              revenueLabel={privacy.hidden ? CENSORED : fmt(revenue)}
-              value={periodValue}
-              onChange={applyPeriod}
-            />
-          }
-        />
-
-
-
-
-        {/* ═══════════ KPI CARDS ═══════════ */}
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[
-            { label: "Saldo disponível", value: fmt(Math.max(0, balance)), sub: "Pronto para saque", tone: "success" as const, icon: Wallet },
-            { label: "Recebido hoje", value: fmt(receivedToday), sub: "Movimento confirmado", tone: "primary" as const, icon: RefreshCw },
-            { label: "Reembolsos", value: fmt(disputedAmount), sub: "MEDs e Reembolsos", tone: "danger" as const, icon: ShieldCheck },
-            { label: "Volume total", value: fmt(revenue), sub: "Vendas acumuladas", tone: "success" as const, icon: TrendingUp },
-          ].map((k) => {
-            const isDanger = k.tone === "danger";
-            const Icon = k.icon;
-            return (
-              <div
-                key={k.label}
-                className="group relative min-h-[160px] overflow-hidden rounded-[22px] border border-border bg-card px-5 py-5 transition-colors duration-300 hover:border-primary/30 hover:bg-card-elevated"
-              >
-                <Icon
-                  aria-hidden
-                  strokeWidth={1.25}
-                  className={cn(
-                    "pointer-events-none absolute -bottom-4 -right-3 h-24 w-24 rotate-[-8deg] transition-colors duration-200",
-                    isDanger ? "text-destructive/[0.07] group-hover:text-destructive/[0.11]" : "text-primary/[0.07] group-hover:text-primary/[0.11]",
-                  )}
-                />
-                <div className={cn(
-                  "absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-[10px] border bg-background/65 transition-colors duration-200",
-                  isDanger ? "border-destructive/20 text-destructive group-hover:border-destructive/35" : "border-border text-primary group-hover:border-primary/30",
-                )}>
-                  <Icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
-                </div>
-                <div className="relative z-10 flex h-full min-w-0 flex-col pr-11">
-                  <p className={cn("text-[13px] font-medium", isDanger ? "text-destructive/90" : "text-muted-foreground")}>{k.label}</p>
-                  {statsLoading ? (
-                    <div className="mt-5 h-[25px] w-32 animate-pulse rounded-[6px] bg-muted/50 sm:h-[28px]" aria-label="Carregando" />
-                  ) : (
-                  <p className={cn("mt-5 whitespace-nowrap font-display text-[25px] font-bold leading-none tracking-[-0.02em] tabular-nums sm:text-[28px]", isDanger ? "text-destructive" : "text-foreground")}>
-                  {privacy.hidden ? CENSORED : k.value}
-                  </p>
-                  )}
-
-                  <p className="mt-auto truncate pt-4 text-[11px] font-medium text-muted-foreground/65">{k.sub}</p>
-                </div>
+        {/* ═══════════ CONTA — cartão de saldo estilo banco ═══════════ */}
+        <section className="vp-hero px-5 py-6 sm:px-7 sm:py-7" aria-label="Resumo da conta">
+          <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="min-w-0">
+              <p className="text-[13px] font-medium opacity-80">{greeting}, {nickname}</p>
+              <div className="mt-4 flex items-center gap-2">
+                <span className="text-[13px] font-semibold opacity-90">Saldo disponível</span>
+                <button
+                  type="button"
+                  onClick={privacy.toggle}
+                  aria-label={privacy.hidden ? "Mostrar valores" : "Ocultar valores"}
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary-foreground/10 transition-colors hover:bg-primary-foreground/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground/60"
+                >
+                  {privacy.hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                </button>
               </div>
-            );
-          })}
+              {statsLoading ? (
+                <div className="mt-2 h-10 w-48 animate-pulse rounded-lg bg-primary-foreground/15" aria-label="Carregando" />
+              ) : (
+                <p className="mt-1 font-display text-[34px] font-extrabold leading-tight tracking-[-0.03em] tabular-nums sm:text-[42px]">
+                  {privacy.hidden ? "R$ ••••••" : fmt(Math.max(0, balance))}
+                </p>
+              )}
+              <p className="mt-1 text-[12px] font-medium opacity-75 tabular-nums">
+                A liberar: {privacy.hidden ? CENSORED : fmt(pendingBalance)} · Recebido hoje: {privacy.hidden ? CENSORED : fmt(receivedToday)}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <PeriodDial
+                open={datePickerOpen}
+                setOpen={setDatePickerOpen}
+                label={isCustom ? "Período" : selectedPeriod.label}
+                goalPct={goalPct}
+                revenueLabel={privacy.hidden ? CENSORED : fmt(revenue)}
+                value={periodValue}
+                onChange={applyPeriod}
+              />
+              <button
+                type="button"
+                onClick={() => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); }}
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-primary-foreground px-5 text-[14px] font-bold text-primary transition-transform hover:-translate-y-0.5 active:scale-[0.98] dark:text-background"
+              >
+                <ArrowDownRight className="h-4 w-4" /> Sacar
+              </button>
+            </div>
+          </div>
         </section>
 
-        {/* ═══════════ QUICK ACTIONS ═══════════ */}
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {/* ═══════════ ATALHOS ═══════════ */}
+        <nav aria-label="Atalhos" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:justify-between scrollbar-none">
           {[
-            { label: "Gerar PIX", sub: "Temporariamente indisponível", icon: QrCode, onClick: () => toast.error("Cobranças PIX temporariamente indisponíveis.") },
-            { label: "Solicitar Saque", sub: "Transferir via PIX", icon: ArrowDownRight, onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
-            { label: "Transações", sub: "Ver histórico", icon: Receipt, onClick: () => { if (!requireApprovedAccount()) navigate("/vendas"); } },
-            { label: "Credenciais API", sub: "Gerencie suas credenciais", icon: KeyRound, onClick: () => { if (!requireApprovedAccount()) navigate("/integracoes/credenciais"); } },
+            { label: "Pix", icon: QrCode, onClick: () => toast.error("Cobranças PIX temporariamente indisponíveis.") },
+            { label: "Sacar", icon: ArrowDownRight, onClick: () => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); } },
+            { label: "Vendas", icon: Receipt, onClick: () => { if (!requireApprovedAccount()) navigate("/vendas"); } },
+            { label: "Novo produto", icon: Sparkles, onClick: () => { if (!requireApprovedAccount()) navigate("/vendas/produtos"); } },
+            { label: "Link de pagamento", icon: Link2, onClick: () => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); } },
+            { label: "Credenciais API", icon: KeyRound, onClick: () => { if (!requireApprovedAccount()) navigate("/integracoes/credenciais"); } },
           ].map((a) => {
             const Icon = a.icon;
             return (
-              <Button
-                type="button"
-                variant="ghost"
-                key={a.label}
-                onClick={a.onClick}
-                className="group relative h-auto min-h-[82px] justify-start gap-3 overflow-hidden rounded-[18px] border border-border bg-card px-4 py-3 text-left text-foreground transition-colors duration-300 hover:border-primary/30 hover:bg-accent/55"
-              >
-                <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-primary/20 bg-primary/8 text-primary transition-colors duration-200 group-hover:border-primary/35 group-hover:bg-primary/12">
-                  <Icon className="h-[17px] w-[17px]" strokeWidth={1.8} />
-                </span>
-                <div className="relative min-w-0 flex-1">
-                  <p className="text-[13px] font-semibold leading-tight text-foreground 2xl:text-[14px]">{a.label}</p>
-                  <p className="truncate text-[11px] font-normal text-muted-foreground">{a.sub}</p>
+              <button key={a.label} type="button" onClick={a.onClick} className="vp-shortcut shrink-0 rounded-xl px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <span className="vp-shortcut-icon"><Icon className="h-5 w-5" strokeWidth={1.9} /></span>
+                <span className="max-w-[84px] text-center text-[12px] font-semibold leading-tight text-foreground">{a.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* ═══════════ RESUMO DO PERÍODO ═══════════ */}
+        <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          {[
+            { label: "Faturamento", value: fmt(revenue), sub: revenueTrend === undefined ? compareLabel : `${revenueTrend >= 0 ? "+" : ""}${revenueTrend}% ${compareLabel}`, icon: TrendingUp, danger: false },
+            { label: "Vendas pagas", value: String(approvedCount), sub: `${conversion.toFixed(0)}% de aprovação`, icon: Zap, danger: false },
+            { label: "Ticket médio", value: fmt(approvedCount > 0 ? revenue / approvedCount : 0), sub: "Por venda aprovada", icon: BarChart3, danger: false },
+            { label: "Reembolsos e MED", value: fmt(disputedAmount), sub: "Em análise ou devolvidos", icon: ShieldCheck, danger: true },
+          ].map((k) => {
+            const Icon = k.icon;
+            return (
+              <div key={k.label} className="vp-card p-4 sm:p-5">
+                <div className="flex items-center gap-2">
+                  <span className={cn("grid h-8 w-8 place-items-center rounded-full", k.danger ? "bg-destructive/10 text-destructive" : "bg-accent text-primary")}>
+                    <Icon className="h-4 w-4" strokeWidth={2} />
+                  </span>
+                  <p className="truncate text-[12.5px] font-semibold text-muted-foreground">{k.label}</p>
                 </div>
-                <span className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] text-muted-foreground/60 transition-colors duration-200 group-hover:text-primary">
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </span>
-              </Button>
+                {statsLoading ? (
+                  <div className="mt-4 h-7 w-24 animate-pulse rounded-md bg-muted" aria-label="Carregando" />
+                ) : (
+                  <p className={cn("mt-4 truncate font-display text-[20px] font-extrabold leading-none tracking-[-0.02em] tabular-nums sm:text-[24px]", k.danger && disputedAmount > 0 ? "text-destructive" : "text-foreground")}>
+                    {privacy.hidden && k.label !== "Vendas pagas" ? CENSORED : k.value}
+                  </p>
+                )}
+                <p className="mt-2 truncate text-[11.5px] font-medium text-muted-foreground">{k.sub}</p>
+              </div>
             );
           })}
         </section>
@@ -634,7 +620,7 @@ export default function Dashboard() {
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
 
           {/* Faturamento — clean: título, período e gráfico */}
-          <div className="xl:col-span-2 overflow-hidden rounded-[24px] border border-border bg-card">
+          <div className="xl:col-span-2 overflow-hidden vp-card">
             <div className="flex items-start justify-between gap-4 px-6 pt-6 md:px-7">
               <div className="min-w-0">
                 <h4 className="font-display text-xl font-bold text-foreground">Faturamento</h4>
@@ -704,7 +690,7 @@ export default function Dashboard() {
           {/* Right side: donuts + links */}
           <div className="space-y-4">
             {/* Índices — formato original */}
-             <div className="rounded-[24px] border border-border bg-card p-7">
+             <div className="vp-card p-7">
               <div className="mb-6">
                 <h4 className="font-display font-bold text-xl text-foreground">Índices</h4>
                 <p className="mt-1 text-[11px] text-muted-foreground">Conversão por método de pagamento</p>
@@ -752,7 +738,7 @@ export default function Dashboard() {
             </div>
 
             {/* Payment links */}
-             <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full rounded-[24px] border border-border bg-card p-7 text-left transition-colors duration-300 hover:border-primary/35 hover:bg-card-elevated">
+             <button type="button" onClick={() => { if (!requireApprovedAccount()) navigate("/vendas/link-pagamento"); }} className="group block w-full vp-card p-7 text-left transition-colors duration-300 hover:border-primary/35 hover:bg-card-elevated">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="font-display font-black text-base tracking-[-0.01em] flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" /> Links de pagamentos</h3>
@@ -783,10 +769,10 @@ export default function Dashboard() {
         </section>
 
         {/* ═══════════ ÚLTIMAS TRANSAÇÕES — clean table ═══════════ */}
-        <section className="overflow-hidden rounded-[24px] border border-border bg-card">
+        <section className="overflow-hidden vp-card">
           <div className="flex items-center justify-between gap-3 px-5 md:px-6 pt-5 pb-4">
             <div className="min-w-0">
-              <h3 className="font-display font-bold text-[15px] tracking-[-0.01em] text-foreground">Últimas transações</h3>
+              <h3 className="font-display font-bold text-[15px] tracking-[-0.01em] text-foreground">Últimas movimentações</h3>
               <p className="text-[11px] text-muted-foreground/60 mt-0.5">
                 {activity.length} {activity.length === 1 ? "transação" : "transações"} · {conversion.toFixed(0)}% aprovadas
               </p>
@@ -834,7 +820,7 @@ export default function Dashboard() {
                     className="group w-full grid md:grid-cols-[1fr_100px_120px_130px_20px] grid-cols-[1fr_auto] gap-4 items-center px-5 md:px-6 py-3.5 text-left transition-all hover:bg-primary/[0.04] active:scale-[0.995]"
                   >
                     <div className="flex min-w-0 items-center gap-3">
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border bg-secondary font-display text-[13px] font-bold text-foreground transition-colors group-hover:border-primary/50 group-hover:bg-primary group-hover:text-primary-foreground">{initial}</span>
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent text-primary font-display text-[13px] font-bold text-foreground transition-colors group-hover:border-primary/50 group-hover:bg-primary group-hover:text-primary-foreground">{initial}</span>
                       <div className="min-w-0">
                       <p className="text-[13px] font-semibold text-foreground truncate">{custName}</p>
                       <p className="text-[11px] text-muted-foreground/70 tabular-nums mt-0.5">
