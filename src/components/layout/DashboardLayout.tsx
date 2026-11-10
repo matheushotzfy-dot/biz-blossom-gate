@@ -1,6 +1,6 @@
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { supabase } from "@/integrations/supabase/client";
-import { AppSidebar } from "./AppSidebar";
+import { SellerTopbar } from "@/components/seller-shell/SellerTopbar";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { MobileRevenueBar } from "./MobileRevenueBar";
 import { GlobalSearchDialog } from "./GlobalSearchDialog";
@@ -122,110 +122,22 @@ function DashboardLayoutInner() {
  }, []);
 
  return (
-      <SidebarProvider
-        open={sidebarPinned || sidebarHover}
-        onOpenChange={(v) => setSidebarPinned(v)}
-        style={{ "--sidebar-width": "17.5rem", "--sidebar-width-icon": "4.25rem" } as { [key: string]: string }}
-      >
-  <div className={cn("flex w-full h-full platform-shell venx-executive-shell", !sidebarPinned && "sidebar-unpinned")}>
- <AppSidebar
-   pinned={sidebarPinned}
-   onTogglePin={togglePin}
-    onHoverChange={handleSidebarHover}
- />
-
-  <SidebarInset className="ambient-backdrop dashboard-content-field relative min-w-0 bg-transparent flex flex-col h-full min-h-0 overflow-hidden">
-
-          <header className="technical-topbar relative z-30 hidden h-16 items-center gap-1.5 border-b border-border px-3 transition-colors duration-200 lg:px-7 sticky top-0 md:flex">
-            <SidebarTrigger className="seller-clickable icon-only relative md:hidden h-8 w-8 rounded-[9px] border border-transparent bg-transparent flex items-center justify-center text-muted-foreground transition-colors duration-200 hover:border-border/70 hover:text-foreground [&>svg]:hidden">
-              <PanelToggleIcon size={17} />
-              <span className="sr-only">Alternar menu</span>
-            </SidebarTrigger>
-
-
-            {/* ─── SEARCH (ícone apenas) ─── */}
-            <button
-              onClick={() => setSearchOpen(true)}
-              aria-label="Pesquisar (⌘K)"
-              title="Buscar em tudo · ⌘K"
-              className="seller-clickable mr-auto flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors duration-200 hover:text-foreground"
-            >
-              <Search className="h-[17px] w-[17px]" strokeWidth={2.2} />
-            </button>
-
-            {/* ─── BALANCE ─── */}
-            <div className="hidden md:flex items-center justify-center pr-1">
-              <div className="flex h-9 items-center gap-2.5 rounded-lg border border-border bg-card px-3 transition-colors duration-200 hover:border-primary/30">
-                <Wallet className="h-3.5 w-3.5 text-primary" strokeWidth={2.2} />
-                <div className="leading-none">
-                  <p className="text-[9.5px] font-medium text-muted-foreground/60">Saldo disponível</p>
-                  <p className="mt-[3px] font-numbers text-[13px] font-semibold tabular-nums tracking-[-0.02em] text-foreground">
-                    {privacyHidden ? "••••••" : formatBRL(Math.max(balance, 0))}
-                  </p>
-                </div>
-                <button
-                  onClick={() => navigate("/financeiro/saques")}
-                  className="ml-1 hidden lg:inline-flex h-6 items-center rounded-[7px] bg-primary px-2.5 text-[11px] font-semibold text-primary-foreground transition-colors hover:brightness-105"
-                >
-                  Sacar
-                </button>
-              </div>
-            </div>
-
-            {/* ─── ACTION CLUSTER ─── */}
-            <div className="flex items-center gap-0.5">
-              <button
-                onClick={togglePrivacy}
-                aria-label={privacyHidden ? "Mostrar saldo" : "Ocultar saldo"}
-                className={cn(
-                  "seller-clickable icon-only h-8 w-8 rounded-[9px] border border-transparent bg-transparent flex items-center justify-center transition-colors duration-200 hover:border-border/70 hover:text-foreground",
-                  privacyHidden ? "text-primary" : "text-muted-foreground",
-                )}
-              >
-                <IrisIcon size={17} off={privacyHidden} />
-              </button>
-
-              <button
-                onClick={toggleTheme}
-                aria-label="Alternar tema"
-                className="seller-clickable icon-only h-8 w-8 rounded-[9px] border border-transparent bg-transparent text-muted-foreground hover:border-border/70 hover:text-foreground flex items-center justify-center transition-colors duration-200"
-              >
-                {theme === "dark" ? <SunDialIcon size={17} /> : <MoonDialIcon size={17} />}
-              </button>
-
-              <button
-                onClick={() => setNotifOpen(!notifOpen)}
-                aria-label="Notificações"
-                className="seller-clickable icon-only relative h-8 w-8 rounded-[9px] border border-transparent bg-transparent text-muted-foreground hover:border-border/70 hover:text-foreground flex items-center justify-center transition-colors duration-200"
-              >
-                <SignalBellIcon size={17} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-primary ring-2 ring-card" />
-                )}
-              </button>
-            </div>
-
-            <div className="mx-1.5 h-5 w-px bg-border/60" />
-
-            <button
-              onClick={() => navigate("/perfil")}
-              aria-label="Meu perfil"
-              className="seller-clickable relative flex items-center rounded-full p-[2px] transition-colors"
-            >
-              <Avatar className="h-7 w-7 ring-1 ring-border/70 hover:ring-primary/50 transition-colors cursor-pointer">
-                <AvatarImage src={profile?.avatar_url || undefined} className="object-cover" />
-                <AvatarFallback className="bg-muted font-display text-foreground text-[10.5px] font-bold">
-                  {(profile?.full_name || "U").charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <span
-                className={cn(
-                  "absolute -bottom-0 -right-0 h-2 w-2 rounded-full ring-2 ring-card",
-                  kyc.approved ? "bg-success" : "bg-warning",
-                )}
-              />
-            </button>
-          </header>
+      <SidebarProvider open={false} onOpenChange={() => {}} className="block">
+  <div className="vp-seller-shell flex h-full w-full flex-col bg-background">
+          <SellerTopbar
+            balance={balance}
+            hidden={privacyHidden}
+            onTogglePrivacy={togglePrivacy}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+            unread={unreadCount}
+            onOpenNotifications={() => setNotifOpen(!notifOpen)}
+            onOpenSearch={() => setSearchOpen(true)}
+            avatarUrl={profile?.avatar_url}
+            name={profile?.full_name}
+            kycApproved={kyc.approved}
+          />
+  <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
 
 
 
@@ -247,14 +159,14 @@ function DashboardLayoutInner() {
 
  <MobileRevenueBar />
 
-             <div ref={scrollRef} className={cn("dashboard-scroll-field relative z-10 flex-1 min-h-0", pathname === "/suporte" ? "flex flex-col overflow-hidden pb-20 md:pb-0" : "overflow-y-auto overscroll-contain px-3 sm:px-5 md:px-8 xl:px-12 pb-28 md:pb-12")}>
-   <div className={cn("mx-auto w-full", pathname === "/suporte" ? "flex min-h-0 flex-1 flex-col max-w-none" : "py-3 md:py-7", pathname !== "/suporte" && (pathname.startsWith("/premiacoes") ? "max-w-none" : "max-w-[1280px]"))}>
+             <div ref={scrollRef} className={cn("dashboard-scroll-field relative z-10 flex-1 min-h-0", pathname === "/suporte" ? "flex flex-col overflow-hidden pb-20 md:pb-0" : "overflow-y-auto overscroll-contain px-3 sm:px-5 md:px-6 pb-28 md:pb-12")}>
+   <div className={cn("mx-auto w-full", pathname === "/suporte" ? "flex min-h-0 flex-1 flex-col max-w-none" : "py-3 md:py-7", pathname !== "/suporte" && (pathname.startsWith("/premiacoes") ? "max-w-none" : "max-w-[1320px]"))}>
   <div key={routeKey} className={cn("page-fluid", pathname === "/suporte" && "flex min-h-0 flex-1 flex-col")}>
   <Outlet />
   </div>
   </div>
  </div>
- </SidebarInset>
+ </div>
 
  <MobileBottomNav />
  </div>
