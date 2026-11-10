@@ -10,7 +10,7 @@
 
 - Customer support fills the authenticated shell's available space using a flex inbox/conversation layout, not viewport-height caps; account-scoped caches, unique realtime subscriptions and scoped theme tokens preserve isolation, while human ticket messages retain existing attachment primitives.
 
-- Public marketing (`src/components/landing3`) is an always-dark tech system with tokens scoped to `.vx3`, a 2D canvas background that pauses off-tab and goes static under reduced motion, and purely illustrative simulated data (never database queries); authentication defaults light with account-synced dark mode, while checkout keeps its product-defined theme.
+- Public marketing (`src/components/landing-vp`) always renders in the light brand identity via tokens scoped to `.vp-site`, using only illustrative example data (never database queries); authentication defaults light with account-synced dark mode, while checkout keeps its product-defined theme.
 
 - Dashboard revenue card is minimal: title, subtitle, period chip and a single approved-revenue area chart; value details only in the hover tooltip — no summary metrics, big totals or metric switcher (user wants it clean).
 - Payment operations must fail closed when no acquirer is configured; never leave UI actions calling removed gateway functions.
@@ -26,3 +26,5 @@
 
 - Staff policy changes are atomically audited through owner-only routines; individual fee floors fail closed, and assigned staff can only place separate withdrawal blocks, never block/delete seller accounts or release holds.
 - Manager portfolios use one temporal active assignment per seller; operational access starts at assignment, ends on transfer, while immutable commission history remains tied to the original accrual.
+
+- Visual identity lives in a final unlayered token block at the end of `src/index.css` that overrides all legacy layers (root, dark, admin `--as-*`, auth and admin-content scopes); change brand colors there rather than in older layers.
