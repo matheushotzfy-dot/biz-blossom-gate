@@ -12,7 +12,7 @@ import { prefetchRoute } from "@/lib/routePrefetch";
 import { supabase } from "@/integrations/supabase/client";
 
 const tabs = [
-  { label: "Home", icon: LayoutDashboard, path: "/dashboard" },
+  { label: "Início", icon: LayoutDashboard, path: "/dashboard" },
   { label: "Vendas", icon: ShoppingCart, path: "/vendas" },
   { label: "Produtos", icon: Package, path: "/vendas/produtos" },
   { label: "Financeiro", icon: Wallet, path: "/financeiro/saques" },
