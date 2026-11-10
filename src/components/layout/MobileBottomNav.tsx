@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
   LayoutDashboard, ShoppingCart, Package, Wallet, MoreHorizontal,
   Trophy, Ticket, Building2, User, LogOut, X, Blocks,
-  MessageSquare, ChevronRight,
+  MessageSquare, ChevronRight, QrCode,
   type LucideIcon,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 const tabs = [
   { label: "Início", icon: LayoutDashboard, path: "/dashboard" },
   { label: "Vendas", icon: ShoppingCart, path: "/vendas" },
-  { label: "Produtos", icon: Package, path: "/vendas/produtos" },
+  { label: "Cobrar", icon: QrCode, path: "/vendas/link-pagamento" },
   { label: "Financeiro", icon: Wallet, path: "/financeiro/saques" },
   { label: "Mais", icon: MoreHorizontal, path: "__more__" },
 ];
@@ -169,6 +169,21 @@ export function MobileBottomNav() {
                 ? moreOpen
                 : location.pathname === tab.path ||
                   (tab.path !== "/dashboard" && location.pathname.startsWith(tab.path));
+              if (tab.path === "/vendas/link-pagamento") {
+                return (
+                  <button
+                    key={tab.path}
+                    onClick={() => { setMoreOpen(false); navigate(tab.path); }}
+                    className="relative flex min-w-[60px] flex-1 flex-col items-center gap-1 active:scale-[0.94] transition-transform"
+                    aria-label="Cobrar com Pix ou cartão"
+                  >
+                    <span className="-mt-6 grid h-[52px] w-[52px] place-items-center rounded-full bg-primary text-primary-foreground ring-4 ring-card">
+                      <tab.icon className="h-[22px] w-[22px]" strokeWidth={2.3} />
+                    </span>
+                    <span className="text-[10px] font-bold leading-none text-primary">{tab.label}</span>
+                  </button>
+                );
+              }
               return (
                 <button
                   key={tab.path}
