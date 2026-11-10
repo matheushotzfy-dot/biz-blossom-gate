@@ -28,4 +28,4 @@
 - Manager portfolios use one temporal active assignment per seller; operational access starts at assignment, ends on transfer, while immutable commission history remains tied to the original accrual.
 
 - Visual identity lives in a final unlayered token block at the end of `src/index.css` that overrides all legacy layers (root, dark, admin `--as-*`, auth and admin-content scopes); change brand colors there rather than in older layers.
-- Seller area navigation lives in `src/components/seller-shell/navConfig.ts` (navy top bar + horizontal tabs on desktop, bottom bar with central Cobrar on mobile); the old seller sidebar is no longer rendered, so add seller pages there.
+- Seller area navigation lives in `src/components/seller-shell/navConfig.ts` (SellerRail on desktop, bottom bar with central Cobrar on mobile); the seller layout adds `vp-noir` to <html> while mounted so portals inherit the dark identity, and legacy global button/radius rules are neutralised under `.vp-seller-shell`.

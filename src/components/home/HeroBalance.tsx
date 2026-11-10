@@ -64,7 +64,7 @@ export function HeroBalance(p: HeroBalanceProps) {
                   <a.icon className="h-6 w-6" strokeWidth={2.1} />
                 </button>
                 <span className="mt-2.5 block text-[13.5px] font-semibold text-foreground">{a.label}</span>
-                <span className="hidden text-[11.5px] text-muted-foreground sm:block">{a.hint}</span>
+                <span className="hidden max-w-[84px] text-[11.5px] leading-tight text-muted-foreground 2xl:block">{a.hint}</span>
               </li>
             ))}
           </ul>
