@@ -52,7 +52,7 @@ export function CardPix() {
                 <motion.span className="vx3-cc-shine" style={reduce ? undefined : { background: shine }} aria-hidden />
                 <div className="flex items-start justify-between">
                   <span className="vx3-cc-chip" aria-hidden />
-                  <span className="vx3-cc-brand">VENXPAY</span>
+                  <span className="vx3-cc-brand">Vemprapay</span>
                 </div>
                 <span className="vx3-cc-number vx3-num">4970 •••• •••• 2026</span>
                 <div className="flex items-end justify-between">

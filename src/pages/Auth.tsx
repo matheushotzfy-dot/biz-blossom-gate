@@ -351,8 +351,8 @@ export default function Auth() {
     <div className="auth-shell relative min-h-[100dvh] bg-background text-foreground lg:h-[100dvh] lg:overflow-hidden">
       <div className="auth-mobile-ambient pointer-events-none fixed inset-0 lg:hidden" aria-hidden="true" />
       <Seo
-        title={isLogin ? "Entrar — VENXPAY" : "Criar conta grátis — VENXPAY"}
-        description={isLogin ? "Acesse seu painel VENXPAY: produtos, vendas, saques e área de membros em um só lugar." : "Crie sua conta VENXPAY gratuitamente e comece a vender infoprodutos com checkout de alta conversão."}
+        title={isLogin ? "Entrar — Vemprapay" : "Criar conta grátis — Vemprapay"}
+        description={isLogin ? "Acesse seu painel Vemprapay: produtos, vendas, saques e área de membros em um só lugar." : "Crie sua conta Vemprapay gratuitamente e comece a vender infoprodutos com checkout de alta conversão."}
         path="/auth"
       />
 
@@ -667,7 +667,7 @@ export default function Auth() {
                             </div>
                           </div>
                           <div>
-                            <Label className={labelCls}>Onde conheceu a VENXPAY?</Label>
+                            <Label className={labelCls}>Onde conheceu a Vemprapay?</Label>
                             <Select value={referralSource} onValueChange={setReferralSource}>
                               <SelectTrigger className={inputCls}><SelectValue placeholder="Selecione uma opção" /></SelectTrigger>
                               <SelectContent className="rounded-[10px] border-border/70">

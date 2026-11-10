@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * VENXPAY logomark — a minimalist "V" cut from two beveled rails:
+ * Vemprapay logomark — a minimalist "V" cut from two beveled rails:
  * the left rail is solid (capital in), the right rail is a gradient blade
  * (settlement out), joined by a payment node at the vertex.
  * 100% inline SVG — no external assets, scales cleanly at any size.
@@ -24,7 +24,7 @@ export function VenxpayLogo({ className, size = 32, withWordmark = false, animat
         viewBox="0 0 64 64"
         fill="none"
         role="img"
-        aria-label="VENXPAY"
+        aria-label="Vemprapay"
         className="shrink-0"
       >
         <defs>

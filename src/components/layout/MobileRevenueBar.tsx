@@ -36,7 +36,7 @@ export function MobileRevenueBar() {
  {/* Logo */}
  <div className="flex items-center gap-2 shrink-0">
  <VenxpayLogo size={28} />
- <span className="text-sm font-display font-bold text-foreground tracking-tight">VENXPAY</span>
+ <span className="text-sm font-display font-bold text-foreground tracking-tight">Vemprapay</span>
  </div>
 
  <div className="flex-1" />

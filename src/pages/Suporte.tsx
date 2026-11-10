@@ -49,7 +49,7 @@ export default function Suporte() {
     if (await support.createTicket(subject, message, priority, composerFiles)) { setShowComposer(false); setSubject(''); setMessage(''); setPriority('normal'); setComposerFiles([]); }
   };
   return <div className="support-surface flex min-h-0 flex-1 flex-col bg-background">
-    <Seo title="Suporte | VENXPAY" description="Seus chamados e conversas com a equipe VENXPAY." path="/suporte" noindex />
+    <Seo title="Suporte | Vemprapay" description="Seus chamados e conversas com a equipe Vemprapay." path="/suporte" noindex />
     <header className="support-toolbar flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-4 md:px-7">
       <div className="flex items-center gap-3"><Headphones className="h-5 w-5 text-primary" /><h1 className="text-lg font-semibold md:text-xl">Central de suporte</h1></div>
       <div className="flex items-center gap-2"><Button variant="ghost" size="icon" aria-label="Perguntas frequentes" title="Perguntas frequentes" onClick={() => setShowFaq(true)}><CircleHelp className="h-5 w-5" /></Button><Button className="h-10 rounded-md px-3 md:px-4" onClick={() => setShowComposer(true)}><Plus className="h-4 w-4" /><span className="hidden sm:inline">Novo chamado</span><span className="sm:hidden">Novo</span></Button></div>

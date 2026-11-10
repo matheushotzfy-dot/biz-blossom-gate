@@ -103,7 +103,7 @@ export default function LinkPagamento() {
   const filters = useMemo(() => [{ value: "all", label: "Todos" }, { value: "active", label: "Ativos" }, { value: "paused", label: "Pausados" }, { value: "blocked", label: "Bloqueados" }, { value: "expired", label: "Expirados" }, { value: "archived", label: "Arquivados" }] as const, []);
 
   return <HDShell>
-    <Seo title="Links de Pagamento | Venxpay" description="Crie e gerencie links de pagamento avulsos." path="/vendas/link-pagamento" noindex />
+    <Seo title="Links de Pagamento | Vemprapay" description="Crie e gerencie links de pagamento avulsos." path="/vendas/link-pagamento" noindex />
     <PaymentLinkDialog open={dialogOpen} busy={busy} permissions={permissions} editing={editing} onOpenChange={(open) => { setDialogOpen(open); if (!open) setEditing(null); }} onSubmit={save} />
     <HDHeader eyebrow="Checkout" title="Links de Pagamento" subtitle="Crie cobranças avulsas e acompanhe cada acesso." actions={<Button className="h-11 gap-2 rounded-xl px-5 font-semibold" onClick={() => { setEditing(null); setDialogOpen(true); }}><Plus className="h-4 w-4" />Criar novo link</Button>} />
     <HDStatGrid><HDStat label="Receita gerada" value={formatCurrency(Number(pageData.revenue))} sub="Total aprovado nos links" icon={TrendingUp} /><HDStat label="Cliques" value={Number(pageData.clicks).toLocaleString("pt-BR")} sub="Visitas registradas" icon={Eye} /><HDStat label="Conversões" value={Number(pageData.uses).toLocaleString("pt-BR")} sub={`${conversion.toFixed(1)}% de conversão`} icon={ShoppingBag} /><HDStat label="Links ativos" value={`${pageData.active}/${pageData.total}`} sub="Disponíveis para acesso" icon={Power} /></HDStatGrid>

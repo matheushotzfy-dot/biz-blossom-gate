@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { CountUp, Reveal, SectionHead, SpotCard } from "./bits";
 
 const POINTS = [
-  { icon: Fingerprint, title: "Nominais e exclusivas", text: "Adquirências 100% exclusivas da VENXPAY, não compartilhadas com o mercado." },
+  { icon: Fingerprint, title: "Nominais e exclusivas", text: "Adquirências 100% exclusivas da Vemprapay, não compartilhadas com o mercado." },
   { icon: GitBranch, title: "Roteamento inteligente", text: "Cada transação segue pela rota com melhor chance de aprovação." },
   { icon: Lock, title: "Reserva automática", text: "Se uma rota oscila, a venda desvia para a reserva sem o cliente perceber." },
   { icon: TrendingUp, title: "75%+ de aprovação", text: "PIX e cartão mantidos acima de 75% para você vender mais com o mesmo tráfego." },

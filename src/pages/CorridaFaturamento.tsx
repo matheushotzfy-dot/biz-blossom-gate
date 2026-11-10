@@ -209,7 +209,7 @@ export default function CorridaFaturamento() {
       {/* PRIZES */}
       {prizes.length > 0 && (
         <section className="rounded-xl border border-border bg-card px-5 py-6 sm:px-8">
-          <p className="font-mono text-[10px] uppercase text-muted-foreground">Definidos pela VENXPAY</p>
+          <p className="font-mono text-[10px] uppercase text-muted-foreground">Definidos pela Vemprapay</p>
           <h2 className="mt-1 flex items-center gap-2 font-display text-lg font-bold text-foreground"><Gift className="h-4 w-4 text-primary" />Prêmios da temporada</h2>
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {prizes.map((p) => {

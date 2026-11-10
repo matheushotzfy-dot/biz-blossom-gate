@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Seo } from "@/components/Seo";
 
 const LAST_UPDATED = "01 de Abril de 2026";
-const COMPANY_NAME = "VENXPAY";
+const COMPANY_NAME = "Vemprapay";
 
 const sections = [
  {
@@ -72,8 +72,8 @@ export default function PoliticaDePrivacidade() {
  return (
  <div className="min-h-screen bg-background">
  <Seo
-   title="Política de Privacidade — VENXPAY"
-   description="Saiba como a VENXPAY coleta, usa e protege seus dados pessoais conforme a LGPD. Transparência total no tratamento de informações."
+   title="Política de Privacidade — Vemprapay"
+   description="Saiba como a Vemprapay coleta, usa e protege seus dados pessoais conforme a LGPD. Transparência total no tratamento de informações."
    path="/politica-de-privacidade"
  />
  {/* Header */}

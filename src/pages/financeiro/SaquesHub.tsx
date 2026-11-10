@@ -15,7 +15,7 @@ export default function SaquesHub() {
 
   return (
     <div className="bg-background antialiased selection:bg-primary/20">
-      <Seo title="Saques | Venxpay" description="Solicite saques via PIX ou Crypto e acompanhe o histórico das suas retiradas." path="/financeiro/saques" noindex />
+      <Seo title="Saques | Vemprapay" description="Solicite saques via PIX ou Crypto e acompanhe o histórico das suas retiradas." path="/financeiro/saques" noindex />
       <main className="mx-auto w-full">
         {tab === "pix" ? <Saques /> : <SaquesCrypto />}
       </main>

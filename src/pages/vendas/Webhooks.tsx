@@ -186,7 +186,7 @@ export default function Webhooks() {
                   </DialogTitle>
                   <DialogDescription className="text-[12.5px] text-muted-foreground">
                     Enviamos um POST HTTPS a cada evento selecionado. Valide a assinatura no header
-                    <span className="font-mono text-foreground"> X-Venxpay-Signature</span>.
+                    <span className="font-mono text-foreground"> X-Vemprapay-Signature</span>.
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-5 pt-2">

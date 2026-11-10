@@ -267,7 +267,7 @@ export default function Vendas() {
       if (!rows) return;
       const headers = Object.keys(rows[0]);
       const wb = new ExcelJS.Workbook();
-      wb.creator = "Venxpay";
+      wb.creator = "Vemprapay";
       wb.created = new Date();
       const ws = wb.addWorksheet("Vendas");
       ws.columns = headers.map((h) => ({
@@ -326,7 +326,7 @@ export default function Vendas() {
 
   return (
     <HDShell>
-      <Seo title="Vendas | Venxpay" description="Histórico completo de transações, filtros avançados e exportação de relatórios." path="/vendas" noindex />
+      <Seo title="Vendas | Vemprapay" description="Histórico completo de transações, filtros avançados e exportação de relatórios." path="/vendas" noindex />
 
       {/* Premium Hero */}
       <HDHeader

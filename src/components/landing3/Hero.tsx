@@ -58,7 +58,7 @@ export function Hero({ onSignup }: HeroProps) {
         </div>
 
         <motion.h1 {...enter(0.55)}>
-          <span className="sr-only">VENXPAY — </span>
+          <span className="sr-only">Vemprapay — </span>
           Aprovação acima de <em>75%</em> em PIX e cartão.
         </motion.h1>
         <motion.p className="vx3-hero-sub" {...enter(0.7)}>

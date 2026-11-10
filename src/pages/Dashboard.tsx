@@ -504,7 +504,7 @@ export default function Dashboard() {
 
   return (
     <div className="seller-dashboard relative min-h-full w-full text-foreground animate-in fade-in duration-500">
-      <Seo title="Dashboard | Venxpay" description="Painel operacional Venxpay — saldos, ranking, aprovação e liquidações em tempo real." path="/dashboard" noindex />
+      <Seo title="Dashboard | Vemprapay" description="Painel operacional Vemprapay — saldos, ranking, aprovação e liquidações em tempo real." path="/dashboard" noindex />
 
       <div className="relative z-10 px-1 sm:px-2 md:px-3 pt-0 pb-24 max-w-[1280px] mx-auto space-y-6">
 

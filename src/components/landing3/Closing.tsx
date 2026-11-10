@@ -27,11 +27,11 @@ export function Closing({ onSignup, onLogin }: ClosingProps) {
       </div>
       <footer className="vx3-footer">
         <div className="vx3-shell">
-          <a href="#topo" aria-label="VENXPAY — início" className="flex items-center gap-2">
-            <VenxpayLogo size={22} plate={false} animated={false} className="text-foreground" /><b>VENXPAY</b>
+          <a href="#topo" aria-label="Vemprapay — início" className="flex items-center gap-2">
+            <VenxpayLogo size={22} plate={false} animated={false} className="text-foreground" /><b>Vemprapay</b>
           </a>
           <nav aria-label="Links legais">{LEGAL.map(([href, label]) => <a key={href} href={href}>{label}</a>)}</nav>
-          <span>© {new Date().getFullYear()} VENXPAY</span>
+          <span>© {new Date().getFullYear()} Vemprapay</span>
         </div>
       </footer>
     </section>

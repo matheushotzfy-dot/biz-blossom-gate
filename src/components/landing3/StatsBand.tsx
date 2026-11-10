@@ -2,7 +2,7 @@ import { CountUp, Reveal, SpotCard } from "./bits";
 
 export function StatsBand() {
   return (
-    <section className="vx3-stats" aria-label="Números da VENXPAY">
+    <section className="vx3-stats" aria-label="Números da Vemprapay">
       <div className="vx3-shell vx3-stats-grid">
         <Reveal><SpotCard className="vx3-stat">
           <strong><CountUp to={75} suffix="%+" /></strong>

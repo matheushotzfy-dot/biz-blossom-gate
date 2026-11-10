@@ -244,7 +244,7 @@ export default function MemberAuth() {
 
  return (
  <div className="h-screen flex bg-background text-foreground overflow-hidden">
- <Seo title="Área de Membros — Login VENXPAY" description="Acesse a área de membros para assistir suas aulas, baixar materiais e acompanhar seu progresso." path="/membros-area/login" />
+ <Seo title="Área de Membros — Login Vemprapay" description="Acesse a área de membros para assistir suas aulas, baixar materiais e acompanhar seu progresso." path="/membros-area/login" />
 
  {/* ═══ LEFT: Form ═══ */}
  <div className="flex-1 relative overflow-y-auto overflow-x-hidden">

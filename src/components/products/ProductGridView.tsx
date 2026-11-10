@@ -24,7 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * Catálogo em grid de cards — estética VENXPAY:
+ * Catálogo em grid de cards — estética Vemprapay:
  * cartões de altura uniforme, capa 16/9, pill de status com dot,
  * preço em destaque, linha mono do checkout com copiar, rodapé de ações.
  * Hover leve (borda + translate), sem blur pesado nem sombra cinza.

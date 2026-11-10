@@ -79,8 +79,8 @@ function visualFor(type: string): EventVisual {
   return EVENT_MAP[type] || { icon: Clock, tone: "muted", label: type };
 }
 
-/** Sellers never see provider names — everything is branded VENXPAY. */
-const BRAND_LABEL = "VENXPAY";
+/** Sellers never see provider names — everything is branded Vemprapay. */
+const BRAND_LABEL = "Vemprapay";
 function maskAcquirer(text: string | null | undefined, variant: "admin" | "seller"): string {
   if (!text) return "";
   if (variant === "admin") return text;

@@ -1,5 +1,5 @@
 /**
- * LandingPage — página pública da VENXPAY (sistema escuro tecnológico, v3).
+ * LandingPage — página pública da Vemprapay (sistema escuro tecnológico, v3).
  *
  * Tudo aqui é apresentacional: sem consultas ao banco e sem regras de negócio.
  * Painéis e notificações são simulações ilustrativas. A navegação leva a /auth.
@@ -47,7 +47,7 @@ export default function LandingPage() {
   return (
     <div id="topo" className="vx3 min-h-dvh">
       <Seo
-        title="VENXPAY — gateway com aprovação acima de 75%"
+        title="Vemprapay — gateway com aprovação acima de 75%"
         description="Gateway de pagamentos com adquirências exclusivas, aprovação acima de 75% em PIX e cartão, saque instantâneo e checkout que converte."
         path="/"
         jsonLd={FAQ_JSONLD}

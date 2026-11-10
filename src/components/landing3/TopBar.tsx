@@ -54,9 +54,9 @@ export function TopBar({ onLogin, onSignup }: TopBarProps) {
   return (
     <header className={cn("vx3-nav", (compact || menuOpen) && "vx3-nav-compact")}>
       <div className="vx3-shell flex h-[68px] items-center justify-between gap-4">
-        <a href="#topo" className="flex items-center gap-2.5" aria-label="VENXPAY — início">
+        <a href="#topo" className="flex items-center gap-2.5" aria-label="Vemprapay — início">
           <VenxpayLogo size={28} plate={false} animated={false} className="text-foreground" />
-          <span className="font-heading text-sm font-extrabold tracking-[0.14em] text-foreground">VENXPAY</span>
+          <span className="font-heading text-sm font-extrabold tracking-[0.14em] text-foreground">Vemprapay</span>
         </a>
 
         <nav className="vx3-nav-pill hidden lg:flex" aria-label="Navegação principal">

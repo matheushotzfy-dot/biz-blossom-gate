@@ -40,7 +40,7 @@ export function AuthAside({ className }: AuthAsideProps) {
       onPointerMove={onMove}
       onPointerLeave={onLeave}
       className={cn("auth-aside relative isolate h-full overflow-hidden [perspective:1200px]", className)}
-      aria-label="VENXPAY"
+      aria-label="Vemprapay"
     >
       <motion.img
         src={heroV}
@@ -59,7 +59,7 @@ export function AuthAside({ className }: AuthAsideProps) {
       <div className="auth-stage-grain pointer-events-none absolute inset-0" aria-hidden="true" />
 
       <motion.span {...fade(0.3)} className="absolute right-10 top-9 font-heading text-[12px] font-semibold tracking-[0.4em] auth-aside-muted">
-        VENXPAY
+        Vemprapay
       </motion.span>
 
       <motion.div {...fade(0.5)} className="pointer-events-none absolute bottom-10 left-10 max-w-[420px]">

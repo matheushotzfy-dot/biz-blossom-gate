@@ -1,5 +1,5 @@
 /**
- * Primitivas de movimento da landing VENXPAY (v3).
+ * Primitivas de movimento da landing Vemprapay (v3).
  * Tudo é apresentacional; respeita `prefers-reduced-motion`.
  */
 import { useEffect, useRef, useState, type ComponentProps, type PointerEvent, type ReactNode } from "react";

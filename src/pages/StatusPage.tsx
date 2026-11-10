@@ -23,7 +23,7 @@ const STATUS_CONFIG: Record<ServiceStatus, { label: string; color: string; bgCol
 
 export default function StatusPage() {
  const [services, setServices] = useState<ServiceInfo[]>([
- { name: "Plataforma VENXPAY", icon: Server, status: "checking", description: "Dashboard, gerenciamento de produtos e área do vendedor" },
+ { name: "Plataforma Vemprapay", icon: Server, status: "checking", description: "Dashboard, gerenciamento de produtos e área do vendedor" },
  { name: "Gateway de Pagamento", icon: CreditCard, status: "checking", description: "Processamento de pagamentos PIX, cartão e boleto" },
  { name: "Autenticação", icon: Shield, status: "checking", description: "Login, registro e gerenciamento de sessões" },
  { name: "Área de Membros", icon: Zap, status: "checking", description: "Acesso a cursos, vídeos e conteúdo digital" },
@@ -102,8 +102,8 @@ export default function StatusPage() {
  return (
  <div className="min-h-screen bg-[#050505] text-white">
  <Seo
-   title="Status dos serviços — VENXPAY"
-   description="Acompanhe em tempo real a disponibilidade da plataforma VENXPAY: gateway de pagamento, autenticação, área de membros e API."
+   title="Status dos serviços — Vemprapay"
+   description="Acompanhe em tempo real a disponibilidade da plataforma Vemprapay: gateway de pagamento, autenticação, área de membros e API."
    path="/status"
  />
  {/* Header */}
@@ -114,7 +114,7 @@ export default function StatusPage() {
  <Activity className="h-5 w-5 text-white" />
  </div>
  <div>
- <h1 className="text-lg font-bold tracking-tight">VENXPAY Status</h1>
+ <h1 className="text-lg font-bold tracking-tight">Vemprapay Status</h1>
  <p className="text-[11px] text-white/30 font-medium">Status dos serviços em tempo real</p>
  </div>
  </div>
@@ -193,7 +193,7 @@ export default function StatusPage() {
  Status atualizado automaticamente a cada 60 segundos
  </p>
  <p className="text-[11px] text-white/10 mt-1">
- © {new Date().getFullYear()} VENXPAY — Todos os direitos reservados
+ © {new Date().getFullYear()} Vemprapay — Todos os direitos reservados
  </p>
  </div>
  </main>

@@ -11,7 +11,7 @@ export function HeroConsole() {
     <div className="vx3-console">
       <div className="vx3-console-bar">
         <span className="vx3-dots" aria-hidden><i /><i /><i /></span>
-        <span className="vx3-mono">painel.venxpay · ao vivo</span>
+        <span className="vx3-mono">painel.vemprapay · ao vivo</span>
         <span className="vx3-live"><i />online</span>
       </div>
       <div className="vx3-console-body">

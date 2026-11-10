@@ -1,8 +1,8 @@
-# VENXPAY
+# Vemprapay
 
 > Plataforma brasileira de pagamentos e gestão para infoprodutores: checkout de alta conversão, área de membros, analytics em tempo real e antifraude integrado.
 
-VENXPAY permite vender, gerenciar e escalar produtos digitais com PIX, cartão e boleto, sistema de afiliados, coproduções, cupons e saques rápidos.
+Vemprapay permite vender, gerenciar e escalar produtos digitais com PIX, cartão e boleto, sistema de afiliados, coproduções, cupons e saques rápidos.
 
 ## Pages
 

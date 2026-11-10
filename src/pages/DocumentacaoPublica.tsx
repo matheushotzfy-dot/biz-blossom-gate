@@ -14,17 +14,17 @@ export default function DocumentacaoPublica() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Seo
-        title="Documentação da API PIX | Venxpay"
-        description="Referência completa da API Venxpay: autenticação por chave secreta, criação de cobranças PIX, consulta de status e webhooks assinados com HMAC-SHA256."
+        title="Documentação da API PIX | Vemprapay"
+        description="Referência completa da API Vemprapay: autenticação por chave secreta, criação de cobranças PIX, consulta de status e webhooks assinados com HMAC-SHA256."
         path="/documentacao"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "TechArticle",
-          headline: "Documentação da API PIX Venxpay",
+          headline: "Documentação da API PIX Vemprapay",
           description:
-            "Guia de integração da API Venxpay: autenticação, cobranças PIX e webhooks.",
+            "Guia de integração da API Vemprapay: autenticação, cobranças PIX e webhooks.",
           inLanguage: "pt-BR",
-          publisher: { "@type": "Organization", name: "Venxpay" },
+          publisher: { "@type": "Organization", name: "Vemprapay" },
         }}
       />
 
