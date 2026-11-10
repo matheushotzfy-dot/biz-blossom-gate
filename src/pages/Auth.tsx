@@ -360,8 +360,8 @@ export default function Auth() {
         {/* ═══ LEFT — form ═══ */}
         <div className="auth-form-panel relative z-10 flex min-h-[100dvh] flex-col px-5 py-6 sm:px-10 lg:h-full lg:min-h-0 lg:px-14 lg:py-7 xl:px-20">
           <a href="/" className="inline-flex w-fit items-center gap-2.5 opacity-95 transition-opacity hover:opacity-100">
-            <VenxpayLogo size={32} plate={false} />
-            <span className="text-[18px] font-heading font-bold text-foreground">VENX<span className="text-primary">PAY</span></span>
+            <VenxpayLogo size={32} />
+            <span className="text-[19px] font-heading font-extrabold tracking-[-0.035em] text-foreground">vempra<span className="text-primary">pay</span></span>
           </a>
 
           <div className="flex flex-1 flex-col lg:min-h-0 lg:overflow-y-auto">

@@ -5206,3 +5206,5 @@ html body .font-display, html body .font-heading {
   background: hsl(222 47% 11%); color: hsl(150 20% 96%);
 }
 .dark .vp-site .vp-hero { background: hsl(156 100% 33%); color: hsl(0 0% 100%); }
+.vp-auth-aside h2, .vp-auth-aside > div > span, .vp-auth-aside ul li { color: hsl(0 0% 100%) !important; }
+.vp-shortcut, .vp-shortcut:hover, .vp-shortcut:active { background: transparent !important; border: 0 !important; box-shadow: none !important; transform: none !important; }
