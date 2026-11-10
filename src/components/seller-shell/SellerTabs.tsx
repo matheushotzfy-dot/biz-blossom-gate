@@ -8,6 +8,7 @@ import { SELLER_NAV, isSectionActive, type SellerNavSection } from "./navConfig"
 export function SellerTabs() {
   const { pathname } = useLocation();
   const [openId, setOpenId] = useState<string | null>(null);
+  const [left, setLeft] = useState(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const schedule = (id: string | null, delay: number) => {
@@ -25,8 +26,8 @@ export function SellerTabs() {
             <Link
               to={s.url}
               data-active={isSectionActive(pathname, s)}
-              onMouseEnter={() => { prefetchRoute(s.url); schedule(s.id, 90); }}
-              onFocus={() => setOpenId(s.id)}
+              onMouseEnter={(e) => { prefetchRoute(s.url); setLeft(e.currentTarget.offsetLeft); schedule(s.id, 90); }}
+              onFocus={(e) => { setLeft(e.currentTarget.offsetLeft); setOpenId(s.id); }}
               onClick={() => setOpenId(null)}
               className="vp-tab flex h-11 items-center px-3.5 text-[13.5px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md"
             >
@@ -35,16 +36,16 @@ export function SellerTabs() {
           </li>
         ))}
       </ul>
-      {open && <MegaPanel section={open} onPick={() => setOpenId(null)} onEnter={() => schedule(open.id, 0)} />}
+      {open && <MegaPanel left={left} section={open} onPick={() => setOpenId(null)} onEnter={() => schedule(open.id, 0)} />}
     </nav>
   );
 }
 
-function MegaPanel({ section, onPick, onEnter }: { section: SellerNavSection; onPick: () => void; onEnter: () => void }) {
+function MegaPanel({ section, onPick, onEnter, left }: { left: number; section: SellerNavSection; onPick: () => void; onEnter: () => void }) {
   const { pathname, search } = useLocation();
   const here = pathname + search;
   return (
-    <div onMouseEnter={onEnter} className="vp-mega vp-fade absolute left-0 top-full z-50 mt-1 w-[560px] rounded-2xl p-2 text-foreground">
+    <div onMouseEnter={onEnter} style={{ left: Math.max(0, left - 8) }} className="vp-mega vp-fade absolute top-full z-50 mt-1 w-[560px] rounded-2xl p-2 text-foreground">
       <div className="grid grid-cols-2 gap-1">
         {section.links!.map((l) => (
           <Link

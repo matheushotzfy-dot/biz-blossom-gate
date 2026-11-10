@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { differenceInDays } from "date-fns";
-import { ArrowDownToLine, CalendarDays, ChevronDown, FileCheck2, KeyRound, Link2, PackagePlus, QrCode, Receipt, ShieldCheck, PackageSearch } from "lucide-react";
+import { ArrowDownToLine, CalendarDays, ChevronDown, FileCheck2, KeyRound, Link2, PackagePlus, QrCode, Receipt, PackageSearch } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import { useProfile } from "@/hooks/useProfile";
@@ -101,7 +101,6 @@ export default function Dashboard() {
   ];
 
   const tasks: PendingTask[] = [];
-  if (kyc.resolved && kyc.showOnboarding) tasks.push({ id: "kyc", title: profile?.document_number ? "Conta em análise" : "Verifique sua conta", desc: profile?.document_number ? "Avisaremos assim que for aprovada" : "Envie seus documentos para liberar saques", icon: ShieldCheck, tone: "warning", onClick: () => navigate("/perfil?tab=identidade&scrollTo=kyc") });
   const inReview = (products as Array<{ status?: string }>).filter((p) => p.status === "pending_review").length;
   if (inReview > 0) tasks.push({ id: "review", title: `${inReview} ${inReview === 1 ? "produto em análise" : "produtos em análise"}`, desc: "Nossa equipe está revisando", icon: PackageSearch, tone: "info", onClick: () => navigate("/vendas/produtos") });
   if (kyc.approved && products.length === 0) tasks.push({ id: "first", title: "Crie seu primeiro produto", desc: "Leva poucos minutos", icon: FileCheck2, tone: "info", onClick: () => navigate("/vendas/produtos") });
@@ -144,7 +143,7 @@ export default function Dashboard() {
         <DayPulse hourly={hourly} todayRevenue={Number(todayStats?.current?.revenue ?? 0)} todayOrders={Number(todayStats?.current?.approved_count ?? 0)} lastSaleAt={lastPaid?.created_at} hidden={privacy.hidden} />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1fr_320px] md:gap-5">
+      <div className="grid items-start gap-4 lg:grid-cols-[1fr_320px] md:gap-5">
         <Statement items={txs} products={productNames} hidden={privacy.hidden} loading={txLoading} onOpen={setDetail} />
         <PaymentMix
           total={Number(cur?.total_count ?? 0)} approved={Number(cur?.approved_count ?? 0)} customers={Number(cur?.unique_customers ?? 0)}
