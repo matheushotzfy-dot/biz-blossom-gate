@@ -5208,3 +5208,70 @@ html body .font-display, html body .font-heading {
 .dark .vp-site .vp-hero { background: hsl(156 100% 33%); color: hsl(0 0% 100%); }
 .vp-auth-aside h2, .vp-auth-aside > div > span, .vp-auth-aside ul li { color: hsl(0 0% 100%) !important; }
 .vp-shortcut, .vp-shortcut:hover, .vp-shortcut:active { background: transparent !important; border: 0 !important; box-shadow: none !important; transform: none !important; }
+
+/* ═════════ VEMPRAPAY SELLER SHELL v2 — identidade banco ═════════ */
+:root {
+  --vp-ink: 222 52% 9%;          /* navy da barra superior */
+  --vp-ink-2: 222 40% 14%;
+  --vp-ink-line: 222 30% 20%;
+  --vp-ink-fg: 150 20% 96%;
+  --vp-ink-muted: 218 18% 66%;
+  --vp-money: 156 100% 33%;
+  --vp-money-deep: 158 100% 22%;
+  --vp-surface-1: 150 11% 97%;
+  --vp-surface-2: 0 0% 100%;
+  --vp-surface-3: 150 14% 99%;
+}
+.dark {
+  --vp-ink: 222 52% 5%; --vp-ink-2: 222 40% 9%; --vp-ink-line: 222 30% 15%;
+  --vp-surface-1: 222 47% 6%; --vp-surface-2: 222 40% 10%; --vp-surface-3: 222 36% 13%;
+}
+.vp-top { background: hsl(var(--vp-ink)); color: hsl(var(--vp-ink-fg)); }
+.vp-top-line { border-color: hsl(var(--vp-ink-line)); }
+.vp-top-muted { color: hsl(var(--vp-ink-muted)); }
+.vp-top-chip { background: hsl(var(--vp-ink-2)); border: 1px solid hsl(var(--vp-ink-line)); }
+.vp-top-chip:hover { border-color: hsl(var(--vp-money) / .55); }
+.vp-tab { position: relative; color: hsl(var(--vp-ink-muted)); transition: color .15s ease; }
+.vp-tab:hover, .vp-tab[data-active="true"] { color: hsl(var(--vp-ink-fg)); }
+/* Marcador do item ativo: o "check" da marca */
+.vp-tab[data-active="true"]::after {
+  content: ""; position: absolute; left: 50%; bottom: -1px; width: 22px; height: 7px; margin-left: -11px;
+  background: hsl(var(--vp-money)); clip-path: polygon(0 0, 36% 100%, 100% 0, 84% 0, 36% 62%, 16% 0);
+}
+.vp-mega { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); box-shadow: 0 24px 48px -24px hsl(var(--vp-ink) / .35); }
+
+/* Cartão de saldo com textura guilloché e recorte diagonal */
+.vp-balance {
+  position: relative; overflow: hidden; color: hsl(0 0% 100%);
+  background: hsl(var(--vp-money-deep));
+  background-image:
+    linear-gradient(115deg, hsl(var(--vp-money)) 0%, hsl(var(--vp-money-deep)) 62%),
+    repeating-radial-gradient(circle at 110% -10%, transparent 0 11px, hsl(0 0% 100% / .06) 11px 12px);
+  background-blend-mode: normal;
+  border-radius: 22px;
+}
+.vp-balance::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-radial-gradient(circle at 105% 0%, transparent 0 13px, hsl(0 0% 100% / .07) 13px 14px);
+  mask-image: linear-gradient(90deg, transparent 35%, hsl(0 0% 0%) 100%);
+}
+.vp-balance::after {
+  content: ""; position: absolute; right: -40px; bottom: -40px; width: 220px; height: 220px; pointer-events: none;
+  background: hsl(0 0% 100% / .07); clip-path: polygon(0 30%, 38% 100%, 100% 0, 78% 0, 38% 62%, 18% 30%);
+}
+.vp-balance-chip { background: hsl(0 0% 100% / .12); border: 1px solid hsl(0 0% 100% / .18); }
+.vp-balance-chip:hover { background: hsl(0 0% 100% / .2); }
+.vp-balance-cta { background: hsl(0 0% 100%); color: hsl(var(--vp-money-deep)); }
+
+.vp-panel { background: hsl(var(--vp-surface-2)); border: 1px solid hsl(var(--border)); border-radius: 18px; }
+.vp-panel-soft { background: hsl(var(--vp-surface-3)); border: 1px solid hsl(var(--border) / .7); border-radius: 14px; }
+.vp-label { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
+.vp-num { font-variant-numeric: tabular-nums; letter-spacing: -.035em; }
+.vp-action-tile { background: hsl(var(--vp-surface-2)); border: 1px solid hsl(var(--border)); transition: transform .15s ease, border-color .15s ease; }
+.vp-action-tile:hover { transform: translateY(-2px); border-color: hsl(var(--primary) / .45); }
+.vp-action-tile:active { transform: scale(.97); }
+.vp-skel { background: linear-gradient(90deg, hsl(var(--muted)) 0%, hsl(var(--muted) / .5) 50%, hsl(var(--muted)) 100%); background-size: 200% 100%; animation: vp-shimmer 1.2s linear infinite; border-radius: 8px; }
+@keyframes vp-shimmer { to { background-position: -200% 0; } }
+.vp-fade { animation: vp-fade .18s ease-out both; }
+@keyframes vp-fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .vp-skel, .vp-fade { animation: none; } }
