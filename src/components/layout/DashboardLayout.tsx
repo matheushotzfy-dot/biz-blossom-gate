@@ -136,7 +136,7 @@ function DashboardLayoutInner() {
 
   <SidebarInset className="ambient-backdrop dashboard-content-field relative min-w-0 bg-transparent flex flex-col h-full min-h-0 overflow-hidden">
 
-          <header className="technical-topbar relative z-30 flex h-16 items-center gap-1.5 border-b border-border px-3 transition-colors duration-200 lg:px-7 sticky top-0 md:flex">
+          <header className="technical-topbar relative z-30 hidden h-16 items-center gap-1.5 border-b border-border px-3 transition-colors duration-200 lg:px-7 sticky top-0 md:flex">
             <SidebarTrigger className="seller-clickable icon-only relative md:hidden h-8 w-8 rounded-[9px] border border-transparent bg-transparent flex items-center justify-center text-muted-foreground transition-colors duration-200 hover:border-border/70 hover:text-foreground [&>svg]:hidden">
               <PanelToggleIcon size={17} />
               <span className="sr-only">Alternar menu</span>
