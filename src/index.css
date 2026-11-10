@@ -5146,3 +5146,26 @@ html body .font-display, html body .font-heading {
 }
 .support-surface { --primary: 156 100% 33%; --ring: 156 100% 33%; --accent: 153 57% 94%; }
 .dark .support-surface { --primary: 156 82% 42%; --accent: 156 50% 14%; }
+
+/* Re-assert identity inside legacy-scoped surfaces (auth + admin content). */
+.auth-shell, [data-admin-content], .admin-frame [data-admin-content] {
+  --background: 150 11% 97%; --foreground: 222 47% 11%;
+  --card: 0 0% 100%; --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%; --popover-foreground: 222 47% 11%;
+  --muted: 150 12% 95%; --muted-foreground: 218 13% 42%;
+  --accent: 153 57% 94%; --accent-foreground: 157 100% 22%;
+  --secondary: 150 14% 94%; --secondary-foreground: 222 47% 11%;
+  --border: 150 10% 90%; --input: 150 9% 86%;
+  --primary: 156 100% 33%; --primary-foreground: 0 0% 100%; --ring: 156 100% 33%;
+}
+.auth-shell { --background: 0 0% 100%; }
+.dark .auth-shell, .dark [data-admin-content], .dark .admin-frame [data-admin-content] {
+  --background: 222 47% 6%; --foreground: 150 20% 96%;
+  --card: 222 40% 10%; --card-foreground: 150 20% 96%;
+  --popover: 222 40% 10%; --popover-foreground: 150 20% 96%;
+  --muted: 222 32% 14%; --muted-foreground: 218 14% 66%;
+  --accent: 156 50% 14%; --accent-foreground: 156 70% 70%;
+  --secondary: 222 32% 15%; --secondary-foreground: 150 20% 96%;
+  --border: 222 28% 18%; --input: 222 26% 22%;
+  --primary: 156 82% 42%; --primary-foreground: 222 47% 6%; --ring: 156 82% 42%;
+}
