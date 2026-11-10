@@ -92,7 +92,7 @@ export function SellerOnboarding() {
       {
         id: "ativacao",
         label: "Liberação final",
-        desc: inReview ? "Em análise pelo nosso time" : "Aprovação da equipe Venxpay",
+        desc: inReview ? "Em análise pelo nosso time" : "Aprovação da equipe Vemprapay",
         icon: ShieldCheck,
         to: "/perfil?tab=identidade",
         state: "pending",

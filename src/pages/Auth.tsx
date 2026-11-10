@@ -351,8 +351,8 @@ export default function Auth() {
     <div className="auth-shell relative min-h-[100dvh] bg-background text-foreground lg:h-[100dvh] lg:overflow-hidden">
       <div className="auth-mobile-ambient pointer-events-none fixed inset-0 lg:hidden" aria-hidden="true" />
       <Seo
-        title={isLogin ? "Entrar — VENXPAY" : "Criar conta grátis — VENXPAY"}
-        description={isLogin ? "Acesse seu painel VENXPAY: produtos, vendas, saques e área de membros em um só lugar." : "Crie sua conta VENXPAY gratuitamente e comece a vender infoprodutos com checkout de alta conversão."}
+        title={isLogin ? "Entrar — Vemprapay" : "Criar conta grátis — Vemprapay"}
+        description={isLogin ? "Acesse seu painel Vemprapay: produtos, vendas, saques e área de membros em um só lugar." : "Crie sua conta Vemprapay gratuitamente e comece a vender infoprodutos com checkout de alta conversão."}
         path="/auth"
       />
 
@@ -360,8 +360,8 @@ export default function Auth() {
         {/* ═══ LEFT — form ═══ */}
         <div className="auth-form-panel relative z-10 flex min-h-[100dvh] flex-col px-5 py-6 sm:px-10 lg:h-full lg:min-h-0 lg:px-14 lg:py-7 xl:px-20">
           <a href="/" className="inline-flex w-fit items-center gap-2.5 opacity-95 transition-opacity hover:opacity-100">
-            <VenxpayLogo size={32} plate={false} />
-            <span className="text-[18px] font-heading font-bold text-foreground">VENX<span className="text-primary">PAY</span></span>
+            <VenxpayLogo size={32} />
+            <span className="text-[19px] font-heading font-extrabold tracking-[-0.035em] text-foreground">vempra<span className="text-primary">pay</span></span>
           </a>
 
           <div className="flex flex-1 flex-col lg:min-h-0 lg:overflow-y-auto">
@@ -667,7 +667,7 @@ export default function Auth() {
                             </div>
                           </div>
                           <div>
-                            <Label className={labelCls}>Onde conheceu a VENXPAY?</Label>
+                            <Label className={labelCls}>Onde conheceu a Vemprapay?</Label>
                             <Select value={referralSource} onValueChange={setReferralSource}>
                               <SelectTrigger className={inputCls}><SelectValue placeholder="Selecione uma opção" /></SelectTrigger>
                               <SelectContent className="rounded-[10px] border-border/70">

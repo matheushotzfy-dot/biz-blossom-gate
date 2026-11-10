@@ -88,7 +88,7 @@ export default function ManagerLogin() {
  </motion.div>
 
  <h1 className="text-[28px] font-bold text-foreground tracking-tight">Painel da Equipe</h1>
- <p className="text-[13px] text-muted-foreground mt-1.5 font-medium tracking-wide">Gestão de Contas · VENXPAY</p>
+ <p className="text-[13px] text-muted-foreground mt-1.5 font-medium tracking-wide">Gestão de Contas · Vemprapay</p>
  </div>
 
  {/* Card */}

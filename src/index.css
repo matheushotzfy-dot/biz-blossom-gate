@@ -4585,7 +4585,7 @@ html body .lp .lp-progress {
 }
 
 /* ════════════════════════════════════════════════════════════
-   VENXPAY EXECUTIVE — azul financeiro + superfícies frias
+   Vemprapay EXECUTIVE — azul financeiro + superfícies frias
    Base compartilhada por todas as superfícies seller.
    ════════════════════════════════════════════════════════════ */
 @layer base {
@@ -4769,7 +4769,7 @@ html body .lp .lp-progress {
 }
 
 /* ════════════════════════════════════════════════════════════
-   VENXPAY GOAT SYSTEM — black operational canvas + yellow action
+   Vemprapay GOAT SYSTEM — black operational canvas + yellow action
    Shared by seller, admin and all authenticated product surfaces.
    ════════════════════════════════════════════════════════════ */
 @layer base {
@@ -5014,3 +5014,197 @@ html body .lp .lp-progress {
 .inactive-workspace tr[aria-selected='true'] td:first-child { border-left-color: hsl(var(--primary)); }
 .inactive-detail { width: 100%; border-top: 1px solid hsl(var(--border)); }
 @media (min-width: 1280px) { .inactive-detail { width: 320px; flex-shrink: 0; border-top: 0; border-left: 1px solid hsl(var(--border)); } }
+
+/* ═══════════════════════════════════════════════════════════════════
+   VEMPRAPAY DESIGN SYSTEM — final layer (wins over every legacy layer).
+   Bank-grade: money green, deep navy text, soft grey canvas, white cards,
+   16px corners, hairline borders, one typeface (Plus Jakarta Sans) with
+   tabular figures for money. No glow, no glass, no decorative grids.
+   ═══════════════════════════════════════════════════════════════════ */
+:root {
+  --background: 150 11% 97%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-elevated: 0 0% 100%;
+  --card-inset: 150 11% 97%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 156 100% 33%;
+  --primary-foreground: 0 0% 100%;
+  --primary-soft: 153 57% 94%;
+  --secondary: 150 14% 94%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 150 12% 95%;
+  --muted-foreground: 218 13% 42%;
+  --accent: 153 57% 94%;
+  --accent-foreground: 157 100% 22%;
+  --destructive: 0 74% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 150 10% 90%;
+  --input: 150 9% 86%;
+  --ring: 156 100% 33%;
+  --radius: 1rem;
+  --success: 156 100% 31%;
+  --warning: 34 94% 42%;
+  --info: 221 83% 53%;
+  --info-foreground: 0 0% 100%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 218 15% 35%;
+  --sidebar-primary: 156 100% 33%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 153 57% 94%;
+  --sidebar-accent-foreground: 157 100% 22%;
+  --sidebar-border: 150 10% 91%;
+  --sidebar-ring: 156 100% 33%;
+}
+.dark {
+  --background: 222 47% 6%;
+  --foreground: 150 20% 96%;
+  --card: 222 40% 10%;
+  --card-elevated: 222 38% 12%;
+  --card-inset: 222 45% 8%;
+  --card-foreground: 150 20% 96%;
+  --popover: 222 40% 10%;
+  --popover-foreground: 150 20% 96%;
+  --primary: 156 82% 42%;
+  --primary-foreground: 222 47% 6%;
+  --primary-soft: 156 60% 14%;
+  --secondary: 222 32% 15%;
+  --secondary-foreground: 150 20% 96%;
+  --muted: 222 32% 14%;
+  --muted-foreground: 218 14% 66%;
+  --accent: 156 50% 14%;
+  --accent-foreground: 156 70% 70%;
+  --border: 222 28% 18%;
+  --input: 222 26% 22%;
+  --ring: 156 82% 42%;
+  --sidebar-background: 222 42% 8%;
+  --sidebar-foreground: 218 14% 72%;
+  --sidebar-primary: 156 82% 42%;
+  --sidebar-primary-foreground: 222 47% 6%;
+  --sidebar-accent: 156 50% 13%;
+  --sidebar-accent-foreground: 156 70% 72%;
+  --sidebar-border: 222 28% 15%;
+}
+
+html body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; letter-spacing: -0.006em; }
+html body h1, html body h2, html body h3, html body h4,
+html body .font-display, html body .font-heading {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+  letter-spacing: -0.022em;
+}
+.font-numbers, .tabular-nums, .font-mono-money { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+/* Kill legacy decorative backgrounds in the app shell. */
+.platform-shell::before, .platform-shell::after { display: none !important; }
+.platform-shell, .venx-executive-shell { background: hsl(var(--background)) !important; }
+.venx-executive-shell .technical-topbar { background: hsl(var(--background) / 0.96); backdrop-filter: none; }
+
+/* Bank card primitive — opt-in. */
+.vp-card { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: 1.125rem; }
+.vp-hero {
+  border-radius: 1.5rem;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  position: relative; overflow: hidden;
+}
+.vp-hero::after {
+  content: ""; position: absolute; right: -80px; top: -120px; width: 340px; height: 340px; border-radius: 9999px;
+  background: hsl(var(--primary-foreground) / 0.08); pointer-events: none;
+}
+.dark .vp-hero { background: hsl(156 70% 18%); color: hsl(150 20% 96%); }
+.vp-shortcut { display: flex; flex-direction: column; align-items: center; gap: .5rem; min-width: 72px; }
+.vp-shortcut-icon {
+  width: 52px; height: 52px; border-radius: 9999px; display: grid; place-items: center;
+  background: hsl(var(--card)); color: hsl(var(--primary)); border: 1px solid hsl(var(--border));
+  transition: transform .18s ease, background-color .18s ease;
+}
+.vp-shortcut:hover .vp-shortcut-icon { background: hsl(var(--accent)); transform: translateY(-2px); }
+.vp-shortcut:active .vp-shortcut-icon { transform: scale(.96); }
+
+/* Admin / manager / partner consoles adopt the same identity. */
+.admin-shell, .admin-frame {
+  --as-bg: #f6f8f7; --as-bg-soft: #f9fbfa; --as-surface: #ffffff; --as-surface-2: #f1f5f3; --as-elev: #ffffff;
+  --as-border: #e1e7e4; --as-border-soft: #ecf0ee; --as-border-strong: #c9d3ce;
+  --as-text: #0f172a; --as-text-2: #1e293b; --as-text-3: #00895a; --as-muted: #5b6474; --as-muted-2: #8a93a3;
+  --as-accent: #00a868; --as-accent-hover: #00935b; --as-accent-soft: #e9f8f1; --as-on-accent: #ffffff;
+  --as-rail: #00a868; --as-success: #00895a; --as-info: #2563eb; --as-success-bg: #e9f8f1; --as-info-bg: #eaf1ff;
+  --as-radius: 12px; --as-ring: 0 0 0 3px rgba(0,168,104,0.18);
+}
+.dark .admin-shell, .dark .admin-frame {
+  --as-bg: #070c16; --as-bg-soft: #0a111d; --as-surface: #0e1626; --as-surface-2: #131d30; --as-elev: #172235;
+  --as-border: #1e2a3d; --as-border-soft: #182234; --as-border-strong: #2a3850;
+  --as-text: #eef5f1; --as-text-2: #cfd8d4; --as-text-3: #3ddc97; --as-muted: #8b96a8; --as-muted-2: #66728a;
+  --as-accent: #12c07d; --as-accent-hover: #1fd38c; --as-accent-soft: rgba(18,192,125,0.14); --as-on-accent: #04130c;
+  --as-rail: #12c07d; --as-success: #3ddc97; --as-info: #60a5fa;
+}
+.admin-shell, .admin-frame,
+.admin-shell h1, .admin-shell h2, .admin-shell h3, .admin-shell h4, .admin-shell .font-display,
+.admin-frame h1, .admin-frame h2, .admin-frame h3, .support-surface, .support-surface h1, .support-surface h2 {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+}
+.support-surface { --primary: 156 100% 33%; --ring: 156 100% 33%; --accent: 153 57% 94%; }
+.dark .support-surface { --primary: 156 82% 42%; --accent: 156 50% 14%; }
+
+/* Re-assert identity inside legacy-scoped surfaces (auth + admin content). */
+.auth-shell, [data-admin-content], .admin-frame [data-admin-content] {
+  --background: 150 11% 97%; --foreground: 222 47% 11%;
+  --card: 0 0% 100%; --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%; --popover-foreground: 222 47% 11%;
+  --muted: 150 12% 95%; --muted-foreground: 218 13% 42%;
+  --accent: 153 57% 94%; --accent-foreground: 157 100% 22%;
+  --secondary: 150 14% 94%; --secondary-foreground: 222 47% 11%;
+  --border: 150 10% 90%; --input: 150 9% 86%;
+  --primary: 156 100% 33%; --primary-foreground: 0 0% 100%; --ring: 156 100% 33%;
+}
+.auth-shell { --background: 0 0% 100%; }
+.dark .auth-shell, .dark [data-admin-content], .dark .admin-frame [data-admin-content] {
+  --background: 222 47% 6%; --foreground: 150 20% 96%;
+  --card: 222 40% 10%; --card-foreground: 150 20% 96%;
+  --popover: 222 40% 10%; --popover-foreground: 150 20% 96%;
+  --muted: 222 32% 14%; --muted-foreground: 218 14% 66%;
+  --accent: 156 50% 14%; --accent-foreground: 156 70% 70%;
+  --secondary: 222 32% 15%; --secondary-foreground: 150 20% 96%;
+  --border: 222 28% 18%; --input: 222 26% 22%;
+  --primary: 156 82% 42%; --primary-foreground: 222 47% 6%; --ring: 156 82% 42%;
+}
+
+/* ── Auth aside (Vemprapay) ── */
+.vp-auth-aside { background: hsl(156 100% 30%); color: hsl(0 0% 100%); }
+.vp-auth-logo-tile { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: hsl(0 0% 100%); --primary: 156 100% 30%; }
+.vp-auth-ring { position: absolute; border-radius: 9999px; border: 1px solid hsl(0 0% 100% / 0.14); pointer-events: none; z-index: -1; }
+.vp-auth-ring-a { width: 620px; height: 620px; right: -220px; top: -160px; background: hsl(0 0% 100% / 0.05); }
+.vp-auth-ring-b { width: 380px; height: 380px; left: -140px; bottom: -160px; }
+.vp-phone {
+  /* phone always renders in light identity, independent of account theme */
+  --background: 0 0% 100%; --foreground: 222 47% 11%; --muted: 150 12% 95%; --muted-foreground: 218 13% 42%;
+  --accent: 153 57% 94%; --accent-foreground: 157 100% 22%; --border: 150 10% 90%; --primary: 156 100% 33%; --primary-foreground: 0 0% 100%;
+  width: 290px; max-height: 100%; overflow: hidden; border-radius: 36px; padding: 26px 16px 18px;
+  background: hsl(var(--background)); color: hsl(var(--foreground));
+  border: 8px solid hsl(222 47% 11%); position: relative;
+}
+.vp-phone-notch { position: absolute; top: 8px; left: 50%; width: 76px; height: 16px; margin-left: -38px; border-radius: 999px; background: hsl(222 47% 11%); }
+.vp-auth-toast {
+  --foreground: 222 47% 11%; --muted-foreground: 218 13% 42%; --primary: 156 100% 33%; --primary-foreground: 0 0% 100%;
+  position: absolute; right: 2%; bottom: 14%; display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px 10px 10px; border-radius: 16px; background: hsl(0 0% 100%); border: 1px solid hsl(150 10% 90%);
+}
+@media (max-height: 760px) { .vp-phone { transform: scale(.86); transform-origin: center; } }
+
+/* ── Public site: always light identity, independent of account theme ── */
+.vp-site, .dark .vp-site {
+  --background: 150 11% 97%; --foreground: 222 47% 11%; --card: 0 0% 100%; --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%; --popover-foreground: 222 47% 11%;
+  --muted: 150 12% 95%; --muted-foreground: 218 13% 42%; --accent: 153 57% 94%; --accent-foreground: 157 100% 22%;
+  --secondary: 0 0% 100%; --secondary-foreground: 157 100% 22%;
+  --border: 150 10% 90%; --input: 150 9% 86%; --primary: 156 100% 33%; --primary-foreground: 0 0% 100%; --ring: 156 100% 33%;
+  color-scheme: light;
+}
+.vp-site .vp-site-dark {
+  --border: 222 30% 22%; --primary: 156 82% 46%;
+  background: hsl(222 47% 11%); color: hsl(150 20% 96%);
+}
+.dark .vp-site .vp-hero { background: hsl(156 100% 33%); color: hsl(0 0% 100%); }
+.vp-auth-aside h2, .vp-auth-aside > div > span, .vp-auth-aside ul li { color: hsl(0 0% 100%) !important; }
+.vp-shortcut, .vp-shortcut:hover, .vp-shortcut:active { background: transparent !important; border: 0 !important; box-shadow: none !important; transform: none !important; }

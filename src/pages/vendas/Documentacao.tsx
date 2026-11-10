@@ -579,7 +579,7 @@ Content-Type: application/json`} language="header" />
 const res = await fetch('${BASE_URL}/v1/pix/charges', {
   method: 'POST',
   headers: {
-    'Authorization': \`Bearer \${process.env.VENXPAY_SECRET_KEY}\`,
+    'Authorization': \`Bearer \${process.env.Vemprapay_SECRET_KEY}\`,
     'Content-Type': 'application/json',
     'Idempotency-Key': crypto.randomUUID(),
   },
@@ -620,7 +620,7 @@ import crypto from 'crypto';
 app.post('/webhook/venxpay', express.raw({ type: 'application/json' }), (req, res) => {
   const signature = req.header('x-venxpay-signature') || '';
   const computed = crypto
-    .createHmac('sha256', process.env.VENXPAY_WEBHOOK_SECRET)
+    .createHmac('sha256', process.env.Vemprapay_WEBHOOK_SECRET)
     .update(req.body)  // Buffer bruto
     .digest('hex');
 
@@ -721,7 +721,7 @@ function WebhookCodeExamples() {
 app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
   const signature = req.header('x-venxpay-signature') || '';
   const computed = crypto
-    .createHmac('sha256', process.env.VENXPAY_WEBHOOK_SECRET)
+    .createHmac('sha256', process.env.Vemprapay_WEBHOOK_SECRET)
     .update(req.body)
     .digest('hex');
 
@@ -745,7 +745,7 @@ from flask import request, jsonify
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    secret = os.environ['VENXPAY_WEBHOOK_SECRET'].encode()
+    secret = os.environ['Vemprapay_WEBHOOK_SECRET'].encode()
     signature = request.headers.get('x-venxpay-signature', '')
     computed = hmac.new(secret, request.data, hashlib.sha256).hexdigest()
 
@@ -758,8 +758,8 @@ def webhook():
     return jsonify(received=True)`,
     php: `<?php
 $rawBody   = file_get_contents('php://input');
-$signature = $_SERVER['HTTP_X_VENXPAY_SIGNATURE'] ?? '';
-$secret    = getenv('VENXPAY_WEBHOOK_SECRET');
+$signature = $_SERVER['HTTP_X_Vemprapay_SIGNATURE'] ?? '';
+$secret    = getenv('Vemprapay_WEBHOOK_SECRET');
 
 $computed = hash_hmac('sha256', $rawBody, $secret);
 

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Seo } from "@/components/Seo";
 
 const LAST_UPDATED = "01 de Abril de 2026";
-const COMPANY_NAME = "VENXPAY";
+const COMPANY_NAME = "Vemprapay";
 
 const sections = [
  {
@@ -66,8 +66,8 @@ export default function TermosDeUso() {
  return (
  <div className="min-h-screen bg-background">
  <Seo
-   title="Termos de Uso — VENXPAY"
-   description="Leia os Termos de Uso da VENXPAY: condições gerais, regras para vendedores, responsabilidades e políticas da plataforma."
+   title="Termos de Uso — Vemprapay"
+   description="Leia os Termos de Uso da Vemprapay: condições gerais, regras para vendedores, responsabilidades e políticas da plataforma."
    path="/termos-de-uso"
  />
  {/* Header */}

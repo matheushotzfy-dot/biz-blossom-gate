@@ -100,7 +100,7 @@ export default function ApiKeys() {
             Credenciais API
           </h1>
           <p className="text-sm text-muted-foreground">
-            Chaves publishable e secretas para autenticar requisições na API Venxpay.
+            Chaves publishable e secretas para autenticar requisições na API Vemprapay.
           </p>
         </div>
         <div className="flex items-center gap-2">

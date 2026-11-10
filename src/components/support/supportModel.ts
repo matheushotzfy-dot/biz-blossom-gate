@@ -15,7 +15,7 @@ export const STATUS_MAP: Record<string, { label: string; dot: string; text: stri
   closed: { label: 'Fechado', dot: 'bg-muted-foreground', text: 'text-muted-foreground' },
 };
 export const PRIORITIES: Record<string, string> = { low: 'Baixa', normal: 'Normal', high: 'Alta', urgent: 'Urgente' };
-export const ROLE_LABEL: Record<string, string> = { admin: 'Equipe VENXPAY', manager: 'Gerente de suporte', employee: 'Atendente', staff: 'Suporte' };
+export const ROLE_LABEL: Record<string, string> = { admin: 'Equipe Vemprapay', manager: 'Gerente de suporte', employee: 'Atendente', staff: 'Suporte' };
 export const HELP_CATEGORIES = [
   { label: 'Saques e financeiro', subject: 'Dúvida sobre saques e financeiro' },
   { label: 'Produtos e checkout', subject: 'Dúvida sobre produtos e checkout' },

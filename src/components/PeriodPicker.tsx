@@ -1,7 +1,7 @@
 /**
  * PeriodPicker — seletor de período único da plataforma.
  *
- * Grade de mês própria (sem react-day-picker), no padrão VENXPAY:
+ * Grade de mês própria (sem react-day-picker), no padrão Vemprapay:
  * bordas hairline, cantos suaves, esmeralda sólido nas extremidades do
  * intervalo e trilho suave nos dias intermediários.
  *

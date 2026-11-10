@@ -79,7 +79,7 @@ export default function IntegracoesHub() {
 
  return (
  <>
- <Seo title="Integrações | Venxpay" description="Conecte apps, webhooks, gerencie chaves de API e consulte a documentação técnica." path="/integracoes" noindex />
+ <Seo title="Integrações | Vemprapay" description="Conecte apps, webhooks, gerencie chaves de API e consulte a documentação técnica." path="/integracoes" noindex />
  <HubTabs tabs={TABS} active={tab} onChange={handleTabChange} />
  <ActiveComponent />
  </>

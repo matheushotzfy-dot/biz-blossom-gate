@@ -56,7 +56,7 @@ const NotFound = () => {
  <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center">
  <Rocket className="h-3 w-3 text-primary/50" />
  </div>
- <span className="text-[11px] font-bold tracking-wider">VENXPAY</span>
+ <span className="text-[11px] font-bold tracking-wider">Vemprapay</span>
  </div>
  </div>
  </div>

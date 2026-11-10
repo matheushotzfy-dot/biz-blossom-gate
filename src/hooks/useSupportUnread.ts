@@ -96,7 +96,7 @@ export function useSupportUnread(): number {
           void refresh();
           if (onSupportPage) return; // already viewing — silent update
 
-          const who = m.sender_name || "Equipe Venxpay";
+          const who = m.sender_name || "Equipe Vemprapay";
           const preview = String(m.body || "").slice(0, 120);
           playIncomingBeep();
           toast.message(`Nova resposta: ${ticket.subject}`, {

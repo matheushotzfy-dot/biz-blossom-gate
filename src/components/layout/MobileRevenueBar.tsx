@@ -31,12 +31,12 @@ export function MobileRevenueBar() {
 
  return (
  <>
- <div className="md:hidden sticky top-0 z-20 border-b border-border/50 bg-background/85 backdrop-blur-2xl">
+ <div className="md:hidden sticky top-0 z-20 border-b border-border/50 bg-background">
  <div className="flex items-center gap-2 px-3 py-2.5">
  {/* Logo */}
  <div className="flex items-center gap-2 shrink-0">
  <VenxpayLogo size={28} />
- <span className="text-sm font-display font-bold text-foreground tracking-tight">VENXPAY</span>
+ <span className="text-[17px] font-display font-extrabold text-foreground tracking-[-0.035em]">vempra<span className="text-primary">pay</span></span>
  </div>
 
  <div className="flex-1" />

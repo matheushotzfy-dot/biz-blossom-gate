@@ -452,7 +452,7 @@ export default function ProductEditor() {
   }
   const { error } = await supabase.from("products").update(updatePayload).eq("id", effectiveProductId!).eq("user_id", user.id);
   if (error) {
-    toast.error(error.hint === "product_status_restricted" ? "Esse status só pode ser alterado pela equipe VENXPAY." : "Erro ao salvar");
+    toast.error(error.hint === "product_status_restricted" ? "Esse status só pode ser alterado pela equipe Vemprapay." : "Erro ao salvar");
     return;
   }
   if (submittingForReview) {

@@ -685,7 +685,7 @@ export default function PublicCheckout() {
  return (
  <div data-checkout-theme={themeMode} className={`min-h-screen selection:bg-emerald-500/20 ${isDark ? "bg-[hsl(220_18%_11%)] text-[hsl(210_20%_96%)]" : isWhite ? "bg-[hsl(210_20%_98%)] text-gray-900" : "bg-[hsl(210_16%_94%)] text-gray-900"}`} style={checkoutThemeStyle}>
  <Seo
-   title={`${product.name} — Checkout VENXPAY`}
+   title={`${product.name} — Checkout Vemprapay`}
    description={(product.description || `Compre ${product.name} com pagamento seguro via PIX, cartão ou boleto.`).slice(0, 155)}
    path={`/pay/${slug || ""}`}
    ogType="product"
@@ -973,7 +973,7 @@ export default function PublicCheckout() {
  {/* Card fields are rendered only by the future acquirer tokenization widget. */}
  {method === "credit_card" && (
  <div className="space-y-4 rounded-lg border border-[hsl(var(--checkout-border))] bg-[hsl(var(--checkout-bg-soft))] p-4">
- <div className="flex items-start gap-3"><Lock className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--checkout-text-muted))]" /><div><p className="text-sm font-bold text-[hsl(var(--checkout-text))]">Dados do cartão protegidos</p><p className="text-xs text-[hsl(var(--checkout-text-muted))]">Os campos seguros serão exibidos pela adquirente quando o cartão for habilitado. A VENXPAY não armazena número nem CVV.</p></div></div>
+ <div className="flex items-start gap-3"><Lock className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--checkout-text-muted))]" /><div><p className="text-sm font-bold text-[hsl(var(--checkout-text))]">Dados do cartão protegidos</p><p className="text-xs text-[hsl(var(--checkout-text-muted))]">Os campos seguros serão exibidos pela adquirente quando o cartão for habilitado. A Vemprapay não armazena número nem CVV.</p></div></div>
  <div>
  <Label className={labelClass}>Parcelas</Label>
  <div className="relative mt-1.5">

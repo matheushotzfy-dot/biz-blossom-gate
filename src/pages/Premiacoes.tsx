@@ -87,9 +87,9 @@ export default function Premiacoes() {
   };
 
   const share = async () => {
-    const text = revenue >= award.value ? `Conquistei ${award.title} na VENXPAY.` : `Minha próxima meta na VENXPAY é ${award.label}.`;
+    const text = revenue >= award.value ? `Conquistei ${award.title} na Vemprapay.` : `Minha próxima meta na Vemprapay é ${award.label}.`;
     try {
-      if (navigator.share) await navigator.share({ title: `VENXPAY · ${award.title}`, text });
+      if (navigator.share) await navigator.share({ title: `Vemprapay · ${award.title}`, text });
       else { await navigator.clipboard.writeText(text); toast.success("Marco copiado"); }
     } catch { /* cancelado */ }
   };
@@ -104,7 +104,7 @@ export default function Premiacoes() {
           <div>
             <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-primary"><Trophy className="h-3.5 w-3.5" /> Hall de conquistas</p>
             <h1 className="mt-2 max-w-4xl font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl lg:text-5xl">Sua operação merece ser vista.</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Cada marco libera uma peça física VENXPAY, produzida para registrar o tamanho da sua operação.</p>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Cada marco libera uma peça física Vemprapay, produzida para registrar o tamanho da sua operação.</p>
           </div>
           <dl className="grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-border bg-border">
             {[
@@ -171,7 +171,7 @@ export default function Premiacoes() {
         </div>
 
         <div className="relative z-10 px-6 py-5 sm:px-10 lg:px-14">
-          <p className="mb-3 font-mono text-[10px] uppercase text-muted-foreground">Coleção VENXPAY · selecione uma peça</p>
+          <p className="mb-3 font-mono text-[10px] uppercase text-muted-foreground">Coleção Vemprapay · selecione uma peça</p>
           <AwardGallery awards={awards} activeIndex={safeIndex} revenue={revenue} onSelect={select} />
         </div>
       </section>

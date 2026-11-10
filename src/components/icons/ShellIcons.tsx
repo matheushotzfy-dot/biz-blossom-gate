@@ -1,7 +1,7 @@
 import type { SVGProps } from "react";
 
 /**
- * Ícones próprios do shell Venxpay — geometria técnica, traço fino.
+ * Ícones próprios do shell Vemprapay — geometria técnica, traço fino.
  * Substituem os ícones genéricos na topbar/sidebar para dar identidade própria.
  */
 

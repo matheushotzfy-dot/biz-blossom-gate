@@ -891,7 +891,7 @@ export default function CheckoutBuilder() {
  <div className="flex-1 mx-2">
  <div className="flex items-center gap-1.5 bg-muted/30 rounded-md px-3 py-1 border border-border/20">
  <Lock className="h-2.5 w-2.5 text-success/60" />
-  <span className="text-[9px] text-muted-foreground font-mono truncate">{checkoutUrl || "venxpay.com.br/pay/seu-produto"}</span>
+  <span className="text-[9px] text-muted-foreground font-mono truncate">{checkoutUrl || "vemprapay.com.br/pay/seu-produto"}</span>
  </div>
  </div>
  <div className="flex items-center gap-1">

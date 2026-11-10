@@ -46,7 +46,7 @@ export function ClaimDialog({ open, userId, award, onOpenChange, onCreated }: Cl
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-xl overflow-y-auto rounded-none border-border bg-card">
         <DialogHeader><DialogTitle className="flex items-center gap-2 font-display"><Gift className="text-primary" /> Solicitar {award.title}</DialogTitle></DialogHeader>
-        <p className="text-xs text-muted-foreground">Informe o endereço de entrega. A VENXPAY atualizará o rastreio dentro da plataforma.</p>
+        <p className="text-xs text-muted-foreground">Informe o endereço de entrega. A Vemprapay atualizará o rastreio dentro da plataforma.</p>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <Input aria-label="Nome do recebedor" placeholder="Nome do recebedor *" value={form.recipient_name} onChange={(event) => update("recipient_name", event.target.value)} />
           <Input aria-label="Telefone" inputMode="tel" placeholder="Telefone com DDD *" value={form.phone} onChange={(event) => update("phone", event.target.value)} />

@@ -56,7 +56,7 @@ function Readout({
 
 function LiquidityPlate() {
   return (
-    <svg viewBox="0 0 420 260" className="h-full w-full" role="img" aria-label="Ilustração do motor de liquidez Venxpay">
+    <svg viewBox="0 0 420 260" className="h-full w-full" role="img" aria-label="Ilustração do motor de liquidez Vemprapay">
       <defs>
         <linearGradient id="pb-arc" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.95" />
@@ -118,7 +118,7 @@ function LiquidityPlate() {
           <path d="M 0 64 A 64 64 0 0 1 -55.4 -32" fill="none" stroke="hsl(var(--primary))" strokeOpacity="0.5" strokeWidth="1.4" strokeLinecap="round" />
         </g>
 
-        {/* core monogram — logomark VENXPAY oficial */}
+        {/* core monogram — logomark Vemprapay oficial */}
         <g>
           <rect x="-34" y="-34" width="68" height="68" rx="18" fill="hsl(var(--background))" stroke="hsl(var(--primary)/0.35)" />
           <g transform="translate(-34 -34) scale(1.0625)">
@@ -185,7 +185,7 @@ export function PromoBanner({ periodControl }: { periodControl?: React.ReactNode
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
             <span className="h-px w-6 bg-primary/60" />
-            <span className="text-[11px] font-medium tracking-[0.02em] text-primary">Infraestrutura Venxpay</span>
+            <span className="text-[11px] font-medium tracking-[0.02em] text-primary">Infraestrutura Vemprapay</span>
           </div>
 
           <h2 className="mt-2.5 max-w-[16ch] font-display text-[22px] font-extrabold leading-[0.95] tracking-[-0.04em] text-foreground sm:text-[26px] lg:text-[30px]">

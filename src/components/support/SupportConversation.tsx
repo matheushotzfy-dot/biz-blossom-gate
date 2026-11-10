@@ -32,7 +32,7 @@ export function SupportConversation(p: SupportConversationProps) {
         const customer = m.sender_type === 'customer';
         return <article key={m.id} className={cn('flex flex-col items-start', !customer && 'items-end')}>
           <div className={cn('support-message max-w-[92%] rounded-lg border px-4 py-3 text-[15px] leading-relaxed md:max-w-[82%]', customer ? 'rounded-tl-sm border-border bg-muted text-foreground' : 'rounded-tr-sm border-primary bg-primary text-primary-foreground')}><p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{m.body}</p><AttachmentChips attachments={m.attachments} tone={customer ? 'muted' : 'primary'} /></div>
-          <div className="mt-2 flex max-w-full flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground"><span>{customer ? 'Você' : ROLE_LABEL[m.sender_role || 'staff'] || 'Equipe VENXPAY'}{!customer && m.sender_name ? ` · ${m.sender_name}` : ''}</span><span>·</span><time dateTime={m.created_at}>{formatFull(m.created_at)}</time></div>
+          <div className="mt-2 flex max-w-full flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground"><span>{customer ? 'Você' : ROLE_LABEL[m.sender_role || 'staff'] || 'Equipe Vemprapay'}{!customer && m.sender_name ? ` · ${m.sender_name}` : ''}</span><span>·</span><time dateTime={m.created_at}>{formatFull(m.created_at)}</time></div>
         </article>;
       })}</div>}
       <div ref={p.endRef} />{p.typing.length > 0 && <p className="mt-4 text-xs text-primary">{p.typing[0]?.name || 'Suporte'} está digitando…</p>}

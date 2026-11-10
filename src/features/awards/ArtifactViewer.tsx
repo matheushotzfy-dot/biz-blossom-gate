@@ -104,7 +104,7 @@ export function ArtifactViewer({ award, revenue, claimed, onClaim, onShare }: Ar
             <Share2 />
           </Button>
         </div>
-        <p className="mt-3 font-mono text-[9px] uppercase text-awards-steel/60">Série {award.reference} · edição verificada VENXPAY</p>
+        <p className="mt-3 font-mono text-[9px] uppercase text-awards-steel/60">Série {award.reference} · edição verificada Vemprapay</p>
       </div>
     </div>
   );
