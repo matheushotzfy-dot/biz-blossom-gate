@@ -313,9 +313,9 @@ export function AppSidebar({ pinned = true, onTogglePin, onHoverChange }: AppSid
             <VenxpayLogo size={30} />
           </div>
           <div className="sidebar-expanded-detail min-w-0 flex-1">
-            <h1 className="font-heading text-[15px] leading-none tracking-[-0.02em] text-sidebar-accent-foreground">
-              Vemprapay
-            </h1>
+            <p className="font-heading text-[17px] font-extrabold leading-none tracking-[-0.035em] text-foreground">
+              vempra<span className="text-primary">pay</span>
+            </p>
           </div>
           {onTogglePin && (
             <button
