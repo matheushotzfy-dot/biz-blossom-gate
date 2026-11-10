@@ -24,10 +24,10 @@ export function SellerTopbar(p: SellerTopbarProps) {
 
   return (
     <header className="sticky top-0 z-30 hidden h-[76px] items-center justify-end gap-3 bg-background/80 px-8 backdrop-blur-xl md:flex">
-      <button onClick={p.onOpenSearch} className={cn(orb, "w-auto gap-2.5 px-4 text-[13px] text-muted-foreground")} aria-label="Buscar (Ctrl K)">
+      <button onClick={p.onOpenSearch} className={cn(orb, "w-auto grid-flow-col gap-2.5 px-4 text-[13px] text-muted-foreground")} aria-label="Buscar (Ctrl K)">
         <Search className="h-[18px] w-[18px] text-foreground" />
         <span className="hidden lg:inline">Buscar</span>
-        <kbd className="hidden rounded-md border border-border px-1.5 text-[10.5px] lg:inline">Ctrl K</kbd>
+        <kbd className="hidden whitespace-nowrap rounded-md border border-border px-1.5 text-[10.5px] lg:inline">Ctrl K</kbd>
       </button>
       <button onClick={p.onOpenNotifications} className={orb} aria-label="Notificações">
         <Bell className="h-[18px] w-[18px]" />

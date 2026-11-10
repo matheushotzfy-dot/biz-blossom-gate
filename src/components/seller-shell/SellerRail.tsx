@@ -27,7 +27,7 @@ export function SellerRail() {
                   to={s.url}
                   data-active={active}
                   onMouseEnter={() => prefetchRoute(s.url)}
-                  className="vp-rail-item flex h-11 items-center gap-3 rounded-xl px-3.5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="vp-rail-item rounded-xl flex h-11 items-center gap-3 rounded-xl px-3.5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <s.icon className="h-[18px] w-[18px]" strokeWidth={2} />
                   {s.label}

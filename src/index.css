@@ -5342,3 +5342,9 @@ html.vp-noir body { background: hsl(var(--background)); }
 }
 .vp-glow-text { color: hsl(var(--vp-glow)); }
 @media (prefers-reduced-motion: reduce) { .vp-card-float { animation: none; } }
+/* Neutraliza regras legadas globais de botões/links dentro do painel escuro */
+.vp-seller-shell .rounded-xl:not([class*="border"]), .vp-seller-shell .rounded-2xl:not([class*="border"]) { border-width: 0; }
+.vp-seller-shell .vp-orb { border-radius: 9999px !important; border-width: 1px; }
+.vp-seller-shell .vp-orb-main { border-width: 0; }
+.vp-rail .vp-rail-item { border-radius: 12px !important; border-width: 0 !important; }
+.vp-seller-shell button.rounded-full, .vp-seller-shell a.rounded-full { border-radius: 9999px !important; }
