@@ -72,7 +72,7 @@ export function Statement({ items, products, hidden, loading, onOpen }: Statemen
                             {t.is_simulated && " · Simulação"}
                           </span>
                         </span>
-                        <Money value={Number(t.amount)} hidden={hidden} signed={ok} className={cn("text-[14px] font-bold", ok ? "text-primary" : "text-muted-foreground", !ok && "line-through decoration-1 opacity-70" && st !== "pending" && st !== "processing" ? "" : "")} />
+                        <Money value={Number(t.amount)} hidden={hidden} signed={ok} className={cn("text-[14px] font-bold", ok ? "text-primary" : "text-muted-foreground")} />
                       </button>
                     </li>
                   );
