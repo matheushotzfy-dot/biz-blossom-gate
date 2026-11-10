@@ -556,7 +556,7 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={() => { if (!requireApprovedAccount()) navigate("/financeiro/saques"); }}
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-primary-foreground px-5 text-[14px] font-bold text-primary transition-transform hover:-translate-y-0.5 active:scale-[0.98] dark:text-background"
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-primary-foreground px-5 text-[14px] font-bold text-primary transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
               >
                 <ArrowDownRight className="h-4 w-4" /> Sacar
               </button>
