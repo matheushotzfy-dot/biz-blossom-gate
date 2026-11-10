@@ -33,8 +33,9 @@ const moreGroups: Array<{
   {
     label: "Operação",
     items: [
+      { title: "Produtos", subtitle: "Catálogo e checkouts", url: "/vendas/produtos", icon: Package, accent: "primary" },
       { title: "Cupons", subtitle: "Descontos e promoções", url: "/vendas/cupons", icon: Ticket, accent: "info" },
-      { title: "Taxas", subtitle: "No seu perfil", url: "/perfil", icon: Building2, accent: "success" },
+      { title: "Taxas", subtitle: "Seu plano de tarifas", url: "/financeiro/taxas", icon: Building2, accent: "success" },
       { title: "Integrações", subtitle: "Apps, Webhooks e API", url: "/integracoes", icon: Blocks, accent: "primary" },
     ],
   },
