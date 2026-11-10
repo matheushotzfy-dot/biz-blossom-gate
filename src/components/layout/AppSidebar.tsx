@@ -170,10 +170,10 @@ function SidebarNavList({ items, pathname }: SidebarNavListProps) {
                     activeClassName=""
 
                     className={cn(
-                       "group/nav relative flex h-11 w-full items-center gap-3 overflow-hidden rounded-lg px-3 text-[13px] outline-none",
+                       "group/nav relative flex h-11 w-full items-center gap-3 overflow-hidden rounded-xl px-3 text-[13.5px] outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
                       "transition-colors duration-200 ease-out",
                       isActive
-                         ? "border border-primary/25 bg-primary/[0.10] font-semibold text-sidebar-accent-foreground"
+                         ? "border border-transparent bg-sidebar-accent font-bold text-sidebar-accent-foreground"
                          : "border border-transparent font-medium text-sidebar-foreground/72 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                     )}
                   >
