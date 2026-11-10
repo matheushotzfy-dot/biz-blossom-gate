@@ -5275,3 +5275,6 @@ html body .font-display, html body .font-heading {
 .vp-fade { animation: vp-fade .18s ease-out both; }
 @keyframes vp-fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .vp-skel, .vp-fade { animation: none; } }
+.vp-seg-track { background: hsl(0 0% 100% / .15); }
+.vp-seg-a { background: hsl(0 0% 100%); }
+.vp-seg-b { background: hsl(0 0% 100% / .5); }

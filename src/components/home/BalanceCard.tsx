@@ -47,14 +47,14 @@ export function BalanceCard(p: BalanceCardProps) {
 
         {/* Linha de liberação */}
         <div className="mt-7">
-          <div className="flex h-2 w-full overflow-hidden rounded-full bg-[hsl(0_0%_100%/0.15)]" aria-hidden>
-            <span className="h-full bg-[hsl(0_0%_100%)]" style={{ width: `${pct(Math.max(p.available, 0))}%` }} />
-            <span className="h-full bg-[hsl(0_0%_100%/0.5)]" style={{ width: `${pct(p.pending)}%` }} />
+          <div className="flex h-2 w-full overflow-hidden rounded-full vp-seg-track" aria-hidden>
+            <span className="h-full vp-seg-a" style={{ width: `${pct(Math.max(p.available, 0))}%` }} />
+            <span className="h-full vp-seg-b" style={{ width: `${pct(p.pending)}%` }} />
             <span className="h-full bg-warning" style={{ width: `${p.disputed > 0 ? pct(p.disputed) : 0}%` }} />
           </div>
           <dl className="mt-3 grid grid-cols-3 gap-3 text-[12px]">
-            <Legend dot="bg-[hsl(0_0%_100%)]" label="Disponível" value={<Money value={Math.max(p.available, 0)} hidden={p.hidden} className="font-bold" />} />
-            <Legend dot="bg-[hsl(0_0%_100%/0.5)]" icon={<Hourglass className="h-3 w-3" />} label="A liberar" value={<Money value={p.pending} hidden={p.hidden} className="font-bold" />} />
+            <Legend dot="vp-seg-a" label="Disponível" value={<Money value={Math.max(p.available, 0)} hidden={p.hidden} className="font-bold" />} />
+            <Legend dot="vp-seg-b" icon={<Hourglass className="h-3 w-3" />} label="A liberar" value={<Money value={p.pending} hidden={p.hidden} className="font-bold" />} />
             <Legend dot="bg-warning" icon={<ShieldAlert className="h-3 w-3" />} label="Em análise" value={<Money value={p.disputed} hidden={p.hidden} className="font-bold" />} />
           </dl>
         </div>
