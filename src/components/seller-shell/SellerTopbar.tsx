@@ -1,18 +1,11 @@
-import { Link, useNavigate } from "react-router-dom";
-import { Search, Eye, EyeOff, Moon, Sun, Bell, LogOut, HelpCircle } from "lucide-react";
-import { VenxpayLogo } from "@/components/VenxpayLogo";
+import { useNavigate } from "react-router-dom";
+import { Bell, ChevronDown, LogOut, Search } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
-import { SellerTabs } from "./SellerTabs";
-import { Money } from "@/components/home/Money";
+import { cn } from "@/lib/utils";
 
 export interface SellerTopbarProps {
-  balance: number;
-  hidden: boolean;
-  onTogglePrivacy: () => void;
-  theme: string;
-  onToggleTheme: () => void;
   unread: number;
   onOpenNotifications: () => void;
   onOpenSearch: () => void;
@@ -21,72 +14,48 @@ export interface SellerTopbarProps {
   kycApproved: boolean;
 }
 
-const iconBtn = "grid h-9 w-9 place-items-center rounded-full vp-top-muted transition-colors hover:bg-[hsl(var(--vp-ink-2))] hover:text-[hsl(var(--vp-ink-fg))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
+const orb = "relative grid h-11 w-11 place-items-center rounded-full border border-border bg-card text-foreground transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
 
-/** Barra superior navy do seller: marca, busca, saldo, ações e abas. Só desktop/tablet. */
+/** Barra superior do conteúdo: busca, avisos e conta. Só desktop/tablet. */
 export function SellerTopbar(p: SellerTopbarProps) {
   const navigate = useNavigate();
+  const first = (p.name || "").split(" ")[0] || "Seller";
   const logout = async () => { await supabase.auth.signOut(); navigate("/auth"); };
 
   return (
-    <header className="vp-top sticky top-0 z-40 hidden md:block">
-      <div className="mx-auto flex h-[60px] max-w-[1320px] items-center gap-4 px-6">
-        <Link to="/dashboard" className="flex items-center gap-2.5" aria-label="Vemprapay — início">
-          <VenxpayLogo size={30} />
-          <span className="text-[17px] font-extrabold tracking-[-0.03em]">vempra<span className="text-primary">pay</span></span>
-        </Link>
+    <header className="sticky top-0 z-30 hidden h-[76px] items-center justify-end gap-3 bg-background/80 px-8 backdrop-blur-xl md:flex">
+      <button onClick={p.onOpenSearch} className={cn(orb, "w-auto grid-flow-col gap-2.5 px-4 text-[13px] text-muted-foreground")} aria-label="Buscar (Ctrl K)">
+        <Search className="h-[18px] w-[18px] text-foreground" />
+        <span className="hidden lg:inline">Buscar</span>
+        <kbd className="hidden whitespace-nowrap rounded-md border border-border px-1.5 text-[10.5px] lg:inline">Ctrl K</kbd>
+      </button>
+      <button onClick={p.onOpenNotifications} className={orb} aria-label="Notificações">
+        <Bell className="h-[18px] w-[18px]" />
+        {p.unread > 0 && <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />}
+      </button>
 
-        <button
-          onClick={p.onOpenSearch}
-          className="vp-top-chip ml-4 flex h-9 w-full max-w-[380px] items-center gap-2.5 rounded-full px-3.5 text-left text-[13px] vp-top-muted transition-colors"
-        >
-          <Search className="h-4 w-4" />
-          <span className="flex-1 truncate">Buscar vendas, produtos, páginas…</span>
-          <kbd className="rounded-md border vp-top-line px-1.5 py-0.5 text-[10.5px] font-semibold">Ctrl K</kbd>
-        </button>
-
-        <div className="ml-auto flex items-center gap-1">
-          <button
-            onClick={() => navigate("/financeiro/saques")}
-            className="vp-top-chip mr-2 flex h-9 items-center gap-2.5 rounded-full pl-3.5 pr-1 transition-colors"
-            aria-label="Ver saldo e sacar"
-          >
-            <span className="text-[11px] font-semibold vp-top-muted">Saldo</span>
-            <Money value={Math.max(p.balance, 0)} hidden={p.hidden} className="text-[14px] font-bold" />
-            <span className="rounded-full bg-primary px-3 py-1 text-[11.5px] font-bold text-primary-foreground">Sacar</span>
-          </button>
-          <button onClick={p.onTogglePrivacy} className={iconBtn} aria-label={p.hidden ? "Mostrar valores" : "Ocultar valores"}>
-            {p.hidden ? <EyeOff className="h-[17px] w-[17px]" /> : <Eye className="h-[17px] w-[17px]" />}
-          </button>
-          <button onClick={p.onToggleTheme} className={iconBtn} aria-label="Alternar tema">
-            {p.theme === "dark" ? <Sun className="h-[17px] w-[17px]" /> : <Moon className="h-[17px] w-[17px]" />}
-          </button>
-          <button onClick={p.onOpenNotifications} className={cn(iconBtn, "relative")} aria-label="Notificações">
-            <Bell className="h-[17px] w-[17px]" />
-            {p.unread > 0 && (
-              <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[9.5px] font-bold text-primary-foreground">
-                {p.unread > 9 ? "9+" : p.unread}
-              </span>
-            )}
-          </button>
-          <button onClick={() => navigate("/suporte")} className={iconBtn} aria-label="Ajuda e suporte">
-            <HelpCircle className="h-[17px] w-[17px]" />
-          </button>
-          <button onClick={() => navigate("/perfil")} className="relative ml-1 rounded-full" aria-label="Meu perfil">
-            <Avatar className="h-8 w-8 ring-2 ring-[hsl(var(--vp-ink-line))]">
+      <DropdownMenu>
+        <DropdownMenuTrigger className="ml-1 flex items-center gap-3 rounded-full py-1 pl-1 pr-3 transition-colors hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+          <span className="relative">
+            <Avatar className="h-11 w-11 ring-2 ring-primary/60">
               <AvatarImage src={p.avatarUrl || undefined} className="object-cover" />
-              <AvatarFallback className="bg-primary text-[12px] font-bold text-primary-foreground">
-                {(p.name || "U").charAt(0).toUpperCase()}
-              </AvatarFallback>
+              <AvatarFallback className="bg-accent text-[14px] font-bold text-accent-foreground">{first.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
-            <span className={cn("absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-[hsl(var(--vp-ink))]", p.kycApproved ? "bg-success" : "bg-warning")} />
-          </button>
-          <button onClick={logout} className={iconBtn} aria-label="Sair da conta"><LogOut className="h-[16px] w-[16px]" /></button>
-        </div>
-      </div>
-      <div className="border-t vp-top-line">
-        <div className="mx-auto max-w-[1320px] px-4"><SellerTabs /></div>
-      </div>
+          </span>
+          <span className="text-left leading-tight">
+            <span className="block text-[14px] font-bold text-foreground">Olá, {first}</span>
+            <span className={cn("block text-[12px]", p.kycApproved ? "text-muted-foreground" : "text-warning")}>{p.kycApproved ? "Conta verificada" : "Verificação pendente"}</span>
+          </span>
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-52">
+          <DropdownMenuItem onClick={() => navigate("/perfil")}>Minha conta</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate("/financeiro/taxas")}>Minhas taxas</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate("/suporte")}>Suporte</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={logout} className="text-destructive"><LogOut className="mr-2 h-4 w-4" />Sair</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </header>
   );
 }

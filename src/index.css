@@ -5278,3 +5278,73 @@ html body .font-display, html body .font-heading {
 .vp-seg-track { background: hsl(0 0% 100% / .15); }
 .vp-seg-a { background: hsl(0 0% 100%); }
 .vp-seg-b { background: hsl(0 0% 100% / .5); }
+
+/* ═════════ VEMPRAPAY NOIR — painel do seller (escuro premium, sempre) ═════════
+   Aplicado em <html class="vp-noir"> enquanto a área do seller está montada,
+   para que diálogos/popovers em portal também herdem a identidade. */
+html.vp-noir, html.vp-noir.dark, html.vp-noir .vp-site-never {
+  --background: 220 33% 4%; --foreground: 150 14% 95%;
+  --card: 220 24% 7%; --card-foreground: 150 14% 95%;
+  --popover: 220 24% 8%; --popover-foreground: 150 14% 95%;
+  --muted: 220 18% 11%; --muted-foreground: 218 10% 60%;
+  --accent: 152 45% 12%; --accent-foreground: 150 80% 62%;
+  --secondary: 220 18% 12%; --secondary-foreground: 150 14% 95%;
+  --border: 220 16% 14%; --input: 220 16% 17%;
+  --primary: 150 84% 52%; --primary-foreground: 220 40% 5%; --ring: 150 84% 52%;
+  --success: 150 84% 52%; --info: 213 94% 64%;
+  --vp-surface-2: 220 24% 7%; --vp-surface-3: 220 22% 9%;
+  --vp-glow: 150 84% 52%;
+  color-scheme: dark;
+  background: hsl(var(--background));
+}
+html.vp-noir body { background: hsl(var(--background)); }
+
+.vp-noir-stage {
+  background:
+    radial-gradient(900px 500px at 18% -8%, hsl(var(--vp-glow) / .10), transparent 60%),
+    radial-gradient(700px 420px at 100% 0%, hsl(var(--vp-glow) / .05), transparent 60%),
+    hsl(var(--background));
+}
+.vp-glass {
+  background: linear-gradient(180deg, hsl(var(--card) / .92), hsl(var(--card) / .78));
+  border: 1px solid hsl(var(--border));
+  border-radius: 22px;
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / .04), 0 30px 60px -40px hsl(0 0% 0% / .8);
+}
+.vp-rail { background: hsl(220 30% 5%); border-right: 1px solid hsl(var(--border)); }
+.vp-rail-item { color: hsl(var(--muted-foreground)); transition: background .15s ease, color .15s ease; }
+.vp-rail-item:hover { color: hsl(var(--foreground)); background: hsl(var(--muted) / .6); }
+.vp-rail-item[data-active="true"] {
+  color: hsl(var(--foreground));
+  background: linear-gradient(90deg, hsl(var(--vp-glow) / .16), hsl(var(--vp-glow) / .04));
+  box-shadow: inset 2px 0 0 hsl(var(--vp-glow));
+}
+.vp-rail-item[data-active="true"] svg { color: hsl(var(--vp-glow)); }
+.vp-orb {
+  display: grid; place-items: center; width: 64px; height: 64px; border-radius: 9999px;
+  background: hsl(var(--muted)); border: 1px solid hsl(var(--border)); color: hsl(var(--foreground));
+  transition: transform .15s ease, border-color .15s ease;
+}
+.vp-orb:hover { transform: translateY(-2px); border-color: hsl(var(--vp-glow) / .5); }
+.vp-orb:active { transform: scale(.96); }
+.vp-orb-main {
+  background: hsl(var(--vp-glow)); color: hsl(var(--primary-foreground)); border-color: transparent;
+  box-shadow: 0 0 0 6px hsl(var(--vp-glow) / .10), 0 12px 32px -6px hsl(var(--vp-glow) / .55);
+}
+.vp-card-float { filter: drop-shadow(0 40px 50px hsl(150 90% 30% / .35)) drop-shadow(0 10px 18px hsl(0 0% 0% / .6)); animation: vp-float 7s ease-in-out infinite; }
+@keyframes vp-float { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-8px) rotate(-1deg); } }
+.vp-card-plinth { background: radial-gradient(closest-side, hsl(var(--vp-glow) / .22), transparent); filter: blur(18px); }
+.vp-promo {
+  background:
+    radial-gradient(420px 260px at 100% 100%, hsl(var(--vp-glow) / .22), transparent 65%),
+    linear-gradient(160deg, hsl(220 22% 10%), hsl(220 30% 6%));
+  border: 1px solid hsl(var(--border)); border-radius: 22px;
+}
+.vp-glow-text { color: hsl(var(--vp-glow)); }
+@media (prefers-reduced-motion: reduce) { .vp-card-float { animation: none; } }
+/* Neutraliza regras legadas globais de botões/links dentro do painel escuro */
+.vp-seller-shell .rounded-xl:not([class*="border"]), .vp-seller-shell .rounded-2xl:not([class*="border"]) { border-width: 0; }
+.vp-seller-shell .vp-orb { border-radius: 9999px !important; border-width: 1px; }
+.vp-seller-shell .vp-orb-main { border-width: 0; }
+.vp-rail .vp-rail-item { border-radius: 12px !important; border-width: 0 !important; }
+.vp-seller-shell button.rounded-full, .vp-seller-shell a.rounded-full { border-radius: 9999px !important; }

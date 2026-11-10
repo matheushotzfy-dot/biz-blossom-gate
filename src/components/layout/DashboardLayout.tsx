@@ -1,6 +1,7 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { SellerTopbar } from "@/components/seller-shell/SellerTopbar";
+import { SellerRail } from "@/components/seller-shell/SellerRail";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { MobileRevenueBar } from "./MobileRevenueBar";
 import { GlobalSearchDialog } from "./GlobalSearchDialog";
@@ -32,6 +33,12 @@ function DashboardLayoutInner() {
  useRealtimeSync();
  // Aquece os chunks das abas mais usadas em segundo plano (evita "só carregando").
  useEffect(() => { prefetchIdleRoutes(); }, []);
+ // Área do seller sempre na identidade escura premium (inclui diálogos em portal).
+ useEffect(() => {
+   const root = document.documentElement;
+   root.classList.add("vp-noir");
+   return () => root.classList.remove("vp-noir");
+ }, []);
  const navigate = useNavigate();
 
   const { pathname, search } = useLocation();
@@ -123,13 +130,10 @@ function DashboardLayoutInner() {
 
  return (
       <SidebarProvider open={false} onOpenChange={() => {}} className="block">
-  <div className="vp-seller-shell flex h-full w-full flex-col bg-background">
+  <div className="vp-seller-shell vp-noir-stage flex h-full w-full">
+          <SellerRail />
+  <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <SellerTopbar
-            balance={balance}
-            hidden={privacyHidden}
-            onTogglePrivacy={togglePrivacy}
-            theme={theme}
-            onToggleTheme={toggleTheme}
             unread={unreadCount}
             onOpenNotifications={() => setNotifOpen(!notifOpen)}
             onOpenSearch={() => setSearchOpen(true)}
@@ -137,7 +141,6 @@ function DashboardLayoutInner() {
             name={profile?.full_name}
             kycApproved={kyc.approved}
           />
-  <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
 
 
 
@@ -159,8 +162,8 @@ function DashboardLayoutInner() {
 
  <MobileRevenueBar />
 
-             <div ref={scrollRef} className={cn("dashboard-scroll-field relative z-10 flex-1 min-h-0", pathname === "/suporte" ? "flex flex-col overflow-hidden pb-20 md:pb-0" : "overflow-y-auto overscroll-contain px-3 sm:px-5 md:px-6 pb-28 md:pb-12")}>
-   <div className={cn("mx-auto w-full", pathname === "/suporte" ? "flex min-h-0 flex-1 flex-col max-w-none" : "py-3 md:py-7", pathname !== "/suporte" && (pathname.startsWith("/premiacoes") ? "max-w-none" : "max-w-[1320px]"))}>
+             <div ref={scrollRef} className={cn("dashboard-scroll-field relative z-10 flex-1 min-h-0", pathname === "/suporte" ? "flex flex-col overflow-hidden pb-20 md:pb-0" : "overflow-y-auto overscroll-contain px-3 sm:px-5 md:px-8 pb-28 md:pb-12")}>
+   <div className={cn("mx-auto w-full", pathname === "/suporte" ? "flex min-h-0 flex-1 flex-col max-w-none" : "py-3 md:pb-8 md:pt-1", pathname !== "/suporte" && (pathname.startsWith("/premiacoes") ? "max-w-none" : "max-w-[1440px]"))}>
   <div key={routeKey} className={cn("page-fluid", pathname === "/suporte" && "flex min-h-0 flex-1 flex-col")}>
   <Outlet />
   </div>
