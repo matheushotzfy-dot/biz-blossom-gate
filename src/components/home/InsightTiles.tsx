@@ -1,5 +1,3 @@
-import { Gauge, Radio, Receipt } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { Money } from "./Money";
 
 export interface InsightTilesProps {
@@ -7,32 +5,32 @@ export interface InsightTilesProps {
   todayRevenue: number; todayOrders: number; hidden: boolean;
 }
 
-function Tile({ icon: Icon, label, children, foot }: { icon: LucideIcon; label: string; children: React.ReactNode; foot: React.ReactNode }) {
+function Cell({ label, children, foot }: { label: string; children: React.ReactNode; foot: React.ReactNode }) {
   return (
-    <div className="vp-glass flex items-center gap-4 p-5">
-      <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-muted text-foreground"><Icon className="h-6 w-6" strokeWidth={2} /></span>
-      <div className="min-w-0">
-        <p className="text-[13px] text-muted-foreground">{label}</p>
-        <div className="mt-0.5 text-[24px] font-extrabold leading-tight text-foreground">{children}</div>
-        <p className="mt-0.5 text-[12.5px]">{foot}</p>
-      </div>
+    <div className="min-w-0 p-4 md:p-5">
+      <p className="vp-label">{label}</p>
+      <div className="mt-2 text-[22px] font-bold leading-none text-foreground md:text-[24px]">{children}</div>
+      <div className="mt-2 text-[12px] text-muted-foreground">{foot}</div>
     </div>
   );
 }
 
-/** Três leituras rápidas: hoje, ticket médio e aprovação. */
+function Bar({ value }: { value: number }) {
+  return <span className="mt-2 block h-1 w-full overflow-hidden rounded-sm bg-muted"><span className="block h-full bg-[hsl(var(--vp-glow))]" style={{ width: `${Math.min(Math.max(value, 0), 100)}%` }} /></span>;
+}
+
+/** Régua de telemetria: quatro células conectadas por linhas finas. */
 export function InsightTiles(p: InsightTilesProps) {
   return (
-    <section className="grid gap-4 md:grid-cols-3" aria-label="Indicadores">
-      <Tile icon={Radio} label="Vendas de hoje" foot={<span className="vp-glow-text font-semibold">{p.todayOrders} {p.todayOrders === 1 ? "pedido pago" : "pedidos pagos"}</span>}>
-        <Money value={p.todayRevenue} hidden={p.hidden} centsClassName="opacity-100 text-[1em]" />
-      </Tile>
-      <Tile icon={Receipt} label="Ticket médio" foot={<span className="text-muted-foreground">Média por venda paga</span>}>
-        <Money value={p.ticket} hidden={p.hidden} centsClassName="opacity-100 text-[1em]" />
-      </Tile>
-      <Tile icon={Gauge} label="Taxa de aprovação" foot={<span className="text-muted-foreground">Pix {p.pixRate}% · Cartão {p.cardRate}%</span>}>
-        <span className="vp-num">{p.conversion}%</span>
-      </Tile>
+    <section className="vp-desk grid grid-cols-2 divide-border lg:grid-cols-4 [&>*:nth-child(odd)]:border-r [&>*:nth-child(n+3)]:border-t lg:[&>*]:border-t-0 lg:[&>*:not(:last-child)]:border-r [&>*]:border-border" aria-label="Indicadores">
+      <Cell label="Hoje" foot={<span className="vp-num">{p.todayOrders} {p.todayOrders === 1 ? "pedido pago" : "pedidos pagos"}</span>}>
+        <Money value={p.todayRevenue} hidden={p.hidden} />
+      </Cell>
+      <Cell label="Ticket médio" foot="Por venda paga no período"><Money value={p.ticket} hidden={p.hidden} /></Cell>
+      <Cell label="Aprovação geral" foot={<Bar value={p.conversion} />}><span className="vp-num">{p.conversion}%</span></Cell>
+      <Cell label="Por método" foot={<span className="vp-num">Pix {p.pixRate}% · Cartão {p.cardRate}%</span>}>
+        <span className="vp-num">{p.pixRate}<span className="text-[0.6em] text-muted-foreground">% pix</span></span>
+      </Cell>
     </section>
   );
 }
