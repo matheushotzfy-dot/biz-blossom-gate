@@ -28,7 +28,7 @@ export function HeroBalance(p: HeroBalanceProps) {
   const actions = [
     { label: "Sacar", icon: ArrowDownToLine, onClick: p.onWithdraw, main: true },
     { label: "Cobrar Pix", icon: QrCode, onClick: p.onPix },
-    { label: "Link de pagamento", icon: Link2, onClick: p.onCharge },
+    { label: "Criar link", icon: Link2, onClick: p.onCharge },
     { label: "Integrações", icon: FileText, onClick: p.onMore },
   ];
 
