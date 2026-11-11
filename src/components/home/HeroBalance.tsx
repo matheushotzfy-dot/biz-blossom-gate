@@ -55,11 +55,11 @@ export function HeroBalance(p: HeroBalanceProps) {
           {total > 0 && parts.map((x) => <span key={x.label} className={x.tone} style={{ width: `${(x.value / total) * 100}%` }} />)}
         </div>
 
-        <dl className="mt-4 grid grid-cols-3 divide-x divide-border border-t border-border pt-4">
+        <dl className="mt-4 vp-desk-split divide-x divide-border border-t border-border pt-4">
           {parts.map((x, i) => (
             <div key={x.label} className={cn("min-w-0", i > 0 && "pl-3 md:pl-5")}>
               <dt className="flex items-center gap-1.5 text-[12px] text-muted-foreground"><span className={cn("h-2 w-2 rounded-[2px]", x.tone)} />{x.label}</dt>
-              <dd className="mt-1"><Money value={x.value} hidden={p.hidden} className="text-[15px] font-semibold text-foreground md:text-[18px]" /></dd>
+              <dd className="mt-1"><Money value={x.value} hidden={p.hidden} className="text-[14px] font-semibold text-foreground md:text-[18px]" /></dd>
               <dd className="mt-0.5 hidden text-[11px] text-muted-foreground sm:block">{x.hint}</dd>
             </div>
           ))}

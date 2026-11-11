@@ -5361,3 +5361,6 @@ html.vp-noir body { background: hsl(var(--background)); }
 .vp-seller-shell .vp-tag { border-radius: 4px !important; }
 .vp-seller-shell .vp-desk button { border-radius: 0; }
 .vp-seller-shell .vp-desk [role="tablist"] button { border-radius: 0 !important; }
+.vp-seller-shell .vp-desk nav button, .vp-seller-shell .vp-desk ul button { border-radius: 0 !important; }
+.vp-seller-shell .vp-desk [role="tablist"] { border-radius: 6px !important; }
+.vp-desk-split { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
