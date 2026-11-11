@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useKycStatus } from "@/hooks/useKycStatus";
-import { ArrowRight, Check, Fingerprint, Landmark, ShieldCheck, Sparkles, UserRound } from "lucide-react";
+import { ArrowRight, Check, Fingerprint, Landmark, ShieldCheck, Sparkles, UserRound, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type StepState = "done" | "pending";
@@ -32,6 +32,29 @@ export function SellerOnboarding() {
   const kyc = useKycStatus();
   const [hasDocs, setHasDocs] = useState<boolean | null>(null);
   const [hasPayout, setHasPayout] = useState<boolean | null>(null);
+  const [dismissed, setDismissed] = useState(false);
+
+  // O seller pode fechar o cartão; a escolha fica salva por conta neste navegador.
+  const dismissKey = user?.id ? `vp_onboarding_dismissed_${user.id}` : null;
+
+  useEffect(() => {
+    if (!dismissKey) return;
+    try {
+      setDismissed(window.localStorage.getItem(dismissKey) === "1");
+    } catch {
+      setDismissed(false);
+    }
+  }, [dismissKey]);
+
+  const handleDismiss = () => {
+    setDismissed(true);
+    if (!dismissKey) return;
+    try {
+      window.localStorage.setItem(dismissKey, "1");
+    } catch {
+      // Sem storage disponível: o fechamento vale só para esta sessão.
+    }
+  };
 
   // Conta aprovada = ativação concluída. Nada é buscado nem exibido.
   const approved = kyc.approved;
@@ -103,6 +126,7 @@ export function SellerOnboarding() {
   // Fonte única de verdade: só renderiza quando o perfil resolveu E não está aprovado.
   if (!kyc.resolved || !kyc.showOnboarding || !profile) return null;
   if (hasDocs === null || hasPayout === null) return null;
+  if (dismissed) return null;
 
   const doneCount = steps.filter((s) => s.state === "done").length;
   const pct = Math.round((doneCount / steps.length) * 100);
@@ -130,6 +154,14 @@ export function SellerOnboarding() {
         rejected ? "border-destructive/30" : "border-border/60",
       )}
     >
+      <button
+        type="button"
+        onClick={handleDismiss}
+        aria-label="Fechar aviso de ativação"
+        className="absolute right-3 top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-border/60 bg-background/60 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      >
+        <X className="h-3.5 w-3.5" strokeWidth={2.5} />
+      </button>
       <div
         aria-hidden
         className={cn(
