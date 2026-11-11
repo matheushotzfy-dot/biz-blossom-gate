@@ -98,7 +98,7 @@ export default function Dashboard() {
 
 
   return (
-    <div className="vp-fade space-y-5 pb-6 md:space-y-6">
+    <div className="vp-fade space-y-4 pb-6">
       <Seo title="Início | Vemprapay" description="Saldo, vendas e extrato da sua conta Vemprapay." path="/dashboard" noindex />
 
       {statsError && (
@@ -125,18 +125,6 @@ export default function Dashboard() {
 
       <PendingTasks items={tasks} />
 
-      <div className="grid items-stretch gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
-        <RevenueChart
-          data={series} revenue={revenue} orders={approved} trend={trend} hidden={privacy.hidden} loading={statsLoading}
-          ranges={RANGES} activeRange={period.presetId} onRange={(id) => setPeriod(buildPeriod(id as PeriodPresetId))}
-          extra={
-            <PeriodPicker open={pickerOpen} onOpenChange={setPickerOpen} value={period} onChange={setPeriod} align="end" side="bottom"
-              trigger={<button aria-label="Escolher datas" className="grid h-9 w-9 place-items-center rounded-full bg-muted text-muted-foreground transition-colors hover:text-foreground"><CalendarDays className="h-4 w-4" /></button>} />
-          }
-        />
-        <Statement items={txs} products={productNames} hidden={privacy.hidden} loading={txLoading} onOpen={setDetail} />
-      </div>
-
       <InsightTiles
         ticket={approved > 0 ? revenue / approved : 0}
         conversion={rate(approved, Number(cur?.total_count ?? 0))}
@@ -146,6 +134,18 @@ export default function Dashboard() {
         todayOrders={Number(todayStats?.current?.approved_count ?? 0)}
         hidden={privacy.hidden}
       />
+      <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
+        <RevenueChart
+          data={series} revenue={revenue} orders={approved} trend={trend} hidden={privacy.hidden} loading={statsLoading}
+          ranges={RANGES} activeRange={period.presetId} onRange={(id) => setPeriod(buildPeriod(id as PeriodPresetId))}
+          extra={
+            <PeriodPicker open={pickerOpen} onOpenChange={setPickerOpen} value={period} onChange={setPeriod} align="end" side="bottom"
+              trigger={<button aria-label="Escolher datas" className="grid h-9 w-9 place-items-center rounded-md border border-border text-muted-foreground transition-colors hover:text-foreground"><CalendarDays className="h-4 w-4" /></button>} />
+          }
+        />
+        <Statement items={txs} products={productNames} hidden={privacy.hidden} loading={txLoading} onOpen={setDetail} />
+      </div>
+
 
       {detail && <TransactionDetailPanel tx={detail} products={productNames} onClose={() => setDetail(null)} variant="seller" />}
     </div>
