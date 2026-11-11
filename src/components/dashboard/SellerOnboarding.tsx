@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useKycStatus } from "@/hooks/useKycStatus";
-import { ArrowRight, Check, Fingerprint, Landmark, ShieldCheck, Sparkles, UserRound } from "lucide-react";
+import { ArrowRight, Check, Fingerprint, Landmark, ShieldCheck, Sparkles, UserRound, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type StepState = "done" | "pending";
@@ -32,6 +32,29 @@ export function SellerOnboarding() {
   const kyc = useKycStatus();
   const [hasDocs, setHasDocs] = useState<boolean | null>(null);
   const [hasPayout, setHasPayout] = useState<boolean | null>(null);
+  const [dismissed, setDismissed] = useState(false);
+
+  // O seller pode fechar o cartão; a escolha fica salva por conta neste navegador.
+  const dismissKey = user?.id ? `vp_onboarding_dismissed_${user.id}` : null;
+
+  useEffect(() => {
+    if (!dismissKey) return;
+    try {
+      setDismissed(window.localStorage.getItem(dismissKey) === "1");
+    } catch {
+      setDismissed(false);
+    }
+  }, [dismissKey]);
+
+  const handleDismiss = () => {
+    setDismissed(true);
+    if (!dismissKey) return;
+    try {
+      window.localStorage.setItem(dismissKey, "1");
+    } catch {
+      // Sem storage disponível: o fechamento vale só para esta sessão.
+    }
+  };
 
   // Conta aprovada = ativação concluída. Nada é buscado nem exibido.
   const approved = kyc.approved;
