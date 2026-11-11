@@ -5348,3 +5348,16 @@ html.vp-noir body { background: hsl(var(--background)); }
 .vp-seller-shell .vp-orb-main { border-width: 0; }
 .vp-rail .vp-rail-item { border-radius: 12px !important; border-width: 0 !important; }
 .vp-seller-shell button.rounded-full, .vp-seller-shell a.rounded-full { border-radius: 9999px !important; }
+
+/* ===== Seller · mesa de operação (grade institucional) ===== */
+.vp-desk { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: 10px; overflow: hidden; }
+.vp-seller-shell .vp-desk { border-radius: 10px !important; border-width: 1px !important; }
+.vp-label { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
+.vp-tag { display: inline-flex; align-items: center; border-radius: 4px; padding: 1px 6px; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; border: 1px solid transparent; }
+.vp-tag-ok { color: hsl(var(--vp-glow)); background: hsl(var(--vp-glow) / .10); border-color: hsl(var(--vp-glow) / .25); }
+.vp-tag-wait { color: hsl(var(--warning)); background: hsl(var(--warning) / .10); border-color: hsl(var(--warning) / .25); }
+.vp-tag-bad { color: hsl(var(--destructive)); background: hsl(var(--destructive) / .10); border-color: hsl(var(--destructive) / .25); }
+.vp-tag-off { color: hsl(var(--muted-foreground)); background: hsl(var(--muted)); border-color: hsl(var(--border)); }
+.vp-seller-shell .vp-tag { border-radius: 4px !important; }
+.vp-seller-shell .vp-desk button { border-radius: 0; }
+.vp-seller-shell .vp-desk [role="tablist"] button { border-radius: 0 !important; }
