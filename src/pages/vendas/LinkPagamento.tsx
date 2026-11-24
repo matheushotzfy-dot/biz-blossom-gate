@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Seo } from "@/components/Seo";
 import { PageHead } from "@/components/seller-ui/PageHead";
 import { StatBand } from "@/components/seller-ui/StatBand";
+import { SectionTabs } from "@/components/seller-ui/SectionTabs";
 import { FilterPills } from "@/components/seller-ui/FilterPills";
 import { SearchField } from "@/components/seller-ui/SearchField";
 import { Pager } from "@/components/seller-ui/Pager";
@@ -111,6 +112,7 @@ export default function LinkPagamento() {
       <Seo title="Links de Pagamento | Vemprapay" description="Crie e gerencie links de pagamento avulsos." path="/vendas/link-pagamento" noindex />
       <PaymentLinkDialog open={dialogOpen} busy={busy} permissions={permissions} editing={editing} onOpenChange={(open) => { setDialogOpen(open); if (!open) setEditing(null); }} onSubmit={save} />
 
+      <SectionTabs section="sales" />
       <PageHead
         title="Links de pagamento"
         subtitle="Cobre por Pix ou cartão com um endereço só seu e acompanhe cada acesso."

@@ -55,9 +55,7 @@ const RecuperacaoWhatsApp = lazy(() => import("./pages/vendas/RecuperacaoWhatsAp
 const RelatorioChurn = lazy(() => import("./pages/vendas/RelatorioChurn"));
 const SmartCheckout = lazy(() => import("./pages/vendas/SmartCheckout"));
 const UpsellPosPagamento = lazy(() => import("./pages/vendas/UpsellPosPagamento"));
-const Antecipacao = lazy(() => import("./pages/financeiro/Antecipacao"));
 const ControleGastos = lazy(() => import("./pages/financeiro/ControleGastos"));
-const NotasFiscais = lazy(() => import("./pages/financeiro/NotasFiscais"));
 const Taxas = lazy(() => import("./pages/financeiro/Taxas"));
 const Suporte = lazy(() => import("./pages/Suporte"));
 const Gamificacao = lazy(() => import("./pages/Gamificacao"));
@@ -215,9 +213,10 @@ const App = () => (
                   <Route path="/vendas/upsell" element={<UpsellPosPagamento />} />
 
 
-                  <Route path="/financeiro/antecipacao" element={<Antecipacao />} />
+                  {/* Desativadas por enquanto: o menu mostra "Em breve" e quem chegar por link volta para Saldo e saques. */}
+                  <Route path="/financeiro/antecipacao" element={<Navigate to="/financeiro/saques" replace />} />
                   <Route path="/financeiro/gastos" element={<ControleGastos />} />
-                  <Route path="/financeiro/notas" element={<NotasFiscais />} />
+                  <Route path="/financeiro/notas" element={<Navigate to="/financeiro/saques" replace />} />
                   <Route path="/financeiro/taxas" element={<Taxas />} />
 
                   <Route path="/marketplace" element={<Marketplace />} />

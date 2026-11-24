@@ -44,6 +44,17 @@ export function SellerRail() {
                   <ul className="vp-fade mb-2 ml-[29px] mt-1 space-y-0.5 border-l-2 border-border pl-4">
                     {s.links.map((l) => {
                       const current = here === l.url;
+                      if (l.soon) {
+                        return (
+                          <li key={l.url} className="relative">
+                            <span aria-hidden className="absolute left-[-21px] top-1/2 h-[7px] w-[7px] -translate-y-1/2 rounded-full bg-border ring-4 ring-card" />
+                            <span aria-disabled="true" className="flex cursor-not-allowed items-center gap-2 py-1.5 pr-2 text-[13px] font-medium text-muted-foreground/60">
+                              {l.title}
+                              <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">Em breve</span>
+                            </span>
+                          </li>
+                        );
+                      }
                       return (
                         <li key={l.url} className="relative">
                           <span aria-hidden className={cn("absolute left-[-21px] top-1/2 h-[7px] w-[7px] -translate-y-1/2 rounded-full ring-4 ring-card transition-colors", current ? "bg-primary" : "bg-border")} />

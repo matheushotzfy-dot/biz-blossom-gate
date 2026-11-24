@@ -3,6 +3,7 @@ import {
   AtSign, Building2, Check, ClipboardPaste, Fingerprint, Key, Shuffle, Smartphone, X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -74,14 +75,14 @@ export function WithdrawDestinationPicker({
   };
 
   const tabClass = (active: boolean) => cn(
-    "relative flex h-10 flex-1 items-center justify-center gap-2 rounded-xl text-[12px] font-semibold transition-all duration-200",
+    "relative flex h-10 flex-1 items-center justify-center gap-2 rounded-full text-[13px] font-semibold transition-all duration-200",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
     active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
   );
 
   return (
     <div className="flex flex-col gap-3">
-      <div role="tablist" aria-label="Tipo de destino" className="flex gap-1 rounded-2xl border border-border/60 bg-background p-1">
+      <div role="tablist" aria-label="Tipo de destino" className="flex gap-1 rounded-full bg-muted/70 p-1">
         <button type="button" role="tab" aria-selected={!isCopyPaste} onClick={selectKeysMode} className={tabClass(!isCopyPaste)}>
           <Key className="h-3.5 w-3.5" strokeWidth={2.5} /> Minhas chaves
           {pixKeys.length > 0 && (
@@ -137,7 +138,7 @@ export function WithdrawDestinationPicker({
             <span className="grid h-11 w-11 place-items-center rounded-xl bg-muted text-muted-foreground"><Key className="h-5 w-5" /></span>
             <p className="text-[13px] font-semibold text-foreground">Nenhuma chave cadastrada</p>
             <p className="max-w-[240px] text-[11px] leading-relaxed text-muted-foreground">
-              Cadastre em <span className="font-semibold text-foreground">Destino › Gerenciar Dados Bancários</span> ou use Copia e Cola.
+              Cadastre em <Link to="/financeiro/config" className="font-semibold text-primary underline-offset-2 hover:underline">Dados bancários</Link> ou use Copia e Cola.
             </p>
           </div>
         ) : (
@@ -167,7 +168,7 @@ export function WithdrawDestinationPicker({
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-[11px] font-semibold text-muted-foreground">{meta.label}</span>
-                    <span className="block truncate font-mono text-[13px] font-bold text-foreground">{getPixKeyLabel(pk)}</span>
+                    <span className="block truncate text-[14px] font-bold text-foreground">{getPixKeyLabel(pk)}</span>
                   </span>
                   <span className={cn(
                     "grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 transition-all",

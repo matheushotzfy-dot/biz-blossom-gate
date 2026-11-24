@@ -11,6 +11,7 @@ import { format, differenceInDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { PageHead } from "@/components/seller-ui/PageHead";
 import { StatBand } from "@/components/seller-ui/StatBand";
+import { SectionTabs } from "@/components/seller-ui/SectionTabs";
 import { SalesLedger } from "@/components/sales/SalesLedger";
 import type { SalesStatusKey } from "@/lib/sales-status-filter";
 import { Money } from "@/components/home/Money";
@@ -263,6 +264,7 @@ export default function Vendas() {
     <div className="vp-fade space-y-5 pb-6 md:space-y-6">
       <Seo title="Vendas | Vemprapay" description="Histórico completo de transações, filtros avançados e exportação de relatórios." path="/vendas" noindex />
 
+      <SectionTabs section="sales" />
       <PageHead
         title="Todas as vendas"
         subtitle="Acompanhe cada pagamento, filtre por status e exporte quando precisar."

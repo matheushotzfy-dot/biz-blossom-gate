@@ -9,6 +9,7 @@ import { Seo } from "@/components/Seo";
 import { Money } from "@/components/home/Money";
 import { PageHead } from "@/components/seller-ui/PageHead";
 import { StatBand } from "@/components/seller-ui/StatBand";
+import { SectionTabs } from "@/components/seller-ui/SectionTabs";
 import { FilterPills } from "@/components/seller-ui/FilterPills";
 import { SearchField } from "@/components/seller-ui/SearchField";
 import { PlansGrid } from "@/components/subscriptions/PlansGrid";
@@ -96,6 +97,7 @@ export default function Assinaturas() {
     <div className="vp-fade space-y-5 pb-6 md:space-y-6">
       <Seo title="Assinaturas | Vemprapay" description="Planos recorrentes e assinantes." path="/vendas/assinaturas" noindex />
 
+      <SectionTabs section="sales" />
       <PageHead
         title="Assinaturas"
         subtitle="Receita recorrente com planos próprios. Acompanhe assinantes e o quanto entra todo mês."

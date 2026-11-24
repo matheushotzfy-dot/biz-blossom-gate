@@ -1,15 +1,16 @@
 /**
- * AutoWithdrawalSettings — Tile compacto + Dialog
+ * AutoWithdrawalSettings — cartão compacto + diálogo
  * Clique no tile abre popup para ativar/desativar, valor alvo e chave Pix.
  */
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
 import { useKycStatus } from "@/hooks/useKycStatus";
 import { usePixKeys } from "@/hooks/useQueryData";
 import { toast } from "sonner";
-import { Zap, Loader2, ShieldAlert, ChevronRight, CheckCircle2, X, Mail, Phone, Hash, Fingerprint, Sparkles, PlusCircle } from "lucide-react";
+import { Zap, Loader2, ShieldAlert, ChevronRight, Check, Mail, Phone, Hash, Fingerprint, PlusCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { getPixKeyMeta } from "@/components/financeiro/WithdrawDestinationPicker";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ReauthenticationDialog } from "@/components/security/ReauthenticationDialog";
@@ -31,7 +32,6 @@ const parseBRL = (v: string) => Number(v.replace(/\./g, "").replace(",", ".")) |
 
 export default function AutoWithdrawalSettings() {
   const { user } = useAuth();
-  const { profile } = useProfile();
   const kyc = useKycStatus();
   const { data: pixKeys = [] } = usePixKeys();
   const [config, setConfig] = useState<Config | null>(null);
@@ -132,151 +132,111 @@ export default function AutoWithdrawalSettings() {
         type="button"
         onClick={() => setOpen(true)}
         disabled={loading}
-        className="w-full group relative overflow-hidden rounded-xl border border-border/60 bg-card hover:border-primary/40 hover:bg-muted/30 transition-all px-3 py-2 flex items-center gap-3 text-left disabled:opacity-60"
+        className="vp-sheet group flex w-full min-w-0 items-center gap-3.5 p-4 text-left transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60"
       >
-        <div className="h-8 w-8 shrink-0 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
-          <Zap size={15} strokeWidth={2.5} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="text-[11px] font-semibold text-foreground tracking-tight leading-none">Saque Automatizado</p>
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent text-accent-foreground">
+          <Zap className="h-5 w-5" strokeWidth={2.3} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex items-center gap-2">
+            <span className="text-[15px] font-bold text-foreground">Saque automático</span>
             {isActive && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Ativo
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-[12px] font-bold text-accent-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" /> Ativo
               </span>
             )}
-          </div>
-          <p className="text-[9px] font-bold text-muted-foreground/80 mt-1 truncate leading-none">
+          </span>
+          <span className="mt-0.5 block truncate text-[13.5px] text-muted-foreground">
             {isActive
-              ? `${fmt(Number(config?.target_amount || 0))} para ${(selectedKey?.key_type || "chave").toUpperCase()} · ${visibleKey(selectedKey)}`
-              : "Solicita saque sozinho ao atingir o valor alvo"}
-          </p>
-        </div>
-        <ChevronRight size={14} className="text-muted-foreground/60 group-hover:text-primary transition-colors shrink-0" />
+              ? `${fmt(Number(config?.target_amount || 0))} na chave ${selectedKey ? getPixKeyMeta(selectedKey.key_type).label : ""} ${visibleKey(selectedKey)}`.replace(/\s+/g, " ").trim()
+              : "Saca sozinho ao atingir o valor alvo"}
+          </span>
+        </span>
+        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg bg-card border-border/60 p-0 overflow-hidden rounded-3xl">
-          {/* Header with subtle gradient */}
-          <DialogHeader className="relative p-6 pb-5 border-b border-border/40 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent pointer-events-none" />
-            <div className="relative flex items-center gap-3">
-              <div className="h-11 w-11 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shadow-sm">
-                <Zap size={18} strokeWidth={2.5} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <DialogTitle className="text-lg font-semibold tracking-tight flex items-center gap-2">
-                  Saque Automatizado
+        <DialogContent className="max-h-[92dvh] w-[calc(100vw-1.5rem)] max-w-lg gap-0 overflow-hidden rounded-[28px] border-border bg-card p-0">
+          <DialogHeader className="border-b border-border p-6 text-left">
+            <div className="flex items-center gap-3.5">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
+                <Zap className="h-5 w-5" strokeWidth={2.4} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <DialogTitle className="flex items-center gap-2 font-heading text-[22px] font-extrabold tracking-[-0.03em]">
+                  Saque automático
                   {isActive && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Ativo
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-[12px] font-bold text-accent-foreground">
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary" /> Ativo
                     </span>
                   )}
                 </DialogTitle>
-                <DialogDescription className="text-[11px] font-bold text-muted-foreground/80 mt-0.5">
-                  Solicite saques sozinho ao atingir o valor alvo
+                <DialogDescription className="mt-0.5 text-[14px] text-muted-foreground">
+                  Pede o saque sozinho quando o saldo chega no valor alvo.
                 </DialogDescription>
               </div>
             </div>
           </DialogHeader>
 
-          <div className="p-6 space-y-5 max-h-[65vh] overflow-y-auto">
+          <div className="max-h-[62dvh] space-y-5 overflow-y-auto p-6">
             {!kycOk && (
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-2">
-                <ShieldAlert size={14} className="text-amber-500 shrink-0 mt-0.5" />
-                <p className="text-[11px] font-bold text-amber-500/90 leading-relaxed">
-                  Só será processado após aprovação do seu KYC.
-                </p>
+              <div className="flex items-start gap-3 rounded-2xl bg-warning/15 p-3.5">
+                <ShieldAlert className="mt-0.5 h-[18px] w-[18px] shrink-0 text-warning" />
+                <p className="text-[14px] leading-relaxed text-foreground">O saque só é processado depois que o seu KYC for aprovado.</p>
               </div>
             )}
 
-            {/* Master toggle */}
-            <button
-              type="button"
-              onClick={() => setEnabled(!enabled)}
-              className="w-full flex items-center justify-between p-4 rounded-2xl bg-muted/30 border border-border/60 hover:border-primary/40 transition-all text-left group"
-            >
-              <div className="flex items-center gap-3">
-                <div className={`h-9 w-9 rounded-xl flex items-center justify-center transition-colors ${enabled ? "bg-emerald-500/15 text-emerald-500" : "bg-muted text-muted-foreground/60"}`}>
-                  <Sparkles size={16} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-foreground ">
-                    {enabled ? "Automação Ativada" : "Automação Desativada"}
-                  </p>
-                  <p className="text-[10px] font-bold text-muted-foreground/70 mt-0.5">
-                    {enabled ? "Saques serão criados automaticamente" : "Ative para configurar"}
-                  </p>
-                </div>
-              </div>
-              <Switch checked={enabled} onCheckedChange={setEnabled} />
-            </button>
+            <div className="flex items-center justify-between gap-4 rounded-2xl bg-muted/60 p-4">
+              <label htmlFor="auto-withdraw-enabled" className="min-w-0 flex-1 cursor-pointer">
+                <span className="block text-[15px] font-bold text-foreground">{enabled ? "Automação ligada" : "Automação desligada"}</span>
+                <span className="mt-0.5 block text-[13.5px] text-muted-foreground">{enabled ? "Os saques serão criados sozinhos." : "Ligue para configurar o valor e a chave."}</span>
+              </label>
+              <Switch id="auto-withdraw-enabled" checked={enabled} onCheckedChange={setEnabled} />
+            </div>
 
-            <div className={`space-y-5 transition-opacity ${enabled ? "" : "opacity-40 pointer-events-none"}`}>
-              {/* Valor alvo */}
-              <div className="space-y-2">
-                <div className="flex items-baseline justify-between">
-                  <label className="text-[11px] font-semibold text-muted-foreground">
-                    Valor alvo
-                  </label>
-                  <span className="text-[10px] font-bold text-muted-foreground/60">
-                    {fmt(MIN)} — {fmt(MAX)}
-                  </span>
+            <div className={cn("space-y-5 transition-opacity", enabled ? "" : "pointer-events-none opacity-40")} aria-disabled={!enabled}>
+              <div className="space-y-2.5">
+                <div className="flex items-baseline justify-between gap-3">
+                  <label htmlFor="auto-withdraw-amount" className="text-[13.5px] font-semibold text-foreground">Valor alvo</label>
+                  <span className="text-[13px] tabular-nums text-muted-foreground">de {fmt(MIN)} a {fmt(MAX)}</span>
                 </div>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-muted-foreground/70 text-sm">R$</span>
+                  <span aria-hidden className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-[20px] font-bold text-muted-foreground">R$</span>
                   <input
+                    id="auto-withdraw-amount"
                     type="text"
                     inputMode="decimal"
                     value={amountStr}
                     onChange={(e) => setAmountStr(e.target.value.replace(/[^\d,]/g, ""))}
                     placeholder="1.500,00"
-                    className="w-full pl-12 h-14 rounded-2xl bg-background border border-border/60 text-lg font-black tabular-nums tracking-tight focus:outline-none focus:border-primary/60 focus:ring-4 focus:ring-primary/10 transition-all"
+                    aria-invalid={!!amountError}
+                    className="vp-field vp-field-lg"
                   />
                 </div>
-                {/* Quick presets */}
-                <div className="flex flex-wrap justify-center gap-1.5 pt-1">
+                <div className="flex flex-wrap justify-center gap-1.5">
                   {[500, 1000, 2500, 5000, 10000].map((v) => (
-                    <button
-                      key={v}
-                      type="button"
-                      onClick={() => setAmountStr(v.toFixed(2).replace(".", ","))}
-                      className={`px-3 h-8 rounded-lg text-[11px] font-semibold border transition-all ${
-                        amountNum === v
-                          ? "bg-primary/15 border-primary/40 text-primary"
-                          : "bg-muted/30 border-border/60 text-muted-foreground hover:border-primary/30 hover:text-foreground"
-                      }`}
-                    >
+                    <button key={v} type="button" onClick={() => setAmountStr(v.toFixed(2).replace(".", ","))} aria-pressed={amountNum === v} className="vp-pill border border-border">
                       {fmt(v).replace(",00", "")}
                     </button>
                   ))}
                 </div>
-                {amountError && <p className="text-[10px] font-bold text-destructive pt-1">{amountError}</p>}
+                {amountError && <p role="alert" className="text-[13px] font-semibold text-destructive">{amountError}</p>}
               </div>
 
-              {/* Chave Pix */}
-              <div className="space-y-2">
-                <div className="flex items-baseline justify-between">
-                  <label className="text-[11px] font-semibold text-muted-foreground">
-                    Chave Pix de recebimento
-                  </label>
+              <div className="space-y-2.5">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span id="auto-withdraw-key" className="text-[13.5px] font-semibold text-foreground">Chave Pix que recebe</span>
                   {activeKeys.length > 0 && (
-                    <span className="text-[10px] font-bold text-muted-foreground/60">
-                      {activeKeys.length} {activeKeys.length === 1 ? "chave" : "chaves"}
-                    </span>
+                    <span className="text-[13px] text-muted-foreground">{activeKeys.length} {activeKeys.length === 1 ? "chave" : "chaves"}</span>
                   )}
                 </div>
                 {activeKeys.length === 0 ? (
-                  <div className="p-4 rounded-2xl border border-dashed border-border/60 bg-muted/20 flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-xl bg-muted flex items-center justify-center text-muted-foreground">
-                      <PlusCircle size={16} />
-                    </div>
-                    <p className="text-[11px] font-bold text-muted-foreground flex-1">
-                      Cadastre uma chave Pix primeiro para configurar.
-                    </p>
+                  <div className="flex items-center gap-3 rounded-2xl border border-dashed border-border p-4">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-muted text-muted-foreground"><PlusCircle className="h-[18px] w-[18px]" /></span>
+                    <p className="flex-1 text-[14px] text-muted-foreground">Cadastre uma chave Pix em Dados bancários para ligar o saque automático.</p>
                   </div>
                 ) : (
-                  <div className="space-y-1.5">
+                  <div role="radiogroup" aria-labelledby="auto-withdraw-key" className="space-y-2">
                     {activeKeys.map((k) => {
                       const selected = pixKeyId === k.id;
                       const Icon = k.key_type === "email" ? Mail
@@ -288,31 +248,24 @@ export default function AutoWithdrawalSettings() {
                         <button
                           key={k.id}
                           type="button"
+                          role="radio"
+                          aria-checked={selected}
                           onClick={() => setPixKeyId(k.id)}
-                          className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
-                            selected
-                              ? "bg-primary/8 border-primary/50 ring-2 ring-primary/15"
-                              : "bg-background border-border/60 hover:border-border hover:bg-muted/30"
-                          }`}
+                          className={cn(
+                            "flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                            selected ? "border-primary bg-accent" : "border-border bg-background hover:border-primary/40",
+                          )}
                         >
-                          <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                            selected ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
-                          }`}>
-                            <Icon size={16} strokeWidth={2.5} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[11px] font-semibold text-muted-foreground/70">
-                              {k.key_type}
-                            </p>
-                            <p className="text-sm font-black text-foreground truncate mt-0.5">
-                              {val}
-                            </p>
-                          </div>
-                          <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                            selected ? "border-primary bg-primary" : "border-border"
-                          }`}>
-                            {selected && <CheckCircle2 size={12} className="text-primary-foreground" />}
-                          </div>
+                          <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-full", selected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
+                            <Icon className="h-[18px] w-[18px]" strokeWidth={2.2} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-[13px] font-semibold text-muted-foreground">{getPixKeyMeta(k.key_type).label}</span>
+                            <span className="block truncate text-[15px] font-bold text-foreground">{val}</span>
+                          </span>
+                          <span className={cn("grid h-5 w-5 shrink-0 place-items-center rounded-full border-2", selected ? "border-primary bg-primary text-primary-foreground" : "border-border")}>
+                            {selected && <Check className="h-3 w-3" strokeWidth={3.5} />}
+                          </span>
                         </button>
                       );
                     })}
@@ -320,35 +273,18 @@ export default function AutoWithdrawalSettings() {
                 )}
               </div>
 
-              {/* Summary */}
               {enabled && formValid && (
-                <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
-                  <p className="text-[11px] font-semibold text-emerald-500/90 mb-2">
-                    Como vai funcionar
-                  </p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Quando seu <strong className="text-foreground">saldo disponível</strong> atingir{" "}
-                    <strong className="text-emerald-500 tabular-nums">{fmt(amountNum)}</strong>,
-                    um saque desse valor é solicitado automaticamente para a chave selecionada.
-                  </p>
-                </div>
+                <p className="rounded-2xl bg-accent p-4 text-[14px] leading-relaxed text-accent-foreground">
+                  Quando o seu saldo disponível chegar a <strong className="font-extrabold tabular-nums">{fmt(amountNum)}</strong>, um saque desse valor é pedido sozinho para a chave escolhida.
+                </p>
               )}
             </div>
           </div>
 
-          <div className="p-4 border-t border-border/40 bg-muted/20 flex gap-2">
-            <button
-              onClick={() => setOpen(false)}
-              className="flex-1 h-11 rounded-xl bg-background border border-border/60 text-[11px] font-semibold text-foreground hover:bg-muted transition-all flex items-center justify-center gap-1.5"
-            >
-              <X size={14} /> Cancelar
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={!canSave}
-              className="flex-[1.5] h-11 rounded-xl bg-primary text-primary-foreground text-[11px] font-semibold hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
-            >
-              {saving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+          <div className="flex gap-2.5 border-t border-border bg-muted/40 p-4">
+            <button type="button" onClick={() => setOpen(false)} className="vp-ghost h-12 flex-1">Cancelar</button>
+            <button type="button" onClick={handleSave} disabled={!canSave} className="vp-cta h-12 flex-[1.5]">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               {enabled ? "Salvar configuração" : "Salvar"}
             </button>
           </div>

@@ -4,7 +4,11 @@ import {
   ArrowDownToLine, Landmark, Percent, FileText, BadgeDollarSign, KeyRound, Webhook, Puzzle, BookOpenText, LayoutTemplate, PlayCircle,
 } from "lucide-react";
 
-export interface SellerNavLink { title: string; desc: string; url: string; icon: LucideIcon }
+export interface SellerNavLink {
+  title: string; desc: string; url: string; icon: LucideIcon;
+  /** Recurso ainda desativado: aparece no menu como "Em breve" e não abre. */
+  soon?: boolean;
+}
 export interface SellerNavSection {
   id: string;
   label: string;
@@ -30,9 +34,9 @@ export const SELLER_NAV: SellerNavSection[] = [
     id: "money", label: "Financeiro", url: "/financeiro/saques", icon: Wallet, match: ["/financeiro"],
     links: [
       { title: "Saldo e saques", desc: "Transfira para sua conta", url: "/financeiro/saques", icon: ArrowDownToLine },
-      { title: "Antecipação", desc: "Receba antes do prazo", url: "/financeiro/antecipacao", icon: BadgeDollarSign },
+      { title: "Antecipação", desc: "Receba antes do prazo", url: "/financeiro/antecipacao", icon: BadgeDollarSign, soon: true },
       { title: "Taxas", desc: "Seu plano de tarifas", url: "/financeiro/taxas", icon: Percent },
-      { title: "Notas fiscais", desc: "Emissão e histórico", url: "/financeiro/notas", icon: FileText },
+      { title: "Notas fiscais", desc: "Emissão e histórico", url: "/financeiro/notas", icon: FileText, soon: true },
       { title: "Dados bancários", desc: "Chaves Pix e contas", url: "/financeiro/config", icon: Landmark },
     ],
   },
