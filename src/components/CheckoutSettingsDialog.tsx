@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Palette, Timer, ShieldCheck, CreditCard, QrCode, FileText, MapPin, Mail, X, Upload, Package, Plus, Trash2, Users, Loader2 } from "lucide-react";
+import { Palette, Timer, ShieldCheck, CreditCard, QrCode, FileText, MapPin, Mail, X, Upload, Package, Plus, Trash2, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -26,7 +26,7 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
  const [buttonColor, setButtonColor] = useState(product.checkout_button_color || "#10b981");
  const [timerEnabled, setTimerEnabled] = useState(product.checkout_timer_enabled ?? true);
  const [timerMinutes, setTimerMinutes] = useState(String(product.checkout_timer_minutes ?? 15));
- const [socialProof, setSocialProof] = useState(product.checkout_social_proof ?? false);
+ const socialProof = product.checkout_social_proof ?? false; // o checkout público não usa; só preservamos o valor ao salvar
  const [guaranteeEnabled, setGuaranteeEnabled] = useState(product.checkout_guarantee_enabled ?? true);
  const [pixEnabled, setPixEnabled] = useState(product.checkout_pix_enabled ?? true);
  const [boletoEnabled, setBoletoEnabled] = useState(product.checkout_boleto_enabled ?? false);
@@ -224,9 +224,6 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
                       )}
                       <Switch checked={timerEnabled} onCheckedChange={setTimerEnabled} aria-label="Timer de urgência" />
                     </div>
-                  </ToggleRow>
-                  <ToggleRow icon={<Users className="h-[18px] w-[18px]" />} title="Prova social" description="Mostra quantas pessoas já compraram">
-                    <Switch checked={socialProof} onCheckedChange={setSocialProof} aria-label="Prova social" />
                   </ToggleRow>
                   <ToggleRow icon={<ShieldCheck className="h-[18px] w-[18px]" />} title="Garantia de 7 dias" description="Selo de devolução garantida">
                     <Switch checked={guaranteeEnabled} onCheckedChange={setGuaranteeEnabled} aria-label="Garantia de 7 dias" />

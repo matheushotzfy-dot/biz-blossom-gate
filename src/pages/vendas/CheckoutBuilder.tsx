@@ -1,1045 +1,939 @@
-import { formatCurrency } from "@/components/products/productPresentation";
 /**
- * Checkout Builder — Premium immersive checkout customizer
- * @module CheckoutBuilder
- * @version 5.0.0
+ * Construtor de checkout: personaliza a página onde o comprador paga e mostra uma prévia ao vivo.
+ * Só a apresentação foi refeita; o que é gravado em `products` e `order_bumps` segue as mesmas colunas.
+ * Tela cheia, fora do DashboardLayout: usa useSellerSkin() e a raiz `vp-seller-shell vp-stage`.
  */
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useSellerSkin } from "@/hooks/useSellerSkin";
 import {
- Palette, CreditCard, Mail, Package, Plus, Trash2, ArrowLeft,
- Timer, ShieldCheck, QrCode, FileText, MapPin, X, Upload,
- Zap, Users, Monitor, Smartphone, Check, Eye,
- Clock, Lock,
- Sparkles, Hash, MousePointerClick,
- RotateCcw, Copy, ExternalLink, Wand2, TrendingUp,
- ChevronRight, Grip, Settings2
+  Palette, CreditCard, ClipboardList, Layers, Zap, ArrowLeft, Timer, ShieldCheck, QrCode, FileText, MapPin,
+  Mail, Hash, Monitor, Smartphone, Check, Copy, ExternalLink, ImagePlus, Upload, X, Plus, Package, Lock,
+  Loader2, Sparkles, Eye, SlidersHorizontal, Clock, AlertCircle,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { MotionConfig, motion, AnimatePresence } from "framer-motion";
+import { formatCurrency } from "@/components/products/productPresentation";
+import { FieldHint, FieldLabel, GroupBox, ToggleRow } from "@/components/seller-ui/form";
+import { Notice, StepEmpty } from "@/components/seller-ui/studio";
 
-/* ─── Constants ─── */
+/* ─── Constantes ─── */
 const TABS = [
- { id: "visual", label: "Visual", icon: Palette },
- { id: "payment", label: "Pagamento", icon: CreditCard },
- { id: "form", label: "Formulário", icon: Mail },
- { id: "bumps", label: "Order Bumps", icon: Package },
- { id: "cro", label: "Conversão", icon: Zap },
+  { id: "visual", label: "Visual", icon: Palette },
+  { id: "payment", label: "Pagamento", icon: CreditCard },
+  { id: "form", label: "Formulário", icon: ClipboardList },
+  { id: "bumps", label: "Order bumps", icon: Layers },
+  { id: "cro", label: "Conversão", icon: Zap },
 ] as const;
-type TabId = typeof TABS[number]["id"];
+type TabId = (typeof TABS)[number]["id"];
 
+type Theme = "gray" | "white" | "dark";
 type ProductWithCheckoutTheme = Tables<"products"> & { checkout_theme?: unknown };
+const normalizeCheckoutTheme = (value: unknown): Theme => (value === "white" ? "white" : value === "dark" ? "dark" : "gray");
+const getCheckoutTheme = (value: Tables<"products"> | null) => normalizeCheckoutTheme((value as ProductWithCheckoutTheme | null)?.checkout_theme);
 
-const normalizeCheckoutTheme = (value: unknown): "gray" | "white" | "dark" =>
- value === "white" ? "white" : value === "dark" ? "dark" : "gray";
-
-const getCheckoutTheme = (value: Tables<"products"> | null) =>
- normalizeCheckoutTheme((value as ProductWithCheckoutTheme | null)?.checkout_theme);
+const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
+const MAX_BUMPS = 5;
+const MAX_BANNER = 5 * 1024 * 1024;
+const ALLOWED_BANNER = ["image/jpeg", "image/png", "image/webp"];
+const SAVE_DELAY = 1200;
 
 const PRESET_COLORS = [
- { name: "Esmeralda", hex: "#10b981" },
- { name: "Laranja", hex: "#f97316" },
- { name: "Royal", hex: "#3b82f6" },
- { name: "Roxo", hex: "#8b5cf6" },
- { name: "Rosa", hex: "#ec4899" },
- { name: "Vermelho", hex: "#ef4444" },
- { name: "Dourado", hex: "#eab308" },
- { name: "Cyan", hex: "#06b6d4" },
+  { name: "Esmeralda", hex: "#10b981" },
+  { name: "Laranja", hex: "#f97316" },
+  { name: "Royal", hex: "#3b82f6" },
+  { name: "Roxo", hex: "#8b5cf6" },
+  { name: "Rosa", hex: "#ec4899" },
+  { name: "Vermelho", hex: "#ef4444" },
+  { name: "Dourado", hex: "#eab308" },
+  { name: "Cyan", hex: "#06b6d4" },
 ];
 
-/* ─── Score Ring ─── */
-function ScoreRing({ score, max }: { score: number; max: number }) {
- const pct = Math.round((score / max) * 100);
- const r = 16, c = 2 * Math.PI * r;
- const color = pct >= 80 ? "hsl(var(--success))" : pct >= 50 ? "hsl(var(--warning))" : "hsl(var(--primary))";
- return (
- <div className="relative h-10 w-10 shrink-0">
- <svg viewBox="0 0 40 40" className="h-10 w-10 -rotate-90">
- <circle cx="20" cy="20" r={r} fill="none" stroke="hsl(var(--border))" strokeWidth="2.5" opacity={0.15} />
- <motion.circle
- cx="20" cy="20" r={r} fill="none"
- stroke={color} strokeWidth="2.5" strokeLinecap="round"
- strokeDasharray={c}
- initial={{ strokeDashoffset: c }}
- animate={{ strokeDashoffset: c - (c * pct / 100) }}
- transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
- />
- </svg>
- <div className="absolute inset-0 flex items-center justify-center">
- <span className="text-[9px] font-numbers font-black tabular-nums" style={{ color }}>{pct}%</span>
- </div>
- </div>
- );
+const THEME_OPTIONS: { key: Theme; name: string; hint: string }[] = [
+  { key: "gray", name: "Cinza suave", hint: "Fundo cinza claro" },
+  { key: "white", name: "Branco", hint: "Fundo quase branco" },
+  { key: "dark", name: "Escuro", hint: "Fundo escuro" },
+];
+
+/** Cores fixas da prévia: reproduzem o checkout público e não mudam com o tema do painel. */
+const PREVIEW_THEMES: Record<Theme, { bg: string; card: string; soft: string; border: string; text: string; muted: string }> = {
+  gray: { bg: "hsl(210 16% 94%)", card: "#ffffff", soft: "hsl(210 18% 97%)", border: "hsl(215 16% 84%)", text: "hsl(220 24% 14%)", muted: "hsl(220 10% 46%)" },
+  white: { bg: "hsl(210 20% 98%)", card: "#ffffff", soft: "hsl(210 20% 96%)", border: "hsl(215 18% 88%)", text: "hsl(220 24% 14%)", muted: "hsl(220 10% 46%)" },
+  dark: { bg: "hsl(220 18% 11%)", card: "hsl(220 16% 14%)", soft: "hsl(220 15% 18%)", border: "hsl(220 12% 24%)", text: "hsl(210 20% 96%)", muted: "hsl(215 12% 68%)" },
+};
+
+/* ─── Configurações editáveis e o que vai para o banco ─── */
+type Settings = {
+  buttonColor: string; theme: Theme; timerEnabled: boolean; timerMinutes: string; socialProof: boolean; guaranteeEnabled: boolean;
+  pix: boolean; boleto: boolean; card: boolean; address: boolean; emailConfirm: boolean;
+  bannerD: string; bannerM: string; fileD: File | null; fileM: File | null;
+};
+type Allowed = { pix: boolean; boleto: boolean; card: boolean };
+
+const fromProduct = (p: Tables<"products">): Settings => ({
+  buttonColor: p.checkout_button_color || "#10b981",
+  theme: getCheckoutTheme(p),
+  timerEnabled: p.checkout_timer_enabled ?? true,
+  timerMinutes: String(p.checkout_timer_minutes ?? 15),
+  socialProof: p.checkout_social_proof ?? false,
+  guaranteeEnabled: p.checkout_guarantee_enabled ?? true,
+  pix: p.checkout_pix_enabled ?? true,
+  boleto: p.checkout_boleto_enabled ?? false,
+  card: p.checkout_credit_card_enabled ?? true,
+  address: p.checkout_address_required ?? false,
+  emailConfirm: p.checkout_email_confirm ?? true,
+  bannerD: p.checkout_banner_desktop_url || "",
+  bannerM: p.checkout_banner_mobile_url || "",
+  fileD: null,
+  fileM: null,
+});
+
+/** Métodos que a conta não pode usar ficam desligados, como o checkout público também respeita. */
+const effective = (s: Settings, allowed: Allowed | null): Settings =>
+  allowed ? { ...s, pix: s.pix && allowed.pix, boleto: s.boleto && allowed.boleto, card: s.card && allowed.card } : s;
+
+const fileKey = (f: File | null) => (f ? `${f.name}:${f.size}:${f.lastModified}` : "");
+const makeSnapshot = (s: Settings) =>
+  JSON.stringify([s.buttonColor.trim().toLowerCase(), s.theme, s.timerEnabled, s.timerMinutes, s.socialProof, s.guaranteeEnabled, s.pix, s.boleto, s.card, s.address, s.emailConfirm, s.bannerD, s.bannerM, fileKey(s.fileD), fileKey(s.fileM)]);
+
+const timerValid = (s: Settings) => !s.timerEnabled || (/^\d+$/.test(s.timerMinutes.trim()) && Number(s.timerMinutes) >= 1 && Number(s.timerMinutes) <= 60);
+
+type SaveState = "idle" | "dirty" | "saving" | "saved" | "error";
+type Bump = { id: string; bump_product_id: string };
+
+const inputClass = "vp-field";
+
+/* ─── Blocos de interface ─── */
+function Block({ title, subtitle, children, className }: { title?: string; subtitle?: string; children: React.ReactNode; className?: string }) {
+  return (
+    <section className={cn("vp-sheet p-5", className)}>
+      {title && (
+        <div className="mb-4">
+          <h3 className="text-[16px] font-bold tracking-[-0.01em] text-foreground">{title}</h3>
+          {subtitle && <p className="mt-0.5 text-[13.5px] leading-snug text-muted-foreground">{subtitle}</p>}
+        </div>
+      )}
+      {children}
+    </section>
+  );
 }
 
-/* ─── Section Card ─── */
-function SectionCard({ children, className }: { children: React.ReactNode; className?: string }) {
- return (
- <div className={cn("rounded-xl border border-border/40 bg-card/95 p-4 space-y-3 ", className)}>
- {children}
- </div>
- );
+function PanelHeading({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className="mb-1">
+      <h2 className="font-heading text-[24px] font-extrabold leading-[1.1] tracking-[-0.03em] text-foreground">{title}</h2>
+      <p className="mt-1.5 text-[14.5px] leading-relaxed text-muted-foreground">{subtitle}</p>
+    </div>
+  );
 }
 
-/* ─── Section Header ─── */
-function SectionHeader({ title, desc, icon: Icon, badge }: { title: string; desc: string; icon?: React.ComponentType<{ className?: string }>; badge?: string }) {
- return (
- <div className="flex items-center gap-3 mb-1">
- {Icon && (
- <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/10">
- <Icon className="h-4 w-4 text-primary" />
- </div>
- )}
- <div className="flex-1 min-w-0">
- <div className="flex items-center gap-2">
- <p className="text-sm font-display font-bold text-foreground">{title}</p>
- {badge && (
- <span className="text-[11px] font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/10">{badge}</span>
- )}
- </div>
- <p className="text-xs text-muted-foreground leading-snug">{desc}</p>
- </div>
- </div>
- );
+function ThemeChoice({ option, selected, onSelect }: { option: (typeof THEME_OPTIONS)[number]; selected: boolean; onSelect: () => void }) {
+  const T = PREVIEW_THEMES[option.key];
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      onClick={onSelect}
+      className={cn(
+        "vp-r16 relative border p-2.5 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+        selected ? "border-primary/60 bg-accent" : "border-border bg-card hover:border-primary/40",
+      )}
+    >
+      {selected && <span aria-hidden className="absolute right-2 top-2 z-10 grid h-5 w-5 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm"><Check className="h-3 w-3" strokeWidth={3} /></span>}
+      <span className="block rounded-[10px] p-2" style={{ background: T.bg, border: `1px solid ${T.border}` }}>
+        <span className="block h-1.5 w-2/3 rounded-full" style={{ background: T.text, opacity: 0.75 }} />
+        <span className="mt-1.5 block h-5 rounded-md" style={{ background: T.card, border: `1px solid ${T.border}` }} />
+        <span className="mt-1.5 block h-2 rounded-full bg-primary" />
+      </span>
+      <span className={cn("mt-2.5 block truncate text-[13px] font-bold leading-tight", selected ? "text-accent-foreground" : "text-foreground")}>{option.name}<span className="sr-only">. {option.hint}</span></span>
+    </button>
+  );
 }
 
-/* ─── Toggle Row ─── */
-function ToggleRow({ icon: Icon, title, desc, checked, onChange, extra, badge }: {
- icon: React.ComponentType<{ className?: string }>; title: string; desc: string;
- checked: boolean; onChange: (v: boolean) => void; extra?: React.ReactNode; badge?: string;
+function BannerSlot({ label, size, hint, preview, inputRef, onFile, onClear }: {
+  label: string; size: string; hint?: string; preview: string; inputRef: React.RefObject<HTMLInputElement>;
+  onFile: (e: React.ChangeEvent<HTMLInputElement>) => void; onClear: () => void;
 }) {
- return (
- <div className={cn(
- "group relative flex items-center justify-between p-3 rounded-xl border transition-all duration-200",
- checked
- ? "border-primary/25 bg-primary/[0.04]"
- : "border-border/30 bg-card/60 hover:border-border/50"
- )}>
- {checked && (
- <div className="absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-full bg-primary/60" />
- )}
- <div className="flex items-center gap-3 flex-1 min-w-0">
- <div className={cn(
- "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 transition-all border",
- checked ? "bg-primary/10 border-primary/15" : "bg-muted/30 border-transparent"
- )}>
- <Icon className={cn("h-4 w-4 transition-colors", checked ? "text-primary" : "text-muted-foreground/50")} />
- </div>
- <div className="min-w-0">
- <div className="flex items-center gap-2">
- <p className={cn("text-xs font-semibold transition-colors", checked ? "text-foreground" : "text-foreground/70")}>{title}</p>
- {badge && (
- <span className="text-[11px] font-medium bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">{badge}</span>
- )}
- </div>
- <p className="text-[11px] text-muted-foreground leading-snug">{desc}</p>
- </div>
- </div>
- <div className="flex items-center gap-2 shrink-0">
- {extra}
- <Switch checked={checked} onCheckedChange={onChange} />
- </div>
- </div>
- );
+  return (
+    <div>
+      <FieldLabel hint={size}>{label}</FieldLabel>
+      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={onFile} className="hidden" aria-label={`Escolher banner ${label.toLowerCase()}`} />
+      {preview ? (
+        <div className="relative overflow-hidden rounded-[16px] border border-border">
+          <img src={preview} alt={`Banner ${label.toLowerCase()}`} className="h-24 w-full object-cover" />
+          <div className="absolute inset-x-2 bottom-2 flex justify-end gap-1.5">
+            <button type="button" onClick={() => inputRef.current?.click()} aria-label={`Trocar banner ${label.toLowerCase()}`} className="vp-orb !h-9 !w-9 shadow-sm"><ImagePlus className="h-4 w-4" /></button>
+            <button type="button" onClick={onClear} aria-label={`Remover banner ${label.toLowerCase()}`} className="vp-orb !h-9 !w-9 text-destructive shadow-sm"><X className="h-4 w-4" /></button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" onClick={() => inputRef.current?.click()} className="vp-r16 flex h-24 w-full flex-col items-center justify-center gap-1 border-2 border-dashed border-border bg-muted/40 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-accent hover:text-accent-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+          <Upload className="h-5 w-5" />
+          <span className="text-[13.5px] font-semibold">Enviar imagem</span>
+        </button>
+      )}
+      {hint && <FieldHint>{hint}</FieldHint>}
+    </div>
+  );
 }
 
-/* ─── Conversion Tip ─── */
-function ConversionTip({ text, icon: Icon = Zap }: { text: string; icon?: React.ComponentType<{ className?: string }> }) {
- return (
- <div className="rounded-xl bg-primary/5 border border-primary/10 p-3 flex items-start gap-2.5">
- <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
- <Icon className="h-3 w-3 text-primary" />
- </div>
- <div>
- <p className="text-[11px] font-medium text-primary/70 mb-0.5">Dica de conversão</p>
- <p className="text-[11px] text-muted-foreground leading-relaxed">{text}</p>
- </div>
- </div>
- );
+/* ─── Prévia do checkout (aproximação do checkout público) ─── */
+type PreviewProps = {
+  device: "desktop" | "mobile"; theme: Theme; color: string; timerEnabled: boolean; timerMinutes: string; banner: string;
+  name: string; description: string; price: number; image: string; card: boolean; pix: boolean; boleto: boolean;
+  emailConfirm: boolean; address: boolean; guarantee: boolean; url: string; bumps: { id: string; name: string; price: number; image: string }[];
+};
+
+function CheckoutPreview(p: PreviewProps) {
+  const T = PREVIEW_THEMES[p.theme];
+  const color = HEX_COLOR.test(p.color.trim()) ? p.color.trim() : "#10b981";
+  const mobile = p.device === "mobile";
+  const minutes = /^\d+$/.test(p.timerMinutes.trim()) && Number(p.timerMinutes) >= 1 ? Math.min(Number(p.timerMinutes), 60) : 15;
+  const mm = String(minutes).padStart(2, "0");
+  const anyMethod = p.pix || p.boleto || p.card;
+  const steps = p.address ? ["Identificação", "Endereço", "Pagamento"] : ["Identificação", "Pagamento"];
+  const host = (p.url || "seudominio.com.br/pay/seu-produto").replace(/^https?:\/\//, "");
+
+  // A regra global `[class*="border"]` força a cor da borda do painel; na prévia as bordas vão em style para manter as cores do checkout.
+  const bd = (color: string, width = 1, style: "solid" | "dashed" = "solid") => ({ border: `${width}px ${style} ${color}` });
+
+  const field = (label: string, placeholder: string) => (
+    <div className="min-w-0">
+      <p className="mb-1 text-[11.5px] font-semibold" style={{ color: T.muted }}>{label}</p>
+      <div className="flex h-9 items-center rounded-[10px] px-3 text-[12.5px]" style={{ background: T.soft, ...bd(T.border), color: T.muted }}>{placeholder}</div>
+    </div>
+  );
+  const sectionCard = "rounded-[16px] p-4";
+  const sectionStyle = { background: T.card, ...bd(T.border) };
+  const timeBox = (v: string) => (
+    <span className="rounded-lg px-2.5 py-1 text-[15px] font-extrabold tabular-nums" style={{ background: T.soft, ...bd(T.border) }}>{v}</span>
+  );
+
+  const content = (
+    <div style={{ background: T.bg, color: T.text }}>
+      {p.timerEnabled && (
+        <div className="flex items-center justify-between px-4 py-2.5" style={{ background: T.card, borderBottom: `1px solid ${T.border}` }}>
+          <span className="flex items-center gap-2 text-[12px] font-semibold" style={{ color: T.muted }}>
+            <span className="grid h-6 w-6 place-items-center rounded-lg" style={{ background: `${color}1f` }}><Zap className="h-3.5 w-3.5" style={{ color }} /></span>
+            Oferta expira em
+          </span>
+          <span className="flex items-center gap-1 font-mono">{timeBox(mm)}<span className="font-bold" style={{ color: T.muted }}>:</span>{timeBox("00")}</span>
+        </div>
+      )}
+      {p.banner && <img src={p.banner} alt="" className={cn("w-full object-cover", mobile ? "aspect-[2/1]" : "aspect-[3/1]")} />}
+
+      <div className={cn("space-y-3.5", mobile ? "p-4" : "p-5")}>
+        <div className={cn(sectionCard, "flex items-center gap-3.5")} style={sectionStyle}>
+          {p.image ? (
+            <img src={p.image} alt="" className="h-14 w-14 shrink-0 rounded-[14px] object-cover" style={bd(T.border)} />
+          ) : (
+            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-[14px]" style={{ background: `${color}14`, ...bd(T.border) }}><Sparkles className="h-6 w-6" style={{ color: `${color}99` }} /></span>
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[14.5px] font-bold leading-tight">{p.name || "Nome do produto"}</p>
+            {p.description && <p className="mt-0.5 line-clamp-1 text-[11.5px]" style={{ color: T.muted }}>{p.description}</p>}
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-[19px] font-extrabold leading-none tracking-tight" style={{ color }}>{formatCurrency(p.price)}</p>
+            {p.card && <p className="mt-1 text-[10.5px]" style={{ color: T.muted }}>ou 12x de {formatCurrency((p.price * 1.2189) / 12)}</p>}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5" aria-hidden>
+          {steps.map((s, i) => (
+            <div key={s} className="min-w-0 flex-1">
+              <div className="h-1 rounded-full" style={{ background: i === 0 ? color : T.border }} />
+              <p className="mt-1 truncate text-[10.5px] font-semibold" style={{ color: i === 0 ? T.text : T.muted }}>{s}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className={cn(sectionCard, "space-y-3")} style={sectionStyle}>
+          <p className="text-[13px] font-bold">Identificação</p>
+          {field("Nome completo", "Seu nome completo")}
+          <div className={cn("grid gap-3", p.emailConfirm && !mobile ? "grid-cols-2" : "grid-cols-1")}>
+            {field("E-mail", "seu@email.com")}
+            {p.emailConfirm && field("Confirme seu e-mail", "Repita o e-mail")}
+          </div>
+          {field("CPF / CNPJ", "000.000.000-00")}
+          {p.address && (
+            <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3">
+              {field("CEP", "00000-000")}
+              {field("Endereço", "Rua e número")}
+            </div>
+          )}
+        </div>
+
+        <div className={cn(sectionCard, "space-y-3")} style={sectionStyle}>
+          <p className="text-[13px] font-bold">Forma de pagamento</p>
+          {anyMethod ? (
+            <div className="flex flex-wrap gap-2">
+              {p.pix && <span className="inline-flex items-center gap-1.5 rounded-[10px] px-3 py-2 text-[12px] font-bold" style={{ ...bd(`${color}66`), background: `${color}14`, color: T.text }}><QrCode className="h-3.5 w-3.5" style={{ color }} /> PIX</span>}
+              {p.card && <span className="inline-flex items-center gap-1.5 rounded-[10px] px-3 py-2 text-[12px] font-bold" style={{ ...bd(T.border), background: T.soft }}><CreditCard className="h-3.5 w-3.5" style={{ color: T.muted }} /> Cartão</span>}
+              {p.boleto && <span className="inline-flex items-center gap-1.5 rounded-[10px] px-3 py-2 text-[12px] font-bold" style={{ ...bd(T.border), background: T.soft }}><FileText className="h-3.5 w-3.5" style={{ color: T.muted }} /> Boleto</span>}
+            </div>
+          ) : (
+            <p className="rounded-[10px] px-3 py-3 text-center text-[12.5px] font-semibold" style={{ ...bd("hsl(0 72% 51% / .5)", 1, "dashed"), color: "hsl(0 72% 51%)" }}>Nenhuma forma de pagamento ativa</p>
+          )}
+        </div>
+
+        {p.bumps.length > 0 && (
+          <div className="space-y-2">
+            <p className="flex items-center gap-1.5 text-[12px] font-extrabold" style={{ color }}><Sparkles className="h-3.5 w-3.5" /> Oferta exclusiva</p>
+            {p.bumps.map((b) => (
+              <div key={b.id} className="flex items-center gap-3 rounded-[14px] p-3" style={{ ...bd(`${color}55`, 2, "dashed"), background: `${color}0d` }}>
+                {b.image ? <img src={b.image} alt="" className="h-11 w-11 shrink-0 rounded-[10px] object-cover" style={bd(T.border)} /> : <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[10px]" style={{ background: T.card, ...bd(T.border) }}><Package className="h-4 w-4" style={{ color }} /></span>}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[12.5px] font-bold">{b.name}</p>
+                  <p className="text-[10.5px]" style={{ color: T.muted }}>Adicione ao seu pedido</p>
+                  <p className="text-[13px] font-extrabold" style={{ color }}>+ {formatCurrency(b.price)}</p>
+                </div>
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[10px]" style={bd(`${color}66`, 2)}><Plus className="h-3.5 w-3.5" style={{ color }} /></span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {p.guarantee && (
+          <div className={cn(sectionCard, "flex items-center gap-3.5")} style={sectionStyle}>
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px]" style={{ background: `${color}12`, ...bd(`${color}33`) }}><ShieldCheck className="h-5 w-5" style={{ color }} /></span>
+            <div className="min-w-0">
+              <p className="text-[13px] font-bold">Garantia incondicional de 7 dias</p>
+              <p className="mt-0.5 text-[11.5px] leading-snug" style={{ color: T.muted }}>Não ficou satisfeito? Devolvemos 100% do valor.</p>
+            </div>
+          </div>
+        )}
+
+        <div className="flex h-12 w-full items-center justify-center gap-2 rounded-[14px] text-[14.5px] font-bold text-white" style={{ background: color, boxShadow: `0 10px 24px -10px ${color}` }}>
+          <Lock className="h-4 w-4" /> Comprar agora
+        </div>
+      </div>
+    </div>
+  );
+
+  if (mobile) {
+    return <div className="mx-auto w-[375px] max-w-full overflow-hidden rounded-[34px] shadow-[0_30px_60px_-30px_rgba(15,23,42,.45)]" style={{ border: "8px solid #111827", background: "#111827" }}><div className="overflow-hidden rounded-[26px]">{content}</div></div>;
+  }
+  return (
+    <div className="mx-auto w-full max-w-[660px] overflow-hidden rounded-[20px] border border-border bg-card shadow-[0_30px_60px_-34px_rgba(15,23,42,.35)]">
+      <div className="flex items-center gap-3 border-b border-border bg-muted/60 px-4 py-2.5">
+        <span aria-hidden className="flex gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-border" /><i className="h-2.5 w-2.5 rounded-full bg-border" /><i className="h-2.5 w-2.5 rounded-full bg-border" /></span>
+        <span className="flex min-w-0 flex-1 items-center gap-1.5 rounded-full bg-background px-3 py-1 text-[12px] text-muted-foreground"><Lock className="h-3 w-3 shrink-0" /><span className="truncate">{host}</span></span>
+      </div>
+      {content}
+    </div>
+  );
 }
 
-/* ─── Preview Field ─── */
-function PreviewField({ label, theme }: { label: string; theme?: string }) {
- return (
- <div>
- <p className="text-[11px] font-semibold text-gray-500 mb-1.5 ">{label}</p>
- <div className={cn(
- "h-10 rounded-lg border",
- theme === "white" ? "bg-white border-gray-200" : theme === "dark" ? "bg-[hsl(220_15%_16%)] border-[hsl(220_12%_24%)]" : "bg-white/70 border-gray-200"
- )} />
- </div>
- );
-}
-
-/* ═══════════════════════════════════════════════ */
-/* MAIN COMPONENT */
 /* ═══════════════════════════════════════════════ */
 export default function CheckoutBuilder() {
- const { productId } = useParams<{ productId: string }>();
- const navigate = useNavigate();
- const location = useLocation();
- const { user } = useAuth();
- const initialProduct = (location.state as { product?: Tables<"products"> } | null)?.product ?? null;
- const [product, setProduct] = useState<Tables<"products"> | null>(initialProduct);
- const [loading, setLoading] = useState(!initialProduct);
- const [activeTab, setActiveTab] = useState<TabId>("visual");
- const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
- const [saving, setSaving] = useState(false);
- const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
- const saveTimeout = useRef<ReturnType<typeof setTimeout>>();
- const initializedRef = useRef(false);
+  useSellerSkin();
+  const { productId } = useParams<{ productId: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
+  const initialProduct = (location.state as { product?: Tables<"products"> } | null)?.product ?? null;
 
- // Settings state
- const [buttonColor, setButtonColor] = useState(initialProduct?.checkout_button_color || "#10b981");
- const [checkoutTheme, setCheckoutTheme] = useState<"gray" | "white" | "dark">(getCheckoutTheme(initialProduct));
- const [timerEnabled, setTimerEnabled] = useState(initialProduct?.checkout_timer_enabled ?? true);
- const [timerMinutes, setTimerMinutes] = useState(String(initialProduct?.checkout_timer_minutes ?? 15));
- const [socialProof, setSocialProof] = useState(initialProduct?.checkout_social_proof ?? false);
- const [guaranteeEnabled, setGuaranteeEnabled] = useState(initialProduct?.checkout_guarantee_enabled ?? true);
- const [pixEnabled, setPixEnabled] = useState(initialProduct?.checkout_pix_enabled ?? true);
- const [boletoEnabled, setBoletoEnabled] = useState(initialProduct?.checkout_boleto_enabled ?? false);
- const [creditCardEnabled, setCreditCardEnabled] = useState(initialProduct?.checkout_credit_card_enabled ?? true);
- const [allowedMethods, setAllowedMethods] = useState({ pix: true, boleto: false, card: true });
- const [addressRequired, setAddressRequired] = useState(initialProduct?.checkout_address_required ?? false);
- const [emailConfirm, setEmailConfirm] = useState(initialProduct?.checkout_email_confirm ?? true);
- const [bannerDesktopPreview, setBannerDesktopPreview] = useState(initialProduct?.checkout_banner_desktop_url || "");
- const [bannerMobilePreview, setBannerMobilePreview] = useState(initialProduct?.checkout_banner_mobile_url || "");
- const [bannerDesktopFile, setBannerDesktopFile] = useState<File | null>(null);
- const [bannerMobileFile, setBannerMobileFile] = useState<File | null>(null);
- const desktopRef = useRef<HTMLInputElement>(null);
- const mobileRef = useRef<HTMLInputElement>(null);
+  const [product, setProduct] = useState<Tables<"products"> | null>(initialProduct);
+  const [loading, setLoading] = useState(!initialProduct);
+  const [activeTab, setActiveTab] = useState<TabId>("visual");
+  const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">(() => (typeof window !== "undefined" && window.innerWidth < 1024 ? "mobile" : "desktop"));
+  const [mobileView, setMobileView] = useState<"edit" | "preview">("edit");
+  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
- // Form extras
- const [cpfRequired] = useState(true);
+  const initial = useMemo(() => (initialProduct ? fromProduct(initialProduct) : null), [initialProduct]);
+  const [buttonColor, setButtonColor] = useState(initial?.buttonColor ?? "#10b981");
+  const [theme, setTheme] = useState<Theme>(initial?.theme ?? "gray");
+  const [timerEnabled, setTimerEnabled] = useState(initial?.timerEnabled ?? true);
+  const [timerMinutes, setTimerMinutes] = useState(initial?.timerMinutes ?? "15");
+  const [socialProof, setSocialProof] = useState(initial?.socialProof ?? false);
+  const [guaranteeEnabled, setGuaranteeEnabled] = useState(initial?.guaranteeEnabled ?? true);
+  const [pixEnabled, setPixEnabled] = useState(initial?.pix ?? true);
+  const [boletoEnabled, setBoletoEnabled] = useState(initial?.boleto ?? false);
+  const [creditCardEnabled, setCreditCardEnabled] = useState(initial?.card ?? true);
+  const [addressRequired, setAddressRequired] = useState(initial?.address ?? false);
+  const [emailConfirm, setEmailConfirm] = useState(initial?.emailConfirm ?? true);
+  const [bannerDesktopPreview, setBannerDesktopPreview] = useState(initial?.bannerD ?? "");
+  const [bannerMobilePreview, setBannerMobilePreview] = useState(initial?.bannerM ?? "");
+  const [bannerDesktopFile, setBannerDesktopFile] = useState<File | null>(null);
+  const [bannerMobileFile, setBannerMobileFile] = useState<File | null>(null);
+  const desktopRef = useRef<HTMLInputElement>(null);
+  const mobileRef = useRef<HTMLInputElement>(null);
 
- // Order bumps
- const [allProducts, setAllProducts] = useState<Tables<"products">[]>([]);
- const [orderBumps, setOrderBumps] = useState<{ id: string; bump_product_id: string }[]>([]);
- const [selectedBumpProduct, setSelectedBumpProduct] = useState("");
+  const [allowed, setAllowed] = useState<Allowed | null>(null);
+  const [allProducts, setAllProducts] = useState<Tables<"products">[]>([]);
+  const [orderBumps, setOrderBumps] = useState<Bump[]>([]);
+  const [selectedBumpProduct, setSelectedBumpProduct] = useState("");
+  const [addingBump, setAddingBump] = useState(false);
 
- // Optimization score
- const optimizationScore = (() => {
- let s = 0;
- // Boleto está desativado na plataforma e a prova social fictícia foi removida.
- const max = 6;
- if (pixEnabled) s++;
- if (creditCardEnabled) s++;
- if (timerEnabled) s++;
- if (guaranteeEnabled) s++;
- if (orderBumps.length > 0) s++;
- if (bannerDesktopPreview || bannerMobilePreview) s++;
- return { score: s, max };
- })();
+  // Valores atuais (com os métodos que a conta pode usar) e a "foto" do que já está no banco.
+  const raw: Settings = { buttonColor, theme, timerEnabled, timerMinutes, socialProof, guaranteeEnabled, pix: pixEnabled, boleto: boletoEnabled, card: creditCardEnabled, address: addressRequired, emailConfirm, bannerD: bannerDesktopPreview, bannerM: bannerMobilePreview, fileD: bannerDesktopFile, fileM: bannerMobileFile };
+  const current = effective(raw, allowed);
+  const snapshot = makeSnapshot(current);
+  const latest = useRef({ current, allowed });
+  latest.current = { current, allowed };
+  const savedSnapshot = useRef<string | null>(null);
+  const savingRef = useRef(false);
 
- // Tab feature counts
- const getTabFeatureCount = (tabId: TabId): number => {
- switch (tabId) {
- case "visual": return [timerEnabled, guaranteeEnabled, !!bannerDesktopPreview, !!bannerMobilePreview].filter(Boolean).length;
- case "payment": return [pixEnabled, boletoEnabled, creditCardEnabled].filter(Boolean).length;
- case "form": return [emailConfirm, cpfRequired, addressRequired].filter(Boolean).length;
- case "bumps": return orderBumps.length;
- case "cro": return 0;
- default: return 0;
- }
- };
+  const colorValid = HEX_COLOR.test(buttonColor.trim());
+  const minutesValid = timerValid(raw);
+  const formValid = colorValid && minutesValid;
+  const ready = loaded && allowed !== null;
 
- // Load product
- useEffect(() => {
- if (!user?.id || !productId) return;
- if (!product) setLoading(true);
- supabase.from("products").select("*").eq("id", productId).eq("user_id", user.id).maybeSingle()
- .then(({ data, error }) => {
- if (error || !data) { toast.error("Produto não encontrado"); navigate("/vendas/produtos"); return; }
- setProduct(data);
- setButtonColor(data.checkout_button_color || "#10b981");
- setCheckoutTheme(getCheckoutTheme(data));
- setTimerEnabled(data.checkout_timer_enabled ?? true);
- setTimerMinutes(String(data.checkout_timer_minutes ?? 15));
- setSocialProof(data.checkout_social_proof ?? false);
- setGuaranteeEnabled(data.checkout_guarantee_enabled ?? true);
- setPixEnabled(data.checkout_pix_enabled ?? true);
- setBoletoEnabled(data.checkout_boleto_enabled ?? false);
- setCreditCardEnabled(data.checkout_credit_card_enabled ?? true);
- setAddressRequired(data.checkout_address_required ?? false);
- setEmailConfirm(data.checkout_email_confirm ?? true);
- setBannerDesktopPreview(data.checkout_banner_desktop_url || "");
- setBannerMobilePreview(data.checkout_banner_mobile_url || "");
- setLoading(false);
- });
- supabase.from("products").select("*").eq("user_id", user.id).eq("status", "active").neq("id", productId)
- .then(({ data }) => { if (data) setAllProducts(data); });
- supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", productId)
- .then(({ data }) => { if (data) setOrderBumps(data); });
- // eslint-disable-next-line react-hooks/exhaustive-deps
- }, [user?.id, productId]);
+  const applyProduct = useCallback((data: Tables<"products">) => {
+    const s = fromProduct(data);
+    setProduct(data);
+    setButtonColor(s.buttonColor); setTheme(s.theme); setTimerEnabled(s.timerEnabled); setTimerMinutes(s.timerMinutes);
+    setSocialProof(s.socialProof); setGuaranteeEnabled(s.guaranteeEnabled); setPixEnabled(s.pix); setBoletoEnabled(s.boleto);
+    setCreditCardEnabled(s.card); setAddressRequired(s.address); setEmailConfirm(s.emailConfirm);
+    setBannerDesktopPreview(s.bannerD); setBannerMobilePreview(s.bannerM);
+    savedSnapshot.current = makeSnapshot(s);
+    setLoaded(true);
+    setLoading(false);
+  }, []);
 
- useEffect(() => {
-  if (!user?.id) return;
-  supabase.from("profiles").select("pix_enabled, boleto_enabled, credit_card_enabled").eq("user_id", user.id).maybeSingle()
-   .then(({ data }) => {
-    if (!data) return;
-    setAllowedMethods({ pix: data.pix_enabled, boleto: data.boleto_enabled, card: data.credit_card_enabled });
-    if (!data.pix_enabled) setPixEnabled(false);
-    if (!data.boleto_enabled) setBoletoEnabled(false);
-    if (!data.credit_card_enabled) setCreditCardEnabled(false);
-   });
- }, [user?.id]);
+  /* Carrega produto, outros produtos ativos, order bumps e os métodos liberados para a conta */
+  useEffect(() => {
+    if (!user?.id || !productId) return;
+    if (!initialProduct) setLoading(true);
+    supabase.from("products").select("*").eq("id", productId).eq("user_id", user.id).maybeSingle()
+      .then(({ data, error }) => {
+        if (error || !data) { toast.error("Produto não encontrado"); navigate("/vendas/produtos"); return; }
+        applyProduct(data);
+      });
+    supabase.from("products").select("*").eq("user_id", user.id).eq("status", "active").is("deleted_at", null).neq("id", productId)
+      .then(({ data }) => { if (data) setAllProducts(data); });
+    supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", productId)
+      .then(({ data }) => { if (data) setOrderBumps(data); });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, productId]);
 
- // Auto-save
- const autoSave = useCallback(async () => {
- if (!user?.id || !productId) return;
- setSaving(true);
- let desktopUrl = bannerDesktopPreview;
- let mobileUrl = bannerMobilePreview;
- const ALLOWED_BANNER = ["image/jpeg", "image/png", "image/webp"];
- const MAX_BANNER = 5 * 1024 * 1024;
- if (bannerDesktopFile) {
- if (!ALLOWED_BANNER.includes(bannerDesktopFile.type)) { toast.error("Banner desktop: use JPG, PNG ou WebP"); setSaving(false); return; }
- if (bannerDesktopFile.size > MAX_BANNER) { toast.error("Banner desktop: máximo 5MB"); setSaving(false); return; }
- const ext = (bannerDesktopFile.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
- const path = `${user.id}/${productId}-desktop.${ext}`;
- const { error } = await supabase.storage.from("checkout-banners").upload(path, bannerDesktopFile, { upsert: true });
- if (!error) { const { data } = supabase.storage.from("checkout-banners").getPublicUrl(path); desktopUrl = data.publicUrl; }
- setBannerDesktopFile(null);
- }
- if (bannerMobileFile) {
- if (!ALLOWED_BANNER.includes(bannerMobileFile.type)) { toast.error("Banner mobile: use JPG, PNG ou WebP"); setSaving(false); return; }
- if (bannerMobileFile.size > MAX_BANNER) { toast.error("Banner mobile: máximo 5MB"); setSaving(false); return; }
- const ext = (bannerMobileFile.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
- const path = `${user.id}/${productId}-mobile.${ext}`;
- const { error } = await supabase.storage.from("checkout-banners").upload(path, bannerMobileFile, { upsert: true });
- if (!error) { const { data } = supabase.storage.from("checkout-banners").getPublicUrl(path); mobileUrl = data.publicUrl; }
- setBannerMobileFile(null);
- }
- const { error } = await supabase.from("products").update({
- checkout_button_color: buttonColor,
- checkout_theme: checkoutTheme,
- checkout_timer_enabled: timerEnabled,
- checkout_timer_minutes: parseInt(timerMinutes) || 15,
- checkout_banner_desktop_url: desktopUrl || null,
- checkout_banner_mobile_url: mobileUrl || null,
- checkout_social_proof: socialProof,
- checkout_guarantee_enabled: guaranteeEnabled,
- checkout_pix_enabled: pixEnabled,
- checkout_boleto_enabled: boletoEnabled,
- checkout_credit_card_enabled: creditCardEnabled,
- checkout_address_required: addressRequired,
- checkout_email_confirm: emailConfirm,
- }).eq("id", productId).eq("user_id", user.id);
- setSaving(false);
- setLastSavedAt(new Date());
- if (!error) toast.success("Alterações salvas", { duration: 1500 });
- }, [user?.id, productId, buttonColor, checkoutTheme, timerEnabled, timerMinutes, socialProof, guaranteeEnabled, pixEnabled, boletoEnabled, creditCardEnabled, addressRequired, emailConfirm, bannerDesktopPreview, bannerMobilePreview, bannerDesktopFile, bannerMobileFile]);
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.from("profiles").select("pix_enabled, boleto_enabled, credit_card_enabled").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => {
+        setAllowed(data ? { pix: !!data.pix_enabled, boleto: !!data.boleto_enabled, card: !!data.credit_card_enabled } : { pix: true, boleto: true, card: true });
+      });
+  }, [user?.id]);
 
- useEffect(() => {
- if (loading || !product) return;
-  if (!initializedRef.current) { initializedRef.current = true; return; }
- if (saveTimeout.current) clearTimeout(saveTimeout.current);
- saveTimeout.current = setTimeout(autoSave, 1200);
- return () => { if (saveTimeout.current) clearTimeout(saveTimeout.current); };
- }, [buttonColor, checkoutTheme, timerEnabled, timerMinutes, socialProof, guaranteeEnabled, pixEnabled, boletoEnabled, creditCardEnabled, addressRequired, emailConfirm, autoSave, loading, product]);
+  /* Salvar: valida, envia os banners e grava. Devolve true se salvou. */
+  const save = useCallback(async (manual = false): Promise<boolean> => {
+    if (!user?.id || !productId || savingRef.current) return false;
+    const { current: s } = latest.current;
+    if (!HEX_COLOR.test(s.buttonColor.trim())) { if (manual) toast.error("Use uma cor no formato #10b981"); return false; }
+    if (!timerValid(s)) { if (manual) toast.error("O timer vai de 1 a 60 minutos"); return false; }
 
- const handleFile = (e: React.ChangeEvent<HTMLInputElement>, type: "desktop" | "mobile") => {
- const file = e.target.files?.[0];
- if (!file) return;
- if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB"); return; }
- if (type === "desktop") { setBannerDesktopFile(file); setBannerDesktopPreview(URL.createObjectURL(file)); }
- else { setBannerMobileFile(file); setBannerMobilePreview(URL.createObjectURL(file)); }
- };
+    savingRef.current = true;
+    setSaveState("saving");
+    try {
+      let desktopUrl = s.bannerD;
+      let mobileUrl = s.bannerM;
+      const banners = [
+        { file: s.fileD, kind: "desktop" as const, label: "desktop" },
+        { file: s.fileM, kind: "mobile" as const, label: "mobile" },
+      ];
+      for (const b of banners) {
+        if (!b.file) continue;
+        if (!ALLOWED_BANNER.includes(b.file.type)) throw new Error(`Banner ${b.label}: use JPG, PNG ou WebP`);
+        if (b.file.size > MAX_BANNER) throw new Error(`Banner ${b.label}: máximo 5 MB`);
+        const ext = (b.file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+        const path = `${user.id}/${productId}-${b.kind}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("checkout-banners").upload(path, b.file, { upsert: true });
+        if (upErr) throw new Error(`Não foi possível enviar o banner ${b.label}. Tente de novo.`);
+        const { data: pub } = supabase.storage.from("checkout-banners").getPublicUrl(path);
+        if (b.kind === "desktop") desktopUrl = pub.publicUrl; else mobileUrl = pub.publicUrl;
+      }
+      // Nunca grava um endereço temporário do navegador.
+      if (desktopUrl.startsWith("blob:") || mobileUrl.startsWith("blob:")) throw new Error("Não foi possível enviar o banner. Tente de novo.");
 
- const addBump = async () => {
- if (!selectedBumpProduct) return;
- if (orderBumps.some(b => b.bump_product_id === selectedBumpProduct)) { toast.error("Já adicionado"); return; }
- const { data, error } = await supabase.from("order_bumps").insert({ product_id: productId!, bump_product_id: selectedBumpProduct, sort_order: orderBumps.length }).select("id, bump_product_id").maybeSingle();
- if (error || !data) { toast.error("Erro ao adicionar"); return; }
- setOrderBumps(prev => [...prev, data]);
- setSelectedBumpProduct("");
- toast.success("Bump adicionado!");
- };
+      const { error } = await supabase.from("products").update({
+        checkout_button_color: s.buttonColor.trim(),
+        checkout_theme: s.theme,
+        checkout_timer_enabled: s.timerEnabled,
+        checkout_timer_minutes: timerValid(s) && /^\d+$/.test(s.timerMinutes.trim()) ? Number(s.timerMinutes) : 15,
+        checkout_banner_desktop_url: desktopUrl || null,
+        checkout_banner_mobile_url: mobileUrl || null,
+        checkout_social_proof: s.socialProof,
+        checkout_guarantee_enabled: s.guaranteeEnabled,
+        checkout_pix_enabled: s.pix,
+        checkout_boleto_enabled: s.boleto,
+        checkout_credit_card_enabled: s.card,
+        checkout_address_required: s.address,
+        checkout_email_confirm: s.emailConfirm,
+      }).eq("id", productId).eq("user_id", user.id);
+      if (error) throw new Error("Não foi possível salvar. Tente de novo.");
 
- const removeBump = async (id: string) => {
- await supabase.from("order_bumps").delete().eq("id", id).eq("product_id", productId!);
- setOrderBumps(prev => prev.filter(b => b.id !== id));
- toast.success("Bump removido");
- };
+      savedSnapshot.current = makeSnapshot({ ...s, bannerD: desktopUrl, bannerM: mobileUrl, fileD: null, fileM: null });
+      if (s.fileD) { setBannerDesktopPreview(desktopUrl); setBannerDesktopFile(null); }
+      if (s.fileM) { setBannerMobilePreview(mobileUrl); setBannerMobileFile(null); }
+      setLastSavedAt(new Date());
+      setSaveState("saved");
+      if (manual) toast.success("Checkout salvo");
+      return true;
+    } catch (e) {
+      setSaveState("error");
+      toast.error(e instanceof Error ? e.message : "Não foi possível salvar. Tente de novo.");
+      return false;
+    } finally {
+      savingRef.current = false;
+    }
+  }, [user?.id, productId]);
 
- const availableForBump = allProducts.filter(p => !orderBumps.some(b => b.bump_product_id === p.id));
- const checkoutUrl = product?.checkout_url ? `${window.location.origin}/pay/${product.checkout_url.split("/").pop()}` : "";
- const themeLabel = checkoutTheme === "white" ? "Branco Premium" : checkoutTheme === "dark" ? "Cinza Escuro" : "Cinza Suave";
+  /* Salva sozinho 1,2 s depois da última mudança válida */
+  useEffect(() => {
+    if (!ready || savedSnapshot.current === null) return;
+    if (snapshot === savedSnapshot.current) {
+      setSaveState((prev) => (prev === "dirty" || prev === "error" ? (lastSavedAt ? "saved" : "idle") : prev));
+      return;
+    }
+    setSaveState((prev) => (prev === "saving" ? prev : "dirty"));
+    if (!formValid) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const tick = () => { if (savingRef.current) { timer = setTimeout(tick, 400); return; } void save(); };
+    timer = setTimeout(tick, SAVE_DELAY);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot, ready, formValid, save]);
 
- /* ─── LOADING STATE ─── */
- if (loading) return (
- <div className="min-h-screen bg-background flex items-center justify-center">
- <div className="flex flex-col items-center gap-4">
- <motion.div
- animate={{ rotate: 360 }}
- transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
- className="h-12 w-12 border-2 border-border/20 border-t-primary rounded-full"
- />
- <div className="text-center space-y-1">
- <p className="text-sm font-display font-bold text-foreground">Checkout Builder</p>
- <p className="text-xs text-muted-foreground">Carregando...</p>
- </div>
- </div>
- </div>
- );
+  const isDirty = ready && savedSnapshot.current !== null && snapshot !== savedSnapshot.current;
+  const dirtyRef = useRef(false);
+  dirtyRef.current = isDirty;
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => { if (dirtyRef.current) { e.preventDefault(); e.returnValue = ""; } };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, []);
 
- /* ═══════════════════════════════════════════════ */
- /* RENDER */
- /* ═══════════════════════════════════════════════ */
- return (
- <div className="h-screen bg-background flex flex-col lg:flex-row overflow-hidden">
- 
- {/* ─── LEFT: Control Panel ─── */}
- <aside className="w-full lg:w-[420px] shrink-0 border-b lg:border-b-0 lg:border-r border-border/50 bg-card/50 backdrop-blur-sm flex flex-col max-h-[60vh] lg:max-h-none lg:h-screen min-h-0">
- 
- {/* Header */}
- <div className="px-4 py-3 border-b border-border/40 bg-card/80">
- <div className="flex items-center gap-3">
- <Button
- variant="ghost" size="icon"
- onClick={() => navigate("/vendas/produtos")}
- className="h-8 w-8 rounded-lg hover:bg-muted/50 text-muted-foreground"
- >
- <ArrowLeft className="h-4 w-4" />
- </Button>
- <div className="min-w-0 flex-1">
- <h1 className="text-sm font-display font-bold text-foreground truncate">{product?.name}</h1>
- <div className="flex items-center gap-2 mt-0.5">
- <span className="text-[10px] text-muted-foreground font-medium">Checkout Builder</span>
- <AnimatePresence mode="wait">
- {saving ? (
- <motion.span
- key="saving"
- initial={{ opacity: 0 }}
- animate={{ opacity: 1 }}
- exit={{ opacity: 0 }}
- className="inline-flex items-center gap-1 text-[10px] text-primary font-medium"
- >
- <motion.span
- animate={{ scale: [1, 1.4, 1] }}
- transition={{ repeat: Infinity, duration: 0.8 }}
- className="h-1.5 w-1.5 rounded-full bg-primary"
- />
- Salvando...
- </motion.span>
- ) : lastSavedAt ? (
- <motion.span
- key="saved"
- initial={{ opacity: 0 }}
- animate={{ opacity: 1 }}
- className="inline-flex items-center gap-1 text-[10px] text-success font-medium"
- >
- <Check className="h-2.5 w-2.5" /> Salvo
- </motion.span>
- ) : null}
- </AnimatePresence>
- </div>
- </div>
- <ScoreRing score={optimizationScore.score} max={optimizationScore.max} />
- </div>
- </div>
+  const handleBack = async () => {
+    if (isDirty) {
+      if (!formValid) { toast.error(!colorValid ? "Corrija a cor do botão antes de sair" : "Corrija o tempo do timer antes de sair"); return; }
+      const ok = await save();
+      if (!ok) return;
+    }
+    navigate("/vendas/produtos");
+  };
 
- {/* Tab Navigation */}
- <nav className="flex gap-0.5 p-2 mx-3 mt-3 rounded-lg bg-muted/30 border border-border/30">
- {TABS.map(tab => {
- const isActive = activeTab === tab.id;
- const featureCount = getTabFeatureCount(tab.id);
- return (
- <button
- key={tab.id}
- onClick={() => setActiveTab(tab.id)}
- className={cn(
- "relative flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-md text-[11px] font-medium transition-all duration-200",
- isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground/70"
- )}
- >
- {isActive && (
- <motion.div
- layoutId="builder-tab"
- className="absolute inset-0 rounded-md bg-card border border-border/50 "
- transition={{ type: "spring", bounce: 0.15, duration: 0.35 }}
- />
- )}
- <div className="relative z-10">
- <tab.icon className={cn("h-3.5 w-3.5 transition-colors", isActive ? "text-primary" : "")} />
- {featureCount > 0 && !isActive && (
- <div className="absolute -top-1 -right-2 h-3.5 min-w-3.5 px-0.5 rounded-full bg-primary text-primary-foreground text-[7px] font-bold flex items-center justify-center">
- {featureCount}
- </div>
- )}
- </div>
- <span className="relative z-10">{tab.label}</span>
- </button>
- );
- })}
- </nav>
+  /* Banners */
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>, type: "desktop" | "mobile") => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!ALLOWED_BANNER.includes(file.type)) { toast.error("Use JPG, PNG ou WebP"); return; }
+    if (file.size > MAX_BANNER) { toast.error("Banner: máximo 5 MB"); return; }
+    const url = URL.createObjectURL(file);
+    if (type === "desktop") { setBannerDesktopFile(file); setBannerDesktopPreview((prev) => { if (prev.startsWith("blob:")) URL.revokeObjectURL(prev); return url; }); }
+    else { setBannerMobileFile(file); setBannerMobilePreview((prev) => { if (prev.startsWith("blob:")) URL.revokeObjectURL(prev); return url; }); }
+  };
+  const clearBanner = (type: "desktop" | "mobile") => {
+    if (type === "desktop") { setBannerDesktopFile(null); setBannerDesktopPreview((prev) => { if (prev.startsWith("blob:")) URL.revokeObjectURL(prev); return ""; }); }
+    else { setBannerMobileFile(null); setBannerMobilePreview((prev) => { if (prev.startsWith("blob:")) URL.revokeObjectURL(prev); return ""; }); }
+  };
 
- {/* Tab Content */}
- <div className="flex-1 overflow-y-auto p-4 pt-3 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
- <AnimatePresence mode="wait">
- <motion.div
- key={activeTab}
- initial={{ opacity: 0, y: 8 }}
- animate={{ opacity: 1, y: 0 }}
- exit={{ opacity: 0, y: -8 }}
- transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
- className="space-y-3"
- >
- {/* ── VISUAL TAB ── */}
- {activeTab === "visual" && (
- <>
- <SectionHeader icon={Palette} title="Aparência" desc="Cores, banners e tema visual" badge="Design" />
+  /* Order bumps */
+  const availableForBump = allProducts.filter((p) => !orderBumps.some((b) => b.bump_product_id === p.id));
+  const addBump = async () => {
+    if (!selectedBumpProduct || !productId || addingBump) return;
+    if (orderBumps.length >= MAX_BUMPS) { toast.error(`Máximo de ${MAX_BUMPS} order bumps`); return; }
+    if (orderBumps.some((b) => b.bump_product_id === selectedBumpProduct)) { toast.error("Produto já adicionado"); return; }
+    setAddingBump(true);
+    const { data, error } = await supabase.from("order_bumps").insert({ product_id: productId, bump_product_id: selectedBumpProduct, sort_order: orderBumps.length }).select("id, bump_product_id").maybeSingle();
+    setAddingBump(false);
+    if (error || !data) { toast.error("Não foi possível adicionar o order bump"); return; }
+    setOrderBumps((prev) => [...prev, data]);
+    setSelectedBumpProduct("");
+    toast.success("Order bump adicionado");
+  };
+  const removeBump = async (id: string) => {
+    if (!productId) return;
+    const { error } = await supabase.from("order_bumps").delete().eq("id", id).eq("product_id", productId);
+    if (error) { toast.error("Não foi possível remover o order bump"); return; }
+    setOrderBumps((prev) => prev.filter((b) => b.id !== id));
+    toast.success("Order bump removido");
+  };
 
- {/* Theme Selector */}
- <SectionCard>
- <Label className="text-[11px] font-medium text-muted-foreground block">Tema Visual</Label>
- <div className="grid grid-cols-3 gap-2.5">
- {[
- { key: "gray" as const, name: "Cinza Suave", swatch: "linear-gradient(180deg,#f3f4f6,#e5e7eb)", ring: "border-border" },
- { key: "white" as const, name: "Branco", swatch: "linear-gradient(180deg,#ffffff,#f9fafb)", ring: "border-border" },
- { key: "dark" as const, name: "Escuro", swatch: "linear-gradient(180deg,hsl(220 16% 18%),hsl(220 18% 10%))", ring: "border-border" },
- ].map(theme => (
- <button
- key={theme.key}
- type="button"
- onClick={() => setCheckoutTheme(theme.key)}
- className={cn(
- "relative rounded-lg border-2 p-2.5 transition-all text-left group",
- checkoutTheme === theme.key
- ? "border-primary "
- : "border-border/30 hover:border-border/60"
- )}
- >
- {checkoutTheme === theme.key && (
- <div className="absolute top-1.5 right-1.5 h-4 w-4 rounded-full bg-primary flex items-center justify-center">
- <Check className="h-2.5 w-2.5 text-primary-foreground" />
- </div>
- )}
- <div className={cn("h-10 rounded-md mb-2 border", theme.ring)} style={{ background: theme.swatch }} />
- <p className="text-[10px] font-bold text-foreground">{theme.name}</p>
- </button>
- ))}
- </div>
- </SectionCard>
+  /* Link do checkout */
+  const checkoutUrl = product?.checkout_url ? `${window.location.origin}/pay/${product.checkout_url.split("/").pop()}` : "";
+  const copyLink = async () => {
+    try { await navigator.clipboard.writeText(checkoutUrl); toast.success("Link copiado"); }
+    catch { toast.error("Não foi possível copiar. Copie o link da barra do navegador."); }
+  };
 
- {/* Color Picker */}
- <SectionCard>
- <Label className="text-[11px] font-medium text-muted-foreground block">Cor do Botão CTA</Label>
- <div className="flex gap-2 flex-wrap">
- {PRESET_COLORS.map(c => (
- <button
- key={c.hex}
- onClick={() => setButtonColor(c.hex)}
- className={cn(
- "h-8 w-8 rounded-lg transition-all relative ",
- buttonColor === c.hex ? "ring-2 ring-offset-2 ring-offset-card ring-primary scale-110" : "hover:scale-105"
- )}
- style={{ backgroundColor: c.hex }}
- title={c.name}
- >
- {buttonColor === c.hex && (
- <div className="absolute inset-0 flex items-center justify-center">
- <Check className="h-3.5 w-3.5 text-white drop-shadow" />
- </div>
- )}
- </button>
- ))}
- </div>
- <div className="flex items-center gap-2">
- <div className="relative">
- <input type="color" value={buttonColor} onChange={(e) => setButtonColor(e.target.value)} className="w-9 h-9 rounded-lg cursor-pointer opacity-0 absolute inset-0 z-10" />
- <div className="h-9 w-9 rounded-lg border border-border/30 flex items-center justify-center" style={{ backgroundColor: buttonColor }}>
- <Palette className="h-3.5 w-3.5 text-white/80 drop-shadow" />
- </div>
- </div>
- <Input value={buttonColor} onChange={(e) => setButtonColor(e.target.value)} className="flex-1 font-mono text-xs h-9 rounded-lg bg-muted/20 border-border/30" />
- </div>
- {/* CTA Preview */}
- <div
- className="h-11 rounded-lg flex items-center justify-center text-white text-sm font-bold gap-2 cursor-pointer transition-transform "
- style={{ backgroundColor: buttonColor, boxShadow: `0 8px 24px -6px ${buttonColor}40` }}
- >
- <Sparkles className="h-4 w-4" /> COMPRAR AGORA — {formatCurrency(Number(product?.price || 0))}
- </div>
- </SectionCard>
+  const bumpsForPreview = orderBumps.map((b) => {
+    const prod = allProducts.find((p) => p.id === b.bump_product_id);
+    return { id: b.id, name: prod?.name || "Produto", price: Number(prod?.price || 0), image: prod?.image_url || "" };
+  });
 
- <ToggleRow icon={Timer} title="Timer de urgência" desc="Contador regressivo de oferta"
- checked={timerEnabled} onChange={setTimerEnabled}
- extra={timerEnabled ? (
- <div className="flex items-center gap-1">
- <Input type="number" min="1" max="60" value={timerMinutes} onChange={(e) => setTimerMinutes(e.target.value)} className="w-14 h-7 text-center text-[11px] rounded-md bg-muted/20 border-border/30 font-bold" />
- <span className="text-[10px] text-muted-foreground">min</span>
- </div>
- ) : undefined}
- />
+  /* Recomendações da aba Conversão (o que está ligado agora) */
+  const checklist: { id: string; ok: boolean; title: string; why: string; tab: TabId }[] = [
+    { id: "pix", ok: current.pix, title: "PIX ativo", why: "O pagamento é aprovado na hora.", tab: "payment" },
+    { id: "card", ok: current.card, title: "Cartão ativo", why: "Permite parcelar em até 12x.", tab: "payment" },
+    { id: "timer", ok: current.timerEnabled, title: "Timer de urgência", why: "Dá um prazo para o comprador decidir.", tab: "visual" },
+    { id: "guarantee", ok: current.guaranteeEnabled, title: "Selo de garantia", why: "Reduz o receio de comprar.", tab: "visual" },
+    { id: "bump", ok: orderBumps.length > 0, title: "Order bump", why: "Aumenta o valor do pedido com uma oferta complementar.", tab: "bumps" },
+    { id: "banner", ok: !!(current.bannerD || current.bannerM), title: "Banner da oferta", why: "Reforça a identidade da sua página.", tab: "visual" },
+  ];
+  const checklistDone = checklist.filter((c) => c.ok).length;
 
- {/* Banners */}
- <SectionCard>
- <Label className="text-[11px] font-medium text-muted-foreground block">Banners</Label>
- {[
- { type: "desktop" as const, label: "Desktop", icon: Monitor, ref: desktopRef, preview: bannerDesktopPreview, setFile: setBannerDesktopFile, setPreview: setBannerDesktopPreview, size: "1200×400" },
- { type: "mobile" as const, label: "Mobile", icon: Smartphone, ref: mobileRef, preview: bannerMobilePreview, setFile: setBannerMobileFile, setPreview: setBannerMobilePreview, size: "600×300" },
- ].map(banner => (
- <div key={banner.type} className="space-y-2">
- <div className="flex items-center justify-between">
- <span className="text-xs text-foreground/70 font-medium flex items-center gap-1.5">
- <banner.icon className="h-3.5 w-3.5 text-muted-foreground" /> {banner.label}
- </span>
- <span className="text-[10px] text-muted-foreground">{banner.size}</span>
- </div>
- <input ref={banner.ref} type="file" accept="image/*" onChange={(e) => handleFile(e, banner.type)} className="hidden" />
- {banner.preview ? (
- <div className="relative rounded-lg overflow-hidden border border-border/30 group">
- <img src={banner.preview} alt={banner.label} className="w-full h-20 object-cover" />
- <div className="absolute inset-0 bg-background/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
- <button onClick={() => banner.ref.current?.click()} className="h-8 w-8 rounded-lg bg-card border border-border/50 flex items-center justify-center  active:scale-95 transition-transform">
- <RotateCcw className="h-3.5 w-3.5 text-foreground" />
- </button>
- <button onClick={() => { banner.setFile(null); banner.setPreview(""); }} className="h-8 w-8 rounded-lg bg-card border border-border/50 flex items-center justify-center  active:scale-95 transition-transform">
- <X className="h-3.5 w-3.5 text-destructive" />
- </button>
- </div>
- </div>
- ) : (
- <button
- type="button" onClick={() => banner.ref.current?.click()}
- className="w-full h-16 rounded-lg border-2 border-dashed border-border/30 hover:border-primary/30 hover:bg-primary/[0.02] flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-primary transition-all"
- >
- <Upload className="h-4 w-4" />
- <span className="text-[10px] font-medium">Clique para enviar</span>
- </button>
- )}
- </div>
- ))}
- </SectionCard>
+  const themeName = THEME_OPTIONS.find((t) => t.key === theme)?.name ?? "Cinza suave";
+  const timeText = lastSavedAt ? lastSavedAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "";
 
-  <ToggleRow icon={ShieldCheck} title="Selo de garantia" desc="Garantia com ícone de proteção" checked={guaranteeEnabled} onChange={setGuaranteeEnabled} />
- <ConversionTip text="Banners de qualidade aumentam a conversão em até 32%. Use imagens claras e diretas." icon={TrendingUp} />
- </>
- )}
+  let statusNode: React.ReactNode;
+  if (isDirty && !formValid) statusNode = <span className="inline-flex items-center gap-1.5 text-destructive"><AlertCircle className="h-3.5 w-3.5" /> Corrija o campo em vermelho para salvar</span>;
+  else if (saveState === "saving") statusNode = <span className="inline-flex items-center gap-1.5"><Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" /> Salvando…</span>;
+  else if (saveState === "error") statusNode = <span className="inline-flex items-center gap-1.5 text-destructive"><AlertCircle className="h-3.5 w-3.5" /> Não foi possível salvar. Clique em Salvar</span>;
+  else if (isDirty) statusNode = <span>Salvando em instantes…</span>;
+  else if (saveState === "saved" && timeText) statusNode = <span className="inline-flex items-center gap-1.5 vp-green-ink"><Check className="h-3.5 w-3.5" /> Salvo às {timeText}</span>;
+  else statusNode = <span>Salvamento automático</span>;
 
- {/* ── PAYMENT TAB ── */}
- {activeTab === "payment" && (
- <>
- <SectionHeader icon={CreditCard} title="Pagamento" desc="Formas de pagamento aceitas" badge="Core" />
+  if (loading || !product) {
+    return (
+      <div className="vp-seller-shell vp-stage grid h-[100dvh] place-items-center" role="status" aria-live="polite">
+        <div className="flex flex-col items-center gap-3 text-muted-foreground">
+          <Loader2 className="h-7 w-7 animate-spin text-primary motion-reduce:animate-none" />
+          <p className="text-[14.5px] font-semibold">Abrindo o construtor de checkout…</p>
+        </div>
+      </div>
+    );
+  }
 
- {/* Payment summary cards */}
- <div className="grid grid-cols-3 gap-2">
- {[
- { enabled: allowedMethods.pix && pixEnabled, icon: QrCode, label: "PIX", color: "text-success", bg: "bg-success/10 border-success/20" },
- { enabled: allowedMethods.boleto && boletoEnabled, icon: FileText, label: "Boleto", color: "text-warning", bg: "bg-warning/10 border-warning/20" },
- { enabled: allowedMethods.card && creditCardEnabled, icon: CreditCard, label: "Cartão", color: "text-info", bg: "bg-info/10 border-info/20" },
- ].map(pm => (
- <div key={pm.label} className={cn(
- "rounded-lg p-3 text-center border transition-all",
- pm.enabled ? pm.bg : "border-border/20 bg-muted/10 opacity-40"
- )}>
- <pm.icon className={cn("h-5 w-5 mx-auto mb-1", pm.enabled ? pm.color : "text-muted-foreground/30")} />
- <p className="text-[10px] font-bold">{pm.label}</p>
- <p className={cn("text-[9px] font-medium mt-0.5", pm.enabled ? "text-success" : "text-muted-foreground/40")}>{pm.enabled ? "Ativo" : "Inativo"}</p>
- </div>
- ))}
- </div>
+  const switchLabel = (label: string) => ({ "aria-label": label });
 
- {allowedMethods.pix && <ToggleRow icon={QrCode} title="PIX" desc="Pagamento instantâneo" checked={pixEnabled} onChange={setPixEnabled} />}
- {allowedMethods.boleto && <ToggleRow icon={FileText} title="Boleto Bancário" desc="Vencimento em 3 dias úteis" checked={boletoEnabled} onChange={setBoletoEnabled} />}
- {allowedMethods.card && <ToggleRow icon={CreditCard} title="Cartão de Crédito" desc="Até 12x" checked={creditCardEnabled} onChange={setCreditCardEnabled} />}
- <ConversionTip text="PIX + Cartão maximiza a conversão. PIX converte 99% e cartão captura quem prefere parcelar." />
- </>
- )}
+  return (
+    <MotionConfig reducedMotion="user">
+      <div className="vp-seller-shell vp-stage flex h-[100dvh] flex-col overflow-hidden">
+        {/* ─── Cabeçalho ─── */}
+        <header className="z-30 border-b border-border bg-background">
+          <div className="flex items-center gap-3 px-4 py-3 sm:px-6">
+            <button type="button" onClick={handleBack} aria-label="Voltar para Produtos" className="vp-orb shrink-0"><ArrowLeft className="h-[18px] w-[18px]" /></button>
+            <div className="min-w-0 flex-1">
+              <h1 className="truncate font-heading text-[18px] font-extrabold leading-tight tracking-[-0.02em] text-foreground">{product.name}</h1>
+              <p className="truncate text-[13px] text-muted-foreground" aria-live="polite">{statusNode}</p>
+            </div>
+            {checkoutUrl && (
+              <div className="hidden items-center gap-2 sm:flex">
+                <button type="button" onClick={copyLink} className="vp-ghost"><Copy className="h-4 w-4" /> Copiar link</button>
+                <button type="button" onClick={() => window.open(checkoutUrl, "_blank", "noopener,noreferrer")} aria-label="Abrir o checkout em uma nova aba" className="vp-orb"><ExternalLink className="h-[18px] w-[18px]" /></button>
+              </div>
+            )}
+            <button type="button" onClick={() => void save(true)} disabled={saveState === "saving"} className="vp-cta shrink-0 px-5 sm:px-6">
+              {saveState === "saving" ? <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Check className="h-4 w-4" />}
+              {saveState === "saving" ? "Salvando…" : "Salvar"}
+            </button>
+          </div>
+          {/* Editar / Prévia (só no celular) */}
+          <div className="flex gap-1.5 px-4 pb-3 lg:hidden" role="group" aria-label="Alternar entre edição e prévia">
+            <button type="button" aria-pressed={mobileView === "edit"} onClick={() => setMobileView("edit")} className="vp-pill flex-1 justify-center"><SlidersHorizontal className="h-4 w-4" /> Editar</button>
+            <button type="button" aria-pressed={mobileView === "preview"} onClick={() => setMobileView("preview")} className="vp-pill flex-1 justify-center"><Eye className="h-4 w-4" /> Prévia</button>
+          </div>
+        </header>
 
- {/* ── FORM TAB ── */}
- {activeTab === "form" && (
- <>
- <SectionHeader icon={Mail} title="Formulário" desc="Campos do formulário do checkout" />
- <ToggleRow icon={Mail} title="Confirmação de e-mail" desc="Pede e-mail 2 vezes" checked={emailConfirm} onChange={setEmailConfirm} />
- <div className="group relative flex items-center justify-between p-3 rounded-xl border border-primary/25 bg-primary/[0.04]">
- <div className="absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-full bg-primary/60" />
- <div className="flex items-center gap-3 flex-1 min-w-0">
- <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0 bg-primary/10 border border-primary/15">
- <Hash className="h-4 w-4 text-primary" />
- </div>
- <div className="min-w-0">
- <p className="text-xs font-semibold text-foreground">CPF / CNPJ</p>
- <p className="text-[11px] text-muted-foreground leading-snug">Obrigatório — campo sempre ativo</p>
- </div>
- </div>
- <span className="text-[11px] font-medium bg-primary/10 text-primary px-2 py-1 rounded-full border border-primary/15">Obrigatório</span>
- </div>
- <ToggleRow icon={MapPin} title="Endereço completo" desc="CEP com auto-preenchimento" checked={addressRequired} onChange={setAddressRequired} />
- <ConversionTip text="Menos campos = mais conversão. Peça apenas o essencial." icon={MousePointerClick} />
- </>
- )}
+        <div className="flex min-h-0 flex-1">
+          {/* ─── Painel de edição ─── */}
+          <aside className={cn("min-h-0 flex-col border-border bg-background max-lg:w-full lg:flex lg:w-[480px] lg:shrink-0 lg:border-r", mobileView === "edit" ? "flex" : "hidden")}>
+            <div
+              role="tablist"
+              aria-label="Seções do checkout"
+              onKeyDown={(e) => {
+                if (e.key !== "ArrowRight" && e.key !== "ArrowLeft" && e.key !== "Home" && e.key !== "End") return;
+                e.preventDefault();
+                const i = TABS.findIndex((t) => t.id === activeTab);
+                const next = e.key === "Home" ? 0 : e.key === "End" ? TABS.length - 1 : (i + (e.key === "ArrowRight" ? 1 : -1) + TABS.length) % TABS.length;
+                setActiveTab(TABS[next].id);
+                requestAnimationFrame(() => document.getElementById(`tab-${TABS[next].id}`)?.focus());
+              }}
+              className="scrollbar-none flex shrink-0 gap-1.5 overflow-x-auto !border-0 px-4 py-3 lg:flex-wrap lg:overflow-visible lg:px-6">
+              {TABS.map((tab) => {
+                const active = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    id={`tab-${tab.id}`}
+                    aria-selected={active}
+                    aria-controls="builder-panel"
+                    tabIndex={active ? 0 : -1}
+                    aria-current={active ? "page" : undefined}
+                    onClick={() => setActiveTab(tab.id)}
+                    className="vp-pill shrink-0"
+                  >
+                    <tab.icon className="h-4 w-4" />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
 
- {/* ── BUMPS TAB ── */}
- {activeTab === "bumps" && (
- <>
- <SectionHeader icon={Package} title="Order Bumps" desc="Ofertas adicionais no checkout" badge={orderBumps.length > 0 ? `${orderBumps.length} ativo${orderBumps.length > 1 ? "s" : ""}` : undefined} />
+            <div id="builder-panel" role="tabpanel" aria-labelledby={`tab-${activeTab}`} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-12 pt-2 lg:px-6">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  className="space-y-4"
+                >
+                  {/* ── Visual ── */}
+                  {activeTab === "visual" && (
+                    <>
+                      <PanelHeading title="Visual" subtitle="Tema, cor do botão, banners e selos da página de pagamento." />
 
- {orderBumps.length > 0 && (
- <div className="space-y-2">
- {orderBumps.map((bump, i) => {
- const prod = allProducts.find(p => p.id === bump.bump_product_id);
- return (
- <motion.div
- key={bump.id}
- initial={{ opacity: 0, x: -12 }}
- animate={{ opacity: 1, x: 0 }}
- transition={{ delay: i * 0.05 }}
- className="group relative flex items-center gap-3 p-3 rounded-xl border border-primary/20 bg-primary/[0.04]"
- >
- <div className="absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-full bg-primary/50" />
- {prod?.image_url ? (
- <img src={prod.image_url} alt={prod.name} className="h-10 w-10 rounded-lg object-cover border border-border/20" />
- ) : (
- <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
- <Package className="h-4 w-4 text-primary/60" />
- </div>
- )}
- <div className="min-w-0 flex-1">
- <p className="text-xs font-semibold truncate">{prod?.name || "Produto"}</p>
- <p className="text-xs font-bold text-primary">+ {formatCurrency(Number(prod?.price || 0))}</p>
- </div>
- <Button variant="ghost" size="icon" onClick={() => removeBump(bump.id)} className="h-7 w-7 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-all">
- <Trash2 className="h-3.5 w-3.5" />
- </Button>
- </motion.div>
- );
- })}
- </div>
- )}
+                      <Block title="Tema da página" subtitle="Cor de fundo do checkout.">
+                        <div role="radiogroup" aria-label="Tema da página" className="grid grid-cols-[repeat(3,minmax(0,1fr))] gap-2.5">
+                          {THEME_OPTIONS.map((opt) => <ThemeChoice key={opt.key} option={opt} selected={theme === opt.key} onSelect={() => setTheme(opt.key)} />)}
+                        </div>
+                      </Block>
 
- {availableForBump.length > 0 ? (
- <SectionCard>
- <Label className="text-[11px] font-medium text-muted-foreground block">Adicionar Bump</Label>
- <div className="max-h-[200px] overflow-y-auto divide-y divide-border/20 rounded-lg border border-border/30 bg-muted/10">
- {availableForBump.map(p => (
- <button
- key={p.id}
- onClick={() => setSelectedBumpProduct(prev => prev === p.id ? "" : p.id)}
- className={cn(
- "w-full flex items-center gap-3 p-3 text-left transition-colors",
- selectedBumpProduct === p.id ? "bg-primary/[0.06]" : "hover:bg-muted/20"
- )}
- >
- <div className={cn(
- "h-4 w-4 rounded border-2 flex items-center justify-center shrink-0 transition-all",
- selectedBumpProduct === p.id ? "border-primary bg-primary" : "border-border/40"
- )}>
- {selectedBumpProduct === p.id && <Check className="h-2.5 w-2.5 text-primary-foreground" />}
- </div>
- {p.image_url ? (
- <img src={p.image_url} alt={p.name} className="h-9 w-9 rounded-lg object-cover border border-border/20" />
- ) : (
- <div className="h-9 w-9 rounded-lg bg-muted/20 flex items-center justify-center">
- <Package className="h-3.5 w-3.5 text-muted-foreground/40" />
- </div>
- )}
- <div className="min-w-0 flex-1">
- <p className="text-xs font-medium truncate">{p.name}</p>
- <p className="text-[11px] font-bold text-primary">{formatCurrency(Number(p.price))}</p>
- </div>
- </button>
- ))}
- </div>
- {selectedBumpProduct && (
- <Button onClick={addBump} className="w-full gap-2 h-9 text-xs font-bold">
- <Plus className="h-3.5 w-3.5" /> Adicionar como Bump
- </Button>
- )}
- </SectionCard>
- ) : orderBumps.length === 0 ? (
- <div className="rounded-xl border border-dashed border-border/30 p-8 text-center space-y-2">
- <Package className="h-8 w-8 text-muted-foreground/30 mx-auto" />
- <p className="text-xs font-semibold text-muted-foreground">Nenhum produto disponível</p>
- <p className="text-[11px] text-muted-foreground/60">Crie mais produtos para usar como bumps</p>
- </div>
- ) : null}
+                      <Block title="Cor do botão de compra">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <label className="relative h-12 w-12 shrink-0 cursor-pointer overflow-hidden rounded-full border border-border" title="Escolher cor">
+                            <span className="sr-only">Escolher a cor do botão</span>
+                            <input type="color" value={colorValid ? buttonColor.trim() : "#10b981"} onChange={(e) => setButtonColor(e.target.value)} className="absolute -inset-2 h-[calc(100%+16px)] w-[calc(100%+16px)] cursor-pointer border-0 bg-transparent p-0" />
+                          </label>
+                          <div className="w-[140px]">
+                            <Input value={buttonColor} onChange={(e) => setButtonColor(e.target.value)} aria-label="Código da cor" aria-invalid={!colorValid} maxLength={7} spellCheck={false} className={cn(inputClass, "font-mono uppercase")} />
+                          </div>
+                          <span className="inline-flex h-12 items-center rounded-full px-6 text-[14.5px] font-bold text-white" style={{ backgroundColor: colorValid ? buttonColor.trim() : "#10b981" }}>Comprar agora</span>
+                        </div>
+                        {!colorValid && <FieldHint className="text-destructive">Use o formato #10b981 (um # e 6 letras ou números).</FieldHint>}
+                        <div className="mt-4 flex flex-wrap items-center gap-2" role="group" aria-label="Cores sugeridas">
+                          {PRESET_COLORS.map((c) => {
+                            const on = buttonColor.trim().toLowerCase() === c.hex;
+                            return (
+                              <button key={c.hex} type="button" onClick={() => setButtonColor(c.hex)} aria-label={`Usar a cor ${c.name}`} aria-pressed={on} title={c.name}
+                                className={cn("grid h-8 w-8 place-items-center rounded-full border-2 transition-transform hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none", on ? "border-foreground" : "border-transparent")}
+                                style={{ backgroundColor: c.hex }}>
+                                {on && <Check className="h-3.5 w-3.5 text-white drop-shadow" strokeWidth={3} />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </Block>
 
- <ConversionTip text="Bumps podem aumentar o ticket médio em até 40%. Ofereça produtos complementares de baixo custo." icon={TrendingUp} />
- </>
- )}
+                      <GroupBox>
+                        <ToggleRow icon={<Timer className="h-[18px] w-[18px]" />} title="Timer de urgência" description="Contagem regressiva no topo do checkout.">
+                          <div className="flex items-center gap-3">
+                            {timerEnabled && (
+                              <div className="flex items-center gap-2">
+                                <div className="w-[76px]">
+                                  <Input type="number" inputMode="numeric" min={1} max={60} value={timerMinutes} onChange={(e) => setTimerMinutes(e.target.value)} aria-label="Minutos do timer" aria-invalid={!minutesValid} className={cn(inputClass, "!h-10 !px-3 text-center tabular-nums")} />
+                                </div>
+                                <span className="text-[13px] text-muted-foreground">min</span>
+                              </div>
+                            )}
+                            <Switch checked={timerEnabled} onCheckedChange={setTimerEnabled} {...switchLabel("Ativar timer de urgência")} />
+                          </div>
+                        </ToggleRow>
+                        <ToggleRow icon={<ShieldCheck className="h-[18px] w-[18px]" />} title="Selo de garantia" description="Mostra a garantia de 7 dias.">
+                          <Switch checked={guaranteeEnabled} onCheckedChange={setGuaranteeEnabled} {...switchLabel("Ativar selo de garantia")} />
+                        </ToggleRow>
+                      </GroupBox>
+                      {!minutesValid && <FieldHint className="text-destructive">O timer vai de 1 a 60 minutos.</FieldHint>}
 
- {/* ── CRO TAB ── */}
- {activeTab === "cro" && (
- <>
- <SectionHeader icon={Zap} title="Conversão" desc="Ferramentas avançadas de CRO" />
- <div className="rounded-xl border border-dashed border-border/40 bg-muted/10 p-5 text-center space-y-2">
- <div className="h-9 w-9 mx-auto rounded-lg bg-primary/10 flex items-center justify-center">
- <Clock className="h-4 w-4 text-primary" />
- </div>
- <p className="text-xs font-semibold text-foreground">Em breve</p>
- <p className="text-[11px] text-muted-foreground leading-relaxed">
- Estamos desenvolvendo as ferramentas de CRO (vídeo de vendas, escassez,
- depoimentos, badges de confiança e mais) com persistência real e
- aplicação no checkout publicado. Avisaremos quando estiverem disponíveis.
- </p>
- </div>
- </>
- )}
- </motion.div>
- </AnimatePresence>
- </div>
+                      <Block title="Banners" subtitle="Imagem no topo do checkout. JPG, PNG ou WebP, até 5 MB.">
+                        <div className="space-y-5">
+                          <BannerSlot label="Desktop" size="1200 × 400" preview={bannerDesktopPreview} inputRef={desktopRef} onFile={(e) => handleFile(e, "desktop")} onClear={() => clearBanner("desktop")} />
+                          <BannerSlot label="Celular" size="600 × 300" hint="Sem banner de celular, o de desktop é usado." preview={bannerMobilePreview} inputRef={mobileRef} onFile={(e) => handleFile(e, "mobile")} onClear={() => clearBanner("mobile")} />
+                        </div>
+                      </Block>
+                    </>
+                  )}
 
- {/* Bottom Bar */}
- <div className="p-3 border-t border-border/40 bg-card/80">
- <div className="flex items-center gap-2">
- {checkoutUrl && (
- <>
- <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(checkoutUrl); toast.success("Link copiado!"); }} className="flex-1 gap-1.5 h-9 text-xs font-medium">
- <Copy className="h-3 w-3" /> Copiar Link
- </Button>
- <Button variant="outline" size="sm" onClick={() => window.open(checkoutUrl, "_blank")} className="gap-1.5 h-9 text-xs font-medium">
- <ExternalLink className="h-3 w-3" />
- </Button>
- </>
- )}
- <Button size="sm" onClick={autoSave} disabled={saving} className="gap-1.5 h-9 text-xs font-bold">
- {saving ? (
- <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity }} className="h-3 w-3 border border-primary-foreground/30 border-t-primary-foreground rounded-full" />
- ) : <Check className="h-3 w-3" />}
- Salvar
- </Button>
- </div>
- </div>
- </aside>
+                  {/* ── Pagamento ── */}
+                  {activeTab === "payment" && (
+                    <>
+                      <PanelHeading title="Pagamento" subtitle="Formas de pagamento que o comprador pode escolher." />
+                      {!current.pix && !current.card && !current.boleto && (
+                        <Notice tone="warn" icon={<AlertCircle className="h-4 w-4" />} title="Nenhuma forma de pagamento ativa">
+                          Ative ao menos uma, senão o comprador não consegue pagar.
+                        </Notice>
+                      )}
+                      <GroupBox>
+                        <ToggleRow icon={<QrCode className="h-[18px] w-[18px]" />} title="PIX" description={allowed?.pix === false ? "Não liberado na sua conta." : "Confirmação rápida."} tone={allowed?.pix === false ? "muted" : "accent"}>
+                          <Switch checked={current.pix} onCheckedChange={setPixEnabled} disabled={allowed?.pix === false} {...switchLabel("Aceitar PIX")} />
+                        </ToggleRow>
+                        <ToggleRow icon={<CreditCard className="h-[18px] w-[18px]" />} title="Cartão de crédito" description={allowed?.card === false ? "Não liberado na sua conta." : "Em até 12 parcelas."} tone={allowed?.card === false ? "muted" : "accent"}>
+                          <Switch checked={current.card} onCheckedChange={setCreditCardEnabled} disabled={allowed?.card === false} {...switchLabel("Aceitar cartão de crédito")} />
+                        </ToggleRow>
+                        <ToggleRow icon={<FileText className="h-[18px] w-[18px]" />} title="Boleto bancário" description={allowed?.boleto === false ? "Não liberado na sua conta." : "Compensa em 1 a 3 dias."} tone={allowed?.boleto === false ? "muted" : "accent"}>
+                          <Switch checked={current.boleto} onCheckedChange={setBoletoEnabled} disabled={allowed?.boleto === false} {...switchLabel("Aceitar boleto bancário")} />
+                        </ToggleRow>
+                      </GroupBox>
+                      <Notice icon={<Zap className="h-4 w-4" />} title="Combine PIX e cartão">
+                        PIX aprova na hora e o cartão atende quem prefere parcelar.
+                      </Notice>
+                    </>
+                  )}
 
- {/* ─── RIGHT: Live Preview ─── */}
- <main className="flex-1 flex flex-col min-h-0 bg-muted/10 overflow-hidden">
- 
- {/* Preview Header */}
- <div className="h-12 border-b border-border/40 bg-card/80 backdrop-blur-sm flex items-center justify-between px-5 sticky top-0 z-10">
- <div className="flex items-center gap-3">
- <div className="flex items-center gap-2">
- <Eye className="h-3.5 w-3.5 text-primary" />
- <span className="text-xs font-bold text-foreground">Preview</span>
- </div>
- <div className="h-4 w-px bg-border/30" />
- <div className="flex items-center gap-1.5">
- <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
- <span className="text-[10px] text-success font-medium">Tempo real</span>
- </div>
- <div className="h-4 w-px bg-border/30" />
- <span className="text-[10px] text-muted-foreground font-medium">{themeLabel}</span>
- </div>
+                  {/* ── Formulário ── */}
+                  {activeTab === "form" && (
+                    <>
+                      <PanelHeading title="Formulário" subtitle="Os dados que o comprador preenche antes de pagar." />
+                      <GroupBox>
+                        <ToggleRow icon={<Mail className="h-[18px] w-[18px]" />} title="Confirmação de e-mail" description="O comprador digita o e-mail duas vezes.">
+                          <Switch checked={emailConfirm} onCheckedChange={setEmailConfirm} {...switchLabel("Pedir confirmação de e-mail")} />
+                        </ToggleRow>
+                        <ToggleRow icon={<Hash className="h-[18px] w-[18px]" />} title="CPF ou CNPJ" description="Sempre pedido, é necessário para emitir o pagamento.">
+                          <span className="rounded-full bg-accent px-3 py-1 text-[12.5px] font-semibold text-accent-foreground">Obrigatório</span>
+                        </ToggleRow>
+                        <ToggleRow icon={<MapPin className="h-[18px] w-[18px]" />} title="Endereço completo" description="Adiciona uma etapa com CEP e endereço.">
+                          <Switch checked={addressRequired} onCheckedChange={setAddressRequired} {...switchLabel("Pedir endereço completo")} />
+                        </ToggleRow>
+                      </GroupBox>
+                      <Notice icon={<ClipboardList className="h-4 w-4" />} title="Peça só o necessário">
+                        Cada campo a mais é um motivo para o comprador desistir. Ative o endereço apenas se você envia algo físico.
+                      </Notice>
+                    </>
+                  )}
 
- <div className="flex items-center gap-1 p-0.5 rounded-lg bg-muted/30 border border-border/30">
- {[
- { mode: "desktop" as const, icon: Monitor },
- { mode: "mobile" as const, icon: Smartphone },
- ].map(m => (
- <button
- key={m.mode}
- onClick={() => setPreviewMode(m.mode)}
- className={cn(
- "relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-bold transition-all",
- previewMode === m.mode ? "text-foreground" : "text-muted-foreground hover:text-foreground/70"
- )}
- >
- {previewMode === m.mode && (
- <motion.div
- layoutId="preview-mode"
- className="absolute inset-0 bg-card  border border-border/40 rounded-md"
- transition={{ type: "spring", bounce: 0.15, duration: 0.3 }}
- />
- )}
- <m.icon className="h-3 w-3 relative z-10" />
- <span className="relative z-10 hidden sm:inline">{m.mode === "desktop" ? "Desktop" : "Mobile"}</span>
- </button>
- ))}
- </div>
+                  {/* ── Order bumps ── */}
+                  {activeTab === "bumps" && (
+                    <>
+                      <PanelHeading title="Order bumps" subtitle="Ofertas extras que o comprador adiciona com um clique antes de pagar." />
 
- <div className="flex items-center gap-2">
- <span className="text-[10px] text-muted-foreground font-medium">Score</span>
- <span className="text-sm font-numbers font-bold text-primary">{optimizationScore.score}/{optimizationScore.max}</span>
- </div>
- </div>
+                      <Block title="Ofertas neste checkout" subtitle={`Até ${MAX_BUMPS} por produto.`}>
+                        {orderBumps.length === 0 ? (
+                          <p className="vp-r16 border border-dashed border-border px-4 py-6 text-center text-[14px] text-muted-foreground">Nenhuma oferta ainda. Escolha um produto abaixo.</p>
+                        ) : (
+                          <ul className="space-y-2.5">
+                            {orderBumps.map((bump) => {
+                              const prod = allProducts.find((p) => p.id === bump.bump_product_id);
+                              return (
+                                <li key={bump.id} className="vp-r16 flex items-center gap-3 border border-border bg-card p-3">
+                                  {prod?.image_url ? <img src={prod.image_url} alt="" className="h-11 w-11 shrink-0 rounded-[12px] border border-border object-cover" /> : <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-accent text-accent-foreground"><Package className="h-[18px] w-[18px]" /></span>}
+                                  <div className="min-w-0 flex-1">
+                                    <p className="truncate text-[14.5px] font-semibold text-foreground">{prod?.name || "Produto indisponível"}</p>
+                                    <p className="text-[13.5px] font-bold vp-green-ink tabular-nums">+ {formatCurrency(Number(prod?.price || 0))}</p>
+                                  </div>
+                                  <button type="button" onClick={() => removeBump(bump.id)} aria-label={`Remover ${prod?.name || "order bump"}`} className="vp-orb !h-10 !w-10 text-destructive"><X className="h-4 w-4" /></button>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
+                      </Block>
 
- {/* Preview Canvas */}
- <div
- className="flex-1 flex items-start justify-center p-6 lg:p-10 overflow-auto min-h-0"
- style={{
- backgroundImage: "radial-gradient(circle, hsl(var(--border)/0.08) 1px, transparent 1px)",
- backgroundSize: "20px 20px",
- }}
- >
- <motion.div
- layout
- transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
- className={cn(
- "transition-all duration-500",
- previewMode === "desktop" ? "w-full max-w-2xl" : "w-[375px]"
- )}
- >
- {/* Browser Chrome */}
- <div className="rounded-t-xl border-t border-x border-border/30 bg-card/90 px-4 py-2 flex items-center gap-3">
- <div className="flex gap-1.5">
- <div className="h-2.5 w-2.5 rounded-full bg-destructive/60" />
- <div className="h-2.5 w-2.5 rounded-full bg-warning/60" />
- <div className="h-2.5 w-2.5 rounded-full bg-success/60" />
- </div>
- <div className="flex-1 mx-2">
- <div className="flex items-center gap-1.5 bg-muted/30 rounded-md px-3 py-1 border border-border/20">
- <Lock className="h-2.5 w-2.5 text-success/60" />
-  <span className="text-[9px] text-muted-foreground font-mono truncate">{checkoutUrl || "vemprapay.com.br/pay/seu-produto"}</span>
- </div>
- </div>
- <div className="flex items-center gap-1">
- <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
- <span className="text-[11px] font-medium text-success/60 ">Live</span>
- </div>
- </div>
+                      {orderBumps.length < MAX_BUMPS && (
+                        availableForBump.length > 0 ? (
+                          <Block title="Adicionar produto">
+                            <div role="radiogroup" aria-label="Produto para oferecer" className="max-h-[260px] divide-y divide-border overflow-y-auto rounded-[16px] border border-border">
+                              {availableForBump.map((p) => {
+                                const on = selectedBumpProduct === p.id;
+                                return (
+                                  <button key={p.id} type="button" role="radio" aria-checked={on} onClick={() => setSelectedBumpProduct(on ? "" : p.id)}
+                                    className={cn("flex w-full items-center gap-3 px-3 py-3 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary", on ? "bg-accent" : "hover:bg-muted/60")}>
+                                    <span className={cn("grid h-5 w-5 shrink-0 place-items-center rounded-full border-2", on ? "border-primary bg-primary text-primary-foreground" : "border-border")}>{on && <Check className="h-3 w-3" strokeWidth={3} />}</span>
+                                    {p.image_url ? <img src={p.image_url} alt="" className="h-10 w-10 shrink-0 rounded-[10px] border border-border object-cover" /> : <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[10px] bg-muted text-muted-foreground"><Package className="h-4 w-4" /></span>}
+                                    <span className="min-w-0 flex-1">
+                                      <span className="block truncate text-[14px] font-semibold text-foreground">{p.name}</span>
+                                      <span className="block text-[13px] font-bold vp-green-ink tabular-nums">{formatCurrency(Number(p.price))}</span>
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <button type="button" onClick={addBump} disabled={!selectedBumpProduct || addingBump} className="vp-cta mt-4 w-full">
+                              {addingBump ? <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Plus className="h-4 w-4" />} Adicionar order bump
+                            </button>
+                            <FieldHint>Só aparecem produtos seus que estão ativos.</FieldHint>
+                          </Block>
+                        ) : orderBumps.length === 0 ? (
+                          <StepEmpty icon={<Package className="h-7 w-7" />} title="Você ainda não tem outro produto ativo"
+                            action={<Link to="/vendas/produtos/novo/editar" className="vp-ghost">Criar outro produto</Link>}>
+                            O order bump é um segundo produto seu oferecido junto com este.
+                          </StepEmpty>
+                        ) : null
+                      )}
+                      <Notice icon={<Layers className="h-4 w-4" />} title="Ofereça algo que complete a compra">
+                        Funciona melhor com um produto de preço baixo que combina com o principal.
+                      </Notice>
+                    </>
+                  )}
 
- {/* Preview Content */}
- <div data-preview-theme={checkoutTheme} className={cn(
- "rounded-b-xl border border-t-0 border-border/30  overflow-hidden",
- checkoutTheme === "white" ? "bg-[#fafbfc]" : checkoutTheme === "dark" ? "bg-[hsl(220_18%_11%)]" : "bg-[#f0f1f3]"
- )}>
- {/* Banner */}
- {(previewMode === "desktop" ? bannerDesktopPreview : bannerMobilePreview) && (
- <img src={previewMode === "desktop" ? bannerDesktopPreview : bannerMobilePreview} alt="Banner" className="w-full h-32 object-cover" />
- )}
+                  {/* ── Conversão ── */}
+                  {activeTab === "cro" && (
+                    <>
+                      <PanelHeading title="Conversão" subtitle="O que já está ligado no seu checkout e o que ainda falta." />
+                      <Block title={`${checklistDone} de ${checklist.length} recomendações ligadas`}>
+                        <ul className="divide-y divide-border overflow-hidden rounded-[16px] border border-border">
+                          {checklist.map((c) => (
+                            <li key={c.id} className="flex items-center gap-3 bg-card px-4 py-3">
+                              <span className={cn("grid h-6 w-6 shrink-0 place-items-center rounded-full", c.ok ? "bg-primary text-primary-foreground" : "border-2 border-border text-transparent")} aria-hidden>{c.ok && <Check className="h-3.5 w-3.5" strokeWidth={3} />}</span>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-[14.5px] font-semibold text-foreground">{c.title}<span className="sr-only">{c.ok ? ", ligado" : ", desligado"}</span></p>
+                                <p className="text-[13px] leading-snug text-muted-foreground">{c.why}</p>
+                              </div>
+                              {!c.ok && <button type="button" onClick={() => setActiveTab(c.tab)} className="vp-ghost !h-9 shrink-0 px-4 text-[13.5px]">Ajustar</button>}
+                            </li>
+                          ))}
+                        </ul>
+                      </Block>
+                      <Notice icon={<Clock className="h-4 w-4" />} title="Em breve">
+                        Vídeo de vendas, escassez, depoimentos e selos de confiança. Eles ainda não aparecem no checkout publicado.
+                      </Notice>
+                    </>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
+            {/* Ações rápidas no celular (o cabeçalho esconde o link em telas estreitas) */}
+            {checkoutUrl && (
+              <div className="flex gap-2 border-t border-border bg-background px-4 py-3 sm:hidden">
+                <button type="button" onClick={copyLink} className="vp-ghost flex-1 justify-center"><Copy className="h-4 w-4" /> Copiar link</button>
+                <button type="button" onClick={() => window.open(checkoutUrl, "_blank", "noopener,noreferrer")} className="vp-ghost flex-1 justify-center"><ExternalLink className="h-4 w-4" /> Abrir</button>
+              </div>
+            )}
+          </aside>
 
-
-
-
- {/* Timer */}
- {timerEnabled && (
- <div className="px-5 pt-4">
- <div className="flex items-center justify-center gap-2 text-[12px] font-bold text-amber-600 bg-amber-500/10 rounded-lg py-2.5 border border-amber-500/10">
- <Timer className="h-4 w-4" /> Oferta expira em {timerMinutes}:00
- </div>
- </div>
- )}
-
-
- <div className="p-5 space-y-4">
- {/* Product info */}
- <div className="flex items-center gap-3">
- {product?.image_url ? (
- <img src={product.image_url} className="h-14 w-14 rounded-xl object-cover border border-gray-200 shadow" />
- ) : (
- <div className="h-14 w-14 rounded-xl flex items-center justify-center border border-gray-200" style={{ backgroundColor: buttonColor + "15" }}>
- <Package className="h-5 w-5" style={{ color: buttonColor }} />
- </div>
- )}
- <div>
- <p className="text-sm font-bold text-gray-900">{product?.name}</p>
- <p className="text-xl font-black tracking-tight" style={{ color: buttonColor }}>{formatCurrency(Number(product?.price || 0))}</p>
- </div>
- </div>
-
-
- {/* Form fields */}
- <div className="space-y-2.5">
- <PreviewField label="Nome completo" theme={checkoutTheme} />
- <PreviewField label="E-mail" theme={checkoutTheme} />
- {emailConfirm && <PreviewField label="Confirme seu e-mail" theme={checkoutTheme} />}
- {cpfRequired && <PreviewField label="CPF / CNPJ" theme={checkoutTheme} />}
- {addressRequired && (
- <div className="grid grid-cols-3 gap-2">
- <PreviewField label="CEP" theme={checkoutTheme} />
- <div className="col-span-2"><PreviewField label="Endereço" theme={checkoutTheme} /></div>
- </div>
- )}
- </div>
-
- {/* Payment methods */}
- <div className="flex gap-2 flex-wrap">
- {pixEnabled && <span className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/15 inline-flex items-center gap-1.5"><QrCode className="h-3 w-3" /> PIX</span>}
- {boletoEnabled && <span className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-600 border border-amber-500/15 inline-flex items-center gap-1.5"><FileText className="h-3 w-3" /> Boleto</span>}
- {creditCardEnabled && <span className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-600 border border-blue-500/15 inline-flex items-center gap-1.5"><CreditCard className="h-3 w-3" /> Cartão</span>}
- </div>
-
- {/* Order bumps — Persuasive */}
- {orderBumps.length > 0 && (
- <div className="space-y-2.5">
- <div className="flex items-center gap-2 px-0.5">
- <div className="h-4 w-4 rounded-md flex items-center justify-center" style={{ backgroundColor: buttonColor + "18" }}>
- <Sparkles className="h-2.5 w-2.5" style={{ color: buttonColor }} />
- </div>
- <span className="text-[11px] font-extrabold " style={{ color: buttonColor }}>Oferta exclusiva</span>
- <div className="flex-1 h-px" style={{ backgroundColor: buttonColor + "15" }} />
- </div>
- {orderBumps.map(bump => {
- const prod = allProducts.find(p => p.id === bump.bump_product_id);
- return (
- <div key={bump.id} className="relative rounded-xl border-2 border-dashed p-3.5 overflow-hidden transition-all hover: cursor-pointer" style={{ borderColor: buttonColor + "35", background: `linear-gradient(135deg, ${buttonColor}08, ${buttonColor}03)` }}>
- <div className="absolute top-0 right-0 text-white text-[7px] font-extrabold px-2.5 py-1 rounded-bl-lg" style={{ backgroundColor: buttonColor }}>
- APROVEITE!
- </div>
- <div className="flex items-center gap-3">
- {prod?.image_url ? (
- <img src={prod.image_url} className="h-12 w-12 rounded-lg object-cover border border-gray-200 " />
- ) : (
- <div className="h-12 w-12 rounded-lg border border-gray-200 flex items-center justify-center " style={{ backgroundColor: buttonColor + "10" }}>
- <Package className="h-5 w-5" style={{ color: buttonColor + "60" }} />
- </div>
- )}
- <div className="flex-1 min-w-0">
- <p className="text-xs font-bold text-gray-800 truncate">{prod?.name || "Bump"}</p>
- <p className="text-[10px] text-gray-400 mt-0.5">Adicione ao seu pedido</p>
- <p className="text-sm font-extrabold mt-0.5" style={{ color: buttonColor }}>+ {formatCurrency(Number(prod?.price || 0))}</p>
- </div>
- <div className="h-8 w-8 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all" style={{ borderColor: buttonColor + "40", backgroundColor: buttonColor + "08" }}>
- <Plus className="h-3.5 w-3.5" style={{ color: buttonColor }} />
- </div>
- </div>
- </div>
- );
- })}
- </div>
- )}
-
- {/* CTA */}
- <button
- className="w-full py-3.5 rounded-lg text-white font-bold text-sm flex items-center justify-center gap-2 transition-transform "
- style={{ backgroundColor: buttonColor, boxShadow: `0 8px 24px -6px ${buttonColor}40` }}
- >
- <Lock className="h-4 w-4" /> COMPRAR AGORA
- </button>
-
-
- {/* Guarantee */}
- {guaranteeEnabled && (
- <div className="flex items-center justify-center gap-2 py-1 text-[11px] font-semibold" style={{ color: buttonColor }}>
- <ShieldCheck className="h-4 w-4" /> Garantia de 7 dias ou dinheiro de volta
- </div>
- )}
-
- </div>
-
- </div>
- </motion.div>
- </div>
- </main>
-
- {/* Theme overrides for dark preview */}
- <style>{`
- [data-preview-theme="dark"] .bg-white,
- [data-preview-theme="dark"] .bg-gray-50 { background-color: hsl(220 16% 14%) !important; }
- [data-preview-theme="dark"] .bg-gray-100 { background-color: hsl(220 15% 18%) !important; }
- [data-preview-theme="dark"] .border-gray-100,
- [data-preview-theme="dark"] .border-gray-200 { border-color: hsl(220 12% 24%) !important; }
- [data-preview-theme="dark"] .text-gray-900,
- [data-preview-theme="dark"] .text-gray-800,
- [data-preview-theme="dark"] .text-gray-700,
- [data-preview-theme="dark"] .text-gray-600 { color: hsl(210 20% 96%) !important; }
- [data-preview-theme="dark"] .text-gray-500,
- [data-preview-theme="dark"] .text-gray-400,
- [data-preview-theme="dark"] .text-gray-300 { color: hsl(215 10% 66%) !important; }
- `}</style>
- </div>
- );
+          {/* ─── Prévia ─── */}
+          <main className={cn("min-h-0 min-w-0 flex-1 flex-col !pb-0 bg-muted/50 lg:flex", mobileView === "preview" ? "flex" : "hidden")}>
+            <div className="flex items-center justify-between gap-3 border-b border-border bg-background px-4 py-2.5 sm:px-6">
+              <div className="min-w-0">
+                <p className="text-[14.5px] font-bold text-foreground">Prévia</p>
+                <p className="truncate text-[12.5px] text-muted-foreground">Aproximação do que o comprador vê. Tema: {themeName}.</p>
+              </div>
+              <div className="flex shrink-0 items-center gap-1.5" role="group" aria-label="Tamanho da prévia">
+                <button type="button" aria-pressed={previewMode === "desktop"} onClick={() => setPreviewMode("desktop")} className="vp-pill"><Monitor className="h-4 w-4" /><span className="hidden sm:inline">Computador</span></button>
+                <button type="button" aria-pressed={previewMode === "mobile"} onClick={() => setPreviewMode("mobile")} className="vp-pill"><Smartphone className="h-4 w-4" /><span className="hidden sm:inline">Celular</span></button>
+              </div>
+            </div>
+            <div className="min-h-0 flex-1 overflow-auto px-4 py-6 sm:px-8 sm:py-8">
+              <CheckoutPreview
+                device={previewMode}
+                theme={theme}
+                color={buttonColor}
+                timerEnabled={current.timerEnabled}
+                timerMinutes={timerMinutes}
+                banner={previewMode === "desktop" ? bannerDesktopPreview : bannerMobilePreview || bannerDesktopPreview}
+                name={product.name}
+                description={product.description || ""}
+                price={Number(product.price || 0)}
+                image={product.image_url || ""}
+                card={current.card}
+                pix={current.pix}
+                boleto={current.boleto}
+                emailConfirm={current.emailConfirm}
+                address={current.address}
+                guarantee={current.guaranteeEnabled}
+                url={checkoutUrl}
+                bumps={bumpsForPreview}
+              />
+            </div>
+          </main>
+        </div>
+      </div>
+    </MotionConfig>
+  );
 }

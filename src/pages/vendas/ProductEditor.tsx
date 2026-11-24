@@ -847,7 +847,7 @@ export default function ProductEditor() {
                 />}
 
                 {activeTab === "checkout" && <TabCheckout
-                  {...{ isNew: tabsLocked, name, price, imagePreview, productId: effectiveProductId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }}
+                  {...{ isNew: tabsLocked, name, price, imagePreview, productId: effectiveProductId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, guaranteeEnabled, setGuaranteeEnabled, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }}
                 />}
 
                 {activeTab === "co-producao" && <TabCoProducao
@@ -1406,7 +1406,6 @@ type TabCheckoutProps = {
   buttonColor: string; setButtonColor: StrS;
   timerEnabled: boolean; setTimerEnabled: BoolS;
   timerMinutes: string; setTimerMinutes: StrS;
-  socialProof: boolean; setSocialProof: BoolS;
   guaranteeEnabled: boolean; setGuaranteeEnabled: BoolS;
   bannerDesktopPreview: string; bannerMobilePreview: string;
   desktopBannerRef: RefObject<HTMLInputElement>;
@@ -1422,7 +1421,7 @@ type TabCheckoutProps = {
   pixEnabled: boolean; boletoEnabled: boolean; creditCardEnabled: boolean;
 };
 
-function TabCheckout({ isNew, name, price, imagePreview, productId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }: TabCheckoutProps) {
+function TabCheckout({ isNew, name, price, imagePreview, productId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, guaranteeEnabled, setGuaranteeEnabled, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }: TabCheckoutProps) {
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
   const priceValue = priceToNumber(price);
   const colorValid = HEX_COLOR.test(buttonColor.trim());
@@ -1494,7 +1493,6 @@ function TabCheckout({ isNew, name, price, imagePreview, productId, buttonColor,
                   <Switch checked={timerEnabled} onCheckedChange={setTimerEnabled} aria-label="Ativar timer de urgência" />
                 </div>
               </FormToggleRow>
-              <FormToggleRow icon={<Users className="h-[18px] w-[18px]" />} title="Prova social" description="Mostra quantas pessoas compraram."><Switch checked={socialProof} onCheckedChange={setSocialProof} aria-label="Ativar prova social" /></FormToggleRow>
               <FormToggleRow icon={<Shield className="h-[18px] w-[18px]" />} title="Selo de garantia" description={`Garantia de ${GUARANTEE_DAYS} dias no checkout.`}><Switch checked={guaranteeEnabled} onCheckedChange={setGuaranteeEnabled} aria-label="Ativar selo de garantia" /></FormToggleRow>
             </GroupBox>
           </StudioPanel>
@@ -1536,7 +1534,6 @@ function TabCheckout({ isNew, name, price, imagePreview, productId, buttonColor,
                   {creditCardEnabled && <span className="rounded-full bg-info/15 px-2 py-0.5 text-[11.5px] font-bold text-info">Cartão</span>}
                   {boletoEnabled && <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[11.5px] font-bold text-warning">Boleto</span>}
                 </div>
-                {socialProof && <p className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground"><Users className="h-3 w-3" /> Ex.: 127 pessoas compraram</p>}
                 <div className="rounded-full py-2.5 text-center text-[13px] font-bold text-white" style={{ backgroundColor: shownColor }}>Comprar agora</div>
                 {guaranteeEnabled && <p className="flex items-center justify-center gap-1.5 text-[11.5px] text-muted-foreground"><Shield className="h-3 w-3" /> Garantia de {GUARANTEE_DAYS} dias</p>}
               </div>
