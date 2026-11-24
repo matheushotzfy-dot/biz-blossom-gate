@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { differenceInDays } from "date-fns";
-import { CalendarDays, FileCheck2, PackageSearch } from "lucide-react";
+import { differenceInDays, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { CalendarDays, ChevronDown, FileCheck2, PackageSearch } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import { useProfile } from "@/hooks/useProfile";
@@ -11,18 +12,14 @@ import { PeriodPicker, buildPeriod, type PeriodPresetId, type PeriodValue } from
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import { SellerOnboarding } from "@/components/dashboard/SellerOnboarding";
 import { Seo } from "@/components/Seo";
-import { HeroBalance } from "@/components/home/HeroBalance";
-import { RevenueChart, type SalesPoint } from "@/components/home/RevenueChart";
-import { InsightTiles } from "@/components/home/InsightTiles";
-import { Statement } from "@/components/home/Statement";
-import { PendingTasks, type PendingTask } from "@/components/home/PendingTasks";
+import { HomeView } from "@/components/home/HomeView";
+import { saoPauloHour } from "@/components/home/time";
+import type { SalesPoint } from "@/components/home/RevenueChart";
+import type { PendingTask } from "@/components/home/PendingTasks";
 
-const RANGES = [
-  { id: "today", label: "Hoje" },
-  { id: "7d", label: "7 dias" },
-  { id: "30d", label: "30 dias" },
-  { id: "month", label: "Mês" },
-];
+const PRESET_LABEL: Record<string, string> = { today: "Hoje", yesterday: "Ontem", "7d": "7 dias", "15d": "15 dias", "30d": "30 dias", month: "Este mês" };
+const periodLabel = (p: PeriodValue) =>
+  (p.presetId && PRESET_LABEL[p.presetId]) || `${format(p.from, "dd MMM", { locale: ptBR }).replace(".", "")} a ${format(p.to, "dd MMM", { locale: ptBR }).replace(".", "")}`;
 const rate = (a: number, t: number) => (t > 0 ? Math.round((a / t) * 100) : 0);
 const pad = (n: number) => String(n).padStart(2, "0");
 const keyOf = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -97,57 +94,66 @@ export default function Dashboard() {
   if (kyc.approved && products.length === 0) tasks.push({ id: "first", title: "Crie seu primeiro produto", desc: "Leva poucos minutos", icon: FileCheck2, tone: "info", onClick: () => navigate("/vendas/produtos") });
 
 
+  const todayHours = useMemo(() => buildSeries(todayStats?.series ?? [], today.s, today.e, "hour"), [todayStats, today]);
+  const total = Number(cur?.total_count ?? 0);
+  const firstName = (profile?.full_name || "").split(" ")[0] || "Seller";
+
   return (
-    <div className="vp-fade space-y-5 pb-6 md:space-y-6">
+    <>
       <Seo title="Início | Vemprapay" description="Saldo, vendas e extrato da sua conta Vemprapay." path="/dashboard" noindex />
-
-      {statsError && (
-        <div role="alert" className="flex items-center justify-between rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-2.5 text-[12.5px] text-destructive">
-          <span className="font-semibold">Não foi possível carregar seus números.</span>
-          <button onClick={() => refetch()} className="rounded-full border border-destructive/50 px-3 py-1 font-bold">Tentar novamente</button>
-        </div>
-      )}
-
-      <SellerOnboarding />
-
-      <HeroBalance
-        available={balance}
-        pending={Number(stats?.global?.pending_balance ?? 0)}
-        disputed={Number(stats?.global?.disputed_amount ?? 0)}
-        trend={trend}
-        hidden={privacy.hidden}
-        onTogglePrivacy={privacy.toggle}
-        onPix={() => guard("/vendas/link-pagamento")}
-        onWithdraw={() => guard("/financeiro/saques")}
-        onCharge={() => guard("/vendas/link-pagamento")}
-        onMore={() => navigate("/integracoes")}
-      />
-
-      <PendingTasks items={tasks} />
-
-      <div className="grid items-stretch gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
-        <RevenueChart
-          data={series} revenue={revenue} orders={approved} trend={trend} hidden={privacy.hidden} loading={statsLoading}
-          ranges={RANGES} activeRange={period.presetId} onRange={(id) => setPeriod(buildPeriod(id as PeriodPresetId))}
-          extra={
+      <HomeView
+        firstName={firstName}
+        alert={statsError && (
+          <div role="alert" className="flex items-center justify-between gap-3 rounded-2xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-[13px] text-destructive">
+            <span className="font-semibold">Não foi possível carregar seus números.</span>
+            <button onClick={() => refetch()} className="rounded-full border border-destructive/50 px-3.5 py-1 font-bold transition-colors hover:bg-destructive/10">Tentar novamente</button>
+          </div>
+        )}
+        banner={<SellerOnboarding />}
+        hero={{
+          available: balance,
+          pending: Number(stats?.global?.pending_balance ?? 0),
+          disputed: Number(stats?.global?.disputed_amount ?? 0),
+          trend,
+          hidden: privacy.hidden,
+          onTogglePrivacy: privacy.toggle,
+          onPix: () => guard("/vendas/link-pagamento"),
+          onWithdraw: () => guard("/financeiro/saques"),
+          onCharge: () => guard("/vendas/link-pagamento"),
+          onMore: () => navigate("/integracoes"),
+        }}
+        today={{
+          revenue: Number(todayStats?.current?.revenue ?? 0),
+          orders: Number(todayStats?.current?.approved_count ?? 0),
+          hours: todayHours,
+          nowHour: saoPauloHour(),
+          hidden: privacy.hidden,
+          loading: !todayStats,
+          onCreateLink: () => guard("/vendas/link-pagamento"),
+        }}
+        tasks={tasks}
+        chart={{
+          data: series, bucket, hidden: privacy.hidden, loading: statsLoading,
+          action: (
             <PeriodPicker open={pickerOpen} onOpenChange={setPickerOpen} value={period} onChange={setPeriod} align="end" side="bottom"
-              trigger={<button aria-label="Escolher datas" className="grid h-9 w-9 place-items-center rounded-full bg-muted text-muted-foreground transition-colors hover:text-foreground"><CalendarDays className="h-4 w-4" /></button>} />
-          }
-        />
-        <Statement items={txs} products={productNames} hidden={privacy.hidden} loading={txLoading} onOpen={setDetail} />
-      </div>
-
-      <InsightTiles
-        ticket={approved > 0 ? revenue / approved : 0}
-        conversion={rate(approved, Number(cur?.total_count ?? 0))}
-        pixRate={rate(Number(cur?.pix_approved ?? 0), Number(cur?.pix_total ?? 0))}
-        cardRate={rate(Number(cur?.card_approved ?? 0), Number(cur?.card_total ?? 0))}
-        todayRevenue={Number(todayStats?.current?.revenue ?? 0)}
-        todayOrders={Number(todayStats?.current?.approved_count ?? 0)}
-        hidden={privacy.hidden}
+              trigger={<button className="vp-chip" aria-label={`Período: ${periodLabel(period)}. Escolher outro`}><CalendarDays className="h-4 w-4 text-muted-foreground" />{periodLabel(period)}<ChevronDown className="h-4 w-4 text-muted-foreground" /></button>} />
+          ),
+        }}
+        performance={{
+          conversion: rate(approved, total),
+          pixRate: rate(Number(cur?.pix_approved ?? 0), Number(cur?.pix_total ?? 0)),
+          cardRate: rate(Number(cur?.card_approved ?? 0), Number(cur?.card_total ?? 0)),
+          ticket: approved > 0 ? revenue / approved : 0,
+          orders: approved,
+          attempts: total,
+          hasData: total > 0,
+          hidden: privacy.hidden,
+          loading: statsLoading,
+        }}
+        statement={{ items: txs, products: productNames, hidden: privacy.hidden, loading: txLoading, onOpen: setDetail, onCreateLink: () => guard("/vendas/link-pagamento") }}
       />
 
       {detail && <TransactionDetailPanel tx={detail} products={productNames} onClose={() => setDetail(null)} variant="seller" />}
-    </div>
+    </>
   );
 }

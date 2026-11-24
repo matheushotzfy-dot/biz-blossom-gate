@@ -5299,52 +5299,136 @@ html.vp-noir, html.vp-noir.dark, html.vp-noir .vp-site-never {
 }
 html.vp-noir body { background: hsl(var(--background)); }
 
-.vp-noir-stage {
+/* Fundo do painel: liso no tema claro; no escuro, com um brilho discreto. */
+.vp-stage { background: hsl(var(--background)); }
+html.vp-noir .vp-stage {
   background:
     radial-gradient(900px 500px at 18% -8%, hsl(var(--vp-glow) / .10), transparent 60%),
     radial-gradient(700px 420px at 100% 0%, hsl(var(--vp-glow) / .05), transparent 60%),
     hsl(var(--background));
 }
-.vp-glass {
-  background: linear-gradient(180deg, hsl(var(--card) / .92), hsl(var(--card) / .78));
-  border: 1px solid hsl(var(--border));
-  border-radius: 22px;
-  box-shadow: inset 0 1px 0 hsl(0 0% 100% / .04), 0 30px 60px -40px hsl(0 0% 0% / .8);
+
+/* ═════════ VEMPRAPAY SELLER v3 — identidade clara do cadastro (padrão) ═════════
+   Mesma paleta do cadastro/landing: branco esverdeado, verde-esmeralda e tinta azul-marinho.
+   O tema escuro (html.vp-noir) só entra quando o seller escolhe "escuro" no perfil. */
+html.vp-seller:not(.vp-noir) {
+  --background: 150 11% 97%; --foreground: 222 47% 11%;
+  --card: 0 0% 100%; --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%; --popover-foreground: 222 47% 11%;
+  --muted: 150 12% 95%; --muted-foreground: 218 13% 42%;
+  --accent: 153 57% 94%; --accent-foreground: 157 100% 22%;
+  --secondary: 150 12% 95%; --secondary-foreground: 222 47% 11%;
+  --border: 150 10% 90%; --input: 150 9% 86%;
+  --primary: 156 100% 33%; --primary-foreground: 0 0% 100%; --ring: 156 100% 33%;
+  --vp-glow: 156 100% 33%;
+  --vp-surface-2: 0 0% 100%; --vp-surface-3: 150 14% 99%;
+  color-scheme: light;
+  background: hsl(var(--background));
 }
-.vp-rail { background: hsl(220 30% 5%); border-right: 1px solid hsl(var(--border)); }
-.vp-rail-item { color: hsl(var(--muted-foreground)); transition: background .15s ease, color .15s ease; }
-.vp-rail-item:hover { color: hsl(var(--foreground)); background: hsl(var(--muted) / .6); }
-.vp-rail-item[data-active="true"] {
-  color: hsl(var(--foreground));
-  background: linear-gradient(90deg, hsl(var(--vp-glow) / .16), hsl(var(--vp-glow) / .04));
-  box-shadow: inset 2px 0 0 hsl(var(--vp-glow));
+html.vp-seller:not(.vp-noir) body { background: hsl(var(--background)); }
+/* Verde de texto: mais fundo que o verde de botão, para manter contraste em corpo pequeno. */
+html.vp-seller { --vp-green-ink: 157 100% 24%; }
+html.vp-noir { --vp-green-ink: 150 80% 62%; }
+.vp-green-ink { color: hsl(var(--vp-green-ink)); }
+
+/* Painel padrão: hairline + sombra com a tinta da marca (nunca cinza chapado). */
+.vp-sheet {
+  background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: 22px;
+  box-shadow: 0 1px 2px hsl(222 47% 11% / .03), 0 20px 44px -28px hsl(222 47% 11% / .18);
 }
-.vp-rail-item[data-active="true"] svg { color: hsl(var(--vp-glow)); }
-.vp-orb {
-  display: grid; place-items: center; width: 64px; height: 64px; border-radius: 9999px;
-  background: hsl(var(--muted)); border: 1px solid hsl(var(--border)); color: hsl(var(--foreground));
-  transition: transform .15s ease, border-color .15s ease;
+html.vp-noir .vp-sheet { box-shadow: 0 24px 48px -32px hsl(0 0% 0% / .7); }
+
+/* ── Cartão de saldo: verde do cadastro + guilloché (textura de nota bancária) ── */
+.vp-bal {
+  position: relative; isolation: isolate; overflow: hidden; color: hsl(0 0% 100%); border-radius: 28px;
+  background: linear-gradient(128deg, hsl(156 100% 31%) 0%, hsl(157 100% 25%) 58%, hsl(158 100% 20%) 100%);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / .2), 0 36px 64px -32px hsl(158 100% 16% / .7);
 }
-.vp-orb:hover { transform: translateY(-2px); border-color: hsl(var(--vp-glow) / .5); }
-.vp-orb:active { transform: scale(.96); }
-.vp-orb-main {
-  background: hsl(var(--vp-glow)); color: hsl(var(--primary-foreground)); border-color: transparent;
-  box-shadow: 0 0 0 6px hsl(var(--vp-glow) / .10), 0 12px 32px -6px hsl(var(--vp-glow) / .55);
+.vp-bal::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: repeating-radial-gradient(circle at 106% -8%, transparent 0 15px, hsl(0 0% 100% / .085) 15px 16px);
+  -webkit-mask-image: radial-gradient(110% 150% at 100% 0%, #000 0%, transparent 64%);
+  mask-image: radial-gradient(110% 150% at 100% 0%, #000 0%, transparent 64%);
 }
-.vp-card-float { filter: drop-shadow(0 40px 50px hsl(150 90% 30% / .35)) drop-shadow(0 10px 18px hsl(0 0% 0% / .6)); animation: vp-float 7s ease-in-out infinite; }
-@keyframes vp-float { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-8px) rotate(-1deg); } }
-.vp-card-plinth { background: radial-gradient(closest-side, hsl(var(--vp-glow) / .22), transparent); filter: blur(18px); }
+.vp-bal::after {
+  content: ""; position: absolute; z-index: -1; right: -26px; bottom: -58px; width: 290px; height: 290px; pointer-events: none;
+  background: hsl(0 0% 100% / .07);
+  clip-path: polygon(0 30%, 38% 100%, 100% 0, 78% 0, 38% 62%, 18% 30%);
+}
+.vp-bal-ring {
+  position: absolute; z-index: -1; pointer-events: none; border-radius: 9999px; width: 560px; height: 560px; right: -190px; top: -250px;
+  border: 1px solid hsl(0 0% 100% / .16); background: hsl(0 0% 100% / .04);
+}
+.vp-bal-btn {
+  display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 20px; border-radius: 9999px;
+  font-size: 14px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap;
+  transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+}
+.vp-bal-btn:focus-visible { outline: 2px solid hsl(0 0% 100%); outline-offset: 3px; }
+.vp-bal-btn:active { transform: scale(.97); }
+.vp-bal-btn-main { background: hsl(0 0% 100%); color: hsl(157 100% 21%); box-shadow: 0 12px 24px -12px hsl(158 100% 10% / .6); }
+.vp-bal-btn-main:hover { transform: translateY(-1px); box-shadow: 0 16px 28px -12px hsl(158 100% 10% / .65); }
+.vp-bal-btn-ghost { background: hsl(0 0% 100% / .13); color: hsl(0 0% 100%); box-shadow: inset 0 0 0 1px hsl(0 0% 100% / .22); }
+.vp-bal-btn-ghost:hover { background: hsl(0 0% 100% / .22); }
+.vp-bal-eye { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 9999px; background: hsl(0 0% 100% / .13); transition: background .15s ease; }
+.vp-bal-eye:hover { background: hsl(0 0% 100% / .24); }
+.vp-bal-eye:focus-visible { outline: 2px solid hsl(0 0% 100%); outline-offset: 2px; }
+
+/* ── Menu lateral ── */
+.vp-rail { background: hsl(var(--card)); border-right: 1px solid hsl(var(--border)); }
+.vp-nav {
+  display: flex; align-items: center; gap: 12px; height: 46px; padding: 0 10px 0 7px; border-radius: 15px;
+  font-size: 14px; font-weight: 600; letter-spacing: -.005em; color: hsl(var(--muted-foreground));
+  transition: background .15s ease, color .15s ease;
+}
+.vp-nav:hover { background: hsl(var(--muted)); color: hsl(var(--foreground)); }
+.vp-nav:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.vp-nav-chip { display: grid; place-items: center; flex: none; width: 33px; height: 33px; border-radius: 11px; transition: background .15s ease, color .15s ease, box-shadow .15s ease; }
+.vp-nav[data-active="true"] { background: hsl(var(--accent)); color: hsl(var(--accent-foreground)); }
+/* O item ativo vira um mini-logo: quadrado verde com o ícone branco. */
+.vp-nav[data-active="true"] .vp-nav-chip { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); box-shadow: 0 8px 16px -8px hsl(var(--primary) / .75); }
+.vp-nav-sm { height: 40px; font-size: 13.5px; font-weight: 500; }
+.vp-nav-sm .vp-nav-chip { width: 28px; height: 28px; border-radius: 9px; }
+.vp-rail .vp-nav { border-width: 0 !important; border-radius: 15px !important; }
+
 .vp-promo {
-  background:
-    radial-gradient(420px 260px at 100% 100%, hsl(var(--vp-glow) / .22), transparent 65%),
-    linear-gradient(160deg, hsl(220 22% 10%), hsl(220 30% 6%));
-  border: 1px solid hsl(var(--border)); border-radius: 22px;
+  position: relative; isolation: isolate; overflow: hidden; border-radius: 22px; color: hsl(0 0% 100%);
+  background: linear-gradient(150deg, hsl(156 100% 31%), hsl(158 100% 21%));
+  box-shadow: 0 22px 38px -24px hsl(158 100% 16% / .75);
 }
-.vp-glow-text { color: hsl(var(--vp-glow)); }
-@media (prefers-reduced-motion: reduce) { .vp-card-float { animation: none; } }
-/* Neutraliza regras legadas globais de botões/links dentro do painel escuro */
+.vp-promo::before {
+  content: ""; position: absolute; z-index: -1; right: -80px; top: -90px; width: 230px; height: 230px; border-radius: 9999px;
+  border: 1px solid hsl(0 0% 100% / .18); background: hsl(0 0% 100% / .05);
+}
+.vp-promo::after {
+  content: ""; position: absolute; z-index: -1; left: -70px; bottom: -110px; width: 180px; height: 180px; border-radius: 9999px;
+  border: 1px solid hsl(0 0% 100% / .14);
+}
+
+/* ── Controles ── */
+.vp-chip {
+  display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 9999px;
+  background: hsl(var(--card)); border: 1px solid hsl(var(--border)); color: hsl(var(--foreground));
+  font-size: 13px; font-weight: 600; transition: border-color .15s ease, box-shadow .15s ease;
+}
+.vp-chip:hover { border-color: hsl(var(--primary) / .55); }
+.vp-chip:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.vp-orb {
+  position: relative; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 9999px;
+  background: hsl(var(--card)); border: 1px solid hsl(var(--border)); color: hsl(var(--foreground));
+  transition: border-color .15s ease, transform .15s ease;
+}
+.vp-orb:hover { border-color: hsl(var(--primary) / .55); }
+.vp-orb:active { transform: scale(.96); }
+.vp-orb:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+
+/* Indicador de "ao vivo" */
+.vp-live { position: relative; display: inline-block; width: 8px; height: 8px; border-radius: 9999px; background: hsl(var(--primary)); }
+.vp-live::after { content: ""; position: absolute; inset: -4px; border-radius: 9999px; border: 2px solid hsl(var(--primary) / .5); animation: vp-ping 2.2s ease-out infinite; }
+@keyframes vp-ping { from { transform: scale(.55); opacity: 1; } to { transform: scale(1.5); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .vp-live::after { animation: none; opacity: 0; } .vp-bal-btn, .vp-nav, .vp-orb { transition: none; } }
+
+/* Neutraliza regras legadas globais de botões/links dentro do painel do seller */
 .vp-seller-shell .rounded-xl:not([class*="border"]), .vp-seller-shell .rounded-2xl:not([class*="border"]) { border-width: 0; }
-.vp-seller-shell .vp-orb { border-radius: 9999px !important; border-width: 1px; }
-.vp-seller-shell .vp-orb-main { border-width: 0; }
-.vp-rail .vp-rail-item { border-radius: 12px !important; border-width: 0 !important; }
+.vp-seller-shell .vp-orb, .vp-seller-shell .vp-chip, .vp-seller-shell .vp-bal-btn, .vp-seller-shell .vp-bal-eye { border-radius: 9999px !important; }
 .vp-seller-shell button.rounded-full, .vp-seller-shell a.rounded-full { border-radius: 9999px !important; }

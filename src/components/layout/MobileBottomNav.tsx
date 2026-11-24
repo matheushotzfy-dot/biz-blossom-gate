@@ -162,7 +162,7 @@ export function MobileBottomNav() {
 
       {/* ═══ Bottom Tab Bar ═══ */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div className="border-t border-border bg-card">
+        <div className="border-t border-border bg-card shadow-[0_-14px_32px_-20px_hsl(222_47%_11%/.22)]">
           <div className="flex items-stretch justify-around px-1.5 pt-2 pb-[max(env(safe-area-inset-bottom,0px),8px)]">
             {tabs.map((tab) => {
               const isMore = tab.path === "__more__";
@@ -178,7 +178,7 @@ export function MobileBottomNav() {
                     className="relative flex min-w-[60px] flex-1 flex-col items-center gap-1 active:scale-[0.94] transition-transform"
                     aria-label="Cobrar com Pix ou cartão"
                   >
-                    <span className="-mt-6 grid h-[52px] w-[52px] place-items-center rounded-full bg-primary text-primary-foreground ring-4 ring-card">
+                    <span className="-mt-6 grid h-[52px] w-[52px] place-items-center rounded-full bg-primary text-primary-foreground shadow-[0_12px_22px_-8px_hsl(var(--primary)/.65)] ring-4 ring-card">
                       <tab.icon className="h-[22px] w-[22px]" strokeWidth={2.3} />
                     </span>
                     <span className="text-[10px] font-bold leading-none text-primary">{tab.label}</span>

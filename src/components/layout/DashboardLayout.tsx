@@ -33,12 +33,14 @@ function DashboardLayoutInner() {
  useRealtimeSync();
  // Aquece os chunks das abas mais usadas em segundo plano (evita "só carregando").
  useEffect(() => { prefetchIdleRoutes(); }, []);
- // Área do seller sempre na identidade escura premium (inclui diálogos em portal).
+ // Identidade do seller: clara (a do cadastro) por padrão; escura só se o perfil escolher "escuro".
+ // As classes ficam no <html> para que diálogos e menus em portal herdem os mesmos tokens.
  useEffect(() => {
    const root = document.documentElement;
-   root.classList.add("vp-noir");
-   return () => root.classList.remove("vp-noir");
- }, []);
+   root.classList.add("vp-seller");
+   root.classList.toggle("vp-noir", theme === "dark");
+   return () => root.classList.remove("vp-seller", "vp-noir");
+ }, [theme]);
  const navigate = useNavigate();
 
   const { pathname, search } = useLocation();
@@ -130,7 +132,7 @@ function DashboardLayoutInner() {
 
  return (
       <SidebarProvider open={false} onOpenChange={() => {}} className="block">
-  <div className="vp-seller-shell vp-noir-stage flex h-full w-full">
+  <div className="vp-seller-shell vp-stage flex h-full w-full">
           <SellerRail />
   <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <SellerTopbar

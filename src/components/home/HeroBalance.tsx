@@ -1,10 +1,6 @@
-import { ArrowDownToLine, ArrowRight, Eye, EyeOff, MoreHorizontal, QrCode, Share2, TrendingDown, TrendingUp } from "lucide-react";
-import { Link } from "react-router-dom";
-import cardImg from "@/assets/vp-card-3d.webp";
-import { Money } from "./Money";
+import { ArrowDownToLine, Blocks, Eye, EyeOff, QrCode, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-export interface HeroAction { label: string; hint: string; icon: typeof QrCode; onClick: () => void; main?: boolean }
+import { Money } from "./Money";
 
 export interface HeroBalanceProps {
   available: number;
@@ -19,67 +15,58 @@ export interface HeroBalanceProps {
   onMore: () => void;
 }
 
-/** Topo do Início: cartão 3D da marca, saldo protagonista, ações redondas e cartão de destaque. */
+/**
+ * Cartão de saldo — o elemento de marca do painel: verde do cadastro com guilloché
+ * (linhas finas concêntricas, como em nota bancária) e o "V" em check de marca d'água.
+ */
 export function HeroBalance(p: HeroBalanceProps) {
-  const actions: HeroAction[] = [
-    { label: "Pix", hint: "Cobrar via Pix", icon: QrCode, onClick: p.onPix, main: true },
-    { label: "Sacar", hint: "Para sua conta", icon: ArrowDownToLine, onClick: p.onWithdraw },
-    { label: "Cobrar", hint: "Link de pagamento", icon: Share2, onClick: p.onCharge },
-    { label: "Mais", hint: "Ver todos", icon: MoreHorizontal, onClick: p.onMore },
-  ];
   const up = (p.trend ?? 0) >= 0;
+  const stats: Array<{ label: string; value: number }> = [{ label: "A liberar", value: p.pending }];
+  if (p.disputed > 0) stats.push({ label: "Em análise", value: p.disputed });
 
   return (
-    <section className="grid items-center gap-6 xl:grid-cols-[minmax(0,1fr)_340px]" aria-label="Saldo">
-      <div className="grid items-center gap-4 md:grid-cols-[minmax(240px,0.9fr)_minmax(0,1.1fr)]">
-        <div className="relative mx-auto w-full max-w-[420px]">
-          <div className="vp-card-plinth absolute inset-x-6 bottom-0 h-16" aria-hidden />
-          <img src={cardImg} alt="Cartão Vemprapay" width={900} height={630} className="vp-card-float relative w-full select-none" draggable={false} />
-        </div>
+    <section className="vp-bal flex flex-col p-6 sm:p-8" aria-label="Saldo">
+      <span aria-hidden className="vp-bal-ring" />
 
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Saldo disponível</span>
-          </div>
-          <div className="mt-2 flex items-center gap-3">
-            <Money value={Math.max(p.available, 0)} hidden={p.hidden} className="text-[42px] font-extrabold leading-none text-foreground sm:text-[54px]" centsClassName="opacity-100" />
-            <button onClick={p.onTogglePrivacy} aria-label={p.hidden ? "Mostrar valores" : "Ocultar valores"} className="grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-              {p.hidden ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-            </button>
-          </div>
-          <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13.5px]">
-            {p.trend !== undefined && (
-              <span className={cn("inline-flex items-center gap-1 font-semibold", up ? "vp-glow-text" : "text-destructive")}>
-                {up ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}{up ? "+" : "−"}{Math.abs(p.trend)}% no período
-              </span>
-            )}
-            <span className="text-muted-foreground">A liberar <Money value={p.pending} hidden={p.hidden} className="font-semibold text-foreground" /></span>
-            {p.disputed > 0 && <span className="text-warning">Em análise <Money value={p.disputed} hidden={p.hidden} className="font-semibold" /></span>}
-          </p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-[15px] font-semibold text-white/85">Saldo disponível</p>
+        <button onClick={p.onTogglePrivacy} aria-label={p.hidden ? "Mostrar valores" : "Ocultar valores"} aria-pressed={p.hidden} className="vp-bal-eye">
+          {p.hidden ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+        </button>
+      </div>
 
-          <ul className="mt-7 flex gap-5 sm:gap-7">
-            {actions.map((a) => (
-              <li key={a.label} className="text-center">
-                <button onClick={a.onClick} className={cn("vp-orb mx-auto", a.main && "vp-orb-main")} aria-label={a.hint}>
-                  <a.icon className="h-6 w-6" strokeWidth={2.1} />
-                </button>
-                <span className="mt-2.5 block text-[13.5px] font-semibold text-foreground">{a.label}</span>
-                <span className="hidden max-w-[84px] text-[11.5px] leading-tight text-muted-foreground 2xl:block">{a.hint}</span>
-              </li>
-            ))}
-          </ul>
+      <Money
+        value={Math.max(p.available, 0)}
+        hidden={p.hidden}
+        className="mt-3 block text-[46px] font-extrabold leading-none tracking-[-0.045em] sm:text-[64px]"
+        centsClassName="opacity-70"
+      />
+
+      <div className="mt-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
+        {p.trend !== undefined && (
+          <span className="inline-flex h-8 items-center gap-1.5 rounded-full bg-white/15 px-3 text-[13px] font-bold">
+            {up ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+            {up ? "+" : "−"}{Math.abs(p.trend)}% no período
+          </span>
+        )}
+        <div className="flex items-center">
+          {stats.map((s, i) => (
+            <div key={s.label} className={cn("pr-6", i > 0 && "border-l border-white/25 pl-6", i === 0 && p.trend !== undefined && "sm:border-l sm:border-white/25 sm:pl-6")}>
+              <p className="text-[12.5px] text-white/75">{s.label}</p>
+              <Money value={s.value} hidden={p.hidden} className="text-[17px] font-bold" centsClassName="opacity-75" />
+            </div>
+          ))}
         </div>
       </div>
 
-      <Link to="/premiacoes" className="vp-promo group relative hidden min-h-[230px] flex-col justify-between overflow-hidden p-6 xl:flex">
-        <div>
-          <p className="text-[21px] font-semibold leading-snug text-foreground">Grandes conquistas começam com a primeira venda.</p>
-          <p className="mt-3 text-[13px] text-muted-foreground">Acompanhe suas placas e metas de faturamento.</p>
+      <div className="mt-auto flex flex-wrap gap-2.5 pt-8">
+        <button onClick={p.onPix} className="vp-bal-btn vp-bal-btn-main"><QrCode className="h-[18px] w-[18px]" strokeWidth={2.2} />Cobrar via Pix</button>
+        <button onClick={p.onWithdraw} className="vp-bal-btn vp-bal-btn-ghost"><ArrowDownToLine className="h-[18px] w-[18px]" strokeWidth={2.2} />Sacar</button>
+        <button onClick={p.onCharge} className="vp-bal-btn vp-bal-btn-ghost"><Share2 className="h-[18px] w-[18px]" strokeWidth={2.2} />Enviar link</button>
+        <div className="hidden sm:block">
+          <button onClick={p.onMore} className="vp-bal-btn vp-bal-btn-ghost"><Blocks className="h-[18px] w-[18px]" strokeWidth={2.2} />Integrações</button>
         </div>
-        <span className="grid h-11 w-11 place-items-center self-end rounded-full border border-border text-foreground transition-transform group-hover:translate-x-1">
-          <ArrowRight className="h-5 w-5" />
-        </span>
-      </Link>
+      </div>
     </section>
   );
 }

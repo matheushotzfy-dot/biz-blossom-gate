@@ -1,84 +1,84 @@
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { TrendingDown, TrendingUp } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Money } from "./Money";
+import type { ReactNode } from "react";
+import { Area, AreaChart, CartesianGrid, ReferenceDot, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useReducedMotion } from "framer-motion";
 
 export interface SalesPoint { key: number; label: string; full: string; revenue: number; orders: number }
-export interface RangeOption { id: string; label: string }
+export type ChartBucket = "hour" | "day" | "month";
 
 export interface RevenueChartProps {
   data: SalesPoint[];
-  revenue: number;
-  orders: number;
-  trend?: number;
+  bucket: ChartBucket;
   hidden: boolean;
   loading: boolean;
-  ranges: RangeOption[];
-  activeRange: string | null;
-  onRange: (id: string) => void;
-  extra?: React.ReactNode;
+  /** Chip de período (abre o seletor de datas). */
+  action: ReactNode;
 }
 
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const compact = (v: number) => (v >= 1000 ? `${(v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} mil` : String(Math.round(v)));
+const PER: Record<ChartBucket, string> = { hour: "por hora", day: "por dia", month: "por mês" };
+const INK = "hsl(var(--muted-foreground))";
 
-/** Faturamento aprovado: linha luminosa com área em degradê e leitura por ponto. */
+/**
+ * Faturamento aprovado — título, subtítulo, chip de período e uma única área.
+ * Os valores aparecem só no tooltip (decisão de produto: gráfico limpo, sem totais).
+ */
 export function RevenueChart(p: RevenueChartProps) {
-  const up = (p.trend ?? 0) >= 0;
+  const reduced = useReducedMotion() ?? false;
   const empty = !p.loading && p.data.every((d) => d.revenue === 0);
-  const last = [...p.data].reverse().find((d) => d.revenue > 0);
+  const peakIdx = empty ? -1 : p.data.reduce((best, d, i) => (d.revenue > (p.data[best]?.revenue ?? 0) ? i : best), 0);
+  const peak = peakIdx >= 0 ? p.data[peakIdx] : null;
+  const flipLeft = peakIdx > p.data.length * 0.78;
 
   return (
-    <section className="vp-glass p-6" aria-label="Faturamento">
-      <header className="flex flex-wrap items-start justify-between gap-4">
+    <section className="vp-sheet p-6 sm:p-7" aria-label="Faturamento aprovado">
+      <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-[14px] text-muted-foreground">Faturamento aprovado</p>
-          <Money value={p.revenue} hidden={p.hidden} className="mt-1 block text-[34px] font-extrabold leading-none text-foreground" centsClassName="opacity-100" />
-          <p className="mt-2 flex items-center gap-3 text-[13px]">
-            {p.trend !== undefined && <span className={cn("inline-flex items-center gap-1 font-semibold", up ? "vp-glow-text" : "text-destructive")}>{up ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}{up ? "+" : "−"}{Math.abs(p.trend)}% vs período anterior</span>}
-            <span className="text-muted-foreground">{p.orders} {p.orders === 1 ? "pedido pago" : "pedidos pagos"}</span>
-          </p>
+          <h2 className="text-[19px] font-extrabold tracking-[-0.025em] text-foreground">Faturamento aprovado</h2>
+          <p className="mt-0.5 text-[13.5px] text-muted-foreground">Vendas pagas {PER[p.bucket]}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div role="tablist" className="flex rounded-full bg-muted p-1 text-[12.5px] font-semibold">
-            {p.ranges.map((r) => (
-              <button key={r.id} role="tab" aria-selected={p.activeRange === r.id} onClick={() => p.onRange(r.id)}
-                className={cn("rounded-full px-3.5 py-1.5 transition-colors", p.activeRange === r.id ? "bg-secondary text-foreground ring-1 ring-border" : "text-muted-foreground hover:text-foreground")}>
-                {r.label}
-              </button>
-            ))}
-          </div>
-          {p.extra}
-        </div>
+        {p.action}
       </header>
 
-      <div className="relative mt-6 h-[300px]">
+      <div className="relative mt-6 h-[300px] sm:h-[330px]">
         {p.loading ? <div className="vp-skel h-full w-full" /> : (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={p.data} margin={{ top: 16, right: 14, left: -6, bottom: 0 }}>
+            <AreaChart data={p.data} margin={{ top: 46, right: 12, left: -8, bottom: 0 }}>
               <defs>
-                <linearGradient id="vpNoirArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--vp-glow))" stopOpacity={0.32} />
-                  <stop offset="100%" stopColor="hsl(var(--vp-glow))" stopOpacity={0} />
+                <linearGradient id="vpAreaFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.24} />
+                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                 </linearGradient>
-                <filter id="vpNoirGlow" x="-10%" y="-50%" width="120%" height="200%">
-                  <feGaussianBlur stdDeviation="4" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-                </filter>
               </defs>
-              <CartesianGrid vertical stroke="hsl(var(--border))" strokeDasharray="0" horizontal={false} />
-              <XAxis dataKey="label" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={24} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} dy={8} />
-              <YAxis tickLine={false} axisLine={false} width={56} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v: number) => (p.hidden ? "•" : compact(v))} allowDecimals={false} />
-              <Tooltip cursor={{ stroke: "hsl(var(--vp-glow) / .5)", strokeDasharray: "3 3" }} content={<Tip hidden={p.hidden} />} />
-              <Area type="monotone" dataKey="revenue" stroke="hsl(var(--vp-glow))" strokeWidth={2.5} fill="url(#vpNoirArea)" filter="url(#vpNoirGlow)" isAnimationActive={false}
-                dot={false} activeDot={{ r: 6, fill: "hsl(var(--vp-glow))", stroke: "hsl(var(--background))", strokeWidth: 3 }} />
+              <CartesianGrid vertical={false} stroke="hsl(var(--border))" strokeDasharray="2 6" />
+              <XAxis dataKey="label" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={28} tick={{ fontSize: 12, fill: INK }} dy={10} />
+              <YAxis
+                tickLine={false} axisLine={false} width={56} allowDecimals={false}
+                domain={empty ? [0, 100] : [0, "auto"]} tickCount={5}
+                tick={{ fontSize: 12, fill: INK }} tickFormatter={(v: number) => (p.hidden ? "•" : compact(v))}
+              />
+              <Tooltip cursor={{ stroke: "hsl(var(--primary) / .4)", strokeDasharray: "3 4" }} content={<Tip hidden={p.hidden} />} />
+              <Area
+                type="monotone" dataKey="revenue" stroke={empty ? "hsl(var(--primary) / .4)" : "hsl(var(--primary))"} strokeWidth={empty ? 2 : 3} fill="url(#vpAreaFill)"
+                isAnimationActive={!reduced} animationDuration={900} animationEasing="ease-out"
+                dot={false} activeDot={{ r: 6, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))", strokeWidth: 3 }}
+              />
+              {peak && (
+                <ReferenceDot
+                  x={peak.label} y={peak.revenue} ifOverflow="extendDomain"
+                  shape={(s: { cx?: number; cy?: number }) => <PeakMark cx={s.cx ?? 0} cy={s.cy ?? 0} text={p.hidden ? "Pico" : brl(peak.revenue)} flip={flipLeft} />}
+                />
+              )}
             </AreaChart>
           </ResponsiveContainer>
         )}
-        {empty && <div className="pointer-events-none absolute inset-0 grid place-items-center"><span className="rounded-full border border-border bg-card px-4 py-2 text-[12.5px] text-muted-foreground">Nenhuma venda aprovada neste período</span></div>}
-        {!empty && last && !p.hidden && (
-          <div className="pointer-events-none absolute right-4 top-0 rounded-xl border border-border bg-card px-3 py-2 text-right">
-            <p className="text-[13px] font-bold text-foreground vp-num">{brl(last.revenue)}</p>
-            <p className="text-[11px] text-muted-foreground">{last.label}</p>
+
+        {empty && (
+          <div className="pointer-events-none absolute inset-0 grid place-items-center pb-8">
+            <div className="rounded-2xl border border-border bg-card/95 px-5 py-3.5 text-center shadow-[0_12px_32px_-18px_hsl(222_47%_11%/.35)]">
+              <p className="text-[14px] font-bold text-foreground">Nenhuma venda aprovada neste período</p>
+              <p className="mt-0.5 text-[12.5px] text-muted-foreground">Quando você vender, a curva aparece aqui.</p>
+            </div>
           </div>
         )}
       </div>
@@ -86,14 +86,28 @@ export function RevenueChart(p: RevenueChartProps) {
   );
 }
 
+/** Marca do melhor ponto do período: bolinha com aro e o valor numa etiqueta. */
+function PeakMark({ cx, cy, text, flip }: { cx: number; cy: number; text: string; flip: boolean }) {
+  const w = Math.max(64, text.length * 8 + 22);
+  const x = flip ? cx - w + 14 : cx - 14;
+  return (
+    <g pointerEvents="none">
+      <rect x={x} y={cy - 40} width={w} height={26} rx={13} fill="hsl(var(--foreground))" />
+      <text x={x + w / 2} y={cy - 23} textAnchor="middle" fontSize={12} fontWeight={700} fill="hsl(var(--background))">{text}</text>
+      <circle cx={cx} cy={cy} r={9} fill="hsl(var(--primary) / .18)" />
+      <circle cx={cx} cy={cy} r={5.5} fill="hsl(var(--primary))" stroke="hsl(var(--card))" strokeWidth={2.5} />
+    </g>
+  );
+}
+
 function Tip({ active, payload, hidden }: { active?: boolean; payload?: Array<{ payload: SalesPoint }>; hidden: boolean }) {
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return (
-    <div className="rounded-xl border border-border bg-popover px-3.5 py-2.5 text-popover-foreground shadow-2xl">
-      <p className="text-[11px] font-semibold capitalize text-muted-foreground">{d.full}</p>
-      <p className="mt-1 text-[15px] font-extrabold vp-num">{hidden ? "R$ ••••" : brl(d.revenue)}</p>
-      <p className="text-[11.5px] text-muted-foreground">{d.orders} {d.orders === 1 ? "pedido" : "pedidos"}</p>
+    <div className="rounded-2xl border border-border bg-popover px-4 py-3 text-popover-foreground shadow-[0_18px_40px_-18px_hsl(222_47%_11%/.35)]">
+      <p className="text-[12px] font-semibold capitalize text-muted-foreground">{d.full}</p>
+      <p className="mt-1 text-[18px] font-extrabold tracking-[-0.03em] vp-num">{hidden ? "R$ ••••" : brl(d.revenue)}</p>
+      <p className="text-[12.5px] text-muted-foreground">{d.orders} {d.orders === 1 ? "pedido pago" : "pedidos pagos"}</p>
     </div>
   );
 }
