@@ -1,99 +1,74 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Bell, LifeBuoy, LogOut, Moon, Search, Sun, UserRound, Wallet } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useProfile } from "@/hooks/useProfile";
+import { usePrivacyMode } from "@/hooks/usePrivacyMode";
+import { useLedgerBalance } from "@/hooks/useQueryData";
 import { NotificationPanel, useNotificationCount } from "@/components/NotificationPanel";
-import { Sun, Moon, Bell, Search } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useNavigate } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { GlobalSearchDialog } from "./GlobalSearchDialog";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
-import { useDashboardStats } from "@/hooks/useQueryData";
+import { Money } from "@/components/home/Money";
+import { supabase } from "@/integrations/supabase/client";
 
-const fmtCompact = (v: number) => {
- if (v >= 1000000) return `R$ ${(v / 1000000).toFixed(1)}M`;
- if (v >= 1000) return `R$ ${(v / 1000).toFixed(1)}K`;
- return `R$ ${v.toFixed(0)}`;
-};
-
+/** Barra superior do celular: marca, saldo, busca, avisos e conta (com o tema dentro do menu). */
 export function MobileRevenueBar() {
- const { theme, toggleTheme } = useTheme();
- const { profile } = useProfile();
- const navigate = useNavigate();
- const unreadCount = useNotificationCount();
- const range = useMemo(() => {
-  const now = new Date();
-  return { from: new Date(now.getFullYear(), now.getMonth(), 1), to: now };
- }, []);
- const { data: stats, isLoading: loading } = useDashboardStats(range.from, range.to, "month");
- const revenue = Number(stats?.current?.revenue || 0);
- const [notifOpen, setNotifOpen] = useState(false);
- const [searchOpen, setSearchOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const { profile } = useProfile();
+  const navigate = useNavigate();
+  const unreadCount = useNotificationCount();
+  const { hidden } = usePrivacyMode();
+  const { data: balance = 0 } = useLedgerBalance();
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const logout = async () => { await supabase.auth.signOut(); navigate("/auth"); };
 
- return (
- <>
- <div className="md:hidden sticky top-0 z-20 border-b border-border/50 bg-background">
- <div className="flex items-center gap-2 px-3 py-2.5">
- {/* Logo */}
- <div className="flex items-center gap-2 shrink-0">
- <VenxpayLogo size={28} />
- <span className="text-[17px] font-display font-extrabold text-foreground tracking-[-0.035em]">vempra<span className="text-primary">pay</span></span>
- </div>
+  return (
+    <>
+      <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur md:hidden">
+        <div className="flex items-center gap-2 px-3.5 py-2.5">
+          <Link to="/dashboard" className="flex shrink-0 items-center gap-2" aria-label="Início">
+            <VenxpayLogo size={30} />
+            <span className="hidden font-heading text-[18px] font-extrabold tracking-[-0.04em] text-foreground min-[460px]:inline">vempra<span className="text-primary">pay</span></span>
+          </Link>
 
- <div className="flex-1" />
+          <div className="flex-1" />
 
- {/* Revenue chip */}
- <div className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/8 px-2.5 py-1">
- <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
- {loading ? (
- <span className="h-3 w-10 rounded bg-primary/20 animate-pulse" />
- ) : (
- <span className="text-[11px] font-bold font-numbers text-primary tabular-nums">{fmtCompact(revenue)}</span>
- )}
- </div>
+          <Link to="/financeiro/saques" aria-label="Saldo disponível" className="hidden h-10 items-center gap-1.5 rounded-full bg-accent pl-1.5 pr-3 text-accent-foreground min-[380px]:flex">
+            <span className="grid h-7 w-7 place-items-center rounded-full bg-primary text-primary-foreground"><Wallet className="h-3.5 w-3.5" strokeWidth={2.3} /></span>
+            <Money value={balance} hidden={hidden} className="text-[13.5px] font-extrabold tracking-[-0.02em]" centsClassName="hidden" />
+          </Link>
 
- {/* Search */}
- <button
- onClick={() => setSearchOpen(true)}
- className="h-8 w-8 rounded-full flex items-center justify-center bg-muted/30 active:scale-95 transition-transform"
- >
- <Search className="h-3.5 w-3.5 text-muted-foreground" />
- </button>
+          <button onClick={() => setSearchOpen(true)} className="vp-orb !h-10 !w-10" aria-label="Buscar"><Search className="h-[18px] w-[18px]" /></button>
+          <button onClick={() => setNotifOpen(!notifOpen)} className="vp-orb !h-10 !w-10" aria-label={unreadCount > 0 ? `Notificações, ${unreadCount} novas` : "Notificações"}>
+            <Bell className="h-[18px] w-[18px]" />
+            {unreadCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 grid h-[17px] min-w-[17px] place-items-center rounded-full bg-primary px-1 text-[9.5px] font-bold leading-none text-primary-foreground ring-2 ring-background">{unreadCount > 9 ? "9+" : unreadCount}</span>
+            )}
+          </button>
 
- {/* Notifications */}
- <button
- onClick={() => setNotifOpen(!notifOpen)}
- className="relative h-8 w-8 rounded-full flex items-center justify-center bg-muted/30 active:scale-95 transition-transform"
- >
- <Bell className="h-3.5 w-3.5 text-muted-foreground" />
- {unreadCount > 0 && (
- <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] px-1 bg-primary rounded-full ring-2 ring-background flex items-center justify-center text-[8px] font-bold text-primary-foreground">
- {unreadCount > 9 ? "9+" : unreadCount}
- </span>
- )}
- </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" aria-label="Minha conta">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={profile?.avatar_url || undefined} className="object-cover" />
+                <AvatarFallback className="bg-accent text-[14px] font-bold text-accent-foreground">{(profile?.full_name || "U").charAt(0).toUpperCase()}</AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 rounded-2xl p-1.5">
+              <DropdownMenuItem className="rounded-xl py-2.5" onClick={() => navigate("/perfil")}><UserRound className="mr-2.5 h-4 w-4" />Minha conta</DropdownMenuItem>
+              <DropdownMenuItem className="rounded-xl py-2.5" onClick={toggleTheme}>{theme === "dark" ? <Sun className="mr-2.5 h-4 w-4" /> : <Moon className="mr-2.5 h-4 w-4" />}{theme === "dark" ? "Tema claro" : "Tema escuro"}</DropdownMenuItem>
+              <DropdownMenuItem className="rounded-xl py-2.5" onClick={() => navigate("/suporte")}><LifeBuoy className="mr-2.5 h-4 w-4" />Suporte</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={logout} className="rounded-xl py-2.5 text-destructive focus:text-destructive"><LogOut className="mr-2.5 h-4 w-4" />Sair</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
 
- {/* Avatar */}
- <button onClick={() => navigate("/perfil")} className="shrink-0 active:scale-95 transition-transform">
- <Avatar className="h-8 w-8 ring-1 ring-border/40">
- <AvatarImage src={profile?.avatar_url || undefined} className="object-cover" />
- <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
- {(profile?.full_name || "U").charAt(0).toUpperCase()}
- </AvatarFallback>
- </Avatar>
- </button>
-
- {/* Theme */}
- <button
- onClick={toggleTheme}
- className="h-8 w-8 rounded-full flex items-center justify-center bg-muted/30 active:scale-95 transition-transform"
- >
- {theme === "dark" ? <Sun className="h-3.5 w-3.5 text-warning" /> : <Moon className="h-3.5 w-3.5 text-muted-foreground" />}
- </button>
- </div>
- </div>
-
- <GlobalSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
- <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
- </>
- );
+      <GlobalSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+      <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
+    </>
+  );
 }

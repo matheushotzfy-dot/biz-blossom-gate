@@ -1,3 +1,4 @@
+import { usePrivacyMode } from "@/hooks/usePrivacyMode";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { differenceInDays, format } from "date-fns";
@@ -24,15 +25,6 @@ const rate = (a: number, t: number) => (t > 0 ? Math.round((a / t) * 100) : 0);
 const pad = (n: number) => String(n).padStart(2, "0");
 const keyOf = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
-function usePrivacy() {
-  const [hidden, setHidden] = useState(() => { try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; } });
-  const toggle = useCallback(() => setHidden((h) => {
-    try { localStorage.setItem("privacy_mode", String(!h)); window.dispatchEvent(new StorageEvent("storage")); } catch { /* noop */ }
-    return !h;
-  }), []);
-  return { hidden, toggle };
-}
-
 /** Converte a série agregada do servidor em pontos do gráfico (sempre com todos os intervalos). */
 function buildSeries(series: Array<{ bucket: string; revenue: number; count: number }>, start: Date, end: Date, bucket: DashboardBucket): SalesPoint[] {
   const rev = new Map<string, number>(); const cnt = new Map<string, number>();
@@ -54,7 +46,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { profile } = useProfile();
   const kyc = useKycStatus();
-  const privacy = usePrivacy();
+  const privacy = usePrivacyMode();
   const [period, setPeriod] = useState<PeriodValue>(() => buildPeriod("30d"));
   const [pickerOpen, setPickerOpen] = useState(false);
   const [detail, setDetail] = useState<Tables<"transactions"> | null>(null);

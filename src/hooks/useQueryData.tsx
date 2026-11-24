@@ -1,4 +1,5 @@
 import { useEffect, useCallback } from "react";
+import { salesStatusClause, type SalesStatusKey } from "@/lib/sales-status-filter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -122,6 +123,7 @@ export type TransactionsPageParams = {
   page: number;
   pageSize: number;
   search?: string;
+  status?: SalesStatusKey;
 };
 
 /**
@@ -129,14 +131,14 @@ export type TransactionsPageParams = {
  * Evita divergência entre a lista e os agregados: ambos passam a olhar a mesma janela
  * de datas, sem o teto de 500 linhas no cliente.
  */
-export function useTransactionsPage({ from, to, page, pageSize, search }: TransactionsPageParams) {
+export function useTransactionsPage({ from, to, page, pageSize, search, status = "all" }: TransactionsPageParams) {
   const { user } = useAuth();
   const fromIso = from.toISOString();
   const toIso = to.toISOString();
   const term = (search ?? "").trim();
 
   return useQuery({
-    queryKey: ["transactions_page", user?.id, fromIso, toIso, page, pageSize, term],
+    queryKey: ["transactions_page", user?.id, fromIso, toIso, page, pageSize, term, status],
     queryFn: async ({ signal }) => {
       if (!user) throw new Error("Sessão necessária");
       const offset = (page - 1) * pageSize;
@@ -146,6 +148,11 @@ export function useTransactionsPage({ from, to, page, pageSize, search }: Transa
         .eq("user_id", user.id)
         .gte("created_at", fromIso)
         .lte("created_at", toIso);
+
+      const clause = salesStatusClause(status);
+      if (clause.statusIn) query = query.in("status", clause.statusIn);
+      if (clause.createdAfter) query = query.gt("created_at", clause.createdAfter);
+      if (clause.or) query = query.or(clause.or);
 
       if (term) {
         if (UUID_RE.test(term)) {

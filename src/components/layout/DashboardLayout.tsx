@@ -20,6 +20,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useKycStatus } from "@/hooks/useKycStatus";
+import { usePrivacyMode } from "@/hooks/usePrivacyMode";
 import { prefetchIdleRoutes } from "@/lib/routePrefetch";
 
 
@@ -52,9 +53,7 @@ function DashboardLayoutInner() {
    const unreadCount = useNotificationCount();
    const { data: withdrawals = [] } = useWithdrawals();
    const { data: ledgerBalance = 0 } = useLedgerBalance();
-   const [privacyHidden, setPrivacyHidden] = useState(() => {
-     try { return localStorage.getItem("privacy_mode") === "true"; } catch { return false; }
-   });
+   const { hidden: privacyHidden, toggle: togglePrivacy } = usePrivacyMode();
    // Sidebar: fixada (pino) ou reduzida com expansão no hover
    const [sidebarPinned, setSidebarPinned] = useState(() => {
      try { return localStorage.getItem("sidebar_pinned") !== "false"; } catch { return true; }
@@ -79,14 +78,6 @@ function DashboardLayoutInner() {
    };
 
 
-   const togglePrivacy = () => {
-     setPrivacyHidden(prev => {
-       const next = !prev;
-       try { localStorage.setItem("privacy_mode", String(next)); } catch { /* noop */ }
-       return next;
-     });
-   };
-
    // Single source of truth: ledger RPC (same as Dashboard / Extrato / Saques)
    const balance = ledgerBalance;
 
@@ -96,16 +87,6 @@ function DashboardLayoutInner() {
   useEffect(() => {
   scrollRef.current?.scrollTo({ top: 0, left: 0 });
    }, [routeKey]);
-
-  // Sync privacy mode with dashboard
-  useEffect(() => {
-    const handleStorage = () => {
-      const isHidden = localStorage.getItem("privacy_mode") === "true";
-      setPrivacyHidden(isHidden);
-    };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, []);
 
  useEffect(() => {
  if (!user?.id || !profile?.account_status) return;
@@ -142,6 +123,9 @@ function DashboardLayoutInner() {
             avatarUrl={profile?.avatar_url}
             name={profile?.full_name}
             kycApproved={kyc.approved}
+            balance={balance}
+            hidden={privacyHidden}
+            onToggleHidden={togglePrivacy}
           />
 
 

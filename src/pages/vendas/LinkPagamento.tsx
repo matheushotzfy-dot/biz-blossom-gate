@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Eye, Link2, Plus, Power, Search, ShoppingBag, TrendingUp } from "lucide-react";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Seo } from "@/components/Seo";
-import { HDShell, HDHeader, HDStat, HDStatGrid, HDCard } from "@/components/hd/HDPage";
-import AdminPager from "@/components/admin/AdminPager";
+import { PageHead } from "@/components/seller-ui/PageHead";
+import { StatBand } from "@/components/seller-ui/StatBand";
+import { FilterPills } from "@/components/seller-ui/FilterPills";
+import { SearchField } from "@/components/seller-ui/SearchField";
+import { Pager } from "@/components/seller-ui/Pager";
+import { Money } from "@/components/home/Money";
 import { PaymentLinkDialog } from "@/features/payment-links/PaymentLinkDialog";
 import { PaymentLinkList } from "@/features/payment-links/PaymentLinkList";
 import type { PaymentLink, PaymentLinkDraft, PaymentLinkPage, PaymentLinkPermissions, PaymentLinkStatus } from "@/features/payment-links/types";
-import { formatCurrency } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
 const DEFAULT_PERMISSIONS: PaymentLinkPermissions = { accept_pix: false, accept_card: false, accept_boleto: false };
@@ -100,17 +101,51 @@ export default function LinkPagamento() {
   };
 
   const conversion = pageData.clicks > 0 ? (pageData.uses / pageData.clicks) * 100 : 0;
-  const filters = useMemo(() => [{ value: "all", label: "Todos" }, { value: "active", label: "Ativos" }, { value: "paused", label: "Pausados" }, { value: "blocked", label: "Bloqueados" }, { value: "expired", label: "Expirados" }, { value: "archived", label: "Arquivados" }] as const, []);
+  const filters = useMemo(() => [{ value: "all", label: "Todos" }, { value: "active", label: "Ativos" }, { value: "paused", label: "Pausados" }, { value: "expired", label: "Expirados" }, { value: "blocked", label: "Bloqueados" }, { value: "archived", label: "Arquivados" }] as { value: PaymentLinkStatus; label: string }[], []);
+  const openCreate = () => { setEditing(null); setDialogOpen(true); };
+  const clearFilters = () => { setStatus("all"); setSearch(""); setPage(1); };
+  const firstLoad = loading && pageData.total === 0;
 
-  return <HDShell>
-    <Seo title="Links de Pagamento | Vemprapay" description="Crie e gerencie links de pagamento avulsos." path="/vendas/link-pagamento" noindex />
-    <PaymentLinkDialog open={dialogOpen} busy={busy} permissions={permissions} editing={editing} onOpenChange={(open) => { setDialogOpen(open); if (!open) setEditing(null); }} onSubmit={save} />
-    <HDHeader eyebrow="Checkout" title="Links de Pagamento" subtitle="Crie cobranças avulsas e acompanhe cada acesso." actions={<Button className="h-11 gap-2 rounded-xl px-5 font-semibold" onClick={() => { setEditing(null); setDialogOpen(true); }}><Plus className="h-4 w-4" />Criar novo link</Button>} />
-    <HDStatGrid><HDStat label="Receita gerada" value={formatCurrency(Number(pageData.revenue))} sub="Total aprovado nos links" icon={TrendingUp} /><HDStat label="Cliques" value={Number(pageData.clicks).toLocaleString("pt-BR")} sub="Visitas registradas" icon={Eye} /><HDStat label="Conversões" value={Number(pageData.uses).toLocaleString("pt-BR")} sub={`${conversion.toFixed(1)}% de conversão`} icon={ShoppingBag} /><HDStat label="Links ativos" value={`${pageData.active}/${pageData.total}`} sub="Disponíveis para acesso" icon={Power} /></HDStatGrid>
-    <HDCard title="Meus links" description={`${pageData.filtered_total} resultado${pageData.filtered_total === 1 ? "" : "s"}`}>
-      <div className="flex flex-col gap-3 border-b border-border/50 px-4 py-4 sm:flex-row sm:items-center sm:px-6"><div className="relative min-w-0 flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por título ou endereço" className="h-10 rounded-xl pl-10" /></div><div className="flex gap-1 overflow-x-auto">{filters.map((filter) => <Button key={filter.value} type="button" size="sm" variant={status === filter.value ? "default" : "ghost"} onClick={() => { setStatus(filter.value); setPage(1); }} className="shrink-0 rounded-lg">{filter.label}</Button>)}</div></div>
-      <PaymentLinkList links={pageData.items} loading={loading} copiedId={copiedId} onCopy={copy} onEdit={(link) => { setEditing(link); setDialogOpen(true); }} onToggle={(link) => { void mutateLink(link, { is_active: !link.is_active }, link.is_active ? "Link pausado" : "Link ativado"); }} onRemove={(link) => { void remove(link); }} />
-      {pageData.filtered_total > PAGE_SIZE && <div className="px-6 pb-5"><AdminPager page={page} pageSize={PAGE_SIZE} totalCount={pageData.filtered_total} onPageChange={setPage} loading={loading} /></div>}
-    </HDCard>
-  </HDShell>;
+  return (
+    <div className="vp-fade space-y-5 pb-6 md:space-y-6">
+      <Seo title="Links de Pagamento | Vemprapay" description="Crie e gerencie links de pagamento avulsos." path="/vendas/link-pagamento" noindex />
+      <PaymentLinkDialog open={dialogOpen} busy={busy} permissions={permissions} editing={editing} onOpenChange={(open) => { setDialogOpen(open); if (!open) setEditing(null); }} onSubmit={save} />
+
+      <PageHead
+        title="Links de pagamento"
+        subtitle="Cobre por Pix ou cartão com um endereço só seu e acompanhe cada acesso."
+        actions={<button type="button" className="vp-cta" onClick={openCreate}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} />Criar link</button>}
+      />
+
+      <StatBand
+        label="Resumo dos links"
+        cells={[
+          { label: "Receita gerada", featured: true, loading: firstLoad, value: <Money value={Number(pageData.revenue)} centsClassName="opacity-70" />, sub: "Aprovada nos seus links" },
+          { label: "Cliques", loading: firstLoad, value: Number(pageData.clicks).toLocaleString("pt-BR"), sub: "Visitas aos links" },
+          { label: "Pagamentos", loading: firstLoad, value: Number(pageData.uses).toLocaleString("pt-BR"), meter: conversion, sub: `${conversion.toFixed(1).replace(".", ",")}% dos cliques pagaram` },
+          { label: "Links ativos", loading: firstLoad, value: `${pageData.active} de ${pageData.total}`, sub: "Prontos para receber" },
+        ]}
+      />
+
+      <section className="vp-sheet overflow-hidden" aria-label="Meus links">
+        <div className="flex flex-col gap-3 px-5 pb-4 pt-5 sm:px-7 sm:pt-6 lg:flex-row lg:items-center lg:justify-between">
+          <FilterPills label="Filtrar links por situação" value={status} options={filters} onChange={(v) => { setStatus(v); setPage(1); }} />
+          <SearchField label="Buscar links" value={search} onChange={setSearch} placeholder="Título ou endereço do link" className="lg:w-[320px] lg:shrink-0" />
+        </div>
+        <PaymentLinkList
+          links={pageData.items}
+          loading={loading}
+          hasAny={pageData.total > 0}
+          copiedId={copiedId}
+          onCopy={copy}
+          onEdit={(link) => { setEditing(link); setDialogOpen(true); }}
+          onToggle={(link) => { void mutateLink(link, { is_active: !link.is_active }, link.is_active ? "Link pausado" : "Link ativado"); }}
+          onRemove={(link) => { void remove(link); }}
+          onCreate={openCreate}
+          onClearFilters={clearFilters}
+        />
+        {pageData.filtered_total > PAGE_SIZE && <Pager page={page} pageSize={PAGE_SIZE} total={pageData.filtered_total} onPage={setPage} loading={loading} />}
+      </section>
+    </div>
+  );
 }

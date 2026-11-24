@@ -1,9 +1,11 @@
-import { ChevronRight, CreditCard, QrCode } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
 import { cn, deriveTransactionStatus, isApprovedTransaction } from "@/lib/utils";
 import { Money } from "./Money";
+import { Avatar, MethodMark, StatusPill } from "@/components/seller-ui/tx";
+import { isPixMethod, txStatusMeta, whenLabel } from "@/components/seller-ui/txMeta";
 
 type Tx = Tables<"transactions">;
 export interface StatementProps {
@@ -15,39 +17,7 @@ export interface StatementProps {
   onCreateLink: () => void;
 }
 
-type Tone = "ok" | "wait" | "alert" | "idle";
-const SP = "America/Sao_Paulo";
 const COLS = "md:grid-cols-[minmax(0,1.7fr)_110px_170px_150px_minmax(120px,0.8fr)]";
-
-function statusMeta(st: string): { label: string; tone: Tone } {
-  if (isApprovedTransaction(st)) return { label: "Paga", tone: "ok" };
-  if (st === "pending" || st === "processing") return { label: "Aguardando", tone: "wait" };
-  if (st === "refunded" || st === "partially_refunded") return { label: "Reembolsada", tone: "idle" };
-  if (st === "chargeback") return { label: "Chargeback", tone: "alert" };
-  if (["med", "mediation", "dispute", "disputed", "med_lost"].includes(st)) return { label: "MED em análise", tone: "wait" };
-  if (st === "expired") return { label: "Expirada", tone: "idle" };
-  return { label: "Não concluída", tone: "idle" };
-}
-
-const TONE: Record<Tone, string> = {
-  ok: "bg-accent text-accent-foreground",
-  wait: "bg-warning/15 text-warning",
-  alert: "bg-destructive/12 text-destructive",
-  idle: "bg-muted text-muted-foreground",
-};
-const DOT: Record<Tone, string> = { ok: "bg-primary", wait: "bg-warning", alert: "bg-destructive", idle: "bg-muted-foreground/50" };
-
-function when(iso: string): string {
-  const d = new Date(iso);
-  const key = d.toLocaleDateString("pt-BR", { timeZone: SP });
-  const t = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: SP });
-  if (key === new Date().toLocaleDateString("pt-BR", { timeZone: SP })) return `Hoje, ${t}`;
-  if (key === new Date(Date.now() - 864e5).toLocaleDateString("pt-BR", { timeZone: SP })) return `Ontem, ${t}`;
-  return `${d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", timeZone: SP }).replace(".", "")}, ${t}`;
-}
-
-const initials = (n: string) => n.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("") || "V";
-const isPix = (m: string | null) => (m || "").toLowerCase().includes("pix");
 
 /** Extrato recente: livro-razão aberto, com colunas no desktop e duas linhas no celular. */
 export function Statement({ items, products, hidden, loading, onOpen, onCreateLink }: StatementProps) {
@@ -84,15 +54,15 @@ export function Statement({ items, products, hidden, loading, onOpen, onCreateLi
             {items.slice(0, 7).map((t) => {
               const st = deriveTransactionStatus(t);
               const ok = isApprovedTransaction(st);
-              const meta = statusMeta(st);
+              const meta = txStatusMeta(st);
               const product = t.product_id ? products[t.product_id] : undefined;
               const name = t.customer_name || product || "Cliente";
-              const pix = isPix(t.payment_method);
+              const pix = isPixMethod(t.payment_method);
               return (
                 <li key={t.id} role="row" className="border-t border-border first:border-t-0 md:first:border-t">
                   <button onClick={() => onOpen(t)} className={cn("grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3.5 px-6 py-3.5 text-left transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none sm:px-7 md:gap-4", COLS)}>
                     <span role="cell" className="flex min-w-0 items-center gap-3.5">
-                      <span className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-full text-[13px] font-bold", ok ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground")}>{initials(name)}</span>
+                      <Avatar name={name} ok={ok} />
                       <span className="min-w-0">
                         <span className="flex items-center gap-2">
                           <span className="truncate text-[14.5px] font-bold text-foreground">{name}</span>
@@ -103,20 +73,15 @@ export function Statement({ items, products, hidden, loading, onOpen, onCreateLi
                       </span>
                     </span>
 
-                    <span role="cell" className="hidden items-center gap-2 text-[13.5px] font-medium text-foreground md:flex">
-                      {pix ? <QrCode className="h-4 w-4 text-muted-foreground" /> : <CreditCard className="h-4 w-4 text-muted-foreground" />}
-                      {pix ? "Pix" : "Cartão"}
-                    </span>
+                    <span role="cell" className="hidden md:flex"><MethodMark method={t.payment_method} /></span>
                     <span role="cell" className="hidden md:flex">
-                      <span className={cn("inline-flex h-7 items-center gap-2 rounded-full px-3 text-[12.5px] font-bold", TONE[meta.tone])}>
-                        <span aria-hidden className={cn("h-1.5 w-1.5 rounded-full", DOT[meta.tone])} />{meta.label}
-                      </span>
+                      <StatusPill label={meta.label} tone={meta.tone} />
                     </span>
-                    <span role="cell" className="hidden text-[13.5px] text-muted-foreground md:block">{when(t.created_at)}</span>
+                    <span role="cell" className="hidden text-[13.5px] text-muted-foreground md:block">{whenLabel(t.created_at)}</span>
 
                     <span role="cell" className="text-right">
                       <Money value={Number(t.amount)} hidden={hidden} signed={ok} className={cn("block text-[15px] font-extrabold tracking-[-0.02em]", ok ? "vp-green-ink" : "text-muted-foreground")} centsClassName="opacity-70" />
-                      <span className="block text-[12px] text-muted-foreground md:hidden">{when(t.created_at)}</span>
+                      <span className="block text-[12px] text-muted-foreground md:hidden">{whenLabel(t.created_at)}</span>
                     </span>
                   </button>
                 </li>

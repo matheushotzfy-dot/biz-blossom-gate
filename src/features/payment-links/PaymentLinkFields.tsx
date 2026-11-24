@@ -18,7 +18,7 @@ interface PaymentLinkFieldsProps {
 }
 
 function StepLabel({ number, children }: { number: number; children: ReactNode }) {
-  return <h3 className="flex items-center gap-2 text-sm font-semibold"><span className="grid h-6 w-6 place-items-center rounded-md bg-primary/15 text-xs font-bold text-primary">{number}</span>{children}</h3>;
+  return <h3 className="flex items-center gap-2.5 text-[15px] font-extrabold tracking-[-0.01em]"><span className="grid h-7 w-7 place-items-center rounded-full bg-accent text-[13px] font-bold text-accent-foreground">{number}</span>{children}</h3>;
 }
 
 export function PaymentLinkFields({ draft, permissions, coverPreview, fileInputRef, onChange, onPickFile, onClearCover }: PaymentLinkFieldsProps) {
@@ -35,11 +35,11 @@ export function PaymentLinkFields({ draft, permissions, coverPreview, fileInputR
         <img src={coverPreview} alt="Prévia da capa" className="h-full w-full object-cover" />
         <Button type="button" variant="secondary" size="icon" onClick={onClearCover} className="absolute right-2 top-2 h-9 w-9 rounded-xl" aria-label="Remover capa"><X className="h-4 w-4" /></Button>
       </div> : <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} className="h-auto w-full aspect-[16/9] flex-col gap-2 rounded-2xl border-dashed text-muted-foreground">
-        <ImageIcon className="h-6 w-6" /><span className="text-sm font-semibold">Adicionar capa</span><span className="text-xs font-normal">JPG, PNG ou WebP · até 4 MB</span>
+        <ImageIcon className="h-6 w-6" /><span className="text-sm font-semibold">Adicionar capa</span><span className="text-xs font-normal">JPG, PNG ou WebP, até 4 MB</span>
       </Button>}
       <div><Label htmlFor="link-title">Título</Label><Input id="link-title" value={draft.title} onChange={(event) => onChange({ title: event.target.value })} maxLength={120} className="mt-1.5 h-11 rounded-xl" placeholder="Ex.: Consultoria Premium" /></div>
       <div><Label htmlFor="link-description">Descrição</Label><Textarea id="link-description" value={draft.description} onChange={(event) => onChange({ description: event.target.value })} maxLength={500} rows={3} className="mt-1.5 resize-none rounded-xl" placeholder="O que está incluído nesta cobrança" /></div>
-      <div><Label htmlFor="link-amount">Valor</Label><div className="relative mt-1.5"><span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-muted-foreground">R$</span><Input id="link-amount" inputMode="decimal" value={draft.amount} onChange={(event) => onChange({ amount: event.target.value })} className="h-16 rounded-2xl border-primary/40 bg-primary/[0.05] pl-12 text-2xl font-bold tabular-nums" placeholder="0,00" /></div></div>
+      <div><Label htmlFor="link-amount">Valor</Label><div className="relative mt-1.5"><span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-muted-foreground">R$</span><Input id="link-amount" inputMode="decimal" value={draft.amount} onChange={(event) => onChange({ amount: event.target.value })} className="h-16 rounded-2xl border-primary/40 bg-accent/50 pl-12 text-2xl font-extrabold tabular-nums tracking-[-0.03em]" placeholder="0,00" /></div></div>
       <div><Label htmlFor="link-slug">Endereço</Label><Input id="link-slug" value={draft.slug} onChange={(event) => onChange({ slug: event.target.value })} maxLength={60} className="mt-1.5 h-11 rounded-xl font-mono" placeholder="consultoria-premium" /></div>
     </section>
     <section className="space-y-4" aria-labelledby="link-rules-heading">
