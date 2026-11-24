@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ProductActionsMenu, type ProductMenuHandlers } from "./ProductActionsMenu";
 import {
   DELIVERY_LABELS,
+  STATUS_META,
   getCheckoutLink,
   getEffectiveStatus,
   getProductRequirements,
@@ -13,7 +14,6 @@ import {
 import { Money } from "@/components/home/Money";
 import { Pager } from "@/components/seller-ui/Pager";
 import { StatusPill } from "@/components/seller-ui/tx";
-import type { TxTone } from "@/components/seller-ui/txMeta";
 import { cn } from "@/lib/utils";
 
 /**
@@ -26,13 +26,6 @@ const PAGE_SIZE = 24;
 type ProductGridViewProps = ProductMenuHandlers & {
   copiedId: string | null;
   products: Product[];
-};
-
-const STATUS_META: Record<string, { label: string; tone: TxTone }> = {
-  active: { label: "Ativo", tone: "ok" },
-  pending_review: { label: "Em revisão", tone: "wait" },
-  draft: { label: "Rascunho", tone: "idle" },
-  inactive: { label: "Pausado", tone: "idle" },
 };
 
 const shortenLink = (url: string) => {

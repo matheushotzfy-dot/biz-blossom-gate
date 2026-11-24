@@ -1,9 +1,22 @@
 import type { Tables } from "@/integrations/supabase/types";
+import type { TxTone } from "@/components/seller-ui/txMeta";
 
 export type Product = Tables<"products">;
 export type ProductStatus = Product["status"];
 
+/** Rótulo e cor do status do produto (lista, cards e editor usam o mesmo). */
+export const STATUS_META: Record<string, { label: string; tone: TxTone }> = {
+  active: { label: "Ativo", tone: "ok" },
+  pending_review: { label: "Em revisão", tone: "wait" },
+  draft: { label: "Rascunho", tone: "idle" },
+  inactive: { label: "Pausado", tone: "idle" },
+};
+
 export const DELIVERY_LABELS: Record<string, string> = {
+  digital: "Área de membros",
+  email: "Acesso por e-mail",
+  link: "Só o pagamento",
+  external: "Área externa",
   curso: "Curso online",
   ebook: "E-book",
   mentoria: "Mentoria",

@@ -1,11 +1,12 @@
-import { useState, useRef, useEffect, useCallback, type ChangeEvent, type Dispatch, type SetStateAction, type RefObject, type DragEvent } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect, useCallback, type ChangeEvent, type Dispatch, type SetStateAction, type RefObject } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useInvalidateAll } from "@/hooks/useQueryData";
+import { useSellerSkin } from "@/hooks/useSellerSkin";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,116 +14,128 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SegmentedChoice } from "@/components/ui/segmented-choice";
-import * as SelectPrimitive from "@radix-ui/react-select";
-import { QRCodeSVG } from "qrcode.react";
 import {
- ArrowLeft, Save, Package, DollarSign, ImagePlus, X, Settings, ShoppingCart,
- ArrowUpRight, Users, Handshake, Tag, Link2, Trash2, Plus, ExternalLink,
- CreditCard, QrCode, FileText, Mail, MapPin, Shield, Timer, Eye,
- Upload, CheckCircle2, Copy, Globe, Zap, Crosshair, Percent, Clock,
- Layers, UserPlus, Lock, Gift, BarChart3, Star, Palette, Sparkles,
- Check, ChevronRight, TrendingUp, MousePointerClick, GraduationCap, Video, Loader2,
- MessageSquare, Share2, Download, Smartphone, Monitor, AlertTriangle, Phone,
- RefreshCw, Hash, Target, Heart, Megaphone, Rocket, Award,
- BookOpen, Code2, Briefcase, type LucideIcon
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { QRCodeSVG } from "qrcode.react";
+import { StatusPill } from "@/components/seller-ui/tx";
+import { FieldHint, FieldLabel, GroupBox, ToggleRow as FormToggleRow } from "@/components/seller-ui/form";
+import { Notice, OptionCard, StepEmpty, StudioHeading, StudioPanel } from "@/components/seller-ui/studio";
+import { STATUS_META, formatCurrency, getEffectiveStatus } from "@/components/products/productPresentation";
+import {
+  ArrowLeft,
+  Save,
+  Package,
+  ImagePlus,
+  X,
+  Settings,
+  ShoppingCart,
+  ArrowUpRight,
+  Users,
+  Handshake,
+  Tag,
+  Link2,
+  Trash2,
+  Plus,
+  ExternalLink,
+  CreditCard,
+  QrCode,
+  FileText,
+  Mail,
+  Shield,
+  Timer,
+  Eye,
+  Upload,
+  Copy,
+  Globe,
+  Zap,
+  Percent,
+  Clock,
+  Layers,
+  UserPlus,
+  Lock,
+  Palette,
+  Sparkles,
+  Check,
+  ChevronRight,
+  GraduationCap,
+  Video,
+  Loader2,
+  MessageSquare,
+  Share2,
+  Smartphone,
+  Monitor,
+  MoreHorizontal,
+  Star,
+  Megaphone,
+  MapPin,
+  Rocket,
+  RefreshCw,
+  AlertTriangle,
 } from "lucide-react";
 
-/* Rich Select item — icon + label + description in the menu,
-   but only the label shows in the trigger (via ItemText). */
-function RichSelectItem({
-  value, icon: Icon, label, desc,
-}: { value: string; icon: LucideIcon; label: string; desc: string }) {
-  return (
-    <SelectPrimitive.Item
-      value={value}
-      className="relative flex w-full cursor-pointer select-none items-center gap-3 rounded-xl px-2.5 py-2.5 outline-none transition-colors hover:bg-primary/[0.06] focus:bg-primary/[0.08] data-[highlighted]:bg-primary/[0.08] data-[state=checked]:bg-primary/[0.08]"
-    >
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-muted-foreground transition-colors group-hover:border-primary/30 group-data-[state=checked]:border-primary/30 group-data-[state=checked]:bg-primary/10 group-data-[state=checked]:text-primary [[data-state=checked]_&]:border-primary/30 [[data-state=checked]_&]:bg-primary/10 [[data-state=checked]_&]:text-primary">
-        <Icon className="h-3.5 w-3.5" strokeWidth={2} />
-      </span>
-      <span className="flex-1 min-w-0">
-        <SelectPrimitive.ItemText asChild>
-          <span className="block truncate font-display text-[12.5px] font-bold tracking-tight text-foreground">{label}</span>
-        </SelectPrimitive.ItemText>
-        <span className="mt-0.5 block truncate text-[10.5px] text-muted-foreground">{desc}</span>
-      </span>
-      <SelectPrimitive.ItemIndicator className="ml-auto">
-        <Check className="h-3.5 w-3.5 text-primary" strokeWidth={2.4} />
-      </SelectPrimitive.ItemIndicator>
-    </SelectPrimitive.Item>
-  );
-}
-
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const GUARANTEE_DAYS = 7; // o checkout público sempre mostra a garantia de 7 dias
 
 type TabKey = "geral" | "configuracoes" | "conteudo" | "order-bump" | "upsell" | "checkout" | "co-producao" | "cupons" | "afiliados" | "links";
 
 // Abas temporariamente desativadas — voltaremos a ativar futuramente.
 const DISABLED_TABS: TabKey[] = ["conteudo", "cupons", "afiliados"];
 
-const ALL_TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }>; color: string }[] = [
- { key: "geral", label: "Geral", icon: Package, color: "primary" },
- { key: "configuracoes", label: "Configurações", icon: Settings, color: "info" },
- { key: "conteudo", label: "Conteúdo", icon: GraduationCap, color: "primary" },
- { key: "order-bump", label: "Order Bump", icon: Layers, color: "warning" },
- { key: "upsell", label: "Upsell / Downsell", icon: ArrowUpRight, color: "success" },
- { key: "checkout", label: "Checkout", icon: ShoppingCart, color: "primary" },
- { key: "co-producao", label: "Co-Produção", icon: Handshake, color: "info" },
- { key: "cupons", label: "Cupons", icon: Tag, color: "warning" },
- { key: "afiliados", label: "Afiliados", icon: Users, color: "success" },
- { key: "links", label: "Links", icon: Link2, color: "primary" },
+const ALL_TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { key: "geral", label: "Geral", icon: Package },
+  { key: "configuracoes", label: "Configurações", icon: Settings },
+  { key: "conteudo", label: "Conteúdo", icon: GraduationCap },
+  { key: "order-bump", label: "Order bump", icon: Layers },
+  { key: "upsell", label: "Upsell e downsell", icon: ArrowUpRight },
+  { key: "checkout", label: "Checkout", icon: ShoppingCart },
+  { key: "co-producao", label: "Co-produção", icon: Handshake },
+  { key: "cupons", label: "Cupons", icon: Tag },
+  { key: "afiliados", label: "Afiliados", icon: Users },
+  { key: "links", label: "Links", icon: Link2 },
 ];
 
 const TABS = ALL_TABS.filter(t => !DISABLED_TABS.includes(t.key));
 
-/* ─── Completion Progress Ring ─── */
-function CompletionRing({ percent }: { percent: number }) {
- const r = 16, c = 2 * Math.PI * r;
- const getColor = () => {
- if (percent >= 80) return "hsl(var(--success))";
- if (percent >= 50) return "hsl(var(--warning))";
- return "hsl(var(--primary))";
- };
- return (
- <div className="relative h-11 w-11 shrink-0">
- <svg viewBox="0 0 40 40" className="h-11 w-11 -rotate-90">
- <circle cx="20" cy="20" r={r} fill="none" stroke="hsl(var(--border)/0.15)" strokeWidth="2.5" />
- <motion.circle
- cx="20" cy="20" r={r} fill="none"
- stroke={getColor()}
- strokeWidth="2.5" strokeLinecap="round"
- strokeDasharray={c}
- initial={{ strokeDashoffset: c }}
- animate={{ strokeDashoffset: c - (c * percent / 100) }}
- transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
- style={{ filter: `drop-shadow(0 0 4px ${getColor()})` }}
- />
- </svg>
- <div className="absolute inset-0 flex items-center justify-center">
- <span className={cn("text-[9px] font-display font-black tabular-nums", percent >= 80 ? "text-success" : percent >= 50 ? "text-warning" : "text-primary")}>{percent}%</span>
- </div>
- </div>
- );
-}
+const BUTTON_PRESETS = ["#10b981", "#2563eb", "#f97316", "#8b5cf6", "#e11d48", "#111827"];
+const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
+
+/** Lê o preço digitado ("1.997,00", "297", "R$ 10,50") e devolve o número. */
+const priceToNumber = (raw: string): number => {
+  const s = String(raw ?? "").replace(/[^0-9,.-]/g, "");
+  if (!s) return 0;
+  const n = s.includes(",") ? parseFloat(s.replace(/\./g, "").replace(",", ".")) : parseFloat(s);
+  return Number.isFinite(n) ? n : 0;
+};
+const formatPriceInput = (n: number) => n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 
 export default function ProductEditor() {
  const { productId } = useParams<{ productId: string }>();
  const navigate = useNavigate();
  const { user } = useAuth();
+ useSellerSkin();
   // Métodos bloqueados pelo admin ficam indisponíveis e também são validados no banco.
   const [adminPixEnabled, setAdminPixEnabled] = useState(true);
  const [adminBoletoEnabled, setAdminBoletoEnabled] = useState(false);
  const [adminCardEnabled, setAdminCardEnabled] = useState(true);
  const invalidateAll = useInvalidateAll();
- const isNew = productId === "novo";
+ const routeIsNew = productId === "novo";
+ const [createdProductId, setCreatedProductId] = useState<string | null>(null);
+ // "isNew" = o produto ainda não foi criado. Depois do primeiro salvar a URL muda, mas a rota do React Router continua "novo".
+ const isNew = routeIsNew && !createdProductId;
 
  const [activeTab, setActiveTab] = useState<TabKey>("geral");
  const [saving, setSaving] = useState(false);
- const [createdProductId, setCreatedProductId] = useState<string | null>(null);
  const [saved, setSaved] = useState(false);
- const [loading, setLoading] = useState(!isNew);
+ const [loading, setLoading] = useState(!routeIsNew);
+ const [deleteOpen, setDeleteOpen] = useState(false);
+ const [deleting, setDeleting] = useState(false);
+ const [duplicating, setDuplicating] = useState(false);
+  const busyRef = useRef(false); // trava síncrona contra clique duplo em duplicar/excluir
  const fileInputRef = useRef<HTMLInputElement>(null);
  const contentRef = useRef<HTMLDivElement>(null);
  const [isDragging, setIsDragging] = useState(false);
@@ -134,13 +147,10 @@ export default function ProductEditor() {
  const [pageUrl, setPageUrl] = useState("");
  const [imageFile, setImageFile] = useState<File | null>(null);
  const [imagePreview, setImagePreview] = useState<string | null>(null);
- const [category, setCategory] = useState("infoproduto");
- const [paymentType, setPaymentType] = useState("unico");
   const [displayName, setDisplayName] = useState("");
   const [supportEmail, setSupportEmail] = useState("");
   const [supportPhone, setSupportPhone] = useState("");
 
- const [warrantyDays, setWarrantyDays] = useState("7");
  const [deliveryType, setDeliveryType] = useState("link");
  const [memberAreaEnabled, setMemberAreaEnabled] = useState(false);
 
@@ -154,7 +164,6 @@ export default function ProductEditor() {
  const [creditCardEnabled, setCreditCardEnabled] = useState(true);
  const [addressRequired, setAddressRequired] = useState(false);
  const [emailConfirm, setEmailConfirm] = useState(true);
- const [showCouponField, setShowCouponField] = useState(false);
  const [bannerDesktopPreview, setBannerDesktopPreview] = useState("");
  const [bannerMobilePreview, setBannerMobilePreview] = useState("");
  const [bannerDesktopFile, setBannerDesktopFile] = useState<File | null>(null);
@@ -175,12 +184,7 @@ export default function ProductEditor() {
  const [coProductionEnabled, setCoProductionEnabled] = useState(false);
  const [coProducerEmail, setCoProducerEmail] = useState("");
  const [coProductionSplit, setCoProductionSplit] = useState("50");
- const [coProductionDuration, setCoProductionDuration] = useState("30");
- const [coProductionSalesType, setCoProductionSalesType] = useState("all");
 
- const [hasCustomThankYou, setHasCustomThankYou] = useState(false);
- const [thankYouUrl, setThankYouUrl] = useState("");
- const [sendConfirmationEmail, setSendConfirmationEmail] = useState(true);
  const [emailTiming, setEmailTiming] = useState("immediate");
 
  // Upsell / Downsell (persistido em products)
@@ -217,7 +221,7 @@ export default function ProductEditor() {
  const completionPercent = (() => {
  let score = 0; const total = 8;
  if (name.trim()) score++;
- if (price && parseFloat(price) > 0) score++;
+ if (priceToNumber(price) > 0) score++;
  if (description.trim().length >= 50) score++;
  if (imagePreview) score++;
  if (pageUrl) score++;
@@ -227,12 +231,24 @@ export default function ProductEditor() {
  return Math.round((score / total) * 100);
  })();
 
+ // O que ainda falta para o produto ficar completo (mostrado ao lado das etapas).
+ const missingItems = [
+ !name.trim() && "nome",
+ !(priceToNumber(price) > 0) && "preço",
+ description.trim().length < 50 && "descrição",
+ !imagePreview && "capa",
+ !pageUrl && "página de vendas",
+ !supportEmail.trim() && "e-mail de suporte",
+ !displayName.trim() && "nome do produtor",
+ status !== "active" && "aprovação da equipe",
+ ].filter(Boolean) as string[];
+
  const effectiveProductId = createdProductId || productId;
- const tabsLocked = isNew && !createdProductId;
+ const tabsLocked = isNew;
 
  const tabCompleted = useCallback((key: TabKey): boolean => {
  switch (key) {
- case "geral": return !!(name && price && parseFloat(price) > 0);
+ case "geral": return !!(name && priceToNumber(price) > 0);
  case "configuracoes": return true;
  case "checkout": return !isNew;
  case "links": return !isNew && !!product?.checkout_url;
@@ -245,14 +261,14 @@ export default function ProductEditor() {
  }, [activeTab]);
 
  useEffect(() => {
- if (isNew || !user?.id) { setLoading(false); return; }
+ if (routeIsNew || !user?.id) { setLoading(false); return; }
  (async () => {
  const { data, error } = await supabase.from("products").select("*").eq("id", productId!).eq("user_id", user.id).maybeSingle();
  if (error || !data) { toast.error("Produto não encontrado"); navigate("/vendas/produtos"); return; }
  setProduct(data);
  setName(data.name);
  setDescription(data.description || "");
- setPrice(String(data.price));
+ setPrice(formatPriceInput(Number(data.price)));
  setStatus(data.status);
  setPageUrl(data.page_url || "");
  setImagePreview(data.image_url || null);
@@ -291,7 +307,7 @@ export default function ProductEditor() {
  setEmailTiming(data.email_timing || "immediate");
  setLoading(false);
  })();
-   }, [productId, user?.id, isNew]);
+   }, [productId, user?.id, routeIsNew]);
 
 
   // Carrega gates de pagamento definidos pelo admin no perfil do seller
@@ -308,16 +324,16 @@ export default function ProductEditor() {
   }, [user?.id]);
 
   useEffect(() => {
-    if (!user?.id || isNew) return;
- supabase.from("products").select("*").eq("user_id", user.id).eq("status", "active").neq("id", productId!)
+    if (!user?.id || isNew || !effectiveProductId) return;
+ supabase.from("products").select("*").eq("user_id", user.id).eq("status", "active").neq("id", effectiveProductId)
  .then(({ data }) => { if (data) setAllProducts(data); });
- supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", productId!)
+ supabase.from("order_bumps").select("id, bump_product_id").eq("product_id", effectiveProductId)
  .then(({ data }) => { if (data) setOrderBumps(data); });
- supabase.from("coupons").select("*").eq("user_id", user.id).eq("product_id", productId!).order("created_at", { ascending: false })
+ supabase.from("coupons").select("*").eq("user_id", user.id).eq("product_id", effectiveProductId).order("created_at", { ascending: false })
  .then(({ data }) => { if (data) setCoupons(data); });
- supabase.from("co_productions").select("*").eq("product_id", productId!).order("created_at", { ascending: false })
+ supabase.from("co_productions").select("*").eq("product_id", effectiveProductId).order("created_at", { ascending: false })
  .then(({ data }) => { if (data) setCoProductionsList(data); });
- }, [user?.id, productId, isNew]);
+ }, [user?.id, effectiveProductId, isNew]);
 
 
  const uploadImage = async (file: File, bucket: string, path: string): Promise<string | null> => {
@@ -351,6 +367,7 @@ export default function ProductEditor() {
      if (!supportEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim())) { toast.error("Insira um e-mail de suporte válido (ex: suporte@seusite.com)"); setActiveTab("geral"); return; }
      if (!supportPhone.trim() || supportPhone.replace(/\D/g, "").length < 10) { toast.error("Insira um telefone de suporte válido (com DDD)"); setActiveTab("geral"); return; }
      if (!displayName.trim()) { toast.error("Nome de exibição é obrigatório"); setActiveTab("geral"); return; }
+     if (!HEX_COLOR.test(buttonColor.trim())) { toast.error("Use uma cor no formato #10b981 para o botão do checkout"); setActiveTab(isNew ? "geral" : "checkout"); return; }
      // sincroniza o input para refletir a URL normalizada (caso o usuário salve sem ter prefixo)
      if (normalizedPageUrl !== pageUrl) setPageUrl(normalizedPageUrl);
 
@@ -361,17 +378,23 @@ export default function ProductEditor() {
  const ext = imageFile.name.split(".").pop();
  const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
  imageUrl = await uploadImage(imageFile, "product-images", path);
+ // O aviso do erro já foi exibido; não salvamos o produto sem a capa que a pessoa escolheu.
+ if (!imageUrl) return;
  }
 
  let desktopUrl = bannerDesktopPreview;
  let mobileUrl = bannerMobilePreview;
  if (bannerDesktopFile && !isNew) {
  const ext = bannerDesktopFile.name.split(".").pop();
- desktopUrl = await uploadImage(bannerDesktopFile, "checkout-banners", `${user.id}/${productId}-desktop.${ext}`) || desktopUrl;
+ const uploaded = await uploadImage(bannerDesktopFile, "checkout-banners", `${user.id}/${effectiveProductId}-desktop.${ext}`);
+ if (!uploaded) return;
+ desktopUrl = uploaded;
  }
  if (bannerMobileFile && !isNew) {
  const ext = bannerMobileFile.name.split(".").pop();
- mobileUrl = await uploadImage(bannerMobileFile, "checkout-banners", `${user.id}/${productId}-mobile.${ext}`) || mobileUrl;
+ const uploaded = await uploadImage(bannerMobileFile, "checkout-banners", `${user.id}/${effectiveProductId}-mobile.${ext}`);
+ if (!uploaded) return;
+ mobileUrl = uploaded;
  }
 
  const productData = {
@@ -416,7 +439,7 @@ export default function ProductEditor() {
  };
 
 
- if (isNew && !createdProductId) {
+ if (isNew) {
  const slug = crypto.randomUUID().slice(0, 8);
  const checkoutUrl = `${window.location.origin}/pay/${slug}`;
  const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, status: "draft", user_id: user.id, checkout_url: checkoutUrl } as TablesInsert<"products">).select("*").maybeSingle();
@@ -478,21 +501,33 @@ export default function ProductEditor() {
  toast.success("Produto salvo!");
  invalidateAll(["products", "courses"]);
  }
+ // As imagens já estão no storage: passamos a usar as URLs públicas e não reenviamos a cada salvamento.
+ setImageFile(null);
+ if (imageUrl) setImagePreview(imageUrl);
+ setBannerDesktopFile(null); setBannerMobileFile(null);
+ if (desktopUrl) setBannerDesktopPreview(desktopUrl);
+ if (mobileUrl) setBannerMobilePreview(mobileUrl);
  } finally { setSaving(false); }
  };
 
- const handleDelete = async () => {
- if (!user || tabsLocked) return;
- if (!window.confirm("Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.")) return;
- const { error } = await supabase.from("products").delete().eq("id", effectiveProductId!).eq("user_id", user.id);
- if (error) { toast.error("Erro ao excluir"); return; }
- toast.success("Produto excluído");
+ const confirmDelete = async () => {
+ if (!user || tabsLocked || !effectiveProductId || busyRef.current) return;
+ busyRef.current = true;
+ setDeleting(true);
+ // Exclusão lógica, igual à da lista de produtos: mantém vendas e histórico para auditoria.
+ const { error } = await supabase.from("products").update({ deleted_at: new Date().toISOString(), status: "inactive" }).eq("id", effectiveProductId).eq("user_id", user.id);
+ setDeleting(false);
+ if (error) { busyRef.current = false; toast.error("Erro ao excluir produto"); return; }
+ setDeleteOpen(false);
+ toast.success("Produto removido");
  invalidateAll(["products"]);
  navigate("/vendas/produtos");
  };
 
  const handleDuplicate = async () => {
- if (!user || tabsLocked || !product) return;
+ if (!user || tabsLocked || !product || busyRef.current) return;
+ busyRef.current = true;
+ setDuplicating(true);
  const slug = crypto.randomUUID().slice(0, 8);
  const checkoutUrl = `${window.location.origin}/pay/${slug}`;
  const { error } = await supabase.from("products").insert({
@@ -520,7 +555,8 @@ export default function ProductEditor() {
  affiliate_enabled: product.affiliate_enabled,
  affiliate_commission: product.affiliate_commission,
  } satisfies TablesInsert<"products">).select("id").maybeSingle();
- if (error) { toast.error("Erro ao duplicar"); return; }
+ setDuplicating(false);
+ if (error) { busyRef.current = false; toast.error("Erro ao duplicar"); return; }
  toast.success("Produto duplicado com sucesso!");
  invalidateAll(["products"]);
  navigate("/vendas/produtos");
@@ -529,8 +565,8 @@ export default function ProductEditor() {
  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
  const file = e.target.files?.[0];
  if (!file) return;
- if (!ALLOWED_IMAGE_TYPES.includes(file.type)) { toast.error("Formato inválido"); return; }
- if (file.size > MAX_FILE_SIZE) { toast.error("Máximo 10MB"); return; }
+ if (!ALLOWED_IMAGE_TYPES.includes(file.type)) { toast.error("Use JPG, PNG, WebP ou GIF"); return; }
+ if (file.size > MAX_FILE_SIZE) { toast.error("Imagem: máximo 5 MB"); return; }
  setImageFile(file); setImagePreview(URL.createObjectURL(file));
  };
 
@@ -538,16 +574,16 @@ export default function ProductEditor() {
  e.preventDefault(); setIsDragging(false);
  const file = e.dataTransfer.files[0];
  if (!file) return;
- if (!ALLOWED_IMAGE_TYPES.includes(file.type)) { toast.error("Formato inválido"); return; }
- if (file.size > MAX_FILE_SIZE) { toast.error("Máximo 10MB"); return; }
+ if (!ALLOWED_IMAGE_TYPES.includes(file.type)) { toast.error("Use JPG, PNG, WebP ou GIF"); return; }
+ if (file.size > MAX_FILE_SIZE) { toast.error("Imagem: máximo 5 MB"); return; }
  setImageFile(file); setImagePreview(URL.createObjectURL(file));
  }, []);
 
  const handleBannerFile = (e: React.ChangeEvent<HTMLInputElement>, type: "desktop" | "mobile") => {
  const file = e.target.files?.[0];
  if (!file) return;
- if (!ALLOWED_IMAGE_TYPES.includes(file.type)) { toast.error("Formato inválido"); return; }
- if (file.size > MAX_FILE_SIZE) { toast.error("Máximo 10MB"); return; }
+ if (!ALLOWED_IMAGE_TYPES.includes(file.type)) { toast.error("Use JPG, PNG, WebP ou GIF"); return; }
+ if (file.size > MAX_FILE_SIZE) { toast.error("Imagem: máximo 5 MB"); return; }
  if (type === "desktop") { setBannerDesktopFile(file); setBannerDesktopPreview(URL.createObjectURL(file)); }
  else { setBannerMobileFile(file); setBannerMobilePreview(URL.createObjectURL(file)); }
  };
@@ -557,7 +593,7 @@ export default function ProductEditor() {
  if (orderBumps.length >= 5) { toast.error("Máximo de 5 order bumps"); return; }
  if (orderBumps.some(b => b.bump_product_id === selectedBumpProduct)) { toast.error("Produto já adicionado"); return; }
  const { data, error } = await supabase.from("order_bumps").insert({
- product_id: productId!, bump_product_id: selectedBumpProduct, sort_order: orderBumps.length,
+ product_id: effectiveProductId!, bump_product_id: selectedBumpProduct, sort_order: orderBumps.length,
  }).select("id, bump_product_id").maybeSingle();
  if (error || !data) { toast.error("Erro ao adicionar"); return; }
  setOrderBumps(prev => [...prev, data]);
@@ -626,7 +662,7 @@ export default function ProductEditor() {
  discount_type: newCouponType,
  discount_value: val,
  max_uses: newCouponMaxUses ? parseInt(newCouponMaxUses) : null,
- product_id: productId!,
+ product_id: effectiveProductId!,
  user_id: user.id,
  is_active: true,
  }).select().maybeSingle();
@@ -663,214 +699,253 @@ export default function ProductEditor() {
  };
 
  const copyLink = (link: string) => {
- navigator.clipboard.writeText(link);
- toast.success("Link copiado!");
+ if (!navigator.clipboard) { toast.error("Não foi possível copiar. Copie o link manualmente."); return; }
+ navigator.clipboard.writeText(link).then(
+ () => toast.success("Link copiado!"),
+ () => toast.error("Não foi possível copiar. Copie o link manualmente."),
+ );
  };
 
+
+  const effectiveStatus = product ? getEffectiveStatus(product) : "draft";
+  const statusMeta = STATUS_META[effectiveStatus] ?? STATUS_META.draft;
+
   if (loading) {
-  return (
-  <div className="h-[100dvh] bg-background flex items-center justify-center">
-  <div className="flex flex-col items-center gap-5">
-  <div className="relative">
-  <motion.div
-  animate={{ rotate: 360 }}
-  transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-  className="h-14 w-14 border-2 border-border border-t-primary rounded-full"
-  />
-  <div className="absolute inset-0 flex items-center justify-center">
-  <div className="h-9 w-9 rounded-xl bg-primary/10 border border-border flex items-center justify-center">
-  <Package className="h-4.5 w-4.5 text-primary" />
-  </div>
-  </div>
-  </div>
-  <div className="text-center space-y-1">
-  <p className="text-sm font-display font-bold text-foreground">Carregando produto</p>
-  <p className="text-xs text-muted-foreground">Preparando o editor...</p>
-  </div>
-  </div>
-  </div>
-  );
+    return (
+      <div className="vp-seller-shell vp-stage grid h-[100dvh] place-items-center">
+        <div role="status" className="flex flex-col items-center gap-4 text-center">
+          <span className="grid h-16 w-16 place-items-center rounded-full bg-accent text-accent-foreground"><Loader2 className="h-6 w-6 animate-spin motion-reduce:animate-none" /></span>
+          <div>
+            <p className="text-[17px] font-extrabold tracking-[-0.02em] text-foreground">Carregando produto</p>
+            <p className="mt-1 text-[14px] text-muted-foreground">Só um instante.</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
- const availableForBump = allProducts.filter(p => !orderBumps.some(b => b.bump_product_id === p.id));
- const currentTabIdx = TABS.findIndex(t => t.key === activeTab);
+  const availableForBump = allProducts.filter(p => !orderBumps.some(b => b.bump_product_id === p.id));
+  const currentIdx = TABS.findIndex(t => t.key === activeTab);
+  const prevTab = currentIdx > 0 ? TABS[currentIdx - 1] : null;
+  const nextTab = currentIdx >= 0 && currentIdx < TABS.length - 1 ? TABS[currentIdx + 1] : null;
+  const goNext = () => {
+    if (!nextTab) return;
+    if (tabsLocked) { handleSave(); return; }
+    setActiveTab(nextTab.key);
+  };
+  const goPrev = () => { if (prevTab && !tabsLocked) setActiveTab(prevTab.key); };
 
   return (
-   <div className="product-studio h-[100dvh] overflow-hidden bg-background">
-    <div ref={contentRef} className="product-studio-canvas h-full overflow-y-auto overscroll-contain">
-     <div className="mx-auto w-full max-w-[1080px] px-3 py-3 sm:px-5 sm:py-5">
-      <header className="mb-4 flex items-center justify-between gap-3">
-       <div className="flex min-w-0 items-center gap-2.5">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/vendas/produtos")} aria-label="Voltar para produtos" className="h-9 w-9 shrink-0 border border-border bg-card"><ArrowLeft className="h-4 w-4" /></Button>
-        <div className="min-w-0">
-         <div className="flex items-center gap-2">
-          <h1 className="truncate font-display text-[15px] font-bold text-foreground">{name || (isNew ? "Novo produto" : "Editar produto")}</h1>
-          <span className="hidden rounded-md border border-border bg-secondary px-1.5 py-0.5 text-[9px] font-bold uppercase text-muted-foreground sm:inline">{status === "active" ? "Ativo" : "Rascunho"}</span>
-         </div>
-         <p className="hidden text-[11px] text-muted-foreground sm:block">Construa a oferta por etapas, sem distrações.</p>
+    <MotionConfig reducedMotion="user">
+    <div className="vp-seller-shell vp-stage h-[100dvh] overflow-hidden">
+      <div ref={contentRef} className="h-full overflow-y-auto overscroll-contain">
+        <header className="sticky top-0 z-30 border-b border-border bg-background">
+          <div className="mx-auto flex h-[72px] max-w-[1180px] items-center gap-3 px-4 sm:px-6">
+            <button type="button" onClick={() => navigate("/vendas/produtos")} aria-label="Voltar para produtos" className="vp-orb"><ArrowLeft className="h-[18px] w-[18px]" /></button>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2.5">
+                <h1 className="truncate font-heading text-[19px] font-extrabold leading-tight tracking-[-0.03em] text-foreground">{name.trim() || "Novo produto"}</h1>
+                <StatusPill label={statusMeta.label} tone={statusMeta.tone} className="hidden shrink-0 sm:inline-flex" />
+              </div>
+              <p className="hidden truncate text-[13px] text-muted-foreground sm:block">
+                {isNew ? "Preencha o essencial e crie o produto. As outras etapas liberam em seguida." : "Edite uma etapa por vez e salve quando terminar."}
+              </p>
+            </div>
+            {!tabsLocked && (
+              <div className="hidden items-center gap-2 md:flex">
+                <button type="button" onClick={handleDuplicate} disabled={duplicating} className="vp-ghost"><Copy className="h-4 w-4" /> Duplicar</button>
+                <button type="button" onClick={() => setDeleteOpen(true)} aria-label="Excluir produto" className="vp-orb text-destructive"><Trash2 className="h-[18px] w-[18px]" /></button>
+              </div>
+            )}
+            {!tabsLocked && (
+              <div className="md:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button type="button" aria-label="Mais ações do produto" className="vp-orb"><MoreHorizontal className="h-[18px] w-[18px]" /></button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" collisionPadding={16} sideOffset={6} className="w-56 rounded-[22px] border-border bg-popover p-2">
+                    <DropdownMenuItem onSelect={() => { handleDuplicate(); }} className="vp-r16 h-12 cursor-pointer gap-3 px-3 text-[14.5px] font-semibold"><Copy className="h-4 w-4" /> Duplicar produto</DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-border" />
+                    <DropdownMenuItem onSelect={() => setDeleteOpen(true)} className="vp-r16 h-12 cursor-pointer gap-3 px-3 text-[14.5px] font-semibold text-destructive focus:text-destructive"><Trash2 className="h-4 w-4" /> Excluir produto</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+            <button type="button" onClick={handleSave} disabled={saving} className="vp-cta shrink-0 px-5 sm:px-6">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+              {saving ? "Salvando…" : saved ? "Salvo" : isNew ? "Criar produto" : "Salvar"}
+            </button>
+          </div>
+          <div role="progressbar" aria-label="Produto preenchido" aria-valuemin={0} aria-valuemax={100} aria-valuenow={completionPercent} className="h-[3px] bg-border">
+            <div className="h-full bg-primary transition-[width] duration-500 motion-reduce:transition-none" style={{ width: `${completionPercent}%` }} />
+          </div>
+        </header>
+
+        <div className="mx-auto grid max-w-[1180px] grid-cols-[minmax(0,1fr)] gap-5 px-4 pb-16 pt-5 sm:px-6 lg:grid-cols-[264px_minmax(0,1fr)] lg:gap-10 lg:pt-8">
+          <aside className="max-lg:sticky max-lg:top-[75px] max-lg:z-20 max-lg:-mx-4 max-lg:border-b max-lg:border-border max-lg:bg-background max-lg:px-4 max-lg:py-2 sm:max-lg:-mx-6 sm:max-lg:px-6 lg:sticky lg:top-[104px] lg:self-start">
+            <div className="vp-sheet hidden p-5 lg:block">
+              <p className="text-[13px] font-semibold text-muted-foreground">Seu produto está</p>
+              <p className="mt-1.5 font-heading text-[44px] font-extrabold leading-none tracking-[-0.05em] vp-green-ink tabular-nums">
+                {completionPercent}<span className="text-[26px]">%</span> <span className="text-[15px] font-bold tracking-normal text-muted-foreground">pronto</span>
+              </p>
+              <p className="mt-3 text-[13px] leading-snug text-muted-foreground">
+                {missingItems.length === 0
+                  ? "Tudo preenchido."
+                  : <>Falta: {missingItems.slice(0, 3).join(", ")}{missingItems.length > 3 ? ` e mais ${missingItems.length - 3}` : ""}.</>}
+              </p>
+            </div>
+            <nav aria-label="Etapas do produto" className="scrollbar-none flex gap-1.5 overflow-x-auto lg:mt-4 lg:flex-col lg:overflow-visible">
+              {TABS.map((tab) => {
+                const isActive = activeTab === tab.key;
+                const completed = tabCompleted(tab.key);
+                const locked = tab.key !== "geral" && tabsLocked;
+                return (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    aria-current={isActive ? "page" : undefined}
+                    aria-disabled={locked || undefined}
+                    onClick={() => { if (locked) { toast.error("Crie o produto antes de abrir esta etapa."); return; } setActiveTab(tab.key); }}
+                    className="vp-pill lg:!h-11 lg:w-full lg:justify-start"
+                  >
+                    {locked ? <Lock className="h-4 w-4" /> : <tab.icon className="h-4 w-4" />}
+                    <span>{tab.label}</span>
+                    {completed && !isActive && !locked && <Check aria-label="Etapa preenchida" className="ml-auto hidden h-4 w-4 text-primary lg:block" />}
+                  </button>
+                );
+              })}
+            </nav>
+          </aside>
+
+          <main className="min-w-0">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {activeTab === "geral" && <TabGeral
+                  {...{ name, setName, description, setDescription, price, setPrice, statusKey: effectiveStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, setImageFile, fileInputRef, handleFileChange, displayName, setDisplayName, supportEmail, setSupportEmail, supportPhone, setSupportPhone, isDragging, setIsDragging, handleDrop }}
+                />}
+
+                {activeTab === "configuracoes" && <TabConfiguracoes
+                  {...{ pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, addressRequired, setAddressRequired, deliveryType, setDeliveryType, adminPixEnabled, adminBoletoEnabled, adminCardEnabled }}
+                />}
+
+                {activeTab === "conteudo" && <TabConteudo productId={effectiveProductId} isNew={tabsLocked} />}
+
+                {activeTab === "order-bump" && <TabOrderBump
+                  {...{ isNew: tabsLocked, orderBumps, allProducts, availableForBump, selectedBumpProduct, setSelectedBumpProduct, addBump, removeBump }}
+                />}
+
+                {activeTab === "upsell" && <TabUpsell
+                  {...{ name, price, imagePreview, emailTiming, setEmailTiming,
+                    upsellEnabled, setUpsellEnabled, upsellType, setUpsellType, upsellName, setUpsellName, upsellPrice, setUpsellPrice, upsellDiscount, setUpsellDiscount, upsellUrl, setUpsellUrl,
+                    downsellEnabled, setDownsellEnabled, downsellUrl, setDownsellUrl, downsellPrice, setDownsellPrice, downsellDelay, setDownsellDelay }}
+                />}
+
+                {activeTab === "checkout" && <TabCheckout
+                  {...{ isNew: tabsLocked, name, price, imagePreview, productId: effectiveProductId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }}
+                />}
+
+                {activeTab === "co-producao" && <TabCoProducao
+                  {...{ isNew: tabsLocked, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionsList, inviteCoProducer, removeCoProducer, invitingCoProducer }}
+                />}
+
+                {activeTab === "cupons" && <TabCupons
+                  {...{ isNew: tabsLocked, coupons, newCouponCode, setNewCouponCode, newCouponType, setNewCouponType, newCouponValue, setNewCouponValue, newCouponMaxUses, setNewCouponMaxUses, creatingCoupon, createCoupon, toggleCoupon, deleteCoupon }}
+                />}
+
+                {activeTab === "afiliados" && <TabAfiliados
+                  {...{ isNew: tabsLocked, productId: effectiveProductId, affiliateEnabled, setAffiliateEnabled, affiliateCommission, setAffiliateCommission, affiliateAttribution, setAffiliateAttribution, affiliateCookieDays, setAffiliateCookieDays, affiliateApprovalManual, setAffiliateApprovalManual, affiliateUpsellCommission, setAffiliateUpsellCommission, affiliateMarketplace, setAffiliateMarketplace, affiliateSupportEmail, setAffiliateSupportEmail, affiliateDescription, setAffiliateDescription, copyLink }}
+                />}
+
+                {activeTab === "links" && <TabLinks
+                  {...{ isNew: tabsLocked, product, pageUrl, affiliateEnabled, productId: effectiveProductId, getCheckoutLink, copyLink, name, price }}
+                />}
+              </motion.div>
+            </AnimatePresence>
+
+            <div className="mt-8 flex items-center justify-between gap-3 border-t border-border pt-6">
+              <button type="button" onClick={goPrev} disabled={!prevTab || tabsLocked} className="vp-ghost">
+                <ChevronRight className="h-4 w-4 rotate-180" /> {prevTab ? prevTab.label : "Anterior"}
+              </button>
+              {nextTab ? (
+                <button type="button" onClick={goNext} disabled={saving} className="vp-cta">
+                  {tabsLocked ? "Criar produto e continuar" : `Próxima: ${nextTab.label}`} <ChevronRight className="h-4 w-4" />
+                </button>
+              ) : (
+                <button type="button" onClick={handleSave} disabled={saving} className="vp-cta">
+                  <Save className="h-4 w-4" /> Salvar alterações
+                </button>
+              )}
+            </div>
+          </main>
         </div>
-       </div>
-       <div className="flex shrink-0 items-center gap-2">
-        {!tabsLocked && <Button variant="ghost" onClick={handleDuplicate} className="hidden h-9 gap-2 px-3 text-xs md:flex"><Copy className="h-3.5 w-3.5" /> Duplicar</Button>}
-        {!tabsLocked && <Button variant="ghost" size="icon" onClick={handleDelete} aria-label="Excluir produto" className="hidden h-9 w-9 text-destructive md:inline-flex"><Trash2 className="h-3.5 w-3.5" /></Button>}
-        <Button onClick={handleSave} disabled={saving} className={cn("h-9 gap-2 px-4 text-xs font-display font-bold", saved && "bg-success hover:bg-success")}>
-         {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : saved ? <Check className="h-3.5 w-3.5" /> : <Save className="h-3.5 w-3.5" />}
-         {saving ? "Salvando" : saved ? "Salvo" : isNew ? "Criar produto" : "Salvar"}
-        </Button>
-       </div>
-      </header>
-
-      <div className="product-studio-shell overflow-hidden rounded-2xl">
-       <div className="grid min-h-[590px] grid-cols-1 md:grid-cols-[184px_minmax(0,1fr)]">
-        <aside className="product-studio-nav border-b border-border p-2 md:border-b-0 md:border-r md:p-3">
-         <div className="mb-2 hidden px-2 py-2 md:block">
-          <div className="mb-2 flex items-center justify-between text-[10px] font-bold text-muted-foreground"><span>Progresso</span><span className="text-primary">{completionPercent}%</span></div>
-          <div className="h-1 overflow-hidden rounded-full bg-border"><motion.div className="h-full bg-primary" animate={{ width: `${completionPercent}%` }} transition={{ duration: 0.4 }} /></div>
-         </div>
-         <nav aria-label="Etapas do produto" className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
-          {TABS.map((tab) => {
-           const isActive = activeTab === tab.key;
-           const completed = tabCompleted(tab.key);
-           const locked = tab.key !== "geral" && tabsLocked;
-           return (
-            <Button key={tab.key} type="button" variant="ghost" disabled={locked} onClick={() => { if (locked) { toast.error("Crie o produto antes de acessar esta etapa"); return; } setActiveTab(tab.key); }} className={cn("h-9 shrink-0 justify-start gap-2 px-2.5 text-[11px] font-semibold md:w-full", locked ? "opacity-35" : isActive ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground" : "text-muted-foreground hover:bg-card hover:text-foreground")}>
-             {locked ? <Lock className="h-3.5 w-3.5" /> : <tab.icon className="h-3.5 w-3.5" />}
-             <span>{tab.label}</span>
-             {completed && !isActive && !locked && <Check className="ml-auto hidden h-3 w-3 text-success md:block" />}
-            </Button>
-           );
-          })}
-         </nav>
-        </aside>
-        <main className="product-studio-workspace min-w-0 p-3 sm:p-5 md:p-6">
- <AnimatePresence mode="wait">
- <motion.div
- key={activeTab}
- initial={{ opacity: 0, y: 10 }}
- animate={{ opacity: 1, y: 0 }}
- exit={{ opacity: 0, y: -6 }}
- transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
- >
-  {activeTab === "geral" && <TabGeral
-  {...{ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, supportPhone, setSupportPhone, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop, onNext: handleSave }}
-  />}
-
-{activeTab === "configuracoes" && <TabConfiguracoes
-  {...{ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType, adminPixEnabled, adminBoletoEnabled, adminCardEnabled }}
-/>}
-
- {activeTab === "conteudo" && <TabConteudo productId={effectiveProductId} isNew={tabsLocked} />}
-
- {activeTab === "order-bump" && <TabOrderBump
- {...{ isNew: tabsLocked, orderBumps, allProducts, availableForBump, selectedBumpProduct, setSelectedBumpProduct, addBump, removeBump }}
- />}
-
-    {activeTab === "upsell" && <TabUpsell
- {...{ isNew: tabsLocked, name, price, imagePreview, hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming,
-       upsellEnabled, setUpsellEnabled, upsellType, setUpsellType, upsellName, setUpsellName, upsellPrice, setUpsellPrice, upsellDiscount, setUpsellDiscount, upsellUrl, setUpsellUrl,
-       downsellEnabled, setDownsellEnabled, downsellUrl, setDownsellUrl, downsellPrice, setDownsellPrice, downsellDelay, setDownsellDelay }}
- />}
-
- {activeTab === "checkout" && <TabCheckout
- {...{ isNew: tabsLocked, name, price, productId: effectiveProductId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }}
- />}
-
- {activeTab === "co-producao" && <TabCoProducao
- {...{ isNew: tabsLocked, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType, coProductionsList, inviteCoProducer, removeCoProducer, invitingCoProducer }}
- />}
-
-
- {activeTab === "cupons" && <TabCupons
- {...{ isNew: tabsLocked, coupons, newCouponCode, setNewCouponCode, newCouponType, setNewCouponType, newCouponValue, setNewCouponValue, newCouponMaxUses, setNewCouponMaxUses, creatingCoupon, createCoupon, toggleCoupon, deleteCoupon }}
- />}
-
- {activeTab === "afiliados" && <TabAfiliados
- {...{ isNew: tabsLocked, productId: effectiveProductId, affiliateEnabled, setAffiliateEnabled, affiliateCommission, setAffiliateCommission, affiliateAttribution, setAffiliateAttribution, affiliateCookieDays, setAffiliateCookieDays, affiliateApprovalManual, setAffiliateApprovalManual, affiliateUpsellCommission, setAffiliateUpsellCommission, affiliateMarketplace, setAffiliateMarketplace, affiliateSupportEmail, setAffiliateSupportEmail, affiliateDescription, setAffiliateDescription, copyLink }}
- />}
-
- {activeTab === "links" && <TabLinks
- {...{ isNew: tabsLocked, product, pageUrl, affiliateEnabled, productId: effectiveProductId, getCheckoutLink, copyLink, name, price }}
- />}
- </motion.div>
- </AnimatePresence>
-
-  {/* Navegação sequencial */}
- {(() => {
-   const idx = TABS.findIndex(t => t.key === activeTab);
-   const prev = idx > 0 ? TABS[idx - 1] : null;
-   const next = idx >= 0 && idx < TABS.length - 1 ? TABS[idx + 1] : null;
-   const goNext = () => {
-     if (!next) return;
-     if (tabsLocked) { handleSave(); return; }
-     setActiveTab(next.key);
-   };
-   const goPrev = () => { if (prev && !tabsLocked) setActiveTab(prev.key); };
-   return (
-      <div className="mt-5 flex items-center justify-between gap-3 border-t border-border pt-4">
-       <Button
-         variant="outline"
-         onClick={goPrev}
-         disabled={!prev || tabsLocked}
-          className="h-9 gap-2 px-3 text-xs font-display font-bold"
-       >
-         <ChevronRight className="h-4 w-4 rotate-180" />
-         {prev ? prev.label : "Anterior"}
-       </Button>
-       {next ? (
-          <Button onClick={goNext} disabled={saving} className="h-9 gap-2 px-4 text-xs font-display font-bold">
-           {tabsLocked ? "Salvar e continuar" : `Próximo: ${next.label}`}
-           <ChevronRight className="h-4 w-4" />
-         </Button>
-       ) : (
-          <Button onClick={handleSave} disabled={saving} className="h-9 gap-2 px-4 text-xs font-display font-bold">
-           <Save className="h-4 w-4" /> Salvar alterações
-         </Button>
-       )}
-     </div>
-   );
- })()}
-        </main>
-       </div>
       </div>
-     </div>
+
+      <AlertDialog open={deleteOpen} onOpenChange={(open) => { if (!deleting) setDeleteOpen(open); }}>
+        <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
+          <AlertDialogHeader className="space-y-2 text-left">
+            <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive"><Trash2 className="h-5 w-5" /></span>
+            <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">Excluir este produto?</AlertDialogTitle>
+            <AlertDialogDescription className="text-[14.5px] leading-relaxed text-muted-foreground">
+              <span className="font-semibold text-foreground">{name.trim() || "Este produto"}</span> sai da sua lista e o checkout deixa de funcionar. As vendas já feitas continuam no seu histórico.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 gap-2 sm:gap-2">
+            <AlertDialogCancel disabled={deleting} className="vp-ghost m-0 h-11">Manter produto</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => { e.preventDefault(); confirmDelete(); }} disabled={deleting} className="vp-cta vp-cta-danger h-11">
+              {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {deleting ? "Excluindo…" : "Excluir produto"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
-    </div>
- );
+    </MotionConfig>
+  );
 }
+
 
 /* ═══════════════════════════════════════════════
  TAB COMPONENTS
  ═══════════════════════════════════════════════ */
 
-
-
 type S<T> = Dispatch<SetStateAction<T>>;
 type StrS = S<string>;
 type BoolS = S<boolean>;
-type AnyObj = Record<string, unknown>;
+
+const inputClass = "vp-field";
+const selectTriggerClass = "h-12 vp-r16 border-border bg-background px-4 text-[15px] data-[placeholder]:font-normal data-[placeholder]:text-muted-foreground";
 
 type TabGeralProps = {
   name: string; setName: StrS;
   description: string; setDescription: StrS;
   price: string; setPrice: StrS;
-  status: string; setStatus: StrS;
+  statusKey: "draft" | "active" | "pending_review" | "inactive";
   pageUrl: string; setPageUrl: StrS;
   imagePreview: string | null; setImagePreview: S<string | null>;
-  imageFile: File | null; setImageFile: S<File | null>;
+  setImageFile: S<File | null>;
   fileInputRef: RefObject<HTMLInputElement>;
   handleFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  category: string; setCategory: StrS;
-  paymentType: string; setPaymentType: StrS;
   displayName: string; setDisplayName: StrS;
   supportEmail: string; setSupportEmail: StrS;
   supportPhone: string; setSupportPhone: StrS;
-  warrantyDays: string; setWarrantyDays: StrS;
   isDragging: boolean; setIsDragging: BoolS;
   handleDrop: (e: React.DragEvent) => void;
-  onNext: () => void;
 };
 
-function TabGeral({ name, setName, description, setDescription, price, setPrice, status, setStatus, pageUrl, setPageUrl, imagePreview, setImagePreview, imageFile, setImageFile, fileInputRef, handleFileChange, category, setCategory, paymentType, setPaymentType, displayName, setDisplayName, supportEmail, setSupportEmail, supportPhone, setSupportPhone, warrantyDays, setWarrantyDays, isDragging, setIsDragging, handleDrop, onNext }: TabGeralProps) {
+const STATUS_TEXT: Record<TabGeralProps["statusKey"], string> = {
+  draft: "Quando nome, preço, descrição e capa estiverem preenchidos, ao salvar o produto vai para a análise da equipe.",
+  pending_review: "A equipe está revisando o produto. Assim que for aprovado, o checkout começa a aceitar pagamentos.",
+  active: "O checkout está no ar e aceitando pagamentos.",
+  inactive: "O checkout não está aceitando vendas.",
+};
+
+function TabGeral({ name, setName, description, setDescription, price, setPrice, statusKey, pageUrl, setPageUrl, imagePreview, setImagePreview, setImageFile, fileInputRef, handleFileChange, displayName, setDisplayName, supportEmail, setSupportEmail, supportPhone, setSupportPhone, isDragging, setIsDragging, handleDrop }: TabGeralProps) {
   const descValid = description.length >= 50;
   // Aceita URL sem https://
   const urlValid = pageUrl.trim().length > 3 && /\.[a-z]{2,}/i.test(pageUrl.trim());
@@ -892,127 +967,127 @@ function TabGeral({ name, setName, description, setDescription, price, setPrice,
     const value = cents / 100;
     setPrice(value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
   };
-  const priceNumber = (() => {
-    const s = String(price);
-    if (!s) return 0;
-    return s.includes(",")
-      ? parseFloat(s.replace(/\./g, "").replace(",", ".")) || 0
-      : parseFloat(s) || 0;
-  })();
-
-  const CATEGORIES = [
-    { value: "infoproduto", label: "Infoproduto",     desc: "Conteúdo digital genérico", icon: Package },
-    { value: "curso",       label: "Curso Online",    desc: "Aulas em módulos",          icon: GraduationCap },
-    { value: "ebook",       label: "E-book",          desc: "Material em PDF",           icon: BookOpen },
-    { value: "mentoria",    label: "Mentoria",        desc: "Acompanhamento 1:1",        icon: Users },
-    { value: "software",    label: "Software / SaaS", desc: "Aplicativo ou ferramenta",  icon: Code2 },
-    { value: "servico",     label: "Serviço",         desc: "Trabalho prestado",         icon: Briefcase },
-    { value: "comunidade",  label: "Comunidade",      desc: "Grupo recorrente",          icon: MessageSquare },
-    { value: "outro",       label: "Outro",           desc: "Modelo personalizado",      icon: Layers },
-  ];
+  const priceNumber = priceToNumber(price);
+  const priceInvalid = price !== "" && (priceNumber < 1 || priceNumber > 99999.99);
+  const status = STATUS_META[statusKey];
 
   return (
-    <div className="mx-auto max-w-[820px]">
-      <div className="mb-5 flex items-end justify-between gap-4 border-b border-border pb-4">
-        <div>
-          <h2 className="font-display text-xl font-bold text-foreground">Informações do produto</h2>
-          <p className="mt-1 text-xs text-muted-foreground">Defina a oferta, o preço e os dados de publicação.</p>
-        </div>
-        <span className="hidden text-[10px] font-semibold text-muted-foreground sm:block">Campos obrigatórios *</span>
-      </div>
+    <div className="space-y-5">
+      <StudioHeading title="Informações do produto" subtitle="É o que o comprador vê no checkout. Preencha tudo para enviar o produto à análise." />
 
-      <div className="space-y-4">
-          <section className="border-b border-border pb-5">
-            <div className="mb-4 flex items-center gap-3">
-              <div
-                className={cn("relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border transition-colors", isDragging ? "border-primary bg-primary/10" : "border-border bg-secondary")}
-                onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }}
-                onDragLeave={() => setIsDragging(false)}
-                onDrop={handleDrop}
-              >
-                <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" />
-                {imagePreview ? (
-                  <div className="group/image relative h-full w-full">
-                    <img src={imagePreview} alt="Capa do produto" className="h-full w-full object-cover" />
-                    <div className="absolute inset-0 flex items-center justify-center gap-1 bg-background/85 opacity-0 transition-opacity group-hover/image:opacity-100">
-                      <Button type="button" variant="outline" size="icon" onClick={() => fileInputRef.current?.click()} aria-label="Trocar capa" className="h-7 w-7"><ImagePlus className="h-3 w-3" /></Button>
-                      <Button type="button" variant="outline" size="icon" onClick={() => { setImageFile(null); setImagePreview(null); }} aria-label="Remover capa" className="h-7 w-7 text-destructive"><X className="h-3 w-3" /></Button>
-                    </div>
+      <StudioPanel title="Sobre o produto">
+        <div className="flex flex-col gap-6 sm:flex-row">
+          <div className="shrink-0">
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFileChange} className="hidden" aria-label="Escolher imagem de capa" />
+            <div
+              onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={handleDrop}
+              className={cn(
+                "relative h-[148px] w-[148px] overflow-hidden rounded-[22px] border-2 transition-colors",
+                imagePreview ? "border-border" : cn("border-dashed", isDragging ? "border-primary bg-accent" : "border-border bg-muted/60 hover:border-primary/50"),
+              )}
+            >
+              {imagePreview ? (
+                <>
+                  <img src={imagePreview} alt="Capa do produto" className="h-full w-full object-cover" />
+                  <div className="absolute inset-x-2 bottom-2 flex justify-end gap-1.5">
+                    <button type="button" onClick={() => fileInputRef.current?.click()} aria-label="Trocar capa" className="vp-orb !h-9 !w-9 shadow-sm"><ImagePlus className="h-4 w-4" /></button>
+                    <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} aria-label="Remover capa" className="vp-orb !h-9 !w-9 text-destructive shadow-sm"><X className="h-4 w-4" /></button>
                   </div>
-                ) : (
-                  <Button type="button" variant="ghost" onClick={() => fileInputRef.current?.click()} className="h-full w-full flex-col gap-1 rounded-none p-0 text-muted-foreground hover:text-primary">
-                    <Upload className="h-4 w-4" />
-                    <span className="text-[9px]">Adicionar capa</span>
-                  </Button>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <Label htmlFor="product-name" className="text-xs font-semibold text-foreground">Nome do produto *</Label>
-                <Input id="product-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Ex: Formação em Marketing" className="mt-1 h-10 border-border bg-background px-3 text-sm font-semibold" required maxLength={200} />
-              </div>
+                </>
+              ) : (
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="flex h-full w-full flex-col items-center justify-center gap-2 px-3 text-center text-muted-foreground transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
+                  <ImagePlus className="h-7 w-7" />
+                  <span className="text-[13.5px] font-semibold leading-tight">Adicionar capa</span>
+                </button>
+              )}
+            </div>
+            <FieldHint className="w-[148px]">JPG, PNG, WebP ou GIF, até 5 MB. Necessária para enviar à análise.</FieldHint>
+          </div>
+
+          <div className="min-w-0 flex-1 space-y-5">
+            <div>
+              <FieldLabel htmlFor="product-name">Nome do produto</FieldLabel>
+              <Input id="product-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Ex.: Formação em marketing digital" className={inputClass} maxLength={200} />
+              <FieldHint>É o nome que o comprador vê no checkout.</FieldHint>
             </div>
             <div>
-              <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="product-description" className="text-xs font-semibold text-foreground">Descrição *</Label>
-                <span className={cn("text-[10px] tabular-nums", description.length > 0 && !descValid ? "text-destructive" : "text-muted-foreground")}>{description.length}/2000</span>
+              <div className="mb-2 flex items-baseline justify-between gap-3">
+                <label htmlFor="product-description" className="text-[13.5px] font-semibold text-foreground">Descrição</label>
+                <span className={cn("text-[12.5px] tabular-nums", description.length > 0 && !descValid ? "font-semibold text-destructive" : "text-muted-foreground")}>{description.length}/2000</span>
               </div>
-              <Textarea id="product-description" value={description} onChange={(event) => setDescription(event.target.value)} rows={3} placeholder="Explique com clareza o que o comprador recebe e qual transformação esperar." className={cn("mt-1 resize-none border-border bg-background px-3 py-2.5 text-sm leading-relaxed", description.length > 0 && !descValid && "border-destructive/50")} maxLength={2000} />
-              {description.length > 0 && !descValid && <p className="mt-1 text-[10px] text-destructive">Complete mais {50 - description.length} caracteres.</p>}
+              <Textarea id="product-description" value={description} onChange={(event) => setDescription(event.target.value)} rows={5} placeholder="Explique o que o comprador recebe e o resultado que pode esperar." aria-invalid={description.length > 0 && !descValid} className={cn(inputClass, "resize-none leading-relaxed")} maxLength={2000} />
+              <FieldHint className={description.length > 0 && !descValid ? "text-destructive" : undefined}>
+                {description.length > 0 && !descValid ? `Escreva mais ${50 - description.length} caracteres. O mínimo é 50.` : "Mínimo de 50 caracteres."}
+              </FieldHint>
             </div>
-          </section>
+          </div>
+        </div>
+      </StudioPanel>
 
-          <section className="border-b border-border pb-5">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <Label className="text-xs font-semibold text-foreground">Tipo de produto *</Label>
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger className="mt-1 h-10 bg-background"><SelectValue /></SelectTrigger>
-                  <SelectContent>{CATEGORIES.map((option) => <RichSelectItem key={option.value} {...option} />)}</SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="product-price" className="text-xs font-semibold text-foreground">Preço de venda *</Label>
-                <div className="relative mt-1">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">R$</span>
-                  <Input id="product-price" inputMode="decimal" value={price} onChange={(event) => handlePriceChange(event.target.value)} className="h-10 border-border bg-background pl-9 pr-3 font-numbers text-base font-bold text-primary" placeholder="0,00" />
-                </div>
-              </div>
+      <StudioPanel title="Preço e cobrança">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 sm:grid-cols-2">
+          <div>
+            <FieldLabel htmlFor="product-price">Preço de venda</FieldLabel>
+            <div className="relative">
+              <span aria-hidden className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[15px] font-bold text-muted-foreground">R$</span>
+              <Input id="product-price" inputMode="decimal" value={price} onChange={(event) => handlePriceChange(event.target.value)} placeholder="0,00" aria-invalid={priceInvalid} className={cn(inputClass, "!pl-12 text-[17px] font-bold tabular-nums")} />
             </div>
-            <div className="mt-3 border-t border-border pt-3">
-              <Label className="text-xs font-semibold text-foreground">Cobrança</Label>
-              <SegmentedChoice value={paymentType} onValueChange={setPaymentType} columns={2} size="sm" className="mt-1" options={[{ value: "unico", label: "Pagamento único" }, { value: "assinatura", label: "Assinatura", disabled: true, badge: "Em breve" }]} />
+            <FieldHint className={priceInvalid ? "text-destructive" : undefined}>
+              {priceInvalid ? "O preço vai de R$ 1,00 a R$ 99.999,99." : "De R$ 1,00 a R$ 99.999,99."}
+            </FieldHint>
+          </div>
+          <div>
+            <FieldLabel>Cobrança</FieldLabel>
+            <div role="radiogroup" aria-label="Tipo de cobrança" className="grid grid-cols-[minmax(0,1fr)] gap-2.5">
+              <OptionCard selected onClick={() => undefined} icon={<CreditCard className="h-[18px] w-[18px]" />} title="Pagamento único" description="O comprador paga uma vez." />
+              <OptionCard selected={false} disabled onClick={() => undefined} icon={<RefreshCw className="h-[18px] w-[18px]" />} title="Assinatura" badge="Em breve" description="Cobrança recorrente." />
             </div>
-          </section>
+          </div>
+        </div>
+      </StudioPanel>
 
-          <details className="group border-b border-border pb-1" open>
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">
-              <div>
-                <p className="text-xs font-semibold text-foreground">Dados para publicação</p>
-                <p className="mt-0.5 text-[10px] text-muted-foreground">Suporte, página de vendas, garantia e visibilidade.</p>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-90" />
-            </summary>
-            <div className="grid gap-3 border-t border-border px-0 py-4 sm:grid-cols-2">
-              <div><Label className="text-[11px] text-muted-foreground">Página de vendas *</Label><Input value={pageUrl} onChange={(event) => setPageUrl(event.target.value)} placeholder="seuproduto.com" className={cn("mt-1 h-9 bg-background", pageUrl && !urlValid && "border-destructive/50")} /></div>
-              <div><Label className="text-[11px] text-muted-foreground">E-mail de suporte *</Label><Input value={supportEmail} onChange={(event) => setSupportEmail(event.target.value)} placeholder="suporte@seuproduto.com" type="email" className={cn("mt-1 h-9 bg-background", supportEmail && !emailValid && "border-destructive/50")} /></div>
-              <div><Label className="text-[11px] text-muted-foreground">Telefone de suporte *</Label><Input value={supportPhone} onChange={(event) => setSupportPhone(formatPhone(event.target.value))} placeholder="(11) 91234-5678" inputMode="tel" className={cn("mt-1 h-9 bg-background", supportPhone && !phoneValid && "border-destructive/50")} /></div>
-              <div><Label className="text-[11px] text-muted-foreground">Nome do produtor *</Label><Input value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder="Nome exibido no checkout" className="mt-1 h-9 bg-background" /></div>
-              <div><Label className="text-[11px] text-muted-foreground">Garantia</Label><Select value={warrantyDays} onValueChange={setWarrantyDays}><SelectTrigger className="mt-1 h-9 bg-background"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="7">7 dias</SelectItem><SelectItem value="14">14 dias</SelectItem><SelectItem value="30">30 dias</SelectItem></SelectContent></Select></div>
-              <div><Label className="text-[11px] text-muted-foreground">Visibilidade</Label><Select value={status} onValueChange={setStatus}><SelectTrigger className="mt-1 h-9 bg-background"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="pending_review">Rascunho</SelectItem><SelectItem value="active">Ativo</SelectItem></SelectContent></Select></div>
-            </div>
-          </details>
-      </div>
+      <StudioPanel title="Publicação e suporte" subtitle="Para onde o comprador vai e como ele fala com você.">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 sm:grid-cols-2">
+          <div>
+            <FieldLabel htmlFor="product-page">Página de vendas</FieldLabel>
+            <Input id="product-page" value={pageUrl} onChange={(event) => setPageUrl(event.target.value)} placeholder="seuproduto.com" inputMode="url" aria-invalid={pageUrl !== "" && !urlValid} className={inputClass} />
+            <FieldHint className={pageUrl !== "" && !urlValid ? "text-destructive" : undefined}>{pageUrl !== "" && !urlValid ? "Digite um endereço válido, como seuproduto.com." : "Pode digitar sem https://."}</FieldHint>
+          </div>
+          <div>
+            <FieldLabel htmlFor="product-display-name">Nome do produtor</FieldLabel>
+            <Input id="product-display-name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder="Seu nome ou da sua marca" className={inputClass} />
+            <FieldHint>Aparece no checkout como vendedor.</FieldHint>
+          </div>
+          <div>
+            <FieldLabel htmlFor="product-support-email">E-mail de suporte</FieldLabel>
+            <Input id="product-support-email" value={supportEmail} onChange={(event) => setSupportEmail(event.target.value)} placeholder="suporte@seuproduto.com" type="email" aria-invalid={supportEmail !== "" && !emailValid} className={inputClass} />
+            <FieldHint className={supportEmail !== "" && !emailValid ? "text-destructive" : undefined}>{supportEmail !== "" && !emailValid ? "Digite um e-mail válido." : "Para onde o comprador escreve se precisar de ajuda."}</FieldHint>
+          </div>
+          <div>
+            <FieldLabel htmlFor="product-support-phone">Telefone de suporte</FieldLabel>
+            <Input id="product-support-phone" value={supportPhone} onChange={(event) => setSupportPhone(formatPhone(event.target.value))} placeholder="(11) 91234-5678" inputMode="tel" aria-invalid={supportPhone !== "" && !phoneValid} className={inputClass} />
+            <FieldHint className={supportPhone !== "" && !phoneValid ? "text-destructive" : undefined}>{supportPhone !== "" && !phoneValid ? "Digite o telefone com DDD." : "Com DDD."}</FieldHint>
+          </div>
+        </div>
+      </StudioPanel>
+
+      <StudioPanel title="Situação do produto">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <StatusPill label={status.label} tone={status.tone} />
+          <p className="min-w-0 flex-1 basis-[260px] text-[14px] leading-relaxed text-muted-foreground">{STATUS_TEXT[statusKey]}</p>
+        </div>
+      </StudioPanel>
     </div>
   );
 }
 
 type TabConfiguracoesProps = {
-  price: string;
   pixEnabled: boolean; setPixEnabled: BoolS;
   boletoEnabled: boolean; setBoletoEnabled: BoolS;
   creditCardEnabled: boolean; setCreditCardEnabled: BoolS;
   emailConfirm: boolean; setEmailConfirm: BoolS;
-  showCouponField: boolean; setShowCouponField: BoolS;
   addressRequired: boolean; setAddressRequired: BoolS;
   deliveryType: string; setDeliveryType: StrS;
   adminBoletoEnabled?: boolean;
@@ -1020,105 +1095,62 @@ type TabConfiguracoesProps = {
   adminPixEnabled?: boolean;
 };
 
-function TabConfiguracoes({ price, pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, showCouponField, setShowCouponField, addressRequired, setAddressRequired, deliveryType, setDeliveryType, adminPixEnabled = true, adminBoletoEnabled = true, adminCardEnabled = true }: TabConfiguracoesProps) {
- return (
- <div className="space-y-6">
- <SectionHeader icon={Settings} title="Configurações" subtitle="Métodos de pagamento, formulário e entrega de conteúdo." />
+function TabConfiguracoes({ pixEnabled, setPixEnabled, boletoEnabled, setBoletoEnabled, creditCardEnabled, setCreditCardEnabled, emailConfirm, setEmailConfirm, addressRequired, setAddressRequired, deliveryType, setDeliveryType, adminPixEnabled = true, adminBoletoEnabled = true, adminCardEnabled = true }: TabConfiguracoesProps) {
+  const methodsAllowed = (adminPixEnabled ? 1 : 0) + (adminBoletoEnabled ? 1 : 0) + (adminCardEnabled ? 1 : 0);
+  const methodsOn = (adminPixEnabled && pixEnabled ? 1 : 0) + (adminBoletoEnabled && boletoEnabled ? 1 : 0) + (adminCardEnabled && creditCardEnabled ? 1 : 0);
 
- <EditorCard accentColor="bg-primary">
- <h3 className="text-[15px] font-display font-black text-foreground tracking-[-0.02em] flex items-center gap-2">
- <CreditCard className="h-4 w-4 text-primary" /> Métodos de pagamento
- </h3>
- <div className="space-y-2">
- {adminPixEnabled && <PaymentMethodRow icon={QrCode} label="PIX" sublabel="Taxa: 2,49% • Aprovação imediata" color="text-success" checked={pixEnabled} onChange={setPixEnabled} />}
- {adminBoletoEnabled && <PaymentMethodRow icon={FileText} label="Boleto" sublabel="Taxa: 2,49% + R$ 2,49" color="text-warning" checked={boletoEnabled} onChange={setBoletoEnabled} />}
- {adminCardEnabled && <PaymentMethodRow icon={CreditCard} label="Cartão de Crédito" sublabel="Taxa: 6,38% • Até 12x" color="text-info" checked={creditCardEnabled} onChange={setCreditCardEnabled} />}
- </div>
+  return (
+    <div className="space-y-5">
+      <StudioHeading title="Configurações" subtitle="Como o comprador paga, o que preenche e como recebe o conteúdo." />
 
- {/* Simulação de taxas — temporariamente desativada, voltaremos depois */}
- {/* eslint-disable-next-line no-constant-binary-expression */}
- {false && price && parseFloat(price) > 0 && (
- <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-xl bg-muted/5 border border-border p-3 space-y-2">
- <p className="text-[11px] font-display font-semibold text-muted-foreground/40">Simulação de taxas (R$ {Number(price).toFixed(2)})</p>
- <div className="grid grid-cols-3 gap-3">
- {pixEnabled && (
- <div className="text-center">
- <p className="text-[10px] text-muted-foreground/50">PIX</p>
- <p className="text-xs font-numbers font-black text-success">R$ {(parseFloat(price) * 0.9751).toFixed(2)}</p>
- <p className="text-[9px] text-muted-foreground/30">líquido</p>
- </div>
- )}
- {boletoEnabled && (
- <div className="text-center">
- <p className="text-[10px] text-muted-foreground/50">Boleto</p>
- <p className="text-xs font-numbers font-black text-warning">R$ {(parseFloat(price) * 0.9751 - 2.49).toFixed(2)}</p>
- <p className="text-[9px] text-muted-foreground/30">líquido</p>
- </div>
- )}
- {creditCardEnabled && (
- <div className="text-center">
- <p className="text-[10px] text-muted-foreground/50">Cartão</p>
- <p className="text-xs font-numbers font-black text-info">R$ {(parseFloat(price) * 0.9362).toFixed(2)}</p>
- <p className="text-[9px] text-muted-foreground/30">líquido</p>
- </div>
- )}
- </div>
- </motion.div>
- )}
- </EditorCard>
+      <StudioPanel title="Formas de pagamento" subtitle="O comprador escolhe entre as que estiverem ativas.">
+        {methodsAllowed === 0 ? (
+          <Notice tone="warn" icon={<AlertTriangle className="h-4 w-4" />} title="Nenhuma forma de pagamento liberada">
+            Sua conta ainda não tem métodos de pagamento liberados. <Link to="/suporte" className="font-semibold text-primary underline-offset-2 hover:underline">Fale com o suporte</Link> para ativar.
+          </Notice>
+        ) : (
+          <>
+            <GroupBox>
+              {adminPixEnabled && <FormToggleRow icon={<QrCode className="h-[18px] w-[18px]" />} title="Pix" description="Aprovação na hora."><Switch checked={pixEnabled} onCheckedChange={setPixEnabled} aria-label="Aceitar Pix" /></FormToggleRow>}
+              {adminBoletoEnabled && <FormToggleRow icon={<FileText className="h-[18px] w-[18px]" />} title="Boleto" description="Para quem prefere pagar no banco." tone="warning"><Switch checked={boletoEnabled} onCheckedChange={setBoletoEnabled} aria-label="Aceitar boleto" /></FormToggleRow>}
+              {adminCardEnabled && <FormToggleRow icon={<CreditCard className="h-[18px] w-[18px]" />} title="Cartão de crédito" description="Parcelamento em até 12x."><Switch checked={creditCardEnabled} onCheckedChange={setCreditCardEnabled} aria-label="Aceitar cartão de crédito" /></FormToggleRow>}
+            </GroupBox>
+            {methodsOn === 0 && (
+              <Notice tone="warn" icon={<AlertTriangle className="h-4 w-4" />} className="mt-4">
+                Ative pelo menos uma forma de pagamento. Sem isso, o comprador não consegue finalizar a compra.
+              </Notice>
+            )}
+            <FieldHint className="mt-3">As taxas de cada método estão em <Link to="/financeiro/taxas" className="font-semibold text-primary underline-offset-2 hover:underline">Financeiro, Taxas</Link>.</FieldHint>
+          </>
+        )}
+      </StudioPanel>
 
- <EditorCard accentColor="bg-info">
- <h3 className="text-[15px] font-display font-black text-foreground tracking-[-0.02em]">Configurações do formulário</h3>
- <div className="space-y-2">
- <ToggleRow label="Pedir para o comprador repetir o e-mail" checked={emailConfirm} onChange={setEmailConfirm} />
- <ToggleRow label="Exibir campo de cupom de desconto" checked={showCouponField} onChange={setShowCouponField} />
- <ToggleRow label="Solicitar endereço do comprador" sublabel="CEP com preenchimento automático" checked={addressRequired} onChange={setAddressRequired} />
- </div>
- </EditorCard>
+      <StudioPanel title="Formulário de compra" subtitle="Menos campos costumam vender mais.">
+        <GroupBox>
+          <FormToggleRow icon={<Mail className="h-[18px] w-[18px]" />} title="Confirmação de e-mail" description="O comprador digita o e-mail duas vezes."><Switch checked={emailConfirm} onCheckedChange={setEmailConfirm} aria-label="Pedir confirmação de e-mail" /></FormToggleRow>
+          <FormToggleRow icon={<MapPin className="h-[18px] w-[18px]" />} title="Endereço do comprador" description="CEP com preenchimento automático."><Switch checked={addressRequired} onCheckedChange={setAddressRequired} aria-label="Pedir endereço do comprador" /></FormToggleRow>
+        </GroupBox>
+      </StudioPanel>
 
- <EditorCard accentColor="bg-success">
- <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2 tracking-[-0.02em]"><Globe className="h-4 w-4 text-success" /> Entrega de conteúdo</h3>
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
- {[
- { value: "digital", label: "Área de Membros", desc: "Plataforma integrada com player e módulos", icon: Star },
- { value: "email", label: "Acesso por e-mail", desc: "Links e arquivos enviados por e-mail", icon: Mail },
- { value: "link", label: "Link de pagamento", desc: "Apenas receba pagamentos", icon: Link2 },
- { value: "external", label: "Área externa", desc: "Plataforma de terceiros", icon: ExternalLink },
- ].map((opt) => (
- <motion.button
- key={opt.value}
- type="button"
- onClick={() => setDeliveryType(opt.value)}
- whileHover={{ scale: 1.01 }}
- whileTap={{ scale: 0.98 }}
- className={cn(
- "flex items-start gap-3 p-4 rounded-xl border text-left transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden",
- deliveryType === opt.value
- ? "bg-primary/5 border-primary/20 "
- : "bg-card border-border hover:border-border"
- )}
- >
- {deliveryType === opt.value && <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />}
- <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ring-1 transition-all", deliveryType === opt.value ? "bg-primary/10 ring-primary/20" : "bg-muted/10 ring-border/20")}>
- <opt.icon className={cn("h-4 w-4", deliveryType === opt.value ? "text-primary" : "text-muted-foreground/40")} />
- </div>
- <div>
- <p className="text-sm font-display font-bold text-foreground">{opt.label}</p>
- <p className="text-[10px] text-muted-foreground/50 mt-0.5">{opt.desc}</p>
- </div>
- {deliveryType === opt.value && (
- <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2">
- <div className="h-5 w-5 rounded-full bg-primary/15 flex items-center justify-center">
- <div className="h-2 w-2 rounded-full bg-primary" />
- </div>
- </motion.div>
- )}
- </motion.button>
- ))}
- </div>
- </EditorCard>
- </div>
- );
+      <StudioPanel title="Entrega do conteúdo" subtitle="O que o comprador recebe depois de pagar.">
+        <div role="radiogroup" aria-label="Entrega do conteúdo" className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
+          {[
+            { value: "digital", label: "Área de membros", desc: "Aulas e materiais dentro da plataforma.", icon: Star },
+            { value: "email", label: "Acesso por e-mail", desc: "Links e arquivos enviados por e-mail.", icon: Mail },
+            { value: "link", label: "Só o pagamento", desc: "Você entrega o produto por conta própria.", icon: Link2 },
+            { value: "external", label: "Área externa", desc: "Plataforma de terceiros.", icon: ExternalLink },
+          ].map((opt) => (
+            <OptionCard key={opt.value} selected={deliveryType === opt.value} onClick={() => setDeliveryType(opt.value)} icon={<opt.icon className="h-[18px] w-[18px]" />} title={opt.label} description={opt.desc} />
+          ))}
+        </div>
+        {deliveryType === "digital" && (
+          <Notice tone="ok" icon={<GraduationCap className="h-4 w-4" />} className="mt-4">
+            Ao salvar, criamos o curso deste produto na Área de membros para você montar as aulas.
+          </Notice>
+        )}
+      </StudioPanel>
+    </div>
+  );
 }
 
 type TabOrderBumpProps = {
@@ -1132,106 +1164,79 @@ type TabOrderBumpProps = {
 };
 
 function TabOrderBump({ isNew, orderBumps, allProducts, availableForBump, selectedBumpProduct, setSelectedBumpProduct, addBump, removeBump }: TabOrderBumpProps) {
- return (
- <div className="space-y-6">
- <SectionHeader icon={Layers} title="Order Bump" subtitle="Adicione produtos complementares que aparecem como oferta no checkout." />
+  return (
+    <div className="space-y-5">
+      <StudioHeading title="Order bump" subtitle="Uma oferta extra que aparece no checkout, antes do pagamento. O comprador adiciona com um clique." />
 
- {/* How it works */}
- <EditorCard accentColor="bg-info">
- <div className="flex items-start gap-3">
- <div className="h-10 w-10 rounded-xl bg-info/10 flex items-center justify-center shrink-0">
- <Sparkles className="h-4 w-4 text-info" />
- </div>
- <div>
- <p className="text-sm font-display font-bold text-foreground">Como funciona?</p>
- <p className="text-xs text-muted-foreground/60 mt-1 leading-relaxed">
- Order bumps são ofertas extras que aparecem no checkout antes da compra. O comprador pode adicionar com apenas um clique, aumentando seu ticket médio em até 30%.
- </p>
- </div>
- </div>
- </EditorCard>
+      {isNew ? (
+        <StepEmpty icon={<Layers className="h-7 w-7" />} title="Crie o produto primeiro">
+          Salve a etapa Geral para poder oferecer outros produtos como order bump.
+        </StepEmpty>
+      ) : allProducts.length === 0 && orderBumps.length === 0 ? (
+        <StepEmpty
+          icon={<Layers className="h-7 w-7" />}
+          title="Você ainda não tem outro produto ativo"
+          action={<button type="button" onClick={() => window.open("/vendas/produtos/novo/editar", "_blank")} className="vp-cta"><Plus className="h-4 w-4" /> Criar outro produto</button>}
+        >
+          O order bump é outro produto seu, ativo, oferecido junto com este. Crie e ative mais um produto para configurar.
+        </StepEmpty>
+      ) : (
+        <>
+          <StudioPanel
+            title="Ofertas neste checkout"
+            subtitle="Até 5 por produto."
+            aside={<span className="rounded-full bg-muted px-3 py-1 text-[13px] font-semibold tabular-nums text-muted-foreground">{orderBumps.length} de 5</span>}
+          >
+            {orderBumps.length > 0 ? (
+              <GroupBox>
+                {orderBumps.map((bump) => {
+                  const prod = allProducts.find((p) => p.id === bump.bump_product_id);
+                  return (
+                    <div key={bump.id} className="flex items-center gap-3.5 px-4 py-3.5">
+                      {prod?.image_url ? (
+                        <img src={prod.image_url} alt="" className="h-12 w-12 shrink-0 rounded-[14px] object-cover" />
+                      ) : (
+                        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[14px] bg-accent text-accent-foreground"><Package className="h-5 w-5" /></span>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[14.5px] font-semibold text-foreground">{prod?.name || "Produto indisponível"}</p>
+                        <p className="text-[13.5px] font-bold tabular-nums vp-green-ink">{prod ? formatCurrency(Number(prod.price)) : "Pausado ou removido"}</p>
+                      </div>
+                      <button type="button" onClick={() => removeBump(bump.id)} aria-label={`Remover order bump ${prod?.name || ""}`.trim()} className="vp-orb text-destructive"><Trash2 className="h-[18px] w-[18px]" /></button>
+                    </div>
+                  );
+                })}
+              </GroupBox>
+            ) : (
+              <p className="rounded-[16px] border border-dashed border-border px-4 py-6 text-center text-[14px] text-muted-foreground">Nenhuma oferta ainda. Escolha um produto abaixo.</p>
+            )}
 
- {isNew ? (
- <EmptyCard icon={Layers} message="Salve o produto primeiro para configurar Order Bumps." />
- ) : (
- <>
- {orderBumps.length > 0 ? (
- <div className="space-y-2">
- {orderBumps.map((bump, i: number) => {
- const prod = allProducts.find((p) => p.id === bump.bump_product_id);
- return (
- <motion.div
- key={bump.id}
- initial={{ opacity: 0, x: -10 }}
- animate={{ opacity: 1, x: 0 }}
- transition={{ delay: i * 0.05 }}
- className="flex items-center justify-between rounded-[12px] border border-border bg-card p-4 relative overflow-hidden group/bump hover:border-primary/20 transition-all"
- >
- <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-warning" />
- <div className="flex items-center gap-3 min-w-0 flex-1 pl-1">
- {prod?.image_url ? (
- <img src={prod.image_url} alt={prod.name} className="h-11 w-11 rounded-xl object-cover shrink-0" />
- ) : (
- <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
- <Package className="h-4 w-4 text-primary" />
- </div>
- )}
- <div className="min-w-0">
- <p className="text-sm font-display font-bold truncate">{prod?.name || "Produto"}</p>
- <p className="text-xs text-primary font-numbers font-black">R$ {Number(prod?.price || 0).toFixed(2)}</p>
- </div>
- </div>
- <Button variant="ghost" size="sm" onClick={() => removeBump(bump.id)} className="text-destructive hover:text-destructive h-9 w-9 p-0 rounded-xl opacity-50 group-hover/bump:opacity-100 transition-opacity">
- <Trash2 className="h-4 w-4" />
- </Button>
- </motion.div>
- );
- })}
- </div>
- ) : allProducts.length === 0 ? (
-  <div className="rounded-[12px] border border-dashed border-border bg-card/50 p-8 text-center space-y-3">
-    <div className="mx-auto h-12 w-12 rounded-[12px] bg-warning/10 flex items-center justify-center">
-      <Layers className="h-5 w-5 text-warning" />
+            {availableForBump.length > 0 && orderBumps.length < 5 && (
+              <div className="mt-6">
+                <FieldLabel htmlFor="bump-select">Adicionar produto</FieldLabel>
+                <div className="flex flex-col gap-2.5 sm:flex-row">
+                  <Select value={selectedBumpProduct} onValueChange={setSelectedBumpProduct}>
+                    <SelectTrigger id="bump-select" className={cn(selectTriggerClass, "min-w-0 flex-1")}><SelectValue placeholder="Escolha um dos seus produtos" /></SelectTrigger>
+                    <SelectContent>
+                      {availableForBump.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>{p.name} <span className="text-muted-foreground">{formatCurrency(Number(p.price))}</span></SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <button type="button" onClick={addBump} disabled={!selectedBumpProduct} className="vp-cta"><Plus className="h-4 w-4" /> Adicionar</button>
+                </div>
+                <FieldHint>Só aparecem produtos seus que estão ativos.</FieldHint>
+              </div>
+            )}
+          </StudioPanel>
+        </>
+      )}
     </div>
-    <p className="text-sm font-display font-bold text-foreground">Sem produtos para oferecer</p>
-    <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
-      Order bumps são produtos adicionais que aparecem no checkout. Você precisa ter pelo menos mais um produto ativo para configurar.
-    </p>
-    <Button onClick={() => window.open("/vendas/produtos/novo", "_blank")} variant="outline" className="gap-1.5 rounded-xl mt-2">
-      <Plus className="h-4 w-4" /> Criar outro produto
-    </Button>
-  </div>
- ) : (
- <EmptyCard icon={Layers} message="Nenhum bump adicionado. Selecione um produto abaixo." />
- )}
-
- {availableForBump.length > 0 && orderBumps.length < 5 && (
- <div className="flex gap-2">
- <Select value={selectedBumpProduct} onValueChange={setSelectedBumpProduct}>
- <SelectTrigger className="flex-1 h-10 bg-secondary border-border"><SelectValue placeholder="Selecione um produto..." /></SelectTrigger>
- <SelectContent>
- {availableForBump.map((p) => (
- <SelectItem key={p.id} value={p.id}>{p.name} — R$ {Number(p.price).toFixed(2)}</SelectItem>
- ))}
- </SelectContent>
- </Select>
- <Button onClick={addBump} disabled={!selectedBumpProduct} className="gap-1.5 rounded-xl"><Plus className="h-4 w-4" /> Adicionar</Button>
- </div>
- )}
- {allProducts.length > 0 && <p className="text-xs text-muted-foreground/40 text-right font-numbers tabular-nums">{orderBumps.length}/5</p>}
-
- </>
- )}
- </div>
- );
+  );
 }
 
 type TabUpsellProps = {
-  isNew: boolean;
   name: string; price: string; imagePreview: string | null;
-  hasCustomThankYou: boolean; setHasCustomThankYou: BoolS;
-  thankYouUrl: string; setThankYouUrl: StrS;
-  sendConfirmationEmail: boolean; setSendConfirmationEmail: BoolS;
   emailTiming: string; setEmailTiming: StrS;
   upsellEnabled: boolean; setUpsellEnabled: BoolS;
   upsellType: string; setUpsellType: StrS;
@@ -1245,327 +1250,164 @@ type TabUpsellProps = {
   downsellDelay: string; setDownsellDelay: StrS;
 };
 
-function TabUpsell({ isNew, name, price, imagePreview, hasCustomThankYou, setHasCustomThankYou, thankYouUrl, setThankYouUrl, sendConfirmationEmail, setSendConfirmationEmail, emailTiming, setEmailTiming,
+function TabUpsell({ name, price, imagePreview, emailTiming, setEmailTiming,
   upsellEnabled, setUpsellEnabled, upsellType, setUpsellType, upsellName, setUpsellName, upsellPrice, setUpsellPrice, upsellDiscount, setUpsellDiscount, upsellUrl, setUpsellUrl,
   downsellEnabled, setDownsellEnabled, downsellUrl, setDownsellUrl, downsellPrice, setDownsellPrice, downsellDelay, setDownsellDelay }: TabUpsellProps) {
 
- const mainPrice = Number(price || 0);
- const upPrice = Number(upsellPrice || 0);
- const downPrice = Number(downsellPrice || 0);
+  const mainPrice = priceToNumber(price);
+  const upPrice = Number(String(upsellPrice || 0).replace(",", ".")) || 0;
+  const downPrice = Number(String(downsellPrice || 0).replace(",", ".")) || 0;
+  const isConfigured = upsellEnabled && upsellType !== "none";
 
- const isConfigured = upsellEnabled && upsellType !== "none";
+  return (
+    <div className="space-y-5">
+      <StudioHeading title="Upsell e downsell" subtitle="Ofertas mostradas depois que o comprador paga." />
 
- // Projected AOV: assume 18% accept upsell, 12% of refusers accept downsell
- const projectedAov = mainPrice + (isConfigured ? upPrice * 0.18 : 0) + (isConfigured && downsellEnabled ? downPrice * 0.12 * 0.82 : 0);
- const upliftPct = mainPrice > 0 ? Math.round(((projectedAov - mainPrice) / mainPrice) * 100) : 0;
+      <Notice tone="warn" icon={<Rocket className="h-4 w-4" />} title="Ainda não aparece para o comprador">
+        As ofertas pós-pagamento estão em desenvolvimento. O que você configurar aqui fica salvo e entra no ar quando o recurso for liberado.
+      </Notice>
 
- return (
- <div className="space-y-6">
- <SectionHeader icon={ArrowUpRight} title="Funil pós-pagamento" subtitle="Defina a sequência de ofertas exibidas após a compra inicial." />
+      <GroupBox>
+        <FormToggleRow icon={<ArrowUpRight className="h-[18px] w-[18px]" />} title="Ativar upsell pós-pagamento" description="Desligado, o comprador vai direto para a página de obrigado.">
+          <Switch checked={upsellEnabled} onCheckedChange={setUpsellEnabled} aria-label="Ativar upsell pós-pagamento" />
+        </FormToggleRow>
+      </GroupBox>
 
- {/* Master toggle */}
- <div className="rounded-[12px] border border-border bg-card p-4 flex items-center justify-between gap-4">
-   <div className="flex items-start gap-3 min-w-0">
-     <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0", upsellEnabled ? "bg-primary/10 text-primary" : "bg-muted/30 text-muted-foreground/50")}>
-       <ArrowUpRight className="h-4 w-4" />
-     </div>
-     <div className="min-w-0">
-       <p className="text-sm font-display font-bold text-foreground">Ativar upsell pós-pagamento</p>
-       <p className="text-xs text-muted-foreground/70 mt-0.5">Quando desligado, o comprador vai direto para a página de obrigado.</p>
-     </div>
-   </div>
-   <Switch checked={upsellEnabled} onCheckedChange={setUpsellEnabled} />
- </div>
+      {upsellEnabled && (
+        <>
+          <StudioPanel title="Jornada do comprador" subtitle="A sequência em que as ofertas aparecem.">
+            <ol className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-[repeat(4,minmax(0,1fr))]">
+              <FunnelStep step={1} label="Compra" title={name || "Seu produto"} price={mainPrice} thumb={imagePreview} anchor />
+              <FunnelStep step={2} label={isConfigured ? "Upsell" : "Sem upsell"} title={isConfigured ? (upsellName || "Oferta complementar") : "Vai direto à confirmação"} price={isConfigured ? upPrice : undefined} badge={isConfigured && upsellType === "popup" && upsellDiscount ? `-${upsellDiscount}%` : undefined} empty={!isConfigured} />
+              <FunnelStep step={3} label={downsellEnabled ? "Downsell" : "Sem downsell"} title={downsellEnabled ? "Oferta de recuperação" : "Opcional"} price={downsellEnabled ? downPrice : undefined} empty={!downsellEnabled} />
+              <FunnelStep step={4} label="Confirmação" title="Página de obrigado" icon={<Check className="h-4 w-4" />} />
+            </ol>
+          </StudioPanel>
 
- {!upsellEnabled ? (
-   <EmptyCard icon={ArrowUpRight} message="Upsell desativado. Ative acima para configurar o funil." />
- ) : (<>
+          <StudioPanel title="Oferta de upsell" subtitle="Exibida logo depois do pagamento aprovado.">
+            <div role="radiogroup" aria-label="Tipo de upsell" className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-3">
+              {[
+                { value: "none", label: "Nenhum", desc: "Vai direto para a confirmação.", icon: Check },
+                { value: "page", label: "Página externa", desc: "Leva para uma página sua.", icon: ExternalLink },
+                { value: "popup", label: "Popup", desc: "Oferta sobre a página de obrigado.", icon: Sparkles },
+              ].map((opt) => (
+                <OptionCard key={opt.value} selected={upsellType === opt.value} onClick={() => setUpsellType(opt.value)} icon={<opt.icon className="h-[18px] w-[18px]" />} title={opt.label} description={opt.desc} />
+              ))}
+            </div>
 
+            {upsellType === "popup" && (
+              <div className="mt-6 grid gap-5 sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
+                <div>
+                  <FieldLabel htmlFor="upsell-name">Nome da oferta</FieldLabel>
+                  <Input id="upsell-name" value={upsellName} onChange={(e) => setUpsellName(e.target.value)} placeholder="Ex.: Mentoria 1:1 com desconto" className={inputClass} />
+                </div>
+                <div>
+                  <FieldLabel htmlFor="upsell-price">Preço (R$)</FieldLabel>
+                  <Input id="upsell-price" type="number" min="0" step="0.01" inputMode="decimal" value={upsellPrice} onChange={(e) => setUpsellPrice(e.target.value)} placeholder="0,00" className={cn(inputClass, "tabular-nums")} />
+                </div>
+                <div>
+                  <FieldLabel htmlFor="upsell-discount">Desconto (%)</FieldLabel>
+                  <Input id="upsell-discount" type="number" min="0" max="90" value={upsellDiscount} onChange={(e) => setUpsellDiscount(e.target.value)} className={cn(inputClass, "tabular-nums")} />
+                </div>
+              </div>
+            )}
+            {upsellType === "page" && (
+              <div className="mt-6">
+                <FieldLabel htmlFor="upsell-url">Endereço da página de upsell</FieldLabel>
+                <Input id="upsell-url" value={upsellUrl} onChange={(e) => setUpsellUrl(e.target.value)} placeholder="https://seusite.com/oferta-especial" type="url" className={inputClass} />
+                <FieldHint>O comprador é levado para esse endereço depois que o pagamento é aprovado.</FieldHint>
+              </div>
+            )}
+          </StudioPanel>
 
- {/* ═══ FUNNEL FLOW VISUAL ═══ */}
- <div className="rounded-[12px] border border-border bg-card overflow-hidden">
- <div className="px-5 py-4 border-b border-border flex items-center justify-between">
- <div>
- <p className="text-[11px] text-muted-foreground/70 font-display font-medium">Sequência do funil</p>
- <p className="text-[15px] font-display font-black text-foreground mt-0.5 tracking-[-0.02em]">Jornada do comprador</p>
- </div>
- <div className="text-right">
- <p className="text-[11px] text-muted-foreground/60 font-medium">Ticket projetado</p>
- <p className="text-base font-numbers font-black text-success tabular-nums">
- R$ {projectedAov.toFixed(2)}
- {upliftPct > 0 && <span className="text-[10px] font-display font-bold text-success/80 ml-1.5">+{upliftPct}%</span>}
- </p>
- </div>
- </div>
+          <StudioPanel
+            title="Oferta de recuperação (downsell)"
+            subtitle="Só aparece se o comprador recusar o upsell."
+            aside={<Switch checked={downsellEnabled} onCheckedChange={setDownsellEnabled} aria-label="Ativar downsell" />}
+          >
+            {downsellEnabled ? (
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
+                <div>
+                  <FieldLabel htmlFor="downsell-url">Endereço da oferta</FieldLabel>
+                  <Input id="downsell-url" value={downsellUrl} onChange={(e) => setDownsellUrl(e.target.value)} placeholder="https://..." type="url" className={inputClass} />
+                </div>
+                <div>
+                  <FieldLabel htmlFor="downsell-price">Preço reduzido (R$)</FieldLabel>
+                  <Input id="downsell-price" type="number" min="0" step="0.01" inputMode="decimal" value={downsellPrice} onChange={(e) => setDownsellPrice(e.target.value)} placeholder="0,00" className={cn(inputClass, "tabular-nums")} />
+                </div>
+                <div>
+                  <FieldLabel htmlFor="downsell-delay">Atraso (segundos)</FieldLabel>
+                  <Input id="downsell-delay" type="number" min="0" max="30" value={downsellDelay} onChange={(e) => setDownsellDelay(e.target.value)} className={cn(inputClass, "tabular-nums")} />
+                </div>
+              </div>
+            ) : (
+              <p className="text-[14px] text-muted-foreground">Desligado. Ative para oferecer um preço menor a quem recusar o upsell.</p>
+            )}
+          </StudioPanel>
+        </>
+      )}
 
- <div className="p-5 grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-3 md:gap-2 items-stretch">
- <FunnelStep
- step="01"
- status="active"
- label="Produto principal"
- title={name || "Seu produto"}
- price={mainPrice}
- thumb={imagePreview}
- anchor
- />
- <FunnelArrow />
- <FunnelStep
- step="02"
- status={isConfigured ? "active" : "empty"}
- label={isConfigured ? "Upsell" : "Sem upsell"}
- title={isConfigured ? (upsellName || "Oferta complementar") : "Configure abaixo"}
- price={isConfigured ? upPrice : undefined}
- badge={isConfigured && upsellDiscount ? `-${upsellDiscount}%` : undefined}
- />
- <FunnelArrow />
- <FunnelStep
- step="03"
- status={downsellEnabled ? "active" : "empty"}
- label={downsellEnabled ? "Downsell" : "Sem downsell"}
- title={downsellEnabled ? "Oferta de recuperação" : "Opcional"}
- price={downsellEnabled ? downPrice : undefined}
- muted
- />
- <FunnelArrow />
- <FunnelStep
- step="04"
- status="active"
- label="Confirmação"
- title="Página de obrigado"
- icon={Check}
- />
- </div>
- </div>
-
- {/* ═══ STEP 02 EDITOR — UPSELL TYPE ═══ */}
- <div className="rounded-[12px] border border-border bg-card">
- <div className="px-5 py-3.5 border-b border-border flex items-center gap-3">
- <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center text-[10px] font-numbers font-black text-primary tabular-nums">02</div>
- <div className="flex-1 min-w-0">
- <p className="text-[15px] font-display font-black text-foreground tracking-[-0.02em]">Configurar oferta de upsell</p>
- <p className="text-xs text-muted-foreground/70 mt-0.5">Exibida imediatamente após o pagamento aprovado.</p>
- </div>
- </div>
-
- <div className="p-5 space-y-5">
- <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
- {[
- { value: "none", label: "Nenhum", desc: "Ir direto para confirmação", icon: Check },
- { value: "page", label: "Página externa", desc: "Redirecionar para URL própria", icon: ExternalLink },
- { value: "popup", label: "Popup nativo", desc: "Oferta sobre página de obrigado", icon: Sparkles },
- ].map((opt) => {
- const selected = upsellType === opt.value;
- return (
- <button
- key={opt.value}
- type="button"
- onClick={() => { setUpsellType(opt.value); if (opt.value !== "none") setHasCustomThankYou(opt.value === "page"); }}
- className={cn(
- "group relative flex items-start gap-3 p-3.5 rounded-xl border text-left transition-colors",
- selected ? "bg-primary/5 border-primary/40" : "bg-card border-border hover:border-border/80"
- )}
- >
- {selected && <div className="absolute left-0 top-3 bottom-3 w-[2px] rounded-full bg-primary" />}
- <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-colors", selected ? "bg-primary/10 text-primary" : "bg-muted/30 text-muted-foreground/50")}>
- <opt.icon className="h-4 w-4" />
- </div>
- <div className="min-w-0">
- <p className={cn("text-[13px] font-display font-bold leading-tight", selected ? "text-foreground" : "text-foreground/80")}>{opt.label}</p>
- <p className="text-[11px] text-muted-foreground/60 mt-1 leading-snug">{opt.desc}</p>
- </div>
- </button>
- );
- })}
- </div>
-
- <AnimatePresence initial={false}>
- {upsellType === "popup" && (
- <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
- <div className="grid grid-cols-1 sm:grid-cols-[1.4fr_1fr_1fr] gap-3 pt-1">
- <div className="space-y-1.5">
- <EditorLabel>Nome da oferta</EditorLabel>
- <Input value={upsellName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUpsellName(e.target.value)} placeholder="Ex: Mentoria 1:1 com 30% OFF" className="h-10 bg-secondary border-border" />
- </div>
- <div className="space-y-1.5">
- <EditorLabel>Preço (R$)</EditorLabel>
- <Input type="number" value={upsellPrice} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUpsellPrice(e.target.value)} placeholder="0,00" className="h-10 bg-secondary border-border font-numbers tabular-nums" />
- </div>
- <div className="space-y-1.5">
- <EditorLabel>Desconto (%)</EditorLabel>
- <Input type="number" min="0" max="90" value={upsellDiscount} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUpsellDiscount(e.target.value)} className="h-10 bg-secondary border-border font-numbers tabular-nums" />
- </div>
- </div>
- </motion.div>
- )}
- {upsellType === "page" && (
- <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
- <div className="space-y-1.5 pt-1">
- <EditorLabel>URL da página de upsell</EditorLabel>
- <Input value={thankYouUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setThankYouUrl(e.target.value)} placeholder="https://seusite.com/oferta-especial" type="url" className="h-10 bg-secondary border-border" />
- <p className="text-[11px] text-muted-foreground/60">O comprador será redirecionado após pagamento aprovado.</p>
- </div>
- </motion.div>
- )}
- </AnimatePresence>
- </div>
- </div>
-
- {/* ═══ STEP 03 EDITOR — DOWNSELL ═══ */}
- <div className={cn("rounded-[12px] border bg-card transition-colors", downsellEnabled ? "border-border" : "border-border/60")}>
- <div className="px-5 py-3.5 border-b border-border flex items-center gap-3">
- <div className={cn("h-6 w-6 rounded-md flex items-center justify-center text-[10px] font-numbers font-black tabular-nums", downsellEnabled ? "bg-info/10 text-info" : "bg-muted/40 text-muted-foreground/50")}>03</div>
- <div className="flex-1 min-w-0">
- <p className="text-[15px] font-display font-black text-foreground tracking-[-0.02em]">Oferta de recuperação (Downsell)</p>
- <p className="text-xs text-muted-foreground/70 mt-0.5">Acionada apenas se o cliente recusar o upsell.</p>
- </div>
- <Switch checked={downsellEnabled} onCheckedChange={setDownsellEnabled} />
- </div>
-
- <AnimatePresence initial={false}>
- {downsellEnabled && (
- <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
- <div className="p-5 grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr] gap-3">
- <div className="space-y-1.5">
- <EditorLabel>URL ou identificador da oferta</EditorLabel>
- <Input value={downsellUrl} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDownsellUrl(e.target.value)} placeholder="https://..." type="url" className="h-10 bg-secondary border-border" />
- </div>
- <div className="space-y-1.5">
- <EditorLabel>Preço reduzido (R$)</EditorLabel>
- <Input type="number" value={downsellPrice} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDownsellPrice(e.target.value)} placeholder="0,00" className="h-10 bg-secondary border-border font-numbers tabular-nums" />
- </div>
- <div className="space-y-1.5">
- <EditorLabel>Delay (s)</EditorLabel>
- <Input type="number" min="0" max="30" value={downsellDelay} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDownsellDelay(e.target.value)} className="h-10 bg-secondary border-border font-numbers tabular-nums text-center" />
- </div>
- </div>
- </motion.div>
- )}
- </AnimatePresence>
- </div>
-
- {/* ═══ STEP 04 EDITOR — CONFIRMATION EMAIL ═══ */}
- <div className="rounded-[12px] border border-border bg-card">
- <div className="px-5 py-3.5 border-b border-border flex items-center gap-3">
- <div className="h-6 w-6 rounded-md bg-success/10 flex items-center justify-center text-[10px] font-numbers font-black text-success tabular-nums">04</div>
- <div className="flex-1 min-w-0">
- <p className="text-[15px] font-display font-black text-foreground tracking-[-0.02em]">E-mail de confirmação</p>
- <p className="text-xs text-muted-foreground/70 mt-0.5">Define quando o acesso é entregue ao comprador.</p>
- </div>
- <Switch checked={sendConfirmationEmail} onCheckedChange={setSendConfirmationEmail} />
- </div>
-
- <AnimatePresence initial={false}>
- {sendConfirmationEmail && (
- <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
- <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-2">
- {[
- { val: "immediate", label: "Enviar imediatamente", desc: "Logo após pagamento aprovado", icon: Zap },
- { val: "after_upsell", label: "Após o funil completo", desc: "Aguarda fim de upsell/downsell", icon: Clock },
- ].map(opt => {
- const selected = emailTiming === opt.val;
- return (
- <button
- key={opt.val}
- type="button"
- onClick={() => setEmailTiming(opt.val)}
- className={cn(
- "relative flex items-start gap-3 p-3.5 rounded-xl border text-left transition-colors",
- selected ? "bg-success/5 border-success/40" : "bg-card border-border hover:border-border/80"
- )}
- >
- {selected && <div className="absolute left-0 top-3 bottom-3 w-[2px] rounded-full bg-success" />}
- <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", selected ? "bg-success/10 text-success" : "bg-muted/30 text-muted-foreground/50")}>
- <opt.icon className="h-4 w-4" />
- </div>
- <div className="min-w-0">
- <p className="text-[13px] font-display font-bold leading-tight text-foreground">{opt.label}</p>
- <p className="text-[11px] text-muted-foreground/60 mt-1 leading-snug">{opt.desc}</p>
- </div>
- </button>
- );
- })}
- </div>
- </motion.div>
- )}
- </AnimatePresence>
- </div>
- </>)}
- </div>
- );
+      <StudioPanel title="Quando enviar o acesso" subtitle="Define o momento do e-mail de confirmação com o acesso ao comprador.">
+        <div role="radiogroup" aria-label="Momento do e-mail de confirmação" className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
+          {[
+            { val: "immediate", label: "Logo após o pagamento", desc: "Assim que o pagamento é aprovado.", icon: Zap },
+            { val: "after_upsell", label: "Depois das ofertas", desc: "Espera o fim do upsell e do downsell.", icon: Clock },
+          ].map((opt) => (
+            <OptionCard key={opt.val} selected={emailTiming === opt.val} onClick={() => setEmailTiming(opt.val)} icon={<opt.icon className="h-[18px] w-[18px]" />} title={opt.label} description={opt.desc} />
+          ))}
+        </div>
+      </StudioPanel>
+    </div>
+  );
 }
-
 
 /* ───── Funnel sub-primitives ───── */
 type FunnelStepProps = {
-  step: number | string;
-  status: string;
+  step: number;
   label: string;
   title: string;
-  price?: string | number;
+  price?: number;
   thumb?: string | null;
   badge?: string;
-  icon?: React.ComponentType<{ className?: string }>;
-  anchor?: boolean | string;
-  muted?: boolean;
+  icon?: React.ReactNode;
+  anchor?: boolean;
+  empty?: boolean;
 };
 
-function FunnelStep({ step, status, label, title, price, thumb, badge, icon: Icon, anchor, muted }: FunnelStepProps) {
- const isEmpty = status === "empty";
- return (
- <div className={cn(
- "relative rounded-xl border p-3.5 flex flex-col gap-2 min-h-[112px]",
- anchor ? "bg-primary/[0.04] border-primary/30" : isEmpty ? "bg-muted/10 border-dashed border-border/70" : "bg-card border-border"
- )}>
- <div className="flex items-center justify-between">
- <span className={cn(
- "text-[10px] font-numbers font-black tabular-nums tracking-wider",
- anchor ? "text-primary" : isEmpty ? "text-muted-foreground/40" : "text-muted-foreground/70"
- )}>{step}</span>
- {badge && (
- <span className="text-[9px] font-display font-black px-1.5 py-0.5 rounded-md bg-success/10 text-success tabular-nums">{badge}</span>
- )}
- </div>
- <div className="flex items-center gap-2.5 min-w-0">
- {thumb ? (
- <img src={thumb} alt="" className="h-9 w-9 rounded-lg object-cover border border-border shrink-0" />
- ) : Icon ? (
- <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", isEmpty ? "bg-muted/20 text-muted-foreground/40" : "bg-success/10 text-success")}>
- <Icon className="h-4 w-4" />
- </div>
- ) : (
- <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", isEmpty ? "bg-muted/20 text-muted-foreground/40" : "bg-muted/30 text-muted-foreground/60")}>
- <Package className="h-4 w-4" />
- </div>
- )}
- <div className="min-w-0 flex-1">
- <p className={cn("text-[11px] font-display font-medium leading-tight", isEmpty ? "text-muted-foreground/50" : "text-muted-foreground/70")}>{label}</p>
- <p className={cn("text-[13px] font-display font-bold truncate leading-tight mt-0.5", isEmpty ? "text-muted-foreground/60" : "text-foreground")}>{title}</p>
- </div>
- </div>
- {typeof price === "number" && price > 0 && (
- <p className={cn("text-xs font-numbers font-black tabular-nums mt-auto", anchor ? "text-primary" : "text-foreground/80")}>R$ {price.toFixed(2)}</p>
- )}
- </div>
- );
-}
-
-function FunnelArrow() {
- return (
- <div className="flex md:flex-col items-center justify-center text-muted-foreground/30 py-1 md:py-0">
- <ArrowUpRight className="h-3.5 w-3.5 rotate-45 md:rotate-0" />
- </div>
- );
+function FunnelStep({ step, label, title, price, thumb, badge, icon, anchor, empty }: FunnelStepProps) {
+  return (
+    <li className={cn(
+      "relative flex min-h-[116px] flex-col gap-2.5 rounded-[16px] border p-4",
+      anchor ? "border-primary/50 bg-accent" : empty ? "border-dashed border-border bg-muted/40" : "border-border bg-card",
+    )}>
+      <div className="flex items-center justify-between gap-2">
+        <span className={cn("grid h-6 w-6 place-items-center rounded-full text-[12px] font-bold tabular-nums", anchor ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>{step}</span>
+        {badge && <span className="rounded-full bg-accent px-2 py-0.5 text-[12px] font-bold tabular-nums text-accent-foreground">{badge}</span>}
+      </div>
+      <div className="flex min-w-0 items-center gap-2.5">
+        {thumb ? (
+          <img src={thumb} alt="" className="h-10 w-10 shrink-0 rounded-[12px] border border-border object-cover" />
+        ) : (
+          <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-[12px]", empty ? "bg-muted text-muted-foreground" : "bg-accent text-accent-foreground")}>{icon ?? <Package className="h-4 w-4" />}</span>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="text-[12.5px] leading-tight text-muted-foreground">{label}</p>
+          <p className={cn("mt-0.5 line-clamp-2 break-words text-[14px] font-bold leading-tight", empty ? "text-muted-foreground" : "text-foreground")}>{title}</p>
+        </div>
+      </div>
+      {typeof price === "number" && price > 0 && <p className="mt-auto text-[13.5px] font-bold tabular-nums text-foreground">{formatCurrency(price)}</p>}
+    </li>
+  );
 }
 
 type TabCheckoutProps = {
   isNew: boolean;
-  name: string; price: string; productId?: string;
+  name: string; price: string; imagePreview: string | null; productId?: string;
   buttonColor: string; setButtonColor: StrS;
   timerEnabled: boolean; setTimerEnabled: BoolS;
   timerMinutes: string; setTimerMinutes: StrS;
   socialProof: boolean; setSocialProof: BoolS;
   guaranteeEnabled: boolean; setGuaranteeEnabled: BoolS;
-  warrantyDays: string;
   bannerDesktopPreview: string; bannerMobilePreview: string;
   desktopBannerRef: RefObject<HTMLInputElement>;
   mobileBannerRef: RefObject<HTMLInputElement>;
@@ -1580,316 +1422,249 @@ type TabCheckoutProps = {
   pixEnabled: boolean; boletoEnabled: boolean; creditCardEnabled: boolean;
 };
 
-function TabCheckout({ isNew, name, price, productId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, warrantyDays, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }: TabCheckoutProps) {
- const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
+function TabCheckout({ isNew, name, price, imagePreview, productId, buttonColor, setButtonColor, timerEnabled, setTimerEnabled, timerMinutes, setTimerMinutes, socialProof, setSocialProof, guaranteeEnabled, setGuaranteeEnabled, bannerDesktopPreview, bannerMobilePreview, desktopBannerRef, mobileBannerRef, handleBannerFile, setBannerDesktopFile, setBannerDesktopPreview, setBannerMobileFile, setBannerMobilePreview, getCheckoutLink, copyLink, navigate, pixEnabled, boletoEnabled, creditCardEnabled }: TabCheckoutProps) {
+  const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
+  const priceValue = priceToNumber(price);
+  const colorValid = HEX_COLOR.test(buttonColor.trim());
+  const shownColor = colorValid ? buttonColor.trim() : "#10b981";
+  const banner = previewDevice === "desktop" ? bannerDesktopPreview : bannerMobilePreview;
 
- return (
- <div className="space-y-6">
- <SectionHeader icon={ShoppingCart} title="Checkout" subtitle="Gerencie e personalize seus checkouts." />
- {isNew ? (
- <EmptyCard icon={ShoppingCart} message="Salve o produto primeiro para personalizar o checkout." />
- ) : (
- <>
- {/* Checkout Quick Actions Card */}
- <div className="rounded-[12px] border border-border bg-card overflow-hidden relative">
- <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full bg-primary" />
- <div className="p-5 flex items-center justify-between">
- <div className="flex items-center gap-4">
- <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
- <ShoppingCart className="h-5 w-5 text-primary" />
- </div>
- <div>
- <p className="text-[15px] font-display font-black text-foreground">Checkout Padrão</p>
- <p className="text-sm font-numbers font-black text-primary">R$ {Number(price || 0).toFixed(2)}</p>
- </div>
- </div>
- <div className="flex items-center gap-2">
- <Button variant="outline" size="sm" onClick={() => navigate(`/vendas/produtos/${productId}/checkout-builder`)} className="h-9 text-xs gap-1.5 rounded-xl font-display font-bold">
- <Palette className="h-3.5 w-3.5" /> Personalizar
- </Button>
- <Button variant="outline" size="sm" onClick={() => copyLink(getCheckoutLink())} className="h-9 text-xs gap-1.5 rounded-xl font-display font-bold">
- <Copy className="h-3.5 w-3.5" /> Copiar
- </Button>
- <Button variant="outline" size="sm" onClick={() => window.open(getCheckoutLink(), "_blank")} className="h-9 text-xs gap-1.5 rounded-xl font-display font-bold">
- <Eye className="h-3.5 w-3.5" /> Abrir
- </Button>
- </div>
- </div>
- </div>
+  if (isNew) {
+    return (
+      <div className="space-y-5">
+        <StudioHeading title="Checkout" subtitle="A página onde o comprador paga." />
+        <StepEmpty icon={<ShoppingCart className="h-7 w-7" />} title="Crie o produto primeiro">
+          Salve a etapa Geral para personalizar e abrir o checkout deste produto.
+        </StepEmpty>
+      </div>
+    );
+  }
 
- {/* Live Mini Preview */}
- <EditorCard accentColor="bg-primary">
- <div className="flex items-center justify-between mb-3">
- <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2">
- <Eye className="h-4 w-4 text-primary" /> Pré-visualização
- </h3>
- <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-0.5">
- <button
- onClick={() => setPreviewDevice("desktop")}
- className={cn("h-7 w-7 rounded-md flex items-center justify-center transition-all", previewDevice === "desktop" ? "bg-primary/10 text-primary" : "text-muted-foreground/40 hover:text-muted-foreground")}
- >
- <Monitor className="h-3.5 w-3.5" />
- </button>
- <button
- onClick={() => setPreviewDevice("mobile")}
- className={cn("h-7 w-7 rounded-md flex items-center justify-center transition-all", previewDevice === "mobile" ? "bg-primary/10 text-primary" : "text-muted-foreground/40 hover:text-muted-foreground")}
- >
- <Smartphone className="h-3.5 w-3.5" />
- </button>
- </div>
- </div>
+  return (
+    <div className="space-y-5">
+      <StudioHeading title="Checkout" subtitle="Cor, timer, banners e selos da página onde o comprador paga." />
 
- {/* Mini checkout preview */}
- <div className={cn(
- "mx-auto rounded-xl border border-border bg-background overflow-hidden transition-all duration-300",
- previewDevice === "mobile" ? "max-w-[320px]" : "max-w-full"
- )}>
- {/* Banner area */}
- {(previewDevice === "desktop" ? bannerDesktopPreview : bannerMobilePreview) && (
- <img src={previewDevice === "desktop" ? bannerDesktopPreview : bannerMobilePreview} alt="" className="w-full h-20 object-cover" />
- )}
- <div className="p-4 space-y-3">
- {/* Timer preview */}
- {timerEnabled && (
- <div className="flex items-center justify-center gap-2 rounded-lg bg-destructive/10 border border-destructive/15 py-1.5 px-3">
- <Timer className="h-3 w-3 text-destructive" />
- <span className="text-[10px] font-numbers font-bold text-destructive">{timerMinutes}:00</span>
- <span className="text-[9px] text-destructive/60">restantes</span>
- </div>
- )}
+      <div className="vp-sheet flex flex-wrap items-center gap-4 p-5 sm:px-7">
+        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-accent text-accent-foreground"><ShoppingCart className="h-5 w-5" /></span>
+        <div className="min-w-0 flex-1 basis-[180px]">
+          <p className="text-[16px] font-bold leading-tight text-foreground">Checkout padrão</p>
+          <p className="mt-0.5 text-[14px] font-bold tabular-nums vp-green-ink">{formatCurrency(priceValue)}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button type="button" onClick={() => navigate(`/vendas/produtos/${productId}/checkout-builder`)} className="vp-cta"><Palette className="h-4 w-4" /> Abrir o construtor</button>
+          <button type="button" onClick={() => copyLink(getCheckoutLink())} className="vp-ghost"><Copy className="h-4 w-4" /> Copiar link</button>
+          <button type="button" onClick={() => window.open(getCheckoutLink(), "_blank")} className="vp-ghost"><Eye className="h-4 w-4" /> Abrir</button>
+        </div>
+      </div>
 
- {/* Product */}
- <div className="flex items-center gap-3">
- <div className="h-10 w-10 rounded-lg bg-muted/10 flex items-center justify-center shrink-0 border border-border">
- <Package className="h-4 w-4 text-muted-foreground/30" />
- </div>
- <div className="flex-1 min-w-0">
- <p className="text-xs font-display font-bold truncate text-foreground">{name || "Produto"}</p>
- <p className="text-xs font-numbers font-black text-primary">R$ {Number(price || 0).toFixed(2)}</p>
- </div>
- </div>
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="min-w-0 space-y-5">
+          <StudioPanel title="Cor do botão de compra">
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="relative h-12 w-12 shrink-0 cursor-pointer overflow-hidden rounded-full border border-border" title="Escolher cor">
+                <span className="sr-only">Escolher a cor do botão</span>
+                <input type="color" value={shownColor} onChange={(e) => setButtonColor(e.target.value)} className="absolute -inset-2 h-[calc(100%+16px)] w-[calc(100%+16px)] cursor-pointer border-0 bg-transparent p-0" />
+              </label>
+              <div className="w-[140px]">
+                <Input value={buttonColor} onChange={(e) => setButtonColor(e.target.value)} aria-label="Código da cor" aria-invalid={!colorValid} maxLength={7} spellCheck={false} className={cn(inputClass, "font-mono uppercase")} />
+              </div>
+              <span className="inline-flex h-12 items-center rounded-full px-7 text-[14.5px] font-bold text-white" style={{ backgroundColor: shownColor }}>Comprar agora</span>
+            </div>
+            {!colorValid && <FieldHint className="text-destructive">Use o formato #10b981 (um # e 6 letras ou números).</FieldHint>}
+            <div className="mt-5 flex flex-wrap items-center gap-2.5" role="group" aria-label="Cores sugeridas">
+              <span className="mr-1 text-[13px] text-muted-foreground">Sugestões</span>
+              {BUTTON_PRESETS.map((c) => (
+                <button key={c} type="button" onClick={() => setButtonColor(c)} aria-label={`Usar a cor ${c}`} aria-pressed={buttonColor.toLowerCase() === c}
+                  className={cn("h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none", buttonColor.toLowerCase() === c ? "border-foreground" : "border-transparent ring-1 ring-border")}
+                  style={{ backgroundColor: c }} />
+              ))}
+            </div>
+          </StudioPanel>
 
- {/* Payment methods preview */}
- <div className="flex items-center gap-2">
- {pixEnabled && <span className="text-[9px] px-2 py-0.5 rounded bg-success/10 text-success border border-success/20 font-display font-bold">PIX</span>}
- {creditCardEnabled && <span className="text-[9px] px-2 py-0.5 rounded bg-info/10 text-info border border-info/20 font-display font-bold">Cartão</span>}
- {boletoEnabled && <span className="text-[9px] px-2 py-0.5 rounded bg-warning/10 text-warning border border-warning/20 font-display font-bold">Boleto</span>}
- </div>
+          <StudioPanel title="Elementos de conversão">
+            <GroupBox>
+              <FormToggleRow icon={<Timer className="h-[18px] w-[18px]" />} title="Timer de urgência" description="Contagem regressiva no checkout.">
+                <div className="flex items-center gap-3">
+                  {timerEnabled && (
+                    <div className="flex items-center gap-2">
+                      <Input type="number" min="1" max="60" value={timerMinutes} onChange={(e) => setTimerMinutes(e.target.value)} aria-label="Minutos do timer" className={cn(inputClass, "!h-10 !w-[76px] !px-3 text-center tabular-nums")} />
+                      <span className="text-[13px] text-muted-foreground">min</span>
+                    </div>
+                  )}
+                  <Switch checked={timerEnabled} onCheckedChange={setTimerEnabled} aria-label="Ativar timer de urgência" />
+                </div>
+              </FormToggleRow>
+              <FormToggleRow icon={<Users className="h-[18px] w-[18px]" />} title="Prova social" description="Mostra quantas pessoas compraram."><Switch checked={socialProof} onCheckedChange={setSocialProof} aria-label="Ativar prova social" /></FormToggleRow>
+              <FormToggleRow icon={<Shield className="h-[18px] w-[18px]" />} title="Selo de garantia" description={`Garantia de ${GUARANTEE_DAYS} dias no checkout.`}><Switch checked={guaranteeEnabled} onCheckedChange={setGuaranteeEnabled} aria-label="Ativar selo de garantia" /></FormToggleRow>
+            </GroupBox>
+          </StudioPanel>
 
- {/* Social proof */}
- {socialProof && (
- <p className="text-[9px] text-muted-foreground/50 flex items-center gap-1">
- <Users className="h-2.5 w-2.5" /> 127 pessoas compraram recentemente
- </p>
- )}
+          <StudioPanel title="Banners do checkout" subtitle="Aparecem no topo da página de pagamento.">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2">
+              <BannerUpload label="Banner no computador" sublabel="Tamanho ideal: 1200×200 px" preview={bannerDesktopPreview} inputRef={desktopBannerRef} onFile={(e) => handleBannerFile(e, "desktop")} onClear={() => { setBannerDesktopFile(null); setBannerDesktopPreview(""); if (desktopBannerRef.current) desktopBannerRef.current.value = ""; }} />
+              <BannerUpload label="Banner no celular" sublabel="Tamanho ideal: 600×200 px" preview={bannerMobilePreview} inputRef={mobileBannerRef} onFile={(e) => handleBannerFile(e, "mobile")} onClear={() => { setBannerMobileFile(null); setBannerMobilePreview(""); if (mobileBannerRef.current) mobileBannerRef.current.value = ""; }} />
+            </div>
+          </StudioPanel>
+        </div>
 
- {/* CTA Button preview */}
- <div className="rounded-lg py-2.5 text-center text-xs font-display font-black text-primary-foreground " style={{ backgroundColor: buttonColor }}>
- Comprar Agora
- </div>
-
- {/* Guarantee badge */}
- {guaranteeEnabled && (
- <div className="flex items-center justify-center gap-1.5 py-1.5">
- <Shield className="h-3 w-3 text-success/50" />
- <span className="text-[9px] text-muted-foreground/50 font-display">Garantia de {warrantyDays} dias</span>
- </div>
- )}
- </div>
- </div>
- </EditorCard>
-
- {/* Visual customization */}
- <EditorCard accentColor="bg-info">
- <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2">
- <Palette className="h-4 w-4 text-info" /> Personalização visual
- </h3>
-
- <div className="space-y-2">
- <EditorLabel icon={Palette}>Cor do botão de compra</EditorLabel>
- <div className="flex items-center gap-3">
- <div className="relative">
- <input type="color" value={buttonColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setButtonColor(e.target.value)} className="w-12 h-12 rounded-xl border border-border cursor-pointer" />
- </div>
- <Input value={buttonColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setButtonColor(e.target.value)} className="flex-1 font-mono text-sm bg-secondary border-border h-11" />
- <motion.div whileHover={{ scale: 1.02 }} className="h-11 px-8 rounded-xl flex items-center justify-center text-sm font-display font-black text-primary-foreground cursor-default" style={{ backgroundColor: buttonColor }}>
- Comprar Agora
- </motion.div>
- </div>
- {/* Quick color presets */}
- <div className="flex items-center gap-2 mt-2">
- <span className="text-[11px] font-display font-medium text-muted-foreground/40 mr-1">Cores populares</span>
- {["#10b981", "#3b82f6", "#8b5cf6", "#ef4444", "#f59e0b", "#ec4899", "#06b6d4", "#000000"].map(c => (
- <button
- key={c}
- onClick={() => setButtonColor(c)}
- className={cn("h-6 w-6 rounded-lg border-2 transition-all hover:scale-110", buttonColor === c ? "border-foreground ring-1 ring-foreground/20 scale-110" : "border-border")}
- style={{ backgroundColor: c }}
- />
- ))}
- </div>
- </div>
- </EditorCard>
-
- <EditorCard accentColor="bg-warning">
- <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2">
- <Zap className="h-4 w-4 text-warning" /> Elementos de conversão
- </h3>
- <div className="space-y-2">
- <ToggleRow icon={Timer} label="Timer de urgência" sublabel="Contador regressivo no checkout" checked={timerEnabled} onChange={setTimerEnabled}>
- {timerEnabled && (
- <div className="flex items-center gap-1.5">
- <Input type="number" min="1" max="60" value={timerMinutes} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTimerMinutes(e.target.value)} className="w-16 h-8 text-center text-xs bg-secondary border-border" />
- <span className="text-[10px] text-muted-foreground">min</span>
- </div>
- )}
- </ToggleRow>
- <ToggleRow icon={Users} label="Prova social" sublabel="'X pessoas compraram'" checked={socialProof} onChange={setSocialProof} />
- <ToggleRow icon={Shield} label="Selo de garantia" sublabel={`${warrantyDays} dias no checkout`} checked={guaranteeEnabled} onChange={setGuaranteeEnabled} />
- </div>
- </EditorCard>
-
- {/* Banners */}
- <EditorCard accentColor="bg-success">
- <h3 className="text-[15px] font-display font-black text-foreground flex items-center gap-2">
- <ImagePlus className="h-4 w-4 text-success" /> Banners do Checkout
- </h3>
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
- <BannerUpload label="Banner Desktop" sublabel="Recomendado: 1200×200px" preview={bannerDesktopPreview} inputRef={desktopBannerRef} onFile={(e: React.ChangeEvent<HTMLInputElement>) => handleBannerFile(e, "desktop")} onClear={() => { setBannerDesktopFile(null); setBannerDesktopPreview(""); }} />
- <BannerUpload label="Banner Mobile" sublabel="Recomendado: 600×200px" preview={bannerMobilePreview} inputRef={mobileBannerRef} onFile={(e: React.ChangeEvent<HTMLInputElement>) => handleBannerFile(e, "mobile")} onClear={() => { setBannerMobileFile(null); setBannerMobilePreview(""); }} />
- </div>
- </EditorCard>
- </>
- )}
- </div>
- );
+        <div className="max-lg:order-first lg:sticky lg:top-[104px] lg:self-start">
+          <section className="vp-sheet p-5" aria-label="Pré-visualização do checkout">
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <h3 className="text-[16px] font-bold tracking-[-0.01em] text-foreground">Pré-visualização</h3>
+              <div className="flex items-center gap-1" role="group" aria-label="Tamanho da pré-visualização">
+                <button type="button" onClick={() => setPreviewDevice("desktop")} aria-pressed={previewDevice === "desktop"} aria-label="Computador" className="vp-pill !h-9 !px-3"><Monitor className="h-4 w-4" /></button>
+                <button type="button" onClick={() => setPreviewDevice("mobile")} aria-pressed={previewDevice === "mobile"} aria-label="Celular" className="vp-pill !h-9 !px-3"><Smartphone className="h-4 w-4" /></button>
+              </div>
+            </div>
+            <div className={cn("mx-auto overflow-hidden rounded-[16px] border border-border bg-background transition-[max-width] duration-300 motion-reduce:transition-none", previewDevice === "mobile" ? "max-w-[220px]" : "max-w-full")}>
+              {banner && <img src={banner} alt="" className="h-16 w-full object-cover" />}
+              <div className="space-y-3 p-3.5">
+                {timerEnabled && (
+                  <div className="flex items-center justify-center gap-1.5 rounded-[10px] bg-destructive/10 py-1.5 text-[12px] font-bold tabular-nums text-destructive">
+                    <Timer className="h-3.5 w-3.5" /> {String(parseInt(timerMinutes) || 15).padStart(2, "0")}:00
+                  </div>
+                )}
+                <div className="flex items-center gap-2.5">
+                  {imagePreview ? <img src={imagePreview} alt="" className="h-10 w-10 shrink-0 rounded-[10px] object-cover" /> : <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[10px] bg-muted text-muted-foreground"><Package className="h-4 w-4" /></span>}
+                  <div className="min-w-0">
+                    <p className="truncate text-[13px] font-bold text-foreground">{name || "Seu produto"}</p>
+                    <p className="text-[13px] font-bold tabular-nums vp-green-ink">{formatCurrency(priceValue)}</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {pixEnabled && <span className="rounded-full bg-accent px-2 py-0.5 text-[11.5px] font-bold text-accent-foreground">Pix</span>}
+                  {creditCardEnabled && <span className="rounded-full bg-info/15 px-2 py-0.5 text-[11.5px] font-bold text-info">Cartão</span>}
+                  {boletoEnabled && <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[11.5px] font-bold text-warning">Boleto</span>}
+                </div>
+                {socialProof && <p className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground"><Users className="h-3 w-3" /> Ex.: 127 pessoas compraram</p>}
+                <div className="rounded-full py-2.5 text-center text-[13px] font-bold text-white" style={{ backgroundColor: shownColor }}>Comprar agora</div>
+                {guaranteeEnabled && <p className="flex items-center justify-center gap-1.5 text-[11.5px] text-muted-foreground"><Shield className="h-3 w-3" /> Garantia de {GUARANTEE_DAYS} dias</p>}
+              </div>
+            </div>
+            <FieldHint className="text-center">Aproximação do que o comprador vê.</FieldHint>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 type TabCoProducaoProps = {
   isNew: boolean;
   coProducerEmail: string; setCoProducerEmail: StrS;
   coProductionSplit: string; setCoProductionSplit: StrS;
-  coProductionDuration: string; setCoProductionDuration: StrS;
-  coProductionSalesType: string; setCoProductionSalesType: StrS;
   coProductionsList?: Tables<"co_productions">[];
   inviteCoProducer: () => void | Promise<void>;
   removeCoProducer: (id: string) => void | Promise<void>;
   invitingCoProducer: boolean;
 };
 
-function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionDuration, setCoProductionDuration, coProductionSalesType, setCoProductionSalesType, coProductionsList = [], inviteCoProducer, removeCoProducer, invitingCoProducer }: TabCoProducaoProps) {
- return (
- <div className="space-y-6">
- <SectionHeader icon={Handshake} title="Co-Produção" subtitle="Divida receitas com parceiros de produção." />
+function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductionSplit, setCoProductionSplit, coProductionsList = [], inviteCoProducer, removeCoProducer, invitingCoProducer }: TabCoProducaoProps) {
+  const [removeTarget, setRemoveTarget] = useState<Tables<"co_productions"> | null>(null);
+  const [removing, setRemoving] = useState(false);
+  const split = Math.min(Math.max(Number(coProductionSplit) || 0, 0), 100);
+  const splitInvalid = coProductionSplit !== "" && (Number(coProductionSplit) < 1 || Number(coProductionSplit) > 99);
+  const emailInvalid = coProducerEmail !== "" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(coProducerEmail.trim());
 
- {/* Info card */}
- <EditorCard accentColor="bg-info">
- <div className="flex items-start gap-3">
- <div className="h-10 w-10 rounded-xl bg-info/10 flex items-center justify-center shrink-0">
- <Award className="h-4 w-4 text-info" />
- </div>
- <div>
- <p className="text-sm font-display font-bold text-foreground">Co-produção simplificada</p>
- <p className="text-xs text-muted-foreground/60 mt-1 leading-relaxed">
- Divida a receita automaticamente com seu co-produtor. Cada venda terá o split calculado e creditado em tempo real.
- </p>
- </div>
- </div>
- </EditorCard>
+  const confirmRemove = async () => {
+    if (!removeTarget) return;
+    setRemoving(true);
+    await removeCoProducer(removeTarget.id);
+    setRemoving(false);
+    setRemoveTarget(null);
+  };
 
- {isNew ? (
- <EmptyCard icon={Handshake} message="Salve o produto primeiro para configurar co-produção." />
- ) : (
- <>
- <EditorCard accentColor="bg-info">
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
- <div className="space-y-2">
- <EditorLabel icon={Mail}>E-mail do co-produtor</EditorLabel>
- <Input value={coProducerEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCoProducerEmail(e.target.value)} placeholder="email@coprodutor.com" type="email" className="h-11 bg-secondary border-border" />
- </div>
- <div className="space-y-2">
- <EditorLabel icon={Clock}>Tempo de duração</EditorLabel>
- <Select value={coProductionDuration} onValueChange={setCoProductionDuration}>
- <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
- <SelectContent>
- <SelectItem value="30">30 dias</SelectItem>
- <SelectItem value="60">60 dias</SelectItem>
- <SelectItem value="90">90 dias</SelectItem>
- <SelectItem value="180">180 dias</SelectItem>
- <SelectItem value="365">1 ano</SelectItem>
- <SelectItem value="indefinido">Indefinido</SelectItem>
- </SelectContent>
- </Select>
- </div>
- </div>
- </EditorCard>
+  return (
+    <div className="space-y-5">
+      <StudioHeading title="Co-produção" subtitle="Divida a receita deste produto com um parceiro. Ele precisa aceitar o convite." />
 
- <EditorCard accentColor="bg-primary">
- <EditorLabel icon={Percent}>Comissão do co-produtor</EditorLabel>
- <div className="flex items-center gap-3">
- <Input type="number" min="1" max="99" value={coProductionSplit} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCoProductionSplit(e.target.value)} className="w-24 h-11 text-center font-numbers font-black text-lg bg-secondary border-border" />
- <span className="text-lg font-display font-black text-muted-foreground">%</span>
- <div className="flex-1">
- <div className="h-3 rounded-full bg-muted/20 overflow-hidden flex">
- <motion.div animate={{ width: `${100 - Number(coProductionSplit)}%` }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} className="h-full rounded-l-full bg-primary/60" />
- <motion.div animate={{ width: `${Math.min(Number(coProductionSplit), 100)}%` }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} className="h-full rounded-r-full bg-info/60" />
- </div>
- <div className="flex justify-between mt-1.5">
- <span className="text-[10px] font-display font-bold text-primary/60">Você: {100 - Number(coProductionSplit)}%</span>
- <span className="text-[10px] font-display font-bold text-info/60">Co-produtor: {coProductionSplit}%</span>
- </div>
- </div>
- </div>
+      {isNew ? (
+        <StepEmpty icon={<Handshake className="h-7 w-7" />} title="Crie o produto primeiro">
+          Salve a etapa Geral para convidar um co-produtor.
+        </StepEmpty>
+      ) : (
+        <>
+          <StudioPanel title="Convidar co-produtor">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-6 sm:grid-cols-[minmax(0,1fr)_200px]">
+              <div>
+                <FieldLabel htmlFor="coprod-email">E-mail do co-produtor</FieldLabel>
+                <Input id="coprod-email" value={coProducerEmail} onChange={(e) => setCoProducerEmail(e.target.value)} placeholder="email@coprodutor.com" type="email" aria-invalid={emailInvalid} className={inputClass} />
+                <FieldHint className={emailInvalid ? "text-destructive" : undefined}>{emailInvalid ? "Digite um e-mail válido." : "A pessoa recebe o convite nesse e-mail."}</FieldHint>
+              </div>
+              <div>
+                <FieldLabel htmlFor="coprod-split">Parte do co-produtor (%)</FieldLabel>
+                <div className="relative">
+                  <Input id="coprod-split" type="number" min="1" max="99" value={coProductionSplit} onChange={(e) => setCoProductionSplit(e.target.value)} aria-invalid={splitInvalid} className={cn(inputClass, "!pr-10 tabular-nums")} />
+                  <Percent aria-hidden className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                </div>
+                <FieldHint className={splitInvalid ? "text-destructive" : undefined}>{splitInvalid ? "Use um valor de 1 a 99." : "De 1 a 99."}</FieldHint>
+              </div>
+            </div>
 
- <div className="space-y-2">
- <EditorLabel>Comissões de quais vendas?</EditorLabel>
- <Select value={coProductionSalesType} onValueChange={setCoProductionSalesType}>
- <SelectTrigger className="h-11 bg-secondary border-border"><SelectValue /></SelectTrigger>
- <SelectContent>
- <SelectItem value="all">Todas as vendas</SelectItem>
- <SelectItem value="producer_only">Vendas do produtor</SelectItem>
- <SelectItem value="affiliate_only">Vendas dos afiliados</SelectItem>
- </SelectContent>
- </Select>
- </div>
+            <div className="mt-6">
+              <div className="flex h-3 overflow-hidden rounded-full bg-muted" role="img" aria-label={`Você fica com ${100 - split}% e o co-produtor com ${split}%`}>
+                <div className="h-full bg-primary transition-[width] duration-500 motion-reduce:transition-none" style={{ width: `${100 - split}%` }} />
+                <div className="h-full bg-primary/30 transition-[width] duration-500 motion-reduce:transition-none" style={{ width: `${split}%` }} />
+              </div>
+              <div className="mt-2 flex justify-between text-[13px] font-semibold tabular-nums">
+                <span className="vp-green-ink">Você: {100 - split}%</span>
+                <span className="text-muted-foreground">Co-produtor: {split}%</span>
+              </div>
+            </div>
 
- <Button onClick={inviteCoProducer} className="gap-2 rounded-xl font-display font-bold" disabled={!coProducerEmail || invitingCoProducer}>
- <UserPlus className="h-4 w-4" /> {invitingCoProducer ? "Enviando..." : "Convidar Co-Produtor"}
- </Button>
- </EditorCard>
+            <div className="mt-6 flex justify-end">
+              <button type="button" onClick={inviteCoProducer} disabled={!coProducerEmail.trim() || invitingCoProducer} className="vp-cta">
+                {invitingCoProducer ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                {invitingCoProducer ? "Enviando…" : "Convidar co-produtor"}
+              </button>
+            </div>
+          </StudioPanel>
 
- {coProductionsList.length > 0 ? (
-   <div className="space-y-2">
-     {coProductionsList.map((cp) => (
-       <div key={cp.id} className="flex items-center justify-between rounded-[12px] border border-border bg-card p-4 relative overflow-hidden">
-         <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-full",
-           cp.status === "accepted" ? "bg-success" : cp.status === "rejected" ? "bg-destructive" : "bg-warning")} />
-         <div className="flex items-center gap-3 pl-1 min-w-0">
-           <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
-             cp.status === "accepted" ? "bg-success/10 text-success" : cp.status === "rejected" ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning")}>
-             <Handshake className="h-4 w-4" />
-           </div>
-           <div className="min-w-0">
-             <p className="text-sm font-display font-bold truncate">{cp.co_producer_email}</p>
-             <p className="text-[11px] text-muted-foreground/70 font-numbers">
-               {cp.split_percentage}% • {cp.status === "accepted" ? "Aceito" : cp.status === "rejected" ? "Rejeitado" : "Convite pendente"}
-             </p>
-           </div>
-         </div>
-         <Button variant="ghost" size="sm" onClick={() => removeCoProducer(cp.id)} className="text-destructive hover:text-destructive h-9 w-9 p-0 rounded-xl">
-           <Trash2 className="h-4 w-4" />
-         </Button>
-       </div>
-     ))}
-   </div>
- ) : (
-   <EmptyCard icon={Handshake} message="Nenhum co-produtor cadastrado" />
- )}
+          <StudioPanel title="Convites e co-produtores">
+            {coProductionsList.length > 0 ? (
+              <GroupBox>
+                {coProductionsList.map((cp) => {
+                  const st = cp.status === "accepted" ? { label: "Aceito", tone: "ok" as const } : cp.status === "rejected" ? { label: "Recusado", tone: "alert" as const } : { label: "Convite pendente", tone: "wait" as const };
+                  return (
+                    <div key={cp.id} className="flex flex-wrap items-center gap-3 px-4 py-3.5">
+                      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-muted text-[14px] font-bold text-muted-foreground">{(cp.co_producer_email || "?").charAt(0).toUpperCase()}</span>
+                      <div className="min-w-0 flex-1 basis-[160px]">
+                        <p className="truncate text-[14.5px] font-semibold text-foreground">{cp.co_producer_email}</p>
+                        <p className="text-[13px] tabular-nums text-muted-foreground">{cp.split_percentage}% da receita</p>
+                      </div>
+                      <StatusPill label={st.label} tone={st.tone} />
+                      <button type="button" onClick={() => setRemoveTarget(cp)} aria-label={`Remover ${cp.co_producer_email}`} className="vp-orb text-destructive"><Trash2 className="h-[18px] w-[18px]" /></button>
+                    </div>
+                  );
+                })}
+              </GroupBox>
+            ) : (
+              <p className="rounded-[16px] border border-dashed border-border px-4 py-6 text-center text-[14px] text-muted-foreground">Nenhum convite enviado ainda.</p>
+            )}
+          </StudioPanel>
 
- </>
- )}
- </div>
- );
+          <AlertDialog open={!!removeTarget} onOpenChange={(open) => { if (!open && !removing) setRemoveTarget(null); }}>
+            <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
+              <AlertDialogHeader className="space-y-2 text-left">
+                <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive"><Trash2 className="h-5 w-5" /></span>
+                <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">Remover este co-produtor?</AlertDialogTitle>
+                <AlertDialogDescription className="text-[14.5px] leading-relaxed text-muted-foreground">
+                  <span className="font-semibold text-foreground">{removeTarget?.co_producer_email}</span> é removido da co-produção deste produto.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="mt-4 gap-2 sm:gap-2">
+                <AlertDialogCancel disabled={removing} className="vp-ghost m-0 h-11">Manter co-produtor</AlertDialogCancel>
+                <AlertDialogAction onClick={(e) => { e.preventDefault(); confirmRemove(); }} disabled={removing} className="vp-cta vp-cta-danger h-11">
+                  {removing && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {removing ? "Removendo…" : "Remover co-produtor"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
+      )}
+    </div>
+  );
 }
 
 type TabCuponsProps = {
@@ -2092,9 +1867,10 @@ function TabAfiliados({ isNew, productId, affiliateEnabled, setAffiliateEnabled,
  );
 }
 
+
 type TabLinksProps = {
   isNew: boolean;
-  product: AnyObj | null;
+  product: Tables<"products"> | null;
   pageUrl: string;
   affiliateEnabled: boolean;
   productId?: string;
@@ -2105,171 +1881,98 @@ type TabLinksProps = {
 };
 
 function TabLinks({ isNew, product, pageUrl, affiliateEnabled, productId, getCheckoutLink, copyLink, name, price }: TabLinksProps) {
-   const [showQR, setShowQR] = useState(false);
-   const checkoutLink = getCheckoutLink();
-   const affiliateInviteLink = `${window.location.origin}/vendas/afiliados?product=${productId || ""}`;
-
+  const [showQR, setShowQR] = useState(false);
+  const checkoutLink = getCheckoutLink();
+  const affiliateInviteLink = `${window.location.origin}/vendas/afiliados?product=${productId || ""}`;
+  const priceLabel = formatCurrency(priceToNumber(price));
 
   const shareLinks = [
-    { label: "WhatsApp", icon: MessageSquare, url: `https://wa.me/?text=${encodeURIComponent(`Confira: ${name} por apenas R$ ${Number(price || 0).toFixed(2)}! ${checkoutLink}`)}` },
-    { label: "Telegram", icon: Share2, url: `https://t.me/share/url?url=${encodeURIComponent(checkoutLink)}&text=${encodeURIComponent(`${name} — R$ ${Number(price || 0).toFixed(2)}`)}` },
-    { label: "Twitter / X", icon: Megaphone, url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${name} — R$ ${Number(price || 0).toFixed(2)}`)}&url=${encodeURIComponent(checkoutLink)}` },
+    { label: "WhatsApp", icon: MessageSquare, url: `https://wa.me/?text=${encodeURIComponent(`Confira: ${name} por apenas ${priceLabel}! ${checkoutLink}`)}` },
+    { label: "Telegram", icon: Share2, url: `https://t.me/share/url?url=${encodeURIComponent(checkoutLink)}&text=${encodeURIComponent(`${name} — ${priceLabel}`)}` },
+    { label: "X (Twitter)", icon: Megaphone, url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${name} — ${priceLabel}`)}&url=${encodeURIComponent(checkoutLink)}` },
   ];
 
-  type LinkRow = {
-    type: string;
-    typeColor: string;
-    icon: React.ComponentType<{ className?: string }>;
-    label: string;
-    description: string;
-    url: string;
-    showQrToggle?: boolean;
-  };
-
+  type LinkRow = { key: string; icon: React.ComponentType<{ className?: string }>; label: string; description: string; url: string; qr?: boolean };
   const rows: LinkRow[] = [];
   if (product?.checkout_url && checkoutLink) {
-    rows.push({
-      type: "Checkout",
-      typeColor: "bg-primary/10 text-primary border-primary/20",
-      icon: ShoppingCart,
-      label: "Link do Checkout",
-      description: "Pagamento direto para este produto",
-      url: checkoutLink,
-      showQrToggle: true,
-    });
+    rows.push({ key: "checkout", icon: ShoppingCart, label: "Link do checkout", description: "Leva direto ao pagamento deste produto.", url: checkoutLink, qr: true });
   }
-  if (pageUrl) {
-    rows.push({
-      type: "Página",
-      typeColor: "bg-info/10 text-info border-info/20",
-      icon: Globe,
-      label: "Página de Vendas",
-      description: "Landing page pública do produto",
-      url: pageUrl,
-    });
+  if (pageUrl.trim()) {
+    const href = /^https?:\/\//i.test(pageUrl.trim()) ? pageUrl.trim() : `https://${pageUrl.trim()}`;
+    rows.push({ key: "page", icon: Globe, label: "Página de vendas", description: "A página pública que apresenta o produto.", url: href });
   }
   if (affiliateEnabled) {
-    rows.push({
-      type: "Afiliado",
-      typeColor: "bg-warning/10 text-warning border-warning/20",
-      icon: Users,
-      label: "Convite de Afiliado",
-      description: "Compartilhe para recrutar parceiros",
-      url: affiliateInviteLink,
-    });
+    rows.push({ key: "affiliate", icon: Users, label: "Convite de afiliado", description: "Para recrutar parceiros que vendem por você.", url: affiliateInviteLink });
   }
 
   return (
-    <div className="space-y-6">
-      <SectionHeader icon={Link2} title="Links de Venda" subtitle="Gerencie, compartilhe e monitore seus links de checkout." />
+    <div className="space-y-5">
+      <StudioHeading title="Links de venda" subtitle="Copie, abra ou compartilhe os endereços deste produto." />
 
       {isNew ? (
-        <EmptyCard icon={Link2} message="Salve o produto primeiro para gerar links." />
+        <StepEmpty icon={<Link2 className="h-7 w-7" />} title="Crie o produto primeiro">
+          Salve a etapa Geral para gerar o link do checkout.
+        </StepEmpty>
       ) : rows.length === 0 ? (
-        <EmptyCard icon={Link2} message="Nenhum link disponível ainda." />
+        <StepEmpty icon={<Link2 className="h-7 w-7" />} title="Nenhum link disponível ainda">
+          Preencha a página de vendas na etapa Geral para ver os links aqui.
+        </StepEmpty>
       ) : (
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
-          {/* Header row */}
-          <div className="hidden md:grid grid-cols-[140px_1fr_auto] gap-4 px-4 py-2.5 border-b border-border bg-muted/20">
-            <span className="text-[11px] font-medium text-muted-foreground">Tipo</span>
-            <span className="text-[11px] font-medium text-muted-foreground">Link</span>
-            <span className="text-[11px] font-medium text-muted-foreground text-right">Ações</span>
-          </div>
-
-          {rows.map((row, idx) => (
-            <div key={row.label} className={cn("border-b border-border last:border-0", idx % 2 === 1 && "bg-muted/[0.04]")}>
-              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr_auto] gap-3 md:gap-4 px-4 py-3.5 items-center">
-                {/* Type pill + icon */}
-                <div className="flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-lg bg-muted/30 border border-border flex items-center justify-center shrink-0">
-                    <row.icon className="h-3.5 w-3.5 text-foreground/70" />
-                  </div>
-                  <div className="min-w-0">
-                    <span className={cn("inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium border", row.typeColor)}>
-                      {row.type}
-                    </span>
-                    <p className="text-[11px] text-muted-foreground/70 mt-1 truncate md:hidden">{row.description}</p>
-                  </div>
-                </div>
-
-                {/* Link content */}
-                <div className="min-w-0">
-                  <p className="text-[12px] font-semibold text-foreground mb-0.5">{row.label}</p>
-                  <p className="text-[11px] text-muted-foreground/70 mb-1.5 hidden md:block">{row.description}</p>
-                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-muted/30 border border-border">
-                    <Link2 className="h-3 w-3 text-muted-foreground/50 shrink-0" />
-                    <span className="font-mono text-[11px] text-foreground/80 truncate">{row.url}</span>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-1.5 md:justify-end">
-                  {row.showQrToggle && (
-                    <Button
-                      type="button"
-                      variant={showQR ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setShowQR(!showQR)}
-                      className="h-8 w-8 p-0 rounded-md"
-                      title="Mostrar QR Code"
-                    >
-                      <QrCode className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
-                  <Button variant="outline" size="sm" onClick={() => window.open(row.url, "_blank")} className="h-8 w-8 p-0 rounded-md" title="Abrir link">
-                    <Eye className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button size="sm" onClick={() => copyLink(row.url)} className="h-8 gap-1.5 rounded-md font-semibold text-[11px] px-3">
-                    <Copy className="h-3.5 w-3.5" /> Copiar
-                  </Button>
-                </div>
-              </div>
-
-              {/* QR Code expansion (only for checkout row) */}
-              <AnimatePresence>
-                {row.showQrToggle && showQR && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="flex flex-col items-center gap-2 py-4 border-t border-border bg-muted/[0.03]">
-                      <div className="bg-background p-3 rounded-lg border border-border">
-                        <QRCodeSVG value={row.url} size={160} level="M" bgColor="transparent" fgColor="hsl(var(--foreground))" />
-                      </div>
-                      <p className="text-[10px] text-muted-foreground/60">Escaneie para acessar o checkout</p>
+        <>
+          {product && product.status !== "active" && product.checkout_url && (
+            <Notice tone="info" icon={<Clock className="h-4 w-4" />}>
+              O checkout só aceita pagamentos depois que o produto estiver ativo.
+            </Notice>
+          )}
+          <section className="vp-sheet divide-y divide-border overflow-hidden" aria-label="Links do produto">
+            {rows.map((row) => (
+              <div key={row.key}>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-3 p-5 sm:px-7">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent text-accent-foreground"><row.icon className="h-[18px] w-[18px]" /></span>
+                  <div className="min-w-0 flex-1 basis-[240px]">
+                    <p className="text-[15px] font-bold leading-tight text-foreground">{row.label}</p>
+                    <p className="mt-0.5 text-[13.5px] text-muted-foreground">{row.description}</p>
+                    <div className="mt-2.5 flex items-center gap-2 rounded-[12px] border border-border bg-muted/50 px-3 py-2">
+                      <Link2 aria-hidden className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                      <span className="truncate font-mono text-[12.5px] text-foreground">{row.url}</span>
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Quick share — compact strip */}
-      {!isNew && checkoutLink && (
-        <div>
-          <div className="flex items-center gap-2 mb-2.5">
-            <Share2 className="h-3.5 w-3.5 text-muted-foreground" />
-            <h4 className="text-[11px] font-medium text-muted-foreground">Compartilhamento Rápido</h4>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {shareLinks.map(sl => (
-              <a
-                key={sl.label}
-                href={sl.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 h-10 rounded-lg border border-border bg-card hover:bg-muted/30 hover:border-primary/30 transition-colors text-[12px] font-semibold text-foreground"
-              >
-                <sl.icon className="h-3.5 w-3.5 text-muted-foreground" />
-                {sl.label}
-              </a>
+                  </div>
+                  <div className="flex items-center justify-end gap-2 sm:w-[224px]">
+                    {row.qr && (
+                      <button type="button" onClick={() => setShowQR(!showQR)} aria-pressed={showQR} aria-label="Mostrar QR Code" className={cn("vp-orb", showQR && "!border-primary !bg-accent text-accent-foreground")}><QrCode className="h-[18px] w-[18px]" /></button>
+                    )}
+                    <button type="button" onClick={() => window.open(row.url, "_blank", "noopener,noreferrer")} aria-label={`Abrir ${row.label.toLowerCase()}`} className="vp-orb"><ExternalLink className="h-[18px] w-[18px]" /></button>
+                    <button type="button" onClick={() => copyLink(row.url)} className="vp-cta !h-11"><Copy className="h-4 w-4" /> Copiar</button>
+                  </div>
+                </div>
+                <AnimatePresence initial={false}>
+                  {row.qr && showQR && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                      <div className="flex flex-col items-center gap-3 border-t border-border bg-muted/30 py-6">
+                        <div className="rounded-[16px] bg-white p-3.5 shadow-sm ring-1 ring-black/5">
+                          <QRCodeSVG value={row.url} size={168} level="M" bgColor="#ffffff" fgColor="#0b1220" />
+                        </div>
+                        <p className="text-[13px] text-muted-foreground">Aponte a câmera do celular para abrir o checkout.</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             ))}
-          </div>
-        </div>
+          </section>
+
+          {checkoutLink && (
+            <StudioPanel title="Compartilhar rápido" subtitle="Abre o app com a mensagem e o link do checkout prontos.">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-2.5 sm:grid-cols-3">
+                {shareLinks.map((sl) => (
+                  <a key={sl.label} href={sl.url} target="_blank" rel="noopener noreferrer" className="vp-ghost">
+                    <sl.icon className="h-4 w-4 text-muted-foreground" /> {sl.label}
+                  </a>
+                ))}
+              </div>
+            </StudioPanel>
+          )}
+        </>
       )}
     </div>
   );
@@ -2466,107 +2169,44 @@ function TabConteudo({ productId, isNew }: { productId?: string; isNew: boolean 
   );
 }
 
+
 /* ═══════════════════════════════════════════════
- SHARED COMPONENTS
+ SHARED COMPONENTS (usados também pelas abas desativadas)
  ═══════════════════════════════════════════════ */
 
-function SectionHeader({ icon: Icon, title, subtitle }: { icon: React.ComponentType<{ className?: string }>; title: string; subtitle: string }) {
-  return (
-  <div className="flex items-center gap-4 mb-7">
-  <div className="h-12 w-12 shrink-0 rounded-2xl bg-primary text-primary-foreground border border-primary flex items-center justify-center">
-  <Icon className="h-5 w-5 text-primary" />
-  </div>
-  <div>
-  <h2 className="text-[20px] font-display font-bold text-foreground">{title}</h2>
-  <p className="text-[13px] text-muted-foreground mt-1 font-sans">{subtitle}</p>
-  </div>
-  </div>
-  );
+function SectionHeader({ title, subtitle }: { icon?: React.ComponentType<{ className?: string }>; title: string; subtitle: string }) {
+  return <StudioHeading title={title} subtitle={subtitle} />;
 }
 
-function EditorCard({ children, accentColor = "bg-primary" }: { children: React.ReactNode; accentColor?: string }) {
-  return (
-  <div className="product-studio-panel rounded-[24px] border border-border bg-card p-5 sm:p-7 space-y-5 relative overflow-hidden hover:border-primary/25 transition-colors duration-300">
-  <div className={cn("absolute left-0 top-6 bottom-6 w-[3px] rounded-full", accentColor)} />
-  {children}
-  </div>
-  );
+function EditorCard({ children }: { children: React.ReactNode; accentColor?: string }) {
+  return <StudioPanel className="space-y-5">{children}</StudioPanel>;
 }
 
 function EditorLabel({ icon: Icon, children }: { icon?: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
-  <Label className="text-[11px] font-display font-medium text-muted-foreground flex items-center gap-1.5">
-  {Icon && <Icon className="h-3 w-3 text-muted-foreground/60" />}
-  {children}
-  </Label>
+    <Label className="mb-2 flex items-center gap-1.5 text-[13.5px] font-semibold text-foreground">
+      {Icon && <Icon className="h-3.5 w-3.5 text-muted-foreground" />}
+      {children}
+    </Label>
   );
 }
 
 function EmptyCard({ icon: Icon, message }: { icon: React.ComponentType<{ className?: string }>; message: string }) {
-  return (
-  <div className="rounded-[12px] border border-border bg-card flex flex-col items-center justify-center py-16 gap-4">
-  <div className="h-16 w-16 rounded-[12px] bg-secondary flex items-center justify-center border border-border">
-  <Icon className="h-7 w-7 text-muted-foreground/30" />
-  </div>
-  <p className="text-sm font-display font-medium text-muted-foreground">{message}</p>
-  </div>
-  );
+  return <StepEmpty icon={<Icon className="h-7 w-7" />} title={message} />;
 }
 
 function ToggleRow({ icon: Icon, label, sublabel, checked, onChange, children }: {
   icon?: React.ComponentType<{ className?: string }>; label: string; sublabel?: string; checked: boolean; onChange: (v: boolean) => void; children?: React.ReactNode;
 }) {
   return (
-  <div className={cn(
- "flex items-center justify-between p-3.5 rounded-xl border transition-colors duration-200 relative",
-  checked ? "border-primary/20 bg-primary/5" : "border-border bg-card hover:border-muted-foreground/20"
-  )}>
-  {checked && <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary" />}
-  <div className="flex items-center gap-3 flex-1">
-  {Icon && (
-  <div className={cn(
- "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border transition-colors duration-200",
-  checked ? "bg-primary/10 border-primary/20" : "bg-secondary border-border"
-  )}>
-  <Icon className={cn("h-3.5 w-3.5 transition-colors duration-200", checked ? "text-primary" : "text-muted-foreground/50")} />
-  </div>
-  )}
-  <div>
-  <p className="text-sm font-semibold text-foreground">{label}</p>
-  {sublabel && <p className="text-[11px] text-muted-foreground mt-0.5">{sublabel}</p>}
-  </div>
-  </div>
-  <div className="flex items-center gap-2">
-  {children}
-  <Switch checked={checked} onCheckedChange={onChange} />
-  </div>
-  </div>
-  );
-}
-
-function PaymentMethodRow({ icon: Icon, label, sublabel, color, checked, onChange }: {
- icon: React.ComponentType<{ className?: string }>; label: string; sublabel?: string; color: string; checked: boolean; onChange: (v: boolean) => void;
-}) {
- const accentBg = color === "text-success" ? "bg-success" : color === "text-warning" ? "bg-warning" : "bg-info";
- const bgColor = color === "text-success" ? "bg-success/10" : color === "text-warning" ? "bg-warning/10" : "bg-info/10";
-
-  return (
-  <div className={cn(
- "flex items-center justify-between p-3.5 rounded-xl border transition-colors duration-200 relative",
-  checked ? "bg-card border-border" : "bg-card border-border opacity-50"
-  )}>
-  {checked && <div className={cn("absolute left-0 top-2 bottom-2 w-[3px] rounded-full", accentBg)} />}
-  <div className="flex items-center gap-3">
-  <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border border-border", bgColor)}>
-  <Icon className={cn("h-4 w-4", color)} />
-  </div>
-  <div>
-  <p className="text-sm font-semibold">{label}</p>
-  {sublabel && <p className="text-[11px] text-muted-foreground font-numbers">{sublabel}</p>}
-  </div>
-  </div>
-  <Switch checked={checked} onCheckedChange={onChange} />
-  </div>
+    <div className="overflow-hidden rounded-[16px] border border-border bg-card">
+      <FormToggleRow icon={Icon ? <Icon className="h-[18px] w-[18px]" /> : undefined} title={label} description={sublabel}>
+        <div className="flex items-center gap-3">
+          {children}
+          <Switch checked={checked} onCheckedChange={onChange} aria-label={label} />
+        </div>
+      </FormToggleRow>
+    </div>
   );
 }
 
@@ -2574,27 +2214,23 @@ function BannerUpload({ label, sublabel, preview, inputRef, onFile, onClear }: {
   label: string; sublabel?: string; preview: string; inputRef: React.RefObject<HTMLInputElement>; onFile: (e: React.ChangeEvent<HTMLInputElement>) => void; onClear: () => void;
 }) {
   return (
-  <div className="space-y-2">
-  <EditorLabel>{label}</EditorLabel>
-  {sublabel && <p className="text-[10px] text-muted-foreground">{sublabel}</p>}
-  <input ref={inputRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
-  {preview ? (
-  <div className="relative rounded-lg overflow-hidden border border-border group/banner">
-  <img src={preview} alt={label} className="w-full h-24 object-cover" />
-  <div className="absolute inset-0 bg-background/80 opacity-0 group-hover/banner:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
-  <button type="button" onClick={() => inputRef.current?.click()} className="h-8 w-8 rounded-lg bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors duration-200 active:scale-95">
-  <ImagePlus className="h-3.5 w-3.5 text-foreground" />
-  </button>
-  <button type="button" onClick={onClear} className="h-8 w-8 rounded-lg bg-card border border-border flex items-center justify-center text-destructive hover:bg-destructive/10 transition-colors duration-200 active:scale-95">
-  <X className="h-3.5 w-3.5" />
-  </button>
-  </div>
-  </div>
-  ) : (
-  <button type="button" onClick={() => inputRef.current?.click()} className="w-full h-20 rounded-lg border-2 border-dashed border-border hover:border-primary/40 hover:bg-primary/5 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary text-xs transition-colors duration-200 ">
-  <Upload className="h-4 w-4" /> Upload {label.toLowerCase()}
-  </button>
-  )}
-  </div>
+    <div>
+      <FieldLabel hint={sublabel}>{label}</FieldLabel>
+      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={onFile} className="hidden" aria-label={`Escolher ${label.toLowerCase()}`} />
+      {preview ? (
+        <div className="relative overflow-hidden rounded-[16px] border border-border">
+          <img src={preview} alt={label} className="h-28 w-full object-cover" />
+          <div className="absolute inset-x-2 bottom-2 flex justify-end gap-1.5">
+            <button type="button" onClick={() => inputRef.current?.click()} aria-label={`Trocar ${label.toLowerCase()}`} className="vp-orb !h-9 !w-9 shadow-sm"><ImagePlus className="h-4 w-4" /></button>
+            <button type="button" onClick={onClear} aria-label={`Remover ${label.toLowerCase()}`} className="vp-orb !h-9 !w-9 text-destructive shadow-sm"><X className="h-4 w-4" /></button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" onClick={() => inputRef.current?.click()} className="vp-r16 flex h-28 w-full flex-col items-center justify-center gap-1.5 border-2 border-dashed border-border bg-muted/40 text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
+          <Upload className="h-5 w-5" />
+          <span className="text-[13.5px] font-semibold">Enviar imagem</span>
+        </button>
+      )}
+    </div>
   );
 }

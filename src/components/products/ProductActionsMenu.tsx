@@ -134,7 +134,8 @@ export function ProductActionsMenu({
         align="end"
         side="bottom"
         sideOffset={6}
-        className="w-72 rounded-[22px] border border-border bg-popover p-2 shadow-[0_24px_48px_-24px_hsl(222_47%_11%/.35)]"
+        collisionPadding={16}
+        className="max-h-[var(--radix-dropdown-menu-content-available-height)] w-72 overflow-y-auto rounded-[22px] border border-border bg-popover p-2 shadow-[0_24px_48px_-24px_hsl(222_47%_11%/.35)]"
       >
         <div className="px-3 pb-2 pt-2">
           <p className="truncate font-heading text-[16px] font-extrabold tracking-[-0.02em] text-foreground">
