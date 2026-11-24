@@ -1,15 +1,15 @@
-import { useState, useRef, useEffect, ReactNode } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Settings, Palette, Timer, Image as ImageIcon, ShieldCheck, CreditCard, QrCode, FileText, MapPin, Mail, X, Upload, Package, Plus, Trash2, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Palette, Timer, ShieldCheck, CreditCard, QrCode, FileText, MapPin, Mail, X, Upload, Package, Plus, Trash2, Users, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DialogHead, FieldLabel, FormSection, GroupBox, ToggleRow, dialogShell, tabListClass, tabTriggerClass } from "@/components/seller-ui/form";
 import { toast } from "sonner";
+import { cn, formatCurrency } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface Props {
@@ -84,11 +84,13 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
  let mobileUrl = bannerMobilePreview;
  if (bannerDesktopFile) {
  const url = await uploadBanner(bannerDesktopFile, "desktop");
- if (url) desktopUrl = url;
+ if (!url) return; // não salva um link temporário (blob:) se o envio falhou
+ desktopUrl = url;
  }
  if (bannerMobileFile) {
  const url = await uploadBanner(bannerMobileFile, "mobile");
- if (url) mobileUrl = url;
+ if (!url) return;
+ mobileUrl = url;
  }
 
  const { error } = await supabase.from("products").update({
@@ -106,8 +108,8 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
  checkout_email_confirm: emailConfirm,
  }).eq("id", product.id).eq("user_id", user!.id);
 
- if (error) { toast.error("Erro ao salvar"); return; }
- toast.success("Checkout personalizado!");
+ if (error) { toast.error("Não foi possível salvar o checkout"); return; }
+ toast.success("Checkout salvo");
  onSaved();
  onOpenChange(false);
  } finally { setSaving(false); }
@@ -116,8 +118,8 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
  const handleFile = (e: React.ChangeEvent<HTMLInputElement>, type: "desktop" | "mobile") => {
  const file = e.target.files?.[0];
  if (!file) return;
- const ALLOWED_BANNER_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
- if (!ALLOWED_BANNER_TYPES.includes(file.type)) { toast.error("Formato inválido. Use JPEG, PNG, WebP ou GIF"); return; }
+ const ALLOWED_BANNER_TYPES = ["image/jpeg", "image/png", "image/webp"];
+ if (!ALLOWED_BANNER_TYPES.includes(file.type)) { toast.error("Formato inválido. Use JPG, PNG ou WebP"); return; }
  if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB"); return; }
  if (type === "desktop") {
  setBannerDesktopFile(file);
@@ -131,17 +133,17 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
  const addBump = async () => {
  if (!selectedBumpProduct) return;
  if (orderBumps.some(b => b.bump_product_id === selectedBumpProduct)) {
- toast.error("Produto já adicionado"); return;
+ toast.error("Esse produto já está vinculado"); return;
  }
  const { data, error } = await supabase.from("order_bumps").insert({
  product_id: product.id,
  bump_product_id: selectedBumpProduct,
  sort_order: orderBumps.length,
  }).select("id, bump_product_id").maybeSingle();
- if (error || !data) { toast.error("Erro ao adicionar"); return; }
+ if (error || !data) { toast.error("Não foi possível vincular o produto"); return; }
  setOrderBumps(prev => [...prev, data]);
  setSelectedBumpProduct("");
- toast.success("Order bump adicionado!");
+ toast.success("Order bump vinculado");
  };
 
  const removeBump = async (id: string) => {
@@ -152,234 +154,227 @@ export default function CheckoutSettingsDialog({ product, open, onOpenChange, on
 
  const availableForBump = allProducts.filter(p => !orderBumps.some(b => b.bump_product_id === p.id));
 
+  const bumpExtra = orderBumps.reduce((sum, b) => {
+    const p = allProducts.find(ap => ap.id === b.bump_product_id);
+    return sum + Number(p?.price || 0);
+  }, 0);
+  const noMethodAllowed = !allowedMethods.pix && !allowedMethods.boleto && !allowedMethods.card;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl max-h-[88vh] overflow-y-auto p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-border/60">
-          <DialogTitle className="flex items-center gap-2 text-base font-display font-bold">
-            <Settings className="h-4 w-4 text-primary" /> Personalizar Checkout
-          </DialogTitle>
-          <p className="text-[12px] text-muted-foreground mt-1 truncate">{product.name}</p>
-        </DialogHeader>
+      <DialogContent className={cn(dialogShell, "flex max-h-[92vh] w-[calc(100vw-1rem)] max-w-[720px] flex-col")}>
+        <DialogHead icon={<Palette className="h-5 w-5" strokeWidth={2.2} />} title="Personalizar checkout" subtitle={product.name || "Produto sem nome"} />
 
-        <Tabs defaultValue="visual" className="px-6 pt-4">
-          <TabsList className="grid grid-cols-4 w-full h-9">
-            <TabsTrigger value="visual" className="text-[11px] gap-1.5 font-semibold"><Palette className="h-3 w-3" /> Visual</TabsTrigger>
-            <TabsTrigger value="payment" className="text-[11px] gap-1.5 font-semibold"><CreditCard className="h-3 w-3" /> Pagamento</TabsTrigger>
-            <TabsTrigger value="form" className="text-[11px] gap-1.5 font-semibold"><Mail className="h-3 w-3" /> Formulário</TabsTrigger>
-            <TabsTrigger value="bumps" className="text-[11px] gap-1.5 font-semibold"><Package className="h-3 w-3" /> Bumps</TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="visual" className="flex min-h-0 flex-1 flex-col">
+          <div className="border-b border-border px-5 py-3 sm:px-8">
+            <TabsList className={tabListClass}>
+              <TabsTrigger value="visual" className={tabTriggerClass}><Palette className="h-4 w-4" /> Visual</TabsTrigger>
+              <TabsTrigger value="payment" className={tabTriggerClass}><CreditCard className="h-4 w-4" /> Pagamento</TabsTrigger>
+              <TabsTrigger value="form" className={tabTriggerClass}><Mail className="h-4 w-4" /> Formulário</TabsTrigger>
+              <TabsTrigger value="bumps" className={tabTriggerClass}><Package className="h-4 w-4" /> Order bumps</TabsTrigger>
+            </TabsList>
+          </div>
 
-          {/* VISUAL TAB */}
-          <TabsContent value="visual" className="mt-5 space-y-6 pb-2">
-            <Section title="Identidade visual" subtitle="Cor principal do botão de compra">
-              <div className="flex items-center gap-2.5">
-                <input type="color" value={buttonColor} onChange={(e) => setButtonColor(e.target.value)} className="w-11 h-11 rounded-lg border border-border cursor-pointer bg-card shrink-0" />
-                <Input value={buttonColor} onChange={(e) => setButtonColor(e.target.value)} className="flex-1 font-mono text-[13px] h-11" />
-                <div className="h-11 px-5 rounded-lg flex items-center justify-center text-white text-[13px] font-bold shadow-sm" style={{ backgroundColor: buttonColor }}>
-                  Comprar
-                </div>
-              </div>
-            </Section>
-
-            <Section title="Banners do checkout" subtitle="Imagens topo (5 MB · JPG, PNG, WebP)">
-              <div className="grid grid-cols-2 gap-3">
-                <BannerSlot label="Desktop" preview={bannerDesktopPreview} inputRef={desktopRef} onSelect={() => desktopRef.current?.click()} onClear={() => { setBannerDesktopFile(null); setBannerDesktopPreview(""); }} onChange={(e) => handleFile(e, "desktop")} />
-                <BannerSlot label="Mobile" preview={bannerMobilePreview} inputRef={mobileRef} onSelect={() => mobileRef.current?.click()} onClear={() => { setBannerMobileFile(null); setBannerMobilePreview(""); }} onChange={(e) => handleFile(e, "mobile")} />
-              </div>
-            </Section>
-
-            <Section title="Gatilhos de conversão" subtitle="Elementos persuasivos exibidos no checkout">
-              <div className="rounded-xl border border-border/60 divide-y divide-border/60 overflow-hidden bg-card">
-                <Row icon={<Timer className="h-4 w-4 text-warning" />} title="Timer de urgência" description="Contador regressivo no topo">
-                  <div className="flex items-center gap-2">
-                    {timerEnabled && (
-                      <Input type="number" min="1" max="60" value={timerMinutes} onChange={(e) => setTimerMinutes(e.target.value)} className="w-14 h-8 text-center text-[12px] font-numbers" />
-                    )}
-                    <Switch checked={timerEnabled} onCheckedChange={setTimerEnabled} />
+          <div className="h-[min(480px,calc(92dvh-16rem))] shrink-0 overflow-y-auto px-5 py-6 sm:px-8">
+            {/* VISUAL */}
+            <TabsContent value="visual" className="mt-0 space-y-8">
+              <FormSection title="Botão de compra" subtitle="Escolha a cor que combina com a sua página de vendas.">
+                <div className="space-y-4 rounded-[16px] border border-border bg-card p-4 sm:p-5">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <label className="relative h-12 w-12 shrink-0 cursor-pointer overflow-hidden rounded-full border border-border" title="Escolher cor">
+                      <span className="sr-only">Escolher a cor do botão</span>
+                      <input type="color" value={buttonColor} onChange={(e) => setButtonColor(e.target.value)} className="absolute -inset-2 h-[calc(100%+16px)] w-[calc(100%+16px)] cursor-pointer border-0 bg-transparent p-0" />
+                    </label>
+                    <Input value={buttonColor} onChange={(e) => setButtonColor(e.target.value)} aria-label="Código da cor" spellCheck={false} className="vp-field min-w-0 flex-1 font-mono sm:max-w-[170px]" />
+                    <span className="inline-flex h-12 items-center justify-center rounded-full px-8 text-[15px] font-bold text-white shadow-sm" style={{ backgroundColor: buttonColor }}>Comprar agora</span>
                   </div>
-                </Row>
-                <Row icon={<Users className="h-4 w-4 text-primary" />} title="Prova social" description='"X pessoas compraram"'>
-                  <Switch checked={socialProof} onCheckedChange={setSocialProof} />
-                </Row>
-                <Row icon={<ShieldCheck className="h-4 w-4 text-success" />} title="Garantia 7 dias" description="Selo de devolução garantida">
-                  <Switch checked={guaranteeEnabled} onCheckedChange={setGuaranteeEnabled} />
-                </Row>
+                  <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Cores sugeridas">
+                    {BUTTON_PRESETS.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setButtonColor(c)}
+                        aria-label={`Usar a cor ${c}`}
+                        aria-pressed={buttonColor.toLowerCase() === c}
+                        className={cn("h-8 w-8 rounded-full border border-black/10 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card", buttonColor.toLowerCase() === c && "ring-2 ring-primary ring-offset-2 ring-offset-card")}
+                        style={{ backgroundColor: c }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </FormSection>
+
+              <FormSection title="Banners" subtitle="Imagem no topo do checkout. JPG, PNG ou WebP, até 5 MB.">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <BannerSlot label="Computador" preview={bannerDesktopPreview} inputRef={desktopRef} onSelect={() => desktopRef.current?.click()} onClear={() => { setBannerDesktopFile(null); setBannerDesktopPreview(""); }} onChange={(e) => handleFile(e, "desktop")} />
+                  <BannerSlot label="Celular" preview={bannerMobilePreview} inputRef={mobileRef} onSelect={() => mobileRef.current?.click()} onClear={() => { setBannerMobileFile(null); setBannerMobilePreview(""); }} onChange={(e) => handleFile(e, "mobile")} />
+                </div>
+              </FormSection>
+
+              <FormSection title="Gatilhos de conversão" subtitle="Elementos que ajudam o cliente a decidir.">
+                <GroupBox>
+                  <ToggleRow tone="warning" icon={<Timer className="h-[18px] w-[18px]" />} title="Timer de urgência" description="Contagem regressiva no topo da página">
+                    <div className="flex items-center gap-2.5">
+                      {timerEnabled && (
+                        <label className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
+                          <span className="sr-only">Minutos do timer</span>
+                          <Input type="number" min="1" max="60" value={timerMinutes} onChange={(e) => setTimerMinutes(e.target.value)} className="vp-field !h-10 !w-[72px] text-center font-bold tabular-nums" />
+                          min
+                        </label>
+                      )}
+                      <Switch checked={timerEnabled} onCheckedChange={setTimerEnabled} aria-label="Timer de urgência" />
+                    </div>
+                  </ToggleRow>
+                  <ToggleRow icon={<Users className="h-[18px] w-[18px]" />} title="Prova social" description="Mostra quantas pessoas já compraram">
+                    <Switch checked={socialProof} onCheckedChange={setSocialProof} aria-label="Prova social" />
+                  </ToggleRow>
+                  <ToggleRow icon={<ShieldCheck className="h-[18px] w-[18px]" />} title="Garantia de 7 dias" description="Selo de devolução garantida">
+                    <Switch checked={guaranteeEnabled} onCheckedChange={setGuaranteeEnabled} aria-label="Garantia de 7 dias" />
+                  </ToggleRow>
+                </GroupBox>
+              </FormSection>
+            </TabsContent>
+
+            {/* PAGAMENTO */}
+            <TabsContent value="payment" className="mt-0 space-y-4">
+              <FormSection title="Formas de pagamento" subtitle="O que o cliente pode usar para pagar este produto.">
+                {noMethodAllowed ? (
+                  <div className="rounded-[16px] border border-dashed border-border bg-muted/30 px-5 py-8 text-center">
+                    <p className="text-[15px] font-bold text-foreground">Nenhuma forma de pagamento liberada</p>
+                    <p className="mx-auto mt-1 max-w-[340px] text-[13.5px] leading-snug text-muted-foreground">As formas de pagamento são liberadas na sua conta. Fale com o suporte para ativar.</p>
+                  </div>
+                ) : (
+                  <GroupBox>
+                    {allowedMethods.pix && (
+                      <ToggleRow icon={<QrCode className="h-[18px] w-[18px]" />} title="Pix" description="Aprovação imediata">
+                        <Switch checked={pixEnabled} onCheckedChange={setPixEnabled} aria-label="Pix" />
+                      </ToggleRow>
+                    )}
+                    {allowedMethods.boleto && (
+                      <ToggleRow tone="warning" icon={<FileText className="h-[18px] w-[18px]" />} title="Boleto bancário" description="Compensação em 1 a 3 dias úteis">
+                        <Switch checked={boletoEnabled} onCheckedChange={setBoletoEnabled} aria-label="Boleto bancário" />
+                      </ToggleRow>
+                    )}
+                    {allowedMethods.card && (
+                      <ToggleRow icon={<CreditCard className="h-[18px] w-[18px]" />} title="Cartão de crédito" description="Parcelamento em até 12x">
+                        <Switch checked={creditCardEnabled} onCheckedChange={setCreditCardEnabled} aria-label="Cartão de crédito" />
+                      </ToggleRow>
+                    )}
+                  </GroupBox>
+                )}
+                <p className="px-1 text-[13px] text-muted-foreground">Mantenha ao menos uma forma de pagamento ativa.</p>
+              </FormSection>
+            </TabsContent>
+
+            {/* FORMULÁRIO */}
+            <TabsContent value="form" className="mt-0 space-y-4">
+              <FormSection title="Dados do cliente" subtitle="Escolha o que pedir na hora da compra. Menos campos costumam vender mais.">
+                <GroupBox>
+                  <ToggleRow icon={<MapPin className="h-[18px] w-[18px]" />} title="Endereço de entrega" description="CEP com preenchimento automático">
+                    <Switch checked={addressRequired} onCheckedChange={setAddressRequired} aria-label="Endereço de entrega" />
+                  </ToggleRow>
+                  <ToggleRow icon={<Mail className="h-[18px] w-[18px]" />} title="Confirmação de e-mail" description="O cliente digita o e-mail duas vezes">
+                    <Switch checked={emailConfirm} onCheckedChange={setEmailConfirm} aria-label="Confirmação de e-mail" />
+                  </ToggleRow>
+                </GroupBox>
+              </FormSection>
+            </TabsContent>
+
+            {/* ORDER BUMPS */}
+            <TabsContent value="bumps" className="mt-0 space-y-6">
+              <div className="grid grid-cols-[repeat(3,minmax(0,1fr))] divide-x divide-border overflow-hidden rounded-[16px] border border-border bg-muted/40">
+                <BumpStat label="Ofertas" value={String(orderBumps.length)} />
+                <BumpStat label="Extra por venda" value={formatCurrency(bumpExtra)} green />
+                <BumpStat label="Disponíveis" value={String(availableForBump.length)} />
               </div>
-            </Section>
-          </TabsContent>
 
-          {/* PAYMENT TAB */}
-          <TabsContent value="payment" className="mt-5 space-y-4 pb-2">
-            <Section title="Métodos de pagamento" subtitle="Formas de pagamento aceitas no checkout">
-              <div className="rounded-xl border border-border/60 divide-y divide-border/60 overflow-hidden bg-card">
-                {allowedMethods.pix && <Row icon={<QrCode className="h-4 w-4 text-success" />} title="PIX" description="Aprovação imediata">
-                  <Switch checked={pixEnabled} onCheckedChange={setPixEnabled} />
-                </Row>}
-                {allowedMethods.boleto && <Row icon={<FileText className="h-4 w-4 text-warning" />} title="Boleto bancário" description="Compensação em 1–3 dias úteis">
-                  <Switch checked={boletoEnabled} onCheckedChange={setBoletoEnabled} />
-                </Row>}
-                {allowedMethods.card && <Row icon={<CreditCard className="h-4 w-4 text-primary" />} title="Cartão de crédito" description="Parcelamento em até 12x">
-                  <Switch checked={creditCardEnabled} onCheckedChange={setCreditCardEnabled} />
-                </Row>}
-              </div>
-              <p className="text-[11px] text-muted-foreground/70 mt-2 px-1">Ao menos um método deve permanecer ativo.</p>
-            </Section>
-          </TabsContent>
+              {orderBumps.length > 0 ? (
+                <GroupBox>
+                  {orderBumps.map((bump, idx) => {
+                    const prod = allProducts.find(p => p.id === bump.bump_product_id);
+                    return (
+                      <div key={bump.id} className="flex items-center gap-3.5 px-4 py-3">
+                        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-muted text-[13px] font-bold tabular-nums text-muted-foreground">{idx + 1}</span>
+                        {prod?.image_url ? (
+                          <img src={prod.image_url} alt="" className="h-12 w-12 shrink-0 rounded-[12px] border border-border object-cover" />
+                        ) : (
+                          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[12px] border border-border bg-accent text-accent-foreground"><Package className="h-5 w-5" /></span>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-[14.5px] font-semibold leading-tight text-foreground">{prod?.name || "Produto"}</p>
+                          <p className="mt-0.5 text-[13.5px] font-medium tabular-nums text-muted-foreground">{formatCurrency(Number(prod?.price || 0))}</p>
+                        </div>
+                        <button type="button" onClick={() => removeBump(bump.id)} aria-label={`Desvincular ${prod?.name || "produto"}`} title="Desvincular" className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                          <Trash2 className="h-[18px] w-[18px]" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </GroupBox>
+              ) : availableForBump.length > 0 ? (
+                <div className="rounded-[16px] border border-dashed border-border bg-muted/30 px-5 py-8 text-center">
+                  <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-accent text-accent-foreground"><Package className="h-5 w-5" /></span>
+                  <p className="mt-3 text-[15px] font-bold text-foreground">Nenhuma oferta vinculada</p>
+                  <p className="mt-0.5 text-[13.5px] text-muted-foreground">Escolha um produto abaixo para oferecer junto com este.</p>
+                </div>
+              ) : null}
 
-          {/* FORM TAB */}
-          <TabsContent value="form" className="mt-5 space-y-4 pb-2">
-            <Section title="Campos do formulário" subtitle="Defina quais dados são solicitados ao cliente">
-              <div className="rounded-xl border border-border/60 divide-y divide-border/60 overflow-hidden bg-card">
-                <Row icon={<MapPin className="h-4 w-4 text-muted-foreground" />} title="Endereço de entrega" description="CEP com preenchimento automático">
-                  <Switch checked={addressRequired} onCheckedChange={setAddressRequired} />
-                </Row>
-                <Row icon={<Mail className="h-4 w-4 text-muted-foreground" />} title="Confirmação de e-mail" description="Solicita digitar o e-mail duas vezes">
-                  <Switch checked={emailConfirm} onCheckedChange={setEmailConfirm} />
-                </Row>
-              </div>
-            </Section>
-          </TabsContent>
+              {availableForBump.length > 0 && (
+                <div>
+                  <FieldLabel hint="A oferta aparece antes do cliente concluir o pagamento.">Vincular produto</FieldLabel>
+                  <div className="flex flex-col gap-2.5 sm:flex-row">
+                    <Select value={selectedBumpProduct} onValueChange={setSelectedBumpProduct}>
+                      <SelectTrigger className="h-12 min-w-0 flex-1 vp-r16 border-border bg-background text-[15px] data-[placeholder]:font-normal data-[placeholder]:text-muted-foreground" aria-label="Produto para vincular">
+                        <SelectValue placeholder="Escolha um dos seus produtos" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableForBump.map(p => (
+                          <SelectItem key={p.id} value={p.id}>
+                            <span className="font-medium">{p.name}</span>
+                            <span className="ml-2 tabular-nums text-muted-foreground">{formatCurrency(Number(p.price))}</span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <button type="button" onClick={addBump} disabled={!selectedBumpProduct} className="vp-cta !h-12 sm:min-w-[140px]">
+                      <Plus className="h-[18px] w-[18px]" strokeWidth={2.4} />
+                      Vincular
+                    </button>
+                  </div>
+                </div>
+              )}
 
-          {/* ORDER BUMPS TAB */}
-          <TabsContent value="bumps" className="mt-5 space-y-5 pb-2">
- {/* Header / Stats strip */}
- <div className="grid grid-cols-3 gap-px rounded-xl overflow-hidden border border-border bg-border">
- <div className="bg-card px-3 py-2.5">
- <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Ofertas</p>
- <p className="text-lg font-semibold tabular-nums">{orderBumps.length}</p>
- </div>
- <div className="bg-card px-3 py-2.5">
- <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Receita extra</p>
- <p className="text-lg font-semibold tabular-nums">
- R$ {orderBumps.reduce((sum, b) => {
- const p = allProducts.find(ap => ap.id === b.bump_product_id);
- return sum + Number(p?.price || 0);
- }, 0).toFixed(0)}
- </p>
- </div>
- <div className="bg-card px-3 py-2.5">
- <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Disponíveis</p>
- <p className="text-lg font-semibold tabular-nums">{availableForBump.length}</p>
- </div>
- </div>
-
- {/* Linked products list */}
- {orderBumps.length > 0 ? (
- <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
- {orderBumps.map((bump, idx) => {
- const prod = allProducts.find(p => p.id === bump.bump_product_id);
- return (
- <div key={bump.id} className="flex items-center gap-3 p-3 bg-card hover:bg-muted/30 transition-colors">
- <div className="flex items-center justify-center h-6 w-6 rounded-md bg-muted text-[11px] font-semibold text-muted-foreground tabular-nums flex-shrink-0">
- {idx + 1}
- </div>
- {prod?.image_url ? (
- <img src={prod.image_url} alt={prod.name} className="h-12 w-12 rounded-lg object-cover flex-shrink-0 border border-border" />
- ) : (
- <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 border border-border">
- <Package className="h-5 w-5 text-muted-foreground" />
- </div>
- )}
- <div className="min-w-0 flex-1">
- <p className="text-sm font-semibold truncate leading-tight">{prod?.name || "Produto"}</p>
- <div className="flex items-center gap-2 mt-0.5">
- <span className="text-xs font-medium text-foreground tabular-nums">R$ {Number(prod?.price || 0).toFixed(2)}</span>
- <span className="text-[10px] text-muted-foreground">·</span>
- <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Posição {idx + 1}</span>
- </div>
- </div>
- <Button variant="ghost" size="icon" onClick={() => removeBump(bump.id)} className="text-muted-foreground hover:text-destructive h-8 w-8 flex-shrink-0">
- <Trash2 className="h-3.5 w-3.5" />
- </Button>
- </div>
- );
- })}
- </div>
- ) : availableForBump.length > 0 ? (
- <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-6 text-center">
- <Package className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
- <p className="text-sm font-medium text-foreground">Nenhuma oferta vinculada</p>
- <p className="text-xs text-muted-foreground mt-1">Selecione um produto abaixo para começar</p>
- </div>
- ) : null}
-
- {/* Add new bump control */}
- {availableForBump.length > 0 && (
- <div className="space-y-2">
- <Label className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">Vincular produto</Label>
- <div className="flex gap-2">
- <Select value={selectedBumpProduct} onValueChange={setSelectedBumpProduct}>
- <SelectTrigger className="flex-1 h-10 rounded-lg">
- <SelectValue placeholder="Selecione da sua biblioteca..." />
- </SelectTrigger>
- <SelectContent>
- {availableForBump.map(p => (
- <SelectItem key={p.id} value={p.id}>
- <span className="font-medium">{p.name}</span>
- <span className="text-muted-foreground ml-2 tabular-nums">R$ {Number(p.price).toFixed(2)}</span>
- </SelectItem>
- ))}
- </SelectContent>
- </Select>
- <Button onClick={addBump} disabled={!selectedBumpProduct} size="default" className="gap-1.5 rounded-lg h-10 px-4">
- <Plus className="h-4 w-4" /> Vincular
- </Button>
- </div>
- <p className="text-[11px] text-muted-foreground">
- Ofertas aparecem antes da finalização do pagamento. Adicione com 1 clique.
- </p>
- </div>
- )}
-
- {allProducts.length === 0 && orderBumps.length === 0 && (
- <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-8 text-center">
- <Package className="h-6 w-6 text-muted-foreground mx-auto mb-3" />
- <p className="text-sm font-semibold text-foreground">Sem produtos disponíveis</p>
- <p className="text-xs text-muted-foreground mt-1 mb-4">Cadastre outros produtos para vincular como ofertas</p>
- <a href="/vendas/produtos" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
- <Plus className="h-3.5 w-3.5" /> Cadastrar produto
- </a>
- </div>
- )}
- </TabsContent>
+              {allProducts.length === 0 && orderBumps.length === 0 && (
+                <div className="rounded-[16px] border border-dashed border-border bg-muted/30 px-5 py-8 text-center">
+                  <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-accent text-accent-foreground"><Package className="h-5 w-5" /></span>
+                  <p className="mt-3 text-[15px] font-bold text-foreground">Você ainda não tem outro produto ativo</p>
+                  <p className="mx-auto mt-0.5 max-w-[320px] text-[13.5px] leading-snug text-muted-foreground">Ative outro produto para poder oferecê-lo como order bump neste checkout.</p>
+                  <a href="/vendas/produtos" className="vp-ghost mt-5 !h-10 px-4 text-[13.5px]"><Plus className="h-4 w-4" />Ir para Produtos</a>
+                </div>
+              )}
+            </TabsContent>
+          </div>
         </Tabs>
 
-        <div className="sticky bottom-0 mt-6 px-6 py-4 border-t border-border/60 bg-card/95 backdrop-blur-md">
-          <Button onClick={handleSave} disabled={saving} className="w-full h-11 gradient-primary text-primary-foreground font-bold rounded-xl shadow-lg shadow-primary/20">
-            {saving ? "Salvando..." : "Salvar configurações"}
-          </Button>
+        <div className="border-t border-border bg-muted/40 px-5 py-4 sm:px-8">
+          <button type="button" onClick={handleSave} disabled={saving} className="vp-cta !h-12 w-full">
+            {saving ? <><Loader2 className="h-4 w-4 animate-spin" />Salvando…</> : "Salvar checkout"}
+          </button>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
 
-/* ─── Internal layout helpers ─── */
+/* ─── Auxiliares de layout ─── */
 
-function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
-  return (
-    <section className="space-y-2.5">
-      <div>
-        <h4 className="text-[12px] font-display font-bold text-foreground tracking-tight">{title}</h4>
-        {subtitle && <p className="text-[11px] text-muted-foreground/70 mt-0.5">{subtitle}</p>}
-      </div>
-      {children}
-    </section>
-  );
-}
+const BUTTON_PRESETS = ["#10b981", "#2563eb", "#f97316", "#8b5cf6", "#e11d48", "#111827"];
 
-function Row({ icon, title, description, children }: { icon: ReactNode; title: string; description?: string; children: ReactNode }) {
+function BumpStat({ label, value, green }: { label: string; value: string; green?: boolean }) {
   return (
-    <div className="flex items-center justify-between gap-3 px-3.5 py-3">
-      <div className="flex items-center gap-3 min-w-0">
-        <div className="h-7 w-7 rounded-lg bg-muted/40 border border-border/40 flex items-center justify-center shrink-0">{icon}</div>
-        <div className="min-w-0">
-          <p className="text-[13px] font-semibold text-foreground leading-tight">{title}</p>
-          {description && <p className="text-[11px] text-muted-foreground/70 mt-0.5 truncate">{description}</p>}
-        </div>
-      </div>
-      <div className="shrink-0">{children}</div>
+    <div className="min-w-0 px-3 py-3.5 sm:px-4">
+      <p className="text-[12.5px] leading-tight text-muted-foreground sm:text-[13px]">{label}</p>
+      <p className={cn("mt-1 truncate font-heading text-[17px] font-extrabold leading-tight tracking-[-0.03em] tabular-nums sm:text-[21px]", green ? "vp-green-ink" : "text-foreground")}>{value}</p>
     </div>
   );
 }
@@ -395,23 +390,22 @@ function BannerSlot({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
-    <div className="space-y-1.5">
-      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/70 font-bold">{label}</Label>
-      <input ref={inputRef} type="file" accept="image/*" onChange={onChange} className="hidden" />
+    <div className="min-w-0">
+      <p className="mb-2 text-[13.5px] font-semibold text-foreground">{label}</p>
+      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={onChange} className="hidden" />
       {preview ? (
-        <div className="relative rounded-xl overflow-hidden border border-border/60 bg-muted/20 aspect-[16/9]">
-          <img src={preview} alt={label} className="w-full h-full object-cover" />
-          <button type="button" onClick={onClear} className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-background/80 backdrop-blur flex items-center justify-center text-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors">
-            <X className="h-3 w-3" />
+        <div className="relative aspect-[16/9] overflow-hidden rounded-[16px] border border-border bg-muted">
+          <img src={preview} alt={`Banner para ${label.toLowerCase()}`} className="h-full w-full object-cover" />
+          <button type="button" onClick={onClear} aria-label={`Remover banner de ${label.toLowerCase()}`} className="absolute right-2 top-2 grid h-9 w-9 place-items-center rounded-full bg-card/95 text-foreground shadow-sm backdrop-blur transition-colors hover:bg-destructive hover:text-destructive-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+            <X className="h-4 w-4" />
           </button>
         </div>
       ) : (
-        <button type="button" onClick={onSelect} className="w-full aspect-[16/9] rounded-xl border-2 border-dashed border-border/60 hover:border-primary/40 hover:bg-primary/[0.02] flex flex-col items-center justify-center gap-1.5 text-muted-foreground hover:text-primary text-[11px] font-medium transition-colors">
-          <Upload className="h-4 w-4" />
+        <button type="button" onClick={onSelect} className="flex aspect-[16/9] w-full flex-col items-center justify-center gap-2 vp-r16 border border-dashed border-border bg-muted/30 text-[13.5px] font-semibold text-muted-foreground transition-colors hover:border-primary/50 hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+          <span className="grid h-10 w-10 place-items-center rounded-full bg-card text-foreground shadow-sm"><Upload className="h-[18px] w-[18px]" /></span>
           Enviar imagem
         </button>
       )}
     </div>
   );
 }
-

@@ -1,27 +1,17 @@
-import { motion } from "framer-motion";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  CheckCircle2,
-  Clock,
-  FileEdit,
-  Layers,
-  Loader2,
-  Package,
-  Plus,
-  Search,
-  Trash2,
-  X,
-  XCircle,
-} from "lucide-react";
+import { Loader2, Package, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { HDShell, HDHeader } from "@/components/hd/HDPage";
-
-
+import { Seo } from "@/components/Seo";
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
 import { ProductGridView } from "@/components/products/ProductGridView";
 import type { Product } from "@/components/products/productPresentation";
 import { getCheckoutLink, getEffectiveStatus, isCheckoutLive } from "@/components/products/productPresentation";
+import { PageHead } from "@/components/seller-ui/PageHead";
+import { SectionTabs } from "@/components/seller-ui/SectionTabs";
+import { FilterPills } from "@/components/seller-ui/FilterPills";
+import { SearchField } from "@/components/seller-ui/SearchField";
+import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,8 +25,6 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts } from "@/hooks/useQueryData";
 import { supabase } from "@/integrations/supabase/client";
-import { cn } from "@/lib/utils";
-
 
 type FilterTab = "all" | "active" | "draft" | "pending_review" | "inactive";
 
@@ -78,8 +66,14 @@ export default function Produtos() {
     return c;
   }, [productsWithStatus]);
 
+  // "Rascunho" na tela inclui produto ativo com dados faltando; só quem tem status "draft" no banco
+  // nunca foi publicado e pode ser apagado de vez. O resto pode ter histórico de vendas e fica de fora.
   const draftIds = useMemo(
-    () => productsWithStatus.filter((p) => p.eff === "draft").map((p) => p.product.id),
+    () => products.filter((p) => p.status === "draft").map((p) => p.id),
+    [products]
+  );
+  const incompleteActive = useMemo(
+    () => productsWithStatus.filter((p) => p.eff === "draft" && p.product.status !== "draft").length,
     [productsWithStatus]
   );
 
@@ -88,7 +82,7 @@ export default function Produtos() {
     { label: "Ativos", value: "active" as const, count: counts.active },
     { label: "Rascunhos", value: "draft" as const, count: counts.draft },
     { label: "Em revisão", value: "pending_review" as const, count: counts.pending_review },
-    { label: "Inativos", value: "inactive" as const, count: counts.inactive },
+    { label: "Pausados", value: "inactive" as const, count: counts.inactive },
   ];
 
   const handleEditProduct = useCallback((product: Product) => navigate(`/vendas/produtos/${product.id}/editar`), [navigate]);
@@ -139,7 +133,7 @@ export default function Produtos() {
     setClearingDrafts(false);
     setClearDraftsOpen(false);
     if (error) { toast.error("Erro ao limpar rascunhos"); return; }
-    toast.success(`${draftIds.length} rascunho(s) removido(s)`);
+    toast.success(draftIds.length === 1 ? "Rascunho excluído" : `${draftIds.length} rascunhos excluídos`);
     await loadProducts();
   };
 
@@ -194,196 +188,136 @@ export default function Produtos() {
   }), [handleCopyLink, handleDeleteProduct, handleEditProduct, handleOpenCheckout, handleOpenMembers, handleOpenPixels, handleDuplicate, handleToggleStatus]);
 
   const showClearDraftsBtn = tab === "draft" && draftIds.length > 0;
-
-  const tabIcon: Record<FilterTab, JSX.Element> = {
-    all: <Layers className="h-3 w-3" strokeWidth={2.5} />,
-    active: <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />,
-    draft: <FileEdit className="h-3 w-3" strokeWidth={2.5} />,
-    pending_review: <Clock className="h-3 w-3" strokeWidth={2.5} />,
-    inactive: <XCircle className="h-3 w-3" strokeWidth={2.5} />,
-  };
-
-  const tabAccent: Record<FilterTab, string> = {
-    all: "text-foreground",
-    active: "text-success",
-    draft: "text-muted-foreground",
-    pending_review: "text-warning",
-    inactive: "text-destructive",
-  };
+  const hasFilter = search.trim() !== "" || tab !== "all";
+  const goNew = () => navigate("/vendas/produtos/novo/editar");
 
   return (
-    <HDShell>
-      {/* ── Hero ── */}
-      <HDHeader
-        eyebrow={`${products.length} ${products.length === 1 ? "produto" : "produtos"} no catálogo`}
+    <div className="vp-fade space-y-5 pb-6 md:space-y-6">
+      <Seo title="Produtos | Vemprapay" description="Gerencie seu catálogo, checkouts e área de membros." path="/vendas/produtos" noindex />
+
+      <SectionTabs section="products" />
+      <PageHead
         title="Produtos"
-        subtitle="Gerencie seu catálogo, checkout e área de membros em um só lugar."
+        subtitle="Tudo o que você vende, com checkout, pixels e área de membros de cada produto."
         actions={
-          <div className="flex items-center gap-2">
+          <>
             {showClearDraftsBtn && (
-              <button
-                onClick={() => setClearDraftsOpen(true)}
-                className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl border border-border/60 bg-card px-3 text-[12px] font-medium text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" strokeWidth={2} />
-                <span className="hidden sm:inline">Limpar rascunhos</span>
-                <span className="tabular-nums">{draftIds.length}</span>
+              <button type="button" onClick={() => setClearDraftsOpen(true)} className="vp-ghost">
+                <Trash2 className="h-[18px] w-[18px]" strokeWidth={2} />
+                Limpar rascunhos
+                <span className="rounded-full bg-foreground/[0.07] px-1.5 text-[12px] font-bold tabular-nums">{draftIds.length}</span>
               </button>
             )}
-            <button
-              onClick={() => navigate("/vendas/produtos/novo/editar")}
-              className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-[12px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-            >
-              <Plus className="h-4 w-4" strokeWidth={2.25} />
+            <button type="button" onClick={goNew} className="vp-cta">
+              <Plus className="h-[18px] w-[18px]" strokeWidth={2.4} />
               Novo produto
             </button>
-          </div>
+          </>
         }
       />
 
-      {/* ── Filtros + busca ── */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="overflow-x-auto scrollbar-none">
-          <div role="tablist" className="flex min-w-full items-center border-b border-border lg:min-w-0">
-            {tabs.map((item) => {
-              const active = tab === item.value;
-              return (
-                <button
-                  key={item.value}
-                  onClick={() => setTab(item.value)}
-                  className={cn(
-                    "group relative inline-flex shrink-0 items-center gap-2 whitespace-nowrap px-4 pb-3 pt-2 text-[13px] font-semibold transition-colors",
-                    active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  <span className={cn("flex h-3.5 w-3.5 items-center justify-center", active ? "text-primary" : "text-muted-foreground/60 group-hover:text-primary")}>
-                    {tabIcon[item.value]}
-                  </span>
-                  {item.label}
-                  {item.count > 0 && (
-                    <span className={cn("min-w-[18px] rounded-full px-1.5 text-center font-mono text-[10px] leading-[18px] tabular-nums", active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
-                      {item.count}
-                    </span>
-                  )}
-                  {active && <motion.span layoutId="products-tab" transition={{ type: "spring", stiffness: 520, damping: 40 }} className="absolute inset-x-2 -bottom-px h-[2px] rounded-full bg-primary" />}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="relative w-full lg:w-72">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/45" size={15} />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar produto..."
-            className="h-10 w-full rounded-xl border border-border/60 bg-card pl-10 pr-9 text-[12.5px] font-medium text-foreground transition-colors placeholder:text-muted-foreground/40 focus:border-primary/30 focus:outline-none"
+      {/* Filtros e busca (só aparecem quando já existe catálogo) */}
+      {(products.length > 0 || productsLoading) && (
+        <div className="vp-sheet flex flex-col gap-3 px-5 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+          <FilterPills<FilterTab>
+            label="Filtrar produtos por situação"
+            value={tab}
+            options={tabs.map((t) => ({ value: t.value, label: t.label, count: t.count > 0 ? t.count : undefined }))}
+            onChange={setTab}
           />
-          {search && (
-            <button
-              onClick={() => setSearch("")}
-              aria-label="Limpar busca"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 transition-colors hover:text-foreground"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
+          <SearchField label="Buscar produtos" value={search} onChange={setSearch} placeholder="Nome ou descrição" className="lg:w-[320px] lg:shrink-0" />
         </div>
-      </div>
+      )}
 
-
-      {/* ── Catálogo ── */}
+      {/* Catálogo */}
       {productsLoading ? (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" aria-busy="true" aria-label="Carregando produtos">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="overflow-hidden rounded-[24px] border border-border/60 bg-card">
-              <div className="aspect-[16/9] w-full animate-pulse bg-muted/30" />
-              <div className="space-y-2.5 p-4">
-                <div className="h-3 w-3/4 animate-pulse rounded-full bg-muted/40" />
-                <div className="h-2.5 w-1/2 animate-pulse rounded-full bg-muted/25" />
-                <div className="h-4 w-24 animate-pulse rounded-full bg-muted/35" />
-                <div className="h-7 w-full animate-pulse rounded-full bg-muted/20" />
+            <div key={i} className="vp-sheet overflow-hidden">
+              <div className="vp-skel aspect-[16/10] w-full" />
+              <div className="space-y-3 p-5">
+                <div className="vp-skel h-5 w-3/4 rounded-full" />
+                <div className="vp-skel h-4 w-1/3 rounded-full" />
+                <div className="vp-skel h-8 w-1/2 rounded-full" />
+                <div className="vp-skel h-10 w-full rounded-full" />
               </div>
             </div>
           ))}
         </div>
-
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-[24px] border border-dashed border-border/60 bg-card px-6 py-20 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-[12px] border border-border/60 bg-muted/30">
-            <Package className="h-6 w-6 text-muted-foreground/50" strokeWidth={1.5} />
-          </div>
-          <p className="mt-5 text-[14px] font-black text-foreground">
-            {search || tab !== "all" ? "Nenhum resultado encontrado" : "Comece seu catálogo"}
-          </p>
-          <p className="mt-1.5 max-w-[320px] text-[12.5px] leading-relaxed text-muted-foreground/70">
-            {search || tab !== "all"
-              ? "Ajuste os filtros ou o termo de busca para encontrar o que procura."
-              : "Crie seu primeiro produto, configure o checkout e comece a faturar hoje mesmo."}
-          </p>
-          {!search && tab === "all" && (
-            <button
-              onClick={() => navigate("/vendas/produtos/novo/editar")}
-              className="mt-6 inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-[12px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-            >
-              <Plus className="h-4 w-4" strokeWidth={2.25} />
-              Criar primeiro produto
-            </button>
+        <div className="vp-sheet">
+          {hasFilter ? (
+            <EmptyPanel
+              icon={<Package className="h-7 w-7" />}
+              title="Nenhum produto encontrado"
+              text="Nada bate com esse filtro ou busca. Limpe os filtros para ver o catálogo inteiro."
+              action={<button type="button" className="vp-ghost" onClick={() => { setSearch(""); setTab("all"); }}>Limpar filtros</button>}
+            />
+          ) : (
+            <EmptyPanel
+              icon={<Package className="h-7 w-7" />}
+              title="Seu catálogo está vazio"
+              text="Crie o primeiro produto, defina preço e entrega e publique o checkout para começar a vender."
+              action={<button type="button" className="vp-cta" onClick={goNew}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} />Criar primeiro produto</button>}
+            />
           )}
         </div>
       ) : (
-        <ProductGridView
-          copiedId={copiedId}
-          products={filtered}
-          {...menuHandlers}
-        />
-
+        <ProductGridView copiedId={copiedId} products={filtered} {...menuHandlers} />
       )}
 
-
-
-      {/* ── Dialogs ── */}
+      {/* Pixels e rastreamento */}
       {pixelProduct && (
         <PixelSettingsDialog product={pixelProduct} open={!!pixelProduct} onOpenChange={(open) => { if (!open) setPixelProduct(null); }} />
       )}
 
-      {/* Delete single product */}
-      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
-        <AlertDialogContent className="max-w-sm rounded-xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-base font-semibold">Excluir produto</AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px] text-muted-foreground">Tem certeza? Esta ação não pode ser desfeita.</AlertDialogDescription>
+      {/* Excluir um produto */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open && !deleting) setDeleteTarget(null); }}>
+        <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
+          <AlertDialogHeader className="space-y-2 text-left">
+            <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive"><Trash2 className="h-5 w-5" /></span>
+            <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">Excluir este produto?</AlertDialogTitle>
+            <AlertDialogDescription className="text-[14.5px] leading-relaxed">
+              <span className="block break-words font-semibold text-foreground">{products.find((p) => p.id === deleteTarget)?.name}</span>
+              O produto sai do catálogo e o checkout deixa de abrir. O histórico das vendas já feitas continua guardado.
+            </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting} className="h-9 rounded-lg text-[13px]">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} disabled={deleting} className="h-9 gap-1.5 rounded-lg bg-destructive text-[13px] text-destructive-foreground hover:bg-destructive/90">
-              {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-              {deleting ? "Excluindo…" : "Excluir"}
+          <AlertDialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <AlertDialogCancel disabled={deleting} className="vp-ghost m-0 h-11 border-border">Manter produto</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} disabled={deleting} className="vp-cta vp-cta-danger h-11">
+              {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {deleting ? "Excluindo…" : "Excluir produto"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Clear all drafts */}
-      <AlertDialog open={clearDraftsOpen} onOpenChange={setClearDraftsOpen}>
-        <AlertDialogContent className="max-w-sm rounded-xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-base font-semibold">Limpar todos os rascunhos</AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px] text-muted-foreground">
-              Você está prestes a excluir <span className="font-bold text-destructive">{draftIds.length} rascunho(s)</span> que ainda não foram finalizados. Esta ação não pode ser desfeita.
+      {/* Limpar rascunhos */}
+      <AlertDialog open={clearDraftsOpen} onOpenChange={(open) => { if (!clearingDrafts) setClearDraftsOpen(open); }}>
+        <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
+          <AlertDialogHeader className="space-y-2 text-left">
+            <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive"><Trash2 className="h-5 w-5" /></span>
+            <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">
+              Excluir {draftIds.length} {draftIds.length === 1 ? "rascunho" : "rascunhos"}?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[14.5px] leading-relaxed">
+              São produtos que você não terminou de criar e que nunca foram publicados. Eles somem de vez e não dá para desfazer.
+              {incompleteActive > 0 && (
+                <span className="mt-2 block text-muted-foreground">
+                  {incompleteActive === 1 ? "1 produto ativo com dados faltando fica de fora" : `${incompleteActive} produtos ativos com dados faltando ficam de fora`}, porque pode haver vendas ligadas a {incompleteActive === 1 ? "ele" : "eles"}. Edite ou exclua {incompleteActive === 1 ? "esse produto" : "esses produtos"} um por um.
+                </span>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={clearingDrafts} className="h-9 rounded-lg text-[13px]">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmClearDrafts} disabled={clearingDrafts} className="h-9 gap-1.5 rounded-lg bg-destructive text-[13px] text-destructive-foreground hover:bg-destructive/90">
-              {clearingDrafts && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-              {clearingDrafts ? "Limpando…" : `Excluir ${draftIds.length}`}
+          <AlertDialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <AlertDialogCancel disabled={clearingDrafts} className="vp-ghost m-0 h-11 border-border">Manter rascunhos</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmClearDrafts} disabled={clearingDrafts} className="vp-cta vp-cta-danger h-11">
+              {clearingDrafts && <Loader2 className="h-4 w-4 animate-spin" />}
+              {clearingDrafts ? "Excluindo…" : draftIds.length === 1 ? "Excluir rascunho" : `Excluir ${draftIds.length} rascunhos`}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </HDShell>
+    </div>
   );
 }

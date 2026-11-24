@@ -25,7 +25,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import type { Product } from "./productPresentation";
-import { getEffectiveStatus, isCheckoutLive } from "./productPresentation";
+import { formatCurrency, getEffectiveStatus, isCheckoutLive } from "./productPresentation";
 
 export type ProductMenuHandlers = {
   onCopyLink: (product: Product) => void;
@@ -84,7 +84,7 @@ export function ProductActionsMenu({
           { icon: ExternalLink, label: "Abrir checkout", action: () => onOpenCheckout(product) },
         ]
       : []),
-    { icon: Crosshair, label: "Pixels & tracking", action: () => onOpenPixels(product) },
+    { icon: Crosshair, label: "Pixels e rastreamento", action: () => onOpenPixels(product) },
   ];
 
   const labeledTrigger = Boolean(triggerLabel);
@@ -96,14 +96,14 @@ export function ProductActionsMenu({
         key={row.label}
         onClick={row.action}
         className={cn(
-          "group flex h-11 cursor-pointer items-center gap-3 rounded-xl px-2.5 text-[13px] font-semibold outline-none transition-colors",
+          "group flex h-12 cursor-pointer items-center gap-3 rounded-[16px] px-2.5 text-[14.5px] font-semibold outline-none transition-colors",
           isDestructive
             ? "text-destructive focus:bg-destructive/10 data-[highlighted]:bg-destructive/10"
             : "text-foreground/85 focus:bg-muted data-[highlighted]:bg-muted focus:text-foreground",
         )}
       >
-        <span className={cn("grid h-8 w-8 shrink-0 place-items-center rounded-lg transition-colors", isDestructive ? "bg-destructive/10 text-destructive" : "bg-secondary text-muted-foreground group-data-[highlighted]:bg-primary group-data-[highlighted]:text-primary-foreground")}>
-          <row.icon className="h-4 w-4" strokeWidth={2} />
+        <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors", isDestructive ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground group-data-[highlighted]:bg-primary group-data-[highlighted]:text-primary-foreground")}>
+          <row.icon className="h-[18px] w-[18px]" strokeWidth={2} />
         </span>
         <span className="truncate">{row.label}</span>
       </DropdownMenuItem>
@@ -116,15 +116,16 @@ export function ProductActionsMenu({
         <button
           type="button"
           onClick={(e) => e.stopPropagation()}
+          aria-label={triggerLabel ? undefined : "Mais ações do produto"}
           className={cn(
-            "group relative flex items-center justify-center rounded-xl border border-border/60 bg-card transition-all duration-200",
+            "group relative flex items-center justify-center transition-colors",
             labeledTrigger
-              ? "h-10 gap-2 px-4 text-[11px] font-semibold text-foreground/80 hover:border-primary/40 hover:bg-muted/40 active:scale-[0.98]"
-              : "h-10 w-10 text-muted-foreground hover:border-primary/40 hover:bg-muted/40 hover:text-foreground active:scale-95",
+              ? "vp-ghost h-10 gap-2 px-4 text-[13.5px]"
+              : "h-10 w-10 rounded-full text-muted-foreground hover:bg-accent hover:text-accent-foreground",
             triggerClassName,
           )}
         >
-          <MoreHorizontal className={labeledTrigger ? "h-3.5 w-3.5" : "h-4 w-4"} strokeWidth={2.25} />
+          <MoreHorizontal className={labeledTrigger ? "h-4 w-4" : "h-[18px] w-[18px]"} strokeWidth={2.25} />
           {triggerLabel && <span>{triggerLabel}</span>}
         </button>
       </DropdownMenuTrigger>
@@ -133,26 +134,26 @@ export function ProductActionsMenu({
         align="end"
         side="bottom"
         sideOffset={6}
-        className="w-64 rounded-2xl border border-border bg-popover p-2 shadow-lg"
+        className="w-72 rounded-[22px] border border-border bg-popover p-2 shadow-[0_24px_48px_-24px_hsl(222_47%_11%/.35)]"
       >
-        <div className="px-2 pb-1.5 pt-1">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Ações do produto</p>
-          <p className="truncate text-[13px] font-bold text-foreground">
+        <div className="px-3 pb-2 pt-2">
+          <p className="truncate font-heading text-[16px] font-extrabold tracking-[-0.02em] text-foreground">
             {product.name || "Sem nome"}
           </p>
+          <p className="text-[13px] text-muted-foreground">{formatCurrency(Number(product.price))}</p>
         </div>
-        <DropdownMenuSeparator className="my-1 bg-border/60" />
+        <DropdownMenuSeparator className="my-1 bg-border" />
 
         {manage.map(renderRow)}
 
         {distribute.length > 0 && (
           <>
-            <DropdownMenuSeparator className="my-1 bg-border/60" />
+            <DropdownMenuSeparator className="my-1 bg-border" />
             {distribute.map(renderRow)}
           </>
         )}
 
-        <DropdownMenuSeparator className="my-1 bg-border/60" />
+        <DropdownMenuSeparator className="my-1 bg-border" />
         {renderRow({
           icon: Trash2,
           label: "Excluir produto",

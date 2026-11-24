@@ -5483,3 +5483,22 @@ html.vp-seller input.vp-field-lg:not([type="checkbox"]):not([type="radio"]):not(
 html.vp-seller input.vp-field[aria-invalid="true"]:not([type="checkbox"]):not([type="radio"]):not([type="range"]) { border-color: hsl(var(--destructive)); }
 html.vp-seller input.vp-field[aria-invalid="true"]:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus { box-shadow: 0 0 0 3px hsl(var(--destructive) / .18); }
 html.vp-seller .vp-cta.vp-cta-danger { background: hsl(var(--destructive)); color: hsl(var(--destructive-foreground)); box-shadow: 0 12px 24px -14px hsl(var(--destructive) / .7), inset 0 1px 0 hsl(0 0% 100% / .22); }
+
+/* ── Raios do seller em botões, selects e diálogos ──
+   As regras legadas forçam 8–12px com !important em botões e em .rounded-2xl/.rounded-xl (e adicionam borda).
+   Estas classes ganham por especificidade e valem também em portais (diálogos e menus ficam fora do shell). */
+html.vp-seller .vp-r10 { border-radius: 10px !important; }
+html.vp-seller .vp-r12 { border-radius: 12px !important; }
+html.vp-seller .vp-r16 { border-radius: 16px !important; }
+html.vp-seller .vp-r22 { border-radius: 22px !important; }
+html.vp-seller [role="dialog"][class*="rounded-[28px]"], html.vp-seller [role="alertdialog"][class*="rounded-[28px]"] { border-radius: 28px !important; }
+
+/* ── Fundo escurecido dos popups do seller ──
+   Uma regra legada zera todo .fixed.inset-0[aria-hidden]; o Radix marca o fundo do diálogo assim, então nenhum popup escurecia a tela.
+   Aqui o fundo volta, com a mesma cor em Dialog, AlertDialog e Sheet, e entra suave. */
+html.vp-seller .fixed.inset-0[aria-hidden="true"][data-state="open"] {
+  opacity: 1 !important; background-color: hsl(222 47% 11% / .45); animation: vp-scrim .2s ease-out both;
+}
+html.vp-noir .fixed.inset-0[aria-hidden="true"][data-state="open"] { background-color: hsl(0 0% 0% / .62); }
+@keyframes vp-scrim { from { background-color: hsl(222 47% 11% / 0); } }
+@media (prefers-reduced-motion: reduce) { html.vp-seller .fixed.inset-0[aria-hidden="true"][data-state="open"] { animation: none; } }

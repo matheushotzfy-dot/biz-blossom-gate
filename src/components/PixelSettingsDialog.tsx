@@ -1,22 +1,20 @@
 /**
- * Pixel Settings Dialog — Billion-Dollar SaaS v6
- * Two-column layout: platform rail (left) + workspace (right).
- * 100% solid, sharp borders, no glassmorphism. GA4 removed.
+ * Pixels e rastreamento do produto.
+ * Duas colunas no desktop (plataformas à esquerda, pixels à direita); no celular as plataformas viram uma faixa no topo.
+ * Visual do painel do seller (pílulas, cantos grandes, verde da marca); a lógica de pixels não mudou.
  */
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
-  Crosshair, Plus, Trash2, Radio, Settings2, Zap,
-  ChevronDown, Sparkles, CircleCheck, Hash, Key, Globe2,
-  X, ShieldCheck, Activity, BookOpen, ExternalLink,
-  type LucideIcon,
+  Crosshair, Plus, Trash2, Radio, Settings2,
+  ChevronDown, Sparkles, Check, BookOpen, ExternalLink,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DialogHead, FieldHint, FieldLabel, FormSection, GroupBox, ChoiceChip, dialogShell } from "@/components/seller-ui/form";
+import { StatusPill } from "@/components/seller-ui/tx";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -108,12 +106,16 @@ const PLATFORMS: PlatformMeta[] = [
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
+const orb = "grid shrink-0 place-items-center rounded-full";
+const iconBtn = "grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
+
 export default function PixelSettingsDialog({ product, open, onOpenChange }: Props) {
   const { user } = useAuth();
   const [activePlatform, setActivePlatform] = useState<Platform>("facebook");
   const [pixels, setPixels] = useState<Pixel[]>([]);
   const [loading, setLoading] = useState(false);
   const [expandedPixel, setExpandedPixel] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   const [newPixelId, setNewPixelId] = useState("");
   const [newApiToken, setNewApiToken] = useState("");
@@ -161,9 +163,9 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
   }, [pixels]);
 
   const addPixel = async () => {
-    if (!newPixelId.trim()) { toast.error("Pixel ID é obrigatório"); return; }
+    if (!newPixelId.trim()) { toast.error("Informe o ID do pixel"); return; }
     const events = newEventMode === "all" ? ALL_EVENTS : newSelectedEvents;
-    if (events.length === 0) { toast.error("Selecione pelo menos um evento"); return; }
+    if (events.length === 0) { toast.error("Escolha pelo menos um evento"); return; }
     const { error } = await supabase.from("product_pixels").insert({
       product_id: product.id, user_id: user!.id, platform: activePlatform,
       pixel_id: newPixelId.trim(), api_token: newApiToken.trim() || null,
@@ -171,8 +173,8 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
       fire_on_pix_qr: false, fire_on_boleto: false,
       pix_conversion_value: 100, boleto_conversion_value: 100, disable_bump_events: false,
     });
-    if (error) { toast.error("Erro ao adicionar pixel"); return; }
-    toast.success(`Pixel ${platform.short} adicionado`);
+    if (error) { toast.error("Não foi possível adicionar o pixel"); return; }
+    toast.success(`Pixel do ${platform.short} adicionado`);
     setNewPixelId(""); setNewApiToken(""); setNewDomain("");
     setNewEventMode("all"); setNewSelectedEvents([...ALL_EVENTS]);
     loadPixels();
@@ -181,6 +183,7 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
   const removePixel = async (id: string) => {
     await supabase.from("product_pixels").delete().eq("id", id).eq("user_id", user!.id);
     setPixels(prev => prev.filter(p => p.id !== id));
+    setRemovingId(null);
     toast.success("Pixel removido");
   };
 
@@ -204,201 +207,99 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
   };
 
   const totalActive = pixels.filter(p => p.is_active).length;
+  const pluralize = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[1080px] w-[96vw] max-h-[92vh] overflow-hidden flex flex-col p-0 rounded-xl border border-border bg-card gap-0">
-        {/* ═══ HEADER ═══ */}
-        <div className="relative border-b border-border bg-card px-7 py-4">
-          <button
-            onClick={() => onOpenChange(false)}
-            className="absolute top-3.5 right-3.5 h-7 w-7 rounded-md border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-            aria-label="Fechar"
+      <DialogContent className={cn(dialogShell, "flex max-h-[92vh] w-[calc(100vw-1rem)] max-w-[1040px] flex-col")}>
+        <DialogHead
+          icon={<Crosshair className="h-5 w-5" strokeWidth={2.2} />}
+          title="Pixels e rastreamento"
+          subtitle={product.name || "Produto sem nome"}
+          aside={
+            <div className="flex items-center gap-7">
+              <HeadStat value={pixels.length} label={pixels.length === 1 ? "pixel" : "pixels"} />
+              <HeadStat value={totalActive} label={totalActive === 1 ? "ativo" : "ativos"} green />
+            </div>
+          }
+        />
+
+        <div className="flex h-[min(700px,calc(92dvh-7.5rem))] shrink-0 flex-col md:flex-row">
+          {/* Plataformas */}
+          <nav
+            aria-label="Plataformas de anúncio"
+            className="scrollbar-none flex shrink-0 gap-1.5 overflow-x-auto border-b border-border px-4 py-3 md:w-[240px] md:flex-col md:overflow-y-auto md:border-b-0 md:border-r md:p-4"
           >
-            <X className="h-3.5 w-3.5" />
-          </button>
-
-          <div className="flex items-center gap-3.5">
-            <div className="relative h-9 w-9 rounded-md border border-border bg-background flex items-center justify-center shrink-0">
-              <Crosshair className="h-4 w-4 text-primary" strokeWidth={2.2} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <h2 className="text-[14px] font-display font-black tracking-[-0.01em] text-foreground leading-none">
-                  Pixels & Conversão
-                </h2>
-                <span className="h-3 w-px bg-border" />
-                <span className="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground truncate max-w-[320px]">
-                  {product.name}
-                </span>
-                <span
-                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8.5px] font-display font-black uppercase tracking-[0.14em] border bg-success/10 border-success/30 text-success"
-                  title="Server-Side Conversions API ativo"
+            {PLATFORMS.map(p => {
+              const isActive = activePlatform === p.id;
+              const stats = platformStats[p.id];
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() => { setActivePlatform(p.id); setExpandedPixel(null); setRemovingId(null); }}
+                  className={cn(
+                    "flex shrink-0 items-center gap-3 vp-r16 px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:w-full",
+                    isActive ? "bg-accent ring-1 ring-primary/30" : "hover:bg-muted",
+                  )}
                 >
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+                  <span className={cn(orb, "h-10 w-10 border border-border bg-card")}>
+                    <p.LogoComp className="h-[18px] w-[18px]" style={{ color: isActive ? p.brandColor : "hsl(var(--muted-foreground))" }} />
                   </span>
-                  Live
-                </span>
+                  <span className="min-w-0 pr-1">
+                    <span className={cn("block truncate text-[14.5px] font-bold leading-tight", isActive ? "text-accent-foreground" : "text-foreground")}>{p.short}</span>
+                    <span className="mt-0.5 block whitespace-nowrap text-[12.5px] text-muted-foreground">
+                      {stats.total === 0 ? "Nenhum pixel" : stats.active > 0 ? `${pluralize(stats.active, "ativo", "ativos")} de ${stats.total}` : pluralize(stats.total, "pixel pausado", "pixels pausados")}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Pixels da plataforma */}
+          <div className="min-h-0 flex-1 space-y-8 overflow-y-auto px-5 py-6 sm:px-8">
+            <div className="flex items-center gap-4">
+              <span className={cn(orb, "h-14 w-14 border border-border bg-card")}>
+                <platform.LogoComp className="h-6 w-6" style={{ color: platform.brandColor }} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <h3 className="truncate font-heading text-[20px] font-extrabold leading-tight tracking-[-0.03em] text-foreground">{platform.label}</h3>
+                <p className="mt-0.5 text-[13.5px] text-muted-foreground">{platform.tagline}</p>
               </div>
-              <p className="mt-1 text-[11px] text-muted-foreground leading-snug font-display">
-                Disparos sincronizados browser ↔ servidor com <span className="font-mono text-foreground/80">eventID</span> compartilhado para deduplicação.
-              </p>
+              <div className="hidden shrink-0 sm:block">
+                <a href={platform.docsUrl} target="_blank" rel="noopener noreferrer" className="vp-ghost !h-10 px-4 text-[13.5px]">
+                  <BookOpen className="h-4 w-4" />
+                  Guia
+                  <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                </a>
+              </div>
             </div>
 
-            <div className="hidden md:flex items-stretch border border-border rounded-md overflow-hidden bg-background shrink-0 mr-10">
-              <KpiCell label="Pixels" value={pixels.length} />
-              <KpiCell label="Ativos" value={totalActive} accent="success" />
-              <KpiCell label={platform.short} value={platformPixels.length} accent="primary" />
-            </div>
-          </div>
-        </div>
-
-
-        {/* ═══ BODY (rail + workspace) ═══ */}
-        <div className="flex-1 flex min-h-0 overflow-hidden">
-          {/* PLATFORM RAIL */}
-          <aside className="w-[220px] shrink-0 border-r border-border bg-background/40 overflow-y-auto py-3">
-            <div className="px-4 pb-2 text-[9.5px] font-display font-black uppercase tracking-[0.2em] text-muted-foreground/70">
-              Plataformas
-            </div>
-            <nav className="px-2 space-y-1">
-              {PLATFORMS.map(p => {
-                const isActive = activePlatform === p.id;
-                const stats = platformStats[p.id];
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => { setActivePlatform(p.id); setExpandedPixel(null); }}
-                    className={cn(
-                      "relative w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors border",
-                      isActive
-                        ? "bg-card border-border"
-                        : "bg-transparent border-transparent hover:bg-card hover:border-border/60"
-                    )}
-                  >
-                    {isActive && (
-                      <span
-                        className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r"
-                        style={{ backgroundColor: p.brandColor }}
-                      />
-                    )}
-                    <div
-                      className={cn(
-                        "h-8 w-8 rounded-md border border-border flex items-center justify-center shrink-0 bg-background"
-                      )}
-                    >
-                      <p.LogoComp
-                        className={cn("h-4 w-4", isActive ? "" : "opacity-70")}
-                        style={{ color: isActive ? p.brandColor : "hsl(var(--muted-foreground))" }}
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className={cn(
-                        "text-[12px] font-display font-bold leading-tight truncate",
-                        isActive ? "text-foreground" : "text-muted-foreground"
-                      )}>{p.short}</p>
-                      <p className="text-[9.5px] font-display text-muted-foreground/70 tabular-nums mt-0.5">
-                        {stats.total} pixel{stats.total !== 1 ? "s" : ""}
-                        {stats.active > 0 && <> · <span className="text-success font-bold">{stats.active} on</span></>}
-                      </p>
-                    </div>
-                    {stats.total > 0 && (
-                      <span className={cn(
-                        "inline-flex items-center justify-center min-w-[22px] h-[18px] px-1.5 rounded text-[9.5px] font-numbers font-black tabular-nums border",
-                        stats.active > 0
-                          ? "bg-success/10 border-success/30 text-success"
-                          : "bg-muted/40 border-border text-muted-foreground"
-                      )}>
-                        {stats.total}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-
-          </aside>
-
-          {/* WORKSPACE */}
-          <div className="flex-1 overflow-y-auto bg-background/20">
-            {/* Brand hero */}
-            <div
-              className="border-b border-border px-7 py-5 relative overflow-hidden"
-              style={{
-                backgroundImage: `linear-gradient(90deg, ${platform.brandColor}0E 0%, transparent 55%)`,
-              }}
+            <FormSection
+              title="Pixels configurados"
+              subtitle={`Cada pixel dispara os eventos escolhidos quando alguém passa pelo checkout deste produto.`}
+              aside={<span className="rounded-full bg-muted px-3 py-1 text-[13px] font-bold tabular-nums text-muted-foreground">{platformPixels.length}</span>}
             >
-              <span
-                className="absolute left-0 top-0 bottom-0 w-[3px]"
-                style={{ backgroundColor: platform.brandColor }}
-              />
-              <div className="flex items-center gap-4">
-                <div
-                  className="h-12 w-12 rounded-md border flex items-center justify-center shrink-0 bg-card"
-                  style={{ borderColor: `${platform.brandColor}38` }}
-                >
-                  <platform.LogoComp className="h-5 w-5" style={{ color: platform.brandColor }} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-[15px] font-display font-black tracking-[-0.01em] text-foreground leading-none">
-                      {platform.label}
-                    </h3>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground mt-1.5 font-display">
-                    {platform.tagline}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="px-7 py-5 space-y-5">
-              {/* Section title */}
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground">
-                  Pixels Configurados
-                </span>
-                <span className="h-px flex-1 bg-border" />
-                <span className="font-numbers text-[10px] font-black text-muted-foreground tabular-nums">
-                  {platformPixels.length.toString().padStart(2, "0")}
-                </span>
-              </div>
-
-              {/* Pixel list */}
               {loading ? (
-                <div className="space-y-2">
-                  {[0, 1].map(i => (
-                    <div key={i} className="h-[68px] rounded-md border border-border bg-card animate-pulse" />
-                  ))}
+                <div className="space-y-2.5" aria-busy="true" aria-label="Carregando pixels">
+                  {[0, 1].map(i => <div key={i} className="vp-skel h-[72px] rounded-[16px]" />)}
                 </div>
               ) : platformPixels.length === 0 ? (
-                <div className="border border-dashed border-border rounded-md py-8 px-5 flex items-center gap-4 bg-card">
-                  <div
-                    className="h-10 w-10 rounded-md border flex items-center justify-center shrink-0"
-                    style={{
-                      borderColor: `${platform.brandColor}30`,
-                      backgroundColor: `${platform.brandColor}0A`,
-                    }}
-                  >
-                    <Radio className="h-4 w-4" style={{ color: platform.brandColor }} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[12.5px] font-display font-bold text-foreground leading-tight">
-                      Nenhum pixel {platform.short} configurado
-                    </p>
-                    <p className="text-[10.5px] text-muted-foreground mt-1 leading-relaxed font-display">
-                      Preencha o formulário abaixo para começar a disparar conversões para esta plataforma.
-                    </p>
+                <div className="flex items-center gap-4 rounded-[16px] border border-dashed border-border bg-muted/30 px-5 py-6">
+                  <span className={cn(orb, "h-12 w-12 bg-accent text-accent-foreground")}><Radio className="h-5 w-5" /></span>
+                  <div className="min-w-0">
+                    <p className="text-[15px] font-bold text-foreground">Nenhum pixel do {platform.short} neste produto</p>
+                    <p className="mt-0.5 text-[13.5px] leading-snug text-muted-foreground">Preencha o formulário logo abaixo para começar a enviar conversões.</p>
                   </div>
                 </div>
               ) : (
-
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <AnimatePresence initial={false}>
                     {platformPixels.map((px) => {
                       const isExpanded = expandedPixel === px.id;
+                      const confirming = removingId === px.id;
                       const activeEvents = (px.events || []).length;
                       return (
                         <motion.div
@@ -408,58 +309,59 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -4 }}
                           transition={{ duration: 0.22, ease }}
-                          className={cn(
-                            "rounded-md border bg-card overflow-hidden",
-                            isExpanded ? "border-primary/40" : "border-border"
-                          )}
+                          className={cn("overflow-hidden rounded-[16px] border bg-card", isExpanded ? "border-primary/45" : "border-border")}
                         >
-                          <div className="flex items-center gap-3 px-4 py-3">
-                            <div className="h-9 w-9 rounded-md border border-border flex items-center justify-center shrink-0 bg-background">
-                              <platform.LogoComp
-                                className="h-4 w-4"
-                                style={{ color: px.is_active ? platform.brandColor : "hsl(var(--muted-foreground))" }}
-                              />
-                            </div>
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3.5 sm:flex-nowrap">
+                            <span className={cn(orb, "h-11 w-11 bg-muted")}>
+                              <platform.LogoComp className="h-5 w-5" style={{ color: px.is_active ? platform.brandColor : "hsl(var(--muted-foreground))" }} />
+                            </span>
 
                             <button
+                              type="button"
                               onClick={() => setExpandedPixel(isExpanded ? null : px.id)}
-                              className="flex-1 min-w-0 text-left"
+                              aria-expanded={isExpanded}
+                              className="min-w-0 basis-[calc(100%-3.5rem)] rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:flex-1 sm:basis-auto"
                             >
-                              <div className="flex items-center gap-2">
-                                <p className="font-mono text-[12px] font-bold text-foreground truncate">{px.pixel_id}</p>
-                                <StatusDot active={px.is_active} />
-                              </div>
-                              <div className="mt-0.5 flex items-center gap-1.5 text-[10.5px] text-muted-foreground font-display">
-                                <span className="tabular-nums">{activeEvents} evento{activeEvents !== 1 ? "s" : ""}</span>
-                                {px.has_api_token && <><Dot /><span>API Token protegido</span></>}
-                                {px.fire_on_pix_qr && <><Dot /><span className="text-success font-bold">PIX QR</span></>}
-                                {px.fire_on_boleto && <><Dot /><span className="text-success font-bold">Boleto</span></>}
-                              </div>
+                              <span className="flex flex-wrap items-center gap-2">
+                                <span className="truncate font-mono text-[14px] font-bold text-foreground">{px.pixel_id}</span>
+                                <StatusPill label={px.is_active ? "Ativo" : "Pausado"} tone={px.is_active ? "ok" : "idle"} />
+                              </span>
+                              <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[13px] text-muted-foreground">
+                                <span className="tabular-nums">{pluralize(activeEvents, "evento", "eventos")}</span>
+                                {px.has_api_token && <span>Token protegido</span>}
+                                {px.fire_on_pix_qr && <span className="font-semibold vp-green-ink">Compra no QR Code Pix</span>}
+                                {px.fire_on_boleto && <span className="font-semibold vp-green-ink">Compra no boleto</span>}
+                              </span>
                             </button>
 
-                            <div className="flex items-center gap-1">
-                              <Switch
-                                checked={px.is_active}
-                                onCheckedChange={v => updatePixelSettings(px.id, { is_active: v })}
-                              />
-                              <button
-                                className="h-8 w-8 rounded-md border border-transparent hover:border-destructive/30 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors"
-                                onClick={() => removePixel(px.id)}
-                                aria-label="Remover pixel"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
-                              <button
-                                onClick={() => setExpandedPixel(isExpanded ? null : px.id)}
-                                className={cn(
-                                  "h-8 w-8 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all",
-                                  isExpanded && "rotate-180 bg-muted/40 text-foreground"
-                                )}
-                                aria-label="Expandir"
-                              >
-                                <ChevronDown className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
+                            {confirming ? (
+                              <div className="flex w-full items-center justify-end gap-2 sm:w-auto" role="group" aria-label="Confirmar remoção do pixel">
+                                <span className="mr-1 text-[13.5px] font-semibold text-foreground">Remover este pixel?</span>
+                                <button type="button" className="vp-ghost !h-10 px-4 text-[13.5px]" onClick={() => setRemovingId(null)}>Manter</button>
+                                <button type="button" className="vp-cta vp-cta-danger !h-10 px-4 text-[13.5px]" onClick={() => removePixel(px.id)}>Remover</button>
+                              </div>
+                            ) : (
+                              <div className="flex w-full items-center justify-end gap-1 sm:w-auto">
+                                <Switch
+                                  checked={px.is_active}
+                                  onCheckedChange={v => updatePixelSettings(px.id, { is_active: v })}
+                                  aria-label={px.is_active ? "Pausar pixel" : "Ativar pixel"}
+                                  className="mr-1"
+                                />
+                                <button type="button" className={cn(iconBtn, "hover:!bg-destructive/10 hover:!text-destructive")} onClick={() => setRemovingId(px.id)} aria-label="Remover pixel" title="Remover pixel">
+                                  <Trash2 className="h-[18px] w-[18px]" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setExpandedPixel(isExpanded ? null : px.id)}
+                                  className={iconBtn}
+                                  aria-label={isExpanded ? "Recolher ajustes" : "Abrir ajustes"}
+                                  title={isExpanded ? "Recolher ajustes" : "Abrir ajustes"}
+                                >
+                                  <ChevronDown className={cn("h-[18px] w-[18px] transition-transform duration-200", isExpanded && "rotate-180")} />
+                                </button>
+                              </div>
+                            )}
                           </div>
 
                           <AnimatePresence initial={false}>
@@ -471,61 +373,51 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
                                 transition={{ duration: 0.22, ease }}
                                 className="overflow-hidden"
                               >
-                                <div className="border-t border-border px-4 py-4 space-y-5 bg-background/40">
-                                  <div>
-                                    <SectionLabel icon={Zap}>Eventos Rastreados</SectionLabel>
-                                    <div className="flex flex-wrap gap-1.5">
+                                <div className="space-y-6 border-t border-border bg-muted/30 px-4 py-5 sm:px-5">
+                                  <FormSection title="Eventos enviados" subtitle="Toque para ligar ou desligar cada evento deste pixel.">
+                                    <div className="flex flex-wrap gap-2">
                                       {ALL_EVENTS.map(event => {
                                         const active = (px.events || []).includes(event);
                                         return (
-                                          <button
-                                            key={event}
-                                            type="button"
-                                            onClick={() => togglePixelEvent(px.id, event)}
-                                            className={cn(
-                                              "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10.5px] font-display font-bold transition-colors border",
-                                              active
-                                                ? "bg-primary/10 border-primary/30 text-primary"
-                                                : "bg-card border-border text-muted-foreground hover:text-foreground"
-                                            )}
-                                          >
-                                            {active && <CircleCheck className="h-3 w-3" />}
+                                          <ChoiceChip key={event} active={active} onClick={() => togglePixelEvent(px.id, event)} className={active ? "!bg-accent !text-accent-foreground !border-primary/40" : "bg-card"}>
+                                            {active && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
                                             {event}
-                                          </button>
+                                          </ChoiceChip>
                                         );
                                       })}
                                     </div>
-                                  </div>
+                                  </FormSection>
 
-                                  <div>
-                                    <SectionLabel icon={Settings2}>Gatilhos de Conversão</SectionLabel>
-                                    <div className="space-y-2">
-                                      <TriggerCard
-                                        label="Disparar Purchase ao gerar QR Code PIX"
-                                        desc={px.fire_on_pix_qr ? "Purchase dispara na geração do QR Code" : "Purchase dispara apenas após confirmação do pagamento"}
+                                  <FormSection title="Quando disparar a compra" subtitle="Por padrão a compra só é enviada depois que o pagamento é confirmado.">
+                                    <GroupBox>
+                                      <TriggerRow
+                                        label="Ao gerar o QR Code Pix"
+                                        desc={px.fire_on_pix_qr ? "A compra é enviada assim que o QR Code é gerado" : "A compra só é enviada depois da confirmação do Pix"}
                                         checked={px.fire_on_pix_qr}
                                         onChange={v => updatePixelSettings(px.id, { fire_on_pix_qr: v })}
-                                        showSlider={px.fire_on_pix_qr}
-                                        sliderValue={px.pix_conversion_value}
-                                        onSliderChange={v => updatePixelSettings(px.id, { pix_conversion_value: v })}
+                                        valueLabel="Valor enviado"
+                                        showValue={px.fire_on_pix_qr}
+                                        value={px.pix_conversion_value}
+                                        onValueChange={v => updatePixelSettings(px.id, { pix_conversion_value: v })}
                                       />
-                                      <TriggerCard
-                                        label="Disparar Purchase ao gerar Boleto"
-                                        desc={px.fire_on_boleto ? "Purchase dispara na geração do boleto" : "Purchase dispara apenas no pagamento confirmado"}
+                                      <TriggerRow
+                                        label="Ao gerar o boleto"
+                                        desc={px.fire_on_boleto ? "A compra é enviada assim que o boleto é gerado" : "A compra só é enviada depois do pagamento do boleto"}
                                         checked={px.fire_on_boleto}
                                         onChange={v => updatePixelSettings(px.id, { fire_on_boleto: v })}
-                                        showSlider={px.fire_on_boleto}
-                                        sliderValue={px.boleto_conversion_value}
-                                        onSliderChange={v => updatePixelSettings(px.id, { boleto_conversion_value: v })}
+                                        valueLabel="Valor enviado"
+                                        showValue={px.fire_on_boleto}
+                                        value={px.boleto_conversion_value}
+                                        onValueChange={v => updatePixelSettings(px.id, { boleto_conversion_value: v })}
                                       />
-                                      <TriggerCard
-                                        label="Desativar eventos de Order Bumps"
-                                        desc="Não dispara eventos de conversão para produtos adicionais"
+                                      <TriggerRow
+                                        label="Ignorar order bumps"
+                                        desc="Ofertas adicionais não geram eventos de conversão"
                                         checked={px.disable_bump_events}
                                         onChange={v => updatePixelSettings(px.id, { disable_bump_events: v })}
                                       />
-                                    </div>
-                                  </div>
+                                    </GroupBox>
+                                  </FormSection>
                                 </div>
                               </motion.div>
                             )}
@@ -536,131 +428,100 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
                   </AnimatePresence>
                 </div>
               )}
+            </FormSection>
 
-              {/* Section title — add */}
-              <div className="flex items-center gap-2 pt-2">
-                <span className="text-[10px] font-display font-black uppercase tracking-[0.18em] text-muted-foreground">
-                  Adicionar Novo Pixel
-                </span>
-                <span className="h-px flex-1 bg-border" />
-              </div>
-
-              <div className="rounded-md border border-border bg-card overflow-hidden">
-                <div className="px-5 py-5 space-y-5">
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <Field label="Pixel ID" icon={Hash} hint={platform.idHint}>
-                      <Input
-                        value={newPixelId}
-                        onChange={e => setNewPixelId(e.target.value)}
-                        placeholder="Ex: 123456789012345"
-                        className="h-10 rounded-md border-border bg-background text-[12.5px] font-mono focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:border-primary/40"
-                      />
-                    </Field>
-                    {platform.fields.includes("api_token") && (
-                      <Field label="API Token / Access Token" icon={Key} hint="Necessário para Conversions API (server-side)">
-                        <Input
-                          value={newApiToken}
-                          onChange={e => setNewApiToken(e.target.value)}
-                          placeholder="Token de conversão"
-                          className="h-10 rounded-md border-border bg-background text-[12.5px] font-mono focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:border-primary/40"
-                        />
-                      </Field>
-                    )}
+            <FormSection
+              title={`Adicionar pixel do ${platform.short}`}
+              subtitle="O navegador e o servidor enviam o mesmo ID de evento, então a plataforma não conta a mesma venda duas vezes."
+            >
+              <div className="space-y-5 rounded-[16px] border border-border bg-card p-5">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="min-w-0">
+                    <FieldLabel htmlFor="px-id">ID do pixel</FieldLabel>
+                    <Input id="px-id" value={newPixelId} onChange={e => setNewPixelId(e.target.value)} placeholder="Ex.: 123456789012345" autoComplete="off" spellCheck={false} className="vp-field font-mono" />
+                    <FieldHint>{platform.idHint}</FieldHint>
                   </div>
-                  {platform.fields.includes("domain") && (
-                    <Field label="Domínio Verificado" icon={Globe2} hint="Recomendado para iOS 14+ (Aggregated Event Measurement)">
-                      <Input
-                        value={newDomain}
-                        onChange={e => setNewDomain(e.target.value)}
-                        placeholder="seusite.com"
-                        className="h-10 rounded-md border-border bg-background text-[12.5px] font-mono focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:border-primary/40"
-                      />
-                    </Field>
+                  {platform.fields.includes("api_token") && (
+                    <div className="min-w-0">
+                      <FieldLabel htmlFor="px-token">Token de acesso</FieldLabel>
+                      <Input id="px-token" value={newApiToken} onChange={e => setNewApiToken(e.target.value)} placeholder="Cole o token de conversão" autoComplete="off" spellCheck={false} className="vp-field font-mono" />
+                      <FieldHint>Necessário para enviar eventos pelo servidor (Conversions API).</FieldHint>
+                    </div>
                   )}
-
+                </div>
+                {platform.fields.includes("domain") && (
                   <div>
-                    <Label className="text-[10px] font-display font-black uppercase tracking-[0.16em] text-muted-foreground mb-2 block">
-                      Eventos
-                    </Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {[
-                        { mode: "all" as const, label: "Todos os eventos", icon: Sparkles, desc: "Recomendado" },
-                        { mode: "custom" as const, label: "Personalizado", icon: Settings2, desc: "Selecione manualmente" },
-                      ].map(opt => (
+                    <FieldLabel htmlFor="px-domain">Domínio verificado</FieldLabel>
+                    <Input id="px-domain" value={newDomain} onChange={e => setNewDomain(e.target.value)} placeholder="seusite.com" autoComplete="off" spellCheck={false} className="vp-field font-mono" />
+                    <FieldHint>Recomendado para medir conversões em iPhones com iOS 14 ou mais novo.</FieldHint>
+                  </div>
+                )}
+
+                <div>
+                  <FieldLabel>Eventos que este pixel envia</FieldLabel>
+                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                    {[
+                      { mode: "all" as const, label: "Todos os eventos", icon: Sparkles, desc: "Recomendado para a maioria dos casos" },
+                      { mode: "custom" as const, label: "Escolher eventos", icon: Settings2, desc: "Você marca um por um" },
+                    ].map(opt => {
+                      const on = newEventMode === opt.mode;
+                      return (
                         <button
                           key={opt.mode}
                           type="button"
+                          aria-pressed={on}
                           onClick={() => { setNewEventMode(opt.mode); if (opt.mode === "all") setNewSelectedEvents([...ALL_EVENTS]); }}
                           className={cn(
-                            "flex items-center gap-2.5 rounded-md px-3 py-2.5 text-left transition-colors border",
-                            newEventMode === opt.mode
-                              ? "bg-primary/10 border-primary/30 text-primary"
-                              : "bg-background border-border text-muted-foreground hover:text-foreground"
+                            "flex items-center gap-3 vp-r16 border px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                            on ? "border-primary/50 bg-accent" : "border-border bg-background hover:bg-muted",
                           )}
                         >
-                          <opt.icon className="h-3.5 w-3.5 shrink-0" />
-                          <div className="min-w-0">
-                            <p className="text-[11.5px] font-display font-bold leading-tight">{opt.label}</p>
-                            <p className={cn(
-                              "text-[9.5px] font-display mt-0.5 leading-tight",
-                              newEventMode === opt.mode ? "text-primary/70" : "text-muted-foreground/70"
-                            )}>{opt.desc}</p>
-                          </div>
+                          <span className={cn(orb, "h-10 w-10", on ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}><opt.icon className="h-[18px] w-[18px]" /></span>
+                          <span className="min-w-0">
+                            <span className={cn("block text-[14.5px] font-bold leading-tight", on ? "text-accent-foreground" : "text-foreground")}>{opt.label}</span>
+                            <span className="mt-0.5 block text-[13px] leading-snug text-muted-foreground">{opt.desc}</span>
+                          </span>
                         </button>
-                      ))}
-                    </div>
-
-                    <AnimatePresence initial={false}>
-                      {newEventMode === "custom" && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.22, ease }}
-                          className="overflow-hidden"
-                        >
-                          <div className="mt-2.5 flex flex-wrap gap-1.5 p-3 rounded-md border border-border bg-background">
-                            {ALL_EVENTS.map(event => {
-                              const sel = newSelectedEvents.includes(event);
-                              return (
-                                <button
-                                  key={event}
-                                  type="button"
-                                  onClick={() => toggleNewEvent(event)}
-                                  className={cn(
-                                    "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10.5px] font-display font-bold transition-colors border",
-                                    sel
-                                      ? "bg-primary/10 border-primary/30 text-primary"
-                                      : "bg-card border-border text-muted-foreground hover:text-foreground"
-                                  )}
-                                >
-                                  {sel && <CircleCheck className="h-3 w-3" />}
-                                  {event}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                      );
+                    })}
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-border">
-                    <p className="text-[10.5px] text-muted-foreground font-display">
-                      <span className="font-numbers font-bold text-foreground tabular-nums">{platformPixels.length}</span>
-                      <span className="mx-1 text-muted-foreground/60">/</span>
-                      <span className="font-numbers tabular-nums">50</span> pixels nesta plataforma
-                    </p>
-                    <Button
-                      onClick={addPixel}
-                      className="h-10 gap-2 rounded-md px-5 text-[12px] font-display font-bold"
-                    >
-                      <Plus className="h-3.5 w-3.5" /> Adicionar Pixel
-                    </Button>
-                  </div>
+                  <AnimatePresence initial={false}>
+                    {newEventMode === "custom" && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.22, ease }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-3 flex flex-wrap gap-2 rounded-[16px] border border-border bg-background p-3.5">
+                          {ALL_EVENTS.map(event => {
+                            const sel = newSelectedEvents.includes(event);
+                            return (
+                              <ChoiceChip key={event} active={sel} onClick={() => toggleNewEvent(event)} className={sel ? "!bg-accent !text-accent-foreground !border-primary/40" : "bg-card"}>
+                                {sel && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
+                                {event}
+                              </ChoiceChip>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-[13.5px] text-muted-foreground">
+                    <span className="font-bold tabular-nums text-foreground">{platformPixels.length}</span> de <span className="tabular-nums">50</span> pixels usados no {platform.short}
+                  </p>
+                  <button type="button" onClick={addPixel} className="vp-cta w-full sm:w-auto">
+                    <Plus className="h-[18px] w-[18px]" strokeWidth={2.4} />
+                    Adicionar pixel
+                  </button>
                 </div>
               </div>
-            </div>
+            </FormSection>
           </div>
         </div>
       </DialogContent>
@@ -668,101 +529,42 @@ export default function PixelSettingsDialog({ product, open, onOpenChange }: Pro
   );
 }
 
-/* ─── Subcomponents ─── */
+/* ─── Subcomponentes ─── */
 
-function KpiCell({
-  label, value, accent,
-}: { label: string; value: number; accent?: "success" | "primary" }) {
-  const color =
-    accent === "success" ? "text-success" :
-    accent === "primary" ? "text-primary" :
-    "text-foreground";
+function HeadStat({ value, label, green }: { value: number; label: string; green?: boolean }) {
   return (
-    <div className="flex flex-col items-center justify-center px-4 py-2 min-w-[68px] border-r border-border last:border-r-0">
-      <p className={cn("font-numbers text-[18px] font-black tabular-nums leading-none", color)}>
-        {value}
-      </p>
-      <p className="mt-1 font-display text-[8.5px] font-black uppercase tracking-[0.18em] text-muted-foreground leading-none">
-        {label}
-      </p>
+    <div className="text-right">
+      <p className={cn("font-heading text-[26px] font-extrabold leading-none tracking-[-0.04em] tabular-nums", green ? "vp-green-ink" : "text-foreground")}>{value}</p>
+      <p className="mt-1 text-[13px] text-muted-foreground">{label}</p>
     </div>
   );
 }
 
-function StatusDot({ active }: { active: boolean }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-display font-black uppercase tracking-[0.1em] border",
-        active
-          ? "bg-success/10 border-success/30 text-success"
-          : "bg-muted/40 border-border text-muted-foreground"
-      )}
-    >
-      <span className={cn("h-1 w-1 rounded-full", active ? "bg-success" : "bg-muted-foreground")} />
-      {active ? "Ativo" : "Inativo"}
-    </span>
-  );
-}
-
-function Dot() {
-  return <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/60" />;
-}
-
-function SectionLabel({ icon: Icon, children }: { icon: LucideIcon; children: React.ReactNode }) {
-  return (
-    <p className="text-[10px] font-display font-black uppercase tracking-[0.16em] text-muted-foreground mb-2.5 flex items-center gap-1.5">
-      <Icon className="h-3 w-3" /> {children}
-    </p>
-  );
-}
-
-function Field({ label, icon: Icon, hint, children }: { label: string; icon: LucideIcon; hint?: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <Label className="text-[10px] font-display font-black uppercase tracking-[0.14em] text-muted-foreground mb-1.5 flex items-center gap-1.5">
-        <Icon className="h-3 w-3" /> {label}
-      </Label>
-      {children}
-      {hint && (
-        <p className="mt-1 text-[9.5px] text-muted-foreground/70 font-display leading-snug">{hint}</p>
-      )}
-    </div>
-  );
-}
-
-function TriggerCard({
-  label, desc, checked, onChange, showSlider, sliderValue, onSliderChange,
+function TriggerRow({
+  label, desc, checked, onChange, showValue, value, onValueChange, valueLabel,
 }: {
   label: string; desc: string; checked: boolean; onChange: (v: boolean) => void;
-  showSlider?: boolean; sliderValue?: number; onSliderChange?: (v: number) => void;
+  showValue?: boolean; value?: number; onValueChange?: (v: number) => void; valueLabel?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "flex items-start justify-between gap-3 p-3.5 rounded-md transition-colors border",
-        checked ? "bg-primary/5 border-primary/30" : "bg-card border-border"
-      )}
-    >
-      <div className="flex-1 min-w-0">
-        <p className="text-[12px] font-display font-bold text-foreground leading-tight">{label}</p>
-        <p className="text-[10.5px] text-muted-foreground mt-1 leading-relaxed font-display">{desc}</p>
-        {showSlider && sliderValue !== undefined && onSliderChange && (
-          <div className="flex items-center gap-2 mt-2.5">
-            <span className="text-[10px] text-muted-foreground font-display font-bold uppercase tracking-[0.12em]">
-              Valor:
-            </span>
+    <div className="flex items-start justify-between gap-4 px-4 py-3.5">
+      <div className="min-w-0 flex-1">
+        <p className="text-[14.5px] font-semibold leading-tight text-foreground">{label}</p>
+        <p className="mt-0.5 text-[13px] leading-snug text-muted-foreground">{desc}</p>
+        {showValue && value !== undefined && onValueChange && (
+          <label className="mt-3 flex items-center gap-2 text-[13px] text-muted-foreground">
+            {valueLabel}
             <Input
-              type="number" min={0} max={100} value={sliderValue}
-              onChange={e => onSliderChange(Number(e.target.value))}
-              className="w-16 h-7 text-[11px] text-center rounded-md bg-background border-border font-numbers tabular-nums"
+              type="number" min={0} max={100} value={value}
+              onChange={e => onValueChange(Number(e.target.value))}
               onClick={e => e.stopPropagation()}
+              className="vp-field !h-10 !w-20 text-center font-bold tabular-nums"
             />
-            <span className="text-[10px] text-muted-foreground font-numbers font-bold">%</span>
-          </div>
+            % do preço
+          </label>
         )}
       </div>
-      <Switch checked={checked} onCheckedChange={onChange} />
+      <Switch checked={checked} onCheckedChange={onChange} aria-label={label} className="mt-0.5" />
     </div>
   );
 }
