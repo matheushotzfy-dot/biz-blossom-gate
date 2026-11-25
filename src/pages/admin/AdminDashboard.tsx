@@ -27,7 +27,7 @@ const AdminOverviewTab = lazy(() => import("./tabs/AdminOverviewTab"));
 const AdminSellersTab = lazy(() => import("./tabs/AdminSellersTab"));
 const AdminProductsTab = lazy(() => import("./tabs/AdminProductsTab"));
 const FinancialAuditTab = lazy(() => import("@/features/admin-finance/FinancialAuditTab"));
-const DisputesCenter = lazy(() => import("@/features/admin-finance/DisputesCenter"));
+const DisputesCenter = lazy(() => import("@/features/admin-disputes/DisputesCenter"));
 const RefundApprovalsTab = lazy(() => import("@/features/admin-finance/RefundApprovalsTab"));
 const StaffRequestsTab = lazy(() => import("@/features/admin-finance/StaffRequestsTab"));
 const AcquirersPanel = lazy(() => import("@/features/admin-finance/AcquirersPanel"));
@@ -707,7 +707,7 @@ export default function AdminDashboard() {
               )}
               {["medpix", "refunds", "chargeback", "premed"].includes(activeTab) && isAdmin && (
                 <DisputesCenter
-                  profiles={profiles}
+                  onNavigate={(id) => handleTabChange(id as TabId)}
                   initialType={activeTab === "refunds" ? "refund" : activeTab === "premed" ? "pre_med_pix" : activeTab === "chargeback" ? "chargeback" : "medpix"}
                 />
               )}

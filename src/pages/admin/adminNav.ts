@@ -50,10 +50,10 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { id: "risk-compliance", label: "Anti-Fraude", icon: ShieldCheck, employeeAccess: false },
       { id: "abuse-metrics", label: "Abuso & Auth", icon: ShieldAlert, employeeAccess: false },
-      { id: "medpix", label: "MedPix", icon: AlertTriangle, employeeAccess: false },
+      { id: "medpix", label: "MED Pix", icon: AlertTriangle, employeeAccess: false },
       { id: "chargeback", label: "Chargeback", icon: RotateCcw, employeeAccess: false },
       { id: "refunds", label: "Reembolsos", icon: Undo2, employeeAccess: false },
-      { id: "premed", label: "Pre-Med", icon: ShieldAlert, employeeAccess: false },
+      { id: "premed", label: "Pré-MED", icon: ShieldAlert, employeeAccess: false },
     ],
   },
   {
