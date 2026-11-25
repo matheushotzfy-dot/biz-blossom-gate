@@ -58,12 +58,12 @@ export function PremiumMetric({ label, value, sub, icon: Icon, tone = "neutral",
   className?: string;
 }) {
   return (
-    <div className={cn("group relative overflow-hidden rounded-[12px] border border-border/60 bg-card px-5 py-4 transition-colors hover:border-border", className)}>
+    <div className={cn("group relative overflow-hidden rounded-[12px] border border-border/60 bg-card px-3.5 py-4 transition-colors hover:border-border sm:px-5", className)}>
       <div className="flex items-center justify-between">
         <p className="text-[11.5px] font-medium text-muted-foreground/70">{label}</p>
         <Icon className={cn("h-3.5 w-3.5 shrink-0 opacity-40 transition-opacity group-hover:opacity-90", toneText[tone])} strokeWidth={2.2} />
       </div>
-      <p className="mt-4 break-words font-display text-[26px] font-semibold leading-none tracking-[-0.02em] tabular-nums text-foreground">
+      <p className="mt-4 break-words font-display text-[20px] font-semibold sm:text-[26px] leading-none tracking-[-0.02em] tabular-nums text-foreground">
         {value}
       </p>
       {sub && <p className="mt-2 truncate text-[11px] font-medium text-muted-foreground/75">{sub}</p>}
@@ -74,12 +74,13 @@ export function PremiumMetric({ label, value, sub, icon: Icon, tone = "neutral",
 
 export function PremiumMetricGrid({ children, cols = 4 }: { children: ReactNode; cols?: 3 | 4 | 5 | 6 }) {
   const cls: Record<number, string> = {
-    3: "grid-cols-1 md:grid-cols-3",
-    4: "grid-cols-1 sm:grid-cols-2 xl:grid-cols-4",
-    5: "grid-cols-1 sm:grid-cols-2 xl:grid-cols-5",
-    6: "grid-cols-1 sm:grid-cols-2 xl:grid-cols-6",
+    // minmax(0,1fr): sem isso um valor longo empurra a coluna e a página vaza para o lado
+    3: "grid-cols-[minmax(0,1fr)] md:grid-cols-[repeat(3,minmax(0,1fr))]",
+    4: "grid-cols-[repeat(2,minmax(0,1fr))] xl:grid-cols-[repeat(4,minmax(0,1fr))]",
+    5: "grid-cols-[repeat(2,minmax(0,1fr))] xl:grid-cols-[repeat(5,minmax(0,1fr))]",
+    6: "grid-cols-[repeat(2,minmax(0,1fr))] xl:grid-cols-[repeat(6,minmax(0,1fr))]",
   };
-  return <div className={cn("grid gap-4", cls[cols])}>{children}</div>;
+  return <div className={cn("grid gap-3 sm:gap-4", cls[cols])}>{children}</div>;
 }
 
 export function PremiumSegmented<T extends string>({ value, options, onChange }: {

@@ -19,22 +19,22 @@ export function AnalyticsSellerTable({ data, filters, onFilters, fmtCurrency: mo
   return <>
     <PremiumPanel title={ranked ? "Ranking de sellers" : "Desempenho de cada seller"} eyebrow={`${data.seller_count.toLocaleString("pt-BR")} contas · período selecionado`}>
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <form className="flex min-w-0 flex-1 gap-2" onSubmit={event => { event.preventDefault(); change({ search: search.trim() }); }}>
+        <form className="flex min-w-0 basis-full gap-2 sm:basis-0 sm:flex-1" onSubmit={event => { event.preventDefault(); change({ search: search.trim() }); }}>
           <Input value={search} onChange={event => setSearch(event.target.value)} maxLength={120} aria-label="Buscar seller" placeholder="Nome, e-mail ou ID do seller" className="min-w-0" />
           <Button type="submit" variant="outline" size="icon" aria-label="Aplicar busca"><Search className="h-4 w-4" /></Button>
         </form>
-        <Select value={filters.sort} onValueChange={value => change({ sort: value as AnalyticsSort })}><SelectTrigger className="w-[170px]" aria-label="Ordenar sellers"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="volume">Maior volume</SelectItem><SelectItem value="sales">Mais vendas</SelectItem><SelectItem value="risk">Mais ocorrências</SelectItem>{!ranked && <SelectItem value="newest">Mais recentes</SelectItem>}</SelectContent></Select>
-        <label className="flex items-center gap-2 text-xs"><Checkbox checked={filters.sellingOnly} onCheckedChange={value => change({ sellingOnly: value === true })} />Só quem vendeu</label>
+        <Select value={filters.sort} onValueChange={value => change({ sort: value as AnalyticsSort })}><SelectTrigger className="w-[160px] max-w-full" aria-label="Ordenar sellers"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="volume">Maior volume</SelectItem><SelectItem value="sales">Mais vendas</SelectItem><SelectItem value="risk">Mais ocorrências</SelectItem>{!ranked && <SelectItem value="newest">Mais recentes</SelectItem>}</SelectContent></Select>
+        <label className="flex items-center gap-2 whitespace-nowrap text-xs"><Checkbox checked={filters.sellingOnly} onCheckedChange={value => change({ sellingOnly: value === true })} />Só quem vendeu</label>
       </div>
       <div className={premiumTable.wrapper}><table className={premiumTable.table}><thead><tr className={premiumTable.headRow}>{["Seller", "Situação atual", "Vendas", "Movimentado", "Clientes", "Ticket médio", "Conversão", "Taxas", "Adquirente", "Resultado de taxas", "Reembolsos", "Chargebacks", "MED PIX", "Ficha"].map(label => <th key={label} className={premiumTable.th}>{label}</th>)}</tr></thead><tbody>
         {data.sellers.map((seller, index) => <tr key={seller.user_id} className={premiumTable.row}>
           <td className={premiumTable.td}><p className="max-w-[220px] truncate text-sm font-semibold">{ranked && <span className="mr-2 font-mono text-primary">#{data.page * data.page_size + index + 1}</span>}{seller.name}</p><p className="max-w-[220px] truncate text-xs text-muted-foreground">{seller.email}</p><p className="mt-1 font-mono text-[10px] text-muted-foreground">{seller.user_id}</p></td>
           <td className={premiumTable.td}><span className="whitespace-nowrap text-xs">{seller.active ? "Ativa" : "Não ativa"}</span></td>
           <td className={premiumTable.td}>{seller.sales.toLocaleString("pt-BR")}</td>
-          <td className={premiumTable.td}>{money(seller.volume)}</td><td className={premiumTable.td}>{seller.clients}</td>
-          <td className={premiumTable.td}>{money(seller.sales ? seller.volume / seller.sales : 0)}</td>
+          <td className={`${premiumTable.td} whitespace-nowrap`}>{money(seller.volume)}</td><td className={premiumTable.td}>{seller.clients}</td>
+          <td className={`${premiumTable.td} whitespace-nowrap`}>{money(seller.sales ? seller.volume / seller.sales : 0)}</td>
           <td className={premiumTable.td}>{ratio(seller.sales, seller.attempts).toFixed(1)}%<p className="whitespace-nowrap text-[10px] text-muted-foreground">{seller.attempts} tentativas</p></td>
-          <td className={premiumTable.td}>{money(seller.fees)}</td><td className={premiumTable.td}>{money(seller.acquirer)}</td><td className={premiumTable.td}>{money(seller.fees - seller.acquirer)}</td>
+          <td className={`${premiumTable.td} whitespace-nowrap`}>{money(seller.fees)}</td><td className={`${premiumTable.td} whitespace-nowrap`}>{money(seller.acquirer)}</td><td className={`${premiumTable.td} whitespace-nowrap`}>{money(seller.fees - seller.acquirer)}</td>
           <td className={premiumTable.td}>{seller.refunds}<p className="whitespace-nowrap text-xs text-muted-foreground">{money(seller.refund_amount)}</p></td>
           <td className={premiumTable.td}>{seller.chargebacks}<p className="whitespace-nowrap text-xs text-muted-foreground">{money(seller.chargeback_amount)}</p></td>
           <td className={premiumTable.td}>{seller.med}<p className="whitespace-nowrap text-xs text-muted-foreground">{money(seller.med_amount)}</p></td>

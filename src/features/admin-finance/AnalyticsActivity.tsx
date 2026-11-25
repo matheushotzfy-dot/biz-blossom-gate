@@ -8,7 +8,7 @@ const labels = { sellers: "Sellers vendendo", clients: "Clientes", registrations
 type ActivityMetric = keyof typeof labels;
 export function AnalyticsActivity({ daily }: { daily: AnalyticsData["daily"] }) {
   const [metric, setMetric] = useState<ActivityMetric>("sellers");
-  const data = daily.map(row => ({ ...row, label: row.day.split("-").reverse().join("/") }));
+  const data = daily.map(row => ({ ...row, label: row.day.split("-").reverse().slice(0, 2).join("/") }));
   return <PremiumPanel title="Atividade por dia" eyebrow="Vendas pagas · horário de Brasília" action={<div className="flex flex-wrap gap-1">{(Object.keys(labels) as ActivityMetric[]).map(key => <Button key={key} size="sm" variant={key === metric ? "secondary" : "ghost"} onClick={() => setMetric(key)}>{labels[key]}</Button>)}</div>}>
     <div className="h-[250px] min-w-0"><ResponsiveContainer width="100%" height="100%"><BarChart data={data}>
       <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
