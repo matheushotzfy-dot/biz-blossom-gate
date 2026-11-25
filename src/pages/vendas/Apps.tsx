@@ -1,556 +1,354 @@
-import { useState } from "react";
-import { Settings2, Zap, Shield, Sparkles, CheckCircle2, Clock, ImageOff } from "lucide-react";
-import { PageShell } from "@/components/PageShell";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import { useProducts, useAppIntegrations, useInvalidateAll } from "@/hooks/useQueryData";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+/**
+ * Apps: conecta ferramentas de terceiros (UTMify, Z-API, Notazz, áreas de membros…).
+ * Cada conexão fica em `app_integrations` (segredos criptografados no banco) e pode cobrir um produto ou todos.
+ * O banco enfileira um envio em `app_deliveries` a cada evento marcado; o worker entrega com 5 tentativas.
+ */
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { AlertCircle, ListChecks, Plug, Search } from "lucide-react";
 import { toast } from "sonner";
-import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
-import { useNavigate } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
+import { useAuth } from "@/hooks/useAuth";
+import { useAppIntegrations, useInvalidateAll, useProducts } from "@/hooks/useQueryData";
+import { Seo } from "@/components/Seo";
+import { PageHead } from "@/components/seller-ui/PageHead";
+import { StatBand } from "@/components/seller-ui/StatBand";
+import { FilterPills } from "@/components/seller-ui/FilterPills";
+import { SearchField } from "@/components/seller-ui/SearchField";
+import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
+import { Pager } from "@/components/seller-ui/Pager";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AppCard } from "@/components/integrations/AppCard";
+import { ConnectDialog, type ConnectSave, type ConnectTarget } from "@/components/integrations/ConnectDialog";
+import { ConnectionsList, type ConnectionHealth } from "@/components/integrations/ConnectionsList";
+import { TestAppDialog, type TestTarget } from "@/components/integrations/TestAppDialog";
+import { DeliveryLedger } from "@/components/integrations/DeliveryLedger";
+import { DeliveryDialog } from "@/components/integrations/DeliveryDialog";
+import type { SaveResult } from "@/components/integrations/KeyDialogs";
+import { ago } from "@/components/integrations/intMeta";
+import { APPS, CATEGORIES, appById, appDeliveryOutcome, appErrorMessage, readTestResult, type AppConnection, type AppDef, type TestResult } from "@/components/integrations/appCatalog";
+import { deliveryKind, type DeliveryRow } from "@/components/integrations/webhookMeta";
 
+type View = "catalog" | "mine" | "activity";
+type StatusFilter = "all" | "success" | "open" | "failed";
 
-import utmifyLogo from "@/assets/apps/utmify.png";
-import notazzLogo from "@/assets/apps/notazz.svg";
-import themembersLogo from "@/assets/apps/themembers.png";
-import activecampaignLogo from "@/assets/apps/activecampaign.png";
-import spedyLogo from "@/assets/apps/spedy.png";
-import astronLogo from "@/assets/apps/astron_members.png";
-import memberkitLogo from "@/assets/apps/memberkit.png";
-import smsfunnelLogo from "@/assets/apps/smsfunnel.png";
-import voxuyLogo from "@/assets/apps/voxuy.png";
-import cademiLogo from "@/assets/apps/cademi.png";
-import webhooksLogo from "@/assets/apps/webhooks.png";
-import zapiLogo from "@/assets/apps/zapi.webp";
-
-/* ─── Types ─── */
-interface AppField {
- key: string; label: string; placeholder: string;
- type: "api_key" | "api_url" | "webhook_url"; required: boolean; help?: string;
-}
-
-interface AppDef {
- id: string; name: string; desc: string; logo: string; category: string;
- fields: AppField[]; events: string[]; helpText?: string; comingSoon?: boolean;
-}
-
-
-const APPS: AppDef[] = [
- {
- id: "zapi", name: "Z-API", desc: "WhatsApp Business via API REST", category: "Comunicação",
- logo: zapiLogo,
- fields: [
- { key: "api_key", label: "Instance Token", placeholder: "Token da instância", type: "api_key", required: true, help: "Z-API → Painel → Sua Instância → Token" },
- { key: "api_url", label: "Instance ID", placeholder: "ID da instância", type: "api_url", required: true, help: "Z-API → Painel → Sua Instância → ID" },
- { key: "webhook_url", label: "Client-Token (Segurança)", placeholder: "Client-Token (opcional)", type: "webhook_url", required: false, help: "Z-API → Segurança → Token da conta" },
- ],
- events: ["Purchase", "Lead", "InitiateCheckout", "PixGenerated", "BoletoGenerated", "Refund", "Chargeback"],
- helpText: "Mensagens automáticas pelo WhatsApp via Z-API REST.",
- },
- {
- id: "utmify", name: "UTMify", desc: "Rastreamento UTM avançado", category: "Analytics",
- logo: utmifyLogo,
- fields: [{ key: "api_key", label: "Token da UTMify", placeholder: "Cole seu token aqui", type: "api_key", required: true, help: "UTMify → Configurações → API → Token" }],
- events: ["Purchase", "InitiateCheckout", "PageView", "AddToCart", "ViewContent", "Lead", "CompleteRegistration", "AddPaymentInfo", "GenerateLead", "BoletoGenerated", "PixGenerated", "Refund", "Chargeback"],
- helpText: "Rastreia automaticamente a origem das conversões via UTM.",
- },
- {
- id: "activecampaign", name: "ActiveCampaign", desc: "Automação de e-mail marketing", category: "Marketing",
- logo: activecampaignLogo, comingSoon: true,
- fields: [
- { key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Settings → Developer → API Key" },
- { key: "api_url", label: "URL da conta", placeholder: "https://suaconta.api-us1.com", type: "api_url", required: true, help: "Settings → Developer → URL" },
- ],
- events: ["Purchase", "Lead", "InitiateCheckout", "Refund", "Chargeback"],
- helpText: "Adiciona contatos e aplica tags automaticamente.",
- },
-
- {
- id: "notazz", name: "Notazz", desc: "Emissão automática de notas fiscais", category: "Fiscal",
- logo: notazzLogo,
- fields: [{ key: "api_key", label: "API Key da Notazz", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Notazz → Configurações → Integrações → API Key" }],
- events: ["Purchase", "Refund"],
- helpText: "Emissão automática de NF-e ao confirmar venda.",
- },
- {
- id: "themembers", name: "TheMembers", desc: "Área de membros", category: "Membros",
- logo: themembersLogo, comingSoon: true,
- fields: [
- { key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "TheMembers → Integrações → API → Chave" },
- { key: "api_url", label: "URL da API (opcional)", placeholder: "https://api.themembers.com.br", type: "api_url", required: false },
- ],
- events: ["Purchase", "Refund", "Chargeback"],
- helpText: "Libera/revoga acesso automático na área de membros.",
- },
- {
- id: "spedy", name: "Spedy", desc: "Logística e envios automatizados", category: "Logística",
- logo: spedyLogo,
- fields: [{ key: "api_key", label: "Token da Spedy", placeholder: "Cole seu token", type: "api_key", required: true, help: "Spedy → Configurações → API → Token" }],
- events: ["Purchase"],
- helpText: "Cria pedidos de envio ao confirmar compra.",
- },
- {
- id: "astron", name: "Astron Members", desc: "Área de membros premium", category: "Membros",
- logo: astronLogo, comingSoon: true,
- fields: [{ key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Astron → Configurações → Integrações → API Key" }],
- events: ["Purchase", "Refund", "Chargeback"],
- helpText: "Libera/revoga acesso na plataforma Astron.",
- },
- {
- id: "memberkit", name: "MemberKit", desc: "Gestão completa de membros", category: "Membros",
- logo: memberkitLogo, comingSoon: true,
- fields: [{ key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "MemberKit → Configurações → API → Chave" }],
- events: ["Purchase", "Refund", "Chargeback"],
- helpText: "Gerencia acesso dos membros automaticamente.",
- },
- {
- id: "smsfunnel", name: "SMSFunnel", desc: "Automação de SMS marketing", category: "Comunicação",
- logo: smsfunnelLogo, comingSoon: true,
- fields: [{ key: "api_key", label: "Token", placeholder: "Cole seu token", type: "api_key", required: true, help: "SMSFunnel → Configurações → API → Token" }],
- events: ["Purchase", "Lead", "InitiateCheckout", "PixGenerated", "BoletoGenerated", "Refund"],
- helpText: "Dispara SMS automáticos com base nos eventos.",
- },
- {
- id: "voxuy", name: "Voxuy", desc: "Chatbot e automação WhatsApp", category: "Comunicação",
- logo: voxuyLogo, comingSoon: true,
- fields: [{ key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Voxuy → Configurações → API → Chave" }],
- events: ["Purchase", "Lead", "InitiateCheckout", "PixGenerated", "Refund", "Chargeback"],
- helpText: "Mensagens automáticas via WhatsApp com Voxuy.",
- },
- {
- id: "cademi", name: "Cademi", desc: "Plataforma de cursos online", category: "Membros",
- logo: cademiLogo, comingSoon: true,
- fields: [{ key: "api_key", label: "API Key", placeholder: "Cole sua API key", type: "api_key", required: true, help: "Cademi → Integrações → API → Chave" }],
- events: ["Purchase", "Refund", "Chargeback"],
- helpText: "Libera/revoga acesso dos alunos automaticamente.",
- },
-
- {
- id: "webhooks", name: "Webhooks", desc: "Integre com qualquer sistema", category: "Avançado",
- logo: webhooksLogo,
- fields: [], events: [],
- helpText: "Gerencie webhooks customizados.",
- },
-];
-
-interface AppIntegration {
- id: string; user_id: string; app_name: string; product_id: string | null;
- api_key_masked: string | null; has_api_key: boolean; api_url: string | null; webhook_url: string | null;
- events: string[]; is_active: boolean; config: Record<string, unknown>; created_at: string;
-}
-
+const LIST_LIMIT = 200;
+const PAGE_SIZE = 10;
+const DAY = 86_400_000;
+const COLUMNS = "id, integration_id, transaction_id, event, attempt, status, response_status, error, next_retry_at, delivered_at, created_at";
+const OPEN = ["queued", "sending", "retrying"];
 
 export default function Apps() {
- const { user } = useAuth();
- const navigate = useNavigate();
- const { data: products = [] } = useProducts();
- const { data: integrationsRaw = [] } = useAppIntegrations();
- const integrations = integrationsRaw as unknown as AppIntegration[];
- const invalidateAll = useInvalidateAll();
- const [dialogApp, setDialogApp] = useState<AppDef | null>(null);
- const [editId, setEditId] = useState<string | null>(null);
- const [saving, setSaving] = useState(false);
- const [testing, setTesting] = useState(false);
- const [formProductId, setFormProductId] = useState("");
- const [formFields, setFormFields] = useState<Record<string, string>>({});
- const [formEventMode, setFormEventMode] = useState<"all" | "custom">("all");
- const [formSelectedEvents, setFormSelectedEvents] = useState<string[]>([]);
- const [failedLogos, setFailedLogos] = useState<Set<string>>(() => new Set());
+  const { user } = useAuth();
+  const invalidateAll = useInvalidateAll();
+  const { data: products = [] } = useProducts();
+  const { data: raw = [], isLoading, isError, refetch } = useAppIntegrations();
+  const connections = raw as unknown as AppConnection[];
 
- const openDialog = (app: AppDef, existing?: AppIntegration) => {
- if (app.comingSoon) { toast.info(`${app.name} estará disponível em breve.`); return; }
- if (app.id === "webhooks") { navigate("/integracoes?tab=webhooks"); return; }
- setDialogApp(app);
- if (existing) {
- setEditId(existing.id);
- setFormProductId(existing.product_id || "");
- const fields: Record<string, string> = {};
- if (existing.api_url) fields["api_url"] = existing.api_url;
-  if (existing.webhook_url && !existing.webhook_url.includes("*")) fields["webhook_url"] = existing.webhook_url;
- setFormFields(fields);
- setFormEventMode(existing.events?.length === app.events.length ? "all" : "custom");
- if (existing.events?.length !== app.events.length) setFormSelectedEvents(existing.events || []);
- } else {
- setEditId(null); setFormProductId(""); setFormFields({}); setFormEventMode("all"); setFormSelectedEvents([]);
- }
- };
+  const [params, setParams] = useSearchParams();
+  const requested = params.get("view");
+  const view: View = requested === "mine" || requested === "activity" || requested === "catalog" ? requested : connections.length > 0 ? "mine" : "catalog";
+  const setView = (v: View) => { const next = new URLSearchParams(params); next.set("view", v); setParams(next, { replace: true }); };
 
+  const [deliveries, setDeliveries] = useState<DeliveryRow[]>([]);
+  const [recent, setRecent] = useState<Array<{ status: string; created_at: string }>>([]);
+  const [loadingDeliveries, setLoadingDeliveries] = useState(true);
+  const [deliveriesError, setDeliveriesError] = useState(false);
 
- const closeDialog = () => { setDialogApp(null); setEditId(null); };
+  const [q, setQ] = useState("");
+  const [category, setCategory] = useState("all");
+  const [connectTarget, setConnectTarget] = useState<ConnectTarget | null>(null);
+  const [testTarget, setTestTarget] = useState<TestTarget | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<AppConnection | null>(null);
+  const [confirmBusy, setConfirmBusy] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [open, setOpen] = useState<DeliveryRow | null>(null);
+  const [status, setStatus] = useState<StatusFilter>("all");
+  const [connFilter, setConnFilter] = useState("all");
+  const [page, setPage] = useState(1);
 
- const handleSave = async () => {
- if (!user?.id || !dialogApp) return;
-  for (const f of dialogApp.fields.filter(f => f.required && !(editId && f.type === "api_key"))) {
- if (!formFields[f.key]?.trim()) { toast.error(`Preencha: ${f.label}`); return; }
- }
- if (!formProductId && dialogApp.events.length > 0) { toast.error("Selecione um produto"); return; }
- setSaving(true);
- const events = formEventMode === "all" ? dialogApp.events : formSelectedEvents;
-  const basePayload: TablesInsert<"app_integrations"> = {
- user_id: user.id, app_name: dialogApp.id, product_id: formProductId || null,
-  api_url: formFields["api_url"] || null, events, is_active: true, config: {},
- };
-  const secrets: TablesUpdate<"app_integrations"> = {};
-  if (!editId || formFields["api_key"]?.trim()) secrets.api_key = formFields["api_key"]?.trim() || null;
-  if (!editId || formFields["webhook_url"]?.trim()) secrets.webhook_url = formFields["webhook_url"]?.trim() || null;
-  const payload = { ...basePayload, ...secrets };
- let error;
- if (editId) {
- const { error: e } = await supabase.from("app_integrations").update(payload).eq("id", editId).eq("user_id", user.id);
- error = e;
- } else {
- if (dialogApp.id === "utmify" && formFields["api_key"]) {
- await supabase.from("product_pixels").insert({
- user_id: user.id, product_id: formProductId, platform: "utmify",
- pixel_id: formFields["api_key"], api_token: formFields["api_key"], events, is_active: true,
- });
- }
- const { error: e } = await supabase.from("app_integrations").insert(payload);
- error = e;
- }
- setSaving(false);
- if (error) toast.error("Erro ao salvar integração");
- else { toast.success(`${dialogApp.name} ${editId ? "atualizada" : "integrada"} com sucesso!`); closeDialog(); invalidateAll(["app_integrations"]); }
- };
+  const loadDeliveries = useCallback(async () => {
+    if (!user) return;
+    const since = new Date(Date.now() - 7 * DAY).toISOString();
+    const [list, week] = await Promise.all([
+      supabase.from("app_deliveries").select(COLUMNS).eq("user_id", user.id).order("created_at", { ascending: false }).limit(LIST_LIMIT),
+      supabase.from("app_deliveries").select("status, created_at").eq("user_id", user.id).gte("created_at", since).limit(5000),
+    ]);
+    if (list.error) { setDeliveriesError(true); } else {
+      // Mesmo formato das entregas de webhook: o "destino" aqui é a conexão.
+      setDeliveries(((list.data ?? []) as Array<DeliveryRow & { integration_id: string }>).map((d) => ({ ...d, webhook_config_id: d.integration_id })));
+      setRecent(((week.data ?? []) as Array<{ status: string; created_at: string }>).filter((r) => new Date(r.created_at).getTime() >= Date.now() - 7 * DAY));
+      setDeliveriesError(false);
+    }
+    setLoadingDeliveries(false);
+  }, [user]);
 
- const toggleEvent = (event: string) => {
- setFormSelectedEvents(prev => prev.includes(event) ? prev.filter(e => e !== event) : [...prev, event]);
- };
+  useEffect(() => { void loadDeliveries(); }, [loadDeliveries]);
 
- const getIntegration = (appId: string) => integrations.find(i => i.app_name === appId);
+  const hasOpen = useMemo(() => deliveries.some((d) => OPEN.includes(deliveryKind(d))), [deliveries]);
+  const loadRef = useRef(loadDeliveries);
+  loadRef.current = loadDeliveries;
+  useEffect(() => {
+    if (!hasOpen || view === "catalog") return;
+    const id = window.setInterval(() => { if (!document.hidden) void loadRef.current(); }, 5000);
+    return () => window.clearInterval(id);
+  }, [hasOpen, view]);
 
- return (
- <PageShell>
- <section className="space-y-6">
-  <div className="flex items-end justify-between gap-4 flex-wrap">
-  <div className="space-y-1">
-  <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.06] px-2.5 py-1 text-[11px] font-medium text-primary">
-  <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-  Conectores
-  </span>
-  <h1 className="font-display text-2xl font-black tracking-tight text-foreground md:text-3xl">Apps</h1>
-  <p className="text-sm text-muted-foreground/70">Clique no logo para configurar a integração.</p>
-  </div>
+  useEffect(() => { setPage(1); }, [status, connFilter]);
 
-  <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/80 px-3.5 py-1.5 text-[11px] font-medium text-muted-foreground/80 backdrop-blur-xl">
-  <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-  {integrations.length} ativas
-  </div>
-  </div>
+  const productName = useCallback((id: string | null) => (id ? products.find((p) => p.id === id)?.name ?? "Produto removido" : "Todos os produtos"), [products]);
 
- <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-  {[...APPS].sort((a, b) => Number(!!a.comingSoon) - Number(!!b.comingSoon)).map((app) => {
- const integration = getIntegration(app.id);
- const active = Boolean(integration?.is_active);
- const isComingSoon = Boolean(app.comingSoon);
+  const labelById = useMemo(() => new Map(connections.map((c) => [c.id, `${appById(c.app_name)?.name ?? c.app_name} (${productName(c.product_id)})`])), [connections, productName]);
+
+  const health = useMemo(() => {
+    const map = new Map<string, ConnectionHealth>();
+    const dayAgo = Date.now() - DAY;
+    for (const d of deliveries) {
+      const cur = map.get(d.webhook_config_id) ?? { last: null, failed: 0 };
+      if (!cur.last) cur.last = d;
+      if (deliveryKind(d) === "exhausted" && new Date(d.created_at).getTime() >= dayAgo) cur.failed += 1;
+      map.set(d.webhook_config_id, cur);
+    }
+    return map;
+  }, [deliveries]);
+
+  const stats = useMemo(() => ({
+    active: connections.filter((c) => c.is_active).length,
+    apps: new Set(connections.filter((c) => c.is_active).map((c) => c.app_name)).size,
+    ok: recent.filter((r) => r.status === "delivered" || r.status === "success").length,
+    bad: recent.filter((r) => r.status === "exhausted" || r.status === "failed").length,
+  }), [connections, recent]);
+
+  const byApp = useMemo(() => {
+    const map = new Map<string, { total: number; active: number }>();
+    for (const c of connections) { const cur = map.get(c.app_name) ?? { total: 0, active: 0 }; cur.total += 1; if (c.is_active) cur.active += 1; map.set(c.app_name, cur); }
+    return map;
+  }, [connections]);
+
+  const catalog = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return APPS.filter((a) => (category === "all" || a.category === category) && (!term || a.name.toLowerCase().includes(term) || a.desc.toLowerCase().includes(term) || a.category.toLowerCase().includes(term)))
+      .sort((a, b) => Number(!!a.comingSoon) - Number(!!b.comingSoon));
+  }, [q, category]);
+
+  const counts = useMemo(() => ({
+    all: deliveries.length,
+    success: deliveries.filter((d) => deliveryKind(d) === "success").length,
+    open: deliveries.filter((d) => OPEN.includes(deliveryKind(d))).length,
+    failed: deliveries.filter((d) => deliveryKind(d) === "exhausted").length,
+  }), [deliveries]);
+
+  const shown = useMemo(() => deliveries.filter((d) => {
+    const k = deliveryKind(d);
+    if (status === "success" && k !== "success") return false;
+    if (status === "open" && !OPEN.includes(k)) return false;
+    if (status === "failed" && k !== "exhausted") return false;
+    return connFilter === "all" || d.webhook_config_id === connFilter;
+  }), [deliveries, status, connFilter]);
+  const pageRows = shown.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const refresh = async () => { invalidateAll(["app_integrations"]); await refetch(); };
+
+  const saveConnection = async (values: ConnectSave): Promise<SaveResult> => {
+    if (!user || !connectTarget) return { ok: false, message: "Sessão expirada. Entre de novo." };
+    const { app, connection } = connectTarget;
+    const urlField = app.fields.find((f) => f.target === "api_url");
+    const secretValue = (target: "api_key" | "webhook_url") => { const f = app.fields.find((x) => x.target === target); return f ? (values.fields[f.key] ?? "").trim() : ""; };
+
+    const config: Record<string, unknown> = { ...(connection?.config ?? {}) };
+    for (const f of app.fields.filter((x) => x.target === "config")) {
+      const v = (values.fields[f.key] ?? "").trim();
+      if (v) config[f.key] = v; else delete config[f.key];
+    }
+
+    const base = {
+      product_id: values.productId, events: values.events, config: config as Json,
+      api_url: urlField ? (values.fields[urlField.key] ?? "").trim() || null : null,
+    };
+    const apiKey = secretValue("api_key"); const clientToken = secretValue("webhook_url");
+
+    if (connection) {
+      const patch: { api_key?: string; webhook_url?: string } & typeof base = { ...base };
+      if (apiKey) patch.api_key = apiKey;
+      if (clientToken) patch.webhook_url = clientToken;
+      const { error } = await supabase.from("app_integrations").update(patch).eq("id", connection.id).eq("user_id", user.id);
+      if (error) return { ok: false, message: appErrorMessage(error, "Não foi possível salvar a conexão.") };
+      toast.success(`${app.name} atualizado.`);
+    } else {
+      const { error } = await supabase.from("app_integrations").insert({ user_id: user.id, app_name: app.id, is_active: true, ...base, api_key: apiKey || null, webhook_url: clientToken || null });
+      if (error) return { ok: false, message: appErrorMessage(error, "Não foi possível criar a conexão.") };
+      toast.success(`${app.name} conectado.`);
+    }
+    setConnectTarget(null);
+    await refresh();
+    if (!connection) setView("mine");
+    return { ok: true };
+  };
+
+  const toggle = async (c: AppConnection) => {
+    if (!user || busyId) return;
+    setBusyId(c.id);
+    const { error } = await supabase.from("app_integrations").update({ is_active: !c.is_active }).eq("id", c.id).eq("user_id", user.id);
+    setBusyId(null);
+    if (error) { toast.error(c.is_active ? "Não foi possível pausar a conexão." : "Não foi possível reativar a conexão."); return; }
+    toast.success(c.is_active ? "Conexão pausada. Ela não recebe eventos enquanto estiver assim." : "Conexão reativada.");
+    await refresh();
+  };
+
+  const runDelete = async () => {
+    if (!confirmDelete || !user) return;
+    setConfirmBusy(true);
+    const { error } = await supabase.from("app_integrations").delete().eq("id", confirmDelete.id).eq("user_id", user.id);
+    setConfirmBusy(false);
+    if (error) { toast.error("Não foi possível remover a conexão."); return; }
+    toast.success("Conexão removida.");
+    setConfirmDelete(null);
+    await Promise.all([refresh(), loadDeliveries()]);
+  };
+
+  const runTest = async (connectionId: string): Promise<TestResult> => {
+    const { data, error } = await supabase.functions.invoke("apps-dispatcher", { body: { action: "test", integration_id: connectionId } });
+    if (!error && data) return readTestResult(data);
+    const ctx = (error as { context?: Response } | null)?.context;
+    if (ctx && typeof ctx.json === "function") { try { return readTestResult(await ctx.json()); } catch { /* corpo ilegível */ } }
+    return { ok: false, status: 0, message: "Não foi possível falar com o servidor. Confira sua conexão e tente de novo.", detail: "" };
+  };
+
+  const connect = (app: AppDef) => { if (!app.comingSoon && app.id !== "webhooks") setConnectTarget({ app }); };
+  const manage = (app: AppDef) => { setConnFilter("all"); setView("mine"); setQ(app.name); };
+  const activityOf = (c: AppConnection) => { setConnFilter(c.id); setStatus("all"); setView("activity"); };
+
+  const mineShown = useMemo(() => {
+    const term = view === "mine" ? q.trim().toLowerCase() : "";
+    return term ? connections.filter((c) => (appById(c.app_name)?.name ?? c.app_name).toLowerCase().includes(term) || productName(c.product_id).toLowerCase().includes(term)) : connections;
+  }, [connections, q, view, productName]);
+
+  const siblings = connectTarget ? connections.filter((c) => c.app_name === connectTarget.app.id && c.is_active && c.id !== connectTarget.connection?.id) : [];
 
   return (
-  <button
-  key={app.id}
-  onClick={() => openDialog(app, integration || undefined)}
-  disabled={isComingSoon}
-  className={cn(
- "group relative isolate flex h-32 items-center overflow-hidden rounded-[22px] border bg-card px-7 text-left transition-[transform,border-color,background-color] duration-300 ease-out md:h-[8.5rem] md:px-8",
-    isComingSoon
-      ? "border-border/40 bg-card/50 cursor-not-allowed opacity-90"
-      : active
-      ? "border-primary/40 bg-card hover:-translate-y-0.5 hover:border-primary/70 hover:bg-primary/[0.045]"
-      : "border-border/70 hover:-translate-y-0.5 hover:border-primary/60 hover:bg-primary/[0.035]"
-  )}
-  >
-  {!isComingSoon && (
-    <>
-      {/* Accent left rail */}
-      <span className={cn(
- "pointer-events-none absolute left-0 top-5 bottom-5 z-0 w-[3px] origin-center rounded-r-full bg-primary transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        active ? "scale-y-100 opacity-100" : "scale-y-50 opacity-0 group-hover:scale-y-100 group-hover:opacity-100"
-      )} />
-      {/* Top hairline on hover */}
-      <span className="pointer-events-none absolute inset-x-6 top-0 z-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-      {/* Diagonal sheen sweep */}
-      <span className="pointer-events-none absolute inset-0 z-0 -translate-x-[120%] bg-[linear-gradient(115deg,transparent_0%,hsl(var(--primary)/0.10)_44%,transparent_72%)] opacity-0 transition-[transform,opacity] duration-700 ease-out group-hover:translate-x-[120%] group-hover:opacity-100" />
-    </>
-  )}
+    <div className="vp-fade space-y-5 pb-6 md:space-y-6">
+      <Seo title="Apps | Vemprapay" description="Conecte suas ferramentas e envie cada venda automaticamente." path="/integracoes?tab=apps" noindex />
 
-               <div className="relative z-[1] flex h-full w-full items-center justify-center">
-                 <div className={cn(
- "flex h-20 w-40 items-center justify-center rounded-xl border border-border bg-logo-surface px-4 md:h-24 md:w-44 transition-colors",
-                   isComingSoon && "grayscale opacity-40"
-                 )}>
-                    {failedLogos.has(app.id) ? (
-                      <div className="flex items-center gap-2 text-muted-foreground" role="img" aria-label={`Logo indisponível: ${app.name}`}>
-                        <ImageOff className="h-4 w-4" />
-                        <span className="text-xs font-semibold">{app.name}</span>
-                      </div>
-                    ) : (
-                      <img
-                        src={app.logo}
-                        alt={app.name}
-                        width={176}
-                        height={96}
-                        loading="eager"
-                        decoding="async"
-                        onError={() => setFailedLogos((current) => new Set(current).add(app.id))}
-                        className={cn(
-                          "max-h-full max-w-full object-contain transition-transform duration-300 ease-out",
-                          !isComingSoon && "group-hover:scale-105"
-                        )}
-                      />
-                    )}
-                 </div>
-               </div>
+      <PageHead title="Apps" subtitle="Conecte as ferramentas que você já usa. A cada venda, a gente envia o que você escolher, sem copiar e colar nada." />
 
-               {isComingSoon && (
-                 <span className="absolute right-3 top-3 z-[2] inline-flex items-center gap-1 rounded-md border border-border/60 bg-background/80 px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-                   <Clock className="h-2.5 w-2.5" strokeWidth={2.5} />
-                   Em breve
-                 </span>
-               )}
-               {active && !isComingSoon && (
-                 <span className="absolute right-3 top-3 z-[2] inline-flex items-center gap-1 rounded-md border border-success/30 bg-success/10 px-1.5 py-0.5 text-[11px] font-medium text-success">
-                   <CheckCircle2 className="h-2.5 w-2.5" strokeWidth={2.5} />
-                   Ativo
-                 </span>
-               )}
-  </button>
-  );
- })}
+      <StatBand
+        label="Resumo dos apps"
+        cells={[
+          { label: "Conexões ativas", featured: true, loading: isLoading, value: String(stats.active), sub: connections.length - stats.active > 0 ? `${connections.length - stats.active} pausada${connections.length - stats.active > 1 ? "s" : ""}` : "Recebendo eventos" },
+          { label: "Apps conectados", loading: isLoading, value: String(stats.apps), sub: `${APPS.filter((a) => !a.comingSoon && a.id !== "webhooks").length} disponíveis` },
+          { label: "Enviados em 7 dias", loading: loadingDeliveries, value: stats.ok.toLocaleString("pt-BR"), sub: deliveries[0] ? `Último ${ago(deliveries[0].created_at)}` : "Nada enviado ainda" },
+          { label: "Falharam em 7 dias", loading: loadingDeliveries, value: stats.bad.toLocaleString("pt-BR"), sub: stats.bad > 0 ? "Esgotaram as 5 tentativas" : "Nada falhou" },
+        ]}
+      />
 
- </div>
- </section>
+      {isError ? (
+        <section className="vp-sheet">
+          <EmptyPanel icon={<AlertCircle className="h-7 w-7" strokeWidth={1.8} />} title="Não foi possível carregar suas conexões" text="Confira sua conexão e tente de novo. Suas conexões continuam salvas." action={<button type="button" className="vp-ghost" onClick={() => { void refetch(); }}>Tentar de novo</button>} />
+        </section>
+      ) : (
+        <>
+          <FilterPills<View>
+            label="Visão dos apps" value={view} onChange={(v) => { setView(v); if (v !== "mine" && v !== "catalog") setQ(""); }}
+            options={[{ value: "catalog", label: "Catálogo" }, { value: "mine", label: "Minhas conexões", count: connections.length }, { value: "activity", label: "Atividade" }]}
+          />
 
-      {/* ─── Integration Dialog · Billion-Dollar SaaS ─── */}
-      {dialogApp && dialogApp.id !== "webhooks" && (
-        <Dialog open={!!dialogApp} onOpenChange={(v) => { if (!v) closeDialog(); }}>
-          <DialogContent className="w-[calc(100vw-1.5rem)] max-w-[680px] rounded-3xl border border-border bg-card p-0 overflow-hidden max-h-[92vh] flex flex-col gap-0">
-            {/* Header — premium */}
-            <div className="relative flex items-center gap-4 border-b border-border/70 bg-gradient-to-b from-primary/[0.04] to-transparent px-6 py-5">
-              <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-              <div className="relative flex h-14 w-20 shrink-0 items-center justify-center rounded-[12px] border border-border/60 bg-background p-2.5">
-                <img src={dialogApp.logo} alt={dialogApp.name} className="relative h-full w-full object-contain" />
+          {view === "catalog" && (
+            <>
+              <div className="flex flex-col gap-3">
+                <SearchField label="Buscar app" value={q} onChange={setQ} placeholder="Buscar por nome ou categoria" className="sm:w-[340px]" />
+                <FilterPills<string> label="Filtrar apps por categoria" value={category} onChange={setCategory} options={[{ value: "all", label: "Todos" }, ...CATEGORIES.map((c) => ({ value: c, label: c }))]} />
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <DialogTitle className="font-display text-[16px] font-black tracking-[-0.01em] text-foreground">
-                    {editId ? `Editar ${dialogApp.name}` : `Conectar ${dialogApp.name}`}
-                  </DialogTitle>
-                  <span className="inline-flex h-5 items-center rounded-md border border-primary/25 bg-primary/[0.08] px-1.5 text-[11px] font-semibold text-primary">
-                    {dialogApp.category}
-                  </span>
-                </div>
-                <p className="mt-1 text-[12px] font-medium text-muted-foreground">{dialogApp.desc}</p>
-              </div>
-            </div>
-
-            {/* Body */}
-            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
-              {dialogApp.helpText && (
-                <div className="group relative flex items-start gap-2.5 rounded-xl border border-primary/25 bg-primary/[0.05] px-3.5 py-3 overflow-hidden">
-                  <span className="pointer-events-none absolute inset-y-2 left-0 w-[3px] rounded-r-full bg-primary/70" />
-                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" strokeWidth={2.2} />
-                  <p className="text-[12px] leading-relaxed text-foreground/85 font-medium">{dialogApp.helpText}</p>
-                </div>
+              {catalog.length === 0 ? (
+                <section className="vp-sheet"><EmptyPanel icon={<Search className="h-7 w-7" strokeWidth={1.8} />} title="Nenhum app encontrado" text="Tente outro nome ou limpe os filtros." action={<button type="button" className="vp-ghost" onClick={() => { setQ(""); setCategory("all"); }}>Limpar filtros</button>} /></section>
+              ) : (
+                <ul className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[repeat(2,minmax(0,1fr))] xl:grid-cols-[repeat(3,minmax(0,1fr))]" aria-label="Apps disponíveis">
+                  {catalog.map((a) => (
+                    <li key={a.id}><AppCard app={a} connected={byApp.get(a.id)?.total ?? 0} active={(byApp.get(a.id)?.active ?? 0) > 0} onConnect={connect} onManage={manage} /></li>
+                  ))}
+                </ul>
               )}
+            </>
+          )}
 
-              {/* Produto vinculado */}
-              {dialogApp.events.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary " />
-                    Produto vinculado
-                  </Label>
-                  <Select value={formProductId} onValueChange={setFormProductId}>
-                    <SelectTrigger className="h-12 rounded-xl border border-border/70 bg-secondary/50 px-4 font-semibold transition-[border-color,background-color,transform] duration-300 hover:border-primary/50 hover:bg-primary/[0.04] focus:border-primary/60 data-[state=open]:border-primary/60">
-                      <SelectValue placeholder="Selecione o produto para esta integração" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {products.length === 0 ? (
-                        <div className="px-3 py-6 text-center text-xs text-muted-foreground">
-                          Nenhum produto cadastrado
-                        </div>
-                      ) : (
-                        products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+          {view === "mine" && (
+            isLoading ? <div className="space-y-3" aria-busy="true">{Array.from({ length: 3 }, (_, i) => <div key={i} className="vp-skel h-[84px] !rounded-[22px]" />)}</div>
+            : connections.length === 0 ? (
+              <section className="vp-sheet">
+                <EmptyPanel icon={<Plug className="h-7 w-7" strokeWidth={1.8} />} title="Você ainda não conectou nenhum app" text="Escolha uma ferramenta no catálogo, cole a chave dela e marque o que enviar. Leva um minuto." action={<button type="button" className="vp-cta" onClick={() => setView("catalog")}>Ver catálogo</button>} />
+              </section>
+            ) : (
+              <>
+                {connections.length > 4 && <SearchField label="Buscar conexão" value={q} onChange={setQ} placeholder="App ou produto" className="sm:w-[320px]" />}
+                {mineShown.length === 0 ? (
+                  <section className="vp-sheet"><EmptyPanel title="Nenhuma conexão encontrada" text="Tente outro nome." action={<button type="button" className="vp-ghost" onClick={() => setQ("")}>Limpar busca</button>} /></section>
+                ) : (
+                  <ConnectionsList
+                    rows={mineShown} productName={productName} health={health} busyId={busyId}
+                    onTest={(c) => { const app = appById(c.app_name); if (app) setTestTarget({ app, connectionId: c.id, productLabel: productName(c.product_id) }); }}
+                    onEdit={(c) => { const app = appById(c.app_name); if (app) setConnectTarget({ app, connection: c }); }}
+                    onToggle={(c) => void toggle(c)} onActivity={activityOf} onDelete={setConfirmDelete}
+                  />
+                )}
+              </>
+            )
+          )}
 
-              {/* Credenciais */}
-              {dialogApp.fields.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
-                    <Shield className="h-3 w-3 text-primary" strokeWidth={2.4} />
-                    Credenciais
-                  </Label>
-                  <div className="relative rounded-xl border border-border/70 bg-secondary/50 divide-y divide-border/60 overflow-hidden">
-                    <span className="pointer-events-none absolute inset-y-3 left-0 w-[3px] rounded-r-full bg-primary/60" />
-                    {dialogApp.fields.map(field => (
-                      <div key={field.key} className="px-4 py-3.5 space-y-1.5">
-                        <label className="flex items-center justify-between text-[11px] font-semibold text-foreground">
-                          <span>
-                            {field.label}
-                            {field.required && <span className="ml-1 text-primary">*</span>}
-                          </span>
-                          {!field.required && (
-                            <span className="text-[11px] font-medium text-muted-foreground/60">
-                              Opcional
-                            </span>
-                          )}
-                        </label>
-                        <Input
-                          placeholder={field.placeholder}
-                          value={formFields[field.key] || ""}
-                          onChange={(e) => setFormFields({ ...formFields, [field.key]: e.target.value })}
-                          className="h-11 rounded-lg border border-border/70 bg-card font-mono text-[12px] transition-[border-color,background-color] duration-300 focus:border-primary/60"
-                        />
-                        {field.help && (
-                          <p className="text-[10px] leading-relaxed text-muted-foreground/70 font-medium">{field.help}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Eventos */}
-              {dialogApp.events.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
-                    <Zap className="h-3 w-3 text-primary" strokeWidth={2.4} />
-                    Eventos de disparo
-                  </Label>
-
-                  <div className="inline-flex h-11 w-full items-center rounded-xl border border-border/70 bg-secondary/50 p-1">
-                    {(["all", "custom"] as const).map(mode => (
-                      <button
-                        key={mode}
-                        type="button"
-                        onClick={() => setFormEventMode(mode)}
-                        className={cn(
- "flex-1 h-full rounded-lg text-[11.5px] font-semibold transition-[color,background-color,box-shadow,transform] duration-300 flex items-center justify-center gap-1.5 ",
-                          formEventMode === mode
-                            ? "bg-card border border-primary/40 text-foreground "
-                            : "text-muted-foreground hover:text-foreground hover:bg-card/50"
-                        )}
-                      >
-                        {formEventMode === mode && <CheckCircle2 className="h-3.5 w-3.5 text-primary" strokeWidth={2.6} />}
-                        {mode === "all" ? `Todos (${dialogApp.events.length})` : "Personalizado"}
-                      </button>
-                    ))}
-                  </div>
-
-                  {formEventMode === "custom" && (
-                    <div className="rounded-xl border border-border/70 bg-secondary/50 overflow-hidden">
-                      <div className="grid grid-cols-1 divide-y divide-border/60 sm:grid-cols-2 sm:divide-y-0">
-                        {dialogApp.events.map(event => {
-                          const selected = formSelectedEvents.includes(event);
-                          const isReversal = event.includes("Refund") || event.includes("Chargeback");
-                          const isPending = event.includes("Pix") || event.includes("Boleto");
-                          const tone = isReversal
-                            ? "border-destructive/30 bg-destructive/10 text-destructive"
-                            : isPending
-                            ? "border-warning/30 bg-warning/10 text-warning"
-                            : event === "Lead"
-                            ? "border-info/30 bg-info/10 text-info"
-                            : "border-primary/30 bg-primary/10 text-primary";
-
-                          return (
-                            <label
-                              key={event}
-                              className={cn(
- "group/evt relative flex items-center gap-3 px-3.5 py-3 text-xs cursor-pointer transition-[background-color,padding] duration-300 hover:pl-5",
-                                selected ? "bg-primary/[0.05] text-foreground" : "text-muted-foreground hover:bg-card/60 hover:text-foreground"
-                              )}
-                            >
-                              <span className={cn(
- "pointer-events-none absolute left-0 top-2 bottom-2 w-[2px] rounded-r-full bg-primary transition-opacity duration-300",
-                                selected ? "opacity-100" : "opacity-0 group-hover/evt:opacity-40"
-                              )} />
-                              <Checkbox
-                                checked={selected}
-                                onCheckedChange={() => toggleEvent(event)}
-                                className="h-4 w-4 rounded-[5px] border-border/80 data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
-                              />
-                              <span className="flex-1 font-bold">{event}</span>
-                              <span className={cn("rounded-md border px-1.5 py-0.5 text-[11px] font-semibold ", tone)}>
-                                {isReversal ? "reversal" : isPending ? "pending" : "trigger"}
-                              </span>
-                            </label>
-                          );
-                        })}
-                      </div>
-                      <div className="border-t border-border/70 bg-card px-3.5 py-2 flex items-center justify-between">
-                        <span className="text-[11px] font-medium text-muted-foreground">
-                          {formSelectedEvents.length} de {dialogApp.events.length} selecionados
-                        </span>
-                        {formSelectedEvents.length > 0 && (
-                          <span className="inline-flex h-1.5 w-16 overflow-hidden rounded-full bg-secondary">
-                    <span className={cn("h-full bg-primary transition-[width] duration-500", formSelectedEvents.length === dialogApp.events.length ? "w-full" : formSelectedEvents.length === 0 ? "w-0" : "w-1/2")} />
-                          </span>
-                        )}
-                      </div>
-                    </div>
+          {view === "activity" && (
+            deliveriesError ? (
+              <section className="vp-sheet"><EmptyPanel icon={<AlertCircle className="h-7 w-7" strokeWidth={1.8} />} title="Não foi possível carregar a atividade" text="Confira sua conexão e tente de novo." action={<button type="button" className="vp-ghost" onClick={() => { setLoadingDeliveries(true); void loadDeliveries(); }}>Tentar de novo</button>} /></section>
+            ) : loadingDeliveries ? <div className="space-y-3" aria-busy="true">{Array.from({ length: 4 }, (_, i) => <div key={i} className="vp-skel h-[72px] !rounded-[22px]" />)}</div>
+            : deliveries.length === 0 ? (
+              <section className="vp-sheet"><EmptyPanel icon={<ListChecks className="h-7 w-7" strokeWidth={1.8} />} title="Nada enviado ainda" text="Assim que uma venda disparar um evento marcado nas suas conexões, cada envio aparece aqui com a resposta do app." /></section>
+            ) : (
+              <>
+                <div className="flex flex-col gap-3">
+                  <FilterPills<StatusFilter> label="Filtrar envios por situação" value={status} onChange={setStatus} options={[{ value: "all", label: "Todos", count: counts.all }, { value: "success", label: "Entregues", count: counts.success }, { value: "open", label: "Em andamento", count: counts.open }, { value: "failed", label: "Falharam", count: counts.failed }]} />
+                  {connections.length > 1 && (
+                    <Select value={connFilter} onValueChange={setConnFilter}>
+                      <SelectTrigger aria-label="Filtrar por conexão" className="vp-r16 h-11 sm:w-[300px]"><SelectValue /></SelectTrigger>
+                      <SelectContent collisionPadding={16}>
+                        <SelectItem value="all">Todas as conexões</SelectItem>
+                        {connections.map((c) => <SelectItem key={c.id} value={c.id}>{labelById.get(c.id)}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
                   )}
                 </div>
-              )}
-            </div>
-
-
-            {/* Footer */}
-            <div className="relative border-t border-border/70 bg-gradient-to-t from-primary/[0.03] to-transparent px-6 py-4 space-y-2.5">
-              <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-              <Button
-                onClick={handleSave}
-                disabled={saving}
-                className="group/btn relative w-full h-12 rounded-xl font-semibold text-[12.5px] bg-primary text-primary-foreground hover:bg-primary/90  transition-[transform,box-shadow] duration-300   overflow-hidden"
-              >
-                <span className="pointer-events-none absolute inset-0 -translate-x-[120%] bg-[linear-gradient(115deg,transparent_0%,hsl(0_0%_100%/0.18)_44%,transparent_72%)] transition-transform duration-700 ease-out group-hover/btn:translate-x-[120%]" />
-                {saving ? (
-                  <span className="relative flex items-center gap-2">
-                    <div className="h-3.5 w-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                    Salvando...
-                  </span>
+                {shown.length === 0 ? (
+                  <section className="vp-sheet"><EmptyPanel title="Nenhum envio encontrado" text="Tente outro filtro." action={<button type="button" className="vp-ghost" onClick={() => { setStatus("all"); setConnFilter("all"); }}>Limpar filtros</button>} /></section>
                 ) : (
-                  <span className="relative flex items-center gap-2">
-                    {editId ? <Settings2 className="h-4 w-4" strokeWidth={2.5} /> : <Zap className="h-4 w-4" strokeWidth={2.5} />}
-                    {editId ? "Salvar alterações" : "Ativar integração"}
-                  </span>
+                  <div className="space-y-3">
+                    <DeliveryLedger rows={pageRows} hostById={labelById} onOpen={setOpen} targetHeader="Conexão" targetGone="Conexão removida" describe={appDeliveryOutcome} footer={<Pager page={page} pageSize={PAGE_SIZE} total={shown.length} onPage={setPage} />} />
+                    {deliveries.length >= LIST_LIMIT && <p className="px-1 text-[13px] text-muted-foreground">Mostrando os {LIST_LIMIT} envios mais recentes.</p>}
+                  </div>
                 )}
-              </Button>
-
-
-              {editId && ["zapi","utmify","activecampaign","notazz","themembers","spedy","astron","memberkit","smsfunnel","voxuy","cademi"].includes(dialogApp.id) && (
-                <Button
-                  variant="outline"
-                  disabled={testing}
-                  onClick={async () => {
-                    setTesting(true);
-                    const { data, error } = await supabase.functions.invoke("apps-dispatcher", {
-                      body: { action: "test", integration_id: editId },
-                    });
-                    setTesting(false);
-                    if (error || !data?.ok) {
-                      toast.error(`Falha no teste: ${data?.error || data?.body || error?.message || "desconhecido"}`);
-                    } else {
-                      toast.success(`Teste OK (HTTP ${data.status})`);
-                    }
-                  }}
-                  className="w-full h-10 rounded-xl text-[12px] font-bold border border-border bg-secondary hover:bg-card"
-                >
-                  {testing ? "Testando conexão..." : "Testar conexão (envio real)"}
-                </Button>
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
+              </>
+            )
+          )}
+        </>
       )}
-    </PageShell>
+
+      <ConnectDialog
+        target={connectTarget} products={products.map((p) => ({ id: p.id, name: p.name }))} siblings={siblings}
+        onOpenChange={(o) => { if (!o) setConnectTarget(null); }} onSave={saveConnection}
+      />
+      <TestAppDialog target={testTarget} onClose={() => setTestTarget(null)} onRun={runTest} />
+      <DeliveryDialog delivery={open} url={open ? labelById.get(open.webhook_config_id) ?? "" : ""} table="app_deliveries" targetLabel="Conexão" onClose={() => setOpen(null)} />
+
+      <AlertDialog open={!!confirmDelete} onOpenChange={(o) => { if (!o && !confirmBusy) setConfirmDelete(null); }}>
+        <AlertDialogContent className="rounded-[28px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover {confirmDelete ? appById(confirmDelete.app_name)?.name : "a conexão"}?</AlertDialogTitle>
+            <AlertDialogDescription>A conexão deixa de receber eventos e o histórico de envios dela é apagado. Se quiser só dar um tempo, pause em vez de remover. Isso não pode ser desfeito.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={confirmBusy}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction className="vp-cta vp-cta-danger" disabled={confirmBusy} onClick={(e) => { e.preventDefault(); void runDelete(); }}>{confirmBusy ? "Aguarde…" : "Remover conexão"}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }
+

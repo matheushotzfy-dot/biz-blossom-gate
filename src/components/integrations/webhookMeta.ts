@@ -36,7 +36,7 @@ export const EVENT_GROUPS: EventGroup[] = [
 ];
 
 export const ALL_EVENTS: string[] = EVENT_GROUPS.flatMap((g) => g.events.map((e) => e.key));
-const LABELS: Record<string, string> = { "webhook.test": "Evento de teste", ...Object.fromEntries(EVENT_GROUPS.flatMap((g) => g.events.map((e) => [e.key, e.label]))) };
+const LABELS: Record<string, string> = { "webhook.test": "Evento de teste", Purchase: "Venda aprovada", InitiateCheckout: "Checkout iniciado", PixGenerated: "PIX gerado", BoletoGenerated: "Boleto gerado", Refund: "Reembolso", Chargeback: "Chargeback", ...Object.fromEntries(EVENT_GROUPS.flatMap((g) => g.events.map((e) => [e.key, e.label]))) };
 export const eventLabel = (key: string) => LABELS[key] ?? key;
 
 /** Endpoint sem eventos escolhidos recebe todos (regra do banco): mostramos como "Todos os eventos". */
@@ -68,16 +68,16 @@ const PRIVATE_V4 = /^(0\.|10\.|127\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|192\.1
 /** Espelha o gatilho do banco (https, sem rede interna) e fecha o que ele deixa passar. Devolve a mensagem de erro ou null. */
 export function validateWebhookUrl(raw: string): string | null {
   const value = raw.trim();
-  if (!value) return "Informe a URL do seu servidor.";
+  if (!value) return "Informe a URL.";
   if (value.length > 2000) return "A URL é longa demais.";
   if (!/^https:\/\//i.test(value)) return "A URL precisa começar com https://.";
   let u: URL;
   try { u = new URL(value); } catch { return "Essa URL não parece válida. Exemplo: https://seusite.com/webhook."; }
-  if (u.username || u.password) return "A URL não pode ter usuário e senha. Valide a assinatura no seu servidor.";
+  if (u.username || u.password) return "A URL não pode ter usuário e senha.";
   const host = u.hostname.toLowerCase();
   if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local") || host.endsWith(".internal") || host.startsWith("[") || host === "::1")
-    return "Use um endereço público. Localhost e redes internas não recebem webhooks.";
-  if (PRIVATE_V4.test(host)) return "Use um endereço público. Localhost e redes internas não recebem webhooks.";
+    return "Use um endereço público. Localhost e redes internas não são aceitos.";
+  if (PRIVATE_V4.test(host)) return "Use um endereço público. Localhost e redes internas não são aceitos.";
   if (!host.includes(".")) return "Use um domínio completo, como seusite.com.";
   return null;
 }
@@ -92,7 +92,7 @@ export const MAX_ATTEMPTS = 5;
 export const RETRY_PLAN = "10 segundos, 30 segundos, 2 minutos, 10 minutos e 1 hora";
 
 export function deliveryKind(d: Pick<DeliveryRow, "status" | "attempt">): DeliveryKind {
-  if (d.status === "success") return "success";
+  if (d.status === "success" || d.status === "delivered") return "success";
   if (d.status === "processing") return "sending";
   if (d.status === "pending") return d.attempt > 0 ? "retrying" : "queued";
   return "exhausted"; // exhausted e failed
@@ -107,12 +107,12 @@ export const DELIVERY_META: Record<DeliveryKind, { label: string; tone: TxTone }
 };
 
 /** Texto curto do que aconteceu, sem jargão. */
-export function deliveryOutcome(d: DeliveryRow): string {
+export function deliveryOutcome(d: DeliveryRow, explain: (error: string | null) => string = deliveryErrorText, subject = "Seu servidor"): string {
   const kind = deliveryKind(d);
-  if (kind === "success") return d.response_status ? `Seu servidor respondeu ${d.response_status}` : "Entregue";
+  if (kind === "success") return d.response_status ? `${subject} respondeu ${d.response_status}` : "Entregue";
   if (kind === "queued") return "Aguardando o próximo envio";
   if (kind === "sending") return "Enviando agora";
-  const why = d.response_status ? `Seu servidor respondeu ${d.response_status}` : deliveryErrorText(d.error);
+  const why = d.response_status ? `${subject} respondeu ${d.response_status}` : explain(d.error);
   return kind === "retrying" ? `${why}. Vamos tentar de novo.` : why;
 }
 
