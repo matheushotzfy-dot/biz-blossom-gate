@@ -1,9 +1,12 @@
-import { Link, useNavigate } from "react-router-dom";
-import { Bell, ChevronDown, Eye, EyeOff, LifeBuoy, LogOut, Moon, Percent, Search, ShieldCheck, Sun, UserRound, Wallet } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Bell, ChevronDown, Eye, EyeOff, Moon, Search, ShieldCheck, Sun, Wallet } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Money } from "@/components/home/Money";
-import { supabase } from "@/integrations/supabase/client";
+import { useSignOut } from "@/hooks/useSignOut";
+import type { KycKey } from "@/components/account/accountMeta";
+import { AccountMenuContent } from "./AccountMenu";
+import { firstNameOf, initialOf } from "./accountMenu";
 import { useTheme } from "@/hooks/useTheme";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +16,9 @@ export interface SellerTopbarProps {
   onOpenSearch: () => void;
   avatarUrl?: string | null;
   name?: string | null;
+  email?: string | null;
+  /** Situação da verificação, para o texto do menu. */
+  kyc?: KycKey;
   kycApproved: boolean;
   /** Texto curto da situação da conta ("Em análise", "Reprovada"…). */
   kycLabel?: string;
@@ -25,12 +31,11 @@ export interface SellerTopbarProps {
 
 /** Barra superior do conteúdo: busca, saldo à mão, aparência, avisos e conta. Só desktop/tablet. */
 export function SellerTopbar(p: SellerTopbarProps) {
-  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
-  const first = (p.name || "").split(" ")[0] || "Vendedor";
+  const first = firstNameOf(p.name);
+  const signOut = useSignOut();
   const tone = p.kycApproved ? "ok" : p.kycTone ?? "warn";
   const label = p.kycApproved ? "Conta verificada" : p.kycLabel ?? "Verificação pendente";
-  const logout = async () => { await supabase.auth.signOut(); navigate("/auth"); };
 
   return (
     <header className="sticky top-0 z-30 hidden h-[84px] shrink-0 items-center gap-3 bg-background/85 px-8 backdrop-blur-xl md:flex">
@@ -76,7 +81,7 @@ export function SellerTopbar(p: SellerTopbarProps) {
             <span className="relative">
               <Avatar className="h-[42px] w-[42px]">
                 <AvatarImage src={p.avatarUrl || undefined} className="object-cover" />
-                <AvatarFallback className="bg-accent text-[15px] font-bold text-accent-foreground">{first.charAt(0).toUpperCase()}</AvatarFallback>
+                <AvatarFallback className="bg-accent text-[15px] font-bold text-accent-foreground">{initialOf(p.name)}</AvatarFallback>
               </Avatar>
               <span className={cn("absolute -bottom-0.5 -right-0.5 grid h-[17px] w-[17px] place-items-center rounded-full text-white ring-2 ring-background", tone === "ok" ? "bg-primary" : tone === "alert" ? "bg-destructive" : "bg-warning")}>
                 <ShieldCheck className="h-[10px] w-[10px]" strokeWidth={3} />
@@ -90,17 +95,8 @@ export function SellerTopbar(p: SellerTopbarProps) {
             </span>
             <ChevronDown className="h-4 w-4 text-muted-foreground" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-60 rounded-2xl p-1.5">
-            <DropdownMenuLabel className="px-2.5 py-2">
-              <span className="block truncate text-[14px] font-bold text-foreground">{p.name || first}</span>
-              <span className={cn("mt-0.5 block text-[12.5px] font-medium", tone === "ok" ? "vp-green-ink" : tone === "alert" ? "text-destructive" : "text-warning")}>{label}</span>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="rounded-xl py-2.5" onClick={() => navigate("/perfil")}><UserRound className="mr-2.5 h-4 w-4" />Minha conta</DropdownMenuItem>
-            <DropdownMenuItem className="rounded-xl py-2.5" onClick={() => navigate("/financeiro/taxas")}><Percent className="mr-2.5 h-4 w-4" />Minhas taxas</DropdownMenuItem>
-            <DropdownMenuItem className="rounded-xl py-2.5" onClick={() => navigate("/suporte")}><LifeBuoy className="mr-2.5 h-4 w-4" />Suporte</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout} className="rounded-xl py-2.5 text-destructive focus:text-destructive"><LogOut className="mr-2.5 h-4 w-4" />Sair</DropdownMenuItem>
+          <DropdownMenuContent align="end" sideOffset={8} className="w-[336px] max-w-[calc(100vw-24px)] rounded-[20px] p-2">
+            <AccountMenuContent name={p.name} email={p.email} avatarUrl={p.avatarUrl} kyc={p.kyc ?? (p.kycApproved ? "approved" : "pending")} onSignOut={() => void signOut()} />
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

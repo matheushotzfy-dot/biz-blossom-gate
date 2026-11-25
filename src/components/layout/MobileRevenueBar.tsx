@@ -1,29 +1,33 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Bell, LifeBuoy, LogOut, Moon, Search, Sun, UserRound, Wallet } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Bell, Moon, Search, Sun, Wallet } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useProfile } from "@/hooks/useProfile";
 import { usePrivacyMode } from "@/hooks/usePrivacyMode";
 import { useLedgerBalance } from "@/hooks/useQueryData";
 import { NotificationPanel, useNotificationCount } from "@/components/NotificationPanel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { AccountMenuContent } from "@/components/seller-shell/AccountMenu";
+import { initialOf } from "@/components/seller-shell/accountMenu";
+import { useKycStatus } from "@/hooks/useKycStatus";
+import { useSignOut } from "@/hooks/useSignOut";
+import type { KycKey } from "@/components/account/accountMeta";
 import { GlobalSearchDialog } from "./GlobalSearchDialog";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
 import { Money } from "@/components/home/Money";
-import { supabase } from "@/integrations/supabase/client";
 
 /** Barra superior do celular: marca, saldo, busca, avisos e conta (com o tema dentro do menu). */
 export function MobileRevenueBar() {
   const { theme, toggleTheme } = useTheme();
   const { profile } = useProfile();
-  const navigate = useNavigate();
+  const kyc = useKycStatus();
+  const signOut = useSignOut();
   const unreadCount = useNotificationCount();
   const { hidden } = usePrivacyMode();
   const { data: balance = 0 } = useLedgerBalance();
   const [notifOpen, setNotifOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const logout = async () => { await supabase.auth.signOut(); navigate("/auth"); };
 
   return (
     <>
@@ -53,15 +57,27 @@ export function MobileRevenueBar() {
             <DropdownMenuTrigger className="shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" aria-label="Minha conta">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={profile?.avatar_url || undefined} className="object-cover" />
-                <AvatarFallback className="bg-accent text-[14px] font-bold text-accent-foreground">{(profile?.full_name || "U").charAt(0).toUpperCase()}</AvatarFallback>
+                <AvatarFallback className="bg-accent text-[14px] font-bold text-accent-foreground">{initialOf(profile?.full_name)}</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 rounded-2xl p-1.5">
-              <DropdownMenuItem className="rounded-xl py-2.5" onClick={() => navigate("/perfil")}><UserRound className="mr-2.5 h-4 w-4" />Minha conta</DropdownMenuItem>
-              <DropdownMenuItem className="rounded-xl py-2.5" onClick={toggleTheme}>{theme === "dark" ? <Sun className="mr-2.5 h-4 w-4" /> : <Moon className="mr-2.5 h-4 w-4" />}{theme === "dark" ? "Tema claro" : "Tema escuro"}</DropdownMenuItem>
-              <DropdownMenuItem className="rounded-xl py-2.5" onClick={() => navigate("/suporte")}><LifeBuoy className="mr-2.5 h-4 w-4" />Suporte</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={logout} className="rounded-xl py-2.5 text-destructive focus:text-destructive"><LogOut className="mr-2.5 h-4 w-4" />Sair</DropdownMenuItem>
+            <DropdownMenuContent align="end" sideOffset={8} className="w-[316px] max-w-[calc(100vw-24px)] rounded-[20px] p-2">
+              <AccountMenuContent
+                name={profile?.full_name}
+                email={profile?.email}
+                avatarUrl={profile?.avatar_url}
+                kyc={kyc.resolved ? (kyc.state as KycKey) : "pending"}
+                onSignOut={() => void signOut()}
+                extra={
+                  <>
+                    <DropdownMenuItem className="rounded-[14px] px-2.5 py-2" onSelect={(e) => { e.preventDefault(); toggleTheme(); }}>
+                      <span className="flex items-center gap-3">
+                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-accent text-accent-foreground">{theme === "dark" ? <Sun className="h-[17px] w-[17px]" aria-hidden /> : <Moon className="h-[17px] w-[17px]" aria-hidden />}</span>
+                        <span className="text-[14px] font-semibold text-foreground">{theme === "dark" ? "Usar tema claro" : "Usar tema escuro"}</span>
+                      </span>
+                    </DropdownMenuItem>
+                  </>
+                }
+              />
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

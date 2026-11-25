@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { accountMenuLinks, firstNameOf, initialOf } from "@/components/seller-shell/accountMenu";
 import {
   addressFrom, avatarPath, canEditDocs, cepDigits, docObjectName, docTypeOf, documentLabel, formatCep, formatPhone, hasAddress, kycBanner, topbarKyc, kycInfo, kycSteps,
   kycSubmitError, memberFor, newestByType, normalizeAddress, parseAccountTab, passwordChangeError, passwordChecks, passwordProblem, payoutChecklist,
@@ -251,5 +252,31 @@ describe("selo do topo", () => {
     expect(topbarKyc("rejected").tone).toBe("alert");
     expect(topbarKyc("blocked").label).toBe("Conta bloqueada");
     expect(topbarKyc("pending").label).toBe("Verificação pendente");
+  });
+});
+
+describe("menu da conta", () => {
+  it("lista os atalhos na ordem e leva cada um para a tela certa", () => {
+    const links = accountMenuLinks("approved");
+    expect(links.map((l) => l.key)).toEqual(["account", "verify", "security", "fees", "bank", "help"]);
+    expect(links.find((l) => l.key === "security")?.to).toBe("/perfil?tab=seguranca");
+    expect(links.find((l) => l.key === "fees")?.to).toBe("/financeiro/taxas");
+    expect(links.find((l) => l.key === "bank")?.to).toBe("/financeiro/config");
+  });
+  it("o atalho de verificação acompanha a situação da conta", () => {
+    const verify = (k: Parameters<typeof accountMenuLinks>[0]) => accountMenuLinks(k).find((l) => l.key === "verify")!;
+    expect(verify("approved").hint).toBe("Identidade confirmada");
+    expect(verify("pending").hint).toMatch(/documentos/);
+    expect(verify("pending_review").hint).toMatch(/análise/);
+    expect(verify("rejected").hint).toMatch(/Corrija/);
+    expect(verify("blocked").to).toBe("/suporte");
+    expect(verify("pending").to).toBe("/perfil?tab=identidade");
+  });
+  it("nome e inicial têm um valor mesmo sem cadastro completo", () => {
+    expect(firstNameOf("  Lucker Teste da Silva ")).toBe("Lucker");
+    expect(firstNameOf("")).toBe("Vendedor");
+    expect(firstNameOf(null)).toBe("Vendedor");
+    expect(initialOf("lucker")).toBe("L");
+    expect(initialOf(undefined)).toBe("V");
   });
 });

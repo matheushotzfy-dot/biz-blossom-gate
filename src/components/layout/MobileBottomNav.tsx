@@ -9,7 +9,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { prefetchRoute } from "@/lib/routePrefetch";
 
-import { supabase } from "@/integrations/supabase/client";
+import { useSignOut } from "@/hooks/useSignOut";
 
 const tabs = [
   { label: "Início", icon: LayoutDashboard, path: "/dashboard" },
@@ -26,7 +26,7 @@ const moreGroups: Array<{
   {
     label: "Conta",
     items: [
-      { title: "Perfil & KYC", subtitle: "Dados pessoais e verificação", url: "/perfil", icon: User, accent: "primary" },
+      { title: "Minha conta", subtitle: "Dados, verificação e segurança", url: "/perfil", icon: User, accent: "primary" },
       { title: "Premiações", subtitle: "Suas conquistas e troféus", url: "/premiacoes", icon: Trophy, accent: "warning" },
     ],
   },
@@ -68,10 +68,10 @@ export function MobileBottomNav() {
     }
   }, [moreOpen]);
 
+  const signOut = useSignOut();
   const handleLogout = async () => {
     setMoreOpen(false);
-    await supabase.auth.signOut();
-    navigate("/auth");
+    await signOut();
   };
 
   return (

@@ -125,6 +125,8 @@ function DashboardLayoutInner() {
             onOpenSearch={() => setSearchOpen(true)}
             avatarUrl={profile?.avatar_url}
             name={profile?.full_name}
+            email={profile?.email}
+            kyc={kyc.resolved ? (kyc.state as KycKey) : undefined}
             kycApproved={kyc.approved}
             kycLabel={kycLook.label}
             kycTone={kycLook.tone}
