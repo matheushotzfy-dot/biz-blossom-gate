@@ -126,11 +126,11 @@ export function ChoiceGrid<T extends string>({ value, onChange, options, label, 
   onChange: (value: T) => void;
   options: Array<{ value: T; label: string; description?: string; icon?: LucideIcon }>;
   label: string;
-  columns?: 2 | 3;
+  columns?: 1 | 2 | 3;
   className?: string;
 }) {
   return (
-    <div role="radiogroup" aria-label={label} className={cn("grid gap-2.5", columns === 3 ? "grid-cols-[repeat(2,minmax(0,1fr))] sm:grid-cols-[repeat(3,minmax(0,1fr))]" : "grid-cols-[minmax(0,1fr)] sm:grid-cols-[repeat(2,minmax(0,1fr))]", className)}>
+    <div role="radiogroup" aria-label={label} className={cn("grid gap-2.5", columns === 1 ? "grid-cols-[minmax(0,1fr)]" : columns === 3 ? "grid-cols-[repeat(2,minmax(0,1fr))] sm:grid-cols-[repeat(3,minmax(0,1fr))]" : "grid-cols-[minmax(0,1fr)] sm:grid-cols-[repeat(2,minmax(0,1fr))]", className)}>
       {options.map((o) => {
         const active = o.value === value;
         const Icon = o.icon;

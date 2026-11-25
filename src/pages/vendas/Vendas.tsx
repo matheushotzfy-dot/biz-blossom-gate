@@ -1,7 +1,7 @@
 import { usePrivacyMode } from "@/hooks/usePrivacyMode";
 import { useState, useMemo, useEffect } from "react";
 import { useProducts, useDashboardStats, useTransactionsPage, fetchTransactionsForExport } from "@/hooks/useQueryData";
-import { EyeOff, Eye, Download, FileText, CalendarDays, ChevronDown } from "lucide-react";
+import { EyeOff, Eye, Download, CalendarDays, ChevronDown } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import { SellerRefundDialog } from "@/components/transactions/SellerRefundDialog";
@@ -21,10 +21,7 @@ import ExcelJS from "exceljs";
 import { toast } from "sonner";
 import { Seo } from "@/components/Seo";
 import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SalesExportDialog } from "@/components/transactions/SalesExportDialog";
 import { filterTransactions, spreadsheetSafe, type SalesExportFilters } from "@/lib/sales-export";
 
 const SP_TZ = "America/Sao_Paulo";
@@ -63,6 +60,7 @@ export default function Vendas() {
   const [exporting, setExporting] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
+  const [exportError, setExportError] = useState<string | null>(null);
   const [exportFilters, setExportFilters] = useState<SalesExportFilters>({ search: "", statuses: [], productId: "", customerName: "", customerEmail: "" });
 
   // Debounce da busca: cada tecla dispara uma query no servidor.
@@ -124,14 +122,15 @@ export default function Vendas() {
   const loadExportRows = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      toast.error("Sessão expirada. Entre novamente.");
+      setExportError("Sua sessão expirou. Entre de novo para exportar.");
       return null;
     }
+    setExportError(null);
     setExportProgress(0);
     const rows = await fetchTransactionsForExport(user.id, rangeStart, rangeEnd, setExportProgress);
     const filteredRows = filterTransactions(rows, exportFilters);
     if (!filteredRows.length) {
-      toast.error("Nenhuma transação para exportar");
+      setExportError("Nenhuma venda com esses filtros no período. Tire algum filtro ou escolha outro período.");
       return null;
     }
     return buildRows(filteredRows);
@@ -199,7 +198,7 @@ export default function Vendas() {
       setExportOpen(false);
     } catch (err) {
       console.error("[Vendas] export CSV failed:", err);
-      toast.error("Falha ao exportar CSV");
+      setExportError("Não deu para gerar o CSV agora. Tente de novo.");
     } finally {
       setExporting(false);
     }
@@ -234,7 +233,7 @@ export default function Vendas() {
       setExportOpen(false);
     } catch (err) {
       console.error("[Vendas] export XLSX failed:", err);
-      toast.error("Falha ao exportar Excel");
+      setExportError("Não deu para gerar o Excel agora. Tente de novo.");
     } finally {
       setExporting(false);
     }
@@ -325,27 +324,13 @@ export default function Vendas() {
         onCreateLink={() => navigate("/vendas/link-pagamento")}
       />
 
-      <Dialog open={exportOpen} onOpenChange={setExportOpen}>
-        <DialogContent className="w-[calc(100vw-1.5rem)] max-w-3xl overflow-hidden rounded-[28px] p-0">
-          <DialogHeader className="border-b border-border px-6 py-5 text-left sm:px-8">
-            <DialogTitle className="text-[20px] font-extrabold tracking-[-0.03em]">Exportar vendas</DialogTitle>
-            <p className="text-[14px] text-muted-foreground">Escolha quais vendas do período ({rangeLabel}) entram na planilha.</p>
-          </DialogHeader>
-          <div className="grid gap-4 px-6 py-5 sm:grid-cols-2 sm:px-8">
-            <div className="space-y-1.5 sm:col-span-2"><Label>Busca geral</Label><Input value={exportFilters.search} onChange={(e) => setExportFilters((f) => ({ ...f, search: e.target.value }))} placeholder="ID, cliente, e-mail ou documento" className="h-11 rounded-xl" /></div>
-            <div className="space-y-1.5"><Label>Status</Label><Select value={exportFilters.statuses?.[0] ?? "all"} onValueChange={(value) => setExportFilters((f) => ({ ...f, statuses: value === "all" ? [] : value === "paid" ? ["approved", "completed", "paid"] : [value] }))}><SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todos</SelectItem><SelectItem value="paid">Pagos</SelectItem><SelectItem value="pending">Pendentes</SelectItem><SelectItem value="expired">Expirados</SelectItem><SelectItem value="refunded">Reembolsados</SelectItem><SelectItem value="chargeback">Chargebacks</SelectItem><SelectItem value="failed">Falhos</SelectItem><SelectItem value="cancelled">Cancelados</SelectItem></SelectContent></Select></div>
-            <div className="space-y-1.5"><Label>Produto</Label><Select value={exportFilters.productId || "all"} onValueChange={(value) => setExportFilters((f) => ({ ...f, productId: value === "all" ? "" : value }))}><SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todos os produtos</SelectItem>{products.map((product) => <SelectItem key={product.id} value={product.id}>{product.name}</SelectItem>)}</SelectContent></Select></div>
-            <div className="space-y-1.5"><Label>Nome do cliente</Label><Input value={exportFilters.customerName} onChange={(e) => setExportFilters((f) => ({ ...f, customerName: e.target.value }))} placeholder="Nome ou parte do nome" className="h-11 rounded-xl" /></div>
-            <div className="space-y-1.5"><Label>E-mail do cliente</Label><Input type="email" value={exportFilters.customerEmail} onChange={(e) => setExportFilters((f) => ({ ...f, customerEmail: e.target.value }))} placeholder="cliente@email.com" className="h-11 rounded-xl" /></div>
-            {exporting && <div className="rounded-xl bg-muted px-4 py-3 text-[13px] text-muted-foreground sm:col-span-2" role="status">Carregando {exportProgress.toLocaleString("pt-BR")} vendas…</div>}
-          </div>
-          <div className="flex flex-col-reverse gap-2 border-t border-border bg-muted/40 px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
-            <button type="button" className="vp-ghost" onClick={() => setExportOpen(false)} disabled={exporting}>Cancelar</button>
-            <button type="button" className="vp-ghost" onClick={exportCSV} disabled={exporting}><FileText className="h-4 w-4" />Baixar CSV</button>
-            <button type="button" className="vp-cta" onClick={exportXLSX} disabled={exporting}><Download className="h-4 w-4" />Baixar Excel</button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <SalesExportDialog
+        open={exportOpen} onOpenChange={(o) => { setExportOpen(o); if (o) setExportError(null); }}
+        rangeLabel={rangeLabel} products={products}
+        filters={exportFilters} onFilters={(f) => { setExportFilters(f); setExportError(null); }}
+        exporting={exporting} progress={exportProgress} error={exportError}
+        onCsv={() => { void exportCSV(); }} onXlsx={() => { void exportXLSX(); }}
+      />
 
       <SellerRefundDialog tx={refundTx} onClose={() => setRefundTx(null)} onDone={() => setDetailTx(null)} />
       <TransactionDetailPanel tx={detailTx} products={prodsMap} onClose={() => setDetailTx(null)} onRefund={(t) => setRefundTx(t as Tables<"transactions">)} />

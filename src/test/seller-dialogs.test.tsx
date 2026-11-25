@@ -5,6 +5,8 @@ import { SellerRefundDialog } from "@/components/transactions/SellerRefundDialog
 import { ReauthenticationDialog } from "@/components/security/ReauthenticationDialog";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import { trackingParams } from "@/components/transactions/detailMeta";
+import { SalesExportDialog } from "@/components/transactions/SalesExportDialog";
+import { exportStatusId } from "@/components/transactions/exportMeta";
 import type { Tables } from "@/integrations/supabase/types";
 
 const mock = vi.hoisted(() => ({ rpc: vi.fn(), success: vi.fn() }));
@@ -165,5 +167,43 @@ describe("detalhe da venda", () => {
     expect(trackingParams("https://loja.com/pay?utm_source=fb&utm_campaign=black&x=1&sck=abc")).toEqual([["utm_source", "fb"], ["utm_campaign", "black"], ["sck", "abc"]]);
     expect(trackingParams("não é url")).toEqual([]);
     expect(trackingParams(null)).toEqual([]);
+  });
+});
+
+describe("exportar vendas", () => {
+  const base = { open: true, onOpenChange: () => {}, rangeLabel: "Hoje", products: [{ id: "p1", name: "Método Escala 10x" }], filters: {}, onFilters: () => {}, exporting: false, progress: 0, error: null as string | null, onCsv: () => {}, onXlsx: () => {} };
+
+  it("reconhece a opção de status pelo filtro guardado, inclusive Pagos", () => {
+    expect(exportStatusId(undefined)).toBe("all");
+    expect(exportStatusId([])).toBe("all");
+    expect(exportStatusId(["approved", "completed", "paid"])).toBe("paid");
+    expect(exportStatusId(["refunded"])).toBe("refunded");
+    expect(exportStatusId(["qualquer"])).toBe("all");
+  });
+
+  it("mostra o período e dispara CSV e Excel pelos botões", () => {
+    const onCsv = vi.fn(); const onXlsx = vi.fn();
+    render(<SalesExportDialog {...base} onCsv={onCsv} onXlsx={onXlsx} />);
+    expect(screen.getByText(/Período: Hoje/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Baixar CSV/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Baixar Excel/ }));
+    expect(onCsv).toHaveBeenCalledTimes(1);
+    expect(onXlsx).toHaveBeenCalledTimes(1);
+  });
+
+  it("mostra o erro dentro do diálogo e trava tudo enquanto exporta", () => {
+    const { rerender } = render(<SalesExportDialog {...base} error="Nenhuma venda com esses filtros no período." />);
+    expect(screen.getByRole("alert").textContent).toContain("Nenhuma venda");
+    rerender(<SalesExportDialog {...base} exporting progress={1250} />);
+    expect(screen.getByRole("status").textContent).toContain("1.250");
+    expect((screen.getByRole("button", { name: /Baixar CSV/ }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "Cancelar" }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("guarda o que foi digitado nos filtros", () => {
+    const onFilters = vi.fn();
+    render(<SalesExportDialog {...base} filters={{ search: "" }} onFilters={onFilters} />);
+    fireEvent.change(screen.getByLabelText("Nome do cliente"), { target: { value: "Marina" } });
+    expect(onFilters).toHaveBeenCalledWith({ search: "", customerName: "Marina" });
   });
 });
