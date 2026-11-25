@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, Plus } from "lucide-react";
+import { AlertCircle, KeyRound, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,7 +18,6 @@ import { useInvalidateAll, useWebhooks } from "@/hooks/useQueryData";
 import { Seo } from "@/components/Seo";
 import { PageHead } from "@/components/seller-ui/PageHead";
 import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { EndpointDialog, WebhookSecretDialog, type EndpointTarget, type EndpointValues, type RevealedSecret } from "@/components/integrations/EndpointDialog";
 import { EndpointDeck } from "@/components/integrations/EndpointDeck";
 import { EndpointPanel } from "@/components/integrations/EndpointPanel";
@@ -28,6 +27,7 @@ import { WebhookWelcome } from "@/components/integrations/WebhookWelcome";
 import { SignatureGuide } from "@/components/integrations/SignatureGuide";
 import type { SaveResult } from "@/components/integrations/KeyDialogs";
 import { LOG_PAGE, useDeliveryLog, usePulses } from "@/components/integrations/useWebhookFeed";
+import { ConfirmDialog } from "@/components/seller-ui/confirm";
 import {
   DEFAULT_TEST_EVENT, MAX_ENDPOINTS, generateWebhookSecret, hostOf, webhookErrorMessage,
   type DeliveryRow, type WebhookRow,
@@ -229,24 +229,16 @@ export default function Webhooks() {
         onTest={revealed?.endpointId ? () => { const id = revealed.endpointId!; setRevealed(null); void sendTest(id); } : undefined}
       />
 
-      <AlertDialog open={!!confirm} onOpenChange={(o) => { if (!o && !confirmBusy) setConfirm(null); }}>
-        <AlertDialogContent className="rounded-[28px]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>{confirm?.kind === "rotate" ? "Gerar uma nova chave de assinatura?" : `Excluir ${confirm ? hostOf(confirm.w.url) : "o endpoint"}?`}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {confirm?.kind === "rotate"
-                ? "A chave atual para de valer na hora. Os próximos envios já saem com a nova, então atualize o seu servidor logo depois de copiá-la. Entregas na fila também usam a nova."
-                : "O endpoint deixa de receber eventos e o histórico de entregas dele é apagado. Isso não pode ser desfeito."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={confirmBusy}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction className={confirm?.kind === "delete" ? "vp-cta vp-cta-danger" : "vp-cta"} disabled={confirmBusy} onClick={(e) => { e.preventDefault(); void runConfirm(); }}>
-              {confirmBusy ? "Aguarde…" : confirm?.kind === "rotate" ? "Gerar nova chave" : "Excluir endpoint"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={!!confirm} onOpenChange={(o) => { if (!o) setConfirm(null); }} busy={confirmBusy}
+        tone={confirm?.kind === "rotate" ? "default" : "danger"} icon={confirm?.kind === "rotate" ? <KeyRound className="h-5 w-5" /> : undefined}
+        title={confirm?.kind === "rotate" ? "Gerar uma nova chave de assinatura?" : `Excluir ${confirm ? hostOf(confirm.w.url) : "o endpoint"}?`}
+        confirmLabel={confirm?.kind === "rotate" ? "Gerar nova chave" : "Excluir endpoint"}
+        description={confirm?.kind === "rotate"
+          ? "A chave atual para de valer na hora. Os próximos envios já saem com a nova, então atualize o seu servidor logo depois de copiá-la. Entregas na fila também usam a nova."
+          : "O endpoint deixa de receber eventos e o histórico de entregas dele é apagado. Isso não pode ser desfeito."}
+        onConfirm={runConfirm}
+      />
     </div>
   );
 }

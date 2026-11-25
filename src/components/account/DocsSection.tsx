@@ -1,17 +1,17 @@
 import { forwardRef, useState } from "react";
 import { useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { BASE_STEPS, CNPJ_STEP, validateKycFile, type KycDocType } from "@/components/kyc/kycSteps";
 import { Notice } from "@/components/seller-ui/studio";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { docObjectName, kycSubmitError, staleNames, type KycKey } from "./accountMeta";
 import { DocSlot } from "./DocSlot";
 import { PanelHead } from "./parts";
 import { kycDocsKey, type KycDocsData } from "./useAccountData";
+import { ConfirmDialog } from "@/components/seller-ui/confirm";
 
 type Problems = Partial<Record<KycDocType, string | null>>;
 
@@ -101,20 +101,12 @@ export const DocsSection = forwardRef<HTMLElement, { kyc: KycKey; isCnpj: boolea
       )}
       {sendError && <p role="alert" className="mt-4 rounded-[16px] bg-destructive/10 px-4 py-3 text-[14px] font-medium text-destructive">{sendError}</p>}
 
-      <AlertDialog open={confirm} onOpenChange={(o) => !sending && setConfirm(o)}>
-        <AlertDialogContent className="rounded-[28px]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Enviar para análise?</AlertDialogTitle>
-            <AlertDialogDescription>Nossa equipe vai conferir os {steps.length} documentos. Enquanto isso você não consegue trocar as fotos.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={sending} className="vp-ghost m-0 h-11">Revisar fotos</AlertDialogCancel>
-            <AlertDialogAction disabled={sending} onClick={(e) => { e.preventDefault(); void submit(); }} className="vp-cta h-11">
-              {sending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}{sending ? "Enviando" : "Enviar para análise"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={confirm} onOpenChange={setConfirm} busy={sending} tone="default" icon={<Send className="h-5 w-5" />}
+        title="Enviar para análise?" confirmLabel="Enviar para análise" cancelLabel="Revisar fotos"
+        description={`Nossa equipe vai conferir os ${steps.length} documentos. Enquanto isso você não consegue trocar as fotos.`}
+        onConfirm={submit}
+      />
     </section>
   );
 });

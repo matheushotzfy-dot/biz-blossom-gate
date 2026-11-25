@@ -2,7 +2,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import {
-  Activity, AlertCircle, ArrowLeft, Check, ExternalLink, Eye, EyeOff, Layers, Loader2, MoreHorizontal, Plus, Settings, Trash2, Video,
+  Activity,
+  AlertCircle,
+  ArrowLeft,
+  Check,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Layers,
+  Loader2,
+  MoreHorizontal,
+  Plus,
+  Settings,
+  Video,
 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -10,9 +22,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSellerSkin } from "@/hooks/useSellerSkin";
 import { useInvalidateAll } from "@/hooks/useQueryData";
 import { cn } from "@/lib/utils";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { SellerMenuItem as BuilderMenuItem, sellerMenuContent as builderMenuContent } from "@/components/seller-ui/menu";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
@@ -25,6 +34,7 @@ import { CourseSettingsDialog } from "@/components/course/builder/CourseSettings
 import { isValidVideoLink } from "@/components/course/builder/videoUtils";
 import { courseContentPathFromUrl, courseFilePath } from "@/lib/courseFiles";
 import type { BuilderAttachment, BuilderCourse, BuilderLesson, BuilderModule, LessonField, SaveStatus } from "@/components/course/builder/types";
+import { ConfirmDialog } from "@/components/seller-ui/confirm";
 
 const SAVE_DELAY = 1000;
 const LINK_SAVE_DELAY = 1500;
@@ -960,27 +970,17 @@ export default function CourseBuilder() {
         </SheetContent>
       </Sheet>
 
-      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open && !deleting) setDeleteTarget(null); }}>
-        <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
-          <AlertDialogHeader className="space-y-2 text-left">
-            <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive"><Trash2 className="h-5 w-5" /></span>
-            <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">{deleteCopy.title}</AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-2 text-[14.5px] leading-relaxed text-muted-foreground">
-                <span className="block break-words font-semibold text-foreground">{deleteTarget?.label}</span>
-                <p>{deleteBody}</p>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <AlertDialogCancel disabled={deleting} className="vp-ghost m-0 h-11 border-border">{deleteCopy.keep}</AlertDialogCancel>
-            <AlertDialogAction onClick={(e) => { e.preventDefault(); void confirmDelete(); }} disabled={deleting} className="vp-cta vp-cta-danger h-11">
-              {deleting && <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />}
-              {deleting ? "Excluindo…" : deleteCopy.confirm}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }} busy={deleting}
+        title={deleteCopy.title} confirmLabel={deleteCopy.confirm} cancelLabel={deleteCopy.keep}
+        description={
+          <div className="space-y-2">
+            <span className="block break-words font-semibold text-foreground">{deleteTarget?.label}</span>
+            <p>{deleteBody}</p>
+          </div>
+        }
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

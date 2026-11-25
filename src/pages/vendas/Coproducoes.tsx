@@ -20,11 +20,11 @@ import { StatBand } from "@/components/seller-ui/StatBand";
 import { FilterPills } from "@/components/seller-ui/FilterPills";
 import { SearchField } from "@/components/seller-ui/SearchField";
 import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CoLedger, type CoRow } from "@/components/marketing/CoLedger";
 import { InviteDialog, type InviteSaveResult, type InviteTarget, type InviteValues } from "@/components/marketing/InviteDialog";
 import { copyText } from "@/components/seller-ui/copy";
+import { ConfirmDialog } from "@/components/seller-ui/confirm";
 import {
   STATE_META, coErrorMessage, coState, directionOf, holdsProduct, partnerCode, yourPct, type CoDirection, type CoProduction, type CoState,
 } from "@/components/marketing/coproMeta";
@@ -328,19 +328,12 @@ export default function Coproducoes() {
         onSave={saveInvite}
       />
 
-      <AlertDialog open={!!confirm} onOpenChange={(o) => { if (!o && !confirmBusy) setConfirm(null); }}>
-        <AlertDialogContent className="rounded-[28px] border-border bg-card p-7 sm:max-w-[460px]">
-          <AlertDialogHeader className="gap-3 text-left">
-            <span aria-hidden className="grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive"><Handshake className="h-6 w-6" strokeWidth={1.9} /></span>
-            <AlertDialogTitle className="text-[20px] font-extrabold tracking-[-0.03em]">{confirmCopy?.title}</AlertDialogTitle>
-            <AlertDialogDescription className="text-[14.5px] leading-relaxed">{confirmCopy?.text}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-2 gap-2 sm:space-x-0">
-            <AlertDialogCancel className="vp-ghost !h-12 justify-center" disabled={confirmBusy}>{confirmCopy?.back}</AlertDialogCancel>
-            <AlertDialogAction className="vp-cta vp-cta-danger !h-12 justify-center" disabled={confirmBusy} onClick={(e) => { e.preventDefault(); void runConfirm(); }}>{confirmBusy ? "Aguarde…" : confirmCopy?.action}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={!!confirm} onOpenChange={(o) => { if (!o) setConfirm(null); }} busy={confirmBusy}
+        icon={<Handshake className="h-5 w-5" strokeWidth={1.9} />}
+        title={confirmCopy?.title} description={confirmCopy?.text} confirmLabel={confirmCopy?.action} cancelLabel={confirmCopy?.back}
+        onConfirm={runConfirm}
+      />
     </div>
   );
 }

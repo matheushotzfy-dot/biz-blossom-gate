@@ -15,11 +15,11 @@ import { PageHead } from "@/components/seller-ui/PageHead";
 import { SearchField } from "@/components/seller-ui/SearchField";
 import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
 import { copyText } from "@/components/seller-ui/copy";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { KeyNameDialog, SecretDialog, type KeyNameTarget, type RevealedKey, type SaveResult } from "@/components/integrations/KeyDialogs";
 import { KeyList } from "@/components/integrations/KeyList";
 import { MAX_API_KEYS, functionErrorMessage, keyState, nextKeyName, type ApiKeyRow } from "@/components/integrations/intMeta";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/seller-ui/confirm";
 
 const COLUMNS = "id, name, public_key, secret_key_prefix, is_active, created_at, last_used_at, expires_at, revoked_at";
 
@@ -200,26 +200,17 @@ export default function ApiKeys() {
       <KeyNameDialog target={nameTarget?.target ?? null} taken={keys.map((k) => k.name)} onOpenChange={(o) => { if (!o) setNameTarget(null); }} onSave={saveName} />
       <SecretDialog value={revealed} onClose={() => setRevealed(null)} />
 
-      <AlertDialog open={!!confirm} onOpenChange={(o) => { if (!o && !confirmBusy) setConfirm(null); }}>
-        <AlertDialogContent className="rounded-[28px]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>{confirm?.kind === "revoke" ? `Revogar "${confirm.key.name}"?` : `Excluir "${confirm?.key.name}"?`}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {confirm?.kind === "revoke"
-                ? "A chave para de funcionar na hora e não pode ser reativada. Quem usa essa chave vai receber erro de autenticação. A chave continua na lista como revogada."
-                : confirm && keyState(confirm.key) === "active"
-                  ? "A chave deixa de funcionar e some da lista. Quem usa essa chave vai receber erro de autenticação. Isso não pode ser desfeito."
-                  : "A chave some da lista. Isso não pode ser desfeito."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={confirmBusy}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction className="vp-cta vp-cta-danger" disabled={confirmBusy} onClick={(e) => { e.preventDefault(); void runConfirm(); }}>
-              {confirmBusy ? "Aguarde…" : confirm?.kind === "revoke" ? "Revogar chave" : "Excluir chave"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={!!confirm} onOpenChange={(o) => { if (!o) setConfirm(null); }} busy={confirmBusy}
+        title={confirm?.kind === "revoke" ? `Revogar "${confirm.key.name}"?` : `Excluir "${confirm?.key.name}"?`}
+        confirmLabel={confirm?.kind === "revoke" ? "Revogar chave" : "Excluir chave"}
+        description={confirm?.kind === "revoke"
+          ? "A chave para de funcionar na hora e não pode ser reativada. Quem usa essa chave vai receber erro de autenticação. A chave continua na lista como revogada."
+          : confirm && keyState(confirm.key) === "active"
+            ? "A chave deixa de funcionar e some da lista. Quem usa essa chave vai receber erro de autenticação. Isso não pode ser desfeito."
+            : "A chave some da lista. Isso não pode ser desfeito."}
+        onConfirm={runConfirm}
+      />
     </div>
   );
 }

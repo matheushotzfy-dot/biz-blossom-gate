@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GraduationCap, LayoutGrid, List, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { GraduationCap, LayoutGrid, List, Plus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 import CourseCreationWizard from "@/components/course/CourseCreationWizard";
@@ -24,20 +24,11 @@ import { SectionTabs } from "@/components/seller-ui/SectionTabs";
 import { StatBand } from "@/components/seller-ui/StatBand";
 import { Money } from "@/components/home/Money";
 import { Seo } from "@/components/Seo";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useCourses as useCoursesQuery, useInvalidateAll, useProducts as useProductsQuery, useProductRevenue } from "@/hooks/useQueryData";
+import { ConfirmDialog } from "@/components/seller-ui/confirm";
 
 type ViewMode = "grid" | "list";
 
@@ -389,35 +380,25 @@ export default function AdminConteudo() {
 
       <CourseCreationWizard open={wizardOpen} onOpenChange={setWizardOpen} editCourse={editCourseData} products={products} onSaved={reloadCourses} />
 
-      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open && !deletingCourse) setDeleteTarget(null); }}>
-        <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
-          <AlertDialogHeader className="space-y-2 text-left">
-            <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive"><Trash2 className="h-5 w-5" /></span>
-            <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">Excluir esta área de membros?</AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-2 text-[14.5px] leading-relaxed text-muted-foreground">
-                <span className="block break-words font-semibold text-foreground">{deleteCourse?.title}</span>
-                <p>
-                  Somem o curso, {deleteStats.modules} {deleteStats.modules === 1 ? "módulo" : "módulos"}, {deleteStats.lessons} {deleteStats.lessons === 1 ? "aula" : "aulas"} e o acesso dos alunos. Não dá para desfazer.
-                </p>
-                {deleteStudents > 0 && (
-                  <p className="font-semibold text-foreground">
-                    {deleteStudents} {deleteStudents === 1 ? "aluno perde" : "alunos perdem"} o acesso agora.
-                  </p>
-                )}
-                <p>O produto vinculado e o histórico de vendas continuam como estão.</p>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <AlertDialogCancel disabled={deletingCourse} className="vp-ghost m-0 h-11 border-border">Manter área</AlertDialogCancel>
-            <AlertDialogAction onClick={(e) => { e.preventDefault(); void confirmDeleteCourse(); }} disabled={deletingCourse} className="vp-cta vp-cta-danger h-11">
-              {deletingCourse && <Loader2 className="h-4 w-4 animate-spin" />}
-              {deletingCourse ? "Excluindo…" : "Excluir área"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }} busy={deletingCourse}
+        title="Excluir esta área de membros?" confirmLabel="Excluir área" cancelLabel="Manter área"
+        description={
+          <div className="space-y-2">
+            <span className="block break-words font-semibold text-foreground">{deleteCourse?.title}</span>
+            <p>
+              Somem o curso, {deleteStats.modules} {deleteStats.modules === 1 ? "módulo" : "módulos"}, {deleteStats.lessons} {deleteStats.lessons === 1 ? "aula" : "aulas"} e o acesso dos alunos. Não dá para desfazer.
+            </p>
+            {deleteStudents > 0 && (
+              <p className="font-semibold text-foreground">
+                {deleteStudents} {deleteStudents === 1 ? "aluno perde" : "alunos perdem"} o acesso agora.
+              </p>
+            )}
+            <p>O produto vinculado e o histórico de vendas continuam como estão.</p>
+          </div>
+        }
+        onConfirm={confirmDeleteCourse}
+      />
     </div>
   );
 }

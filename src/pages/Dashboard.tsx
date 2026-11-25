@@ -143,7 +143,7 @@ export default function Dashboard() {
         statement={{ items: txs, products: productNames, hidden: privacy.hidden, loading: txLoading, onOpen: setDetail, onCreateLink: () => guard("/vendas/link-pagamento") }}
       />
 
-      {detail && <TransactionDetailPanel tx={detail} products={productNames} onClose={() => setDetail(null)} variant="seller" />}
+      <TransactionDetailPanel tx={detail} products={productNames} onClose={() => setDetail(null)} variant="seller" />
     </>
   );
 }

@@ -4,7 +4,7 @@
  */
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, Loader2, Plus, Trash2 } from "lucide-react";
+import { AlertCircle, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,9 +22,7 @@ import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
 import { CouponDialog, type CouponFormValues, type CouponSaveResult } from "@/components/marketing/CouponDialog";
 import { CouponsLedger } from "@/components/marketing/CouponsLedger";
 import { couponErrorMessage, couponState, endOfDayIso, toDateInput, type Coupon } from "@/components/marketing/couponMeta";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ConfirmDialog } from "@/components/seller-ui/confirm";
 
 type Filter = "all" | "active" | "paused" | "closed";
 type DialogState = { mode: "create" | "edit" | "duplicate"; coupon: Coupon | null } | null;
@@ -230,31 +228,21 @@ export default function Cupons() {
         onSave={save}
       />
 
-      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o && !deleting) setDeleteTarget(null); }}>
-        <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
-          <AlertDialogHeader className="space-y-2 text-left">
-            <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive"><Trash2 className="h-5 w-5" /></span>
-            <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">Excluir este cupom?</AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-2 text-[14.5px] leading-relaxed text-muted-foreground">
-                <span className="block break-all font-mono text-[15px] font-bold text-foreground">{deleteTarget?.code}</span>
-                <p>
-                  O código deixa de funcionar no checkout.
-                  {deleteTarget && deleteTarget.current_uses > 0 ? ` As vendas que já usaram o cupom continuam como estão, mas o histórico de ${deleteTarget.current_uses} ${deleteTarget.current_uses === 1 ? "resgate" : "resgates"} some daqui.` : ""}
-                  {" "}Se só quer parar de oferecer, pause o cupom em vez de excluir.
-                </p>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <AlertDialogCancel disabled={deleting} className="vp-ghost m-0 h-11 border-border">Manter cupom</AlertDialogCancel>
-            <AlertDialogAction onClick={(e) => { e.preventDefault(); void confirmDelete(); }} disabled={deleting} className="vp-cta vp-cta-danger h-11">
-              {deleting && <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />}
-              {deleting ? "Excluindo…" : "Excluir cupom"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }} busy={deleting}
+        title="Excluir este cupom?" confirmLabel="Excluir cupom" cancelLabel="Manter cupom"
+        description={
+          <div className="space-y-2">
+            <span className="block break-all font-mono text-[15px] font-bold text-foreground">{deleteTarget?.code}</span>
+            <p>
+              O código deixa de funcionar no checkout.
+              {deleteTarget && deleteTarget.current_uses > 0 ? ` As vendas que já usaram o cupom continuam como estão, mas o histórico de ${deleteTarget.current_uses} ${deleteTarget.current_uses === 1 ? "resgate" : "resgates"} some daqui.` : ""}
+              {" "}Se só quer parar de oferecer, pause o cupom em vez de excluir.
+            </p>
+          </div>
+        }
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

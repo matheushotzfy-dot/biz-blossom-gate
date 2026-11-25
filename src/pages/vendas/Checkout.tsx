@@ -15,10 +15,6 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Seo } from "@/components/Seo";
 import CheckoutSettingsDialog from "@/components/CheckoutSettingsDialog";
@@ -29,6 +25,7 @@ import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
 import { DialogHead, FieldLabel, dialogShell } from "@/components/seller-ui/form";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn, formatCurrency } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/seller-ui/confirm";
 
 const fmt = formatCurrency;
 const orb = "grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
@@ -353,22 +350,12 @@ export default function Checkout() {
  </Dialog>
 
  {/* Excluir cupom */}
- <AlertDialog open={!!couponToDelete} onOpenChange={(o) => { if (!o) setCouponToDelete(null); }}>
- <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
- <AlertDialogHeader className="space-y-2 text-left">
- <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive"><Trash2 className="h-5 w-5" /></span>
- <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">Excluir este cupom?</AlertDialogTitle>
- <AlertDialogDescription className="text-[14.5px] leading-relaxed">
- <span className="block break-all font-mono font-bold text-foreground">{couponToDelete?.code}</span>
- O código deixa de funcionar no checkout. Quem já usou o cupom não é afetado.
- </AlertDialogDescription>
- </AlertDialogHeader>
- <AlertDialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
- <AlertDialogCancel className="vp-ghost m-0 h-11 border-border">Manter cupom</AlertDialogCancel>
- <AlertDialogAction onClick={() => couponToDelete && deleteCoupon(couponToDelete.id)} className="vp-cta vp-cta-danger h-11">Excluir cupom</AlertDialogAction>
- </AlertDialogFooter>
- </AlertDialogContent>
- </AlertDialog>
+ <ConfirmDialog
+   open={!!couponToDelete} onOpenChange={(o) => { if (!o) setCouponToDelete(null); }}
+   title="Excluir este cupom?" confirmLabel="Excluir cupom" cancelLabel="Manter cupom"
+   description={<><span className="block break-all font-mono font-bold text-foreground">{couponToDelete?.code}</span>O código deixa de funcionar no checkout. Quem já usou o cupom não é afetado.</>}
+   onConfirm={() => { if (couponToDelete) deleteCoupon(couponToDelete.id); }}
+ />
 
  {settingsProduct && (
  <CheckoutSettingsDialog product={settingsProduct} open={!!settingsProduct} onOpenChange={(v) => { if (!v) setSettingsProduct(null); }} onSaved={() => refetchProducts()} />

@@ -27,7 +27,7 @@ const TONES: Record<ConfirmTone, { chip: string; cta: string }> = {
  * Confirmação de uma ação (apagar, revogar, sair sem salvar…). O botão de confirmar não fecha sozinho:
  * quem chama decide quando fechar, para poder mostrar `busy` enquanto grava.
  */
-export function ConfirmDialog({ open, onOpenChange, busy = false, onConfirm, tone = "danger", confirmLabel = "Confirmar", cancelLabel = "Cancelar", icon, title, description, children }: ConfirmOptions & {
+export function ConfirmDialog({ open, onOpenChange, busy = false, onConfirm, ...live }: ConfirmOptions & {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   busy?: boolean;
@@ -35,6 +35,10 @@ export function ConfirmDialog({ open, onOpenChange, busy = false, onConfirm, ton
   /** Conteúdo extra abaixo do texto (lista do que será afetado, aviso…). */
   children?: ReactNode;
 }) {
+  // Enquanto o diálogo fecha o texto fica como estava: quem chama costuma zerar o alvo (nome, valores) ao fechar.
+  const held = useRef(live);
+  if (open) held.current = live;
+  const { tone = "danger", confirmLabel = "Confirmar", cancelLabel = "Cancelar", icon, title, description, children } = held.current;
   const t = TONES[tone];
   const glyph = icon ?? (tone === "danger" ? <Trash2 className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />);
   return (

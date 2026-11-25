@@ -20,16 +20,6 @@ import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,6 +28,7 @@ import { DialogHead, FieldHint, FieldLabel, dialogShell } from "@/components/sel
 import { Notice } from "@/components/seller-ui/studio";
 import { COURSE_CATEGORIES, getCategoryLabel } from "@/components/course/contentPresentation";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/seller-ui/confirm";
 
 interface Product {
   id: string;
@@ -620,20 +611,12 @@ export default function CourseCreationWizard({ open, onOpenChange, products, edi
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={confirmDiscard} onOpenChange={setConfirmDiscard}>
-        <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
-          <AlertDialogHeader className="space-y-2 text-left">
-            <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">{isEditing ? "Descartar as alterações?" : "Descartar esta área?"}</AlertDialogTitle>
-            <AlertDialogDescription className="text-[14.5px] leading-relaxed">
-              {isEditing ? "As mudanças que você fez nos detalhes ainda não foram salvas." : "O que você preencheu ainda não foi salvo e vai ser perdido."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <AlertDialogCancel className="vp-ghost m-0 h-11 border-border">Continuar editando</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { setConfirmDiscard(false); onOpenChange(false); }} className="vp-cta vp-cta-danger h-11">Descartar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={confirmDiscard} onOpenChange={setConfirmDiscard}
+        title={isEditing ? "Descartar as alterações?" : "Descartar esta área?"} confirmLabel="Descartar" cancelLabel="Continuar editando"
+        description={isEditing ? "As mudanças que você fez nos detalhes ainda não foram salvas." : "O que você preencheu ainda não foi salvo e vai ser perdido."}
+        onConfirm={() => { setConfirmDiscard(false); onOpenChange(false); }}
+      />
     </>
   );
 }

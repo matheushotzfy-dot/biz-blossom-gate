@@ -14,16 +14,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
-  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { QRCodeSVG } from "qrcode.react";
 import { StatusPill } from "@/components/seller-ui/tx";
 import { FieldHint, FieldLabel, GroupBox, ToggleRow as FormToggleRow } from "@/components/seller-ui/form";
 import { Notice, OptionCard, StepEmpty, StudioHeading, StudioPanel } from "@/components/seller-ui/studio";
 import { STATUS_META, formatCurrency, getEffectiveStatus } from "@/components/products/productPresentation";
+import { ConfirmDialog } from "@/components/seller-ui/confirm";
 import {
   ArrowLeft,
   Save,
@@ -886,24 +883,12 @@ export default function ProductEditor() {
         </div>
       </div>
 
-      <AlertDialog open={deleteOpen} onOpenChange={(open) => { if (!deleting) setDeleteOpen(open); }}>
-        <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
-          <AlertDialogHeader className="space-y-2 text-left">
-            <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive"><Trash2 className="h-5 w-5" /></span>
-            <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">Excluir este produto?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[14.5px] leading-relaxed text-muted-foreground">
-              <span className="font-semibold text-foreground">{name.trim() || "Este produto"}</span> sai da sua lista e o checkout deixa de funcionar. As vendas já feitas continuam no seu histórico.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4 gap-2 sm:gap-2">
-            <AlertDialogCancel disabled={deleting} className="vp-ghost m-0 h-11">Manter produto</AlertDialogCancel>
-            <AlertDialogAction onClick={(e) => { e.preventDefault(); confirmDelete(); }} disabled={deleting} className="vp-cta vp-cta-danger h-11">
-              {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
-              {deleting ? "Excluindo…" : "Excluir produto"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={deleteOpen} onOpenChange={setDeleteOpen} busy={deleting}
+        title="Excluir este produto?" confirmLabel="Excluir produto" cancelLabel="Manter produto"
+        description={<><span className="font-semibold text-foreground">{name.trim() || "Este produto"}</span> sai da sua lista e o checkout deixa de funcionar. As vendas já feitas continuam no seu histórico.</>}
+        onConfirm={confirmDelete}
+      />
     </div>
     </MotionConfig>
   );
@@ -1640,24 +1625,12 @@ function TabCoProducao({ isNew, coProducerEmail, setCoProducerEmail, coProductio
             )}
           </StudioPanel>
 
-          <AlertDialog open={!!removeTarget} onOpenChange={(open) => { if (!open && !removing) setRemoveTarget(null); }}>
-            <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
-              <AlertDialogHeader className="space-y-2 text-left">
-                <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive"><Trash2 className="h-5 w-5" /></span>
-                <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">Remover este co-produtor?</AlertDialogTitle>
-                <AlertDialogDescription className="text-[14.5px] leading-relaxed text-muted-foreground">
-                  <span className="font-semibold text-foreground">{removeTarget?.co_producer_email}</span> é removido da co-produção deste produto.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="mt-4 gap-2 sm:gap-2">
-                <AlertDialogCancel disabled={removing} className="vp-ghost m-0 h-11">Manter co-produtor</AlertDialogCancel>
-                <AlertDialogAction onClick={(e) => { e.preventDefault(); confirmRemove(); }} disabled={removing} className="vp-cta vp-cta-danger h-11">
-                  {removing && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {removing ? "Removendo…" : "Remover co-produtor"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <ConfirmDialog
+            open={!!removeTarget} onOpenChange={(open) => { if (!open) setRemoveTarget(null); }} busy={removing}
+            title="Remover este co-produtor?" confirmLabel="Remover co-produtor" cancelLabel="Manter co-produtor"
+            description={<><span className="font-semibold text-foreground">{removeTarget?.co_producer_email}</span> é removido da co-produção deste produto.</>}
+            onConfirm={confirmRemove}
+          />
         </>
       )}
     </div>

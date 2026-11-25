@@ -17,7 +17,6 @@ import { FilterPills } from "@/components/seller-ui/FilterPills";
 import { SearchField } from "@/components/seller-ui/SearchField";
 import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
 import { Pager } from "@/components/seller-ui/Pager";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AppCard } from "@/components/integrations/AppCard";
 import { ConnectDialog, type ConnectSave, type ConnectTarget } from "@/components/integrations/ConnectDialog";
@@ -28,6 +27,7 @@ import { DeliveryDialog } from "@/components/integrations/DeliveryDialog";
 import type { SaveResult } from "@/components/integrations/KeyDialogs";
 import { APPS, CATEGORIES, appById, appDeliveryOutcome, appErrorMessage, readTestResult, type AppConnection, type AppDef, type TestResult } from "@/components/integrations/appCatalog";
 import { deliveryKind, type DeliveryRow } from "@/components/integrations/webhookMeta";
+import { ConfirmDialog } from "@/components/seller-ui/confirm";
 
 type View = "catalog" | "mine" | "activity";
 type StatusFilter = "all" | "success" | "open" | "failed";
@@ -311,18 +311,12 @@ export default function Apps() {
       <TestAppDialog target={testTarget} onClose={() => setTestTarget(null)} onRun={runTest} />
       <DeliveryDialog delivery={open} url={open ? labelById.get(open.webhook_config_id) ?? "" : ""} table="app_deliveries" targetLabel="Conexão" onClose={() => setOpen(null)} />
 
-      <AlertDialog open={!!confirmDelete} onOpenChange={(o) => { if (!o && !confirmBusy) setConfirmDelete(null); }}>
-        <AlertDialogContent className="rounded-[28px]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remover {confirmDelete ? appById(confirmDelete.app_name)?.name : "a conexão"}?</AlertDialogTitle>
-            <AlertDialogDescription>A conexão deixa de receber eventos e o histórico de envios dela é apagado. Se quiser só dar um tempo, pause em vez de remover. Isso não pode ser desfeito.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={confirmBusy}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction className="vp-cta vp-cta-danger" disabled={confirmBusy} onClick={(e) => { e.preventDefault(); void runDelete(); }}>{confirmBusy ? "Aguarde…" : "Remover conexão"}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={!!confirmDelete} onOpenChange={(o) => { if (!o) setConfirmDelete(null); }} busy={confirmBusy}
+        title={`Remover ${confirmDelete ? appById(confirmDelete.app_name)?.name : "a conexão"}?`} confirmLabel="Remover conexão"
+        description="A conexão deixa de receber eventos e o histórico de envios dela é apagado. Se quiser só dar um tempo, pause em vez de remover. Isso não pode ser desfeito."
+        onConfirm={runDelete}
+      />
     </div>
   );
 }

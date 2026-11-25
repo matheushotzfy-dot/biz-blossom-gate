@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Loader2, Package, Plus, Trash2 } from "lucide-react";
+import { Package, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Seo } from "@/components/Seo";
 import PixelSettingsDialog from "@/components/PixelSettingsDialog";
@@ -12,19 +12,10 @@ import { SectionTabs } from "@/components/seller-ui/SectionTabs";
 import { FilterPills } from "@/components/seller-ui/FilterPills";
 import { SearchField } from "@/components/seller-ui/SearchField";
 import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useProducts } from "@/hooks/useQueryData";
 import { supabase } from "@/integrations/supabase/client";
+import { ConfirmDialog } from "@/components/seller-ui/confirm";
 
 type FilterTab = "all" | "active" | "draft" | "pending_review" | "inactive";
 
@@ -274,52 +265,25 @@ export default function Produtos() {
       )}
 
       {/* Excluir um produto */}
-      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open && !deleting) setDeleteTarget(null); }}>
-        <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
-          <AlertDialogHeader className="space-y-2 text-left">
-            <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive"><Trash2 className="h-5 w-5" /></span>
-            <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">Excluir este produto?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[14.5px] leading-relaxed">
-              <span className="block break-words font-semibold text-foreground">{products.find((p) => p.id === deleteTarget)?.name}</span>
-              O produto sai do catálogo e o checkout deixa de abrir. O histórico das vendas já feitas continua guardado.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <AlertDialogCancel disabled={deleting} className="vp-ghost m-0 h-11 border-border">Manter produto</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} disabled={deleting} className="vp-cta vp-cta-danger h-11">
-              {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
-              {deleting ? "Excluindo…" : "Excluir produto"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }} busy={deleting}
+        title="Excluir este produto?" confirmLabel="Excluir produto" cancelLabel="Manter produto"
+        description={<><span className="block break-words font-semibold text-foreground">{products.find((p) => p.id === deleteTarget)?.name}</span>O produto sai do catálogo e o checkout deixa de abrir. O histórico das vendas já feitas continua guardado.</>}
+        onConfirm={confirmDelete}
+      />
 
       {/* Limpar rascunhos */}
-      <AlertDialog open={clearDraftsOpen} onOpenChange={(open) => { if (!clearingDrafts) setClearDraftsOpen(open); }}>
-        <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
-          <AlertDialogHeader className="space-y-2 text-left">
-            <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive"><Trash2 className="h-5 w-5" /></span>
-            <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">
-              Excluir {draftIds.length} {draftIds.length === 1 ? "rascunho" : "rascunhos"}?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-[14.5px] leading-relaxed">
-              São produtos que você não terminou de criar e que nunca foram publicados. Eles somem de vez e não dá para desfazer.
-              {incompleteActive > 0 && (
-                <span className="mt-2 block text-muted-foreground">
-                  {incompleteActive === 1 ? "1 produto ativo com dados faltando fica de fora" : `${incompleteActive} produtos ativos com dados faltando ficam de fora`}, porque pode haver vendas ligadas a {incompleteActive === 1 ? "ele" : "eles"}. Edite ou exclua {incompleteActive === 1 ? "esse produto" : "esses produtos"} um por um.
-                </span>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <AlertDialogCancel disabled={clearingDrafts} className="vp-ghost m-0 h-11 border-border">Manter rascunhos</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmClearDrafts} disabled={clearingDrafts} className="vp-cta vp-cta-danger h-11">
-              {clearingDrafts && <Loader2 className="h-4 w-4 animate-spin" />}
-              {clearingDrafts ? "Excluindo…" : draftIds.length === 1 ? "Excluir rascunho" : `Excluir ${draftIds.length} rascunhos`}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={clearDraftsOpen} onOpenChange={setClearDraftsOpen} busy={clearingDrafts}
+        title={`Excluir ${draftIds.length} ${draftIds.length === 1 ? "rascunho" : "rascunhos"}?`}
+        confirmLabel={draftIds.length === 1 ? "Excluir rascunho" : `Excluir ${draftIds.length} rascunhos`} cancelLabel="Manter rascunhos"
+        description={<>São produtos que você não terminou de criar e que nunca foram publicados. Eles somem de vez e não dá para desfazer.{incompleteActive > 0 && (
+          <span className="mt-2 block">
+            {incompleteActive === 1 ? "1 produto ativo com dados faltando fica de fora" : `${incompleteActive} produtos ativos com dados faltando ficam de fora`}, porque pode haver vendas ligadas a {incompleteActive === 1 ? "ele" : "eles"}. Edite ou exclua {incompleteActive === 1 ? "esse produto" : "esses produtos"} um por um.
+          </span>
+        )}</>}
+        onConfirm={confirmClearDrafts}
+      />
     </div>
   );
 }

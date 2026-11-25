@@ -1,363 +1,176 @@
-import { useMemo, useState } from "react";
-import { createPortal } from "react-dom";
-import { AnimatePresence, motion } from "framer-motion";
-import {
- ArrowDownRight,
- Check,
- Copy,
- CreditCard,
- ExternalLink,
- Globe,
- Hash,
- Mail,
- MessageCircle,
- Package,
- Phone,
- Receipt,
- RefreshCw,
- Smartphone,
- TrendingUp,
- Users,
- X,
- Zap,
-} from "lucide-react";
-import { PixLogoMark } from "@/components/icons/PixLogoMark";
+import { useMemo, useRef, type ReactNode } from "react";
+import { Copy, ExternalLink, MessageCircle, Undo2 } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DialogBody, DialogFoot, DialogHead, FormSection, GroupBox, dialogBox } from "@/components/seller-ui/form";
+import { MethodMark, StatusPill } from "@/components/seller-ui/tx";
+import { initials, txStatusMeta } from "@/components/seller-ui/txMeta";
+import { copyText } from "@/components/seller-ui/copy";
 import { TransactionTimeline } from "@/components/transactions/TransactionTimeline";
-
-import { StatusBadge } from "@/components/StatusBadge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import type { Tables } from "@/integrations/supabase/types";
-import { cn, deriveTransactionStatus, isApprovedTransaction } from "@/lib/utils";
-import { toast } from "sonner";
+import { cn, deriveTransactionStatus, formatCurrency, isApprovedTransaction } from "@/lib/utils";
+import { trackingParams } from "./detailMeta";
 
 type Transaction = Tables<"transactions">;
 
 interface TransactionDetailPanelProps {
- tx: Transaction & { buyer_ip?: string | null };
- products: Record<string, string>;
- onClose: () => void;
- onRefund?: (tx: Transaction) => void;
- variant?: "seller" | "admin";
- seller?: { full_name?: string | null; email?: string | null; nickname?: string | null } | null;
+  /** `null` fecha o painel (a última venda fica na tela só durante a animação de saída). */
+  tx: (Transaction & { buyer_ip?: string | null }) | null;
+  products: Record<string, string>;
+  onClose: () => void;
+  onRefund?: (tx: Transaction) => void;
+  variant?: "seller" | "admin";
+  seller?: { full_name?: string | null; email?: string | null; nickname?: string | null } | null;
 }
 
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
- style: "currency",
- currency: "BRL",
- minimumFractionDigits: 2,
-});
+const SP = "America/Sao_Paulo";
+const dateTime = (iso: string) => new Intl.DateTimeFormat("pt-BR", { timeZone: SP, day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+const dayOnly = (iso: string) => new Intl.DateTimeFormat("pt-BR", { timeZone: SP, day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(iso));
+const money = (n: number | null | undefined) => formatCurrency(Number(n ?? 0));
 
-const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
- timeZone: "America/Sao_Paulo",
- dateStyle: "short",
- timeStyle: "short",
-});
-
-const avatarTones = [
- "bg-primary/15 text-primary",
- "bg-info/15 text-info",
- "bg-warning/15 text-warning",
- "bg-success/15 text-success",
- "bg-destructive/15 text-destructive",
-];
-
-const methodTones: Record<string, string> = {
- pix: "bg-success/10 text-success border-success/15",
- credit_card: "bg-info/10 text-info border-info/15",
- boleto: "bg-warning/10 text-warning border-warning/15",
-};
-
-const methodLabels: Record<string, string> = {
- pix: "PIX",
- credit_card: "Cartão",
- boleto: "Boleto",
-};
-
-const formatCurrency = (value: number) => currencyFormatter.format(Number.isFinite(value) ? value : 0);
-
-const formatDateTime = (value: string) => dateTimeFormatter.format(new Date(value));
-
-const getInitials = (name: string) => {
- const parts = name.trim().split(/\s+/).filter(Boolean);
- if (parts.length >= 2) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
- return (parts[0]?.[0] || "?").toUpperCase();
-};
-
-const getAvatarTone = (name: string) => {
- const seed = name.split("").reduce((total, char) => total + char.charCodeAt(0), 0);
- return avatarTones[seed % avatarTones.length];
-};
-
-function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
- return (
- <section className="rounded-[24px] border border-border/40 bg-muted/[0.04] p-4 shadow-sm sm:p-5">
- <p className="mb-3 text-[11px] font-semibold text-muted-foreground/70">{title}</p>
- {children}
- </section>
- );
+function Row({ label, children, tone }: { label: string; children: ReactNode; tone?: "warning" | "danger" | "ok" }) {
+  return (
+    <div className="flex items-start justify-between gap-6 px-4 py-3">
+      <span className="shrink-0 pt-px text-[13.5px] text-muted-foreground">{label}</span>
+      <span className={cn("min-w-0 break-words text-right text-[14px] font-semibold text-foreground", tone === "warning" && "text-warning", tone === "danger" && "text-destructive", tone === "ok" && "text-primary")}>{children}</span>
+    </div>
+  );
 }
 
-function DataRow({
- label,
- value,
- icon,
- valueClassName,
-}: {
- label: string;
- value: React.ReactNode;
- icon?: React.ReactNode;
- valueClassName?: string;
-}) {
- return (
- <div className="flex items-start justify-between gap-4 py-2 first:pt-0 last:pb-0">
- <div className="flex min-w-0 items-center gap-2 text-[12px] text-muted-foreground/80">
- {icon}
- <span>{label}</span>
- </div>
- <div className={cn("min-w-0 max-w-[72%] text-right text-[13px] font-semibold text-foreground break-words", valueClassName)}>
- {value}
- </div>
- </div>
- );
+function Money({ label, value, tone }: { label: string; value: string; tone?: "danger" | "ok" }) {
+  return (
+    <div className={cn("min-w-0 rounded-[16px] px-4 py-3.5", tone === "ok" ? "bg-accent" : "bg-muted/60")}>
+      <p className={cn("text-[12.5px] font-semibold", tone === "ok" ? "text-accent-foreground" : "text-muted-foreground")}>{label}</p>
+      <p className={cn("mt-1 truncate text-[17px] font-extrabold tabular-nums tracking-[-0.02em]", tone === "danger" ? "text-destructive" : tone === "ok" ? "text-accent-foreground" : "text-foreground")}>{value}</p>
+    </div>
+  );
 }
 
+/** Detalhe de uma venda: valores, cliente, origem e linha do tempo. Serve o painel do seller e o do admin (`variant`). */
 export function TransactionDetailPanel({ tx, products, onClose, onRefund, variant = "seller", seller }: TransactionDetailPanelProps) {
- const [copiedId, setCopiedId] = useState(false);
+  // guarda a última venda para o conteúdo não sumir enquanto o diálogo fecha
+  const last = useRef(tx);
+  if (tx) last.current = tx;
+  const t = tx ?? last.current;
+  const tracking = useMemo(() => trackingParams(t?.checkout_session_id), [t?.checkout_session_id]);
+  if (!t) return null;
 
- const customerName = tx.customer_name || "Cliente";
- const customerEmail = tx.customer_email || "—";
- const productName = tx.product_id ? products[tx.product_id] || tx.product_id : "Transação Interna";
- const methodLabel = methodLabels[tx.payment_method || ""] || tx.payment_method || "—";
- const methodTone = methodTones[tx.payment_method || ""] || "bg-muted text-muted-foreground border-border";
- const avatarTone = getAvatarTone(customerName);
- const whatsappHref = tx.customer_phone ? `https://wa.me/55${tx.customer_phone.replace(/\D/g, "")}` : null;
-  const derivedStatus = deriveTransactionStatus(tx);
+  const admin = variant === "admin";
+  const name = t.customer_name || "Cliente";
+  const product = t.product_id ? products[t.product_id] || "Produto removido" : "Venda avulsa";
+  const status = deriveTransactionStatus(t);
+  const meta = txStatusMeta(status);
+  const phoneDigits = (t.customer_phone ?? "").replace(/\D/g, "");
+  const whatsapp = phoneDigits.length >= 10 ? `https://wa.me/${phoneDigits.startsWith("55") ? phoneDigits : `55${phoneDigits}`}` : null;
+  const origin = t.checkout_session_id?.startsWith("http") ? t.checkout_session_id : null;
+  const canRefund = !!onRefund && !admin && isApprovedTransaction(status);
+  const refunded = Number(t.refunded_amount ?? 0);
+  const retained = Number(t.retained_amount ?? 0);
+  const feePercent = Number(t.fee_percent_amount ?? 0);
+  const feeFixed = Number(t.fee_fixed_amount ?? 0);
+  const acquirerCost = Number(t.acquirer_fee_amount ?? 0);
+  const hasFooter = canRefund || !!whatsapp || !!origin;
 
- const trackingItems = useMemo(() => {
- if (!tx.checkout_session_id?.startsWith("http")) return [] as Array<[string, string]>;
+  return (
+    <Dialog open={!!tx} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className={dialogBox("xl")}>
+        <DialogHead
+          icon={<span className="text-[15px] font-extrabold">{initials(name)}</span>}
+          title={name}
+          subtitle={[t.customer_email, dateTime(t.created_at)].filter(Boolean).join(" · ")}
+          aside={<StatusPill label={meta.label} tone={meta.tone} />}
+        />
+        <DialogBody>
+          <div aria-hidden className="sm:hidden"><StatusPill label={meta.label} tone={meta.tone} /></div>
 
- try {
- const url = new URL(tx.checkout_session_id);
- return ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "src", "sck"]
- .map((key) => [key, url.searchParams.get(key)] as const)
- .filter((entry): entry is [string, string] => Boolean(entry[1]));
- } catch {
- return [] as Array<[string, string]>;
- }
- }, [tx.checkout_session_id]);
+          <section aria-label="Valores" className="space-y-3">
+            <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+              <div>
+                <p className="text-[13.5px] font-semibold text-muted-foreground">Valor da venda</p>
+                <p className="mt-0.5 text-[34px] font-extrabold leading-none tabular-nums tracking-[-0.04em] text-foreground sm:text-[40px]">{money(t.amount)}</p>
+              </div>
+              <MethodMark method={t.payment_method} />
+            </div>
+            <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-2.5">
+              <Money label="Taxa" value={`− ${money(t.fee_amount)}`} tone="danger" />
+              <Money label="Você recebe" value={money(t.net_amount)} tone="ok" />
+            </div>
+          </section>
 
- const handleCopyId = async () => {
- await navigator.clipboard.writeText(tx.id);
- setCopiedId(true);
- toast.success("ID copiado!");
- window.setTimeout(() => setCopiedId(false), 1800);
- };
+          <FormSection title="Venda">
+            <GroupBox>
+              <Row label="Produto">{product}</Row>
+              <Row label="Data">{dateTime(t.created_at)}</Row>
+              {feePercent > 0 && <Row label="Taxa percentual">{money(feePercent)}</Row>}
+              {feeFixed > 0 && <Row label="Taxa fixa">{money(feeFixed)}</Row>}
+              {Number(t.discount_amount ?? 0) > 0 && <Row label="Desconto do cupom">{`− ${money(t.discount_amount)}`}</Row>}
+              {refunded > 0 && <Row label="Já reembolsado" tone="warning">{`− ${money(refunded)}`}</Row>}
+              {retained > 0 && !t.retention_released && (
+                <Row label="Retido" tone="warning">{money(retained)}{t.retained_until ? ` · libera em ${dayOnly(t.retained_until)}` : ""}</Row>
+              )}
+              {admin && <Row label="Custo da adquirente">{money(acquirerCost)}</Row>}
+              {admin && <Row label="Margem da taxa" tone="ok">{money(Number(t.fee_amount ?? 0) - acquirerCost)}</Row>}
+              <div className="flex items-start justify-between gap-4 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="text-[13.5px] text-muted-foreground">Código da venda</p>
+                  <p className="mt-0.5 break-all font-mono text-[12.5px] text-foreground">{t.id}</p>
+                </div>
+                <button
+                  type="button" onClick={() => { void copyText(t.id, "Código copiado"); }} aria-label="Copiar código da venda"
+                  className="vp-r12 grid h-9 w-9 shrink-0 place-items-center rounded-[12px] text-muted-foreground hover:bg-muted hover:text-foreground"
+                >
+                  <Copy className="h-4 w-4" />
+                </button>
+              </div>
+            </GroupBox>
+          </FormSection>
 
- return createPortal(
- <AnimatePresence>
- <div className="fixed inset-0 z-[70] overflow-hidden">
- <motion.div
- initial={{ opacity: 0 }}
- animate={{ opacity: 1 }}
- exit={{ opacity: 0 }}
- transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
- className="absolute inset-0 bg-background/70 backdrop-blur-sm"
- onClick={onClose}
- />
+          <FormSection title="Cliente">
+            <GroupBox>
+              <Row label="Nome">{t.customer_name || "—"}</Row>
+              <Row label="E-mail">{t.customer_email || "—"}</Row>
+              <Row label="Telefone">{t.customer_phone || "—"}</Row>
+              {t.customer_document && <Row label="CPF/CNPJ">{t.customer_document}</Row>}
+              {admin && t.buyer_ip && <Row label="IP"><span className="font-mono text-[13px]">{t.buyer_ip}</span></Row>}
+            </GroupBox>
+          </FormSection>
 
- <div className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 pointer-events-none">
- <motion.div
- initial={{ opacity: 0, y: 14, scale: 0.985 }}
- animate={{ opacity: 1, y: 0, scale: 1 }}
- exit={{ opacity: 0, y: 8, scale: 0.99 }}
- transition={{ type: "spring", duration: 0.42, bounce: 0.06 }}
- className="pointer-events-auto flex max-h-[92vh] w-full max-w-[760px] flex-col overflow-hidden rounded-[30px] border border-border/50 bg-card/98 shadow-2xl"
- >
- <div className="relative shrink-0 border-b border-border/40 bg-card px-5 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6">
- <button
- onClick={onClose}
- className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border/40 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
- >
- <X className="h-4 w-4" />
- </button>
+          {admin && seller && (
+            <FormSection title="Seller">
+              <GroupBox>
+                <Row label="Nome">{seller.full_name || seller.nickname || "—"}</Row>
+                <Row label="E-mail">{seller.email || "—"}</Row>
+                <Row label="ID"><span className="break-all font-mono text-[12px]">{t.user_id}</span></Row>
+              </GroupBox>
+            </FormSection>
+          )}
 
- <div className="pr-12">
- <p className="text-[11px] font-semibold text-muted-foreground/70">Detalhes da transação</p>
- <div className="mt-4 flex items-start gap-3">
- <Avatar className="h-12 w-12 shrink-0">
- <AvatarFallback className={cn("text-sm font-black", avatarTone)}>{getInitials(customerName)}</AvatarFallback>
- </Avatar>
- <div className="min-w-0 flex-1">
- <p className="truncate text-[15px] font-bold text-foreground">{customerName}</p>
- <p className="truncate text-[12px] text-muted-foreground">{customerEmail}</p>
- <div className="mt-3 flex flex-wrap items-center gap-2">
-  <StatusBadge status={derivedStatus} />
- <span className={cn("inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold ", methodTone)}>
- {tx.payment_method === "pix" && <PixLogoMark className="h-3 w-3" />}
- {tx.payment_method === "credit_card" && <CreditCard className="h-3 w-3" />}
- {tx.payment_method === "boleto" && <Package className="h-3 w-3" />}
- {methodLabel}
- </span>
- </div>
- </div>
- </div>
- </div>
+          {tracking.length > 0 && (
+            <FormSection title="Origem da venda" subtitle="Parâmetros de campanha guardados no link do checkout.">
+              <GroupBox>
+                {tracking.map(([key, value]) => <Row key={key} label={key}>{value}</Row>)}
+              </GroupBox>
+            </FormSection>
+          )}
 
- <div className="mt-5 rounded-[24px] border border-border/40 bg-muted/[0.05] p-4 sm:p-5">
- <div className="flex flex-wrap items-start justify-between gap-3">
- <div>
- <p className="text-[11px] font-semibold text-muted-foreground/75">Valor bruto</p>
- <p className="mt-2 text-[30px] font-black leading-none tracking-tight text-foreground sm:text-[36px]">{formatCurrency(Number(tx.amount))}</p>
- </div>
- <div className="rounded-2xl border border-border/35 bg-background/35 px-3 py-2 text-right">
- <p className="text-[11px] font-semibold text-muted-foreground/70">Data</p>
- <p className="mt-1 text-[12px] font-semibold text-foreground">{formatDateTime(tx.created_at)}</p>
- </div>
- </div>
- </div>
- </div>
+          <FormSection title={admin ? "Auditoria" : "Histórico da venda"}>
+            <TransactionTimeline transactionId={t.id} variant={variant} />
+          </FormSection>
+        </DialogBody>
 
- <div className="flex-1 overflow-y-auto overscroll-contain">
- <div className="grid gap-4 px-5 py-5 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
- <div className="space-y-4">
- <section className="grid gap-3 sm:grid-cols-3">
- <div className="rounded-[24px] border border-border/40 bg-muted/[0.03] p-4">
- <p className="text-[11px] font-semibold text-muted-foreground/70">Bruto</p>
- <p className="mt-2 text-[18px] font-black text-foreground">{formatCurrency(Number(tx.amount))}</p>
- </div>
- <div className="rounded-[24px] border border-border/40 bg-muted/[0.03] p-4">
- <p className="text-[11px] font-semibold text-muted-foreground/70">Taxa</p>
- <p className="mt-2 text-[18px] font-black text-destructive">- {formatCurrency(Number(tx.fee_amount))}</p>
- </div>
- <div className="rounded-[24px] border border-primary/20 bg-primary/[0.05] p-4">
- <p className="text-[11px] font-semibold text-primary/80">Líquido</p>
- <p className="mt-2 text-[18px] font-black text-primary">{formatCurrency(Number(tx.net_amount))}</p>
- </div>
- </section>
-
- <SectionCard title="Transação">
- <DataRow label="Produto" value={<span className="block break-words text-right">{productName}</span>} icon={<Package className="h-3.5 w-3.5 shrink-0" />} />
- <DataRow label="Método" value={methodLabel} icon={<CreditCard className="h-3.5 w-3.5 shrink-0" />} />
- {variant === "admin" && (
-   <DataRow
-     label="Lucro plataforma"
-     icon={<TrendingUp className="h-3.5 w-3.5 shrink-0" />}
-      value={formatCurrency(Number(tx.fee_amount || 0))}
-     valueClassName="text-success"
-   />
- )}
- <DataRow label="Data" value={formatDateTime(tx.created_at)} icon={<Zap className="h-3.5 w-3.5 shrink-0" />} />
- {Number(tx.retained_amount) > 0 && (
- <DataRow
- label="Valor retido"
- value={`- ${formatCurrency(Number(tx.retained_amount))}`}
- icon={<ArrowDownRight className="h-3.5 w-3.5 shrink-0" />}
- valueClassName="text-warning"
- />
- )}
- <div className="mt-3 rounded-2xl border border-border/40 bg-background/40 p-3 sm:p-4">
- <div className="flex items-start justify-between gap-3">
- <div className="min-w-0">
- <p className="text-[11px] font-semibold text-muted-foreground/70">ID da transação</p>
- <p className="mt-2 break-all font-mono text-[12px] text-foreground/90">{tx.id}</p>
- </div>
- <Button variant="outline" size="sm" className="h-9 shrink-0 rounded-xl" onClick={handleCopyId}>
- {copiedId ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
- </Button>
- </div>
- </div>
- </SectionCard>
- </div>
-
- <div className="space-y-4">
- <SectionCard title="Cliente">
- <DataRow label="Nome" value={tx.customer_name || "—"} icon={<Users className="h-3.5 w-3.5 shrink-0" />} />
- <DataRow label="Email" value={tx.customer_email || "—"} icon={<Mail className="h-3.5 w-3.5 shrink-0" />} />
- <DataRow label="Telefone" value={tx.customer_phone || "—"} icon={<Phone className="h-3.5 w-3.5 shrink-0" />} />
- {tx.customer_document && <DataRow label="CPF/CNPJ" value={tx.customer_document} icon={<Hash className="h-3.5 w-3.5 shrink-0" />} />}
- {variant === "admin" && tx.buyer_ip && <DataRow label="IP" value={<span className="font-mono">{tx.buyer_ip}</span>} icon={<Globe className="h-3.5 w-3.5 shrink-0" />} />}
- </SectionCard>
-
- {variant === "admin" && seller && (
-   <SectionCard title="Seller">
-     <DataRow label="Nome" value={seller.full_name || seller.nickname || "—"} icon={<Users className="h-3.5 w-3.5 shrink-0" />} />
-     <DataRow label="Email" value={seller.email || "—"} icon={<Mail className="h-3.5 w-3.5 shrink-0" />} />
-     <DataRow label="ID" value={<span className="font-mono text-[11px]">{tx.user_id}</span>} icon={<Hash className="h-3.5 w-3.5 shrink-0" />} />
-   </SectionCard>
- )}
-
- <SectionCard title="Resumo rápido">
- <div className="space-y-3">
- <div className="rounded-2xl border border-border/30 bg-background/35 p-3">
- <div className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground/70">
- <Receipt className="h-3.5 w-3.5" /> Status atual
- </div>
- <div className="mt-2">
-  <StatusBadge status={derivedStatus} />
- </div>
- </div>
-
- <div className="rounded-2xl border border-border/30 bg-background/35 p-3">
- <p className="text-[11px] font-semibold text-muted-foreground/70">Produto vinculado</p>
- <p className="mt-2 break-words text-[13px] font-semibold text-foreground">{productName}</p>
- </div>
- </div>
- </SectionCard>
-
- {trackingItems.length > 0 && (
- <SectionCard title="Rastreamento">
- <div className="space-y-2">
- {trackingItems.map(([key, value]) => (
- <div key={key} className="flex items-start justify-between gap-4 rounded-2xl border border-border/30 bg-background/35 px-3 py-2.5">
- <span className="text-[11px] font-semibold text-muted-foreground/70">{key}</span>
- <span className="min-w-0 break-words text-right text-[12px] font-semibold text-foreground">{value}</span>
- </div>
- ))}
- </div>
- </SectionCard>
- )}
- </div>
- </div>
-
- <div className="px-5 pb-6 sm:px-6">
-   <SectionCard title={variant === "admin" ? "Auditoria completa" : "Timeline"}>
-     <TransactionTimeline transactionId={tx.id} variant={variant} />
-   </SectionCard>
- </div>
- </div>
-
-  {(whatsappHref || (onRefund && isApprovedTransaction(derivedStatus))) && (
- <div className="flex shrink-0 flex-col gap-2 border-t border-border/40 bg-card px-5 py-4 sm:flex-row sm:px-6">
- {whatsappHref && (
- <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className="flex-1">
- <Button variant="outline" className="h-11 w-full gap-2 rounded-2xl border-success/20 text-success hover:bg-success/5">
- <MessageCircle className="h-4 w-4" /> WhatsApp
- </Button>
- </a>
- )}
-  {onRefund && isApprovedTransaction(derivedStatus) && (
- <Button
- variant="outline"
- className="h-11 flex-1 gap-2 rounded-2xl border-destructive/20 text-destructive hover:bg-destructive/5"
- onClick={() => onRefund(tx)}
- >
- <RefreshCw className="h-4 w-4" /> Reembolsar
- </Button>
- )}
- {tx.checkout_session_id?.startsWith("http") && (
- <a href={tx.checkout_session_id} target="_blank" rel="noopener noreferrer" className="sm:w-auto">
- <Button variant="outline" className="h-11 w-full gap-2 rounded-2xl">
- <ExternalLink className="h-4 w-4" /> Origem
- </Button>
- </a>
- )}
- </div>
- )}
- </motion.div>
- </div>
- </div>
- </AnimatePresence>,
- document.body
- );
+        {hasFooter && (
+          <DialogFoot>
+            {origin && (
+              <a href={origin} target="_blank" rel="noopener noreferrer" className="vp-ghost !h-12 justify-center"><ExternalLink className="h-4 w-4" />Ver origem</a>
+            )}
+            {whatsapp && (
+              <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="vp-ghost !h-12 justify-center"><MessageCircle className="h-4 w-4" />WhatsApp</a>
+            )}
+            {canRefund && (
+              <button type="button" onClick={() => onRefund?.(t)} className="vp-cta vp-cta-danger !h-12 justify-center"><Undo2 className="h-4 w-4" />Reembolsar</button>
+            )}
+          </DialogFoot>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
 }

@@ -3,10 +3,13 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SellerRefundDialog } from "@/components/transactions/SellerRefundDialog";
 import { ReauthenticationDialog } from "@/components/security/ReauthenticationDialog";
+import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
+import { trackingParams } from "@/components/transactions/detailMeta";
 import type { Tables } from "@/integrations/supabase/types";
 
 const mock = vi.hoisted(() => ({ rpc: vi.fn(), success: vi.fn() }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { rpc: mock.rpc } }));
+vi.mock("@/components/transactions/TransactionTimeline", () => ({ TransactionTimeline: () => <p>linha do tempo</p> }));
 vi.mock("sonner", () => ({ toast: { success: mock.success, error: vi.fn() } }));
 
 const tx = (over: Partial<Tables<"transactions">> = {}) => ({ id: "t-1", amount: 297, refunded_amount: 0, ...over }) as Tables<"transactions">;
@@ -113,5 +116,54 @@ describe("confirmação de senha", () => {
     rerender(<ReauthenticationDialog open={false} onOpenChange={() => {}} onConfirm={async () => {}} />);
     rerender(<ReauthenticationDialog open onOpenChange={() => {}} onConfirm={async () => {}} />);
     expect((screen.getByLabelText("Senha atual") as HTMLInputElement).value).toBe("");
+  });
+});
+
+describe("detalhe da venda", () => {
+  const sale = (over: Partial<Tables<"transactions">> = {}) => tx({
+    customer_name: "Marina Alves", customer_email: "marina@exemplo.com", customer_phone: "(44) 99999-1234", customer_document: "12345678900",
+    status: "completed", payment_method: "pix", fee_amount: 17, net_amount: 280, created_at: "2026-11-24T15:00:00Z", product_id: "p1", ...over,
+  });
+
+  it("mostra valores, cliente e produto, e oferece reembolso só da venda paga do seller", () => {
+    const onRefund = vi.fn();
+    render(<TransactionDetailPanel tx={sale()} products={{ p1: "Mentoria Black" }} onClose={() => {}} onRefund={onRefund} />);
+    expect(screen.getByText("Marina Alves", { selector: "h2" })).toBeTruthy();
+    expect(screen.getByText("Mentoria Black")).toBeTruthy();
+    expect(screen.getAllByText("Paga").length).toBeGreaterThan(0);
+    expect(screen.getByText(/280,00/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: /WhatsApp/ }).getAttribute("href")).toBe("https://wa.me/5544999991234");
+    fireEvent.click(screen.getByRole("button", { name: /Reembolsar/ }));
+    expect(onRefund).toHaveBeenCalledWith(expect.objectContaining({ id: "t-1" }));
+  });
+
+  it("venda que não foi paga não tem reembolso, e o admin nunca reembolsa por aqui", () => {
+    const { rerender } = render(<TransactionDetailPanel tx={sale({ status: "pending", created_at: new Date().toISOString() })} products={{}} onClose={() => {}} onRefund={() => {}} />);
+    expect(screen.queryByRole("button", { name: /Reembolsar/ })).toBeNull();
+    rerender(<TransactionDetailPanel tx={sale()} products={{}} onClose={() => {}} onRefund={() => {}} variant="admin" />);
+    expect(screen.queryByRole("button", { name: /Reembolsar/ })).toBeNull();
+    expect(screen.getByText("Margem da taxa")).toBeTruthy();
+  });
+
+  it("reembolso parcial e valor retido aparecem; telefone com 55 não vira 5555", () => {
+    render(<TransactionDetailPanel tx={sale({ refunded_amount: 50, retained_amount: 100, retention_released: false, retained_until: "2026-12-05T12:00:00Z", customer_phone: "5544999991234" })} products={{}} onClose={() => {}} />);
+    expect(screen.getByText("Já reembolsado")).toBeTruthy();
+    expect(screen.getByText(/libera em 05\/12\/2026/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: /WhatsApp/ }).getAttribute("href")).toBe("https://wa.me/5544999991234");
+  });
+
+  it("some quando tx vira null, e Esc/X chamam onClose", () => {
+    const onClose = vi.fn();
+    const { rerender } = render(<TransactionDetailPanel tx={sale()} products={{}} onClose={onClose} />);
+    fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+    expect(onClose).toHaveBeenCalled();
+    rerender(<TransactionDetailPanel tx={null} products={{}} onClose={onClose} />);
+    expect(screen.queryByText("Marina Alves", { selector: "h2" })).toBeNull();
+  });
+
+  it("lê as utms do endereço de origem e ignora lixo", () => {
+    expect(trackingParams("https://loja.com/pay?utm_source=fb&utm_campaign=black&x=1&sck=abc")).toEqual([["utm_source", "fb"], ["utm_campaign", "black"], ["sck", "abc"]]);
+    expect(trackingParams("não é url")).toEqual([]);
+    expect(trackingParams(null)).toEqual([]);
   });
 });

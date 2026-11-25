@@ -5,10 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Notice } from "@/components/seller-ui/studio";
 import { formatDayTime, passwordChangeError, passwordChecks, passwordProblem } from "./accountMeta";
 import { Field, PanelHead } from "./parts";
+import { ConfirmDialog } from "@/components/seller-ui/confirm";
 
 const RULES: { key: keyof ReturnType<typeof passwordChecks>; label: string }[] = [
   { key: "length", label: "8 caracteres ou mais" },
@@ -121,18 +121,12 @@ export function SecurityTab() {
         <button type="button" className="vp-ghost mt-4 h-11 px-5" onClick={() => setOthers(true)}><LogOut className="h-4 w-4" aria-hidden />Sair dos outros aparelhos</button>
       </section>
 
-      <AlertDialog open={others} onOpenChange={(o) => !leaving && setOthers(o)}>
-        <AlertDialogContent className="rounded-[28px]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Sair dos outros aparelhos?</AlertDialogTitle>
-            <AlertDialogDescription>Todo aparelho conectado à sua conta, menos este, vai pedir o login de novo.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={leaving} className="vp-ghost m-0 h-11">Manter conectados</AlertDialogCancel>
-            <AlertDialogAction disabled={leaving} onClick={(e) => { e.preventDefault(); void leaveOthers(); }} className="vp-cta h-11">{leaving ? "Saindo" : "Sair dos outros"}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={others} onOpenChange={setOthers} busy={leaving} tone="default" icon={<LogOut className="h-5 w-5" />}
+        title="Sair dos outros aparelhos?" confirmLabel="Sair dos outros" cancelLabel="Manter conectados"
+        description="Todo aparelho conectado à sua conta, menos este, vai pedir o login de novo."
+        onConfirm={leaveOthers}
+      />
     </div>
   );
 }

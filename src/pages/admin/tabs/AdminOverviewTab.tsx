@@ -470,15 +470,13 @@ export default function AdminOverviewTab({
         onApprove={handleKycApprove}
         onReject={handleKycReject}
       />
-      {selectedTx && (
-        <TransactionDetailPanel
-          tx={selectedTx}
-          products={productsMap}
-          onClose={() => setSelectedTx(null)}
-          variant="admin"
-          seller={sellerFor(selectedTx.user_id)}
-        />
-      )}
+      <TransactionDetailPanel
+        tx={selectedTx}
+        products={productsMap}
+        onClose={() => setSelectedTx(null)}
+        variant="admin"
+        seller={selectedTx ? sellerFor(selectedTx.user_id) : null}
+      />
     </div>
   );
 }
