@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { Dust } from "./Dust";
 import { PieceArt } from "./PieceArt";
 import type { AwardItem } from "./awards-data";
-import { claimHeadline, maskedBRL, spokenBRL, type PieceState, type RewardClaim } from "./awardMeta";
+import { claimHeadline, goalFraction, goalPercent, maskedBRL, spokenBRL, type PieceState } from "./awardMeta";
 
 export interface StageProps {
   awards: AwardItem[];
@@ -56,9 +56,10 @@ function PieceInfo({ award, state, revenue, revenueKnown, claimsKnown, hidden, o
   onClaim: () => void; onShare: () => void; onTrack: () => void;
 }) {
   const missing = Math.max(award.value - revenue, 0);
-  const pct = Math.min((revenue / award.value) * 100, 100);
+  const pct = goalPercent(award.value, revenue);
   const canClaim = state.kind === "ready" && revenueKnown && claimsKnown;
   const delivered = state.claim?.delivered_at ? new Date(state.claim.delivered_at).toLocaleDateString("pt-BR") : null;
+  const hasAction = state.kind === "ready" || state.kind === "active" || state.kind === "delivered" || state.kind === "cancelled";
 
   return (
     <div className="mx-auto w-full max-w-[520px] lg:mx-0">
@@ -66,11 +67,63 @@ function PieceInfo({ award, state, revenue, revenueKnown, claimsKnown, hidden, o
         <span className="vw-dim text-[13.5px] font-medium">Nível {award.roman}</span>
         <span className="vw-rule flex-1" aria-hidden />
         {stateChip(state)}
+        <button type="button" className="vw-orb !h-10 !w-10" onClick={onShare} aria-label={state.unlocked ? "Compartilhar conquista" : "Compartilhar meta"}><Share2 className="h-4 w-4" /></button>
       </div>
 
       <h2 className="vw-ink mt-4 font-heading text-[34px] font-extrabold leading-[1.04] tracking-[-0.04em] sm:text-[44px]">{award.title}</h2>
       <p className="vw-dim mt-2 text-[15px]">{award.tier ? `${award.tier}, a` : "A"} partir de {spokenBRL(award.value)} em vendas</p>
-      {award.description && <p className="vw-ink mt-4 max-w-[46ch] text-[15px] leading-relaxed opacity-90">{award.description}</p>}
+
+      {/* O que importa agora vem primeiro: quanto falta, o botão de resgatar ou o andamento do pedido. */}
+      <div className="mt-6">
+        {state.kind === "sealed" && (
+          revenueKnown ? (
+            <>
+              <div className="flex items-end justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="vw-dim text-[13.5px] font-medium">Faltam</p>
+                  <p className="vw-ink vp-num mt-0.5 truncate font-heading text-[36px] font-extrabold leading-none tracking-[-0.04em] sm:text-[44px]">{maskedBRL(missing, hidden)}</p>
+                </div>
+                <p className="vw-dim vp-num shrink-0 pb-1 text-[15px] font-semibold">{pct}%</p>
+              </div>
+              <div className="vw-meter mt-3.5" role="progressbar" aria-label={`Progresso até ${award.title}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
+                <span style={{ width: `${pct}%` }} />
+              </div>
+              <p className="vw-dim mt-2 text-[13px]">Você tem {maskedBRL(revenue, hidden)} de {maskedBRL(award.value, hidden)}.</p>
+            </>
+          ) : (
+            <p className="vw-dim text-[14px] leading-relaxed">Não foi possível conferir seu faturamento agora, então não dá para dizer quanto falta.</p>
+          )
+        )}
+        {state.kind === "ready" && (
+          <p className="vw-ink text-[15px] font-medium leading-relaxed">
+            {claimsKnown && revenueKnown ? "Peça liberada. Informe o endereço de entrega para pedir a sua." : "Peça liberada, mas não conseguimos conferir seus resgates agora. Tente de novo em instantes."}
+          </p>
+        )}
+        {state.claim && (state.kind === "active" || state.kind === "delivered") && (
+          <>
+            <p className="vw-ink text-[16px] font-semibold">{claimHeadline(state.claim)}</p>
+            <p className="vw-dim mt-1 text-[13.5px]">
+              {state.kind === "delivered" && delivered ? `Entregue em ${delivered}.` : state.claim.tracking_code ? `Rastreio ${state.claim.tracking_carrier ? `${state.claim.tracking_carrier} ` : ""}${state.claim.tracking_code}.` : "Você acompanha cada etapa em Seus resgates, aqui embaixo."}
+            </p>
+          </>
+        )}
+        {state.kind === "cancelled" && (
+          <p className="vw-dim text-[14px] leading-relaxed">
+            O resgate desta peça foi cancelado e não dá para pedir de novo pela plataforma. Fale com o suporte para entender o motivo ou reabrir.
+          </p>
+        )}
+        {hasAction && (
+          <div className="mt-4 flex flex-wrap items-center gap-2.5">
+            {state.kind === "ready" && <button type="button" className="vp-cta" disabled={!canClaim} onClick={onClaim}><Gift className="h-[18px] w-[18px]" />Resgatar esta peça</button>}
+            {(state.kind === "active" || state.kind === "delivered") && <button type="button" className="vw-ghost" onClick={onTrack}><Truck className="h-[18px] w-[18px]" />Acompanhar resgate</button>}
+            {state.kind === "cancelled" && <Link to="/suporte" className="vw-ghost">Falar com o suporte</Link>}
+          </div>
+        )}
+      </div>
+
+      {(award.description || award.rewards.length > 0 || award.phrase) && <div className="vw-rule mt-7" aria-hidden />}
+
+      {award.description && <p className="vw-ink mt-5 max-w-[46ch] text-[15px] leading-relaxed opacity-90">{award.description}</p>}
 
       {award.rewards.length > 0 && (
         <div className="mt-5">
@@ -87,54 +140,6 @@ function PieceInfo({ award, state, revenue, revenueKnown, claimsKnown, hidden, o
       )}
 
       {award.phrase && <p className="vw-ink mt-5 max-w-[42ch] font-heading text-[16px] font-semibold leading-snug opacity-80">“{award.phrase}”</p>}
-
-      <div className="mt-6">
-        {state.kind === "sealed" && (
-          revenueKnown ? (
-            <>
-              <div className="flex items-baseline justify-between gap-3">
-                <span className="vw-dim text-[14px]">Faltam</span>
-                <span className="vw-ink vp-num font-heading text-[22px] font-extrabold tracking-[-0.03em]">{maskedBRL(missing, hidden)}</span>
-              </div>
-              <div className="vw-meter mt-2.5" role="progressbar" aria-label={`Progresso até ${award.title}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)}>
-                <span style={{ width: `${pct}%` }} />
-              </div>
-              <p className="vw-dim mt-2 text-[13px]">Você tem {maskedBRL(revenue, hidden)} de {maskedBRL(award.value, hidden)}.</p>
-            </>
-          ) : (
-            <p className="vw-dim text-[14px] leading-relaxed">Não foi possível conferir seu faturamento agora, então não dá para dizer quanto falta.</p>
-          )
-        )}
-        {state.kind === "ready" && (
-          <p className="vw-ink text-[14.5px] leading-relaxed">
-            {claimsKnown && revenueKnown ? "Peça liberada. Informe o endereço de entrega para pedir a sua." : "Peça liberada, mas não conseguimos conferir seus resgates agora. Tente de novo em instantes."}
-          </p>
-        )}
-        {state.claim && (state.kind === "active" || state.kind === "delivered") && (
-          <>
-            <p className="vw-ink text-[15px] font-semibold">{claimHeadline(state.claim)}</p>
-            <p className="vw-dim mt-1 text-[13.5px]">
-              {state.kind === "delivered" && delivered ? `Entregue em ${delivered}.` : state.claim.tracking_code ? `Rastreio ${state.claim.tracking_carrier ? `${state.claim.tracking_carrier} ` : ""}${state.claim.tracking_code}.` : "Você acompanha cada etapa em Seus resgates, aqui embaixo."}
-            </p>
-          </>
-        )}
-        {state.kind === "cancelled" && (
-          <p className="vw-dim text-[14px] leading-relaxed">
-            O resgate desta peça foi cancelado e não dá para pedir de novo pela plataforma. Fale com o suporte para entender o motivo ou reabrir.
-          </p>
-        )}
-      </div>
-
-      <div className="mt-6 flex flex-wrap items-center gap-2.5">
-        {state.kind === "ready" && (
-          <button type="button" className="vp-cta" disabled={!canClaim} onClick={onClaim}><Gift className="h-[18px] w-[18px]" />Resgatar esta peça</button>
-        )}
-        {(state.kind === "active" || state.kind === "delivered") && (
-          <button type="button" className="vw-ghost" onClick={onTrack}><Truck className="h-[18px] w-[18px]" />Acompanhar resgate</button>
-        )}
-        {state.kind === "cancelled" && <Link to="/suporte" className="vw-ghost">Falar com o suporte</Link>}
-        <button type="button" className="vw-orb" onClick={onShare} aria-label={state.unlocked ? "Compartilhar conquista" : "Compartilhar meta"}><Share2 className="h-[18px] w-[18px]" /></button>
-      </div>
     </div>
   );
 }
@@ -204,7 +209,7 @@ export function Stage(p: StageProps) {
                   exit="exit"
                   transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <PieceArt award={award} sealed={sealed} />
+                  <PieceArt award={award} sealed={sealed} progress={sealed && p.revenueKnown ? goalFraction(award.value, p.revenue) : 0} />
                 </motion.div>
               </AnimatePresence>
               <div aria-hidden style={{ paddingBottom: "19%" }} />

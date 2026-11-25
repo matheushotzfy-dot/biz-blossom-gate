@@ -79,7 +79,20 @@
   filter: drop-shadow(0 22px 26px hsl(0 0% 0% / .5));
   transition: filter .5s ease;
 }
-.vw-img[data-sealed="true"] { filter: brightness(.3) saturate(.3) contrast(1.12) drop-shadow(0 22px 26px hsl(0 0% 0% / .5)); }
+.vw-img[data-sealed="true"] { filter: brightness(.34) saturate(.32) contrast(1.12) drop-shadow(0 22px 26px hsl(0 0% 0% / .5)); }
+
+/* Peça selada que já tem faturamento: a luz sobe de baixo para cima até a porcentagem da meta.
+   A camada acesa é a mesma arte sem o filtro, recortada; a linha de luz só pinta sobre o metal (máscara = silhueta). */
+.vw-lit { transition: clip-path 1.5s cubic-bezier(.16, 1, .3, 1); will-change: clip-path; }
+.vw-scan {
+  position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+.vw-scan > span {
+  position: absolute; left: 0; right: 0; height: 9%; transform: translateY(50%);
+  background: linear-gradient(0deg, transparent, hsl(var(--glow) / .9) 50%, transparent);
+  transition: bottom 1.5s cubic-bezier(.16, 1, .3, 1);
+}
 
 /* Brilho que só existe sobre o metal: a máscara é a própria silhueta da peça. */
 .vw-glare {
@@ -180,12 +193,14 @@ html.vp-seller .vw-ghost, html.vp-seller .vw-orb, html.vp-seller .vw-skip { bord
   transition: box-shadow .18s ease, transform .18s ease;
 }
 .vw-thumb img { position: absolute; inset: 4% 0 0 0; width: 100%; height: 96%; object-fit: contain; transition: filter .3s ease; }
-.vw-thumb[data-sealed="true"] img { filter: brightness(.34) saturate(.3) contrast(1.1); }
+.vw-thumb[data-sealed="true"] img:not(.vw-lit) { filter: brightness(.38) saturate(.32) contrast(1.1); }
+.vw-thumb .vw-lit { transition: clip-path 1.2s cubic-bezier(.16, 1, .3, 1); }
 .vw-node[aria-current="true"] .vw-thumb { box-shadow: inset 0 0 0 2px hsl(var(--glow)), 0 14px 30px -16px hsl(var(--glow) / .7); }
 .vw-node:hover .vw-thumb { transform: translateY(-2px); }
 .vw-node:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; border-radius: 18px; }
 
 @media (prefers-reduced-motion: reduce) {
   .vw-cone, .vw-glare { animation: none; }
+  .vw-lit, .vw-scan > span, .vw-thumb .vw-lit { transition: none; }
   .vw-tilt, .vw-img, .vw-meter > span, .vw-thumb, .vw-orb, .vw-ghost { transition: none; }
 }

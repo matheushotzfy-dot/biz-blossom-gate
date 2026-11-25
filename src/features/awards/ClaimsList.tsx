@@ -1,6 +1,5 @@
 import { Check, Copy, ExternalLink, Package, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
 import { StatusPill } from "@/components/seller-ui/tx";
 import type { TxTone } from "@/components/seller-ui/txMeta";
 import { copyText } from "@/components/seller-ui/copy";
@@ -122,11 +121,12 @@ export function ClaimsList({ claims, awards, loading, failed, onRetry }: ClaimsL
           <button type="button" className="vp-ghost !h-10" onClick={onRetry}>Tentar de novo</button>
         </div>
       ) : claims.length === 0 ? (
-        <EmptyPanel
-          icon={<Package className="h-7 w-7" />}
-          title="Nenhum resgate ainda"
-          text="Quando você conquistar uma peça, peça o resgate no palco acima. O pedido e o rastreio aparecem aqui."
-        />
+        <div className="mt-5 flex items-center gap-4 rounded-[18px] bg-muted/60 px-5 py-4">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent text-accent-foreground"><Package className="h-5 w-5" aria-hidden /></span>
+          <p className="min-w-0 text-[14.5px] leading-snug text-muted-foreground">
+            <span className="font-bold text-foreground">Nenhum resgate ainda.</span> Quando você conquistar uma peça, peça o resgate no palco acima. O pedido e o rastreio aparecem aqui.
+          </p>
+        </div>
       ) : (
         <ul className="mt-2 divide-y divide-border">
           {claims.map((c) => <Row key={c.id} claim={c} award={awards.find((a) => a.id === c.tier_id)} />)}

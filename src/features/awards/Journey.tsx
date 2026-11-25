@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Check, Flag, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AwardItem } from "./awards-data";
-import { maskedBRL, railFraction, segmentPercent, type PieceState } from "./awardMeta";
+import { goalFraction, goalPercent, maskedBRL, railFraction, type PieceState } from "./awardMeta";
 
 interface JourneyProps {
   awards: AwardItem[];
@@ -21,7 +21,7 @@ function caption(state: PieceState, nextId: string | undefined, id: string, pct:
     case "active": return { text: "Resgate em andamento", strong: true };
     case "delivered": return { text: "Entregue" };
     case "cancelled": return { text: "Resgate cancelado" };
-    default: return { text: nextId === id ? `${Math.floor(pct)}% do caminho` : "Selada" };
+    default: return { text: nextId === id && pct > 0 ? `${pct}% da meta` : "Selada" };
   }
 }
 
@@ -33,7 +33,6 @@ export function Journey({ awards, states, index, revenue, revenueKnown, hidden, 
   const pill = useRef<HTMLSpanElement>(null);
   const fill = revenueKnown ? railFraction(awards.map((a) => a.value), revenue) : 0;
   const nextId = awards.find((a) => revenue < a.value)?.id;
-  const pct = revenueKnown ? segmentPercent(awards, revenue) : 0;
   const edge = `${(0.5 / (n + 1)) * 100}%`;
 
   // Mantém a peça escolhida à vista na rolagem horizontal, sem mexer na rolagem da página.
@@ -100,7 +99,8 @@ export function Journey({ awards, states, index, revenue, revenueKnown, hidden, 
             {awards.map((a, i) => {
               const s = states[i];
               const reached = s.unlocked;
-              const cap = caption(s, nextId, a.id, pct);
+              const cap = caption(s, nextId, a.id, revenueKnown ? goalPercent(a.value, revenue) : 0);
+              const lit = revenueKnown && s.kind === "sealed" && !!a.image ? goalFraction(a.value, revenue) : 0;
               return (
                 <li key={a.id} className="flex flex-col items-center px-2">
                   <span
@@ -120,6 +120,7 @@ export function Journey({ awards, states, index, revenue, revenueKnown, hidden, 
                   >
                     <span className="vw-thumb" data-sealed={s.kind === "sealed"}>
                       {a.image ? <img src={a.image} alt="" loading="lazy" decoding="async" draggable={false} /> : <span className="absolute inset-0 grid place-items-center text-[15px] font-extrabold text-white/80">{a.label}</span>}
+                      {lit > 0 && <img src={a.image ?? undefined} alt="" aria-hidden decoding="async" draggable={false} className="vw-lit" style={{ clipPath: `inset(${(1 - lit) * 100}% 0 0 0)` }} />}
                       {s.kind === "sealed" && <span aria-hidden className="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full bg-black/55 text-white/85"><Lock className="h-3 w-3" /></span>}
                     </span>
                     <span className="mt-2.5 block font-heading text-[15px] font-extrabold tracking-[-0.02em] text-foreground">{a.label}</span>

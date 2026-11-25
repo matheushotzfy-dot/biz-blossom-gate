@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Bell, Gift, LifeBuoy, Play, ReceiptText, Trophy } from "lucide-react";
+import { ChevronDown, Play, Sparkles, Trophy, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { PageHead } from "@/components/seller-ui/PageHead";
@@ -12,7 +12,7 @@ import { Journey } from "@/features/awards/Journey";
 import { Stage } from "@/features/awards/Stage";
 import { VaultIntro } from "@/features/awards/VaultIntro";
 import type { AwardItem } from "@/features/awards/awards-data";
-import { pieceState, type PieceState } from "@/features/awards/awardMeta";
+import { newlyUnlocked, pieceState, type PieceState } from "@/features/awards/awardMeta";
 import { useAwards } from "@/features/awards/use-awards";
 import "@/features/awards/awards.css";
 
@@ -31,11 +31,13 @@ const reducedMotion = () => {
 };
 
 const HOW = [
-  { icon: ReceiptText, title: "O que conta", text: "O valor líquido das suas vendas aprovadas, já descontadas as taxas. Vendas de teste não entram na conta." },
-  { icon: Gift, title: "Como pedir", text: "Quando uma peça é liberada, o botão de resgate aparece no palco. Você informa o endereço, revisa e confirma. Cada peça pode ser pedida uma vez por conta." },
-  { icon: Bell, title: "Acompanhamento", text: "Cada mudança de etapa chega como notificação, e o rastreio aparece em Seus resgates assim que a equipe informar." },
-  { icon: LifeBuoy, title: "Endereço errado?", text: "Depois do pedido, só o suporte consegue alterar o endereço. Fale com a gente antes do envio." },
+  { title: "O que conta", text: "O valor líquido das suas vendas aprovadas, já descontadas as taxas. Vendas de teste não entram na conta." },
+  { title: "Como pedir", text: "Quando uma peça é liberada, o botão de resgate aparece no palco. Você informa o endereço, revisa e confirma. Cada peça pode ser pedida uma vez por conta." },
+  { title: "Acompanhamento", text: "Cada mudança de etapa chega como notificação, e o rastreio aparece em Seus resgates assim que a equipe informar." },
+  { title: "Endereço errado?", text: "Depois do pedido, só o suporte consegue alterar o endereço. Fale com a gente antes do envio." },
 ] as const;
+
+const SEEN_KEY = (userId: string) => `vp-awards-seen:${userId}`;
 
 function StageSkeleton() {
   return (
@@ -58,6 +60,23 @@ export default function Premiacoes() {
   const dir = useRef<1 | -1>(1);
   const touched = useRef(false);
   const [claimFor, setClaimFor] = useState<AwardItem | null>(null);
+
+  // Peças que passaram a valer desde a última visita ganham um aviso (uma vez). Na primeira visita só registra o estado.
+  const [fresh, setFresh] = useState<AwardItem[]>([]);
+  const userId = a.user?.id;
+  const unlockedKey = awards.filter((_, i) => states[i]?.unlocked).map((x) => x.id).join(",");
+  useEffect(() => {
+    if (loading || !userId || errors.revenue || awards.length === 0) return;
+    try {
+      const ids = unlockedKey ? unlockedKey.split(",") : [];
+      const raw = localStorage.getItem(SEEN_KEY(userId));
+      const added = newlyUnlocked(raw, ids);
+      // Só acumula: uma peça já comemorada não volta a ser novidade se o faturamento oscilar (estorno, por exemplo).
+      localStorage.setItem(SEEN_KEY(userId), [...new Set([...(raw ? raw.split(",") : []), ...ids])].filter(Boolean).join(","));
+      if (added && added.length > 0) setFresh(awards.filter((x) => added.includes(x.id)));
+    } catch { /* sem armazenamento: sem aviso, o palco continua igual */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, userId, errors.revenue, unlockedKey]);
 
   // Abre na peça que pede ação: a que dá para resgatar, senão a próxima da jornada.
   useEffect(() => {
@@ -137,6 +156,20 @@ export default function Premiacoes() {
         </Notice>
       )}
 
+      {fresh.length > 0 && stageVisible && (
+        <div role="status" className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[22px] bg-accent px-5 py-3.5">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-card text-accent-foreground"><Sparkles className="h-[18px] w-[18px]" aria-hidden /></span>
+          <p className="min-w-0 flex-1 basis-56 text-[14.5px] font-medium leading-snug text-accent-foreground">
+            <span className="font-bold">{fresh.length === 1 ? "Peça liberada desde a sua última visita:" : "Peças liberadas desde a sua última visita:"}</span>{" "}
+            {fresh.map((x) => x.title).join(", ")}.
+          </p>
+          <div className="flex items-center gap-2">
+            <button type="button" className="vp-cta !h-10" onClick={() => { select(awards.findIndex((x) => x.id === fresh[0].id)); setFresh([]); }}>Ver no palco</button>
+            <button type="button" className="vp-orb h-10 w-10" aria-label="Dispensar aviso" onClick={() => setFresh([])}><X className="h-4 w-4" /></button>
+          </div>
+        </div>
+      )}
+
       <div className="relative rounded-[28px]">
         {loading ? (
           <StageSkeleton />
@@ -183,20 +216,20 @@ export default function Premiacoes() {
 
       <section className="vp-sheet p-5 sm:p-7" aria-labelledby="como-funciona">
         <h2 id="como-funciona" className="font-heading text-[22px] font-extrabold tracking-[-0.03em] text-foreground">Como funciona</h2>
-        <dl className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-x-10 gap-y-6 md:grid-cols-[repeat(2,minmax(0,1fr))]">
-          {HOW.map(({ icon: Icon, title, text }) => (
-            <div key={title} className="flex items-start gap-4">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent text-accent-foreground"><Icon className="h-5 w-5" aria-hidden /></span>
-              <div className="min-w-0">
-                <dt className="text-[15.5px] font-bold text-foreground">{title}</dt>
-                <dd className="mt-1 text-[14.5px] leading-relaxed text-muted-foreground">
-                  {text}
-                  {title === "Endereço errado?" && <> <Link to="/suporte" className="font-semibold text-primary hover:underline">Abrir o suporte</Link></>}
-                </dd>
-              </div>
-            </div>
+        <div className="mt-2 divide-y divide-border">
+          {HOW.map(({ title, text }, i) => (
+            <details key={title} className="group py-4" open={i === 0}>
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-[12px] text-[15.5px] font-bold text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden">
+                {title}
+                <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180 motion-reduce:transition-none" aria-hidden />
+              </summary>
+              <p className="mt-2 max-w-[70ch] text-[14.5px] leading-relaxed text-muted-foreground">
+                {text}
+                {title === "Endereço errado?" && <> <Link to="/suporte" className="font-semibold text-primary hover:underline">Abrir o suporte</Link></>}
+              </p>
+            </details>
           ))}
-        </dl>
+        </div>
       </section>
 
       <ClaimDialog

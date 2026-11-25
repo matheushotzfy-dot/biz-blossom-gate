@@ -1,4 +1,4 @@
-import { useCallback, useRef, type PointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { Lock } from "lucide-react";
 import { ART_H, ART_W, type AwardItem } from "./awards-data";
 
@@ -33,10 +33,15 @@ const prefersReducedMotion = () => {
 
 /**
  * A peça no palco: inclina com o mouse, brilha só sobre o metal (a máscara é a própria silhueta),
- * reflete no piso e fica escura e trancada enquanto não foi conquistada.
+ * reflete no piso e fica escura enquanto não foi conquistada. Selada com faturamento (`progress` > 0),
+ * ela acende de baixo para cima até a fração da meta já batida, com uma linha de luz na fronteira.
  */
-export function PieceArt({ award, sealed }: { award: AwardItem; sealed: boolean }) {
+export function PieceArt({ award, sealed, progress = 0 }: { award: AwardItem; sealed: boolean; progress?: number }) {
   const tilt = useRef<HTMLDivElement>(null);
+  const lit = sealed && !!award.image && progress > 0;
+  // A luz sobe uma vez, quando a peça entra no palco.
+  const [shown, setShown] = useState(0);
+  useEffect(() => { const id = requestAnimationFrame(() => setShown(progress)); return () => cancelAnimationFrame(id); }, [progress, award.id]);
   const showGlare = !!award.image && !award.custom && !sealed;
 
   const move = useCallback((e: PointerEvent<HTMLDivElement>) => {
@@ -77,6 +82,17 @@ export function PieceArt({ award, sealed }: { award: AwardItem; sealed: boolean 
         ) : (
           <PlaqueFallback award={award} />
         )}
+        {lit && (
+          <>
+            <img
+              src={award.image ?? undefined} alt="" aria-hidden width={ART_W} height={ART_H} decoding="async" draggable={false}
+              className="vw-img vw-lit" style={{ clipPath: `inset(${(1 - shown) * 100}% 0 0 0)` }}
+            />
+            <div aria-hidden className="vw-scan" style={{ WebkitMaskImage: `url("${award.image}")`, maskImage: `url("${award.image}")` }}>
+              <span style={{ bottom: `${shown * 100}%` }} />
+            </div>
+          </>
+        )}
         {showGlare && (
           <div
             aria-hidden
@@ -90,7 +106,7 @@ export function PieceArt({ award, sealed }: { award: AwardItem; sealed: boolean 
           <img src={award.image} alt="" draggable={false} />
         </div>
       )}
-      {sealed && (
+      {sealed && !lit && (
         <span aria-hidden className="vw-lock"><Lock className="h-6 w-6" /></span>
       )}
     </div>

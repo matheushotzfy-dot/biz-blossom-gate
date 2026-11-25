@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  CLAIM_STEPS, claimHeadline, claimStepIndex, nextAward, pieceState, railFraction, segmentPercent, spokenBRL, sumPaged, toCents,
+  CLAIM_STEPS, claimHeadline, claimStepIndex, nextAward, goalFraction, goalPercent, newlyUnlocked, pieceState, railFraction, spokenBRL, sumPaged, toCents,
   type RewardClaim,
 } from "@/features/awards/awardMeta";
 import { AWARDS } from "@/features/awards/awards-data";
@@ -77,10 +77,26 @@ describe("trilha da jornada", () => {
     expect(nextAward(AWARDS, 0)?.id).toBe("10k");
     expect(nextAward(AWARDS, 100_000)?.id).toBe("250k");
     expect(nextAward(AWARDS, 10_000_000)).toBeNull();
-    expect(segmentPercent(AWARDS, 0)).toBe(0);
-    expect(segmentPercent(AWARDS, 5_000)).toBe(50);
-    expect(segmentPercent(AWARDS, 175_000)).toBe(50);
-    expect(segmentPercent(AWARDS, 20_000_000)).toBe(100);
+  });
+  it("quanto da peça já foi faturado", () => {
+    expect(goalFraction(500_000, 0)).toBe(0);
+    expect(goalFraction(500_000, 280_000)).toBeCloseTo(0.56, 5);
+    expect(goalFraction(500_000, 900_000)).toBe(1);
+    expect(goalFraction(0, 10)).toBe(0);
+    expect(goalFraction(500_000, -5)).toBe(0);
+  });
+  it("a porcentagem só chega a 100 na meta batida", () => {
+    expect(goalPercent(500_000, 280_000)).toBe(56);
+    expect(goalPercent(500_000, 499_999)).toBe(99);
+    expect(goalPercent(500_000, 500_000)).toBe(100);
+    expect(goalPercent(10_000_000, 280_000)).toBe(2);
+    expect(goalPercent(10_000, 0)).toBe(0);
+  });
+  it("peças liberadas desde a última visita", () => {
+    expect(newlyUnlocked(null, ["10k"])).toBeNull();
+    expect(newlyUnlocked("", ["10k"])).toEqual(["10k"]);
+    expect(newlyUnlocked("10k,100k", ["10k", "100k", "250k"])).toEqual(["250k"]);
+    expect(newlyUnlocked("10k", ["10k"])).toEqual([]);
   });
   it("texto falado", () => {
     expect(spokenBRL(10_000)).toBe("R$ 10 mil");

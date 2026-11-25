@@ -99,13 +99,25 @@ export function nextAward<T extends Pick<AwardItem, "value">>(awards: T[], reven
   return awards.find((a) => revenue < a.value) ?? null;
 }
 
-/** Percentual do trecho atual (do marco anterior até o próximo), de 0 a 100. */
-export function segmentPercent(awards: Pick<AwardItem, "value">[], revenue: number): number {
-  const next = nextAward(awards, revenue);
-  if (!next) return 100;
-  const prev = [...awards].reverse().find((a) => revenue >= a.value)?.value ?? 0;
-  const span = next.value - prev;
-  return span > 0 ? Math.min(Math.max(((revenue - prev) / span) * 100, 0), 100) : 0;
+/** Quanto do valor de uma peça já foi faturado, de 0 a 1 (é o que acende a peça no palco). */
+export function goalFraction(value: number, revenue: number): number {
+  return value > 0 ? Math.min(Math.max(revenue / value, 0), 1) : 0;
+}
+
+/** O mesmo em porcentagem inteira; só chega a 100 quando a meta foi batida (nunca arredonda 99,9% para cima). */
+export function goalPercent(value: number, revenue: number): number {
+  const f = goalFraction(value, revenue);
+  return f >= 1 ? 100 : Math.min(Math.floor(f * 100), 99);
+}
+
+/**
+ * Peças liberadas desde a última visita. `seen` é o que ficou guardado (ids separados por vírgula);
+ * sem nada guardado é a primeira visita: devolve null para só registrar o estado atual, sem comemorar o passado.
+ */
+export function newlyUnlocked(seen: string | null, unlockedIds: string[]): string[] | null {
+  if (seen === null) return null;
+  const known = new Set(seen.split(",").filter(Boolean));
+  return unlockedIds.filter((id) => !known.has(id));
 }
 
 /* Faturamento: soma em centavos inteiros e paginada, porque a API devolve no máximo 1.000 linhas por pedido. */
