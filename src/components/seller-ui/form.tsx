@@ -1,3 +1,5 @@
+import type { LucideIcon } from "lucide-react";
+import { Check } from "lucide-react";
 import type { ReactNode } from "react";
 import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -42,7 +44,7 @@ export function DialogHead({ icon, title, subtitle, aside, className }: { icon: 
       <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">{icon}</span>
       <div className="min-w-0 flex-1">
         <DialogTitle className="line-clamp-2 font-heading text-[19px] font-extrabold leading-[1.15] tracking-[-0.03em] text-foreground sm:text-[21px]">{title}</DialogTitle>
-        <DialogDescription className="mt-0.5 line-clamp-2 text-[14px] leading-snug text-muted-foreground">{subtitle}</DialogDescription>
+        <DialogDescription className="mt-0.5 text-[14px] leading-snug text-muted-foreground">{subtitle}</DialogDescription>
       </div>
       {aside && <div className="hidden shrink-0 sm:block">{aside}</div>}
     </div>
@@ -114,3 +116,57 @@ export function ChoiceChip({ active, onClick, children, className }: { active: b
 /** Abas em pílula para diálogos (Radix Tabs): lista com rolagem horizontal e gatilho verde quando ativo. */
 export const tabListClass = "scrollbar-none flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-none !border-0 bg-transparent p-0";
 export const tabTriggerClass = "vp-pill !h-10 shrink-0 gap-2 !rounded-full border-0 px-4 text-[14px] data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:shadow-[inset_0_0_0_1px_hsl(var(--primary)/.28)]";
+
+/**
+ * Escolha única em cartões (tipo de chave, tipo de conta…). O estado vai em `box-shadow` e fundo, não em `border-*`:
+ * a regra legada `[class*="border"]` recolore qualquer borda.
+ */
+export function ChoiceGrid<T extends string>({ value, onChange, options, label, columns = 2, className }: {
+  value: T;
+  onChange: (value: T) => void;
+  options: Array<{ value: T; label: string; description?: string; icon?: LucideIcon }>;
+  label: string;
+  columns?: 2 | 3;
+  className?: string;
+}) {
+  return (
+    <div role="radiogroup" aria-label={label} className={cn("grid gap-2.5", columns === 3 ? "grid-cols-[repeat(2,minmax(0,1fr))] sm:grid-cols-[repeat(3,minmax(0,1fr))]" : "grid-cols-[minmax(0,1fr)] sm:grid-cols-[repeat(2,minmax(0,1fr))]", className)}>
+      {options.map((o) => {
+        const active = o.value === value;
+        const Icon = o.icon;
+        return (
+          <button
+            key={o.value} type="button" role="radio" aria-checked={active} onClick={() => onChange(o.value)}
+            className={cn(
+              "vp-r16 flex min-w-0 items-center gap-3 px-3.5 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+              active ? "bg-accent shadow-[inset_0_0_0_1.5px_hsl(var(--primary)/.6)]" : "bg-background shadow-[inset_0_0_0_1px_hsl(var(--border))] hover:bg-muted/50",
+            )}
+          >
+            {Icon && <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-full", active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}><Icon className="h-[18px] w-[18px]" /></span>}
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[14px] font-semibold leading-tight text-foreground">{o.label}</span>
+              {o.description && <span className="mt-0.5 block truncate text-[12.5px] leading-snug text-muted-foreground">{o.description}</span>}
+            </span>
+            {active && <Check aria-hidden className="h-4 w-4 shrink-0 text-primary" strokeWidth={3} />}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Campo completo: rótulo, o input (children), e embaixo o erro (vence a dica) ou a dica. `id` liga rótulo, erro e dica ao input. */
+export function FormField({ id, label, hint, error, children, className }: { id: string; label: string; hint?: ReactNode; error?: string | null; children: ReactNode; className?: string }) {
+  return (
+    <div className={className}>
+      <FieldLabel htmlFor={id}>{label}</FieldLabel>
+      {children}
+      {error
+        ? <p id={`${id}-msg`} role="alert" className="mt-1.5 text-[12.5px] font-medium text-destructive">{error}</p>
+        : hint ? <FieldHint><span id={`${id}-msg`}>{hint}</span></FieldHint> : null}
+    </div>
+  );
+}
+
+/** Classe do botão-pílula de escolha ativa/inativa (usar com `ChoiceChip`). */
+export const chipTone = (active: boolean) => (active ? "justify-center bg-accent text-accent-foreground !border-primary/50" : "justify-center bg-background");

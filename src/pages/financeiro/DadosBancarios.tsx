@@ -3,14 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useBankAccounts, usePixKeys, useInvalidateAll } from "@/hooks/useQueryData";
 import { Building2, Plus, Trash2, Key, User, Mail, Phone, Hash, Shuffle, Landmark, PiggyBank } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
-  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { SegmentedChoice } from "@/components/ui/segmented-choice";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ChoiceChip, ChoiceGrid, DialogBody, DialogFoot, DialogHead, FieldLabel, FormField, chipTone, dialogBox } from "@/components/seller-ui/form";
+import { ConfirmDialog } from "@/components/seller-ui/confirm";
 import { BankCombobox } from "@/components/ui/bank-combobox";
 import { toast } from "sonner";
 import {
@@ -19,7 +14,6 @@ import {
   flattenZodErrors,
   type FieldErrors,
 } from "@/lib/validation";
-import { InlineError } from "@/components/ui/inline-error";
 import { friendlyError } from "@/lib/friendlyError";
 import { ReauthenticationDialog } from "@/components/security/ReauthenticationDialog";
 import { detectPixKeyType, displayPixKey, formatPixKey, maskAccount, maskAgency, maskDocument } from "@/lib/financial-input";
@@ -48,6 +42,14 @@ const PIX_PLACEHOLDER: Record<string, string> = {
   random: "Cole a chave aleatória",
 };
 
+const PIX_HINT: Record<string, string> = {
+  cpf: "Só números; formatamos para você.",
+  cnpj: "Só números; formatamos para você.",
+  email: "O e-mail que está cadastrado como chave no seu banco.",
+  phone: "Celular com DDD, o mesmo cadastrado como chave.",
+  random: "Cole a chave aleatória que o seu banco gerou.",
+};
+
 const ACCOUNT_TYPES = [
   { value: "corrente" as const, label: "Conta corrente", description: "Movimentação diária", icon: Landmark },
   { value: "poupanca" as const, label: "Poupança", description: "Conta de rendimento", icon: PiggyBank },
@@ -59,9 +61,7 @@ type BankForm = {
   account_type: "corrente" | "poupanca"; holder_name: string; holder_document: string;
 };
 
-const labelClass = "text-[13.5px] font-semibold text-foreground";
 const iconButton = "grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/40";
-const dialogClass = "w-[calc(100vw-1.5rem)] max-w-xl max-h-[90dvh] gap-0 overflow-hidden rounded-[28px] border-border bg-card p-0";
 
 export default function DadosBancarios() {
   const { user } = useAuth();
@@ -308,28 +308,27 @@ export default function DadosBancarios() {
 
       {/* Nova chave Pix */}
       <Dialog open={pixOpen} onOpenChange={(o) => { setPixOpen(o); if (!o) setPixErrors({}); }}>
-        <DialogContent className={dialogClass}>
-          <div className="overflow-y-auto p-6 sm:p-8">
-            <DialogHeader className="space-y-1 text-left">
-              <DialogTitle className="font-heading text-[22px] font-extrabold tracking-[-0.03em]">Nova chave Pix</DialogTitle>
-              <DialogDescription className="text-[14px] text-muted-foreground">Escolha o tipo e digite a chave. Vamos pedir sua senha para salvar.</DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleAddPix} className="mt-6 space-y-5" noValidate>
-              <div className="space-y-2.5">
-                <Label className={labelClass}>Tipo de chave</Label>
-                <SegmentedChoice
-                  value={pixForm.key_type}
-                  onValueChange={(v) => { setPixForm({ ...pixForm, key_type: v }); clearPixError("key_value"); }}
-                  options={PIX_TYPES}
-                  columns={2}
-                  size="sm"
-                />
+        <DialogContent className={dialogBox("md")}>
+          <DialogHead icon={<Key className="h-5 w-5" />} title="Nova chave Pix" subtitle="Escolha o tipo e digite a chave. Vamos pedir sua senha para salvar." />
+          <form onSubmit={handleAddPix} noValidate className="flex min-h-0 flex-1 flex-col">
+            <DialogBody>
+              <div>
+                <FieldLabel>Tipo de chave</FieldLabel>
+                <div role="radiogroup" aria-label="Tipo de chave" className="flex flex-wrap gap-2">
+                  {PIX_TYPES.map((t) => (
+                    <ChoiceChip key={t.value} active={pixForm.key_type === t.value} onClick={() => { setPixForm({ ...pixForm, key_type: t.value }); clearPixError("key_value"); }} className={chipTone(pixForm.key_type === t.value)}>
+                      <t.icon className="h-4 w-4" />{t.label}
+                    </ChoiceChip>
+                  ))}
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="pix-key-input" className={labelClass}>Chave</Label>
-                <Input
+              <FormField id="pix-key-input" label="Chave" error={pixErrors.key_value} hint={PIX_HINT[pixForm.key_type]}>
+                <input
                   id="pix-key-input"
+                  className="vp-field"
                   value={pixForm.key_value}
+                  autoFocus
+                  spellCheck={false}
                   onChange={(e) => {
                     // Tipo escolhido manualmente como aleatória/e-mail é respeitado:
                     // nunca troca para celular/CPF ao colar ou digitar.
@@ -342,32 +341,28 @@ export default function DadosBancarios() {
                   placeholder={PIX_PLACEHOLDER[pixForm.key_type]}
                   inputMode={pixForm.key_type === "email" || pixForm.key_type === "random" ? "text" : "numeric"}
                   autoComplete={pixForm.key_type === "email" ? "email" : pixForm.key_type === "phone" ? "tel" : "off"}
-                  aria-invalid={!!pixErrors.key_value}
-                  aria-describedby={pixErrors.key_value ? "pix-key-error" : undefined}
-                  className="vp-field"
+                  aria-invalid={pixErrors.key_value ? true : undefined}
+                  aria-describedby="pix-key-input-msg"
                 />
-                <InlineError id="pix-key-error" message={pixErrors.key_value} />
-              </div>
-              <button type="submit" disabled={busy} className="vp-cta h-[52px] w-full">
-                {busy ? "Adicionando…" : "Adicionar chave Pix"}
-              </button>
-            </form>
-          </div>
+              </FormField>
+            </DialogBody>
+            <DialogFoot>
+              <button type="button" className="vp-ghost !h-12 justify-center" onClick={() => setPixOpen(false)} disabled={busy}>Cancelar</button>
+              <button type="submit" disabled={busy} className="vp-cta !h-12 justify-center sm:min-w-[190px]">{busy ? "Adicionando…" : "Adicionar chave Pix"}</button>
+            </DialogFoot>
+          </form>
         </DialogContent>
       </Dialog>
 
       {/* Nova conta bancária */}
       <Dialog open={bankOpen} onOpenChange={(o) => { setBankOpen(o); if (!o) setBankErrors({}); }}>
-        <DialogContent className={dialogClass}>
-          <div className="overflow-y-auto p-6 sm:p-8">
-            <DialogHeader className="space-y-1 text-left">
-              <DialogTitle className="font-heading text-[22px] font-extrabold tracking-[-0.03em]">Nova conta bancária</DialogTitle>
-              <DialogDescription className="text-[14px] text-muted-foreground">Use uma conta no seu nome ou da sua empresa. Vamos pedir sua senha para salvar.</DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleAddBank} className="mt-6 space-y-4" noValidate>
-              <div className="space-y-2">
-                <Label className={labelClass}>Banco</Label>
+        <DialogContent className={dialogBox("lg")}>
+          <DialogHead icon={<Landmark className="h-5 w-5" />} title="Nova conta bancária" subtitle="Use uma conta no seu nome ou da sua empresa. Vamos pedir sua senha para salvar." />
+          <form onSubmit={handleAddBank} noValidate className="flex min-h-0 flex-1 flex-col">
+            <DialogBody>
+              <FormField id="bank-name" label="Banco" error={bankErrors.bank_name}>
                 <BankCombobox
+                  id="bank-name"
                   bankName={bankForm.bank_name}
                   bankCode={bankForm.bank_code}
                   onSelect={(b) => {
@@ -381,99 +376,70 @@ export default function DadosBancarios() {
                   }}
                   invalid={!!bankErrors.bank_name}
                 />
-                <InlineError message={bankErrors.bank_name} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label htmlFor="bank-agency" className={labelClass}>Agência</Label>
-                  <Input
-                    id="bank-agency"
+              </FormField>
+              <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-3">
+                <FormField id="bank-agency" label="Agência" error={bankErrors.agency}>
+                  <input
+                    id="bank-agency" className="vp-field"
                     value={bankForm.agency}
                     onChange={(e) => { setBankForm({ ...bankForm, agency: maskAgency(e.target.value) }); clearBankError("agency"); }}
-                    placeholder="0001"
-                    inputMode="numeric"
-                    maxLength={7}
-                    aria-invalid={!!bankErrors.agency}
-                    className="vp-field"
+                    placeholder="0001" inputMode="numeric" maxLength={7}
+                    aria-invalid={bankErrors.agency ? true : undefined} aria-describedby="bank-agency-msg"
                   />
-                  <InlineError message={bankErrors.agency} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="bank-account" className={labelClass}>Conta</Label>
-                  <Input
-                    id="bank-account"
+                </FormField>
+                <FormField id="bank-account" label="Conta" error={bankErrors.account_number}>
+                  <input
+                    id="bank-account" className="vp-field"
                     value={bankForm.account_number}
                     onChange={(e) => { setBankForm({ ...bankForm, account_number: maskAccount(e.target.value) }); clearBankError("account_number"); }}
-                    placeholder="12345-6"
-                    inputMode="numeric"
-                    maxLength={18}
-                    aria-invalid={!!bankErrors.account_number}
-                    className="vp-field"
+                    placeholder="12345-6" inputMode="numeric" maxLength={18}
+                    aria-invalid={bankErrors.account_number ? true : undefined} aria-describedby="bank-account-msg"
                   />
-                  <InlineError message={bankErrors.account_number} />
-                </div>
+                </FormField>
               </div>
-              <div className="space-y-2.5">
-                <Label className={labelClass}>Tipo de conta</Label>
-                <SegmentedChoice
-                  value={bankForm.account_type}
-                  onValueChange={(v) => setBankForm({ ...bankForm, account_type: v })}
-                  options={ACCOUNT_TYPES}
-                  columns={2}
-                />
+              <div>
+                <FieldLabel>Tipo de conta</FieldLabel>
+                <ChoiceGrid label="Tipo de conta" value={bankForm.account_type} onChange={(v) => setBankForm({ ...bankForm, account_type: v })} options={ACCOUNT_TYPES} />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="bank-holder" className={labelClass}>Nome do titular</Label>
-                <Input
-                  id="bank-holder"
+              <FormField id="bank-holder" label="Nome do titular" error={bankErrors.holder_name}>
+                <input
+                  id="bank-holder" className="vp-field"
                   value={bankForm.holder_name}
                   onChange={(e) => { setBankForm({ ...bankForm, holder_name: e.target.value }); clearBankError("holder_name"); }}
                   autoComplete="name"
-                  aria-invalid={!!bankErrors.holder_name}
-                  className="vp-field"
+                  aria-invalid={bankErrors.holder_name ? true : undefined} aria-describedby="bank-holder-msg"
                 />
-                <InlineError message={bankErrors.holder_name} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bank-document" className={labelClass}>CPF ou CNPJ do titular</Label>
-                <Input
-                  id="bank-document"
+              </FormField>
+              <FormField id="bank-document" label="CPF ou CNPJ do titular" error={bankErrors.holder_document} hint="Tem que ser o mesmo documento da conta bancária.">
+                <input
+                  id="bank-document" className="vp-field"
                   value={bankForm.holder_document}
                   onChange={(e) => { setBankForm({ ...bankForm, holder_document: maskDocument(e.target.value) }); clearBankError("holder_document"); }}
-                  placeholder="000.000.000-00"
-                  inputMode="numeric"
-                  maxLength={18}
-                  aria-invalid={!!bankErrors.holder_document}
-                  className="vp-field"
+                  placeholder="000.000.000-00" inputMode="numeric" maxLength={18}
+                  aria-invalid={bankErrors.holder_document ? true : undefined} aria-describedby="bank-document-msg"
                 />
-                <InlineError message={bankErrors.holder_document} />
-              </div>
-              <button type="submit" disabled={busy} className="vp-cta mt-2 h-[52px] w-full">
-                {busy ? "Salvando…" : "Salvar conta bancária"}
-              </button>
-            </form>
-          </div>
+              </FormField>
+            </DialogBody>
+            <DialogFoot>
+              <button type="button" className="vp-ghost !h-12 justify-center" onClick={() => setBankOpen(false)} disabled={busy}>Cancelar</button>
+              <button type="submit" disabled={busy} className="vp-cta !h-12 justify-center sm:min-w-[190px]">{busy ? "Salvando…" : "Salvar conta bancária"}</button>
+            </DialogFoot>
+          </form>
         </DialogContent>
       </Dialog>
 
       {/* Confirmar remoção */}
-      <AlertDialog open={!!toRemove} onOpenChange={(o) => { if (!o) setToRemove(null); }}>
-        <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
-          <AlertDialogHeader className="space-y-2 text-left">
-            <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">
-              {toRemove?.kind === "pix" ? "Remover esta chave Pix?" : "Remover esta conta bancária?"}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-[14.5px] leading-relaxed">
-              <span className="block break-all font-semibold text-foreground">{toRemove?.name}</span>
-              Na próxima etapa vamos pedir a sua senha para concluir.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <AlertDialogCancel className="vp-ghost m-0 h-11 border-border">Manter</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmRemove} className="vp-cta vp-cta-danger h-11">Remover</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={!!toRemove}
+        onOpenChange={(o) => { if (!o) setToRemove(null); }}
+        title={toRemove?.kind === "pix" ? "Remover esta chave Pix?" : "Remover esta conta bancária?"}
+        description="Na próxima etapa vamos pedir a sua senha para concluir."
+        confirmLabel="Remover"
+        cancelLabel="Manter"
+        onConfirm={confirmRemove}
+      >
+        <p className="mt-3 break-all rounded-[12px] bg-muted px-3.5 py-2.5 text-[14px] font-semibold text-foreground">{toRemove?.name}</p>
+      </ConfirmDialog>
     </div>
   );
 }

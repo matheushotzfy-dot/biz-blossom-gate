@@ -11,6 +11,7 @@ type BankComboboxProps = {
   onBankNameChange: (name: string) => void;
   invalid?: boolean;
   placeholder?: string;
+  id?: string;
 };
 
 export function BankCombobox({
@@ -19,7 +20,8 @@ export function BankCombobox({
   onSelect,
   onBankNameChange,
   invalid,
-  placeholder = "Selecione ou pesquise um banco",
+  placeholder = "Escolha o banco",
+  id,
 }: BankComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
@@ -49,50 +51,38 @@ export function BankCombobox({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
+          id={id}
           type="button"
-          aria-invalid={invalid}
+          aria-invalid={invalid || undefined}
           className={cn(
-            "group flex h-11 w-full items-center gap-3 rounded-xl border bg-background px-3.5 text-left transition-all",
-            "hover:border-primary/45 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-            invalid ? "border-destructive/60 bg-destructive/[0.04]" : "border-border/70",
+            // o estado vai em box-shadow: a regra legada [class*="border"] recolore qualquer borda
+            "group vp-r16 flex h-12 w-full items-center gap-3 bg-card px-4 text-left transition-shadow",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+            invalid ? "shadow-[inset_0_0_0_1px_hsl(var(--destructive))]" : "shadow-[inset_0_0_0_1px_hsl(var(--border))] hover:shadow-[inset_0_0_0_1px_hsl(var(--primary)/.5)]",
           )}
         >
-          <span
-            className={cn(
-              "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border transition-colors",
-              selected
-                ? "border-primary/35 bg-primary/10 text-primary"
-                : "border-border/60 bg-muted/30 text-muted-foreground",
-            )}
-          >
-            <Building2 className="h-3.5 w-3.5" strokeWidth={2.25} />
-          </span>
+          <Building2 aria-hidden className={cn("h-[18px] w-[18px] shrink-0", selected ? "text-primary" : "text-muted-foreground")} />
           <span className="min-w-0 flex-1">
             {selected || bankName ? (
               <span className="flex items-center gap-2">
-                {selected && (
-                  <span className="rounded-md border border-border/60 bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] font-black tabular-nums text-foreground">
-                    {selected.code}
-                  </span>
-                )}
-                <span className="truncate text-[13px] font-heading font-black tracking-tight text-foreground">
-                  {selected ? selected.name : bankName}
-                </span>
+                {selected && <span className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-[11.5px] font-bold tabular-nums text-foreground">{selected.code}</span>}
+                <span className="truncate text-[15px] text-foreground">{selected ? selected.name : bankName}</span>
               </span>
             ) : (
-              <span className="text-[13px] font-medium text-muted-foreground/70">{placeholder}</span>
+              <span className="text-[15px] text-muted-foreground/70">{placeholder}</span>
             )}
           </span>
-          <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 transition-transform group-data-[state=open]:rotate-180" />
+          <ChevronsUpDown aria-hidden className="h-4 w-4 shrink-0 text-muted-foreground/70" />
         </button>
       </PopoverTrigger>
       <PopoverContent
         align="start"
         sideOffset={6}
-        className="w-[var(--radix-popover-trigger-width)] min-w-[320px] overflow-hidden rounded-2xl border border-border/70 bg-popover p-0 shadow-2xl"
+        collisionPadding={16}
+        className="w-[var(--radix-popover-trigger-width)] min-w-[300px] overflow-hidden rounded-[16px] bg-popover p-0 shadow-2xl"
       >
-        <div className="flex items-center gap-2 border-b border-border/60 bg-card px-3 py-2.5">
-          <Search className="h-3.5 w-3.5 text-muted-foreground/60" strokeWidth={2.5} />
+        <div className="relative border-b border-border bg-card p-2">
+          <Search aria-hidden className="pointer-events-none absolute left-[22px] top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             ref={inputRef}
             value={query}
@@ -100,15 +90,14 @@ export function BankCombobox({
               setQuery(e.target.value);
               onBankNameChange(e.target.value);
             }}
-            placeholder="Nome ou código do banco (ex: 260, Nubank)"
-            className="h-8 flex-1 bg-transparent text-[13px] font-medium text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
+            id="bank-search" aria-label="Buscar banco"
+            placeholder="Nome ou código (ex.: 260, Nubank)"
+            className="vp-field !h-10 !pl-10 !text-[14px]"
           />
         </div>
-        <div className="max-h-[320px] overflow-y-auto p-1.5">
+        <div className="max-h-[min(320px,var(--radix-popover-content-available-height))] overflow-y-auto p-1.5">
           {results.length === 0 ? (
-            <div className="px-4 py-8 text-center text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">
-              Nenhum banco encontrado
-            </div>
+            <p className="px-4 py-8 text-center text-[13.5px] text-muted-foreground">Nenhum banco encontrado. Confira o nome ou o código.</p>
           ) : (
             results.map((b) => {
               const active = bankCode === b.code;
@@ -118,26 +107,13 @@ export function BankCombobox({
                   type="button"
                   onClick={() => handlePick(b)}
                   className={cn(
-                    "group/row flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-all",
-                    active
-                      ? "bg-primary/[0.09] text-foreground"
-                      : "hover:bg-muted/50 focus:bg-muted/50",
+                    "flex w-full items-center gap-3 rounded-[12px] px-3 py-2.5 text-left transition-colors focus:outline-none focus-visible:bg-muted",
+                    active ? "bg-accent" : "hover:bg-muted/60",
                   )}
                 >
-                  <span
-                    className={cn(
-                      "rounded-md border px-1.5 py-1 font-mono text-[10.5px] font-black tabular-nums",
-                      active
-                        ? "border-primary/40 bg-primary/10 text-primary"
-                        : "border-border/60 bg-muted/40 text-foreground/80",
-                    )}
-                  >
-                    {b.code}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate text-[12.5px] font-heading font-bold tracking-tight text-foreground/90">
-                    {b.name}
-                  </span>
-                  {active && <Check className="h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={3} />}
+                  <span className={cn("w-10 shrink-0 rounded-md px-1.5 py-0.5 text-center font-mono text-[11.5px] font-bold tabular-nums", active ? "bg-primary text-primary-foreground" : "bg-muted text-foreground/80")}>{b.code}</span>
+                  <span className="min-w-0 flex-1 truncate text-[14px] font-medium text-foreground">{b.name}</span>
+                  {active && <Check aria-hidden className="h-4 w-4 shrink-0 text-primary" strokeWidth={3} />}
                 </button>
               );
             })
