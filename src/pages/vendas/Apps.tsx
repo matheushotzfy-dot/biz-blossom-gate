@@ -13,7 +13,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAppIntegrations, useInvalidateAll, useProducts } from "@/hooks/useQueryData";
 import { Seo } from "@/components/Seo";
 import { PageHead } from "@/components/seller-ui/PageHead";
-import { StatBand } from "@/components/seller-ui/StatBand";
 import { FilterPills } from "@/components/seller-ui/FilterPills";
 import { SearchField } from "@/components/seller-ui/SearchField";
 import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
@@ -27,7 +26,6 @@ import { TestAppDialog, type TestTarget } from "@/components/integrations/TestAp
 import { DeliveryLedger } from "@/components/integrations/DeliveryLedger";
 import { DeliveryDialog } from "@/components/integrations/DeliveryDialog";
 import type { SaveResult } from "@/components/integrations/KeyDialogs";
-import { ago } from "@/components/integrations/intMeta";
 import { APPS, CATEGORIES, appById, appDeliveryOutcome, appErrorMessage, readTestResult, type AppConnection, type AppDef, type TestResult } from "@/components/integrations/appCatalog";
 import { deliveryKind, type DeliveryRow } from "@/components/integrations/webhookMeta";
 
@@ -53,7 +51,6 @@ export default function Apps() {
   const setView = (v: View) => { const next = new URLSearchParams(params); next.set("view", v); setParams(next, { replace: true }); };
 
   const [deliveries, setDeliveries] = useState<DeliveryRow[]>([]);
-  const [recent, setRecent] = useState<Array<{ status: string; created_at: string }>>([]);
   const [loadingDeliveries, setLoadingDeliveries] = useState(true);
   const [deliveriesError, setDeliveriesError] = useState(false);
 
@@ -71,15 +68,10 @@ export default function Apps() {
 
   const loadDeliveries = useCallback(async () => {
     if (!user) return;
-    const since = new Date(Date.now() - 7 * DAY).toISOString();
-    const [list, week] = await Promise.all([
-      supabase.from("app_deliveries").select(COLUMNS).eq("user_id", user.id).order("created_at", { ascending: false }).limit(LIST_LIMIT),
-      supabase.from("app_deliveries").select("status, created_at").eq("user_id", user.id).gte("created_at", since).limit(5000),
-    ]);
+    const list = await supabase.from("app_deliveries").select(COLUMNS).eq("user_id", user.id).order("created_at", { ascending: false }).limit(LIST_LIMIT);
     if (list.error) { setDeliveriesError(true); } else {
       // Mesmo formato das entregas de webhook: o "destino" aqui é a conexão.
       setDeliveries(((list.data ?? []) as Array<DeliveryRow & { integration_id: string }>).map((d) => ({ ...d, webhook_config_id: d.integration_id })));
-      setRecent(((week.data ?? []) as Array<{ status: string; created_at: string }>).filter((r) => new Date(r.created_at).getTime() >= Date.now() - 7 * DAY));
       setDeliveriesError(false);
     }
     setLoadingDeliveries(false);
@@ -113,13 +105,6 @@ export default function Apps() {
     }
     return map;
   }, [deliveries]);
-
-  const stats = useMemo(() => ({
-    active: connections.filter((c) => c.is_active).length,
-    apps: new Set(connections.filter((c) => c.is_active).map((c) => c.app_name)).size,
-    ok: recent.filter((r) => r.status === "delivered" || r.status === "success").length,
-    bad: recent.filter((r) => r.status === "exhausted" || r.status === "failed").length,
-  }), [connections, recent]);
 
   const byApp = useMemo(() => {
     const map = new Map<string, { total: number; active: number }>();
@@ -232,16 +217,6 @@ export default function Apps() {
       <Seo title="Apps | Vemprapay" description="Conecte suas ferramentas e envie cada venda automaticamente." path="/integracoes?tab=apps" noindex />
 
       <PageHead title="Apps" subtitle="Conecte as ferramentas que você já usa. A cada venda, a gente envia o que você escolher, sem copiar e colar nada." />
-
-      <StatBand
-        label="Resumo dos apps"
-        cells={[
-          { label: "Conexões ativas", featured: true, loading: isLoading, value: String(stats.active), sub: connections.length - stats.active > 0 ? `${connections.length - stats.active} pausada${connections.length - stats.active > 1 ? "s" : ""}` : "Recebendo eventos" },
-          { label: "Apps conectados", loading: isLoading, value: String(stats.apps), sub: `${APPS.filter((a) => !a.comingSoon && a.id !== "webhooks").length} disponíveis` },
-          { label: "Enviados em 7 dias", loading: loadingDeliveries, value: stats.ok.toLocaleString("pt-BR"), sub: deliveries[0] ? `Último ${ago(deliveries[0].created_at)}` : "Nada enviado ainda" },
-          { label: "Falharam em 7 dias", loading: loadingDeliveries, value: stats.bad.toLocaleString("pt-BR"), sub: stats.bad > 0 ? "Esgotaram as 5 tentativas" : "Nada falhou" },
-        ]}
-      />
 
       {isError ? (
         <section className="vp-sheet">
