@@ -1,5 +1,5 @@
 import React from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { reportClientError } from "@/lib/clientErrorReport";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 
 interface State {
@@ -7,62 +7,17 @@ interface State {
   error: Error | null;
 }
 
-// Strip tokens, JWTs, and sensitive query params from any string before logging.
-const SENSITIVE_PARAMS = /(__lovable_token|access_token|refresh_token|token|apikey|api_key|key|password|secret|code|authorization|auth)/i;
-function sanitize(input: string | null | undefined): string {
-  if (!input) return "";
-  let out = String(input);
-  // Redact JWT-like tokens
-  out = out.replace(/\bey[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g, "[JWT_REDACTED]");
-  out = out.replace(/(Bearer\s+)[A-Za-z0-9._-]+/gi, "$1[REDACTED]");
-  out = out.replace(/\b(sk|pk|whsec|sbp)_[A-Za-z0-9]{16,}\b/g, "[SECRET_REDACTED]");
-  // Redact sensitive query params in any URL-like substring
-  out = out.replace(/([?&#])([^=&#\s]+)=([^&#\s]+)/g, (m, sep, k, _v) =>
-    SENSITIVE_PARAMS.test(k) ? `${sep}${k}=[REDACTED]` : m
-  );
-  return out;
-}
-function sanitizedUrl(): string {
-  try {
-    const u = new URL(window.location.href);
-    for (const k of Array.from(u.searchParams.keys())) {
-      if (SENSITIVE_PARAMS.test(k)) u.searchParams.set(k, "[REDACTED]");
-    }
-    // Clear hash if it contains sensitive tokens
-    if (u.hash && SENSITIVE_PARAMS.test(u.hash)) u.hash = "[REDACTED]";
-    return u.toString();
-  } catch {
-    return sanitize(window.location.href);
-  }
-}
-
-async function logErrorToDb(error: Error, context: string) {
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    await supabase.from("error_logs").insert({
-      error_type: "client_error",
-      message: sanitize(error.message).slice(0, 500) || "Unknown error",
-      stack_trace: sanitize(error.stack).slice(0, 2000) || null,
-      user_id: session?.user?.id || null,
-      metadata: { context: sanitize(context).slice(0, 500), url: sanitizedUrl(), ua: navigator.userAgent },
-    });
-  } catch {
-    // Silent fail — don't break the app for logging
-  }
-}
-
-// Global handlers for uncaught errors (outside React tree)
+// Erros fora da árvore do React (o `componentDidCatch` não os vê). O envio filtra ruído, não repete e tem limite por página.
 declare global {
   interface Window { __lov_error_handlers__?: boolean }
 }
 if (typeof window !== "undefined" && !window.__lov_error_handlers__) {
   window.__lov_error_handlers__ = true;
   window.addEventListener("error", (event) => {
-    if (event.error) logErrorToDb(event.error, "window.onerror");
+    if (event.error) reportClientError(event.error, "window.onerror");
   });
   window.addEventListener("unhandledrejection", (event) => {
-    const err = event.reason instanceof Error ? event.reason : new Error(String(event.reason));
-    logErrorToDb(err, "unhandledrejection");
+    reportClientError(event.reason, "unhandledrejection");
   });
 }
 
@@ -81,7 +36,7 @@ export class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("[ErrorBoundary] Caught:", error.message);
-    logErrorToDb(error, `ErrorBoundary: ${errorInfo.componentStack?.slice(0, 300) || ""}`);
+    reportClientError(error, `ErrorBoundary: ${errorInfo.componentStack?.slice(0, 300) || ""}`);
   }
 
   private handleReset = () => {
