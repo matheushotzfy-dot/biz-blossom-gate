@@ -103,6 +103,18 @@ describe("link de pagamento: página", () => {
     expect(await screen.findByRole("heading", { name: "Este link esgotou" })).toBeInTheDocument();
   });
 
+  it("link bloqueado pela plataforma não mostra título nem valor e não conta clique", async () => {
+    rpc.handlers.get_public_payment_link = () => ({ data: [{ ...ROW, admin_status: "blocked" }] });
+    renderLink();
+    expect(await screen.findByRole("heading", { name: "Este link está indisponível" })).toBeInTheDocument();
+    expect(screen.queryByText("Consultoria premium")).toBeNull();
+    expect(rpc.calls.some(([name]) => name === "increment_payment_link_clicks")).toBe(false);
+    cleanup();
+    rpc.handlers.get_public_payment_link = () => ({ data: [{ ...ROW, admin_status: "review" }] });
+    renderLink();
+    expect(await screen.findByRole("heading", { level: 1, name: "Consultoria premium" })).toBeInTheDocument();
+  });
+
   it("erro do servidor não vira 'não encontrado': oferece tentar de novo", async () => {
     rpc.handlers.get_public_payment_link = () => ({ error: { message: "boom" } });
     renderLink();

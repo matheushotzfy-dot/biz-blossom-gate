@@ -16,6 +16,7 @@ export type PublicPaymentLink = {
 
 export type PaymentLinkLoad =
   | { kind: "missing" }
+  | { kind: "blocked" }
   | { kind: "expired" }
   | { kind: "exhausted" }
   | { kind: "ready"; link: PublicPaymentLink };
@@ -56,5 +57,7 @@ export async function loadPaymentLink(slug: string): Promise<PaymentLinkLoad> {
   if (error) throw new Error(error.message);
   const row = (Array.isArray(data) ? data[0] : data) as Row | null | undefined;
   if (!row || row.is_active === false) return { kind: "missing" };
+  // Bloqueado pela equipe da plataforma: a página não mostra valor nem título, e não diz o motivo.
+  if (row.admin_status === "blocked") return { kind: "blocked" };
   return classifyPaymentLink(normalizePaymentLink(row));
 }

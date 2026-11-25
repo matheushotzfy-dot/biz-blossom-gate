@@ -121,6 +121,7 @@ export function PaymentLinkPage({ slug }: { slug: string | undefined }) {
   if (query.isError) return <LoadErrorScreen title="Não foi possível abrir o link" onRetry={() => void query.refetch()} />;
   const result = query.data;
   if (result.kind === "ready") return <LinkView link={result.link} />;
+  if (result.kind === "blocked") return <ClosedState icon="missing" title="Este link está indisponível" text="Não é possível pagar por este link agora. Fale com quem enviou." />;
   if (result.kind === "expired") return <ClosedState icon="expired" title="Este link venceu" text="O prazo para pagar por este link acabou. Peça um novo link a quem enviou." />;
   if (result.kind === "exhausted") return <ClosedState icon="exhausted" title="Este link esgotou" text="O limite de pagamentos por este link foi atingido. Peça um novo link a quem enviou." />;
   return <ClosedState icon="missing" title="Link não encontrado" text="Este link de pagamento não existe ou foi desativado pelo vendedor." />;

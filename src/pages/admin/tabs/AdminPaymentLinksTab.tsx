@@ -1,350 +1,156 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Link as LinkIcon, Search, ChevronLeft, ChevronRight, AlertTriangle, RefreshCw,
-  Ban, ShieldCheck, Eye as EyeIcon, Clock, Activity,
-} from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useMemo, useState } from "react";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, Ban, CircleDollarSign, Link as LinkIcon, Loader2, RefreshCw, Search, ShieldAlert, ShieldCheck, X } from "lucide-react";
 import { toast } from "sonner";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
-import { PremiumPanel, PremiumEmpty, PremiumSegmented, premiumTable } from "./AdminPremium";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Skeleton } from "@/components/ui/skeleton";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import AdminPager from "@/components/admin/AdminPager";
+import { useConfirm, useReason } from "@/components/seller-ui/confirm";
+import { brl } from "@/features/admin-finance/types";
+import { friendlyError } from "@/lib/friendlyError";
 import { logAdminAction } from "@/lib/auditLog";
-import type { Tables } from "@/integrations/supabase/types";
+import { PremiumEmpty, PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented } from "./AdminPremium";
+import { LinkCards, LinkTable, type LinkContext } from "@/features/admin-payment-links/LinkRows";
+import { LinkSheet } from "@/features/admin-payment-links/LinkSheet";
+import {
+  ACTION_DONE, ACTION_STATUS, MIN_BLOCK_REASON, PAGE_SIZE, parseLinksPage,
+  type LinkFilter, type LinkRow, type LinksPage, type ModerationAction,
+} from "@/features/admin-payment-links/linksModel";
 
-interface Props {
-  fmtCurrency: (v: number) => string;
+async function fetchLinks(search: string, status: LinkFilter, page: number): Promise<LinksPage> {
+  const { data, error } = await supabase.rpc("get_admin_payment_links_page" as never, {
+    _search: search || null, _status: status, _billing_type: "all", _page: page, _page_size: PAGE_SIZE,
+  } as never);
+  if (error) throw error;
+  return parseLinksPage(data);
 }
 
-interface AdminPaymentLink extends Tables<"payment_links"> {
-  seller_name: string | null;
-  seller_email: string | null;
-  pending_count: number;
-  net_revenue: number;
-  last_payment_at: string | null;
-}
-
-type PageResponse = { items: AdminPaymentLink[]; total: number };
-
-const PAGE_SIZE = 50;
-const dateFmt = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" });
-
-type StatusKey = "all" | "active" | "paused" | "blocked" | "archived";
-
-const ADMIN_STATUS_LABEL: Record<string, string> = {
-  clear: "Livre",
-  blocked: "Bloqueado",
-  review: "Em revisão",
-};
-const ADMIN_STATUS_TONE: Record<string, string> = {
-  clear: "border-success/20 bg-success/10 text-success",
-  blocked: "border-destructive/20 bg-destructive/10 text-destructive",
-  review: "border-warning/20 bg-warning/10 text-warning",
-};
-
-export default function AdminPaymentLinksTab({ fmtCurrency }: Props) {
+export default function AdminPaymentLinksTab() {
+  const qc = useQueryClient();
   const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusKey>("all");
+  const [debounced, setDebounced] = useState("");
+  const [status, setStatus] = useState<LinkFilter>("all");
   const [page, setPage] = useState(1);
-  const [items, setItems] = useState<AdminPaymentLink[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const [selected, setSelected] = useState<AdminPaymentLink | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [events, setEvents] = useState<Tables<"payment_link_events">[]>([]);
-  const [eventsLoading, setEventsLoading] = useState(false);
-
-  const [blockOpen, setBlockOpen] = useState(false);
-  const [blockTarget, setBlockTarget] = useState<AdminPaymentLink | null>(null);
-  const [blockReason, setBlockReason] = useState("");
-  const [actionLoading, setActionLoading] = useState(false);
+  const [selected, setSelected] = useState<LinkRow | null>(null);
+  const confirm = useConfirm();
+  const reason = useReason();
 
   useEffect(() => {
-    const t = window.setTimeout(() => { setDebouncedSearch(search.trim()); setPage(1); }, 300);
+    const t = window.setTimeout(() => { setDebounced(search.trim()); setPage(1); }, 300);
     return () => window.clearTimeout(t);
   }, [search]);
-  useEffect(() => { setPage(1); }, [statusFilter]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    const { data, error: err } = await supabase.rpc("get_admin_payment_links_page" as never, {
-      _search: debouncedSearch || null,
-      _status: statusFilter,
-      _billing_type: "all",
-      _page: page,
-      _page_size: PAGE_SIZE,
-    } as never);
-    if (err) { setError(err.message); setLoading(false); return; }
-    const payload = data as unknown as PageResponse;
-    setItems(payload.items || []);
-    setTotal(Number(payload.total || 0));
-    setLoading(false);
-  }, [debouncedSearch, statusFilter, page]);
+  const q = useQuery({
+    queryKey: ["admin-payment-links", debounced, status, page],
+    queryFn: () => fetchLinks(debounced, status, page),
+    placeholderData: keepPreviousData,
+  });
+  const items = q.data?.items ?? [];
+  const summary = q.data?.summary;
+  const total = q.data?.total ?? 0;
 
-  useEffect(() => { void load(); }, [load]);
+  const change = useMutation({
+    mutationFn: async (v: { link: LinkRow; action: ModerationAction; reason?: string }) => {
+      const { error } = await supabase.rpc("admin_set_payment_link_status" as never, { _payment_link_id: v.link.id, _status: ACTION_STATUS[v.action], _reason: v.reason ?? null } as never);
+      if (error) throw error;
+      await logAdminAction("payment_link_admin_status", "payment_link", v.link.id, { status: ACTION_STATUS[v.action], reason: v.reason ?? null }).catch(() => undefined);
+    },
+    onSuccess: (_d, v) => { toast.success(ACTION_DONE[v.action]); void qc.invalidateQueries({ queryKey: ["admin-payment-links"] }); void qc.invalidateQueries({ queryKey: ["admin-link-events"] }); },
+    onError: (e) => toast.error("Não foi possível atualizar o link. Nada mudou.", { description: friendlyError(e, "Tente de novo em instantes.") }),
+  });
 
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-
-  const openEvents = useCallback(async (link: AdminPaymentLink) => {
-    setSelected(link);
-    setSheetOpen(true);
-    setEventsLoading(true);
-    const { data, error: err } = await supabase
-      .from("payment_link_events")
-      .select("*")
-      .eq("payment_link_id", link.id)
-      .order("created_at", { ascending: false })
-      .limit(50);
-    if (err) { toast.error("Erro ao carregar eventos"); setEvents([]); }
-    else setEvents(data || []);
-    setEventsLoading(false);
-  }, []);
-
-  const runStatusChange = async (link: AdminPaymentLink, status: "clear" | "blocked" | "review", reason?: string) => {
-    setActionLoading(true);
-    try {
-      const { error: err } = await supabase.rpc("admin_set_payment_link_status" as never, {
-        _payment_link_id: link.id,
-        _status: status,
-        _reason: reason || null,
-      } as never);
-      if (err) { toast.error(err.message || "Erro ao atualizar link"); return; }
-      await logAdminAction("payment_link_admin_status", "payment_link", link.id, { status, reason: reason || null });
-      toast.success(status === "blocked" ? "Link bloqueado" : status === "review" ? "Link marcado para revisão" : "Link desbloqueado");
-      setBlockOpen(false);
-      setBlockReason("");
-      setBlockTarget(null);
-      void load();
-    } catch {
-      toast.error("Erro de conexão");
-    } finally {
-      setActionLoading(false);
+  const onAction = async (link: LinkRow, action: ModerationAction) => {
+    if (action === "block") {
+      const text = await reason.ask({
+        title: "Bloquear este link?", description: `Ninguém consegue pagar por "${link.title}" enquanto estiver bloqueado. O vendedor vê o motivo.`,
+        label: "Motivo do bloqueio", minLength: MIN_BLOCK_REASON, confirmLabel: "Bloquear link", tone: "danger",
+      });
+      if (text === null) return;
+      change.mutate({ link, action, reason: text.slice(0, 500) });
+      return;
     }
+    if (action === "unblock") {
+      const ok = await confirm.ask({ title: "Desbloquear este link?", description: `"${link.title}" volta a aceitar pagamentos e o motivo do bloqueio deixa de aparecer para o vendedor.`, confirmLabel: "Desbloquear", tone: "warning" });
+      if (!ok) return;
+    }
+    change.mutate({ link, action });
   };
 
-  const openBlockDialog = (link: AdminPaymentLink) => { setBlockTarget(link); setBlockReason(""); setBlockOpen(true); };
-  const confirmBlock = () => {
-    if (!blockTarget) return;
-    if (!blockReason.trim() || blockReason.trim().length < 5) { toast.error("Motivo obrigatório (mín. 5 caracteres)"); return; }
-    void runStatusChange(blockTarget, "blocked", blockReason.trim().slice(0, 500));
-  };
+  const ctx: LinkContext = { busy: change.isPending, onEvents: setSelected, onAction: (l, a) => void onAction(l, a) };
+  const filtersActive = status !== "all" || !!debounced;
+  const clear = () => { setStatus("all"); setSearch(""); setDebounced(""); setPage(1); };
+  const waiting = q.isError ? "Indisponível" : "Carregando…";
+  const withCount = (label: string, n?: number) => (n === undefined ? label : `${label} · ${n.toLocaleString("pt-BR")}`);
+  const pills = useMemo<{ value: LinkFilter; label: string }[]>(() => [
+    { value: "all", label: withCount("Tudo", summary?.total) },
+    { value: "active", label: withCount("Ativos", summary?.active) },
+    { value: "paused", label: withCount("Pausados", summary?.paused) },
+    { value: "review", label: withCount("Em revisão", summary?.review) },
+    { value: "blocked", label: withCount("Bloqueados", summary?.blocked) },
+    { value: "archived", label: withCount("Arquivados", summary?.archived) },
+  ], [summary]);
 
-  const linkStatusLabel = (link: AdminPaymentLink) => {
-    if (link.archived_at) return { label: "Arquivado", tone: "border-border bg-muted/30 text-muted-foreground" };
-    if (!link.is_active) return { label: "Pausado", tone: "border-warning/20 bg-warning/10 text-warning" };
-    return { label: "Ativo", tone: "border-success/20 bg-success/10 text-success" };
-  };
-
-  const statusPills: { value: StatusKey; label: string }[] = useMemo(() => ([
-    { value: "all", label: "Tudo" },
-    { value: "active", label: "Ativos" },
-    { value: "paused", label: "Pausados" },
-    { value: "blocked", label: "Bloqueados" },
-    { value: "archived", label: "Arquivados" },
-  ]), []);
+  const heroStatus = !summary ? (q.isError ? { tone: "destructive" as const, label: "Não foi possível carregar" } : { tone: "neutral" as const, label: "Carregando…" })
+    : summary.review > 0 ? { tone: "warning" as const, label: `${summary.review} ${summary.review === 1 ? "link em revisão" : "links em revisão"}`, pulse: true }
+      : { tone: "success" as const, label: summary.total === 0 ? "Nenhum link criado" : "Nada em revisão" };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-5 animate-fade-in">
       <FinanceiroHero
-        eyebrow="Operações · Pagamentos"
-        title="Links de Pagamento"
-        subtitle="Moderação e auditoria de links de pagamento criados pelos vendedores."
-        status={{ tone: "info", label: `${total} link(s)`, pulse: false }}
+        eyebrow="Operação · Links de pagamento" title="Links de Pagamento"
+        subtitle="Links de cobrança criados pelos vendedores. Daqui você revisa, bloqueia e acompanha o histórico de cada um."
+        status={heroStatus}
+        actions={<Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => void q.refetch()} disabled={q.isFetching}><RefreshCw className={`h-3.5 w-3.5 ${q.isFetching ? "animate-spin" : ""}`} /> Atualizar</Button>}
       />
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[240px] max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por título, slug, vendedor ou e-mail..."
-            className="w-full h-10 pl-10 pr-4 bg-muted/30 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30"
-          />
-        </div>
-        <PremiumSegmented<StatusKey> value={statusFilter} onChange={setStatusFilter} options={statusPills} />
-      </div>
+      <PremiumMetricGrid cols={4}>
+        <PremiumMetric icon={LinkIcon} label="Links ativos" value={summary ? summary.active.toLocaleString("pt-BR") : "—"} sub={summary ? `de ${summary.total.toLocaleString("pt-BR")} no total` : waiting} tone="success" />
+        <PremiumMetric icon={ShieldAlert} label="Em revisão" value={summary ? summary.review.toLocaleString("pt-BR") : "—"} sub={summary ? "continuam funcionando" : waiting} tone={summary && summary.review > 0 ? "warning" : "neutral"} />
+        <PremiumMetric icon={Ban} label="Bloqueados" value={summary ? summary.blocked.toLocaleString("pt-BR") : "—"} sub={summary ? "não aceitam pagamento" : waiting} tone={summary && summary.blocked > 0 ? "destructive" : "neutral"} />
+        <PremiumMetric icon={CircleDollarSign} label="Receita líquida" value={summary ? brl(summary.net_revenue) : "—"} sub={summary ? "vendas aprovadas" : waiting} tone="info" />
+      </PremiumMetricGrid>
+      <p className="-mt-2 text-[12px] text-muted-foreground">Os números consideram todos os links que batem com a busca, não só esta página.</p>
 
-      {error && (
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          <span className="flex items-center gap-2"><AlertTriangle className="h-4 w-4" /> Erro ao carregar links: {error}</span>
-          <button onClick={() => void load()} className="inline-flex items-center gap-1.5 rounded-lg border border-destructive/30 px-3 py-1.5 text-xs font-semibold hover:bg-destructive/10">
-            <RefreshCw className="h-3.5 w-3.5" /> Tentar novamente
-          </button>
+      <PremiumPanel eyebrow="Links" title={summary ? `Links · ${total.toLocaleString("pt-BR")}` : "Links"} icon={LinkIcon}>
+        <div className="mb-4 space-y-3">
+          <PremiumSegmented<LinkFilter> value={status} onChange={(v) => { setStatus(v); setPage(1); }} options={pills} />
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative min-w-[240px] max-w-md flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input aria-label="Buscar link" placeholder="Título, endereço, vendedor ou e-mail" value={search} onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: 40 }}
+                className="h-10 w-full rounded-xl border border-border bg-muted/30 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none" />
+            </div>
+            {filtersActive && <Button type="button" variant="ghost" size="sm" className="gap-1" onClick={clear}><X className="h-3.5 w-3.5" /> Limpar filtros</Button>}
+          </div>
+          <p className="flex items-start gap-1.5 text-[12px] text-muted-foreground"><ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" /> Em revisão é só uma marca: o link continua recebendo. Bloqueado impede o pagamento e mostra o motivo ao vendedor.</p>
         </div>
-      )}
 
-      <PremiumPanel
-        eyebrow="Links"
-        title={`Resultados · ${total}`}
-        icon={LinkIcon}
-        action={
-          <div className="flex items-center gap-2">
-            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1 || loading}
-              className="h-8 w-8 flex items-center justify-center rounded-lg border border-border text-foreground/70 hover:bg-muted/40 disabled:opacity-40 transition-colors">
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <span className="text-xs font-semibold text-muted-foreground tabular-nums">{page} / {totalPages}</span>
-            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages || loading}
-              className="h-8 w-8 flex items-center justify-center rounded-lg border border-border text-foreground/70 hover:bg-muted/40 disabled:opacity-40 transition-colors">
-              <ChevronRight className="h-4 w-4" />
-            </button>
+        {q.isError && !q.isFetching ? (
+          <div role="alert" className="flex flex-col items-start gap-2 rounded-[12px] border border-destructive/30 bg-destructive/5 p-4 text-[13px]">
+            <p className="flex items-center gap-2 font-semibold text-destructive"><AlertTriangle className="h-4 w-4" /> Não foi possível carregar os links.</p>
+            <p className="text-muted-foreground">{friendlyError(q.error, "Tente de novo em instantes.")}</p>
+            <Button type="button" size="sm" variant="outline" onClick={() => void q.refetch()}>Tentar de novo</Button>
           </div>
-        }
-      >
-        {loading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
-          </div>
+        ) : q.isPending ? (
+          <p className="flex items-center gap-2 py-10 text-[13px] text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Carregando links…</p>
         ) : items.length === 0 ? (
-          <PremiumEmpty icon={LinkIcon} title="Nenhum link encontrado" subtitle="Ajuste os filtros de busca ou status." />
+          <div>
+            <PremiumEmpty icon={LinkIcon} title="Nenhum link aqui" subtitle={filtersActive ? "Nenhum link bate com esses filtros." : "Os vendedores ainda não criaram links de pagamento."} />
+            {filtersActive && <div className="-mt-8 pb-6 text-center"><Button type="button" variant="outline" size="sm" onClick={clear}>Limpar filtros</Button></div>}
+          </div>
         ) : (
-          <div className={premiumTable.wrapper}>
-            <table className={premiumTable.table}>
-              <thead>
-                <tr className={premiumTable.headRow}>
-                  <th className={premiumTable.th}>Título / Slug</th>
-                  <th className={premiumTable.th}>Vendedor</th>
-                  <th className={premiumTable.th}>Status</th>
-                  <th className={premiumTable.th}>Moderação</th>
-                  <th className={premiumTable.th}>Receita líquida</th>
-                  <th className={premiumTable.th}>Pendências</th>
-                  <th className={premiumTable.th}>Criado em</th>
-                  <th className={premiumTable.th}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((link) => {
-                  const status = linkStatusLabel(link);
-                  return (
-                    <tr key={link.id} className={premiumTable.row}>
-                      <td className={premiumTable.td}>
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-foreground">{link.title}</span>
-                          <span className="font-mono text-[10px] text-muted-foreground">/{link.slug}</span>
-                        </div>
-                      </td>
-                      <td className={premiumTable.td}>
-                        <div className="flex flex-col">
-                          <span className="text-foreground/80">{link.seller_name || "—"}</span>
-                          <span className="text-[10px] text-muted-foreground">{link.seller_email || link.user_id.slice(0, 8) + "…"}</span>
-                        </div>
-                      </td>
-                      <td className={premiumTable.td}>
-                        <span className={`text-[10px] font-bold px-2 py-1 rounded-lg border ${status.tone}`}>{status.label}</span>
-                      </td>
-                      <td className={premiumTable.td}>
-                        <span className={`text-[10px] font-bold px-2 py-1 rounded-lg border ${ADMIN_STATUS_TONE[link.admin_status] || "border-border bg-muted/30 text-muted-foreground"}`}>
-                          {ADMIN_STATUS_LABEL[link.admin_status] || link.admin_status}
-                        </span>
-                        {link.admin_status === "blocked" && link.admin_block_reason && (
-                          <div className="mt-1 max-w-[220px] truncate text-[10px] text-muted-foreground" title={link.admin_block_reason}>
-                            {link.admin_block_reason}
-                          </div>
-                        )}
-                      </td>
-                      <td className={premiumTable.td}><span className="font-semibold tabular-nums text-foreground">{fmtCurrency(Number(link.net_revenue || 0))}</span></td>
-                      <td className={premiumTable.td}><span className="tabular-nums text-muted-foreground">{link.pending_count}</span></td>
-                      <td className={premiumTable.td}><span className="text-muted-foreground">{dateFmt.format(new Date(link.created_at))}</span></td>
-                      <td className={premiumTable.td}>
-                        <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="icon" className="h-7 w-7" title="Ver eventos" onClick={() => void openEvents(link)}>
-                            <EyeIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                          </Button>
-                          {link.admin_status === "blocked" ? (
-                            <Button variant="ghost" size="icon" className="h-7 w-7" title="Desbloquear" disabled={actionLoading}
-                              onClick={() => void runStatusChange(link, "clear")}>
-                              <ShieldCheck className="h-3.5 w-3.5 text-success" />
-                            </Button>
-                          ) : (
-                            <>
-                              <Button variant="ghost" size="icon" className="h-7 w-7" title="Bloquear" disabled={actionLoading}
-                                onClick={() => openBlockDialog(link)}>
-                                <Ban className="h-3.5 w-3.5 text-destructive" />
-                              </Button>
-                              {link.admin_status !== "review" && (
-                                <Button variant="ghost" size="icon" className="h-7 w-7" title="Marcar para revisão" disabled={actionLoading}
-                                  onClick={() => void runStatusChange(link, "review")}>
-                                  <AlertTriangle className="h-3.5 w-3.5 text-warning" />
-                                </Button>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div aria-busy={q.isPlaceholderData} className={q.isPlaceholderData ? "opacity-60 transition-opacity" : undefined}>
+            <LinkTable rows={items} ctx={ctx} />
+            <LinkCards rows={items} ctx={ctx} />
+            <AdminPager page={page} pageSize={PAGE_SIZE} totalCount={total} onPageChange={setPage} loading={q.isFetching} />
           </div>
         )}
       </PremiumPanel>
 
-      {/* Block dialog */}
-      <Dialog open={blockOpen} onOpenChange={setBlockOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader><DialogTitle>Bloquear link de pagamento</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <p className="text-xs text-muted-foreground">
-              Bloquear <span className="font-semibold text-foreground">{blockTarget?.title}</span> impede novos pagamentos. Informe o motivo (obrigatório).
-            </p>
-            <Textarea
-              value={blockReason}
-              onChange={(e) => setBlockReason(e.target.value)}
-              placeholder="Motivo do bloqueio (mín. 5 caracteres)"
-              className="min-h-[100px]"
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setBlockOpen(false)} disabled={actionLoading}>Cancelar</Button>
-            <Button variant="destructive" onClick={confirmBlock} disabled={actionLoading}>
-              {actionLoading ? "Bloqueando..." : "Confirmar bloqueio"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Events side panel */}
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle className="flex items-center gap-2"><Activity className="h-4 w-4" /> Eventos · {selected?.title}</SheetTitle>
-          </SheetHeader>
-          <div className="mt-4 space-y-3">
-            {eventsLoading ? (
-              Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)
-            ) : events.length === 0 ? (
-              <PremiumEmpty icon={Clock} title="Nenhum evento registrado" subtitle="Este link ainda não possui eventos." />
-            ) : (
-              events.map((ev) => (
-                <div key={ev.id} className="rounded-xl border border-border bg-muted/20 p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-foreground">{ev.event_type}</span>
-                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">{dateFmt.format(new Date(ev.created_at))}</span>
-                  </div>
-                  <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground">
-                    <span className="rounded-full border border-border px-1.5 py-0.5 uppercase font-semibold">{ev.actor_type}</span>
-                    {ev.actor_id && <span className="font-mono">{ev.actor_id.slice(0, 8)}…</span>}
-                  </div>
-                  {ev.metadata && Object.keys(ev.metadata as Record<string, unknown>).length > 0 && (
-                    <pre className="mt-2 whitespace-pre-wrap break-all text-[10px] text-muted-foreground/80">
-                      {JSON.stringify(ev.metadata, null, 2)}
-                    </pre>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
+      <LinkSheet link={selected} onClose={() => setSelected(null)} />
+      {confirm.dialog}
+      {reason.dialog}
     </div>
   );
 }
