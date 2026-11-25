@@ -1,341 +1,349 @@
-import { useMemo, useState } from "react";
+/**
+ * Webhooks: o servidor do vendedor recebe cada evento (pagamento, reembolso, saque) assinado com HMAC.
+ * Endpoints vivem em `webhook_configs`; o histórico vem de `webhook_deliveries`, que o worker (a cada minuto)
+ * preenche com 5 tentativas e esperas crescentes. O teste usa a RPC `enqueue_test_webhook`.
+ */
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { AlertCircle, ListChecks, Plus, Webhook } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useWebhooks, useInvalidateAll } from "@/hooks/useQueryData";
-import type { Tables } from "@/integrations/supabase/types";
+import { useInvalidateAll, useWebhooks } from "@/hooks/useQueryData";
+import { Seo } from "@/components/Seo";
+import { PageHead } from "@/components/seller-ui/PageHead";
+import { StatBand } from "@/components/seller-ui/StatBand";
+import { FilterPills } from "@/components/seller-ui/FilterPills";
+import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
+import { Pager } from "@/components/seller-ui/Pager";
+import { copyText } from "@/components/seller-ui/copy";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { EndpointDialog, WebhookSecretDialog, type EndpointTarget, type EndpointValues, type RevealedSecret } from "@/components/integrations/EndpointDialog";
+import { EndpointList, type EndpointHealth } from "@/components/integrations/EndpointList";
+import { DeliveryLedger } from "@/components/integrations/DeliveryLedger";
+import { DeliveryDialog } from "@/components/integrations/DeliveryDialog";
+import { SignatureGuide } from "@/components/integrations/SignatureGuide";
+import type { SaveResult } from "@/components/integrations/KeyDialogs";
+import { ago } from "@/components/integrations/intMeta";
 import {
-  Plus, Trash2, Globe, Search, Pencil, Radio, Send,
-  Power, PowerOff, Copy, Webhook, ShieldCheck, ExternalLink,
-} from "lucide-react";
+  deliveryKind, eventLabel, generateWebhookSecret, hostOf, webhookErrorMessage,
+  type DeliveryRow, type WebhookRow,
+} from "@/components/integrations/webhookMeta";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger,
-} from "@/components/ui/dialog";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { friendlyError } from "@/lib/friendlyError";
-import { HDShell, HDHeader, HDStat, HDStatGrid, HDCard } from "@/components/hd/HDPage";
+type View = "endpoints" | "deliveries";
+type StatusFilter = "all" | "success" | "open" | "failed";
+type Confirm = { kind: "rotate" | "delete"; w: WebhookRow } | null;
 
-const EVENT_GROUPS = [
-  {
-    label: "Pagamentos",
-    events: [
-      { key: "payment.created", label: "Criada (Pendente)" },
-      { key: "payment.approved", label: "Aprovada" },
-      { key: "payment.failed", label: "Falha" },
-      { key: "payment.expired", label: "Expirada" },
-      { key: "payment.refunded", label: "Reembolso" },
-    ],
-  },
-  {
-    label: "Risco & Saques",
-    events: [
-      { key: "chargeback.received", label: "Chargeback" },
-      { key: "payout.approved", label: "Saque aprovado" },
-      { key: "payout.rejected", label: "Saque rejeitado" },
-    ],
-  },
-];
+const LIST_LIMIT = 200;
+const PAGE_SIZE = 10;
+const DAY = 86_400_000;
+const LIST_COLUMNS = "id, webhook_config_id, transaction_id, event, attempt, status, response_status, error, next_retry_at, delivered_at, created_at";
 
-type WebhookConfig = Tables<"webhook_configs_safe">;
 export default function Webhooks() {
   const { user } = useAuth();
-  const { data: webhooks = [], refetch: refetchWebhooks } = useWebhooks();
   const invalidateAll = useInvalidateAll();
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
-  const [url, setUrl] = useState("");
-  const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [testingId, setTestingId] = useState<string | null>(null);
-  const [createdSecret, setCreatedSecret] = useState<string | null>(null);
+  const { data: configs = [], isLoading: loadingConfigs, isError: configsError, refetch: refetchConfigs } = useWebhooks();
+  const hooks = configs as unknown as WebhookRow[];
 
-  const resetForm = () => {
-    setUrl("");
-    setSelectedEvents([]);
-    setEditingId(null);
-    setCreatedSecret(null);
-  };
+  const [params, setParams] = useSearchParams();
+  const view: View = params.get("view") === "deliveries" ? "deliveries" : "endpoints";
+  const setView = (v: View) => { const next = new URLSearchParams(params); if (v === "endpoints") next.delete("view"); else next.set("view", v); setParams(next, { replace: true }); };
 
-  const openCreate = () => { resetForm(); setCreateOpen(true); };
-  const openEdit = (wh: WebhookConfig) => {
-    if (!wh.id || !wh.url) return;
-    setEditingId(wh.id);
-    setUrl(wh.url);
-    setSelectedEvents(wh.events ?? []);
-    setCreateOpen(true);
-  };
+  const [deliveries, setDeliveries] = useState<DeliveryRow[]>([]);
+  const [recent, setRecent] = useState<Array<{ status: string; attempt: number; created_at: string }>>([]);
+  const [loadingDeliveries, setLoadingDeliveries] = useState(true);
+  const [deliveriesError, setDeliveriesError] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const [target, setTarget] = useState<EndpointTarget | null>(null);
+  const [revealed, setRevealed] = useState<RevealedSecret | null>(null);
+  const [confirm, setConfirm] = useState<Confirm>(null);
+  const [confirmBusy, setConfirmBusy] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [open, setOpen] = useState<DeliveryRow | null>(null);
+
+  const [status, setStatus] = useState<StatusFilter>("all");
+  const [endpointFilter, setEndpointFilter] = useState("all");
+  const [eventFilter, setEventFilter] = useState("all");
+  const [page, setPage] = useState(1);
+
+  const loadDeliveries = useCallback(async () => {
     if (!user) return;
-    if (selectedEvents.length === 0) { toast.error("Selecione ao menos um evento"); return; }
-    if (!url.startsWith("https://")) { toast.error("URL deve começar com https://"); return; }
-
-    setIsSubmitting(true);
-    try {
-      if (editingId) {
-        const { error } = await supabase
-          .from("webhook_configs")
-          .update({ url, events: selectedEvents })
-          .eq("id", editingId)
-          .eq("user_id", user.id);
-        if (error) { toast.error(friendlyError(error, "Erro ao atualizar")); return; }
-        toast.success("Webhook atualizado");
-      } else {
-        const secret = "whsec_" + crypto.randomUUID().replace(/-/g, "") +
-          crypto.randomUUID().replace(/-/g, "").slice(0, 8);
-        const { error } = await supabase
-          .from("webhook_configs")
-          .insert({ user_id: user.id, url, events: selectedEvents, secret, is_active: true });
-        if (error) { toast.error(friendlyError(error, "Erro ao criar webhook")); return; }
-        setCreatedSecret(secret);
-        toast.success("Webhook adicionado");
-      }
-      invalidateAll(["webhooks"]);
-      await refetchWebhooks();
-      if (editingId) {
-        setCreateOpen(false);
-        resetForm();
-      } else {
-        setUrl("");
-        setSelectedEvents([]);
-      }
-    } finally {
-      setIsSubmitting(false);
+    const since = new Date(Date.now() - 7 * DAY).toISOString();
+    const [list, week] = await Promise.all([
+      supabase.from("webhook_deliveries").select(LIST_COLUMNS).eq("user_id", user.id).order("created_at", { ascending: false }).limit(LIST_LIMIT),
+      supabase.from("webhook_deliveries").select("status, attempt, created_at").eq("user_id", user.id).gte("created_at", since).limit(5000),
+    ]);
+    if (list.error) { setDeliveriesError(true); } else {
+      setDeliveries((list.data ?? []) as DeliveryRow[]);
+      setRecent(((week.data ?? []) as Array<{ status: string; attempt: number; created_at: string }>).filter((r) => new Date(r.created_at).getTime() >= Date.now() - 7 * DAY));
+      setDeliveriesError(false);
     }
-  };
+    setLoadingDeliveries(false);
+  }, [user]);
 
-  const toggleActive = async (id: string, current: boolean) => {
-    if (!user) return;
-    const { error } = await supabase.from("webhook_configs").update({ is_active: !current }).eq("id", id).eq("user_id", user.id);
-    if (error) { toast.error(friendlyError(error)); return; }
-    invalidateAll(["webhooks"]);
-    await refetchWebhooks();
-    toast.success(current ? "Pausado" : "Ativado");
-  };
+  useEffect(() => { void loadDeliveries(); }, [loadDeliveries]);
 
-  const deleteWebhook = async (id: string) => {
-    if (!user || !confirm("Excluir este endpoint? Os eventos pendentes serão cancelados.")) return;
-    const { error } = await supabase.from("webhook_configs").delete().eq("id", id).eq("user_id", user.id);
-    if (error) { toast.error(friendlyError(error)); return; }
-    toast.success("Removido");
-    invalidateAll(["webhooks"]);
-    await refetchWebhooks();
-  };
+  // Enquanto algo está na fila ou sendo reenviado, confere de novo a cada 5 s (só com a aba visível).
+  const hasOpen = useMemo(() => deliveries.some((d) => ["queued", "sending", "retrying"].includes(deliveryKind(d))), [deliveries]);
+  const loadRef = useRef(loadDeliveries);
+  loadRef.current = loadDeliveries;
+  useEffect(() => {
+    if (!hasOpen) return;
+    const id = window.setInterval(() => { if (!document.hidden) void loadRef.current(); }, 5000);
+    return () => window.clearInterval(id);
+  }, [hasOpen]);
 
-  /** Enqueues a signed `webhook.test` event delivered by the worker within ~1 min. */
-  const sendTest = async (id: string) => {
-    setTestingId(id);
-    try {
-      const { error } = await supabase.rpc("enqueue_test_webhook", { _config_id: id });
-      if (error) { toast.error(friendlyError(error, "Não foi possível enviar o teste")); return; }
-      toast.success("Evento de teste enfileirado", { description: "O endpoint deve receber a chamada assinada em até 1 minuto." });
-    } finally {
-      setTestingId(null);
+  useEffect(() => { setPage(1); }, [status, endpointFilter, eventFilter]);
+
+  const hostById = useMemo(() => new Map(hooks.map((w) => [w.id, hostOf(w.url)])), [hooks]);
+
+  const health = useMemo(() => {
+    const map = new Map<string, EndpointHealth>();
+    const dayAgo = Date.now() - DAY;
+    for (const d of deliveries) { // já vem da mais nova para a mais antiga
+      const cur = map.get(d.webhook_config_id) ?? { last: null, failed: 0 };
+      if (!cur.last) cur.last = d;
+      if (deliveryKind(d) === "exhausted" && new Date(d.created_at).getTime() >= dayAgo) cur.failed += 1;
+      map.set(d.webhook_config_id, cur);
     }
+    return map;
+  }, [deliveries]);
+
+  const stats = useMemo(() => {
+    const ok = recent.filter((r) => r.status === "success").length;
+    const bad = recent.filter((r) => r.status === "exhausted" || r.status === "failed").length;
+    const rate = ok + bad > 0 ? Math.round((ok / (ok + bad)) * 100) : null;
+    return { ok, bad, rate, active: hooks.filter((w) => w.is_active).length };
+  }, [recent, hooks]);
+
+  const counts = useMemo(() => ({
+    all: deliveries.length,
+    success: deliveries.filter((d) => deliveryKind(d) === "success").length,
+    open: deliveries.filter((d) => ["queued", "sending", "retrying"].includes(deliveryKind(d))).length,
+    failed: deliveries.filter((d) => deliveryKind(d) === "exhausted").length,
+  }), [deliveries]);
+
+  const shown = useMemo(() => deliveries.filter((d) => {
+    const k = deliveryKind(d);
+    if (status === "success" && k !== "success") return false;
+    if (status === "open" && !["queued", "sending", "retrying"].includes(k)) return false;
+    if (status === "failed" && k !== "exhausted") return false;
+    if (endpointFilter !== "all" && d.webhook_config_id !== endpointFilter) return false;
+    if (eventFilter !== "all" && d.event !== eventFilter) return false;
+    return true;
+  }), [deliveries, status, endpointFilter, eventFilter]);
+
+  const pageRows = shown.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const usedEvents = useMemo(() => Array.from(new Set(deliveries.map((d) => d.event))).sort(), [deliveries]);
+
+  const refreshConfigs = async () => { invalidateAll(["webhooks"]); await refetchConfigs(); };
+
+  const saveEndpoint = async (values: EndpointValues): Promise<SaveResult> => {
+    if (!user) return { ok: false, message: "Sessão expirada. Entre de novo." };
+    if (target?.mode === "edit" && target.id) {
+      const { error } = await supabase.from("webhook_configs").update({ url: values.url, events: values.events }).eq("id", target.id).eq("user_id", user.id);
+      if (error) return { ok: false, message: webhookErrorMessage(error, "Não foi possível salvar o endpoint.") };
+      setTarget(null); toast.success("Endpoint atualizado.");
+    } else {
+      const secret = generateWebhookSecret();
+      const { error } = await supabase.from("webhook_configs").insert({ user_id: user.id, url: values.url, events: values.events, secret, is_active: true });
+      if (error) return { ok: false, message: webhookErrorMessage(error, "Não foi possível criar o endpoint.") };
+      setTarget(null); setRevealed({ url: values.url, secret, rotated: false });
+    }
+    await refreshConfigs();
+    return { ok: true };
   };
 
-  const copyCreatedSecret = async () => {
-    if (!createdSecret) return;
-    await navigator.clipboard.writeText(createdSecret);
-    toast.success("Secret copiado");
+  const toggle = async (w: WebhookRow) => {
+    if (!user || busyId) return;
+    setBusyId(w.id);
+    const { error } = await supabase.from("webhook_configs").update({ is_active: !w.is_active }).eq("id", w.id).eq("user_id", user.id);
+    setBusyId(null);
+    if (error) { toast.error(w.is_active ? "Não foi possível pausar o endpoint." : "Não foi possível reativar o endpoint."); return; }
+    toast.success(w.is_active ? "Endpoint pausado. Ele não recebe eventos enquanto estiver assim." : "Endpoint reativado.");
+    await refreshConfigs();
   };
 
-  const filtered = useMemo(() =>
-    webhooks.filter((w) => !query || (w.url ?? "").toLowerCase().includes(query.toLowerCase())),
-    [webhooks, query]
-  );
+  const sendTest = async (w: WebhookRow) => {
+    if (busyId) return;
+    setBusyId(w.id);
+    const { error } = await supabase.rpc("enqueue_test_webhook", { _config_id: w.id });
+    setBusyId(null);
+    if (error) { toast.error(webhookErrorMessage(error, "Não foi possível enviar o teste.")); return; }
+    toast.success("Teste na fila. Ele sai em até 1 minuto.");
+    setView("deliveries");
+    await loadDeliveries();
+  };
 
-  const activeCount = webhooks.filter((w) => w.is_active).length;
+  const runConfirm = async () => {
+    if (!confirm || !user) return;
+    const { kind, w } = confirm;
+    setConfirmBusy(true);
+    if (kind === "rotate") {
+      const secret = generateWebhookSecret();
+      const { error } = await supabase.from("webhook_configs").update({ secret }).eq("id", w.id).eq("user_id", user.id);
+      setConfirmBusy(false);
+      if (error) { toast.error("Não foi possível gerar a nova chave. A anterior continua valendo."); return; }
+      setConfirm(null); setRevealed({ url: w.url, secret, rotated: true });
+    } else {
+      const { error } = await supabase.from("webhook_configs").delete().eq("id", w.id).eq("user_id", user.id);
+      setConfirmBusy(false);
+      if (error) { toast.error("Não foi possível excluir o endpoint."); return; }
+      setConfirm(null); toast.success("Endpoint excluído.");
+      await loadDeliveries();
+    }
+    await refreshConfigs();
+  };
+
+  const openDeliveriesOf = (w: WebhookRow) => { setEndpointFilter(w.id); setStatus("all"); setEventFilter("all"); setView("deliveries"); };
+
+  const noEndpoints = !loadingConfigs && !configsError && hooks.length === 0;
+  const lastDelivery = deliveries[0]?.created_at;
 
   return (
-    <HDShell>
-      <HDHeader
-        eyebrow={`${webhooks.length} ${webhooks.length === 1 ? "endpoint" : "endpoints"} configurados`}
+    <div className="vp-fade space-y-5 pb-6 md:space-y-6">
+      <Seo title="Webhooks | Vemprapay" description="Receba pagamentos, reembolsos e saques no seu servidor, em tempo real." path="/integracoes?tab=webhooks" noindex />
+
+      <PageHead
         title="Webhooks"
-        subtitle="Receba eventos de pagamento em tempo real no seu servidor, assinados com HMAC-SHA256 e isolados por conta."
-        actions={
-          <>
-            <a
-              href="/documentacao"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-10 items-center gap-2 rounded-lg border border-border/60 bg-card px-3.5 text-[12.5px] font-medium text-muted-foreground hover:text-foreground"
-            >
-              Documentação <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-            <Dialog open={createOpen} onOpenChange={(o) => { setCreateOpen(o); if (!o) resetForm(); }}>
-              <DialogTrigger asChild>
-                <button
-                  onClick={openCreate}
-                  className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-primary px-4 text-[12.5px] font-semibold text-primary-foreground hover:bg-primary/90"
-                >
-                  <Plus className="h-4 w-4" /> Novo endpoint
-                </button>
-              </DialogTrigger>
-              <DialogContent className="max-w-lg rounded-[12px] border-border/60 bg-card">
-                <DialogHeader>
-                  <DialogTitle className="font-display text-[19px] font-bold tracking-[-0.02em]">
-                    {editingId ? "Editar endpoint" : "Novo endpoint"}
-                  </DialogTitle>
-                  <DialogDescription className="text-[12.5px] text-muted-foreground">
-                    Enviamos um POST HTTPS a cada evento selecionado. Valide a assinatura no header
-                    <span className="font-mono text-foreground"> X-Vemprapay-Signature</span>.
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-5 pt-2">
-                  {createdSecret && (
-                    <div className="space-y-2 rounded-xl border border-border/60 bg-muted/30 p-4">
-                      <Label className="text-[12px] text-muted-foreground">Secret do webhook</Label>
-                      <div className="flex gap-2">
-                        <Input value={createdSecret} readOnly className="h-10 rounded-lg font-mono text-xs" />
-                        <Button type="button" onClick={copyCreatedSecret} variant="outline" className="h-10 rounded-lg px-3" aria-label="Copiar secret">
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <p className="text-[11px] text-muted-foreground">Guarde em local seguro — não será exibido novamente.</p>
-                    </div>
-                  )}
-
-                  <div className="space-y-2">
-                    <Label className="text-[12px] text-muted-foreground">URL de destino</Label>
-                    <div className="relative">
-                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
-                      <Input
-                        value={url}
-                        onChange={(e) => setUrl(e.target.value)}
-                        placeholder="https://sua-api.com/webhook"
-                        className="h-10 rounded-lg pl-9 font-mono text-xs"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label className="text-[12px] text-muted-foreground">Eventos</Label>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {EVENT_GROUPS.map((g) => (
-                        <div key={g.label} className="space-y-2">
-                          <p className="text-[11.5px] font-semibold text-foreground">{g.label}</p>
-                          <div className="space-y-1">
-                            {g.events.map((ev) => (
-                              <label
-                                key={ev.key}
-                                className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border/60 px-2.5 py-2 hover:bg-muted/40"
-                              >
-                                <Checkbox
-                                  checked={selectedEvents.includes(ev.key)}
-                                  onCheckedChange={(c) => setSelectedEvents(c ? [...selectedEvents, ev.key] : selectedEvents.filter((e) => e !== ev.key))}
-                                />
-                                <span className="truncate text-xs text-foreground">{ev.label}</span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Button type="submit" disabled={isSubmitting || !url} className="h-10 w-full rounded-lg">
-                    {isSubmitting ? "Salvando…" : editingId ? "Atualizar endpoint" : "Salvar endpoint"}
-                  </Button>
-                </form>
-              </DialogContent>
-            </Dialog>
-          </>
-        }
+        subtitle="Receba cada pagamento, reembolso e saque no seu servidor assim que acontece. Cada envio vai assinado, e você acompanha o que foi entregue."
+        actions={<button type="button" className="vp-cta" onClick={() => setTarget({ mode: "create" })}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} />Novo endpoint</button>}
       />
 
-      <HDStatGrid>
-        <HDStat label="Endpoints" value={String(webhooks.length)} sub={`${activeCount} ativos`} icon={Webhook} />
-        <HDStat label="Eventos" value={String(EVENT_GROUPS.reduce((total, group) => total + group.events.length, 0))} sub="tipos disponíveis" icon={Radio} />
-        <HDStat label="Transporte" value="HTTPS" sub="POST seguro" icon={Globe} tone="success" />
-        <HDStat label="Assinatura" value="HMAC" sub="SHA-256 · HTTPS" icon={Radio} />
-      </HDStatGrid>
+      <StatBand
+        label="Resumo dos webhooks"
+        cells={[
+          { label: "Endpoints ativos", featured: true, loading: loadingConfigs, value: `${stats.active} de ${hooks.length}`, sub: hooks.length - stats.active > 0 ? `${hooks.length - stats.active} pausado${hooks.length - stats.active > 1 ? "s" : ""}` : "Recebendo eventos" },
+          { label: "Entregues em 7 dias", loading: loadingDeliveries, value: stats.ok.toLocaleString("pt-BR"), sub: lastDelivery ? `Última ${ago(lastDelivery)}` : "Nenhuma entrega ainda" },
+          { label: "Falharam em 7 dias", loading: loadingDeliveries, value: stats.bad.toLocaleString("pt-BR"), sub: stats.bad > 0 ? "Esgotaram as 5 tentativas" : "Nada falhou" },
+          { label: "Taxa de entrega", loading: loadingDeliveries, value: stats.rate === null ? "Sem dados" : `${stats.rate}%`, sub: "Entregues entre os que terminaram" },
+        ]}
+      />
 
-      <div className="grid grid-cols-1 gap-4">
-        <HDCard
-          title="Endpoints"
-          description={webhooks.length === 0 ? "Nenhum endpoint configurado" : `${webhooks.length} cadastrados`}
-          actions={
-            <div className="relative w-44 sm:w-60">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60" size={14} />
-              <input
-                type="text"
-                placeholder="Buscar URL…"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border/60 bg-background pl-9 pr-3 text-[12.5px] outline-none focus:border-border"
+      {configsError ? (
+        <section className="vp-sheet">
+          <EmptyPanel icon={<AlertCircle className="h-7 w-7" strokeWidth={1.8} />} title="Não foi possível carregar os endpoints" text="Confira sua conexão e tente de novo. Seus endpoints continuam salvos." action={<button type="button" className="vp-ghost" onClick={() => { void refetchConfigs(); }}>Tentar de novo</button>} />
+        </section>
+      ) : noEndpoints ? (
+        <section className="vp-sheet">
+          <EmptyPanel
+            icon={<Webhook className="h-7 w-7" strokeWidth={1.8} />}
+            title="Receba seus eventos em tempo real"
+            text="Cadastre a URL do seu servidor e escolha os eventos. A gente envia cada um assinado e tenta de novo se algo falhar."
+            action={<button type="button" className="vp-cta" onClick={() => setTarget({ mode: "create" })}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} />Novo endpoint</button>}
+          />
+        </section>
+      ) : (
+        <>
+          <FilterPills<View>
+            label="Visão dos webhooks" value={view} onChange={setView}
+            options={[{ value: "endpoints", label: "Endpoints" }, { value: "deliveries", label: "Entregas" }]}
+          />
+
+          {view === "endpoints" ? (
+            <>
+              {loadingConfigs ? (
+                <div className="space-y-3" aria-busy="true">{Array.from({ length: 3 }, (_, i) => <div key={i} className="vp-skel h-[84px] !rounded-[22px]" />)}</div>
+              ) : (
+                <EndpointList
+                  rows={hooks} health={health} busyId={busyId}
+                  onTest={(w) => void sendTest(w)}
+                  onEdit={(w) => setTarget({ mode: "edit", id: w.id, url: w.url, events: w.events ?? [] })}
+                  onToggle={(w) => void toggle(w)}
+                  onRotate={(w) => setConfirm({ kind: "rotate", w })}
+                  onCopyUrl={(w) => { void copyText(w.url, "URL copiada."); }}
+                  onDeliveries={openDeliveriesOf}
+                  onDelete={(w) => setConfirm({ kind: "delete", w })}
+                />
+              )}
+              <SignatureGuide />
+            </>
+          ) : deliveriesError ? (
+            <section className="vp-sheet">
+              <EmptyPanel icon={<AlertCircle className="h-7 w-7" strokeWidth={1.8} />} title="Não foi possível carregar as entregas" text="Confira sua conexão e tente de novo." action={<button type="button" className="vp-ghost" onClick={() => { setLoadingDeliveries(true); void loadDeliveries(); }}>Tentar de novo</button>} />
+            </section>
+          ) : loadingDeliveries ? (
+            <div className="space-y-3" aria-busy="true">{Array.from({ length: 4 }, (_, i) => <div key={i} className="vp-skel h-[72px] !rounded-[22px]" />)}</div>
+          ) : deliveries.length === 0 ? (
+            <section className="vp-sheet">
+              <EmptyPanel
+                icon={<ListChecks className="h-7 w-7" strokeWidth={1.8} />}
+                title="Nenhuma entrega ainda"
+                text="Quando houver uma venda ou você enviar um teste, cada envio aparece aqui com a resposta do seu servidor."
+                action={stats.active > 0 ? <button type="button" className="vp-cta" onClick={() => { const w = hooks.find((h) => h.is_active); if (w) void sendTest(w); }}>Enviar um teste</button> : undefined}
               />
-            </div>
-          }
-        >
-          {filtered.length === 0 ? (
-            <div className="px-6 py-16 text-center">
-              <Webhook size={20} className="mx-auto text-muted-foreground/40" />
-              <p className="mt-3 text-[13px] text-foreground">Nenhum endpoint ativo</p>
-              <p className="mt-1 text-[12px] text-muted-foreground">Adicione um endpoint para começar a receber eventos.</p>
-            </div>
+            </section>
           ) : (
-            <ul className="divide-y divide-border/40">
-              {filtered.map((wh) => (
-                <li key={wh.id ?? wh.url} className="group flex flex-col gap-3 px-6 py-4 hover:bg-muted/20 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2.5">
-                      <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", wh.is_active ? "bg-success" : "bg-muted-foreground/40")} />
-                      <span className="truncate font-mono text-[12.5px] text-foreground">{wh.url}</span>
-                    </div>
-                    <div className="mt-2 flex flex-wrap items-center gap-1 pl-4">
-                      {(wh.events || []).slice(0, 4).map((ev: string) => (
-                        <span key={ev} className="rounded-md bg-muted/50 px-1.5 py-0.5 font-mono text-[10.5px] text-muted-foreground">
-                          {ev}
-                        </span>
-                      ))}
-                      {(wh.events?.length || 0) > 4 && (
-                        <span className="text-[10.5px] text-muted-foreground/70">+{(wh.events?.length || 0) - 4}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-1 sm:opacity-60 sm:group-hover:opacity-100">
-                    <button
-                      onClick={() => wh.id && sendTest(wh.id)}
-                      disabled={!wh.is_active || testingId === wh.id}
-                      title="Enviar evento de teste"
-                      className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border/60 px-2.5 text-[11.5px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-40"
-                    >
-                      <Send size={13} /> {testingId === wh.id ? "Enviando…" : "Testar"}
-                    </button>
-                    <button onClick={() => openEdit(wh)} title="Editar" className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      onClick={() => wh.id && toggleActive(wh.id, Boolean(wh.is_active))}
-                      title={wh.is_active ? "Pausar" : "Ativar"}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
-                    >
-                      {wh.is_active ? <PowerOff size={14} /> : <Power size={14} className="text-success" />}
-                    </button>
-                    <button
-                      onClick={() => wh.id && deleteWebhook(wh.id)}
-                      title="Excluir"
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </HDCard>
+            <>
+              <div className="flex flex-col gap-3">
+                <FilterPills<StatusFilter>
+                  label="Filtrar entregas por situação" value={status} onChange={setStatus}
+                  options={[{ value: "all", label: "Todas", count: counts.all }, { value: "success", label: "Entregues", count: counts.success }, { value: "open", label: "Em andamento", count: counts.open }, { value: "failed", label: "Falharam", count: counts.failed }]}
+                />
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                  {hooks.length > 1 && (
+                    <Select value={endpointFilter} onValueChange={setEndpointFilter}>
+                      <SelectTrigger aria-label="Filtrar por endpoint" className="vp-r16 h-11 sm:w-[240px]"><SelectValue /></SelectTrigger>
+                      <SelectContent collisionPadding={16}>
+                        <SelectItem value="all">Todos os endpoints</SelectItem>
+                        {hooks.map((w) => <SelectItem key={w.id} value={w.id}>{hostOf(w.url)}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  <Select value={eventFilter} onValueChange={setEventFilter}>
+                    <SelectTrigger aria-label="Filtrar por evento" className="vp-r16 h-11 sm:w-[220px]"><SelectValue /></SelectTrigger>
+                    <SelectContent collisionPadding={16}>
+                      <SelectItem value="all">Todos os eventos</SelectItem>
+                      {usedEvents.map((e) => <SelectItem key={e} value={e}>{eventLabel(e)}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-      </div>
-    </HDShell>
+              {shown.length === 0 ? (
+                <section className="vp-sheet">
+                  <EmptyPanel title="Nenhuma entrega encontrada" text="Tente outro filtro." action={<button type="button" className="vp-ghost" onClick={() => { setStatus("all"); setEndpointFilter("all"); setEventFilter("all"); }}>Limpar filtros</button>} />
+                </section>
+              ) : (
+                <div className="space-y-3">
+                  <DeliveryLedger rows={pageRows} hostById={hostById} onOpen={setOpen} footer={<Pager page={page} pageSize={PAGE_SIZE} total={shown.length} onPage={setPage} />} />
+                  {deliveries.length >= LIST_LIMIT && <p className="px-1 text-[13px] text-muted-foreground">Mostrando as {LIST_LIMIT} entregas mais recentes.</p>}
+                </div>
+              )}
+            </>
+          )}
+        </>
+      )}
+
+      <EndpointDialog
+        target={target}
+        existingUrls={hooks.filter((w) => w.id !== target?.id).map((w) => w.url)}
+        onOpenChange={(o) => { if (!o) setTarget(null); }}
+        onSave={saveEndpoint}
+      />
+      <WebhookSecretDialog value={revealed} onClose={() => setRevealed(null)} />
+      <DeliveryDialog delivery={open} url={open ? hooks.find((w) => w.id === open.webhook_config_id)?.url ?? "" : ""} onClose={() => setOpen(null)} />
+
+      <AlertDialog open={!!confirm} onOpenChange={(o) => { if (!o && !confirmBusy) setConfirm(null); }}>
+        <AlertDialogContent className="rounded-[28px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirm?.kind === "rotate" ? "Gerar uma nova chave de assinatura?" : `Excluir ${confirm ? hostOf(confirm.w.url) : "o endpoint"}?`}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirm?.kind === "rotate"
+                ? "A chave atual para de valer na hora. Os próximos envios já saem com a nova, então atualize o seu servidor logo depois de copiá-la. Entregas na fila também usam a nova."
+                : "O endpoint deixa de receber eventos e o histórico de entregas dele é apagado. Isso não pode ser desfeito."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={confirmBusy}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction className={confirm?.kind === "delete" ? "vp-cta vp-cta-danger" : "vp-cta"} disabled={confirmBusy} onClick={(e) => { e.preventDefault(); void runConfirm(); }}>
+              {confirmBusy ? "Aguarde…" : confirm?.kind === "rotate" ? "Gerar nova chave" : "Excluir endpoint"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }
+
