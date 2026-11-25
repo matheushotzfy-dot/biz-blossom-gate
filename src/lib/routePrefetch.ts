@@ -30,7 +30,6 @@ export const routeLoaders: Record<string, Loader> = {
   "/integracoes": () => import("@/pages/IntegracoesHub"),
   "/premiacoes": () => import("@/pages/PremiacoesHub"),
   "/gamificacao": () => import("@/pages/Gamificacao"),
-  "/marketplace": () => import("@/pages/Marketplace"),
   "/perfil": () => import("@/pages/PerfilHub"),
   "/suporte": () => import("@/pages/Suporte"),
 };

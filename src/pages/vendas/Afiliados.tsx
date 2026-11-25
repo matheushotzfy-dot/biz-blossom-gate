@@ -1,580 +1,247 @@
-import { useEffect, useState, useMemo } from "react";
+/**
+ * Afiliados: o programa do vendedor (quem divulga os produtos dele), as afiliações dele em produtos de
+ * outras pessoas e a vitrine para escolher o que divulgar. Comissão e divisão de saldo acontecem no
+ * servidor (apply_transaction_splits); aqui só configuramos o programa e geramos os links.
+ */
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { usePrivacyMode } from "@/hooks/usePrivacyMode";
 import { useProducts } from "@/hooks/useQueryData";
-import type { Tables } from "@/integrations/supabase/types";
+import { Seo } from "@/components/Seo";
+import { PageHead } from "@/components/seller-ui/PageHead";
+import { SectionTabs } from "@/components/seller-ui/SectionTabs";
+import { FilterPills } from "@/components/seller-ui/FilterPills";
+import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
+import { ProgramDialog, type ProgramSaveResult, type ProgramValues } from "@/components/marketing/ProgramDialog";
+import { ProgramTab, type ProgramProductRow } from "@/components/marketing/ProgramTab";
+import { MyLinksTab, type LinkProduct } from "@/components/marketing/MyLinksTab";
+import { ExploreTab } from "@/components/marketing/ExploreTab";
 import {
-  Users, Link2, TrendingUp, DollarSign, Copy, Plus,
-  CheckCircle2, Clock, Search, Percent, Shield,
-  MousePointerClick, ShoppingCart, UserPlus, Globe,
-  Activity, Target, Award, Power, PowerOff, ArrowUpRight,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { StatCard } from "@/components/StatCard";
-import { toast } from "sonner";
-import { EmptyState } from "@/components/PageShell";
-import { cn, formatCurrency } from "@/lib/utils";
+  COMMISSION_DEFAULT, affiliateErrorMessage, affiliateUrl, type AffiliateLink, type AffiliateSale, type CatalogProduct,
+} from "@/components/marketing/affiliateMeta";
 
+type Tab = "program" | "mine" | "explore";
+const TABS: Tab[] = ["program", "mine", "explore"];
 
-const fmt = formatCurrency;
+const CATALOG_COLS = "id, name, price, image_url, affiliate_commission, display_name, delivery_type, checkout_url, created_at";
 
-type AffiliateLink = {
-  id: string; product_id: string; affiliate_user_id: string; owner_user_id: string;
-  slug: string; commission_pct: number; clicks: number; is_active: boolean; created_at: string;
-};
-type AffiliateSale = {
-  id: string; affiliate_link_id: string; transaction_id: string; product_id: string;
-  affiliate_user_id: string; seller_user_id: string; sale_amount: number;
-  commission_amount: number; commission_pct: number; status: string; created_at: string;
-};
-
-const TABS = [
-  { id: "my-products" as const, label: "Meus Produtos", icon: ShoppingCart },
-  { id: "affiliate-of" as const, label: "Sou Afiliado", icon: UserPlus },
-  { id: "marketplace" as const, label: "Marketplace", icon: Globe },
-] as const;
-
-type TabId = typeof TABS[number]["id"];
-
-/* ─── Status Pill ─── */
-function StatusPill({ status }: { status: string }) {
-  const cfg = {
-    approved: { label: "Pago", cls: "bg-success/10 text-success border-success/20", dot: "bg-success" },
-    pending: { label: "Pendente", cls: "bg-warning/10 text-warning border-warning/20", dot: "bg-warning" },
-    rejected: { label: "Recusado", cls: "bg-destructive/10 text-destructive border-destructive/20", dot: "bg-destructive" },
-  }[status] || { label: status, cls: "bg-muted/30 text-muted-foreground border-border/30", dot: "bg-muted-foreground" };
-  return (
-    <span className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-bold border tabular-nums", cfg.cls)}>
-      <span className={cn("h-1.5 w-1.5 rounded-full", cfg.dot)} />
-      {cfg.label}
-    </span>
-  );
+async function copyText(text: string, ok: string) {
+  try { await navigator.clipboard.writeText(text); toast.success(ok); return true; }
+  catch { toast.error("Não foi possível copiar. Selecione e copie manualmente."); return false; }
 }
-
 
 export default function Afiliados() {
   const { user } = useAuth();
-  const { data: products = [] } = useProducts();
+  const qc = useQueryClient();
+  const { hidden } = usePrivacyMode();
+  const { data: products = [], isLoading: loadingProducts } = useProducts();
+  const [params, setParams] = useSearchParams();
 
-  const [tab, setTab] = useState<TabId>("my-products");
-  const [links, setLinks] = useState<AffiliateLink[]>([]);
-  const [sales, setSales] = useState<AffiliateSale[]>([]);
-  const [search, setSearch] = useState("");
-  const [openCreate, setOpenCreate] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState("");
-  const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
-  const [marketProducts, setMarketProducts] = useState<Tables<"products_public">[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [myLinks, setMyLinks] = useState<AffiliateLink[]>([]);
+  const [programLinks, setProgramLinks] = useState<AffiliateLink[]>([]);
+  const [mySales, setMySales] = useState<AffiliateSale[]>([]);
+  const [programSales, setProgramSales] = useState<AffiliateSale[]>([]);
+  const [catalog, setCatalog] = useState<CatalogProduct[]>([]);
+  const [extra, setExtra] = useState<Map<string, CatalogProduct>>(new Map());
+  const [configuringId, setConfiguringId] = useState<string | null>(null);
+  const [busyLinkId, setBusyLinkId] = useState<string | null>(null);
+  const [busyProductId, setBusyProductId] = useState<string | null>(null);
 
-  const affiliateProducts = useMemo(
-    () => products.filter((p) => p.affiliate_enabled),
-    [products]
+  const load = useCallback(async () => {
+    if (!user) return;
+    setLoadError(false);
+    try {
+      const [mine, prog, salesMine, salesProg, cat] = await Promise.all([
+        supabase.from("affiliate_links").select("*").eq("affiliate_user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("affiliate_links").select("*").eq("owner_user_id", user.id).neq("affiliate_user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("affiliate_sales").select("*").eq("affiliate_user_id", user.id).order("created_at", { ascending: false }).limit(500),
+        supabase.from("affiliate_sales").select("*").eq("seller_user_id", user.id).order("created_at", { ascending: false }).limit(500),
+        supabase.from("products_public").select(CATALOG_COLS).eq("status", "active").eq("affiliate_enabled", true).order("created_at", { ascending: false }).limit(200),
+      ]);
+      if (mine.error || prog.error || salesMine.error || salesProg.error || cat.error) throw new Error("load");
+      const links = (mine.data ?? []) as unknown as AffiliateLink[];
+      setMyLinks(links);
+      setProgramLinks((prog.data ?? []) as unknown as AffiliateLink[]);
+      setMySales((salesMine.data ?? []) as unknown as AffiliateSale[]);
+      setProgramSales((salesProg.data ?? []) as unknown as AffiliateSale[]);
+      const catalogRows = ((cat.data ?? []) as unknown as CatalogProduct[]).filter((x) => x.id);
+      setCatalog(catalogRows);
+
+      // Produtos dos seus links que já saíram da vitrine (programa fechado ou produto pausado).
+      const known = new Set(catalogRows.map((x) => x.id));
+      const missing = [...new Set(links.map((l) => l.product_id))].filter((id) => !known.has(id));
+      if (missing.length > 0) {
+        const { data } = await supabase.from("products_public").select(CATALOG_COLS).in("id", missing);
+        setExtra(new Map(((data ?? []) as unknown as CatalogProduct[]).map((x) => [x.id, x])));
+      } else setExtra(new Map());
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  const ownById = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
+  const catalogById = useMemo(() => new Map(catalog.map((p) => [p.id, p])), [catalog]);
+
+  const productInfo = (id: string): LinkProduct | undefined => {
+    const own = ownById.get(id);
+    if (own) return { name: own.name, image_url: own.image_url, checkout_url: own.checkout_url };
+    const c = catalogById.get(id) ?? extra.get(id);
+    return c ? { name: c.name, image_url: c.image_url, checkout_url: c.checkout_url } : undefined;
+  };
+  const productName = (id: string) => productInfo(id)?.name ?? "Produto indisponível";
+
+  const programRows: ProgramProductRow[] = useMemo(
+    () => products.filter((p) => p.status !== "draft").map((p) => ({
+      id: p.id, name: p.name, price: Number(p.price), status: p.status, image_url: p.image_url,
+      enabled: !!p.affiliate_enabled, commission: Number(p.affiliate_commission) || COMMISSION_DEFAULT,
+    })),
+    [products],
   );
+  const exploreList = useMemo(() => catalog.filter((c) => !ownById.has(c.id)), [catalog, ownById]);
+  const linkByProduct = useMemo(() => new Map(myLinks.map((l) => [l.product_id, l])), [myLinks]);
 
-  const loadData = async () => {
-    if (!user) return;
-    const [linksRes, salesRes] = await Promise.all([
-      supabase.from("affiliate_links").select("*").or(`affiliate_user_id.eq.${user.id},owner_user_id.eq.${user.id}`).order("created_at", { ascending: false }),
-      supabase.from("affiliate_sales").select("*").or(`affiliate_user_id.eq.${user.id},seller_user_id.eq.${user.id}`).order("created_at", { ascending: false }),
-    ]);
-    if (linksRes.error || salesRes.error) toast.error("Não foi possível carregar todos os dados de afiliados. Tente novamente.");
-    if (linksRes.data) setLinks(linksRes.data as unknown as AffiliateLink[]);
-    if (salesRes.data) setSales(salesRes.data as unknown as AffiliateSale[]);
+  const initial: Tab = programRows.length === 0 ? "explore" : programRows.some((p) => p.enabled) || programLinks.length > 0 || myLinks.length === 0 ? "program" : "mine";
+  const requested = params.get("tab");
+  const tab: Tab = TABS.includes(requested as Tab) ? (requested as Tab) : initial;
+  const setTab = (t: Tab) => setParams(t === initial && !requested ? {} : { tab: t }, { replace: true });
+  const booting = !requested && (loading || loadingProducts);
+
+  /* ── Programa ── */
+  const configuring = programRows.find((r) => r.id === configuringId) ?? null;
+  const configuringProduct = configuring ? { ...configuring, affiliates: programLinks.filter((l) => l.product_id === configuring.id).length } : null;
+
+  const saveProgram = async (v: ProgramValues): Promise<ProgramSaveResult> => {
+    if (!user || !configuring) return { ok: false, message: "Sua sessão expirou. Entre de novo para continuar." };
+    const { error } = await supabase.from("products").update({ affiliate_enabled: v.enabled, affiliate_commission: v.commission }).eq("id", configuring.id).eq("user_id", user.id);
+    if (error) return { ok: false, message: affiliateErrorMessage(error, "Não foi possível salvar o programa. Tente de novo.") };
+
+    let partial = false;
+    if (!v.enabled && configuring.enabled) {
+      const { error: e2 } = await supabase.from("affiliate_links").update({ is_active: false }).eq("product_id", configuring.id).eq("owner_user_id", user.id);
+      if (e2) partial = true;
+    }
+    if (v.enabled && v.applyToCurrent) {
+      const { error: e3 } = await supabase.from("affiliate_links").update({ commission_pct: v.commission }).eq("product_id", configuring.id).eq("owner_user_id", user.id);
+      if (e3) partial = true;
+    }
+    void qc.invalidateQueries({ queryKey: ["products"], exact: false });
+    await load();
+    setConfiguringId(null);
+    if (partial) toast.warning("O produto foi salvo, mas não deu para atualizar os links dos afiliados. Ajuste pela lista de afiliados.");
+    else toast.success(v.enabled ? (configuring.enabled ? "Programa atualizado." : "Programa aberto. O produto já aparece em Explorar produtos.") : "Programa encerrado neste produto.");
+    return { ok: true };
   };
 
-  const loadMarketplace = async () => {
-    if (!user) return;
-    // Only surface products whose owners explicitly opted-in to affiliation.
-    // Previously we loaded every active product, which let users try to affiliate
-    // on products with affiliate_enabled=false → RPC returned null owner → FK error.
-    const { data } = await supabase
-      .from("products_public")
-      .select("id, name, price, image_url, affiliate_commission, affiliate_enabled, status, checkout_url")
-      .eq("status", "active")
-      .eq("affiliate_enabled", true)
-      .order("created_at", { ascending: false })
-      .limit(200);
-    if (data) setMarketProducts(data.filter((p) => p.id) as Tables<"products_public">[]);
+  const toggleLink = async (l: AffiliateLink) => {
+    if (busyLinkId) return;
+    if (!l.is_active && l.affiliate_user_id === user?.id && !catalogById.has(l.product_id)) { toast.error("O produtor encerrou o programa deste produto."); return; }
+    setBusyLinkId(l.id);
+    const { error } = await supabase.from("affiliate_links").update({ is_active: !l.is_active }).eq("id", l.id);
+    setBusyLinkId(null);
+    if (error) { toast.error(affiliateErrorMessage(error, "Não foi possível alterar o link. Tente de novo.")); return; }
+    toast.success(l.is_active ? "Link pausado." : "Link reativado.");
+    void load();
   };
 
-  useEffect(() => { loadData(); loadMarketplace(); }, [user?.id]);
-
-  const handleCreateLink = async () => {
-    if (!user || !selectedProduct) return;
-    const product = [...affiliateProducts, ...marketProducts].find(p => p.id === selectedProduct) as
-      (Tables<"products"> | Tables<"products_public">) | undefined;
-    if (!product) { toast.error("Produto não encontrado"); return; }
-    const slug = `aff-${crypto.randomUUID().slice(0, 10)}`;
-    const ownerId = ("user_id" in product && product.user_id) ? product.user_id : user.id;
-    const { error } = await supabase.from("affiliate_links").insert({
-      product_id: selectedProduct,
-      affiliate_user_id: user.id,
-      owner_user_id: ownerId,
-      slug,
-      commission_pct: product.affiliate_commission || 30,
-    });
-    if (error) { toast.error("Erro ao criar link de afiliado"); return; }
-    toast.success("Link de afiliado criado!");
-    setOpenCreate(false); setSelectedProduct("");
-    loadData();
+  /* ── Afiliar-se ── */
+  const affiliate = async (p: CatalogProduct) => {
+    if (!user || busyProductId) return;
+    if (linkByProduct.has(p.id)) { void seeLink(p); return; }
+    setBusyProductId(p.id);
+    try {
+      const { data: ownerId, error: ownerErr } = await supabase.rpc("get_affiliate_product_owner", { _product_id: p.id });
+      if (ownerErr) { toast.error("Não foi possível criar o link. Tente de novo."); return; }
+      if (!ownerId) { toast.error("Este produto não aceita afiliados agora."); void load(); return; }
+      if (ownerId === user.id) { toast.error("Você não pode divulgar o seu próprio produto."); return; }
+      const slug = `aff-${crypto.randomUUID().replace(/-/g, "").slice(0, 10)}`;
+      const { error } = await supabase.from("affiliate_links").insert({
+        product_id: p.id, affiliate_user_id: user.id, owner_user_id: ownerId as string, slug,
+        commission_pct: Number(p.affiliate_commission) || COMMISSION_DEFAULT,
+      });
+      if (error) { toast.error(affiliateErrorMessage(error, "Não foi possível criar o link. Tente de novo.")); return; }
+      const url = affiliateUrl(p.checkout_url, slug);
+      if (url) await copyText(url, "Link criado e copiado.");
+      else toast.success("Link criado.");
+      await load();
+      setTab("mine");
+    } catch {
+      toast.error("Não foi possível criar o link. Tente de novo.");
+    } finally {
+      setBusyProductId(null);
+    }
   };
 
-  const copyLink = (slug: string) => {
-    const url = `${window.location.origin}/pay/${slug}`;
-    navigator.clipboard.writeText(url);
-    setCopiedSlug(slug);
-    toast.success("Link copiado!");
-    setTimeout(() => setCopiedSlug(null), 2000);
+  const seeLink = async (p: CatalogProduct) => {
+    const l = linkByProduct.get(p.id);
+    const url = l ? affiliateUrl(p.checkout_url, l.slug) : "";
+    if (url) await copyText(url, "Seu link foi copiado.");
+    else setTab("mine");
   };
 
-  const toggleLinkActive = async (link: AffiliateLink) => {
-    if (!user) return;
-    await supabase.from("affiliate_links").update({ is_active: !link.is_active }).eq("id", link.id).eq("affiliate_user_id", user.id);
-    loadData();
-  };
-
-  // KPIs
-  const myLinks = links.filter(l => l.affiliate_user_id === user?.id);
-  const productLinks = links.filter(l => l.owner_user_id === user?.id && l.affiliate_user_id !== user?.id);
-  const mySales = sales.filter(s => s.affiliate_user_id === user?.id);
-  const productSales = sales.filter(s => s.seller_user_id === user?.id);
-  const totalCommissionEarned = mySales.filter(s => s.status === "approved").reduce((a, s) => a + s.commission_amount, 0);
-  const totalCommissionPending = mySales.filter(s => s.status === "pending").reduce((a, s) => a + s.commission_amount, 0);
-  const totalClicks = myLinks.reduce((a, l) => a + l.clicks, 0);
-  const totalProductSalesViaAff = productSales.reduce((a, s) => a + s.sale_amount, 0);
-  const totalProductCommPaid = productSales.filter(s => s.status === "approved").reduce((a, s) => a + s.commission_amount, 0);
-  const conversionRate = totalClicks > 0 ? ((mySales.length / totalClicks) * 100) : 0;
-
-  const getProductName = (productId: string) => {
-    const p = products.find(pr => pr.id === productId);
-    return p?.name || "Produto";
+  const subtitle: Record<Tab, string> = {
+    program: "Deixe outras pessoas venderem seus produtos em troca de uma comissão. Você escolhe quanto paga e acompanha cada venda.",
+    mine: "Os links que você divulga, as vendas que eles geraram e as comissões que já caíram no seu saldo.",
+    explore: "Produtos de outros vendedores que pagam comissão. Gere seu link em um clique e comece a divulgar.",
   };
 
   return (
-    <div className="p-4 md:p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in duration-500">
-      {/* ── Header ── */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-             <div className="h-3 w-3 rounded-full bg-primary animate-pulse" />
-             <h1 className="text-3xl font-black tracking-tight text-foreground">Afiliados</h1>
-          </div>
-          <p className="text-muted-foreground font-medium text-sm flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Programas, links e comissões em um único painel operacional.
-          </p>
-        </div>
+    <div className="vp-fade space-y-5 pb-6 md:space-y-6">
+      <Seo title="Afiliados | Vemprapay" description="Programa de afiliados, seus links e produtos para divulgar." path="/vendas/afiliados" noindex />
 
-        <Dialog open={openCreate} onOpenChange={setOpenCreate}>
-          <DialogTrigger asChild>
-            <button className="bg-primary text-white px-8 h-12 rounded-[12px] font-black text-sm flex items-center gap-2     transition-all">
-              <Plus className="h-5 w-5" strokeWidth={2.5} />
-              Novo link
-            </button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md rounded-[2.5rem] p-0 overflow-hidden border-border/50 ">
-            <div className="px-8 pt-8 pb-4">
-              <DialogHeader>
-                <DialogTitle className="text-xl font-black flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Link2 className="h-5 w-5 text-primary" />
-                  </div>
-                  Criar Link de Afiliado
-                </DialogTitle>
-              </DialogHeader>
-            </div>
-            <div className="px-8 pb-8 pt-4 space-y-6">
-              <div className="space-y-2">
-                <Label className="text-[11px] font-semibold text-muted-foreground/60 ml-1">Produto</Label>
-                <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-                  <SelectTrigger className="h-12 rounded-[12px] border-border/50 bg-muted/30 px-4 font-bold"><SelectValue placeholder="Selecione um produto" /></SelectTrigger>
-                  <SelectContent className="rounded-[12px] border-border/50  p-2">
-                    {affiliateProducts.length > 0 && (
-                      <>
-                        <div className="px-3 py-2 text-[11px] font-semibold text-muted-foreground/40">Seus Produtos</div>
-                        {affiliateProducts.map(p => (
-                          <SelectItem key={`own-${p.id}`} value={p.id} className="rounded-xl font-bold py-2.5">
-                            {p.name} — {fmt(Number(p.price))}
-                          </SelectItem>
-                        ))}
-                      </>
-                    )}
-                    {marketProducts.filter(mp => !affiliateProducts.some(ap => ap.id === mp.id)).length > 0 && (
-                      <>
-                        <div className="px-3 py-2 text-[11px] font-semibold text-muted-foreground/40 mt-2 border-t border-border/10 pt-4">Marketplace</div>
-                        {marketProducts.filter(mp => !affiliateProducts.some(ap => ap.id === mp.id)).map(p => (
-                          <SelectItem key={`mkt-${p.id}`} value={p.id} className="rounded-xl font-bold py-2.5">
-                            {p.name} — {fmt(Number(p.price))}
-                          </SelectItem>
-                        ))}
-                      </>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button onClick={handleCreateLink} className="w-full h-12 rounded-[12px] font-black text-sm " disabled={!selectedProduct}>
-                Gerar Link Operacional
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+      <SectionTabs section="growth" />
+      <PageHead title="Afiliados" subtitle={subtitle[tab]} />
 
-      {/* ─── Global KPIs ─── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Comissões Ganhas"
-          value={fmt(totalCommissionEarned)}
-          description={`${mySales.filter(s => s.status === "approved").length} venda(s) paga(s)`}
-          icon={DollarSign}
-          color="success"
+      <FilterPills<Tab>
+        label="Áreas dos afiliados"
+        value={tab}
+        onChange={setTab}
+        options={[
+          { value: "program", label: "Meu programa" },
+          { value: "mine", label: "Afiliações" },
+          { value: "explore", label: "Explorar" },
+        ]}
+      />
+
+      {loadError ? (
+        <section className="vp-sheet">
+          <EmptyPanel
+            icon={<AlertCircle className="h-7 w-7" strokeWidth={1.8} />}
+            title="Não foi possível carregar os afiliados"
+            text="Confira sua conexão e tente de novo. Seus links e comissões continuam salvos."
+            action={<button type="button" className="vp-ghost" onClick={() => { setLoading(true); void load(); }}>Tentar de novo</button>}
+          />
+        </section>
+      ) : booting ? (
+        <div className="space-y-4" aria-busy="true"><div className="vp-skel h-[128px] !rounded-[22px]" /><div className="vp-skel h-[260px] !rounded-[22px]" /></div>
+      ) : tab === "program" ? (
+        <ProgramTab
+          loading={loading || loadingProducts} hidden={hidden} products={programRows} links={programLinks} sales={programSales}
+          productName={productName} busyLinkId={busyLinkId} onConfigure={setConfiguringId} onToggleLink={(l) => void toggleLink(l)}
         />
-        <StatCard
-          title="A Receber"
-          value={fmt(totalCommissionPending)}
-          description={`${mySales.filter(s => s.status === "pending").length} pendente(s)`}
-          icon={Clock}
-          color="warning"
+      ) : tab === "mine" ? (
+        <MyLinksTab
+          loading={loading} hidden={hidden} links={myLinks} sales={mySales} product={productInfo} inProgram={(id) => catalogById.has(id)} busyLinkId={busyLinkId}
+          onToggle={(l) => void toggleLink(l)} onCopy={(url) => void copyText(url, "Link copiado.")} onExplore={() => setTab("explore")}
         />
-        <StatCard
-          title="Cliques · Conversão"
-          value={String(totalClicks)}
-          description={`${conversionRate.toFixed(2)}% conversão`}
-          icon={MousePointerClick}
-          color="info"
+      ) : (
+        <ExploreTab
+          loading={loading} error={false} hidden={hidden} products={exploreList} linkByProduct={linkByProduct} busyProductId={busyProductId}
+          onAffiliate={(p) => void affiliate(p)} onSeeLink={(p) => void seeLink(p)} onRetry={() => { setLoading(true); void load(); }}
         />
-        <StatCard
-          title="Links Ativos"
-          value={String(myLinks.filter(l => l.is_active).length)}
-          description={`${myLinks.length} total`}
-          icon={Link2}
-          color="primary"
-        />
-      </div>
-
-
-      {/* ─── Tabs ─── */}
-      <div className="flex items-center bg-muted/30 p-1 rounded-[12px] border border-border/50 w-fit">
-        {TABS.map(t => (
-          <button
-            key={t.id}
-            onClick={() => { setTab(t.id); }}
-            className={cn(
- "px-6 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2",
-              tab === t.id ? "bg-card text-foreground  ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <t.icon className="h-3.5 w-3.5" />
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {/* ── Workspace ── */}
-      <div className="space-y-8">
-
-      {/* ═══ MY PRODUCTS TAB ═══ */}
-      {tab === "my-products" && (
-        <div className="space-y-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard title="Produtos" value={String(affiliateProducts.length)} icon={ShoppingCart} color="primary" />
-            <StatCard title="Afiliados" value={String(productLinks.length)} icon={Users} color="info" />
-            <StatCard title="Receita Afiliados" value={fmt(totalProductSalesViaAff)} icon={TrendingUp} color="success" />
-            <StatCard title="Comissões Pagas" value={fmt(totalProductCommPaid)} icon={DollarSign} color="warning" />
-          </div>
-
-
-          <Card className="border-border/40 overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-6">
-              <div>
-                <CardTitle className="text-xl font-black">Programas Ativos</CardTitle>
-                <CardDescription className="text-xs font-medium ">{affiliateProducts.length} produtos configurados</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              {affiliateProducts.length === 0 ? (
-                <EmptyState
-                  icon={<Users className="h-7 w-7" />}
-                  title="Nenhum programa ativo ainda"
-                  subtitle="Habilite o programa de afiliados nos seus produtos para começar a recrutar afiliados."
-                />
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-border/30 bg-muted/10">
-                        <th className="text-left px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Produto</th>
-                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Preço</th>
-                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Comissão</th>
-                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Afiliados</th>
-                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Vendas</th>
-                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Receita</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/30">
-                      {affiliateProducts.map((p) => {
-                        const pLinks = productLinks.filter(l => l.product_id === p.id).length;
-                        const pSales = productSales.filter(s => s.product_id === p.id);
-                        return (
-                          <tr key={p.id} className="group hover:bg-muted/30 transition-all cursor-pointer">
-                            <td className="px-8 py-4">
-                              <div className="flex items-center gap-3">
-                                {p.image_url ? (
-                                  <img src={p.image_url} alt="" className="h-10 w-10 rounded-xl object-cover ring-1 ring-border/30" />
-                                ) : (
-                                  <div className="h-10 w-10 rounded-xl bg-muted/40 flex items-center justify-center">
-                                    <ShoppingCart className="h-5 w-5 text-muted-foreground/60" />
-                                  </div>
-                                )}
-                                <span className="text-sm font-black">{p.name}</span>
-                              </div>
-                            </td>
-                            <td className="px-8 py-4 text-right text-sm font-bold text-muted-foreground tabular-nums">{fmt(Number(p.price))}</td>
-                            <td className="px-8 py-4 text-right">
-                              <span className="text-[11px] font-semibold text-success bg-success/10 px-2.5 py-1 rounded-lg border border-success/20 tabular-nums ">
-                                {p.affiliate_commission || 30}%
-                              </span>
-                            </td>
-                            <td className="px-8 py-4 text-right text-sm font-black text-foreground tabular-nums">{pLinks}</td>
-                            <td className="px-8 py-4 text-right text-sm font-black text-foreground tabular-nums">{pSales.length}</td>
-                            <td className="px-8 py-4 text-right text-sm font-black text-foreground tabular-nums">
-                              {fmt(pSales.reduce((a, s) => a + s.sale_amount, 0))}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
       )}
 
-      {/* ═══ AFFILIATE OF TAB ═══ */}
-      {tab === "affiliate-of" && (
-        <div className="space-y-8">
-          <Card className="border-border/40 overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-6">
-              <div>
-                <CardTitle className="text-xl font-black">Meus Links</CardTitle>
-                <CardDescription className="text-xs font-medium ">{myLinks.length} links operacionais</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              {myLinks.length === 0 ? (
-                <EmptyState
-                  icon={<Link2 className="h-7 w-7" />}
-                  title="Nenhum link criado"
-                  subtitle="Acesse o Marketplace e afilie-se a um produto para gerar seu primeiro link."
-                />
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-border/30 bg-muted/10">
-                        <th className="text-left px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Produto / Link</th>
-                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Comissão</th>
-                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Cliques</th>
-                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Vendas</th>
-                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Conv.</th>
-                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Ganho</th>
-                        <th className="text-center px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Status</th>
-                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/30">
-                      {myLinks.map((link) => {
-                        const linkSales = mySales.filter(s => s.affiliate_link_id === link.id);
-                        const linkRevenue = linkSales.reduce((a, s) => a + s.commission_amount, 0);
-                        const convRate = link.clicks > 0 ? ((linkSales.length / link.clicks) * 100).toFixed(1) : "0.0";
-                        return (
-                          <tr key={link.id} className="group hover:bg-muted/30 transition-all cursor-pointer">
-                            <td className="px-8 py-4 max-w-[280px]">
-                              <p className="text-sm font-black truncate">{getProductName(link.product_id)}</p>
-                              <p className="font-mono text-[10px] text-muted-foreground/50 truncate mt-0.5">/pay/{link.slug}</p>
-                            </td>
-                            <td className="px-8 py-4 text-right">
-                              <span className="text-[11px] font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20 tabular-nums ">
-                                {link.commission_pct}%
-                              </span>
-                            </td>
-                            <td className="px-8 py-4 text-right text-sm font-bold text-muted-foreground tabular-nums">{link.clicks}</td>
-                            <td className="px-8 py-4 text-right text-sm font-black text-foreground tabular-nums">{linkSales.length}</td>
-                            <td className="px-8 py-4 text-right text-sm font-black text-warning tabular-nums">{convRate}%</td>
-                            <td className="px-8 py-4 text-right text-sm font-black text-success tabular-nums">{fmt(linkRevenue)}</td>
-                            <td className="px-8 py-4 text-center">
-                              <span className={cn(
- "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold border ",
-                                link.is_active
-                                  ? "bg-success/10 text-success border-success/20"
-                                  : "bg-muted/30 text-muted-foreground border-border/30"
-                              )}>
-                                <span className={cn("h-1.5 w-1.5 rounded-full", link.is_active ? "bg-success" : "bg-muted-foreground")} />
-                                {link.is_active ? "Ativo" : "Pausado"}
-                              </span>
-                            </td>
-                            <td className="px-8 py-4">
-                              <div className="flex items-center justify-end gap-2">
-                                <button
-                                  onClick={() => copyLink(link.slug)}
-                                  className={cn(
- "h-9 w-9 rounded-xl flex items-center justify-center transition-all border",
-                                    copiedSlug === link.slug
-                                      ? "bg-success/10 text-success border-success/20"
-                                      : "bg-card text-muted-foreground border-border/40 hover:bg-muted/30 hover:text-foreground"
-                                  )}
-                                >
-                                  {copiedSlug === link.slug ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                                </button>
-                                <button
-                                  onClick={() => toggleLinkActive(link)}
-                                  className="h-9 w-9 rounded-xl flex items-center justify-center transition-all border bg-card text-muted-foreground border-border/40 hover:bg-muted/30 hover:text-foreground"
-                                >
-                                  {link.is_active ? <PowerOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {mySales.length > 0 && (
-            <Card className="border-border/40 overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between border-b border-border/40 px-8 py-6">
-                <div>
-                  <CardTitle className="text-xl font-black">Histórico de Comissões</CardTitle>
-                  <CardDescription className="text-xs font-medium ">{mySales.length} transações registradas</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-border/30 bg-muted/10">
-                        <th className="text-left px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Data</th>
-                        <th className="text-left px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Produto</th>
-                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Venda</th>
-                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">%</th>
-                        <th className="text-right px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Comissão</th>
-                        <th className="text-center px-8 py-4 text-[11px] font-semibold text-muted-foreground/60">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/30">
-                      {mySales.map((s) => (
-                        <tr key={s.id} className="hover:bg-muted/30 transition-all">
-                          <td className="px-8 py-4 text-xs font-bold text-muted-foreground tabular-nums font-mono">
-                            {new Date(s.created_at).toLocaleDateString("pt-BR")}
-                          </td>
-                          <td className="px-8 py-4 text-sm font-black text-foreground">{getProductName(s.product_id)}</td>
-                          <td className="px-8 py-4 text-right text-sm font-bold text-muted-foreground tabular-nums">{fmt(s.sale_amount)}</td>
-                          <td className="px-8 py-4 text-right text-xs font-black text-muted-foreground tabular-nums">{s.commission_pct}%</td>
-                          <td className="px-8 py-4 text-right text-sm font-black text-success tabular-nums">{fmt(s.commission_amount)}</td>
-                          <td className="px-8 py-4 text-center">
-                             <StatusPill status={s.status} />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
-
-      {/* ═══ MARKETPLACE TAB ═══ */}
-      {tab === "marketplace" && (
-        <div className="space-y-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-muted/30 p-6 rounded-[2.5rem] border border-border/50">
-            <div className="relative w-full md:max-w-md">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
-              <Input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Buscar produtos para afiliar..."
-                className="h-12 pl-12 rounded-[12px] border-border/50 bg-card font-bold"
-              />
-            </div>
-            <div className="text-[11px] font-semibold text-muted-foreground/40">
-              {affiliateProducts.filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase())).length} produtos encontrados
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {affiliateProducts.filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase())).map((p) => {
-              const pct = p.affiliate_commission || 30;
-              const earnPerSale = (Number(p.price) * pct) / 100;
-              return (
-                <Card key={p.id} className="p-6 group ">
-                   <div className="flex items-start gap-6">
-                      {p.image_url ? (
-                        <img src={p.image_url} alt="" className="h-20 w-20 rounded-[12px] object-cover ring-1 ring-border/30 " />
-                      ) : (
-                        <div className="h-20 w-20 rounded-[12px] bg-muted/40 flex items-center justify-center shrink-0">
-                          <ShoppingCart className="h-8 w-8 text-muted-foreground/30" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0 space-y-1">
-                        <div className="flex items-center justify-between gap-2">
-                           <h3 className="text-lg font-black truncate">{p.name}</h3>
-                           <span className="text-[11px] font-semibold text-success bg-success/10 px-2.5 py-1 rounded-lg border border-success/20 tabular-nums">
-                              {pct}% COMISSÃO
-                           </span>
-                        </div>
-                        <p className="text-xs font-bold text-muted-foreground/60 line-clamp-2 leading-relaxed">
-                           {p.description || "Este produtor oferece uma excelente oportunidade de afiliação com suporte completo."}
-                        </p>
-                        <div className="pt-4 flex items-center justify-between">
-                           <div className="space-y-0.5">
-                              <p className="text-[11px] font-semibold text-muted-foreground/40">Ganho Estimado</p>
-                              <p className="text-xl font-black text-success tabular-nums">{fmt(earnPerSale)}</p>
-                           </div>
-                           <Button
-                              onClick={() => { setSelectedProduct(p.id); setOpenCreate(true); }}
-                              className="h-10 px-6 rounded-xl font-semibold text-[11px] gap-2 "
-                           >
-                              Solicitar Afiliação
-                              <ArrowUpRight className="h-4 w-4" />
-                           </Button>
-                        </div>
-                      </div>
-                   </div>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Footer Info */}
-      <div className="pt-8 border-t border-border/40">
-         <div className="bg-primary/[0.02] border border-primary/10 rounded-[14px] p-6 flex items-center gap-6">
-            <div className="h-12 w-12 rounded-[12px] bg-primary/10 flex items-center justify-center shrink-0">
-               <Shield className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-               <p className="text-sm font-black">Infraestrutura Operacional Segura</p>
-               <p className="text-xs font-bold text-muted-foreground/60 leading-relaxed">
-                  Comissões creditadas automaticamente via split de pagamento. Transparência total e rastreamento em tempo real de cada clique e conversão.
-               </p>
-            </div>
-         </div>
-      </div>
-      </div>
+      <ProgramDialog product={configuringProduct} onOpenChange={(o) => { if (!o) setConfiguringId(null); }} onSave={saveProgram} />
     </div>
   );
 }

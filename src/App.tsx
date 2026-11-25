@@ -43,7 +43,6 @@ const Afiliados = lazy(() => import("./pages/vendas/Afiliados"));
 const Coproducoes = lazy(() => import("./pages/vendas/Coproducoes"));
 const Cupons = lazy(() => import("./pages/vendas/Cupons"));
 const Assinaturas = lazy(() => import("./pages/vendas/Assinaturas"));
-const DashboardAfiliado = lazy(() => import("./pages/vendas/DashboardAfiliado"));
 const ABTesting = lazy(() => import("./pages/vendas/ABTesting"));
 const AutoCupons = lazy(() => import("./pages/vendas/AutoCupons"));
 const CalculadoraLucro = lazy(() => import("./pages/vendas/CalculadoraLucro"));
@@ -59,7 +58,6 @@ const ControleGastos = lazy(() => import("./pages/financeiro/ControleGastos"));
 const Taxas = lazy(() => import("./pages/financeiro/Taxas"));
 const Suporte = lazy(() => import("./pages/Suporte"));
 const Gamificacao = lazy(() => import("./pages/Gamificacao"));
-const Marketplace = lazy(() => import("./pages/Marketplace"));
 const MemberArea = lazy(() => import("./pages/membros/MemberArea"));
 const CoursePage = lazy(() => import("./pages/membros/CoursePage"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
@@ -197,7 +195,7 @@ const App = () => (
                   <Route path="/vendas/cupons" element={<Cupons />} />
                   <Route path="/vendas/coproducoes" element={<Coproducoes />} />
                   <Route path="/vendas/assinaturas" element={<Assinaturas />} />
-                  <Route path="/vendas/dashboard-afiliado" element={<DashboardAfiliado />} />
+                  <Route path="/vendas/dashboard-afiliado" element={<Navigate to="/vendas/afiliados?tab=mine" replace />} />
                   <Route path="/vendas/ab-testing" element={<ABTesting />} />
 
                   <Route path="/vendas/auto-cupons" element={<AutoCupons />} />
@@ -219,7 +217,7 @@ const App = () => (
                   <Route path="/financeiro/notas" element={<Navigate to="/financeiro/saques" replace />} />
                   <Route path="/financeiro/taxas" element={<Taxas />} />
 
-                  <Route path="/marketplace" element={<Marketplace />} />
+                  <Route path="/marketplace" element={<Navigate to="/vendas/afiliados?tab=explore" replace />} />
                   <Route path="/membros" element={<MemberArea />} />
                   <Route path="/membros/curso/:courseId" element={<CoursePage />} />
                 </Route>
