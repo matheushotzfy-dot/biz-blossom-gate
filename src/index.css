@@ -4442,18 +4442,8 @@ html body .tech-scope section { scroll-margin-top: 80px; }
 .seller-detail-dialog [role="tabpanel"] { min-width: 0; }
 .seller-detail-dialog [role="tabpanel"] > * { max-width: 100%; }
 
-/* Inactive sellers: selected editorial ledger palette, account-theme compatible. */
-.admin-frame [data-admin-content] .inactive-workspace {
- --background: 210 40% 98%; --foreground: 224.35 60.53% 14.9%;
- --card: 0 0% 100%; --card-foreground: 224.35 60.53% 14.9%;
- --muted: 210 40% 98%; --muted-foreground: 215.38 16.32% 46.86%;
- --border: 214.29 31.82% 91.37%; --input: 214.29 31.82% 91.37%;
- --primary: 221.21 83.19% 53.33%; --primary-foreground: 0 0% 100%;
- --accent: 214 100% 97%; --accent-foreground: 224.35 60.53% 14.9%;
- --ring: 221.21 83.19% 53.33%; --success: 160.12 84.08% 39.41%;
- font-family: 'Manrope', sans-serif; background: hsl(var(--card)); color: hsl(var(--foreground));
-}
-.dark .admin-frame [data-admin-content] .inactive-workspace { --card: 216 60% 11%; --foreground: 210 40% 96%; --card-foreground: 210 40% 96%; --muted: 216 40% 16%; --muted-foreground: 215 22% 75%; --border: 216 32% 25%; --input: 216 32% 30%; --accent: 216 40% 19%; --primary: 210 90% 64%; --primary-foreground: 216 60% 8%; }
+/* Inactive sellers: usa os tokens do painel admin (verde), sem paleta própria. */
+.admin-frame [data-admin-content] .inactive-workspace { background: hsl(var(--card)); color: hsl(var(--foreground)); }
 .admin-shell .inactive-workspace *, .inactive-workspace * { letter-spacing: 0; box-shadow: none; }
 .admin-shell .inactive-workspace button { border-radius: 4px; }
 .admin-shell .inactive-workspace .bg-primary { background: hsl(var(--primary)) !important; color: hsl(var(--primary-foreground)) !important; }

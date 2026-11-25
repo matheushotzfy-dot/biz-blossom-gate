@@ -667,7 +667,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
               </div>
               <div className="flex flex-wrap gap-1.5 lg:justify-end shrink-0">
                 <Button size="sm" variant="outline" className="h-8 rounded-lg text-[11px] gap-1.5" onClick={() => selectedUser && handleImpersonate(selectedUser.user_id)} disabled={impersonating}>
-                  <LogIn className="h-3 w-3" /> Login as
+                  <LogIn className="h-3 w-3" /> Entrar como o seller
                 </Button>
                 {selectedUser && !isFrozen(selectedUser) ? (
                   <Button size="sm" variant="outline" className="h-8 rounded-lg text-[11px] gap-1.5 border-info/30 text-info hover:bg-info/10" onClick={() => handleFreezeBalance(selectedUser.user_id, true)}>
@@ -685,7 +685,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <CheckCircle2 className="h-3 w-3" /> Verificar e-mail
                   </Button>
                 )}
-                {selectedUser && emailVerified !== false && (
+                {selectedUser && emailVerified === true && (
                   <Button size="sm" variant="outline" disabled={emailVerifyLoading} className="h-8 rounded-lg text-[11px] gap-1.5 border-warning/30 text-warning hover:bg-warning/10" onClick={() => handleSetEmailVerified(selectedUser.user_id, false)}>
                     <AlertTriangle className="h-3 w-3" /> Remover verificação
                   </Button>

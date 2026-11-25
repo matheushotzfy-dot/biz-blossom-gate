@@ -79,7 +79,7 @@ export function Seller360Panel({ userId, onChanged }: Seller360PanelProps) {
       </Section>
 
       <Section icon={TrendingUp} title="Vendas">
-        <Tile label="Faturamento aprovado" value={brl(s.approved_amount)} sub={`${s.approved_count} vendas`} />
+        <Tile label="Faturamento aprovado" value={brl(s.approved_amount)} sub={`${s.approved_count} ${s.approved_count === 1 ? "venda" : "vendas"}`} />
         <Tile label="Últimos 30 dias" value={brl(s.last_30d_amount)} />
         <Tile label="Ticket médio" value={brl(ticket)} />
         <Tile label="Líquido do seller" value={brl(s.net_amount)} />
@@ -88,13 +88,13 @@ export function Seller360Panel({ userId, onChanged }: Seller360PanelProps) {
       </Section>
 
       <Section icon={RotateCcw} title="Reembolsos e disputas">
-        <Tile label="Reembolsado" value={brl(s.refunded_amount)} sub={`${s.refunded_count} vendas`} />
+        <Tile label="Reembolsado" value={brl(s.refunded_amount)} sub={`${s.refunded_count} ${s.refunded_count === 1 ? "venda" : "vendas"}`} />
         <Tile label="Disputas abertas" value={String(d.open)} tone={d.open > 0 ? "danger" : "muted"} />
         <Tile label="Ganhas / perdidas" value={`${d.won} / ${d.lost}`} sub={`${d.total} no total`} />
       </Section>
 
       <Section icon={ArrowDownToLine} title="Saques">
-        <Tile label="Pagos" value={brl(w.paid)} sub={`${w.count} pedidos`} />
+        <Tile label="Pagos" value={brl(w.paid)} sub={`${w.count} ${w.count === 1 ? "pedido" : "pedidos"}`} />
         <Tile label="Pendentes" value={brl(w.pending)} tone="muted" />
         <Tile label="Recusados" value={String(w.rejected_count)} tone="muted" />
       </Section>
