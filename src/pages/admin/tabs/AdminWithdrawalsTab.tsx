@@ -1,838 +1,408 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import {
- ArrowDownToLine, Search, CheckCircle2, XCircle, Clock, Wallet, UserCog,
- ToggleLeft, AlertTriangle, ShieldAlert, DollarSign, ArrowUpDown, Filter,
- CheckSquare, Plus, Minus, FileText, TrendingUp, TrendingDown, Banknote,
- Eye, ChevronDown, ChevronUp, Users, Copy,
-} from "lucide-react";
-import { StatusBadge } from "@/components/StatusBadge";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { AlertTriangle, ArrowDownToLine, ArrowUpDown, CheckCircle2, Clock, FileText, Loader2, RefreshCw, Search, ShieldAlert, Wallet, XCircle } from "lucide-react";
 import { toast } from "sonner";
-import { logAdminAction } from "@/lib/auditLog";
-import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
-import { PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented, PremiumEmpty, premiumTable } from "./AdminPremium";
-import { formatCurrency } from "@/lib/utils";
-import { friendlyError } from "@/lib/friendlyError";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/hooks/useAuth";
 import { useReason } from "@/components/seller-ui/confirm";
+import { logAdminAction } from "@/lib/auditLog";
+import { friendlyError } from "@/lib/friendlyError";
 import AdminPager from "@/components/admin/AdminPager";
-import { displayPixKey } from "@/lib/financial-input";
-
-/* ── Types ── */
-interface AuditLog { id: string; admin_user_id: string; action: string; entity_id: string | null; created_at: string; }
-interface AutoWithdrawConfig { id: string; user_id: string; enabled: boolean; max_amount: number; admin_user_id: string; }
-interface BalanceAdjustment { id: string; user_id: string; amount: number; type: string; reason: string; admin_user_id: string; created_at: string; }
-
-interface Props {
- withdrawals: Tables<"withdrawals">[];
- profiles: Tables<"profiles">[];
- onWithdrawalAction: (id: string, action: "approved" | "rejected") => void;
- onReload: () => void;
- fmtCurrency: (v: number) => string;
-}
-
-/* ── Risk helpers ── */
-const isNewSeller = (profile: Tables<"profiles"> | undefined) => {
- if (!profile) return true;
- const created = new Date(profile.created_at);
- const daysOld = (Date.now() - created.getTime()) / (1000 * 60 * 60 * 24);
- return daysOld < 30;
-};
-const isHighValue = (amount: number) => amount >= 50000;
-
-/* ── PIX key labels ── */
-const PIX_KEY_LABEL: Record<string, string> = {
-  email: "E-mail",
-  cpf: "CPF",
-  cnpj: "CNPJ",
-  phone: "Telefone",
-  celular: "Telefone",
-  random: "Aleatória",
-  evp: "Aleatória",
-};
-
-/**
- * Destino do pagamento — revela sob demanda a chave PIX (ou endereço cripto)
- * do vendedor, deixando explícito o TIPO da chave e facilitando a cópia.
- */
-function PayoutTarget({ withdrawal }: { withdrawal: Tables<"withdrawals"> }) {
-  const [revealed, setRevealed] = useState<{ type: string; value: string } | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const copy = (value: string, label: string) => {
-    navigator.clipboard.writeText(value);
-    toast.success(`${label} copiado`);
-  };
-
-  const chip = (label: string, tone: "primary" | "warning" | "muted" = "muted") => (
-    <span className={
-      tone === "primary" ? "rounded-md border border-primary/25 bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary"
-        : tone === "warning" ? "rounded-md border border-warning/25 bg-warning/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-warning"
-          : "rounded-md border border-border bg-muted/40 px-1.5 py-0.5 text-[9px] font-bold uppercase text-muted-foreground"
-    }>{label}</span>
-  );
-
-  const copyBtn = (value: string, label: string) => (
-    <button
-      type="button"
-      onClick={() => copy(value, label)}
-      title={value}
-      className="flex max-w-[190px] items-center gap-1.5 rounded-lg border border-border/60 bg-muted/30 px-2 py-1 text-left transition-colors hover:border-border hover:bg-muted/60"
-    >
-      <Copy className="h-3 w-3 shrink-0 text-muted-foreground" />
-      <span className="truncate font-mono text-[10px] text-foreground/80">{value}</span>
-    </button>
-  );
-
-  const reveal = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.rpc("admin_reveal_pix_keys", { _user_id: withdrawal.user_id });
-      if (error) { toast.error("Sem permissão para revelar a chave"); return; }
-      const rows = (data as { id: string; key_type: string; key_value: string; is_default: boolean }[]) || [];
-      const match = rows.find(r => r.id === withdrawal.pix_key_id) || rows.find(r => r.is_default) || rows[0];
-      if (!match) { toast.error("Vendedor sem chave PIX cadastrada"); return; }
-      setRevealed({ type: match.key_type, value: match.key_value });
-    } finally {
-      setLoading(false);
-    }
-  }, [withdrawal.pix_key_id, withdrawal.user_id]);
-
-  if (withdrawal.withdrawal_type === "crypto") {
-    return (
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-1">
-          {chip(withdrawal.crypto_currency || "Cripto", "warning")}
-          {withdrawal.crypto_network ? chip(withdrawal.crypto_network) : null}
-        </div>
-        {withdrawal.crypto_address ? copyBtn(withdrawal.crypto_address, "Endereço") : <span className="text-[10px] text-muted-foreground">—</span>}
-      </div>
-    );
-  }
-
-  if (withdrawal.pix_copy_paste_code) {
-    return (
-      <div className="flex flex-col gap-1">
-        {chip("Copia e Cola", "primary")}
-        {copyBtn(withdrawal.pix_copy_paste_code, "Código PIX")}
-      </div>
-    );
-  }
-
-  if (revealed) {
-    return (
-      <div className="flex flex-col gap-1">
-        {chip(PIX_KEY_LABEL[revealed.type?.toLowerCase()] || revealed.type || "PIX", "primary")}
-        {copyBtn(displayPixKey(revealed.value, revealed.type), "Chave PIX")}
-      </div>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={reveal}
-      disabled={loading}
-      className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/30 px-2 py-1 text-[10px] font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-60"
-    >
-      <Eye className="h-3 w-3" /> {loading ? "Abrindo..." : "Ver chave PIX"}
-    </button>
-  );
-}
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { brl } from "@/features/admin-finance/types";
+import { PremiumEmpty, PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented } from "./AdminPremium";
+import { AdjustmentDialog } from "@/features/admin-withdrawals/AdjustmentDialog";
+import { AutoApprovalDialog, type AutoConfig } from "@/features/admin-withdrawals/AutoApprovalDialog";
+import { AdjustmentList, StatementList } from "@/features/admin-withdrawals/LedgerLists";
+import { QueueCards, QueueTable, type RowContext } from "@/features/admin-withdrawals/WithdrawalRows";
+import {
+  PAYOUTS_AVAILABLE, buildStatement, isHighValue, isNewSeller, sortQueue, summarizeWithdrawals, withdrawalFlags,
+  type Adjustment, type RejectOutcome,
+} from "@/features/admin-withdrawals/withdrawalsModel";
 
 type SubTab = "queue" | "adjustments" | "statement";
+type StatusFilter = "pending" | "approved" | "rejected" | "all";
+type PersonRow = Pick<Tables<"profiles">, "user_id" | "full_name" | "email" | "created_at" | "seller_type">;
 
+const PAGE_SIZE = 50;
+/** Limite com que o painel carrega os saques (ver AdminDashboard). */
+const LOAD_CAP = 5000;
+const MAX_PROOF_BYTES = 5 * 1024 * 1024;
 
-export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawalAction, onReload, fmtCurrency }: Props) {
+interface Props {
+  withdrawals: Tables<"withdrawals">[];
+  profiles: Tables<"profiles">[];
+  onReload: () => void;
+}
+
+function LoadProblem({ what, error, onRetry }: { what: string; error: unknown; onRetry: () => void }) {
+  return (
+    <div role="alert" className="flex flex-col items-start gap-2 rounded-[12px] border border-destructive/30 bg-destructive/5 p-4 text-[13px]">
+      <p className="flex items-center gap-2 font-semibold text-destructive"><AlertTriangle className="h-4 w-4" /> Não foi possível carregar {what}.</p>
+      <p className="text-muted-foreground">{friendlyError(error, "Tente de novo em instantes.")}</p>
+      <Button type="button" size="sm" variant="outline" onClick={onRetry}>Tentar de novo</Button>
+    </div>
+  );
+}
+
+export default function AdminWithdrawalsTab({ withdrawals, profiles, onReload }: Props) {
+  const { user } = useAuth();
   const { ask: askReason, dialog: reasonDialog } = useReason();
- const { user } = useAuth();
- const [search, setSearch] = useState("");
- const [statusFilter, setStatusFilter] = useState("all");
- const [riskFilter, setRiskFilter] = useState("all");
- const [originFilter, setOriginFilter] = useState("all");
- const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
- const [autoConfigs, setAutoConfigs] = useState<AutoWithdrawConfig[]>([]);
- const [adjustments, setAdjustments] = useState<BalanceAdjustment[]>([]);
- const [autoConfigDialog, setAutoConfigDialog] = useState<string | null>(null);
- const [autoEnabled, setAutoEnabled] = useState(false);
- const [autoMaxAmount, setAutoMaxAmount] = useState("100");
- const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
- const [batchProcessing, setBatchProcessing] = useState(false);
- const [adjustDialog, setAdjustDialog] = useState(false);
- const [adjustUserId, setAdjustUserId] = useState("");
- const [adjustAmount, setAdjustAmount] = useState("");
- const [adjustType, setAdjustType] = useState<"credit" | "debit">("credit");
- const [adjustReason, setAdjustReason] = useState("");
- const [subTab, setSubTab] = useState<SubTab>("queue");
- const [rejectDialog, setRejectDialog] = useState<string | null>(null);
- const [rejectReason, setRejectReason] = useState("");
- const [page, setPage] = useState(1);
- const PAGE_SIZE = 50;
+  const [subTab, setSubTab] = useState<SubTab>("queue");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("pending");
+  const [riskFilter, setRiskFilter] = useState("all");
+  const [originFilter, setOriginFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [adjPage, setAdjPage] = useState(1);
+  const [stmtPage, setStmtPage] = useState(1);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [rejecting, setRejecting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [adjustOpen, setAdjustOpen] = useState(false);
+  const [autoSeller, setAutoSeller] = useState<string | null>(null);
+  const [proofBusy, setProofBusy] = useState<string | null>(null);
 
-  useEffect(() => {
-    Promise.all([
-      supabase.from("audit_logs").select("id,admin_user_id,action,entity_id,created_at")
-        .or("action.eq.approve_withdrawal,action.eq.reject_withdrawal")
-        .order("created_at", { ascending: false }).limit(500),
-      supabase.from("seller_auto_withdraw").select("id, user_id, enabled, max_amount, admin_user_id"),
-      supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").order("created_at", { ascending: false }).limit(300),
-    ]).then(([auditRes, autoRes, adjRes]) => {
-      if (auditRes.data) setAuditLogs(auditRes.data as AuditLog[]);
-      if (autoRes.data) setAutoConfigs(autoRes.data as AutoWithdrawConfig[]);
-      if (adjRes.data) setAdjustments(adjRes.data as BalanceAdjustment[]);
-    }).catch((e) => {
-      console.error("[AdminWithdrawalsTab] load error:", e);
-      toast.error("Erro ao carregar dados de saques");
-    });
-  }, []);
-
- /* ── Helpers ── */
- const getProfile = (userId: string) => profiles.find(p => p.user_id === userId);
- const getSellerName = (userId: string) => getProfile(userId)?.full_name || "—";
- const getSellerEmail = (userId: string) => getProfile(userId)?.email || "";
- const getSellerType = (userId: string) => getProfile(userId)?.seller_type || null;
- const getAutoConfig = (userId: string) => autoConfigs.find(c => c.user_id === userId);
- const getAdminName = (adminUserId: string) => getProfile(adminUserId)?.full_name || adminUserId.slice(0, 8);
- const getWithdrawalAudit = (withdrawalId: string) => auditLogs.find(l => l.entity_id === withdrawalId);
-
- /* ── KPIs ── */
- const pending = withdrawals.filter(w => w.status === "pending");
- const approved = withdrawals.filter(w => w.status === "approved");
- const rejected = withdrawals.filter(w => w.status === "rejected");
- const totalPending = pending.reduce((a, w) => a + Number(w.amount), 0);
- const totalApproved = approved.reduce((a, w) => a + Number(w.amount), 0);
- const totalFees = withdrawals.reduce((a, w) => a + Number(w.fee_amount), 0);
- const autoEnabledCount = autoConfigs.filter(c => c.enabled).length;
- const riskCount = pending.filter(w => isNewSeller(getProfile(w.user_id)) || isHighValue(Number(w.amount))).length;
- const totalAdjCredits = adjustments.filter(a => a.type === "credit").reduce((s, a) => s + Number(a.amount), 0);
- const totalAdjDebits = adjustments.filter(a => a.type === "debit").reduce((s, a) => s + Number(a.amount), 0);
-
- /* ── Filtering ── */
- const filtered = useMemo(() => {
- return withdrawals.filter(w => {
- if (statusFilter !== "all" && w.status !== statusFilter) return false;
- if (originFilter !== "all" && (w.origin || "manual") !== originFilter) return false;
- if (riskFilter === "new_seller" && !isNewSeller(getProfile(w.user_id))) return false;
- if (riskFilter === "high_value" && !isHighValue(Number(w.amount))) return false;
- if (riskFilter === "flagged" && !isNewSeller(getProfile(w.user_id)) && !isHighValue(Number(w.amount))) return false;
- if (!search) return true;
- const s = search.toLowerCase();
- return getSellerName(w.user_id).toLowerCase().includes(s) || w.id.includes(s);
- });
- }, [withdrawals, statusFilter, riskFilter, originFilter, search, profiles]);
-
- useEffect(() => { setPage(1); }, [statusFilter, riskFilter, originFilter, search]);
-
- const pagedFiltered = useMemo(() => {
- const from = (page - 1) * PAGE_SIZE;
- return filtered.slice(from, from + PAGE_SIZE);
- }, [filtered, page]);
-
- /* ── Batch Approval ── */
- const handleBatchApprove = async () => {
-  toast.error("Saques estão indisponíveis sem uma adquirente configurada.");
- };
-
-  const handleBatchReject = async () => {
-  if (selectedIds.size === 0) { toast.error("Selecione ao menos 1 saque"); return; }
-  const reason = await askReason({
-    title: `Recusar ${selectedIds.size} ${selectedIds.size === 1 ? "saque" : "saques"}`,
-    description: "Cada valor reservado volta para o saldo do seller. O mesmo motivo vale para todos.",
-    label: "Motivo da recusa",
-    defaultValue: "Rejeitado em lote pela administração",
-    minLength: 5,
-    confirmLabel: "Recusar saques",
-    tone: "danger",
+  const autoQ = useQuery({
+    queryKey: ["wd-auto"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("seller_auto_withdraw").select("id, user_id, enabled, max_amount, admin_user_id");
+      if (error) throw error;
+      return (data ?? []) as AutoConfig[];
+    },
   });
-  if (!reason) return;
-  setBatchProcessing(true);
-  let ok = 0, fail = 0;
-  for (const id of selectedIds) {
-  const { error } = await supabase.from("withdrawals")
-    .update({ status: "rejected", rejection_reason: reason.trim(), processed_by: user?.id })
-    .eq("id", id).eq("status", "pending");
-  if (!error) { await logAdminAction("reject_withdrawal", "withdrawal", id, { method: "batch", reason: reason.trim() }); ok++; }
-  else { fail++; }
-  }
-  let msg = `${ok} saques recusados em lote`;
-  if (fail > 0) msg += `, ${fail} falhas`;
-  toast.success(msg);
-  setSelectedIds(new Set());
-  setBatchProcessing(false);
-  if (ok > 0) onReload();
+  const adjQ = useQuery({
+    queryKey: ["wd-adjustments"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("balance_adjustments").select("id, user_id, amount, type, reason, admin_user_id, created_at").order("created_at", { ascending: false }).limit(300);
+      if (error) throw error;
+      return (data ?? []) as Adjustment[];
+    },
+  });
+  const adjustments = adjQ.data ?? [];
+
+  /* ── Nomes: a lista do painel tem só os perfis mais novos; o resto é buscado sob demanda ── */
+  const knownProfiles = useMemo(() => new Map<string, PersonRow>(profiles.map((p) => [p.user_id, p])), [profiles]);
+  const missingIds = useMemo(() => {
+    const need = new Set<string>();
+    for (const w of withdrawals) { need.add(w.user_id); if (w.processed_by) need.add(w.processed_by); }
+    for (const a of adjustments) { need.add(a.user_id); need.add(a.admin_user_id); }
+    return [...need].filter((id) => !knownProfiles.has(id)).sort().slice(0, 100);
+  }, [withdrawals, adjustments, knownProfiles]);
+  const extraQ = useQuery({
+    queryKey: ["wd-extra-profiles", missingIds.join(",")],
+    enabled: missingIds.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("profiles").select("user_id, full_name, email, created_at, seller_type").in("user_id", missingIds);
+      if (error) throw error;
+      return (data ?? []) as PersonRow[];
+    },
+  });
+  const people = useMemo(() => {
+    const m = new Map(knownProfiles);
+    for (const p of extraQ.data ?? []) m.set(p.user_id, p);
+    return m;
+  }, [knownProfiles, extraQ.data]);
+
+  const nameOf = useCallback((id: string | null) => {
+    if (!id) return "—";
+    const p = people.get(id);
+    return p?.full_name || p?.email || `Conta ${id.slice(0, 8)}`;
+  }, [people]);
+  const emailOf = useCallback((id: string) => people.get(id)?.email || "", [people]);
+  const createdAtOf = useCallback((id: string) => people.get(id)?.created_at, [people]);
+  const autoOf = useCallback((id: string) => (autoQ.data ?? []).find((c) => c.user_id === id), [autoQ.data]);
+
+  const now = useMemo(() => Date.now(), [withdrawals]); // eslint-disable-line react-hooks/exhaustive-deps
+  const totals = useMemo(() => summarizeWithdrawals(withdrawals, createdAtOf, now), [withdrawals, createdAtOf, now]);
+
+  /* ── Fila ── */
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const rows = withdrawals.filter((w) => {
+      if (statusFilter !== "all" && w.status !== statusFilter) return false;
+      if (originFilter !== "all" && (w.origin || "manual") !== originFilter) return false;
+      const amount = Number(w.amount) || 0;
+      if (riskFilter === "flagged" && withdrawalFlags(amount, createdAtOf(w.user_id), now).length === 0) return false;
+      if (riskFilter === "new_seller" && !isNewSeller(createdAtOf(w.user_id), now)) return false;
+      if (riskFilter === "high_value" && !isHighValue(amount)) return false;
+      if (!q) return true;
+      return nameOf(w.user_id).toLowerCase().includes(q) || emailOf(w.user_id).toLowerCase().includes(q) || w.id.toLowerCase().includes(q);
+    });
+    return sortQueue(rows, statusFilter === "pending");
+  }, [withdrawals, statusFilter, originFilter, riskFilter, search, createdAtOf, nameOf, emailOf, now]);
+
+  const pageRows = useMemo(() => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), [filtered, page]);
+  const pagePending = useMemo(() => pageRows.filter((w) => w.status === "pending"), [pageRows]);
+  const pendingIds = useMemo(() => new Set(withdrawals.filter((w) => w.status === "pending").map((w) => w.id)), [withdrawals]);
+  const selectedIds = useMemo(() => [...selected].filter((id) => pendingIds.has(id)), [selected, pendingIds]);
+  const allSelected = pagePending.length > 0 && pagePending.every((w) => selected.has(w.id));
+
+  useEffect(() => { setPage(1); setSelected(new Set()); }, [statusFilter, riskFilter, originFilter, search]);
+  useEffect(() => { setSelected(new Set()); }, [page]);
+  useEffect(() => {
+    const last = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    if (page > last) setPage(last);
+  }, [filtered.length, page]);
+
+  const toggle = (id: string) => setSelected((prev) => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  const toggleAll = () => setSelected((prev) => {
+    const n = new Set(prev);
+    if (allSelected) pagePending.forEach((w) => n.delete(w.id)); else pagePending.forEach((w) => n.add(w.id));
+    return n;
+  });
+
+  /* ── Recusar (um ou vários): cada saque é tratado sozinho e o resultado é contado de verdade ── */
+  const rejectMany = async (ids: string[]) => {
+    if (ids.length === 0) return;
+    const many = ids.length > 1;
+    const reason = await askReason({
+      title: many ? `Recusar ${ids.length} saques` : "Recusar este saque",
+      description: many
+        ? "O valor reservado de cada saque volta para o saldo do seller. O mesmo motivo vale para todos e fica na auditoria."
+        : "O valor reservado volta para o saldo do seller. O motivo fica na auditoria; o seller recebe só o aviso de saque recusado.",
+      label: "Motivo da recusa", minLength: 5, confirmLabel: many ? "Recusar saques" : "Recusar saque", tone: "danger",
+    });
+    if (!reason) return;
+    setRejecting(true);
+    const out: RejectOutcome = { done: [], skipped: [], failed: [] };
+    try {
+      for (const id of ids) {
+        const { data, error } = await supabase.from("withdrawals")
+          .update({ status: "rejected", rejection_reason: reason.slice(0, 500), processed_by: user?.id ?? null })
+          .eq("id", id).eq("status", "pending").select("id");
+        if (error) out.failed.push({ id, message: friendlyError(error, "Não foi possível recusar.") });
+        else if (!data || data.length === 0) out.skipped.push(id);
+        else out.done.push(id);
+      }
+      await Promise.all(out.done.map((id) => logAdminAction("reject_withdrawal", "withdrawal", id, { reason, method: many ? "batch" : "single" })));
+    } finally {
+      setRejecting(false);
+    }
+    const parts: string[] = [];
+    if (out.done.length) parts.push(out.done.length === 1 ? "1 saque recusado" : `${out.done.length} saques recusados`);
+    if (out.skipped.length) parts.push(`${out.skipped.length} já tinha${out.skipped.length > 1 ? "m" : ""} sido processado${out.skipped.length > 1 ? "s" : ""} por outra pessoa`);
+    if (out.failed.length) parts.push(`${out.failed.length} com erro (${out.failed[0].message})`);
+    const text = parts.join(" · ");
+    if (out.failed.length === 0 && out.skipped.length === 0) toast.success(`${text}. O valor voltou para o saldo do seller.`);
+    else if (out.done.length === 0) toast.error(text);
+    else toast.warning(text);
+    setSelected(new Set());
+    if (out.done.length > 0 || out.skipped.length > 0) onReload();
   };
 
- /* ── Single Reject with Reason ── */
- const handleRejectWithReason = async () => {
- if (!rejectDialog || !rejectReason.trim()) { toast.error("Informe o motivo da rejeição"); return; }
- if (rejectReason.trim().length < 3) { toast.error("Motivo muito curto"); return; }
- const { error } = await supabase.from("withdrawals")
-   .update({ status: "rejected", rejection_reason: rejectReason.trim(), processed_by: user?.id })
-   .eq("id", rejectDialog).eq("status", "pending");
- if (error) { toast.error(friendlyError(error, "Erro ao recusar")); return; }
- await logAdminAction("reject_withdrawal", "withdrawal", rejectDialog, { reason: rejectReason.trim() });
- toast.success("Saque recusado com motivo registrado");
- setRejectDialog(null);
- setRejectReason("");
- onReload();
- };
+  /* ── Comprovante ── */
+  const uploadProof = async (id: string, file: File) => {
+    if (!user) { toast.error("Sessão expirada. Entre de novo."); return; }
+    if (!(file.type.startsWith("image/") || file.type === "application/pdf")) { toast.error("Envie uma imagem ou um PDF."); return; }
+    if (file.size > MAX_PROOF_BYTES) { toast.error("O arquivo passa de 5 MB."); return; }
+    setProofBusy(id);
+    try {
+      const path = `${id}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
+      const { error: upErr } = await supabase.storage.from("withdrawal-proofs").upload(path, file, { upsert: true });
+      if (upErr) { toast.error(friendlyError(upErr, "Não foi possível enviar o arquivo.")); return; }
+      const { error } = await supabase.from("withdrawals").update({ payment_proof_url: path }).eq("id", id);
+      if (error) { toast.error(friendlyError(error, "O arquivo subiu, mas não foi possível vinculá-lo ao saque.")); return; }
+      await logAdminAction("upload_withdrawal_proof", "withdrawal", id, { path });
+      toast.success("Comprovante anexado.");
+      onReload();
+    } finally {
+      setProofBusy(null);
+    }
+  };
+  const viewProof = async (path: string) => {
+    // a janela é aberta antes da espera, senão o navegador trata como pop-up bloqueado
+    const win = window.open("about:blank", "_blank");
+    const { data, error } = await supabase.storage.from("withdrawal-proofs").createSignedUrl(path, 300);
+    if (error || !data?.signedUrl) { win?.close(); toast.error("Não foi possível abrir o comprovante."); return; }
+    if (win) { win.opener = null; win.location.href = data.signedUrl; } else toast.error("O navegador bloqueou a janela. Libere pop-ups e tente de novo.");
+  };
 
- /* ── Proof upload ── */
- const handleProofUpload = async (withdrawalId: string, file: File) => {
-   if (!user) return;
-   if (file.size > 5 * 1024 * 1024) { toast.error("Arquivo > 5MB"); return; }
-   const path = `${withdrawalId}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
-   const { error: upErr } = await supabase.storage.from("withdrawal-proofs").upload(path, file, { upsert: true });
-   if (upErr) { toast.error("Erro ao enviar: " + friendlyError(upErr)); return; }
-   const { error } = await supabase.from("withdrawals").update({ payment_proof_url: path }).eq("id", withdrawalId);
-   if (error) { toast.error("Erro ao salvar"); return; }
-   await logAdminAction("upload_withdrawal_proof", "withdrawal", withdrawalId, { path });
-   toast.success("Comprovante anexado");
-   onReload();
- };
+  const refresh = async () => {
+    setRefreshing(true);
+    try { onReload(); await Promise.all([autoQ.refetch(), adjQ.refetch()]); } finally { setRefreshing(false); }
+  };
 
- const handleViewProof = async (path: string) => {
-   const { data, error } = await supabase.storage.from("withdrawal-proofs").createSignedUrl(path, 300);
-   if (error || !data?.signedUrl) { toast.error("Erro ao gerar link"); return; }
-   window.open(data.signedUrl, "_blank", "noopener,noreferrer");
- };
+  const ctx: RowContext = {
+    nameOf: (id) => nameOf(id), emailOf, createdAtOf, autoOf, adminNameOf: nameOf, selected, onToggle: toggle,
+    onReject: (id) => void rejectMany([id]), onAuto: setAutoSeller, onProof: (id, f) => void uploadProof(id, f), onViewProof: (p) => void viewProof(p), proofBusy, now,
+  };
 
- const toggleSelect = (id: string) => {
- setSelectedIds(prev => {
- const n = new Set(prev);
- if (n.has(id)) n.delete(id); else n.add(id);
- return n;
- });
- };
- const toggleSelectAll = () => {
- const pendingFiltered = filtered.filter(w => w.status === "pending");
- if (selectedIds.size === pendingFiltered.length) setSelectedIds(new Set());
- else setSelectedIds(new Set(pendingFiltered.map(w => w.id)));
- };
+  /* ── Ajustes e extrato ── */
+  const adjTotals = useMemo(() => ({
+    credit: adjustments.filter((a) => a.type === "credit").reduce((s, a) => s + Number(a.amount), 0),
+    debit: adjustments.filter((a) => a.type === "debit").reduce((s, a) => s + Number(a.amount), 0),
+  }), [adjustments]);
+  const adjRows = adjustments.slice((adjPage - 1) * PAGE_SIZE, adjPage * PAGE_SIZE);
+  const statement = useMemo(() => buildStatement(withdrawals, adjustments, (id) => nameOf(id), 100), [withdrawals, adjustments, nameOf]);
+  const stmtRows = statement.slice((stmtPage - 1) * PAGE_SIZE, stmtPage * PAGE_SIZE);
 
- /* ── Auto Config ── */
- const openAutoConfigDialog = (userId: string) => {
- const config = getAutoConfig(userId);
- setAutoEnabled(config?.enabled ?? false);
- setAutoMaxAmount(String(config?.max_amount ?? 100));
- setAutoConfigDialog(userId);
- };
- const saveAutoConfig = async () => {
- if (!autoConfigDialog || !user) return;
- const payload = { user_id: autoConfigDialog, enabled: autoEnabled, max_amount: Number(autoMaxAmount), admin_user_id: user.id, updated_at: new Date().toISOString() };
- const { error } = await supabase.from("seller_auto_withdraw").upsert(payload, { onConflict: "user_id" });
- if (error) { toast.error("Erro ao salvar"); return; }
- toast.success("Config salva!");
- await logAdminAction("update_seller_auto_withdraw", "seller_auto_withdraw", autoConfigDialog, payload);
- setAutoConfigDialog(null);
- const { data } = await supabase.from("seller_auto_withdraw").select("*");
- if (data) setAutoConfigs(data as AutoWithdrawConfig[]);
- };
+  const heroStatus = totals.pendingCount > 0
+    ? { tone: "warning" as const, label: `${totals.pendingCount} ${totals.pendingCount === 1 ? "saque na fila" : "saques na fila"}`, pulse: true }
+    : { tone: "success" as const, label: "Fila zerada" };
 
- /* ── Balance Adjustment ── */
- const handleAdjustment = async () => {
- if (!adjustUserId || !adjustAmount || !adjustReason.trim()) { toast.error("Preencha todos os campos obrigatórios"); return; }
- if (!user) return;
- const amount = Number(adjustAmount);
- if (amount <= 0) { toast.error("Valor deve ser positivo"); return; }
- if (!Number.isFinite(amount) || amount > 1_000_000) { toast.error("Valor inválido"); return; }
- // Audited server routine (same as the seller record): validates role and writes the ledger.
- const { error } = await supabase.rpc("admin_request_balance_adjustment", {
- _user_id: adjustUserId, _type: adjustType, _amount: amount, _reason: adjustReason.trim(),
- });
- if (error) { toast.error("Erro ao salvar ajuste"); return; }
- toast.success(`Ajuste de ${adjustType === "credit" ? "+" : "-"}${formatCurrency(amount)} aplicado`);
- await logAdminAction("balance_adjustment", "balance_adjustments", adjustUserId, { amount, type: adjustType, reason: adjustReason.trim() });
- setAdjustDialog(false);
- setAdjustUserId(""); setAdjustAmount(""); setAdjustReason("");
- const { data } = await supabase.from("balance_adjustments").select("*").order("created_at", { ascending: false }).limit(300);
- if (data) setAdjustments(data as BalanceAdjustment[]);
- };
+  const emptySub = withdrawals.length === 0 ? "Ainda não há pedidos de saque."
+    : statusFilter === "pending" && totals.pendingCount === 0 && !search && riskFilter === "all" && originFilter === "all" ? "Nenhum saque está esperando. O histórico está em “Todos”."
+      : "Nenhum saque com esses filtros.";
 
- /* ── Seller Type Badge ── */
- const SellerTypeBadge = ({ type }: { type: string | null }) => {
- if (type === "black") return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-zinc-800 text-zinc-400 border border-zinc-700">B</span>;
- if (type === "white") return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-muted text-muted-foreground border border-border">W</span>;
- return <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-warning/10 text-warning border border-warning/20">?</span>;
- };
-
- /* ── Risk Badge ── */
- const RiskBadge = ({ withdrawal }: { withdrawal: Tables<"withdrawals"> }) => {
- const flags: string[] = [];
- if (isNewSeller(getProfile(withdrawal.user_id))) flags.push("Novo");
- if (isHighValue(Number(withdrawal.amount))) flags.push("Alto Valor");
- if (flags.length === 0) return null;
- return (
- <div className="flex flex-col gap-0.5">
- {flags.map(f => (
- <span key={f} className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 whitespace-nowrap">{f}</span>
- ))}
- </div>
- );
- };
-
- /* ── Global Statement Data ── */
- const statementEntries = useMemo(() => {
- const entries: { date: string; type: string; description: string; amount: number; positive: boolean }[] = [];
- // Completed transactions = money IN
- // We don't have full tx data here, so we show withdrawals and adjustments
- withdrawals.filter(w => w.status === "approved").forEach(w => {
- entries.push({ date: w.processed_at || w.created_at, type: "Saque", description: `Saque para ${getSellerName(w.user_id)}`, amount: -Number(w.net_amount), positive: false });
- entries.push({ date: w.processed_at || w.created_at, type: "Taxa Saque", description: `Taxa de saque - ${getSellerName(w.user_id)}`, amount: Number(w.fee_amount), positive: true });
- });
- adjustments.forEach(a => {
- entries.push({ date: a.created_at, type: `Ajuste ${a.type === "credit" ? "Crédito" : "Débito"}`, description: `${a.reason} - ${getSellerName(a.user_id)}`, amount: a.type === "credit" ? -Number(a.amount) : Number(a.amount), positive: a.type !== "credit" });
- });
- return entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 100);
- }, [withdrawals, adjustments, profiles]);
-
- const pendingFiltered = filtered.filter(w => w.status === "pending");
-
- return (
- <div className="space-y-5 animate-fade-in">
-  {/* Hero */}
-  <FinanceiroHero
-    eyebrow="Operações · Saques"
-    title="Fila de Saques"
-    subtitle="Aprove pagamentos, monitore risco e gerencie ajustes de saldo."
-    status={{ tone: pending.length > 0 ? "warning" : "success", label: pending.length > 0 ? `${pending.length} aguardando` : "Fila zerada", pulse: pending.length > 0 }}
-  />
-
-  <PremiumMetricGrid cols={4}>
-    <PremiumMetric icon={ArrowDownToLine} label="Total Saques" value={String(withdrawals.length)} sub="Histórico" tone="neutral" />
-    <PremiumMetric icon={Clock} label="Pendentes" value={fmtCurrency(totalPending)} sub={`${pending.length} solicitações`} tone="warning" />
-    <PremiumMetric icon={CheckCircle2} label="Aprovados" value={fmtCurrency(totalApproved)} sub={`${approved.length} pagos`} tone="success" />
-    <PremiumMetric icon={XCircle} label="Recusados" value={String(rejected.length)} sub="Negados" tone="destructive" />
-    <PremiumMetric icon={Wallet} label="Taxas" value={fmtCurrency(totalFees)} sub="Coletadas" tone="primary" />
-    <PremiumMetric icon={ShieldAlert} label="Risco" value={String(riskCount)} sub="Requer revisão" tone="destructive" />
-    <PremiumMetric icon={TrendingUp} label="Ajustes +" value={fmtCurrency(totalAdjCredits)} sub="Créditos" tone="info" />
-    <PremiumMetric icon={TrendingDown} label="Ajustes -" value={fmtCurrency(totalAdjDebits)} sub="Débitos" tone="warning" />
-  </PremiumMetricGrid>
-
- {/* Sub-Tabs */}
-  {/* Sub-Tabs */}
-  <div className="flex flex-wrap items-center justify-between gap-3">
-    <PremiumSegmented<SubTab>
-      value={subTab}
-      onChange={setSubTab}
-      options={[
-        { value: "queue", label: `Fila${pending.length > 0 ? ` · ${pending.length}` : ""}` },
-        { value: "adjustments", label: "Ajustes de Saldo" },
-        { value: "statement", label: "Extrato Global" },
-      ]}
-    />
-    {subTab === "adjustments" && (
-      <Button size="sm" className="gap-1.5 rounded-xl" onClick={() => setAdjustDialog(true)}>
-        <DollarSign className="h-3.5 w-3.5" /> Novo Ajuste
-      </Button>
-    )}
-  </div>
-
-  {/* ═══ SUB-TAB: QUEUE ═══ */}
-  {subTab === "queue" && (
-    <PremiumPanel
-      eyebrow="Operações"
-      title={`Fila de Saques · ${filtered.length}`}
-      icon={ArrowDownToLine}
-      action={
-        selectedIds.size > 0 ? (
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{selectedIds.size} selecionados</span>
-            <Button size="sm" disabled onClick={handleBatchApprove}
-              className="h-8 gap-1 rounded-xl border border-primary/20 bg-primary/10 text-[11px] text-primary shadow-none hover:bg-primary/20">
-              <CheckCircle2 className="h-3 w-3" /> Indisponível
+  return (
+    <div className="space-y-5 animate-fade-in">
+      <FinanceiroHero
+        eyebrow="Financeiro · Saques" title="Saques"
+        subtitle="Fila de pedidos dos sellers, ajustes de saldo e regras de auto-aprovação."
+        status={heroStatus}
+        actions={(
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => void refresh()} disabled={refreshing}>
+              <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`} /> Atualizar
             </Button>
-            <Button size="sm" disabled={batchProcessing} onClick={handleBatchReject}
-              className="h-8 gap-1 rounded-xl border border-destructive/20 bg-destructive/10 text-[11px] text-destructive shadow-none hover:bg-destructive/20">
-              <XCircle className="h-3 w-3" /> Recusar lote
+            <Button type="button" size="sm" className="gap-1.5" onClick={() => setAdjustOpen(true)}>
+              <ArrowUpDown className="h-3.5 w-3.5" /> Ajuste de saldo
             </Button>
           </div>
-        ) : null
-      }
-    >
-      {/* Toolbar */}
-      <div className="mb-5 flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[220px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input placeholder="Buscar vendedor ou ID..." value={search} onChange={e => setSearch(e.target.value)}
-            className="h-10 w-full rounded-xl border border-border bg-muted/30 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none" />
+        )}
+      />
+
+      {!PAYOUTS_AVAILABLE && (
+        <div role="note" className="flex items-start gap-3 rounded-[12px] border border-warning/30 bg-warning/10 px-4 py-3 text-[13px] text-foreground">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+          <p>Aprovar saque está desligado enquanto não houver uma adquirente configurada. Você pode recusar saques (o valor volta para o saldo do seller) e anexar comprovante aos que já foram aprovados.</p>
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="h-10 w-[140px] rounded-xl text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos status</SelectItem>
-            <SelectItem value="pending">Pendentes</SelectItem>
-            <SelectItem value="approved">Aprovados</SelectItem>
-            <SelectItem value="rejected">Recusados</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={riskFilter} onValueChange={setRiskFilter}>
-          <SelectTrigger className="h-10 w-[170px] rounded-xl text-xs"><SelectValue placeholder="Risco" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos riscos</SelectItem>
-            <SelectItem value="flagged">Com flag</SelectItem>
-            <SelectItem value="new_seller">Sellers novos</SelectItem>
-            <SelectItem value="high_value">Acima R$ 50k</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={originFilter} onValueChange={setOriginFilter}>
-          <SelectTrigger className="h-10 w-[150px] rounded-xl text-xs"><SelectValue placeholder="Origem" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Toda origem</SelectItem>
-            <SelectItem value="manual">Manual</SelectItem>
-            <SelectItem value="auto">Automático</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-
-      {/* Table */}
-      <div className={premiumTable.wrapper}>
-        <table className={premiumTable.table}>
-          <thead><tr className={premiumTable.headRow}>
-            <th className={`${premiumTable.th} w-10`}>
-              <Checkbox checked={pendingFiltered.length > 0 && selectedIds.size === pendingFiltered.length} onCheckedChange={toggleSelectAll} />
-            </th>
-            {["ID", "Vendedor", "Tipo", "Destino", "Risco", "Bruto", "Taxa", "Líquido", "Status", "Admin", "Auto", "Data", "Ações"].map(h => (
-              <th key={h} className={premiumTable.th}>{h}</th>
-            ))}
-          </tr></thead>
-          <tbody>
-            {pagedFiltered.map(w => {
-              const audit = getWithdrawalAudit(w.id);
-              const autoConfig = getAutoConfig(w.user_id);
-              const isPending = w.status === "pending";
-              const isOver10k = Number(w.amount) > 10000;
-              return (
-                <tr key={w.id} className={`${premiumTable.row} ${isPending ? "bg-warning/[0.025]" : ""} ${isOver10k && isPending ? "ring-1 ring-destructive/30" : ""}`}>
-                  <td className={premiumTable.td}>
-                    {isPending && <Checkbox checked={selectedIds.has(w.id)} onCheckedChange={() => toggleSelect(w.id)} />}
-                  </td>
-                  <td className={`${premiumTable.td} font-mono text-[10px] text-muted-foreground`}>
-                    <div className="flex items-center gap-1.5">
-                      <span>{w.id.slice(0, 8)}</span>
-                      {w.origin === "auto" && (
-                        <span className="rounded border border-primary/20 bg-primary/10 px-1 py-0.5 text-[8px] font-black uppercase text-primary">AUTO</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className={premiumTable.td}>
-                    <p className="text-xs font-bold text-foreground">{getSellerName(w.user_id)}</p>
-                    <p className="text-[10px] text-muted-foreground">{getSellerEmail(w.user_id)}</p>
-                  </td>
-                  <td className={premiumTable.td}>
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-1">
-                        <SellerTypeBadge type={getSellerType(w.user_id)} />
-                        {w.withdrawal_type === "crypto" && (
-                          <span className="rounded border border-amber-500/20 bg-amber-500/10 px-1.5 py-0.5 text-[8px] font-bold uppercase text-amber-500">
-                            {w.crypto_currency || "CRYPTO"}
-                          </span>
-                        )}
-                        {w.withdrawal_type === "pix_copy_paste" && (
-                          <span className="rounded border border-primary/25 bg-primary/10 px-1.5 py-0.5 text-[8px] font-bold uppercase text-primary" title="PIX Copia e Cola (cobrança única)">
-                            Copia&nbsp;Cola
-                          </span>
-                        )}
-                      </div>
-                      {w.pix_copy_paste_code && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(w.pix_copy_paste_code ?? "").then(
-                              () => toast.success("Código PIX copiado"),
-                              () => toast.error("Não foi possível copiar. Selecione o código e copie manualmente."),
-                            );
-                          }}
-                          className="max-w-[180px] truncate rounded-md border border-border/60 bg-muted/40 px-1.5 py-0.5 font-mono text-[9px] text-foreground/80 hover:bg-muted"
-                          title={w.pix_copy_paste_code}
-                        >
-                          {w.pix_copy_paste_code}
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                  <td className={premiumTable.td}><PayoutTarget withdrawal={w} /></td>
-                  <td className={premiumTable.td}><RiskBadge withdrawal={w} /></td>
-
-                  <td className={`${premiumTable.td} text-xs font-extrabold tabular-nums ${isOver10k ? "text-destructive" : "text-foreground"}`}>
-                    {formatCurrency(Number(w.amount))}
-                    {isOver10k && <span className="ml-1 text-[8px] font-bold text-destructive">!</span>}
-                  </td>
-                  <td className={`${premiumTable.td} text-xs tabular-nums text-warning`}>{formatCurrency(Number(w.fee_amount))}</td>
-                  <td className={`${premiumTable.td} text-xs font-bold tabular-nums text-primary`}>{formatCurrency(Number(w.net_amount))}</td>
-                  <td className={premiumTable.td}><StatusBadge status={w.status} /></td>
-                  <td className={premiumTable.td}>
-                    {audit ? (
-                      <div>
-                        <p className="flex items-center gap-1 text-xs font-semibold text-foreground/80">
-                          <UserCog className="h-3 w-3 text-primary" />{getAdminName(audit.admin_user_id)}
-                        </p>
-                        <p className="text-[9px] text-muted-foreground">{new Date(audit.created_at).toLocaleString("pt-BR")}</p>
-                      </div>
-                    ) : <span className="text-[10px] text-muted-foreground">—</span>}
-                  </td>
-                  <td className={premiumTable.td}>
-                    {autoConfig?.enabled ? (
-                      <button onClick={() => openAutoConfigDialog(w.user_id)} className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary hover:bg-primary/20">
-                        Até {formatCurrency(Number(autoConfig.max_amount))}
-                      </button>
-                    ) : (
-                      <button onClick={() => openAutoConfigDialog(w.user_id)} className="text-[9px] text-muted-foreground underline hover:text-foreground">Configurar</button>
-                    )}
-                  </td>
-                  <td className={`${premiumTable.td} text-[10px] text-muted-foreground`}>{new Date(w.created_at).toLocaleString("pt-BR")}</td>
-                  <td className={premiumTable.td}>
-                    {isPending && (
-                      <div className="flex gap-2">
-                        <Button size="sm" disabled className="h-7 gap-1 rounded-xl border border-primary/20 bg-primary/10 text-[11px] text-primary shadow-none" onClick={() => onWithdrawalAction(w.id, "approved")}>
-                          <CheckCircle2 className="h-3 w-3" /> Indisponível
-                        </Button>
-                        <Button size="sm" className="h-7 gap-1 rounded-xl border border-destructive/20 bg-destructive/10 text-[11px] text-destructive shadow-none hover:bg-destructive/20" onClick={() => { setRejectDialog(w.id); setRejectReason(""); }}>
-                          <XCircle className="h-3 w-3" /> Recusar
-                        </Button>
-                      </div>
-                    )}
-                    {w.status === "approved" && (
-                      w.payment_proof_url ? (
-                        <div className="flex items-center gap-1">
-                          <Button size="sm" variant="ghost" className="h-7 gap-1 text-[10px]" onClick={() => handleViewProof(w.payment_proof_url)}>
-                            <FileText className="h-3 w-3" /> Ver comprovante
-                          </Button>
-                          <label className="cursor-pointer text-[10px] text-muted-foreground underline">
-                            Trocar
-                            <input type="file" hidden accept="image/*,application/pdf" onChange={e => e.target.files?.[0] && handleProofUpload(w.id, e.target.files[0])} />
-                          </label>
-                        </div>
-                      ) : (
-                        <label className="inline-flex h-7 cursor-pointer items-center gap-1 rounded-xl border border-primary/20 bg-primary/10 px-2 text-[10px] text-primary hover:bg-primary/20">
-                          <FileText className="h-3 w-3" /> Anexar comprovante
-                          <input type="file" hidden accept="image/*,application/pdf" onChange={e => e.target.files?.[0] && handleProofUpload(w.id, e.target.files[0])} />
-                        </label>
-                      )
-                    )}
-                    {(w.rejection_reason || w.failure_code) && (
-                      <div className="max-w-[220px]">
-                        <p className="text-[10px] font-bold uppercase text-destructive">
-                          {w.status === "rejected" ? "Motivo" : "Última falha"}
-                          {w.failure_code ? ` · ${w.failure_code}` : ""}
-                        </p>
-                        <p className="line-clamp-3 text-[10px] text-muted-foreground">{w.rejection_reason || "Processamento não concluído"}</p>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        {filtered.length === 0 && (
-          <PremiumEmpty icon={ArrowDownToLine} title="Nenhum saque encontrado" subtitle="Ajuste filtros ou aguarde novas solicitações" />
-        )}
-      </div>
-      {filtered.length > 0 && (
-        <AdminPager page={page} pageSize={PAGE_SIZE} totalCount={filtered.length} onPageChange={setPage} />
       )}
-    </PremiumPanel>
-  )}
 
-  {/* ═══ SUB-TAB: ADJUSTMENTS ═══ */}
-  {subTab === "adjustments" && (
-    <PremiumPanel
-      eyebrow="Manual"
-      title={`Histórico de Ajustes · ${adjustments.length}`}
-      icon={ArrowUpDown}
-    >
-      <p className="mb-4 text-xs text-muted-foreground">Ajuste manual de saldo de vendedores. Toda movimentação é auditada.</p>
-      <div className={premiumTable.wrapper}>
-        <table className={premiumTable.table}>
-          <thead><tr className={premiumTable.headRow}>
-            {["Data", "Vendedor", "Tipo", "Valor", "Motivo", "Admin"].map(h => (
-              <th key={h} className={premiumTable.th}>{h}</th>
-            ))}
-          </tr></thead>
-          <tbody>
-            {adjustments.map(a => (
-              <tr key={a.id} className={premiumTable.row}>
-                <td className={`${premiumTable.td} text-[10px] text-muted-foreground`}>{new Date(a.created_at).toLocaleString("pt-BR")}</td>
-                <td className={premiumTable.td}>
-                  <p className="text-xs font-bold text-foreground">{getSellerName(a.user_id)}</p>
-                  <p className="font-mono text-[10px] text-muted-foreground">{a.user_id.slice(0, 8)}</p>
-                </td>
-                <td className={premiumTable.td}>
-                  {a.type === "credit" ? (
-                    <span className="flex w-fit items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-500">
-                      <Plus className="h-2.5 w-2.5" /> Crédito
-                    </span>
-                  ) : (
-                    <span className="flex w-fit items-center gap-1 rounded-full border border-destructive/20 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive">
-                      <Minus className="h-2.5 w-2.5" /> Débito
-                    </span>
-                  )}
-                </td>
-                <td className={`${premiumTable.td} text-xs font-extrabold tabular-nums ${a.type === "credit" ? "text-emerald-500" : "text-destructive"}`}>
-                  {a.type === "credit" ? "+" : "-"}{formatCurrency(Number(a.amount))}
-                </td>
-                <td className={`${premiumTable.td} max-w-[260px] truncate text-xs text-foreground`}>{a.reason}</td>
-                <td className={`${premiumTable.td} text-xs text-muted-foreground`}>
-                  <span className="flex items-center gap-1"><UserCog className="h-3 w-3 text-primary" />{getAdminName(a.admin_user_id)}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {adjustments.length === 0 && (
-          <PremiumEmpty icon={ArrowUpDown} title="Nenhum ajuste" subtitle="Use 'Novo Ajuste' para registrar crédito ou débito" />
-        )}
-      </div>
-    </PremiumPanel>
-  )}
+      <PremiumMetricGrid cols={4}>
+        <PremiumMetric icon={Clock} label="Na fila" value={brl(totals.pendingAmount)} sub={`${totals.pendingCount} ${totals.pendingCount === 1 ? "pedido" : "pedidos"} · qualquer data`} tone="warning" />
+        <PremiumMetric icon={ShieldAlert} label="Pedem atenção" value={String(totals.flagged)} sub="Seller novo ou valor alto" tone={totals.flagged > 0 ? "destructive" : "neutral"} />
+        <PremiumMetric icon={CheckCircle2} label="Aprovados no período" value={brl(totals.paidAmount)} sub={`${totals.paidCount} aprovados · ${totals.rejectedCount} recusados`} tone="success" />
+        <PremiumMetric icon={Wallet} label="Taxas no período" value={brl(totals.fees)} sub="Só de saques aprovados" tone="primary" />
+      </PremiumMetricGrid>
+      {withdrawals.length >= LOAD_CAP && (
+        <p role="status" className="text-[12.5px] text-warning">Mostrando os {LOAD_CAP} saques mais recentes. Estreite o período no topo para ver o restante.</p>
+      )}
 
-  {/* ═══ SUB-TAB: STATEMENT ═══ */}
-  {subTab === "statement" && (
-    <PremiumPanel
-      eyebrow="Conta Mãe"
-      title="Extrato Global"
-      icon={FileText}
-    >
-      <p className="mb-4 text-xs text-muted-foreground">Movimentação consolidada de saques e ajustes da plataforma (últimos 100 lançamentos).</p>
-      <div className={premiumTable.wrapper}>
-        <table className={premiumTable.table}>
-          <thead><tr className={premiumTable.headRow}>
-            {["Data", "Tipo", "Descrição", "Valor"].map(h => (
-              <th key={h} className={premiumTable.th}>{h}</th>
-            ))}
-          </tr></thead>
-          <tbody>
-            {statementEntries.map((e, i) => (
-              <tr key={i} className={premiumTable.row}>
-                <td className={`${premiumTable.td} text-[10px] text-muted-foreground`}>{new Date(e.date).toLocaleString("pt-BR")}</td>
-                <td className={premiumTable.td}>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${e.positive ? "border border-emerald-500/20 bg-emerald-500/10 text-emerald-500" : "border border-destructive/20 bg-destructive/10 text-destructive"}`}>{e.type}</span>
-                </td>
-                <td className={`${premiumTable.td} max-w-[360px] truncate text-xs text-foreground`}>{e.description}</td>
-                <td className={`${premiumTable.td} text-xs font-extrabold tabular-nums ${e.positive ? "text-emerald-500" : "text-destructive"}`}>
-                  {e.positive ? "+" : "-"}{formatCurrency(Math.abs(Number(e.amount)))}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {statementEntries.length === 0 && (
-          <PremiumEmpty icon={FileText} title="Sem movimentações" subtitle="As movimentações aparecerão aqui assim que houver atividade" />
-        )}
-      </div>
-    </PremiumPanel>
-  )}
+      <PremiumSegmented<SubTab> value={subTab} onChange={setSubTab} options={[
+        { value: "queue", label: `Fila${totals.pendingCount > 0 ? ` · ${totals.pendingCount}` : ""}` },
+        { value: "adjustments", label: "Ajustes de saldo" },
+        { value: "statement", label: "Extrato" },
+      ]} />
 
+      {subTab === "queue" && (
+        <PremiumPanel eyebrow="Saques" title={statusFilter === "pending" ? `Pedidos esperando · ${filtered.length}` : `Saques · ${filtered.length}`} icon={ArrowDownToLine}>
+          <div className="mb-4 space-y-3">
+            <PremiumSegmented<StatusFilter> value={statusFilter} onChange={setStatusFilter} options={[
+              { value: "pending", label: `Pendentes · ${totals.pendingCount}` },
+              { value: "approved", label: `Aprovados · ${totals.paidCount}` },
+              { value: "rejected", label: `Recusados · ${totals.rejectedCount}` },
+              { value: "all", label: "Todos" },
+            ]} />
+            <p className="text-[12px] text-muted-foreground">
+              Pendentes aparecem de qualquer data, do mais antigo para o mais novo. Aprovados e recusados seguem o período escolhido no topo.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative min-w-[220px] max-w-sm flex-1">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input aria-label="Buscar saque" placeholder="Buscar seller, e-mail ou código" value={search} onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: 40 }}
+                  className="h-10 w-full rounded-xl border border-border bg-muted/30 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none" />
+              </div>
+              <Select value={riskFilter} onValueChange={setRiskFilter}>
+                <SelectTrigger aria-label="Filtrar por risco" className="h-10 w-[180px] rounded-xl text-xs"><SelectValue placeholder="Risco" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Qualquer risco</SelectItem>
+                  <SelectItem value="flagged">Com alerta</SelectItem>
+                  <SelectItem value="new_seller">Sellers novos</SelectItem>
+                  <SelectItem value="high_value">Acima de R$ 50 mil</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={originFilter} onValueChange={setOriginFilter}>
+                <SelectTrigger aria-label="Filtrar por origem" className="h-10 w-[160px] rounded-xl text-xs"><SelectValue placeholder="Origem" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Qualquer origem</SelectItem>
+                  <SelectItem value="manual">Pedido manual</SelectItem>
+                  <SelectItem value="auto">Pedido automático</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {(autoQ.isError || extraQ.isError) && (
+              <p role="alert" className="flex flex-wrap items-center gap-2 text-[12.5px] text-warning">
+                <AlertTriangle className="h-3.5 w-3.5" />
+                {autoQ.isError ? "As regras de auto-aprovação não carregaram." : "Alguns nomes de seller não carregaram."}
+                <button type="button" className="font-semibold underline" onClick={() => void (autoQ.isError ? autoQ.refetch() : extraQ.refetch())}>Tentar de novo</button>
+              </p>
+            )}
+          </div>
 
- {/* ═══ AUTO-WITHDRAW DIALOG ═══ */}
- <Dialog open={!!autoConfigDialog} onOpenChange={() => setAutoConfigDialog(null)}>
- <DialogContent className="max-w-md">
- <DialogHeader>
- <DialogTitle className="flex items-center gap-2"><ToggleLeft className="h-5 w-5 text-primary" /> Auto-Aprovação</DialogTitle>
- </DialogHeader>
- <div className="space-y-4 mt-2">
- <p className="text-sm text-muted-foreground"><strong className="text-foreground">{autoConfigDialog ? getSellerName(autoConfigDialog) : ""}</strong></p>
- <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/30">
- <div>
- <p className="text-sm font-semibold">Ativar Auto-Aprovação</p>
- <p className="text-xs text-muted-foreground">Saques auto-aprovados até o limite</p>
- </div>
- <Switch checked={autoEnabled} onCheckedChange={setAutoEnabled} />
- </div>
- <div className="space-y-2">
- <Label className="text-xs">Limite máximo (R$)</Label>
- <Input type="number" step="1" value={autoMaxAmount} onChange={e => setAutoMaxAmount(e.target.value)} />
- <p className="text-[10px] text-muted-foreground">Acima desse valor → revisão manual</p>
- </div>
- <Button onClick={saveAutoConfig} className="w-full gap-2"><CheckCircle2 className="h-4 w-4" /> Salvar</Button>
- </div>
- </DialogContent>
- </Dialog>
+          {selectedIds.length > 0 && (
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-border/60 bg-muted/30 px-4 py-2.5">
+              <span className="text-[13px] font-semibold">{selectedIds.length} {selectedIds.length === 1 ? "selecionado" : "selecionados"}</span>
+              <div className="flex items-center gap-2">
+                <Button type="button" variant="ghost" size="sm" onClick={() => setSelected(new Set())} disabled={rejecting}>Limpar</Button>
+                <Button type="button" size="sm" variant="outline" disabled={rejecting} onClick={() => void rejectMany(selectedIds)}
+                  className="gap-1.5 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive">
+                  {rejecting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <XCircle className="h-3.5 w-3.5" />} Recusar selecionados
+                </Button>
+              </div>
+            </div>
+          )}
 
- {/* ═══ BALANCE ADJUSTMENT DIALOG ═══ */}
- <Dialog open={adjustDialog} onOpenChange={setAdjustDialog}>
- <DialogContent className="max-w-md">
- <DialogHeader>
- <DialogTitle className="flex items-center gap-2"><DollarSign className="h-5 w-5 text-primary" /> Ajuste Manual de Saldo</DialogTitle>
- </DialogHeader>
- <div className="space-y-4 mt-2">
- <div className="space-y-2">
- <Label className="text-xs">Vendedor</Label>
- <Select value={adjustUserId} onValueChange={setAdjustUserId}>
- <SelectTrigger className="rounded-xl"><SelectValue placeholder="Selecione um vendedor" /></SelectTrigger>
- <SelectContent className="max-h-60">
- {profiles.map(p => (
- <SelectItem key={p.user_id} value={p.user_id}>{p.full_name || p.email || p.user_id.slice(0, 8)}</SelectItem>
- ))}
- </SelectContent>
- </Select>
- </div>
- <div className="flex items-center gap-2 p-3 rounded-xl border border-border bg-muted/30">
- <button onClick={() => setAdjustType("credit")}
- className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${
- adjustType === "credit" ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" : "text-muted-foreground"
- }`}>
- <Plus className="h-3.5 w-3.5" /> Crédito
- </button>
- <button onClick={() => setAdjustType("debit")}
- className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${
- adjustType === "debit" ? "bg-destructive/10 text-destructive border border-destructive/20" : "text-muted-foreground"
- }`}>
- <Minus className="h-3.5 w-3.5" /> Débito
- </button>
- </div>
- <div className="space-y-2">
- <Label className="text-xs">Valor (R$)</Label>
- <Input type="number" step="0.01" min="0.01" value={adjustAmount} onChange={e => setAdjustAmount(e.target.value)} placeholder="0.00" />
- </div>
- <div className="space-y-2">
- <Label className="text-xs">Motivo da Movimentação <span className="text-destructive">*</span></Label>
- <Textarea value={adjustReason} onChange={e => setAdjustReason(e.target.value)} placeholder="Ex: Compensação de chargeback indevido..." className="min-h-[80px]" />
- <p className="text-[10px] text-muted-foreground">Campo obrigatório. Ficará registrado permanentemente no Audit Trail.</p>
- </div>
- <Button onClick={handleAdjustment} className="w-full gap-2" disabled={!adjustUserId || !adjustAmount || !adjustReason.trim()}>
- <CheckCircle2 className="h-4 w-4" /> Aplicar Ajuste
- </Button>
- </div>
- </DialogContent>
- </Dialog>
+          {filtered.length === 0 ? (
+            <div>
+              <PremiumEmpty icon={ArrowDownToLine} title="Nenhum saque aqui" subtitle={emptySub} />
+              {statusFilter === "pending" && withdrawals.length > 0 && (
+                <div className="-mt-8 pb-6 text-center"><Button type="button" variant="outline" size="sm" onClick={() => setStatusFilter("all")}>Ver todos os saques</Button></div>
+              )}
+            </div>
+          ) : (
+            <>
+              <QueueTable rows={pageRows} ctx={ctx} allSelected={allSelected} onToggleAll={toggleAll} canSelect={pagePending.length > 0} />
+              <QueueCards rows={pageRows} ctx={ctx} />
+              <AdminPager page={page} pageSize={PAGE_SIZE} totalCount={filtered.length} onPageChange={setPage} />
+            </>
+          )}
+        </PremiumPanel>
+      )}
 
- {/* ═══ REJECT WITH REASON DIALOG ═══ */}
- <Dialog open={!!rejectDialog} onOpenChange={() => setRejectDialog(null)}>
- <DialogContent className="max-w-md">
- <DialogHeader>
- <DialogTitle className="flex items-center gap-2"><XCircle className="h-5 w-5 text-destructive" /> Recusar Saque</DialogTitle>
- </DialogHeader>
- <div className="space-y-4 mt-2">
- <p className="text-sm text-muted-foreground">
- Saque <strong className="text-foreground font-mono">{rejectDialog?.slice(0, 8)}</strong> será recusado.
- </p>
- <div className="space-y-2">
- <Label className="text-xs">Motivo da Rejeição <span className="text-destructive">*</span></Label>
- <Textarea value={rejectReason} onChange={e => setRejectReason(e.target.value)} placeholder="Ex: Documentação pendente, dados bancários incorretos..." className="min-h-[80px]" />
- <p className="text-[10px] text-muted-foreground">O motivo será registrado no Audit Trail.</p>
- </div>
- <div className="flex gap-2">
- <Button variant="outline" onClick={() => setRejectDialog(null)} className="flex-1 rounded-xl">Cancelar</Button>
- <Button onClick={handleRejectWithReason} disabled={!rejectReason.trim()} className="flex-1 gap-1.5 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90">
- <XCircle className="h-4 w-4" /> Confirmar Rejeição
- </Button>
- </div>
- </div>
- </DialogContent>
- </Dialog>
- {reasonDialog}
- </div>
- );
+      {subTab === "adjustments" && (
+        <PremiumPanel eyebrow="Manual" title={`Ajustes de saldo · ${adjustments.length}`} icon={ArrowUpDown}
+          action={<Button type="button" size="sm" onClick={() => setAdjustOpen(true)}>Novo ajuste</Button>}>
+          {adjQ.isError ? <LoadProblem what="os ajustes" error={adjQ.error} onRetry={() => void adjQ.refetch()} />
+            : adjQ.isLoading ? <p className="flex items-center gap-2 py-8 text-[13px] text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Carregando ajustes…</p>
+              : adjustments.length === 0 ? <PremiumEmpty icon={ArrowUpDown} title="Nenhum ajuste ainda" subtitle="Use “Novo ajuste” para creditar ou debitar o saldo de um seller." />
+                : (
+                  <div className="space-y-3">
+                    <p className="text-[12.5px] text-muted-foreground">
+                      Créditos <strong className="text-success">{brl(adjTotals.credit)}</strong> · Débitos <strong className="text-destructive">{brl(adjTotals.debit)}</strong> nos últimos {adjustments.length} ajustes. Todo ajuste fica na auditoria.
+                    </p>
+                    <AdjustmentList rows={adjRows} nameOf={(id) => nameOf(id)} />
+                    <AdminPager page={adjPage} pageSize={PAGE_SIZE} totalCount={adjustments.length} onPageChange={setAdjPage} />
+                  </div>
+                )}
+        </PremiumPanel>
+      )}
+
+      {subTab === "statement" && (
+        <PremiumPanel eyebrow="Plataforma" title="Extrato de saques e ajustes" icon={FileText}>
+          <div className="space-y-3">
+            <p className="text-[12.5px] text-muted-foreground">
+              Visto pela plataforma: sai o que ela aprova pagar aos sellers; entra a taxa de saque e os débitos de ajuste. Considera os saques aprovados no período do topo e os últimos 300 ajustes (até 100 lançamentos).
+            </p>
+            {adjQ.isError && <LoadProblem what="os ajustes (o extrato está incompleto sem eles)" error={adjQ.error} onRetry={() => void adjQ.refetch()} />}
+            {statement.length === 0 ? <PremiumEmpty icon={FileText} title="Sem lançamentos" subtitle="Saques aprovados e ajustes aparecem aqui." /> : (
+              <>
+                <StatementList rows={stmtRows} />
+                <AdminPager page={stmtPage} pageSize={PAGE_SIZE} totalCount={statement.length} onPageChange={setStmtPage} />
+              </>
+            )}
+          </div>
+        </PremiumPanel>
+      )}
+
+      <AdjustmentDialog open={adjustOpen} onOpenChange={setAdjustOpen} profiles={profiles} onApplied={() => { void adjQ.refetch(); onReload(); }} />
+      <AutoApprovalDialog sellerId={autoSeller} sellerName={autoSeller ? nameOf(autoSeller) : ""} config={autoSeller ? autoOf(autoSeller) : undefined} adminId={user?.id}
+        onClose={() => setAutoSeller(null)} onSaved={() => void autoQ.refetch()} />
+      {reasonDialog}
+    </div>
+  );
 }

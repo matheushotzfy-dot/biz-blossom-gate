@@ -21,7 +21,7 @@ export function SellerSelect({ profiles, value, onChange, allowAll }: SellerSele
   }, [profiles, q]);
 
   return (
-    <Select value={value || "__all"} onValueChange={(v) => onChange(v === "__all" ? "" : v)}>
+    <Select value={value || (allowAll ? "__all" : "")} onValueChange={(v) => onChange(v === "__all" ? "" : v)}>
       <SelectTrigger><SelectValue placeholder="Selecione um seller" /></SelectTrigger>
       <SelectContent>
         <div className="p-1"><Input placeholder="Buscar nome ou e-mail" value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.stopPropagation()} className="h-8" /></div>

@@ -685,7 +685,7 @@ export default function AdminDashboard() {
                 <AdminTopProductsTab products={products} profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
               )}
               {activeTab === "withdrawals" && isAdmin && (
-                <AdminWithdrawalsTab withdrawals={withdrawals} profiles={profiles} onWithdrawalAction={handleWithdrawalAction} onReload={loadData} fmtCurrency={fmtCurrency} />
+                <AdminWithdrawalsTab withdrawals={withdrawals} profiles={profiles} onReload={loadData} />
               )}
               {activeTab === "risk-compliance" && isAdmin && (
                 <AdminRiskComplianceTab profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
