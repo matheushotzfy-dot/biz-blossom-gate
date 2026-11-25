@@ -1,14 +1,19 @@
 /**
  * LandingPage — página pública da Vemprapay (identidade fintech clara).
- * Apresentacional: sem consultas ao banco. Mockups usam valores de exemplo.
+ * Apresentacional: sem consultas ao banco. Nomes, vendas e valores são exemplos e a página avisa.
+ * Só afirma o que o produto faz hoje: nada de taxa de aprovação, prazo de saque ou número que o painel não prove.
  */
 import { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Seo } from "@/components/Seo";
+import "@/components/landing-vp/landing.css";
 import { SiteNav } from "@/components/landing-vp/SiteNav";
 import { HeroSection } from "@/components/landing-vp/HeroSection";
-import { FeatureGrid, HowItWorks, SecuritySection, StatsStrip } from "@/components/landing-vp/Sections";
-import { CtaAndFooter, FAQ, FaqSection } from "@/components/landing-vp/FaqAndFooter";
+import { SaleJourney } from "@/components/landing-vp/SaleJourney";
+import { SellSection } from "@/components/landing-vp/SellSection";
+import { AwardsShelf } from "@/components/landing-vp/AwardsShelf";
+import { DevAndSecurity } from "@/components/landing-vp/DevAndSecurity";
+import { Closing, FAQ, FaqSection, SiteFooter } from "@/components/landing-vp/FaqAndFooter";
 
 const FAQ_JSONLD = {
   "@context": "https://schema.org",
@@ -29,23 +34,24 @@ export default function LandingPage() {
   const goLogin = useCallback(() => navigate("/auth"), [navigate]);
 
   return (
-    <div id="topo" className="vp-site min-h-dvh bg-background text-foreground">
+    <div id="topo" className="vp-site lp min-h-dvh bg-background text-foreground">
       <Seo
-        title="Vemprapay — receba com Pix e cartão e saque na hora"
-        description="Gateway de pagamentos com aprovação acima de 75% em Pix e cartão, checkout que converte e saque instantâneo. Abra sua conta grátis."
+        title="Vemprapay: venda, entregue e receba num painel só"
+        description="Checkout com Pix, cartão e boleto, área de membros, divisão com coprodutor e afiliado e saque por Pix num painel só. Abra sua conta grátis."
         path="/"
         jsonLd={FAQ_JSONLD}
       />
       <SiteNav onLogin={goLogin} onSignup={goSignup} />
       <main>
         <HeroSection onSignup={goSignup} />
-        <StatsStrip />
-        <FeatureGrid />
-        <HowItWorks />
-        <SecuritySection />
+        <SaleJourney />
+        <SellSection />
+        <AwardsShelf />
+        <DevAndSecurity />
         <FaqSection />
+        <Closing onSignup={goSignup} onLogin={goLogin} />
       </main>
-      <CtaAndFooter onSignup={goSignup} onLogin={goLogin} />
+      <SiteFooter />
     </div>
   );
 }
