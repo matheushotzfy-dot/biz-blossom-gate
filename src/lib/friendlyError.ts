@@ -10,7 +10,7 @@ const PATTERNS: { test: RegExp; message: string }[] = [
   { test: /violates foreign key|foreign key constraint/i,    message: "Ação inválida: registro relacionado não existe." },
   { test: /violates not-null|null value in column/i,         message: "Preencha todos os campos obrigatórios." },
   { test: /violates check constraint/i,                       message: "Valor inválido para um dos campos." },
-  { test: /permission denied|row-level security|rls/i,       message: "Você não tem permissão para esta ação." },
+  { test: /permission denied|not authorized|row-level security|rls/i, message: "Você não tem permissão para esta ação." },
   { test: /jwt|token|unauthorized|401/i,                      message: "Sessão expirada. Faça login novamente." },
   { test: /rate limit|too many requests|429/i,                message: "Muitas tentativas. Aguarde alguns segundos." },
   { test: /network|failed to fetch|timeout|econn|fetch failed/i, message: "Sem conexão. Tente novamente." },

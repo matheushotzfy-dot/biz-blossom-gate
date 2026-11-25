@@ -25,7 +25,7 @@ import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 
 const AdminOverviewTab = lazy(() => import("./tabs/AdminOverviewTab"));
 const AdminSellersTab = lazy(() => import("./tabs/AdminSellersTab"));
-const AdminProductsTab = lazy(() => import("./tabs/AdminProductsTab"));
+const ProductsCenter = lazy(() => import("@/features/admin-products/ProductsCenter"));
 const FinancialAuditTab = lazy(() => import("@/features/admin-finance/FinancialAuditTab"));
 const DisputesCenter = lazy(() => import("@/features/admin-disputes/DisputesCenter"));
 const RefundApprovalsTab = lazy(() => import("@/features/admin-finance/RefundApprovalsTab"));
@@ -675,9 +675,7 @@ export default function AdminDashboard() {
               {activeTab === "sellers" && isAdmin && (
                 <AdminSellersTab profiles={profiles} transactions={transactions} withdrawals={withdrawals} onReload={loadData} fmtCurrency={fmtCurrency} isAdmin={isAdmin} dateRange={dateRange} />
               )}
-              {activeTab === "products" && (
-                <AdminProductsTab products={products} profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} onReload={loadData} />
-              )}
+              {activeTab === "products" && <ProductsCenter isAdmin={isAdmin} />}
               {activeTab === "top-sellers" && isAdmin && (
                 <AdminTopSellersTab dateRange={dateRange} fmtCurrency={fmtCurrency} />
               )}

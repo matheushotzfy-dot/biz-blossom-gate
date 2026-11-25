@@ -10,7 +10,7 @@ type Action = () => Promise<void>;
  * The admin re-enters the password (fresh session); the server rejects the
  * operation unless the password was confirmed in the last 10 minutes.
  */
-export function useSensitiveConfirm() {
+export function useSensitiveConfirm(title = "Confirmação de operação financeira") {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [description, setDescription] = useState("");
@@ -42,7 +42,7 @@ export function useSensitiveConfirm() {
     <ReauthenticationDialog
       open={open}
       busy={busy}
-      title="Confirmação de operação financeira"
+      title={title}
       description={description}
       onOpenChange={setOpen}
       onConfirm={onConfirm}
