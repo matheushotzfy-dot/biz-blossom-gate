@@ -21,6 +21,7 @@ import { ProgramDialog, type ProgramSaveResult, type ProgramValues } from "@/com
 import { ProgramTab, type ProgramProductRow } from "@/components/marketing/ProgramTab";
 import { MyLinksTab, type LinkProduct } from "@/components/marketing/MyLinksTab";
 import { ExploreTab } from "@/components/marketing/ExploreTab";
+import { copyText } from "@/components/marketing/copy";
 import {
   COMMISSION_DEFAULT, affiliateErrorMessage, affiliateUrl, type AffiliateLink, type AffiliateSale, type CatalogProduct,
 } from "@/components/marketing/affiliateMeta";
@@ -29,11 +30,6 @@ type Tab = "program" | "mine" | "explore";
 const TABS: Tab[] = ["program", "mine", "explore"];
 
 const CATALOG_COLS = "id, name, price, image_url, affiliate_commission, display_name, delivery_type, checkout_url, created_at";
-
-async function copyText(text: string, ok: string) {
-  try { await navigator.clipboard.writeText(text); toast.success(ok); return true; }
-  catch { toast.error("Não foi possível copiar. Selecione e copie manualmente."); return false; }
-}
 
 export default function Afiliados() {
   const { user } = useAuth();
