@@ -5602,15 +5602,6 @@ export type Database = {
         Args: { _manager?: string; _seller: string }
         Returns: undefined
       }
-      admin_broadcast_notification: {
-        Args: {
-          _message: string
-          _target?: string
-          _title: string
-          _type?: string
-        }
-        Returns: number
-      }
       admin_bulk_assign_acquirer: {
         Args: {
           _new_acquirer_id: string
@@ -5676,7 +5667,6 @@ export type Database = {
         }
         Returns: string
       }
-      admin_purge_orphan_notifications: { Args: never; Returns: number }
       admin_refund_transaction: {
         Args: { _amount: number; _reason: string; _transaction_id: string }
         Returns: Json
