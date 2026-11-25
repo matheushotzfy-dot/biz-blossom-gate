@@ -52,6 +52,10 @@ export function mergeTiers(rows: TierRow[] | null | undefined): AwardItem[] {
 }
 
 async function loadRevenue(userId: string) {
+  // Uma chamada só no servidor (mesma regra do trava de resgate); se falhar, soma paginando como antes.
+  const { data, error } = await supabase.rpc("get_my_lifetime_revenue");
+  const total = Number(data);
+  if (!error && data !== null && Number.isFinite(total)) return { total, capped: false };
   return sumPaged((from, to) =>
     supabase
       .from("transactions")

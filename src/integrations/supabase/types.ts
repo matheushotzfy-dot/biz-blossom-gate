@@ -6022,6 +6022,7 @@ export type Database = {
       get_ledger_balance: { Args: { _user_id: string }; Returns: number }
       get_ledger_integrity_report: { Args: never; Returns: Json }
       get_my_goal_progress: { Args: { _goal_id: string }; Returns: number }
+      get_my_lifetime_revenue: { Args: never; Returns: number }
       get_my_max_ticket: { Args: never; Returns: number }
       get_my_payment_link_dashboard: {
         Args: {
