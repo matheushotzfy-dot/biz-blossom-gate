@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Package } from "lucide-react";
+import { Package, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { friendlyError } from "@/lib/friendlyError";
@@ -12,14 +12,14 @@ import { CLASS_INFO, CLASS_NOTE, type Classification } from "./productsModel";
 export { ToneTag };
 
 /** Capa do produto; se a imagem falhar ou não existir, aparece o ícone. */
-export function Thumb({ url, name, size = 44, className }: { url: string | null; name: string; size?: number; className?: string }) {
+export function Thumb({ url, name, size = 44, className, icon: Icon = Package }: { url: string | null; name: string; size?: number; className?: string; icon?: LucideIcon }) {
   const [broken, setBroken] = useState(false);
   const safe = url ? safeNavigationUrl(url) : null;
   return (
     <div className={cn("flex shrink-0 items-center justify-center overflow-hidden rounded-[12px] bg-muted/50", className)} style={{ width: size, height: size }}>
       {safe && !broken
         ? <img src={safe} alt={`Capa de ${name}`} loading="lazy" referrerPolicy="no-referrer" onError={() => setBroken(true)} className="h-full w-full object-cover" />
-        : <Package className="h-[42%] w-[42%] text-muted-foreground" aria-hidden />}
+        : <Icon className="h-[42%] w-[42%] text-muted-foreground" aria-hidden />}
     </div>
   );
 }

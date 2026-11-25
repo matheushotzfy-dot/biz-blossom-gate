@@ -4,6 +4,8 @@ export interface BuilderCourse {
   description: string | null;
   category: string | null;
   is_published: boolean;
+  admin_hold_at?: string | null;
+  admin_hold_reason?: string | null;
   user_id: string;
   product_id: string | null;
   thumbnail_url: string | null;

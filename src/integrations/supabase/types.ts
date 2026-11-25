@@ -1286,6 +1286,8 @@ export type Database = {
       }
       courses: {
         Row: {
+          admin_hold_at: string | null
+          admin_hold_reason: string | null
           category: string | null
           created_at: string
           description: string | null
@@ -1299,6 +1301,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_hold_at?: string | null
+          admin_hold_reason?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
@@ -1312,6 +1316,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_hold_at?: string | null
+          admin_hold_reason?: string | null
           category?: string | null
           created_at?: string
           description?: string | null

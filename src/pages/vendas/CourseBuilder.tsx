@@ -711,7 +711,10 @@ export default function CourseBuilder() {
     const next = !course.is_published;
     const { error } = await supabase.from("courses").update({ is_published: next }).eq("id", course.id).eq("user_id", user.id);
     setPublishing(false);
-    if (error) { toast.error(next ? "Não foi possível publicar a área." : "Não foi possível despublicar a área."); return; }
+    if (error) {
+      toast.error(error.message?.startsWith("A equipe tirou") ? error.message : next ? "Não foi possível publicar a área." : "Não foi possível despublicar a área.");
+      return;
+    }
     setCourse((prev) => (prev ? { ...prev, is_published: next } : prev));
     invalidate(["courses"]);
     if (next) toast.success("Área publicada.", totalLessons === 0 ? { description: "Ela ainda não tem aulas. Adicione módulos e aulas para o aluno ver conteúdo." } : undefined);
@@ -800,7 +803,7 @@ export default function CourseBuilder() {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2.5">
               <h1 className="truncate font-heading text-[19px] font-extrabold leading-tight tracking-[-0.03em] text-foreground">{course.title}</h1>
-              <StatusPill label={course.is_published ? "Publicada" : "Rascunho"} tone={course.is_published ? "ok" : "idle"} className="hidden shrink-0 sm:inline-flex" />
+              <StatusPill label={course.admin_hold_at ? "Tirada do ar" : course.is_published ? "Publicada" : "Rascunho"} tone={course.admin_hold_at ? "alert" : course.is_published ? "ok" : "idle"} className="hidden shrink-0 sm:inline-flex" />
             </div>
             <p className="truncate text-[13px] text-muted-foreground">{subtitleParts.join(", ")}</p>
           </div>
@@ -856,11 +859,18 @@ export default function CourseBuilder() {
             )}
           </div>
           <div className="flex shrink-0 items-center gap-2.5">
-            <StatusPill label={course.is_published ? "Publicada" : "Rascunho"} tone={course.is_published ? "ok" : "idle"} className="!h-6 !text-[12px]" />
+            <StatusPill label={course.admin_hold_at ? "Tirada do ar" : course.is_published ? "Publicada" : "Rascunho"} tone={course.admin_hold_at ? "alert" : course.is_published ? "ok" : "idle"} className="!h-6 !text-[12px]" />
             <div className="[&_button]:!h-10 [&_button]:!px-4">{publishButton}</div>
           </div>
         </div>
       </header>
+
+      {course.admin_hold_at && (
+        <div role="alert" className="shrink-0 border-b border-destructive/20 bg-destructive/10 px-4 py-3 sm:px-6">
+          <p className="text-[14px] font-semibold text-destructive">A equipe tirou esta área do ar{course.admin_hold_reason ? `. Motivo: ${course.admin_hold_reason}` : "."}</p>
+          <p className="mt-0.5 text-[13.5px] text-destructive/90">Você pode continuar editando. Para voltar a publicar, fale com o suporte.</p>
+        </div>
+      )}
 
       <div className="min-h-0 flex-1 lg:grid lg:grid-cols-[400px_minmax(0,1fr)]">
         <aside

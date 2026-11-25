@@ -22,7 +22,7 @@ export interface CourseMenuHandlers {
 type Row = { icon: LucideIcon; label: string; action: () => void; destructive?: boolean };
 
 /** Menu de três pontos de uma área de membros (usado no cartão e na linha da lista). */
-export function CourseActionsMenu({ title, isLive, handlers, triggerClassName }: { title: string; isLive: boolean; handlers: CourseMenuHandlers; triggerClassName?: string }) {
+export function CourseActionsMenu({ title, isLive, held = false, handlers, triggerClassName }: { title: string; isLive: boolean; held?: boolean; handlers: CourseMenuHandlers; triggerClassName?: string }) {
   const manage: Row[] = [
     { icon: Settings2, label: "Editar conteúdo", action: handlers.onOpenBuilder },
     { icon: Pencil, label: "Editar detalhes", action: handlers.onOpenEdit },
@@ -73,7 +73,7 @@ export function CourseActionsMenu({ title, isLive, handlers, triggerClassName }:
       >
         <div className="px-3 pb-2 pt-2">
           <p className="truncate font-heading text-[16px] font-extrabold tracking-[-0.02em] text-foreground">{title}</p>
-          <p className="text-[13px] text-muted-foreground">{isLive ? "Publicada para os alunos" : "Rascunho, só você vê"}</p>
+          <p className="text-[13px] text-muted-foreground">{held ? "Tirada do ar pela equipe" : isLive ? "Publicada para os alunos" : "Rascunho, só você vê"}</p>
         </div>
         <DropdownMenuSeparator className="my-1 bg-border" />
         {manage.map(renderRow)}

@@ -18,6 +18,7 @@ type RowProps = Omit<ContentCourseCardProps, "course"> & { course: ContentCourse
 /** Linha da visão em lista: mesma informação do cartão, em uma faixa. Deve ficar dentro de um <ul>. */
 export const ContentCourseRow = memo(function ContentCourseRow({ course, stats, productName, students, revenue, copied, ...handlers }: RowProps) {
   const isLive = !!course.is_published;
+  const held = !!course.admin_hold_at;
   const initial = (course.title || "?").charAt(0).toUpperCase();
   const category = getCategoryLabel(course.category);
 
@@ -33,9 +34,13 @@ export const ContentCourseRow = memo(function ContentCourseRow({ course, stats, 
         </button>
         <div className="min-w-0 flex-1">
           <h3 title={course.title} className="truncate font-heading text-[16.5px] font-extrabold leading-tight tracking-[-0.02em] text-foreground">{course.title}</h3>
-          <p className="mt-0.5 truncate text-[13.5px] text-muted-foreground">{course.description || "Sem descrição."}</p>
+          {held ? (
+            <p className="mt-0.5 truncate text-[13.5px] font-medium text-destructive" title={course.admin_hold_reason ?? undefined}>A equipe tirou do ar{course.admin_hold_reason ? `: ${course.admin_hold_reason}` : "."}</p>
+          ) : (
+            <p className="mt-0.5 truncate text-[13.5px] text-muted-foreground">{course.description || "Sem descrição."}</p>
+          )}
           <div className="mt-2 flex min-w-0 flex-wrap items-center gap-1.5">
-            <StatusPill label={isLive ? "Publicada" : "Rascunho"} tone={isLive ? "ok" : "idle"} className="h-6 !px-2.5 text-[12px]" />
+            <StatusPill label={held ? "Tirada do ar" : isLive ? "Publicada" : "Rascunho"} tone={held ? "alert" : isLive ? "ok" : "idle"} className="h-6 !px-2.5 text-[12px]" />
             {productName ? (
               <span className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-[12.5px] font-semibold text-accent-foreground">
                 <LinkIcon className="h-3 w-3 shrink-0" />
@@ -66,7 +71,7 @@ export const ContentCourseRow = memo(function ContentCourseRow({ course, stats, 
             {copied ? <Check className="h-[18px] w-[18px]" strokeWidth={2.6} /> : <Copy className="h-[18px] w-[18px]" strokeWidth={2} />}
           </button>
         )}
-        <CourseActionsMenu title={course.title} isLive={isLive} handlers={handlers} triggerClassName="ml-auto lg:ml-0" />
+        <CourseActionsMenu title={course.title} isLive={isLive} held={held} handlers={handlers} triggerClassName="ml-auto lg:ml-0" />
       </div>
     </li>
   );

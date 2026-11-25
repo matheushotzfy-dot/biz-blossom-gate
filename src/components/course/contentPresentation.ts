@@ -8,6 +8,9 @@ export interface ContentCourse {
   thumbnail_url: string | null;
   product_id: string | null;
   is_published: boolean;
+  /** Preenchidos quando a equipe tirou a área do ar: o seller não consegue republicar sozinho. */
+  admin_hold_at?: string | null;
+  admin_hold_reason?: string | null;
   sort_order: number | null;
   user_id: string;
   created_at: string;

@@ -141,8 +141,9 @@ export default function AdminConteudo() {
       if (error) throw error;
       reloadCourses();
       toast.success(current ? "Área despublicada." : "Área publicada.");
-    } catch {
-      toast.error(current ? "Não foi possível despublicar a área. Tente de novo." : "Não foi possível publicar a área. Tente de novo.");
+    } catch (e) {
+      const msg = (e as { message?: string } | null)?.message;
+      toast.error(msg?.startsWith("A equipe tirou") ? msg : current ? "Não foi possível despublicar a área. Tente de novo." : "Não foi possível publicar a área. Tente de novo.");
     } finally {
       busyRef.current.delete(id);
     }

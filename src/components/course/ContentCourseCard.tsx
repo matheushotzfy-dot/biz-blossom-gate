@@ -21,6 +21,7 @@ const orb = "grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted-
 
 export const ContentCourseCard = memo(function ContentCourseCard({ course, stats, productName, students, revenue, copied, ...handlers }: ContentCourseCardProps) {
   const isLive = !!course.is_published;
+  const held = !!course.admin_hold_at;
   const initial = (course.title || "?").charAt(0).toUpperCase();
   const category = getCategoryLabel(course.category);
 
@@ -39,12 +40,18 @@ export const ContentCourseCard = memo(function ContentCourseCard({ course, stats
             <span aria-hidden className="font-heading text-[64px] font-extrabold leading-none tracking-[-0.05em] text-primary/35">{initial}</span>
           </span>
         )}
-        <StatusPill label={isLive ? "Publicada" : "Rascunho"} tone={isLive ? "ok" : "idle"} className="absolute left-3.5 top-3.5 bg-card/95 shadow-sm backdrop-blur-sm" />
+        <StatusPill label={held ? "Tirada do ar" : isLive ? "Publicada" : "Rascunho"} tone={held ? "alert" : isLive ? "ok" : "idle"} className="absolute left-3.5 top-3.5 bg-card/95 shadow-sm backdrop-blur-sm" />
       </button>
 
       <div className="flex flex-1 flex-col p-5">
         <h3 title={course.title} className="truncate font-heading text-[19px] font-extrabold leading-tight tracking-[-0.03em] text-foreground">{course.title}</h3>
-        <p className="mt-1 line-clamp-2 min-h-[2.8em] text-[13.5px] leading-snug text-muted-foreground">{course.description || "Sem descrição."}</p>
+        {held ? (
+          <p className="mt-1 line-clamp-2 min-h-[2.8em] text-[13.5px] font-medium leading-snug text-destructive" title={course.admin_hold_reason ?? undefined}>
+            A equipe tirou do ar{course.admin_hold_reason ? `: ${course.admin_hold_reason}` : "."} Fale com o suporte para voltar a publicar.
+          </p>
+        ) : (
+          <p className="mt-1 line-clamp-2 min-h-[2.8em] text-[13.5px] leading-snug text-muted-foreground">{course.description || "Sem descrição."}</p>
+        )}
 
         <dl className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-[13.5px]">
           <div className="flex items-baseline gap-1.5"><dt className="sr-only">Módulos</dt><dd className="font-bold tabular-nums text-foreground">{stats.modules}</dd><span className="text-muted-foreground">{stats.modules === 1 ? "módulo" : "módulos"}</span></div>
@@ -85,7 +92,7 @@ export const ContentCourseCard = memo(function ContentCourseCard({ course, stats
                   </button>
                 </>
               )}
-              <CourseActionsMenu title={course.title} isLive={isLive} handlers={handlers} />
+              <CourseActionsMenu title={course.title} isLive={isLive} held={held} handlers={handlers} />
             </div>
           </div>
         </div>
