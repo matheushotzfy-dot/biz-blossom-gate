@@ -58,7 +58,7 @@ export default function Dashboard() {
   const today = useMemo(() => { const s = new Date(); s.setHours(0, 0, 0, 0); const e = new Date(); e.setHours(23, 59, 59, 999); return { s, e }; }, []);
 
   const { data: stats, isPending: statsLoading, isError: statsError, refetch } = useDashboardStats(start, end, bucket);
-  const { data: todayStats } = useDashboardStats(today.s, today.e, "hour");
+  const { data: todayStats, isPending: todayPending, isError: todayError, refetch: refetchToday } = useDashboardStats(today.s, today.e, "hour");
   const { data: balance = 0 } = useLedgerBalance();
   const { data: txs = [], isPending: txLoading } = useTransactions(12);
   const { data: products = [] } = useProducts();
@@ -118,7 +118,9 @@ export default function Dashboard() {
           hours: todayHours,
           nowHour: saoPauloHour(),
           hidden: privacy.hidden,
-          loading: !todayStats,
+          loading: todayPending,
+          error: todayError && !todayStats,
+          onRetry: () => { void refetchToday(); },
           onCreateLink: () => guard("/vendas/link-pagamento"),
         }}
         tasks={tasks}

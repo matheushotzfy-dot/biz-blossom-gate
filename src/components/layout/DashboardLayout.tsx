@@ -159,7 +159,7 @@ function DashboardLayoutInner() {
 
  <MobileRevenueBar />
 
-             <div ref={scrollRef} className={cn("dashboard-scroll-field relative z-10 flex-1 min-h-0", pathname === "/suporte" ? "flex flex-col overflow-hidden pb-20 md:pb-0" : "overflow-y-auto overscroll-contain px-3 sm:px-5 md:px-8 pb-28 md:pb-12")}>
+             <div ref={scrollRef} className={cn("dashboard-scroll-field relative z-10 flex-1 min-h-0", pathname === "/suporte" ? "flex flex-col overflow-hidden pb-20 xl:pb-0" : "overflow-y-auto overscroll-contain px-3 sm:px-5 md:px-8 pb-28 xl:pb-12")}>
    <div className={cn("mx-auto w-full", pathname === "/suporte" ? "flex min-h-0 flex-1 flex-col max-w-none" : "py-3 md:pb-8 md:pt-1", pathname !== "/suporte" && (pathname.startsWith("/premiacoes") ? "max-w-none" : "max-w-[1440px]"))}>
   <div key={routeKey} className={cn("page-fluid", pathname === "/suporte" && "flex min-h-0 flex-1 flex-col")}>
   <Outlet />

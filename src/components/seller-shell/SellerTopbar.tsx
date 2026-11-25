@@ -38,7 +38,7 @@ export function SellerTopbar(p: SellerTopbarProps) {
   const label = p.kycApproved ? "Conta verificada" : p.kycLabel ?? "Verificação pendente";
 
   return (
-    <header className="sticky top-0 z-30 hidden h-[84px] shrink-0 items-center gap-3 bg-background/85 px-8 backdrop-blur-xl md:flex">
+    <header className="sticky top-0 z-30 hidden h-[84px] shrink-0 items-center gap-3 bg-background/85 px-8 backdrop-blur-xl xl:flex">
       <button
         onClick={p.onOpenSearch}
         aria-label="Buscar (Ctrl K)"

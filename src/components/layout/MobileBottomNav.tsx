@@ -35,7 +35,7 @@ const moreGroups: Array<{
     label: "Operação",
     items: [
       { title: "Produtos", subtitle: "Catálogo e checkouts", url: "/vendas/produtos", icon: Package, accent: "primary" },
-      { title: "Cupons", subtitle: "Descontos e promoções", url: "/vendas/cupons", icon: Ticket, accent: "info" },
+      { title: "Marketing", subtitle: "Cupons, afiliados e coproduções", url: "/vendas/cupons", icon: Ticket, accent: "info" },
       { title: "Taxas", subtitle: "Seu plano de tarifas", url: "/financeiro/taxas", icon: Building2, accent: "success" },
       { title: "Integrações", subtitle: "Apps, Webhooks e API", url: "/integracoes", icon: Blocks, accent: "primary" },
     ],
@@ -43,7 +43,7 @@ const moreGroups: Array<{
   {
     label: "Suporte",
     items: [
-      { title: "Central de Ajuda", subtitle: "Fale com nosso time", url: "/suporte", icon: MessageSquare, accent: "info" },
+      { title: "Suporte", subtitle: "Chamados e central de ajuda", url: "/suporte", icon: MessageSquare, accent: "info" },
     ],
   },
 ];
@@ -80,7 +80,7 @@ export function MobileBottomNav() {
     <>
       {/* ═══ "Mais" bottom sheet — app-grade ═══ */}
       {moreOpen && (
-        <div className="fixed inset-0 z-[60] md:hidden">
+        <div className="fixed inset-0 z-[60] xl:hidden">
           <div
             className="absolute inset-0 bg-background/80 animate-in fade-in duration-200"
             onClick={() => setMoreOpen(false)}
@@ -166,7 +166,7 @@ export function MobileBottomNav() {
       )}
 
       {/* ═══ Bottom Tab Bar ═══ */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 xl:hidden">
         <div className="border-t border-border bg-card shadow-[0_-14px_32px_-20px_hsl(222_47%_11%/.22)]">
           <div className="flex items-stretch justify-around px-1.5 pt-2 pb-[max(env(safe-area-inset-bottom,0px),8px)]">
             {tabs.map((tab) => {

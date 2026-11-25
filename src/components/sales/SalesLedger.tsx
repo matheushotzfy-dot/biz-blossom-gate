@@ -32,16 +32,16 @@ export interface SalesLedgerProps {
   onCreateLink: () => void;
 }
 
-const COLS = "md:grid-cols-[minmax(0,1.8fr)_110px_170px_150px_minmax(130px,0.8fr)]";
+const COLS = "lg:grid-cols-[minmax(0,1.8fr)_110px_170px_150px_minmax(130px,0.8fr)]";
 
 /** Livro de vendas: busca, filtros por status, linhas no padrão do extrato e paginação. */
 export function SalesLedger(p: SalesLedgerProps) {
   const filtering = p.status !== "all" || p.search.trim() !== "";
   return (
     <section className="vp-sheet overflow-hidden" aria-label="Lista de vendas">
-      <div className="flex flex-col gap-3 px-5 pb-4 pt-5 sm:px-7 sm:pt-6 lg:flex-row lg:items-center lg:justify-between">
-        <FilterPills label="Filtrar por status" value={p.status} options={SALES_STATUS_OPTIONS} onChange={p.onStatus} />
-        <SearchField label="Buscar vendas" value={p.search} onChange={p.onSearch} placeholder="Cliente, e-mail ou ID da venda" className="lg:w-[340px] lg:shrink-0" />
+      <div className="flex flex-col gap-3 px-5 pb-4 pt-5 sm:px-7 sm:pt-6 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between lg:gap-x-4">
+        <FilterPills className="lg:shrink-0" label="Filtrar por status" value={p.status} options={SALES_STATUS_OPTIONS} onChange={p.onStatus} />
+        <SearchField label="Buscar vendas" value={p.search} onChange={p.onSearch} placeholder="Cliente, e-mail ou ID da venda" className="lg:ml-auto lg:min-w-[260px] lg:max-w-[340px] lg:flex-1" />
       </div>
 
       {p.error ? (
@@ -74,14 +74,14 @@ export function SalesLedger(p: SalesLedgerProps) {
         </div>
       ) : (
         <div role="table" aria-label="Vendas" aria-busy={p.loading} className={cn(p.loading && "opacity-70 transition-opacity")}>
-          <div role="row" className={cn("hidden border-y border-border bg-muted/50 px-7 py-2.5 text-[12.5px] font-semibold text-muted-foreground md:grid md:items-center md:gap-4", COLS)}>
+          <div role="row" className={cn("hidden border-y border-border bg-muted/50 px-7 py-2.5 text-[12.5px] font-semibold text-muted-foreground lg:grid lg:items-center lg:gap-4", COLS)}>
             <span role="columnheader">Cliente</span>
             <span role="columnheader">Método</span>
             <span role="columnheader">Status</span>
             <span role="columnheader">Quando</span>
             <span role="columnheader" className="text-right">Valor</span>
           </div>
-          <ul className="border-t border-border md:border-t-0">
+          <ul className="border-t border-border lg:border-t-0">
             {p.items.map((t) => {
               const st = deriveTransactionStatus(t);
               const ok = isApprovedTransaction(st);
@@ -90,7 +90,7 @@ export function SalesLedger(p: SalesLedgerProps) {
               const name = t.customer_name || product || "Cliente";
               return (
                 <li key={t.id} role="row" className="border-t border-border first:border-t-0">
-                  <button onClick={() => p.onOpen(t)} className={cn("grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3.5 px-5 py-3.5 text-left transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none sm:px-7 md:gap-4", COLS)}>
+                  <button onClick={() => p.onOpen(t)} className={cn("grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3.5 px-5 py-3.5 text-left transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none sm:px-7 lg:gap-4", COLS)}>
                     <span role="cell" className="flex min-w-0 items-center gap-3.5">
                       <Avatar name={name} ok={ok} />
                       <span className="min-w-0">
@@ -99,20 +99,20 @@ export function SalesLedger(p: SalesLedgerProps) {
                           {t.is_simulated && <span title="Venda de teste: não entra no saldo nem nos totais" className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">Simulação</span>}
                         </span>
                         <span className="block truncate text-[12.5px] text-muted-foreground">
-                          <span className="md:hidden">{meta.label}, </span>{product ?? "Sem produto"}
+                          <span className="lg:hidden">{meta.label}, </span>{product ?? "Sem produto"}
                         </span>
                       </span>
                     </span>
 
-                    <span role="cell" className="hidden md:flex"><MethodMark method={t.payment_method} /></span>
-                    <span role="cell" className="hidden md:flex"><StatusPill label={meta.label} tone={meta.tone} /></span>
-                    <span role="cell" className="hidden text-[13.5px] text-muted-foreground md:block">{whenLabel(t.created_at)}</span>
+                    <span role="cell" className="hidden lg:flex"><MethodMark method={t.payment_method} /></span>
+                    <span role="cell" className="hidden lg:flex"><StatusPill label={meta.label} tone={meta.tone} /></span>
+                    <span role="cell" className="hidden text-[13.5px] text-muted-foreground lg:block">{whenLabel(t.created_at)}</span>
 
                     <span role="cell" className="text-right">
                       <Money value={Number(t.amount)} hidden={p.hidden} signed={ok} className={cn("block text-[15px] font-extrabold tracking-[-0.02em]", ok ? "vp-green-ink" : "text-muted-foreground")} centsClassName="opacity-70" />
                       <span className="block text-[12px] text-muted-foreground">
-                        <span className="md:hidden">{whenLabel(t.created_at)}</span>
-                        {ok && t.net_amount != null && <span className="hidden md:inline">{p.hidden ? "líquido ••••" : `líquido ${Number(t.net_amount).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`}</span>}
+                        <span className="lg:hidden">{whenLabel(t.created_at)}</span>
+                        {ok && t.net_amount != null && <span className="hidden lg:inline">{p.hidden ? "líquido ••••" : `líquido ${Number(t.net_amount).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`}</span>}
                       </span>
                     </span>
                   </button>

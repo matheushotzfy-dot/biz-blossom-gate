@@ -6,7 +6,7 @@ import { StatusPill } from "@/components/seller-ui/tx";
 import { cn, formatCurrency } from "@/lib/utils";
 import { STATE_META, couponState, discountLabel, expiryNote, type Coupon } from "./couponMeta";
 
-const COLS = "md:grid-cols-[minmax(0,1.5fr)_120px_minmax(0,1fr)_minmax(0,0.9fr)_112px_44px]";
+const COLS = "lg:grid-cols-[minmax(0,1.5fr)_120px_minmax(0,1fr)_minmax(0,0.9fr)_112px_44px]";
 
 export interface CouponsLedgerProps {
   coupons: Coupon[];
@@ -52,7 +52,7 @@ export function CouponsLedger(p: CouponsLedgerProps) {
   return (
     <section className="vp-sheet overflow-hidden" aria-label="Cupons">
       <div role="table" aria-label="Cupons">
-        <div role="row" className={cn("hidden border-b border-border bg-muted/50 px-7 py-2.5 text-[12.5px] font-semibold text-muted-foreground md:grid md:items-center md:gap-4", COLS)}>
+        <div role="row" className={cn("hidden border-b border-border bg-muted/50 px-7 py-2.5 text-[12.5px] font-semibold text-muted-foreground lg:grid lg:items-center lg:gap-4", COLS)}>
           <span role="columnheader">Cupom</span>
           <span role="columnheader">Desconto</span>
           <span role="columnheader">Resgates</span>
@@ -68,9 +68,9 @@ export function CouponsLedger(p: CouponsLedgerProps) {
             const pct = c.max_uses ? Math.min(100, (c.current_uses / c.max_uses) * 100) : 0;
             const hasLink = !!c.product_id && !!p.productLink(c.product_id);
             return (
-              <li key={c.id} role="row" className={cn("relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-3 border-t border-border px-5 py-4 first:border-t-0 sm:px-7 md:gap-4", COLS, p.busyId === c.id && "opacity-60")}>
+              <li key={c.id} role="row" className={cn("relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-3 border-t border-border px-5 py-4 first:border-t-0 sm:px-7 lg:gap-4", COLS, p.busyId === c.id && "opacity-60")}>
                 {/* Cupom */}
-                <span role="cell" className="col-start-1 row-start-1 min-w-0 md:col-start-1">
+                <span role="cell" className="col-start-1 row-start-1 min-w-0 lg:col-start-1">
                   <button
                     type="button" onClick={() => p.onCopyCode(c)} title="Copiar o código" aria-label={`Copiar o código ${c.code}`}
                     className="vp-pill group/code !h-9 max-w-full gap-2 bg-accent !px-3.5 font-mono !text-[14px] font-bold tracking-[0.05em] text-accent-foreground hover:!bg-accent hover:ring-1 hover:ring-primary/40"
@@ -82,24 +82,24 @@ export function CouponsLedger(p: CouponsLedgerProps) {
                 </span>
 
                 {/* Ações (no celular ficam ao lado do código) */}
-                <span role="cell" className="col-start-2 row-start-1 justify-self-end md:col-start-6">
+                <span role="cell" className="col-start-2 row-start-1 justify-self-end lg:col-start-6">
                   <RowMenu c={c} st={st} hasLink={hasLink} {...p} />
                 </span>
 
                 {/* Desconto */}
-                <span role="cell" className="col-span-2 flex items-baseline justify-between gap-3 md:col-span-1 md:col-start-2 md:row-start-1 md:block">
-                  <span className="vp-num text-[22px] font-extrabold leading-none tracking-[-0.04em] text-foreground md:text-[20px]">{discountLabel(c)}</span>
-                  <span className="text-[12.5px] text-muted-foreground md:mt-1.5 md:block">{c.discount_type === "percentage" ? "do preço" : "valor fixo"}</span>
+                <span role="cell" className="col-span-2 flex items-baseline justify-between gap-3 lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:block">
+                  <span className="vp-num text-[22px] font-extrabold leading-none tracking-[-0.04em] text-foreground lg:text-[20px]">{discountLabel(c)}</span>
+                  <span className="text-[12.5px] text-muted-foreground lg:mt-1.5 lg:block">{c.discount_type === "percentage" ? "do preço" : "valor fixo"}</span>
                 </span>
 
                 {/* Resgates */}
-                <span role="cell" className="col-span-2 min-w-0 md:col-span-1 md:col-start-3 md:row-start-1">
-                  <span className="flex items-baseline justify-between gap-2 md:block">
+                <span role="cell" className="col-span-2 min-w-0 lg:col-span-1 lg:col-start-3 lg:row-start-1">
+                  <span className="flex items-baseline justify-between gap-2 lg:block">
                     <span className="text-[14.5px] font-bold tabular-nums text-foreground">
                       {c.current_uses.toLocaleString("pt-BR")}
                       <span className="font-medium text-muted-foreground">{c.max_uses ? ` de ${c.max_uses.toLocaleString("pt-BR")}` : c.current_uses === 1 ? " resgate" : " resgates"}</span>
                     </span>
-                    <span className="text-[12.5px] tabular-nums text-muted-foreground md:mt-1 md:block">
+                    <span className="text-[12.5px] tabular-nums text-muted-foreground lg:mt-1 lg:block">
                       {Number(c.total_discount_amount) > 0 ? `${formatCurrency(Number(c.total_discount_amount))} em descontos` : "Sem descontos ainda"}
                     </span>
                   </span>
@@ -111,16 +111,16 @@ export function CouponsLedger(p: CouponsLedgerProps) {
                 </span>
 
                 {/* Status (celular) e validade */}
-                <span role="cell" className="md:hidden">
+                <span role="cell" className="lg:hidden">
                   <StatusPill label={meta.label} tone={meta.tone} />
                 </span>
-                <span role="cell" className="min-w-0 justify-self-end text-right md:col-start-4 md:row-start-1 md:justify-self-start md:text-left">
+                <span role="cell" className="min-w-0 justify-self-end text-right lg:col-start-4 lg:row-start-1 lg:justify-self-start lg:text-left">
                   <span className={cn("block text-[14px] font-medium tabular-nums", ex.past ? "text-destructive" : "text-foreground")}>{ex.text}</span>
-                  {ex.sub && <span className={cn("block text-[12.5px] md:mt-0.5", ex.soon ? "font-semibold text-warning" : ex.past ? "text-destructive/80" : "text-muted-foreground")}>{ex.sub}</span>}
+                  {ex.sub && <span className={cn("block text-[12.5px] lg:mt-0.5", ex.soon ? "font-semibold text-warning" : ex.past ? "text-destructive/80" : "text-muted-foreground")}>{ex.sub}</span>}
                 </span>
 
                 {/* Status (computador) */}
-                <span role="cell" className="hidden md:col-start-5 md:row-start-1 md:block">
+                <span role="cell" className="hidden lg:col-start-5 lg:row-start-1 lg:block">
                   <StatusPill label={meta.label} tone={meta.tone} />
                 </span>
               </li>

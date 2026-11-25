@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { SALE_STATUS, affiliateUrl, isPaidSale, shortUrl, sinceLabel, type AffiliateLink, type AffiliateSale } from "./affiliateMeta";
 import { Thumb } from "./Thumb";
 
-const COLS = "md:grid-cols-[130px_minmax(0,1.4fr)_90px_130px_130px_120px]";
+const COLS = "lg:grid-cols-[130px_minmax(0,1.4fr)_90px_130px_130px_120px]";
 const PAGE = 8;
 
 export interface LinkProduct { name: string; image_url: string | null; checkout_url: string | null }
@@ -40,7 +40,7 @@ export function MyLinksTab(p: MyLinksTabProps) {
   const pagedSales = p.sales.slice((page - 1) * PAGE, page * PAGE);
 
   return (
-    <div className="space-y-5 md:space-y-6">
+    <div className="space-y-5 lg:space-y-6">
       <StatBand
         label="Resumo das suas afiliações"
         cells={[
@@ -52,7 +52,7 @@ export function MyLinksTab(p: MyLinksTabProps) {
       />
 
       {p.loading && p.links.length === 0 ? (
-        <ul className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 xl:grid-cols-3">{Array.from({ length: 3 }, (_, i) => <li key={i} className="vp-skel h-[220px] !rounded-[22px]" />)}</ul>
+        <ul className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2 xl:grid-cols-3">{Array.from({ length: 3 }, (_, i) => <li key={i} className="vp-skel h-[220px] !rounded-[22px]" />)}</ul>
       ) : p.links.length === 0 ? (
         <section className="vp-sheet">
           <EmptyPanel
@@ -63,7 +63,7 @@ export function MyLinksTab(p: MyLinksTabProps) {
           />
         </section>
       ) : (
-        <ul className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 xl:grid-cols-3" aria-label="Seus links de afiliado">
+        <ul className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2 xl:grid-cols-3" aria-label="Seus links de afiliado">
           {p.links.map((l) => {
             const pr = p.product(l.product_id);
             const url = affiliateUrl(pr?.checkout_url, l.slug);
@@ -111,7 +111,7 @@ export function MyLinksTab(p: MyLinksTabProps) {
             <p className="mt-0.5 text-[13.5px] text-muted-foreground">Cada venda feita pelos seus links e o que você recebeu por ela.</p>
           </div>
           <div role="table" aria-label="Comissões">
-            <div role="row" className={cn("hidden border-b border-border bg-muted/50 px-7 py-2.5 text-[12.5px] font-semibold text-muted-foreground md:grid md:items-center md:gap-4", COLS)}>
+            <div role="row" className={cn("hidden border-b border-border bg-muted/50 px-7 py-2.5 text-[12.5px] font-semibold text-muted-foreground lg:grid lg:items-center lg:gap-4", COLS)}>
               <span role="columnheader">Data</span><span role="columnheader">Produto</span><span role="columnheader" className="text-right">Comissão</span><span role="columnheader" className="text-right">Venda</span><span role="columnheader" className="text-right">Você recebeu</span><span role="columnheader" className="text-right">Situação</span>
             </div>
             <ul>
@@ -119,14 +119,14 @@ export function MyLinksTab(p: MyLinksTabProps) {
                 const st = SALE_STATUS[s.status] ?? { label: s.status, tone: "idle" as const };
                 const pr = p.product(s.product_id);
                 return (
-                  <li key={s.id} role="row" className={cn("grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 border-t border-border px-5 py-3.5 first:border-t-0 sm:px-7 md:gap-4", COLS)}>
-                    <span role="cell" className="col-start-1 row-start-1 text-[13px] tabular-nums text-muted-foreground md:text-[13.5px]">{sinceLabel(s.created_at)}</span>
-                    <span role="cell" className="col-start-2 row-start-1 justify-self-end md:col-start-6"><StatusPill label={st.label} tone={st.tone} /></span>
-                    <span role="cell" className="col-span-2 truncate text-[14px] font-bold text-foreground md:col-span-1 md:col-start-2 md:row-start-1 md:font-medium">{pr?.name ?? "Produto indisponível"}</span>
-                    <span role="cell" className="col-span-2 flex items-center justify-between text-[13px] text-muted-foreground md:contents">
-                      <span className="md:text-right md:text-[14px] md:font-semibold md:text-foreground">{Number(s.commission_pct)}%</span>
-                      <span className="tabular-nums md:text-right md:text-[14px] md:font-semibold md:text-foreground">{money(Number(s.sale_amount))}</span>
-                      <span className="tabular-nums md:text-right md:text-[14px] md:font-semibold md:text-foreground">{money(Number(s.commission_amount))}</span>
+                  <li key={s.id} role="row" className={cn("grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 border-t border-border px-5 py-3.5 first:border-t-0 sm:px-7 lg:gap-4", COLS)}>
+                    <span role="cell" className="col-start-1 row-start-1 text-[13px] tabular-nums text-muted-foreground lg:text-[13.5px]">{sinceLabel(s.created_at)}</span>
+                    <span role="cell" className="col-start-2 row-start-1 justify-self-end lg:col-start-6"><StatusPill label={st.label} tone={st.tone} /></span>
+                    <span role="cell" className="col-span-2 truncate text-[14px] font-bold text-foreground lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:font-medium">{pr?.name ?? "Produto indisponível"}</span>
+                    <span role="cell" className="col-span-2 flex items-center justify-between text-[13px] text-muted-foreground lg:contents">
+                      <span className="lg:text-right lg:text-[14px] lg:font-semibold lg:text-foreground">{Number(s.commission_pct)}%</span>
+                      <span className="tabular-nums lg:text-right lg:text-[14px] lg:font-semibold lg:text-foreground">{money(Number(s.sale_amount))}</span>
+                      <span className="tabular-nums lg:text-right lg:text-[14px] lg:font-semibold lg:text-foreground">{money(Number(s.commission_amount))}</span>
                     </span>
                   </li>
                 );

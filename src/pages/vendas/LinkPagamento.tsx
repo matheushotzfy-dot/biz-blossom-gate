@@ -138,9 +138,9 @@ export default function LinkPagamento() {
       />
 
       <section className="vp-sheet overflow-hidden" aria-label="Meus links">
-        <div className="flex flex-col gap-3 px-5 pb-4 pt-5 sm:px-7 sm:pt-6 lg:flex-row lg:items-center lg:justify-between">
-          <FilterPills label="Filtrar links por situação" value={status} options={filters} onChange={(v) => { setStatus(v); setPage(1); }} />
-          <SearchField label="Buscar links" value={search} onChange={setSearch} placeholder="Título ou endereço do link" className="lg:w-[320px] lg:shrink-0" />
+        <div className="flex flex-col gap-3 px-5 pb-4 pt-5 sm:px-7 sm:pt-6 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between lg:gap-x-4">
+          <FilterPills className="lg:shrink-0" label="Filtrar links por situação" value={status} options={filters} onChange={(v) => { setStatus(v); setPage(1); }} />
+          <SearchField label="Buscar links" value={search} onChange={setSearch} placeholder="Título ou endereço do link" className="lg:ml-auto lg:min-w-[260px] lg:max-w-[340px] lg:flex-1" />
         </div>
         <PaymentLinkList
           links={pageData.items}

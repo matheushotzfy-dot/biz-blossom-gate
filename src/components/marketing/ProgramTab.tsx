@@ -17,9 +17,9 @@ export interface ProgramProductRow {
   enabled: boolean; commission: number;
 }
 
-const PRODUCT_COLS = "md:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)_90px_90px_130px_130px_44px]";
-const LINK_COLS = "md:grid-cols-[minmax(0,1.3fr)_minmax(0,1.3fr)_90px_90px_130px_96px]";
-const SALE_COLS = "md:grid-cols-[130px_minmax(0,1.3fr)_minmax(0,1fr)_130px_130px_120px]";
+const PRODUCT_COLS = "lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)_90px_90px_130px_130px_44px]";
+const LINK_COLS = "lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1.3fr)_90px_90px_130px_96px]";
+const SALE_COLS = "lg:grid-cols-[130px_minmax(0,1.3fr)_minmax(0,1fr)_130px_130px_120px]";
 const PAGE = 8;
 
 export interface ProgramTabProps {
@@ -62,7 +62,7 @@ export function ProgramTab(p: ProgramTabProps) {
   const money = (v: number, c?: string) => <Money value={v} hidden={p.hidden} className={c} centsClassName="opacity-70" />;
 
   return (
-    <div className="space-y-5 md:space-y-6">
+    <div className="space-y-5 lg:space-y-6">
       <StatBand
         label="Resumo do seu programa de afiliados"
         cells={[
@@ -85,14 +85,14 @@ export function ProgramTab(p: ProgramTabProps) {
           <EmptyPanel title="Você ainda não tem produtos" text="Publique um produto para poder abrir o programa de afiliados nele." action={<Link to="/vendas/produtos" className="vp-cta"><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} />Ir para produtos</Link>} />
         ) : (
           <div role="table" aria-label="Produtos">
-            <div role="row" className={cn("hidden border-b border-border bg-muted/50 px-7 py-2.5 text-[12.5px] font-semibold text-muted-foreground md:grid md:items-center md:gap-4", PRODUCT_COLS)}>
+            <div role="row" className={cn("hidden border-b border-border bg-muted/50 px-7 py-2.5 text-[12.5px] font-semibold text-muted-foreground lg:grid lg:items-center lg:gap-4", PRODUCT_COLS)}>
               <span role="columnheader">Produto</span><span role="columnheader">Programa</span><span role="columnheader" className="text-right">Afiliados</span><span role="columnheader" className="text-right">Vendas</span><span role="columnheader" className="text-right">Receita</span><span role="columnheader" className="text-right">Comissões</span><span role="columnheader" className="sr-only">Ações</span>
             </div>
             <ul>
               {p.products.map((pr) => {
                 const d = byProduct(pr.id);
                 return (
-                  <li key={pr.id} role="row" className={cn("grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-3 border-t border-border px-5 py-4 first:border-t-0 sm:px-7 md:gap-4", PRODUCT_COLS)}>
+                  <li key={pr.id} role="row" className={cn("grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-3 border-t border-border px-5 py-4 first:border-t-0 sm:px-7 lg:gap-4", PRODUCT_COLS)}>
                     <span role="cell" className="col-start-1 flex min-w-0 items-center gap-3.5">
                       <Thumb src={pr.image_url} />
                       <span className="min-w-0">
@@ -100,20 +100,20 @@ export function ProgramTab(p: ProgramTabProps) {
                         <span className="block text-[12.5px] text-muted-foreground">{pr.status === "active" ? "Ativo" : pr.status === "pending_review" ? "Em revisão" : "Pausado"}</span>
                       </span>
                     </span>
-                    <span role="cell" className="col-start-2 justify-self-end md:col-start-6 md:row-start-1 md:hidden">
+                    <span role="cell" className="col-start-2 justify-self-end lg:col-start-6 lg:row-start-1 lg:hidden">
                       <button type="button" className="vp-orb h-10 w-10" onClick={() => p.onConfigure(pr.id)} aria-label={`Configurar programa de ${pr.name}`}><Settings2 className="h-[18px] w-[18px]" /></button>
                     </span>
-                    <span role="cell" className="col-span-2 md:col-span-1 md:col-start-2 md:row-start-1">
+                    <span role="cell" className="col-span-2 lg:col-span-1 lg:col-start-2 lg:row-start-1">
                       {pr.enabled ? <StatusPill label={`No programa, ${pr.commission}%`} tone="ok" /> : <StatusPill label="Fora do programa" tone="idle" />}
                     </span>
-                    <span role="cell" className="col-span-2 grid grid-cols-[repeat(3,minmax(0,1fr))] gap-3 text-[13px] md:col-span-1 md:contents">
-                      <span className="md:text-right md:text-[14px]"><span className="block text-[12px] text-muted-foreground md:hidden">Afiliados</span><span className="font-bold tabular-nums text-foreground">{d.links}</span></span>
-                      <span className="md:text-right md:text-[14px]"><span className="block text-[12px] text-muted-foreground md:hidden">Vendas</span><span className="font-bold tabular-nums text-foreground">{d.sales}</span></span>
-                      <span className="md:hidden"><span className="block text-[12px] text-muted-foreground">Comissões</span><span className="font-bold tabular-nums text-foreground">{p.hidden ? "R$ ••••" : money(d.commissions)}</span></span>
+                    <span role="cell" className="col-span-2 grid grid-cols-[repeat(3,minmax(0,1fr))] gap-3 text-[13px] lg:col-span-1 lg:contents">
+                      <span className="lg:text-right lg:text-[14px]"><span className="block text-[12px] text-muted-foreground lg:hidden">Afiliados</span><span className="font-bold tabular-nums text-foreground">{d.links}</span></span>
+                      <span className="lg:text-right lg:text-[14px]"><span className="block text-[12px] text-muted-foreground lg:hidden">Vendas</span><span className="font-bold tabular-nums text-foreground">{d.sales}</span></span>
+                      <span className="lg:hidden"><span className="block text-[12px] text-muted-foreground">Comissões</span><span className="font-bold tabular-nums text-foreground">{p.hidden ? "R$ ••••" : money(d.commissions)}</span></span>
                     </span>
-                    <span role="cell" className="hidden text-right text-[14px] font-semibold tabular-nums text-foreground md:block">{money(d.revenue)}</span>
-                    <span role="cell" className="hidden text-right text-[14px] font-semibold tabular-nums text-foreground md:block">{money(d.commissions)}</span>
-                    <span role="cell" className="hidden md:block">
+                    <span role="cell" className="hidden text-right text-[14px] font-semibold tabular-nums text-foreground lg:block">{money(d.revenue)}</span>
+                    <span role="cell" className="hidden text-right text-[14px] font-semibold tabular-nums text-foreground lg:block">{money(d.commissions)}</span>
+                    <span role="cell" className="hidden lg:block">
                       <button type="button" className="vp-orb h-10 w-10" onClick={() => p.onConfigure(pr.id)} aria-label={`Configurar programa de ${pr.name}`} title="Configurar programa"><Settings2 className="h-[18px] w-[18px]" /></button>
                     </span>
                   </li>
@@ -139,24 +139,24 @@ export function ProgramTab(p: ProgramTabProps) {
             <EmptyPanel title="Ninguém divulga seus produtos ainda" text={stats.inProgram === 0 ? "Abra o programa em um produto. Ele passa a aparecer em Explorar produtos para outros vendedores." : "Seu produto já está em Explorar produtos. Quando alguém criar um link, ele aparece aqui."} />
           ) : (
             <div role="table" aria-label="Afiliados">
-              <div role="row" className={cn("hidden border-b border-border bg-muted/50 px-7 py-2.5 text-[12.5px] font-semibold text-muted-foreground md:grid md:items-center md:gap-4", LINK_COLS)}>
+              <div role="row" className={cn("hidden border-b border-border bg-muted/50 px-7 py-2.5 text-[12.5px] font-semibold text-muted-foreground lg:grid lg:items-center lg:gap-4", LINK_COLS)}>
                 <span role="columnheader">Afiliado</span><span role="columnheader">Produto</span><span role="columnheader" className="text-right">Comissão</span><span role="columnheader" className="text-right">Vendas</span><span role="columnheader" className="text-right">Ganhou</span><span role="columnheader" className="text-right">Link ativo</span>
               </div>
               <ul>
                 {p.links.map((l) => {
                   const d = byLink(l.id);
                   return (
-                    <li key={l.id} role="row" className={cn("grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 border-t border-border px-5 py-3.5 first:border-t-0 sm:px-7 md:gap-4", LINK_COLS, p.busyLinkId === l.id && "opacity-60", !l.is_active && "opacity-75")}>
+                    <li key={l.id} role="row" className={cn("grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 border-t border-border px-5 py-3.5 first:border-t-0 sm:px-7 lg:gap-4", LINK_COLS, p.busyLinkId === l.id && "opacity-60", !l.is_active && "opacity-75")}>
                       <span role="cell" className="flex min-w-0 items-center gap-3.5">
                         <CodeBadge code={affiliateCode(l.affiliate_user_id)} active={l.is_active} />
                         <span className="min-w-0"><span className="block truncate text-[14.5px] font-bold text-foreground">Afiliado {affiliateCode(l.affiliate_user_id)}</span><span className="block text-[12.5px] text-muted-foreground">Desde {sinceLabel(l.created_at)}</span></span>
                       </span>
-                      <span role="cell" className="col-start-2 row-start-1 justify-self-end md:col-start-6 md:row-start-1"><Switch checked={l.is_active} onCheckedChange={() => p.onToggleLink(l)} disabled={p.busyLinkId === l.id} aria-label={l.is_active ? `Pausar o link do afiliado ${affiliateCode(l.affiliate_user_id)}` : `Reativar o link do afiliado ${affiliateCode(l.affiliate_user_id)}`} /></span>
-                      <span role="cell" className="col-span-2 truncate text-[13.5px] font-medium text-foreground md:col-span-1 md:col-start-2 md:row-start-1">{p.productName(l.product_id)}</span>
-                      <span role="cell" className="col-span-2 flex items-center justify-between gap-3 text-[13px] text-muted-foreground md:contents">
-                        <span className="md:text-right md:text-[14px] md:font-semibold md:text-foreground">{Number(l.commission_pct)}% <span className="md:hidden">de comissão</span></span>
-                        <span className="tabular-nums md:text-right md:text-[14px] md:font-semibold md:text-foreground">{d.sales} {d.sales === 1 ? "venda" : "vendas"}</span>
-                        <span className="tabular-nums md:text-right md:text-[14px] md:font-semibold md:text-foreground">{money(d.earned)}</span>
+                      <span role="cell" className="col-start-2 row-start-1 justify-self-end lg:col-start-6 lg:row-start-1"><Switch checked={l.is_active} onCheckedChange={() => p.onToggleLink(l)} disabled={p.busyLinkId === l.id} aria-label={l.is_active ? `Pausar o link do afiliado ${affiliateCode(l.affiliate_user_id)}` : `Reativar o link do afiliado ${affiliateCode(l.affiliate_user_id)}`} /></span>
+                      <span role="cell" className="col-span-2 truncate text-[13.5px] font-medium text-foreground lg:col-span-1 lg:col-start-2 lg:row-start-1">{p.productName(l.product_id)}</span>
+                      <span role="cell" className="col-span-2 flex items-center justify-between gap-3 text-[13px] text-muted-foreground lg:contents">
+                        <span className="lg:text-right lg:text-[14px] lg:font-semibold lg:text-foreground">{Number(l.commission_pct)}% <span className="lg:hidden">de comissão</span></span>
+                        <span className="tabular-nums lg:text-right lg:text-[14px] lg:font-semibold lg:text-foreground">{d.sales} {d.sales === 1 ? "venda" : "vendas"}</span>
+                        <span className="tabular-nums lg:text-right lg:text-[14px] lg:font-semibold lg:text-foreground">{money(d.earned)}</span>
                       </span>
                     </li>
                   );
@@ -168,21 +168,21 @@ export function ProgramTab(p: ProgramTabProps) {
           <EmptyPanel title="Nenhuma venda por afiliado ainda" text="Quando um cliente comprar por um link de afiliado, a venda aparece aqui com a comissão paga." />
         ) : (
           <div role="table" aria-label="Vendas por afiliados">
-            <div role="row" className={cn("hidden border-b border-border bg-muted/50 px-7 py-2.5 text-[12.5px] font-semibold text-muted-foreground md:grid md:items-center md:gap-4", SALE_COLS)}>
+            <div role="row" className={cn("hidden border-b border-border bg-muted/50 px-7 py-2.5 text-[12.5px] font-semibold text-muted-foreground lg:grid lg:items-center lg:gap-4", SALE_COLS)}>
               <span role="columnheader">Data</span><span role="columnheader">Produto</span><span role="columnheader">Afiliado</span><span role="columnheader" className="text-right">Venda</span><span role="columnheader" className="text-right">Comissão</span><span role="columnheader" className="text-right">Situação</span>
             </div>
             <ul>
               {pagedSales.map((s) => {
                 const st = SALE_STATUS[s.status] ?? { label: s.status, tone: "idle" as const };
                 return (
-                  <li key={s.id} role="row" className={cn("grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 border-t border-border px-5 py-3.5 first:border-t-0 sm:px-7 md:gap-4", SALE_COLS)}>
-                    <span role="cell" className="col-start-1 row-start-1 text-[13px] tabular-nums text-muted-foreground md:col-start-1 md:text-[13.5px]">{sinceLabel(s.created_at)}</span>
-                    <span role="cell" className="col-start-2 row-start-1 justify-self-end md:col-start-6 md:justify-self-end"><StatusPill label={st.label} tone={st.tone} /></span>
-                    <span role="cell" className="col-span-2 truncate text-[14px] font-bold text-foreground md:col-span-1 md:col-start-2 md:row-start-1 md:font-medium">{p.productName(s.product_id)}</span>
-                    <span role="cell" className="col-span-2 text-[13px] text-muted-foreground md:col-span-1 md:col-start-3 md:row-start-1 md:text-[13.5px]">Afiliado {affiliateCode(s.affiliate_user_id)}</span>
-                    <span role="cell" className="col-span-2 flex items-center justify-between text-[13px] text-muted-foreground md:contents">
-                      <span className="tabular-nums md:text-right md:text-[14px] md:font-semibold md:text-foreground"><span className="md:hidden">Venda </span>{money(Number(s.sale_amount))}</span>
-                      <span className="tabular-nums md:text-right md:text-[14px] md:font-semibold md:text-foreground"><span className="md:hidden">Comissão </span>{money(Number(s.commission_amount))}</span>
+                  <li key={s.id} role="row" className={cn("grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 border-t border-border px-5 py-3.5 first:border-t-0 sm:px-7 lg:gap-4", SALE_COLS)}>
+                    <span role="cell" className="col-start-1 row-start-1 text-[13px] tabular-nums text-muted-foreground lg:col-start-1 lg:text-[13.5px]">{sinceLabel(s.created_at)}</span>
+                    <span role="cell" className="col-start-2 row-start-1 justify-self-end lg:col-start-6 lg:justify-self-end"><StatusPill label={st.label} tone={st.tone} /></span>
+                    <span role="cell" className="col-span-2 truncate text-[14px] font-bold text-foreground lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:font-medium">{p.productName(s.product_id)}</span>
+                    <span role="cell" className="col-span-2 text-[13px] text-muted-foreground lg:col-span-1 lg:col-start-3 lg:row-start-1 lg:text-[13.5px]">Afiliado {affiliateCode(s.affiliate_user_id)}</span>
+                    <span role="cell" className="col-span-2 flex items-center justify-between text-[13px] text-muted-foreground lg:contents">
+                      <span className="tabular-nums lg:text-right lg:text-[14px] lg:font-semibold lg:text-foreground"><span className="lg:hidden">Venda </span>{money(Number(s.sale_amount))}</span>
+                      <span className="tabular-nums lg:text-right lg:text-[14px] lg:font-semibold lg:text-foreground"><span className="lg:hidden">Comissão </span>{money(Number(s.commission_amount))}</span>
                     </span>
                   </li>
                 );

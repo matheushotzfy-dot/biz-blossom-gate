@@ -31,7 +31,7 @@ export function MobileRevenueBar() {
 
   return (
     <>
-      <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur md:hidden">
+      <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur xl:hidden">
         <div className="flex items-center gap-2 px-3.5 py-2.5">
           <Link to="/dashboard" className="flex shrink-0 items-center gap-2" aria-label="Início">
             <VenxpayLogo size={30} />

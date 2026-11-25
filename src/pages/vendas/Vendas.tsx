@@ -78,7 +78,7 @@ export default function Vendas() {
   }, [rangeStart, rangeEnd]);
 
   // Agregados idênticos aos do Dashboard (mesma RPC, mesma janela) — sem cálculo no cliente.
-  const { data: dashStats } = useDashboardStats(rangeStart, rangeEnd, bucket);
+  const { data: dashStats, isError: statsError, refetch: refetchStats } = useDashboardStats(rangeStart, rangeEnd, bucket);
   const cur = dashStats?.current;
 
   const {
@@ -295,15 +295,22 @@ export default function Vendas() {
         }
       />
 
-      <StatBand
-        label="Resumo do período"
-        cells={[
-          { label: "Faturamento líquido", featured: true, loading: !cur, value: privacyHidden ? "R$ ••••" : <Money value={stats.revenue} centsClassName="opacity-70" />, sub: "Depois das taxas" },
-          { label: "Vendas pagas", loading: !cur, value: mask(stats.count.toLocaleString("pt-BR")), sub: privacyHidden ? "••••" : `de ${stats.totalCount.toLocaleString("pt-BR")} tentativas` },
-          { label: "Ticket médio", loading: !cur, value: privacyHidden ? "R$ ••••" : <Money value={stats.avg} centsClassName="opacity-70" />, sub: "Média por venda paga" },
-          { label: "Taxa de aprovação", loading: !cur, value: stats.totalCount === 0 ? "—" : mask(`${stats.conversion.toFixed(1).replace(".", ",")}%`), meter: privacyHidden || stats.totalCount === 0 ? undefined : stats.conversion, sub: privacyHidden ? "••••" : stats.totalCount === 0 ? "Sem tentativas no período" : `Pix aprova ${stats.pixConversion.toFixed(0)}%` },
-        ]}
-      />
+      {statsError && !cur ? (
+        <div role="alert" className="vp-sheet flex flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-7">
+          <p className="text-[14.5px] font-semibold text-foreground">Não foi possível carregar o resumo do período. A lista de vendas abaixo continua valendo.</p>
+          <button type="button" onClick={() => void refetchStats()} className="vp-ghost h-10 px-4 text-[13.5px]">Tentar de novo</button>
+        </div>
+      ) : (
+        <StatBand
+          label="Resumo do período"
+          cells={[
+            { label: "Faturamento líquido", featured: true, loading: !cur, value: privacyHidden ? "R$ ••••" : <Money value={stats.revenue} centsClassName="opacity-70" />, sub: "Depois das taxas" },
+            { label: "Vendas pagas", loading: !cur, value: mask(stats.count.toLocaleString("pt-BR")), sub: privacyHidden ? "••••" : `de ${stats.totalCount.toLocaleString("pt-BR")} tentativas` },
+            { label: "Ticket médio", loading: !cur, value: privacyHidden ? "R$ ••••" : <Money value={stats.avg} centsClassName="opacity-70" />, sub: "Média por venda paga" },
+            { label: "Taxa de aprovação", loading: !cur, value: stats.totalCount === 0 ? "—" : mask(`${stats.conversion.toFixed(1).replace(".", ",")}%`), meter: privacyHidden || stats.totalCount === 0 ? undefined : stats.conversion, sub: privacyHidden ? "••••" : stats.totalCount === 0 ? "Sem tentativas no período" : `Pix aprova ${stats.pixConversion.toFixed(0)}%` },
+          ]}
+        />
+      )}
 
       <SalesLedger
         items={paged}

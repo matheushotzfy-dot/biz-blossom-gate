@@ -379,13 +379,13 @@ export default function Saques() {
         </DialogContent>
       </Dialog>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_372px] lg:items-start">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_372px] xl:items-start">
         <div className="min-w-0 space-y-6">
           <div className="space-y-4">
             <section className="vp-sheet relative overflow-hidden p-6 sm:p-8" aria-label="Saldo disponível">
               <Wallet aria-hidden strokeWidth={1} className="pointer-events-none absolute -bottom-12 -right-8 h-56 w-56 -rotate-[8deg] text-primary/[0.06]" />
-              <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between sm:gap-8">
-                <div className="min-w-0">
+              <div className="relative flex flex-col gap-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-x-8">
+                <div className="min-w-0 sm:max-w-full">
                   <div className="flex items-center gap-3">
                     <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent text-accent-foreground"><Wallet className="h-5 w-5" strokeWidth={2} /></span>
                     <h2 className="text-[15px] font-semibold text-muted-foreground">Disponível para saque</h2>

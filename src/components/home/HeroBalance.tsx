@@ -63,7 +63,7 @@ export function HeroBalance(p: HeroBalanceProps) {
         <button onClick={p.onPix} className="vp-bal-btn vp-bal-btn-main"><QrCode className="h-[18px] w-[18px]" strokeWidth={2.2} />Cobrar via Pix</button>
         <button onClick={p.onWithdraw} className="vp-bal-btn vp-bal-btn-ghost"><ArrowDownToLine className="h-[18px] w-[18px]" strokeWidth={2.2} />Sacar</button>
         <button onClick={p.onCharge} className="vp-bal-btn vp-bal-btn-ghost"><Share2 className="h-[18px] w-[18px]" strokeWidth={2.2} />Enviar link</button>
-        <div className="hidden sm:block">
+        <div className="hidden sm:block xl:max-[1399px]:hidden">
           <button onClick={p.onMore} className="vp-bal-btn vp-bal-btn-ghost"><Blocks className="h-[18px] w-[18px]" strokeWidth={2.2} />Integrações</button>
         </div>
       </div>

@@ -24,7 +24,7 @@ export function SellerRail() {
   useEffect(() => { setOpenId(activeId); }, [activeId]);
 
   return (
-    <aside className="vp-rail sticky top-0 hidden h-[100dvh] w-[272px] shrink-0 flex-col md:flex" aria-label="Menu principal">
+    <aside className="vp-rail sticky top-0 hidden h-[100dvh] w-[272px] shrink-0 flex-col xl:flex" aria-label="Menu principal">
       <Link to="/dashboard" className="flex h-[84px] shrink-0 items-center gap-3 px-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" aria-label="Vemprapay — início">
         <VenxpayLogo size={36} />
         <span className="font-heading text-[21px] font-extrabold tracking-[-0.04em] text-foreground">

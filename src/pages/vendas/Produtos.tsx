@@ -211,14 +211,15 @@ export default function Produtos() {
 
       {/* Filtros e busca (só aparecem quando já existe catálogo) */}
       {(products.length > 0 || productsLoading) && (
-        <div className="vp-sheet flex flex-col gap-3 px-5 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="vp-sheet flex flex-col gap-3 px-5 py-4 sm:px-6 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between lg:gap-x-4">
           <FilterPills<FilterTab>
+            className="lg:shrink-0"
             label="Filtrar produtos por situação"
             value={tab}
             options={tabs.map((t) => ({ value: t.value, label: t.label, count: t.count > 0 ? t.count : undefined }))}
             onChange={setTab}
           />
-          <SearchField label="Buscar produtos" value={search} onChange={setSearch} placeholder="Nome ou descrição" className="lg:w-[320px] lg:shrink-0" />
+          <SearchField label="Buscar produtos" value={search} onChange={setSearch} placeholder="Nome ou descrição" className="lg:ml-auto lg:min-w-[260px] lg:max-w-[340px] lg:flex-1" />
         </div>
       )}
 

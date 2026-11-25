@@ -184,8 +184,9 @@ export default function Cupons() {
             ]}
           />
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-4">
             <FilterPills<Filter>
+              className="sm:shrink-0"
               label="Filtrar cupons por situação"
               value={filter}
               onChange={setFilter}
@@ -196,7 +197,7 @@ export default function Cupons() {
                 { value: "closed", label: "Encerrados", count: counts.closed },
               ]}
             />
-            <SearchField label="Buscar cupom" value={search} onChange={setSearch} placeholder="Código ou produto" className="sm:w-[300px]" />
+            <SearchField label="Buscar cupom" value={search} onChange={setSearch} placeholder="Código ou produto" className="sm:ml-auto sm:min-w-[240px] sm:max-w-[300px] sm:flex-1" />
           </div>
 
           <CouponsLedger

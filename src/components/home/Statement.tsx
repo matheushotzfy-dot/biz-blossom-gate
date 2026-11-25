@@ -17,7 +17,7 @@ export interface StatementProps {
   onCreateLink: () => void;
 }
 
-const COLS = "md:grid-cols-[minmax(0,1.7fr)_110px_170px_150px_minmax(120px,0.8fr)]";
+const COLS = "lg:grid-cols-[minmax(0,1.7fr)_110px_170px_150px_minmax(120px,0.8fr)]";
 
 /** Extrato recente: livro-razão aberto, com colunas no desktop e duas linhas no celular. */
 export function Statement({ items, products, hidden, loading, onOpen, onCreateLink }: StatementProps) {
@@ -43,7 +43,7 @@ export function Statement({ items, products, hidden, loading, onOpen, onCreateLi
         </div>
       ) : (
         <div role="table" aria-label="Últimas transações">
-          <div role="row" className={cn("hidden border-y border-border bg-muted/50 px-7 py-2.5 text-[12.5px] font-semibold text-muted-foreground md:grid md:items-center md:gap-4", COLS)}>
+          <div role="row" className={cn("hidden border-y border-border bg-muted/50 px-7 py-2.5 text-[12.5px] font-semibold text-muted-foreground lg:grid lg:items-center lg:gap-4", COLS)}>
             <span role="columnheader">Cliente</span>
             <span role="columnheader">Método</span>
             <span role="columnheader">Status</span>
@@ -59,8 +59,8 @@ export function Statement({ items, products, hidden, loading, onOpen, onCreateLi
               const name = t.customer_name || product || "Cliente";
               const pix = isPixMethod(t.payment_method);
               return (
-                <li key={t.id} role="row" className="border-t border-border first:border-t-0 md:first:border-t">
-                  <button onClick={() => onOpen(t)} className={cn("grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3.5 px-6 py-3.5 text-left transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none sm:px-7 md:gap-4", COLS)}>
+                <li key={t.id} role="row" className="border-t border-border first:border-t-0 lg:first:border-t">
+                  <button onClick={() => onOpen(t)} className={cn("grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3.5 px-6 py-3.5 text-left transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none sm:px-7 lg:gap-4", COLS)}>
                     <span role="cell" className="flex min-w-0 items-center gap-3.5">
                       <Avatar name={name} ok={ok} />
                       <span className="min-w-0">
@@ -68,20 +68,20 @@ export function Statement({ items, products, hidden, loading, onOpen, onCreateLi
                           <span className="truncate text-[14.5px] font-bold text-foreground">{name}</span>
                           {t.is_simulated && <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">Simulação</span>}
                         </span>
-                        <span className="block truncate text-[12.5px] text-muted-foreground md:hidden">{meta.label}, {pix ? "Pix" : "Cartão"}</span>
-                        {t.customer_name && product && <span className="hidden truncate text-[12.5px] text-muted-foreground md:block">{product}</span>}
+                        <span className="block truncate text-[12.5px] text-muted-foreground lg:hidden">{meta.label}, {pix ? "Pix" : "Cartão"}</span>
+                        {t.customer_name && product && <span className="hidden truncate text-[12.5px] text-muted-foreground lg:block">{product}</span>}
                       </span>
                     </span>
 
-                    <span role="cell" className="hidden md:flex"><MethodMark method={t.payment_method} /></span>
-                    <span role="cell" className="hidden md:flex">
+                    <span role="cell" className="hidden lg:flex"><MethodMark method={t.payment_method} /></span>
+                    <span role="cell" className="hidden lg:flex">
                       <StatusPill label={meta.label} tone={meta.tone} />
                     </span>
-                    <span role="cell" className="hidden text-[13.5px] text-muted-foreground md:block">{whenLabel(t.created_at)}</span>
+                    <span role="cell" className="hidden text-[13.5px] text-muted-foreground lg:block">{whenLabel(t.created_at)}</span>
 
                     <span role="cell" className="text-right">
                       <Money value={Number(t.amount)} hidden={hidden} signed={ok} className={cn("block text-[15px] font-extrabold tracking-[-0.02em]", ok ? "vp-green-ink" : "text-muted-foreground")} centsClassName="opacity-70" />
-                      <span className="block text-[12px] text-muted-foreground md:hidden">{whenLabel(t.created_at)}</span>
+                      <span className="block text-[12px] text-muted-foreground lg:hidden">{whenLabel(t.created_at)}</span>
                     </span>
                   </button>
                 </li>

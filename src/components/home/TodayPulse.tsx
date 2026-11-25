@@ -12,6 +12,9 @@ export interface TodayPulseProps {
   nowHour: number;
   hidden: boolean;
   loading: boolean;
+  /** A consulta falhou e não há número antigo para mostrar no lugar. */
+  error?: boolean;
+  onRetry?: () => void;
   onCreateLink: () => void;
 }
 
@@ -20,7 +23,7 @@ const AXIS = [0, 6, 12, 18, 23];
 /** Vendas de hoje: uma barra por hora. Sem vendas, vira um convite para a primeira cobrança. */
 export function TodayPulse(p: TodayPulseProps) {
   const max = Math.max(...p.hours.map((h) => h.revenue), 0);
-  const empty = !p.loading && p.orders === 0;
+  const empty = !p.loading && !p.error && p.orders === 0;
 
   return (
     <section className="vp-sheet flex flex-col p-6" aria-label="Vendas de hoje">
@@ -33,6 +36,12 @@ export function TodayPulse(p: TodayPulseProps) {
 
       {p.loading ? (
         <div className="mt-5 space-y-4"><div className="vp-skel h-10 w-40" /><div className="vp-skel h-24 w-full" /></div>
+      ) : p.error ? (
+        <div role="alert" className="mt-5 flex flex-1 flex-col items-start justify-center gap-3">
+          <p className="text-[14.5px] font-semibold text-foreground">Não foi possível carregar as vendas de hoje.</p>
+          <p className="text-[13.5px] text-muted-foreground">Seu saldo e o restante da página não foram afetados.</p>
+          {p.onRetry && <button type="button" onClick={p.onRetry} className="vp-ghost h-10 px-4 text-[13.5px]">Tentar de novo</button>}
+        </div>
       ) : (
         <>
           <Money value={p.revenue} hidden={p.hidden} className="mt-4 block text-[36px] font-extrabold leading-none tracking-[-0.04em] text-foreground" centsClassName="opacity-60" />
