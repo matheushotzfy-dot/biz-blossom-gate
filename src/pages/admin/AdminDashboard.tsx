@@ -40,7 +40,7 @@ const AdminAuditTab = lazy(() => import("./tabs/AdminAuditTab"));
 const AdminSettingsTab = lazy(() => import("./tabs/AdminSettingsTab"));
 const AdminEmployeesTab = lazy(() => import("./tabs/AdminEmployeesTab"));
 const AdminTopSellersTab = lazy(() => import("./tabs/AdminTopSellersTab"));
-const AdminTopProductsTab = lazy(() => import("./tabs/AdminTopProductsTab"));
+const TopProductsCenter = lazy(() => import("@/features/admin-top-products/TopProductsCenter"));
 const AdminErrorLogsTab = lazy(() => import("./tabs/AdminErrorLogsTab"));
 const AdminInactiveSellersTab = lazy(() => import("./tabs/AdminInactiveSellersTab"));
 const AdminRiskComplianceTab = lazy(() => import("./tabs/AdminRiskComplianceTab"));
@@ -269,7 +269,7 @@ export default function AdminDashboard() {
     navigate("/admin-matheus", { replace: true });
   };
 
-  const fmtCurrency = (v: number) => v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+  const fmtCurrency = (v: number) => v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const pendingWdCount = withdrawals.filter(w => w.status === "pending").length;
   const activeTabLabel = NAV_SECTIONS.flatMap(s => s.items).find(i => i.id === activeTab)?.label || "";
 
@@ -680,7 +680,7 @@ export default function AdminDashboard() {
                 <AdminTopSellersTab dateRange={dateRange} fmtCurrency={fmtCurrency} />
               )}
               {activeTab === "top-products" && isAdmin && (
-                <AdminTopProductsTab products={products} profiles={profiles} transactions={transactions} fmtCurrency={fmtCurrency} />
+                <TopProductsCenter dateRange={dateRange} fmtCurrency={fmtCurrency} />
               )}
               {activeTab === "withdrawals" && isAdmin && (
                 <AdminWithdrawalsTab withdrawals={withdrawals} profiles={profiles} onReload={loadData} />
