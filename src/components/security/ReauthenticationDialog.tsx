@@ -1,9 +1,7 @@
-import { useState } from "react";
-import { LockKeyhole } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useEffect, useState } from "react";
+import { Eye, EyeOff, Loader2, LockKeyhole } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DialogBody, DialogFoot, DialogHead, FormField, dialogBox } from "@/components/seller-ui/form";
 
 export interface ReauthenticationDialogProps {
   open: boolean;
@@ -14,6 +12,9 @@ export interface ReauthenticationDialogProps {
   onConfirm: (password: string) => Promise<void>;
 }
 
+const REAUTH_MIN_LENGTH = 6;
+
+/** Pede a senha de novo antes de uma operação sensível (saque, troca de chave Pix…). A senha nunca fica guardada: some ao fechar. */
 export function ReauthenticationDialog({
   open,
   busy = false,
@@ -23,48 +24,60 @@ export function ReauthenticationDialog({
   onConfirm,
 }: ReauthenticationDialogProps) {
   const [password, setPassword] = useState("");
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!open) { setPassword(""); setVisible(false); }
+  }, [open]);
 
   const handleOpenChange = (next: boolean) => {
-    if (!busy) {
-      if (!next) setPassword("");
-      onOpenChange(next);
-    }
+    if (busy) return;
+    onOpenChange(next);
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (password.length < 6 || busy) return;
+    if (password.length < REAUTH_MIN_LENGTH || busy) return;
     await onConfirm(password);
   };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="z-[150] max-w-sm">
-        <DialogHeader>
-          <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
-            <LockKeyhole className="h-4 w-4" />
-          </div>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-          <div className="space-y-2">
-            <Label htmlFor="reauth-password">Senha atual</Label>
-            <Input
-              id="reauth-password"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              minLength={6}
-              maxLength={128}
-              autoFocus
-              required
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={busy || password.length < 6}>
-            {busy ? "Confirmando..." : "Confirmar e continuar"}
-          </Button>
+      <DialogContent className={dialogBox("sm", "z-[150]")}>
+        <DialogHead icon={<LockKeyhole className="h-5 w-5" />} title={title} subtitle={description} />
+        <form onSubmit={(e) => { void handleSubmit(e); }} noValidate className="flex min-h-0 flex-1 flex-col">
+          <DialogBody>
+            <FormField id="reauth-password" label="Senha atual" hint="É a mesma senha que você usa para entrar.">
+              <div className="relative">
+                <input
+                  id="reauth-password"
+                  type={visible ? "text" : "password"}
+                  autoComplete="current-password"
+                  autoFocus
+                  maxLength={128}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="vp-field !pr-12"
+                  aria-describedby="reauth-password-msg"
+                />
+                <button
+                  type="button"
+                  onClick={() => setVisible((v) => !v)}
+                  aria-label={visible ? "Ocultar senha" : "Mostrar senha"}
+                  aria-pressed={visible}
+                  className="absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+                >
+                  {visible ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+                </button>
+              </div>
+            </FormField>
+          </DialogBody>
+          <DialogFoot>
+            <button type="button" className="vp-ghost !h-12 justify-center" onClick={() => handleOpenChange(false)} disabled={busy}>Cancelar</button>
+            <button type="submit" className="vp-cta !h-12 justify-center sm:min-w-[190px]" disabled={busy || password.length < REAUTH_MIN_LENGTH}>
+              {busy ? <><Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />Confirmando…</> : "Confirmar e continuar"}
+            </button>
+          </DialogFoot>
         </form>
       </DialogContent>
     </Dialog>

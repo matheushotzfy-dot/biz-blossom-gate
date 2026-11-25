@@ -348,7 +348,8 @@ export default function Vendas() {
       </Dialog>
 
       <SellerRefundDialog tx={refundTx} onClose={() => setRefundTx(null)} onDone={() => setDetailTx(null)} />
-      {detailTx && (
+      {/* O painel fica fora enquanto o reembolso está aberto: ele é mais alto que os diálogos e, invisível, engolia os cliques. */}
+      {detailTx && !refundTx && (
         <TransactionDetailPanel tx={detailTx} products={prodsMap} onClose={() => setDetailTx(null)} onRefund={(t) => setRefundTx(t as Tables<"transactions">)} />
       )}
     </div>
