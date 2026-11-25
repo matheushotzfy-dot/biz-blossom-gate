@@ -7,7 +7,9 @@ const ALLOWED_ORIGINS = new Set([
   "http://localhost:5173",
   "http://localhost:8080",
 ]);
-const LOVABLE_PREVIEW_RE = /^https:\/\/[a-z0-9-]+\.(lovable\.app|lovableproject\.com|lovable\.dev)$/i;
+// Só os hosts de prévia deste projeto (não todo *.lovable.app).
+const PREVIEW_PROJECT_ID = "8b85380d-bbad-44c2-8000-ac99dd36affb";
+const LOVABLE_PREVIEW_RE = new RegExp(`^https://[a-z0-9.-]*${PREVIEW_PROJECT_ID}[a-z0-9.-]*\\.(lovable\\.app|lovableproject\\.com)$`, "i");
 const CORS_BASE_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -168,8 +170,8 @@ Deno.serve(async (req) => {
     const targetEmail = targetProfile?.email || targetUser.user.email || null;
     const targetName = targetProfile?.full_name || targetEmail || targetUserId.slice(0, 8);
 
-    // Mandatory audit log
-    await adminClient.from("audit_logs").insert({
+    // Mandatory audit log: sem registro, não entrega o token.
+    const { error: auditError } = await adminClient.from("audit_logs").insert({
       admin_user_id: caller.id,
       action: "impersonate_user",
       entity_type: "profile",
@@ -182,6 +184,13 @@ Deno.serve(async (req) => {
         user_agent: callerUa,
       },
     });
+    if (auditError) {
+      console.error("[admin-impersonate] Audit log failed:", auditError.message);
+      return new Response(
+        JSON.stringify({ success: false, error: "Internal error" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
     return new Response(

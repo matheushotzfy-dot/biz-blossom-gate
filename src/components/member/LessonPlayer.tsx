@@ -1,3 +1,4 @@
+import { safeNavigationUrl } from "@/lib/safeUrl";
 import { ExternalLink, FileText, Loader2, VideoOff } from "lucide-react";
 import { videoKind } from "@/components/member/courseModel";
 import { courseContentPathFromUrl, useCourseFileUrl } from "@/lib/courseFiles";
@@ -70,7 +71,7 @@ export function LessonPlayer({ url, title, onEnded }: Props) {
       <div>
         <p className="text-[17px] font-bold text-foreground">Este vídeo abre em outra página</p>
         <p className="mx-auto mt-1 max-w-sm text-[14.5px] text-muted-foreground">O produtor usou um endereço que não toca aqui dentro.</p>
-        <a href={clean} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex h-11 items-center gap-2 rounded-full bg-primary px-5 text-[14px] font-bold text-primary-foreground hover:opacity-90">
+        <a href={safeNavigationUrl(clean) ?? undefined} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex h-11 items-center gap-2 rounded-full bg-primary px-5 text-[14px] font-bold text-primary-foreground hover:opacity-90">
           Abrir o vídeo <ExternalLink className="h-4 w-4" />
         </a>
       </div>

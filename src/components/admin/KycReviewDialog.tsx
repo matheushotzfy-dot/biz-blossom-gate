@@ -1,3 +1,4 @@
+import { openExternal } from "@/lib/safeUrl";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -220,7 +221,7 @@ export default function KycReviewDialog({ profile, open, onClose, onApprove, onR
                       >
                         <button
                           type="button"
-                          onClick={() => isImg ? setLightbox(d.url) : window.open(d.url, "_blank")}
+                          onClick={() => isImg ? setLightbox(d.url) : openExternal(d.url)}
                           className="block w-full aspect-square bg-muted/30 relative overflow-hidden"
                           aria-label={`Abrir ${meta.label}`}
                         >

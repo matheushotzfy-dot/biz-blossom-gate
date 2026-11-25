@@ -1,3 +1,4 @@
+import { safeNavigationUrl } from "@/lib/safeUrl";
 import { useMemo, useRef, type ReactNode } from "react";
 import { Copy, ExternalLink, MessageCircle, Undo2 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -61,7 +62,7 @@ export function TransactionDetailPanel({ tx, products, onClose, onRefund, varian
   const meta = txStatusMeta(status);
   const phoneDigits = (t.customer_phone ?? "").replace(/\D/g, "");
   const whatsapp = phoneDigits.length >= 10 ? `https://wa.me/${phoneDigits.startsWith("55") ? phoneDigits : `55${phoneDigits}`}` : null;
-  const origin = t.checkout_session_id?.startsWith("http") ? t.checkout_session_id : null;
+  const origin = /^https?:\/\//i.test(t.checkout_session_id ?? "") ? safeNavigationUrl(t.checkout_session_id) : null;
   const canRefund = !!onRefund && !admin && isApprovedTransaction(status);
   const refunded = Number(t.refunded_amount ?? 0);
   const retained = Number(t.retained_amount ?? 0);

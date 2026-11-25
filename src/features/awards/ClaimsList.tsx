@@ -1,3 +1,4 @@
+import { safeNavigationUrl } from "@/lib/safeUrl";
 import { Check, Copy, ExternalLink, Package, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StatusPill } from "@/components/seller-ui/tx";
@@ -6,7 +7,7 @@ import { copyText } from "@/components/seller-ui/copy";
 import type { AwardItem } from "./awards-data";
 import { CLAIM_STEPS, claimHeadline, claimStepIndex, isCancelled, type RewardClaim } from "./awardMeta";
 
-const safeUrl = (u?: string | null) => (u && /^https?:\/\//i.test(u.trim()) ? u.trim() : null);
+const safeUrl = (u?: string | null) => (u && /^https?:\/\//i.test(u.trim()) ? safeNavigationUrl(u) : null);
 
 function statusPill(claim: RewardClaim): { label: string; tone: TxTone } {
   if (isCancelled(claim.status)) return { label: "Cancelado", tone: "alert" };

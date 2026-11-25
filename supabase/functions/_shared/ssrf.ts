@@ -14,41 +14,9 @@
 //  3. Outbound requests never follow redirects automatically — a 3xx is
 //     treated as a hard failure ("redirect não permitido").
 
-const IPV4_PRIVATE_RANGES: Array<[number, number]> = [
-  [ipToInt("10.0.0.0"), ipToInt("10.255.255.255")],
-  [ipToInt("172.16.0.0"), ipToInt("172.31.255.255")],
-  [ipToInt("192.168.0.0"), ipToInt("192.168.255.255")],
-  [ipToInt("127.0.0.0"), ipToInt("127.255.255.255")],
-  [ipToInt("169.254.0.0"), ipToInt("169.254.255.255")],
-  [ipToInt("100.64.0.0"), ipToInt("100.127.255.255")], // CGNAT
-  [ipToInt("0.0.0.0"), ipToInt("0.255.255.255")],
-];
+import { isPrivateOrReservedIp } from "./ip-guard.ts";
 
-function ipToInt(ip: string): number {
-  const parts = ip.split(".").map(Number);
-  return ((parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8) | parts[3]) >>> 0;
-}
-
-function isPrivateIPv4(ip: string): boolean {
-  if (!/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip)) return false;
-  const n = ipToInt(ip);
-  return IPV4_PRIVATE_RANGES.some(([lo, hi]) => n >= lo && n <= hi);
-}
-
-function isPrivateIPv6(ip: string): boolean {
-  const lower = ip.toLowerCase();
-  if (lower === "::1") return true; // loopback
-  if (lower.startsWith("fe80:") || lower.startsWith("fe8") || lower.startsWith("fe9") || lower.startsWith("fea") || lower.startsWith("feb")) return true; // fe80::/10 link-local
-  if (/^f[cd][0-9a-f]{2}:/.test(lower)) return true; // fc00::/7 unique local
-  // IPv4-mapped IPv6 addresses (::ffff:a.b.c.d) must be checked as IPv4 too.
-  const mapped = lower.match(/^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/);
-  if (mapped && isPrivateIPv4(mapped[1])) return true;
-  return false;
-}
-
-export function isPrivateOrReservedIp(ip: string): boolean {
-  return ip.includes(":") ? isPrivateIPv6(ip) : isPrivateIPv4(ip);
-}
+export { isPrivateOrReservedIp };
 
 /**
  * Resolves the hostname (A + AAAA) and rejects if it's an IP literal or

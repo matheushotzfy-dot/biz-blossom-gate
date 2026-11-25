@@ -1,3 +1,4 @@
+import { safeNavigationUrl } from "@/lib/safeUrl";
 import { useRef } from "react";
 import { ArrowLeft, Download, File as FileIcon, Globe, Loader2, Paperclip, Plus, Trash2, Upload, Video } from "lucide-react";
 
@@ -113,7 +114,7 @@ export function LessonEditor(p: LessonEditorProps) {
                     <Video className="mx-auto h-9 w-9 text-muted-foreground" />
                     <p className="mt-3 text-[14.5px] font-semibold text-foreground">Link salvo</p>
                     <p className="mt-0.5 text-[13.5px] text-muted-foreground">Essa prévia só toca YouTube, Vimeo e arquivos de vídeo. O aluno recebe o link como está.</p>
-                    <a href={p.savedVideoUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-[14px] font-semibold text-primary underline-offset-4 hover:underline">Abrir o link</a>
+                    <a href={safeNavigationUrl(p.savedVideoUrl) ?? undefined} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-[14px] font-semibold text-primary underline-offset-4 hover:underline">Abrir o link</a>
                   </div>
                 </div>
               )}

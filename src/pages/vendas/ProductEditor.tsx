@@ -364,7 +364,9 @@ export default function ProductEditor() {
      if (!supportEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim())) { toast.error("Insira um e-mail de suporte válido (ex: suporte@seusite.com)"); setActiveTab("geral"); return; }
      if (!supportPhone.trim() || supportPhone.replace(/\D/g, "").length < 10) { toast.error("Insira um telefone de suporte válido (com DDD)"); setActiveTab("geral"); return; }
      if (!displayName.trim()) { toast.error("Nome de exibição é obrigatório"); setActiveTab("geral"); return; }
-     if (!HEX_COLOR.test(buttonColor.trim())) { toast.error("Use uma cor no formato #10b981 para o botão do checkout"); setActiveTab(isNew ? "geral" : "checkout"); return; }
+     const isWebAddress = (value: string) => !value.trim() || /^https?:\/\/[^\s<>"']+$/i.test(value.trim());
+    if (!isWebAddress(upsellUrl) || !isWebAddress(downsellUrl)) { toast.error("Os links de upsell e downsell precisam começar com https:// e não podem ter espaços"); setActiveTab(isNew ? "geral" : "upsell"); return; }
+    if (!HEX_COLOR.test(buttonColor.trim())) { toast.error("Use uma cor no formato #10b981 para o botão do checkout"); setActiveTab(isNew ? "geral" : "checkout"); return; }
      // sincroniza o input para refletir a URL normalizada (caso o usuário salve sem ter prefixo)
      if (normalizedPageUrl !== pageUrl) setPageUrl(normalizedPageUrl);
 
@@ -439,8 +441,22 @@ export default function ProductEditor() {
  if (isNew) {
  const slug = crypto.randomUUID().slice(0, 8);
  const checkoutUrl = `${window.location.origin}/pay/${slug}`;
- const { data: newProduct, error } = await supabase.from("products").insert({ ...productData, status: "draft", user_id: user.id, checkout_url: checkoutUrl } as TablesInsert<"products">).select("*").maybeSingle();
+ // Prévia local (blob:) só existe neste navegador: o banner escolhido sobe depois que o produto tem id.
+ const insertPayload = { ...productData, checkout_banner_desktop_url: bannerDesktopFile ? null : productData.checkout_banner_desktop_url, checkout_banner_mobile_url: bannerMobileFile ? null : productData.checkout_banner_mobile_url };
+ const { data: newProduct, error } = await supabase.from("products").insert({ ...insertPayload, status: "draft", user_id: user.id, checkout_url: checkoutUrl } as TablesInsert<"products">).select("*").maybeSingle();
  if (error || !newProduct) { toast.error("Erro ao criar produto"); return; }
+ if (bannerDesktopFile || bannerMobileFile) {
+ const bannerPatch: TablesUpdate<"products"> = {};
+ if (bannerDesktopFile) {
+ const uploaded = await uploadImage(bannerDesktopFile, "checkout-banners", `${user.id}/${newProduct.id}-desktop.${bannerDesktopFile.name.split(".").pop()}`);
+ if (uploaded) { bannerPatch.checkout_banner_desktop_url = uploaded; desktopUrl = uploaded; } else desktopUrl = "";
+ }
+ if (bannerMobileFile) {
+ const uploaded = await uploadImage(bannerMobileFile, "checkout-banners", `${user.id}/${newProduct.id}-mobile.${bannerMobileFile.name.split(".").pop()}`);
+ if (uploaded) { bannerPatch.checkout_banner_mobile_url = uploaded; mobileUrl = uploaded; } else mobileUrl = "";
+ }
+ if (Object.keys(bannerPatch).length) await supabase.from("products").update(bannerPatch).eq("id", newProduct.id).eq("user_id", user.id);
+ }
 
  if (deliveryType === "digital") {
  await supabase.from("courses").insert({

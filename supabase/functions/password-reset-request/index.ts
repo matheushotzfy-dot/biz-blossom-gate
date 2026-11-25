@@ -23,10 +23,15 @@ const ALLOWED_REDIRECT_HOSTS = [
   "localhost",
 ];
 
+// Só os hosts de prévia DESTE projeto. Liberar todo *.lovable.app deixaria qualquer pessoa com um site
+// no Lovable receber o link de recuperação de senha de outra conta.
+const PREVIEW_PROJECT_ID = "8b85380d-bbad-44c2-8000-ac99dd36affb";
+
 function isAllowedRedirect(url: string): boolean {
   try {
     const u = new URL(url);
     if (ALLOWED_REDIRECT_HOSTS.includes(u.hostname)) return true;
+    if (u.protocol !== "https:" || !u.hostname.includes(PREVIEW_PROJECT_ID)) return false;
     return u.hostname.endsWith(".lovable.app") || u.hostname.endsWith(".lovableproject.com");
   } catch {
     return false;

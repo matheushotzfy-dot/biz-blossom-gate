@@ -1,3 +1,4 @@
+import { safeNavigationUrl } from "@/lib/safeUrl";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -388,8 +389,8 @@ export default function AdminRewardsTab({ profiles }: { profiles: { user_id: str
                   <Textarea value={editNotes} onChange={e => setEditNotes(e.target.value)} placeholder="Observações para a equipe..." className="min-h-[70px] text-xs mt-1" />
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  {selected.tracking_url && (
-                    <a href={selected.tracking_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline">
+                  {/^https?:\/\//i.test(selected.tracking_url ?? "") && safeNavigationUrl(selected.tracking_url) && (
+                    <a href={safeNavigationUrl(selected.tracking_url) ?? undefined} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline">
                       <ExternalLink className="h-3 w-3" /> Abrir rastreio salvo
                     </a>
                   )}

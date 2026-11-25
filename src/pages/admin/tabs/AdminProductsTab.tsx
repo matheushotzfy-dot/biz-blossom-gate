@@ -1,3 +1,5 @@
+import { openExternal } from "@/lib/safeUrl";
+import { getCheckoutLink } from "@/components/products/productPresentation";
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -362,7 +364,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="min-w-[200px]">
                           <DropdownMenuItem className="gap-2" onClick={() => openXRay(p)}><Eye className="h-3.5 w-3.5" /> Raio-X completo</DropdownMenuItem>
-                          {p.checkout_url && <DropdownMenuItem className="gap-2" onClick={() => window.open(p.checkout_url!, "_blank")}><ExternalLink className="h-3.5 w-3.5" /> Abrir Checkout</DropdownMenuItem>}
+                          {p.checkout_url && <DropdownMenuItem className="gap-2" onClick={() => openExternal(getCheckoutLink(p.checkout_url!))}><ExternalLink className="h-3.5 w-3.5" /> Abrir Checkout</DropdownMenuItem>}
                           <DropdownMenuSeparator />
                           {p.status !== "active" && <DropdownMenuItem className="gap-2 text-primary" onClick={() => handleProductStatus(p.id, "active", p.user_id)}><CheckCircle2 className="h-3.5 w-3.5" /> Aprovar</DropdownMenuItem>}
                           {p.status === "active" && <DropdownMenuItem className="gap-2 text-warning" onClick={() => { setRejectTarget(p); setRejectReason(""); setRejectOpen(true); }}><ShieldAlert className="h-3.5 w-3.5" /> Em Revisão</DropdownMenuItem>}
@@ -529,7 +531,7 @@ export default function AdminProductsTab({ products, profiles, transactions, fmt
                     </Button>
                   )}
                   {selectedProduct.checkout_url && (
-                    <Button size="sm" variant="ghost" className="gap-1.5 text-xs" onClick={() => window.open(selectedProduct.checkout_url!, "_blank")}>
+                    <Button size="sm" variant="ghost" className="gap-1.5 text-xs" onClick={() => openExternal(getCheckoutLink(selectedProduct.checkout_url!))}>
                       <ExternalLink className="h-3.5 w-3.5" /> Checkout
                     </Button>
                   )}
