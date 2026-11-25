@@ -1,452 +1,269 @@
-import { useEffect, useMemo, useState, useRef } from "react";
-import { useOutletContext, Link } from "react-router-dom";
-import type { User } from "@supabase/supabase-js";
-import { 
-  Play, 
-  Award, 
-  BookOpen, 
-  ChevronRight, 
-  ChevronLeft, 
-  Trophy, 
-  Flame, 
-  GraduationCap, 
-  PlayCircle, 
-  Clock, 
-  Sparkles,
-  ArrowRight,
-  Bookmark,
-  TrendingUp,
-  LayoutGrid,
-  List,
-} from "lucide-react";
-import { motion } from "framer-motion";
+/**
+ * Início do aluno: continuar de onde parou, meus cursos (com busca) e certificados.
+ * Quem acabou de comprar e ainda não vê o curso pode pedir "Atualizar acesso".
+ */
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useOutletContext } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Award, GraduationCap, Loader2, Play, RefreshCw, Search } from "lucide-react";
+import { toast } from "sonner";
+import { Seo } from "@/components/Seo";
 import { supabase } from "@/integrations/supabase/client";
-import { StatCard } from "@/components/StatCard";
-import { cn } from "@/lib/utils";
+import { pickContinueIndex, summarizeCourse, type CourseSummary, type ModuleLite } from "@/components/member/courseModel";
+import type { MemberOutletContext } from "@/pages/membros/MemberLayout";
 
+type HomeCourse = { id: string; title: string; description: string | null; thumbnail_url: string | null; summary: CourseSummary };
+type Cert = { id: string; code: string; course_title: string; issued_at: string };
+type Home = { courses: HomeCourse[]; certs: Cert[] };
 
-type Course = {
-  id: string;
-  title: string;
-  description: string | null;
-  thumbnail_url: string | null;
-  category: string;
-  totalLessons: number;
-  completedLessons: number;
-  lastLessonId: string | null;
-  lastLessonTitle: string | null;
-  lastModuleTitle: string | null;
-  lastActivityAt: number;
-  moduleCount: number;
+type CourseRow = {
+  id: string; title: string; description: string | null; thumbnail_url: string | null;
+  modules: { id: string; title: string; sort_order: number | null; lessons: { id: string; module_id?: string; title: string; sort_order: number | null }[] | null }[] | null;
 };
 
-type Cert = { id: string; code: string; course_title: string; issued_at: string };
+async function fetchHome(userId: string): Promise<Home> {
+  const [{ data: access, error: aErr }, { data: owned, error: oErr }] = await Promise.all([
+    supabase.from("user_access").select("course_id").eq("user_id", userId).eq("status", "active"),
+    supabase.from("courses").select("id").eq("user_id", userId),
+  ]);
+  if (aErr) throw aErr;
+  if (oErr) throw oErr;
+  const ids = [...new Set([...(access ?? []).map((a) => a.course_id), ...(owned ?? []).map((o) => o.id)])];
 
-export default function MemberHome() {
-  const { user } = useOutletContext<{ user: User }>();
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [certs, setCerts] = useState<Cert[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const certQuery = supabase.from("certificates").select("id, code, course_title, issued_at").eq("user_id", userId).order("issued_at", { ascending: false }).limit(20);
+  if (ids.length === 0) {
+    const { data: certs } = await certQuery;
+    return { courses: [], certs: (certs ?? []) as Cert[] };
+  }
 
-  useEffect(() => { if (user) load(); }, [user]);
-
-  async function load() {
-    if (!user) return;
-    const [{ data: access }, { data: owned }] = await Promise.all([
-      supabase.from("user_access").select("course_id").eq("user_id", user.id).eq("status", "active"),
-      supabase.from("courses").select("id").eq("user_id", user.id),
-    ]);
-    const ids = [...new Set([...(access?.map(a => a.course_id) || []), ...(owned?.map(o => o.id) || [])])];
-    if (ids.length === 0) { setLoading(false); return; }
-
-    const { data: coursesData } = await supabase
+  const [{ data: rows, error: cErr }, { data: progress, error: pErr }, { data: certs }] = await Promise.all([
+    supabase
       .from("courses")
-      .select("id, title, description, thumbnail_url, category, modules ( id, title, sort_order, lessons ( id, title, sort_order ) )")
+      .select("id, title, description, thumbnail_url, modules ( id, title, sort_order, lessons ( id, title, sort_order ) )")
       .in("id", ids)
       .eq("is_published", true)
-      .order("sort_order");
+      .order("sort_order"),
+    supabase.from("user_progress").select("lesson_id, completed, updated_at").eq("user_id", userId),
+    certQuery,
+  ]);
+  if (cErr) throw cErr;
+  if (pErr) throw pErr;
 
-    const { data: progress } = await supabase
-      .from("user_progress")
-      .select("lesson_id, completed, updated_at")
-      .eq("user_id", user.id);
-    const progressMap = new Map(progress?.map(p => [p.lesson_id, p]) || []);
+  const courses = ((rows ?? []) as unknown as CourseRow[]).map((c) => {
+    const modules: ModuleLite[] = (c.modules ?? []).map((m) => ({
+      id: m.id, title: m.title, sort_order: m.sort_order,
+      lessons: (m.lessons ?? []).map((l) => ({ id: l.id, module_id: m.id, title: l.title, sort_order: l.sort_order })),
+    }));
+    return { id: c.id, title: c.title, description: c.description, thumbnail_url: c.thumbnail_url, summary: summarizeCourse(modules, progress ?? []) };
+  });
+  return { courses, certs: (certs ?? []) as Cert[] };
+}
 
-    type LessonRow = { id: string; title: string; sort_order: number | null };
-    type ModuleRow = { id: string; title: string; sort_order: number | null; lessons: LessonRow[] | null };
-    type CourseRow = {
-      id: string;
-      title: string;
-      description: string | null;
-      thumbnail_url: string | null;
-      category: string | null;
-      modules: ModuleRow[] | null;
-    };
-    const enriched: Course[] = ((coursesData || []) as CourseRow[]).map((c) => {
-      const modules = (c.modules || []).slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
-      const allLessons: { id: string; title: string; moduleTitle: string }[] = [];
-      modules.forEach((m) => {
-        (m.lessons || [])
-          .slice()
-          .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-          .forEach((l) => allLessons.push({ id: l.id, title: l.title, moduleTitle: m.title }));
-      });
-      const completed = allLessons.filter(l => progressMap.get(l.id)?.completed).length;
+/** Capa sem imagem: degradê estável por curso (matiz vem do id), nunca dois cursos iguais lado a lado por acaso. */
+const hueFor = (id: string) => [...id].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) % 360, 7);
 
-      let lastLesson: typeof allLessons[0] | null = null;
-      let lastTime = 0;
-      for (const l of allLessons) {
-        const p = progressMap.get(l.id);
-        if (p && new Date(p.updated_at).getTime() > lastTime && !p.completed) {
-          lastTime = new Date(p.updated_at).getTime();
-          lastLesson = l;
-        }
-      }
-      if (!lastLesson) lastLesson = allLessons.find(l => !progressMap.get(l.id)?.completed) || allLessons[0] || null;
-
-      return {
-        id: c.id,
-        title: c.title,
-        description: c.description,
-        thumbnail_url: c.thumbnail_url,
-        category: c.category || "Geral",
-        totalLessons: allLessons.length,
-        completedLessons: completed,
-        lastLessonId: lastLesson?.id || null,
-        lastLessonTitle: lastLesson?.title || null,
-        lastModuleTitle: lastLesson?.moduleTitle || null,
-        lastActivityAt: lastTime,
-        moduleCount: modules.length,
-      };
-    });
-
-    setCourses(enriched);
-
-    const { data: certData } = await supabase
-      .from("certificates")
-      .select("id, code, course_title, issued_at")
-      .eq("user_id", user.id)
-      .order("issued_at", { ascending: false })
-      .limit(5);
-    setCerts((certData || []) as Cert[]);
-
-    setLoading(false);
-  }
-
-  const greeting = useMemo(() => {
-    const h = new Date().getHours();
-    return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
-  }, []);
-  
-  const displayName = user?.email?.split("@")[0] || "Aluno";
-
-  const continueWatching = courses
-    .filter(c => c.completedLessons > 0 && c.completedLessons < c.totalLessons)
-    .sort((a, b) => b.lastActivityAt - a.lastActivityAt);
-  
-  const fresh = courses.filter(c => c.completedLessons === 0);
-  const completed = courses.filter(c => c.totalLessons > 0 && c.completedLessons === c.totalLessons);
-  const featured = continueWatching[0] || fresh[0] || null;
-
-  const totalLessons = courses.reduce((a, c) => a + c.totalLessons, 0);
-  const totalCompleted = courses.reduce((a, c) => a + c.completedLessons, 0);
-
-  if (loading) {
-    return (
-      <div className="h-[80vh] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-12 w-12 rounded-xl border border-primary/20 bg-primary/5 flex items-center justify-center animate-pulse">
-            <PlayCircle className="h-6 w-6 text-primary" />
-          </div>
-          <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Preparando seu dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
+function Cover({ course, className }: { course: HomeCourse; className?: string }) {
+  if (course.thumbnail_url) return <img src={course.thumbnail_url} alt="" loading="lazy" className={`object-cover ${className ?? ""}`} />;
+  const h = hueFor(course.id);
   return (
-    <div className="max-w-[1600px] mx-auto py-10 space-y-12">
-      {/* ═══ Header Section ═══ */}
-      <section>
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary mb-2 flex items-center gap-2">
-              <Sparkles className="h-3 w-3" />
-              Bem-vindo de volta
-            </p>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-white">
-              {greeting}, <span className="text-zinc-400">{displayName}</span>
-            </h1>
-          </div>
-          <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 p-2 rounded-2xl">
-            <button 
-              onClick={() => setViewMode("grid")}
-              aria-label="Visualizar em grade"
-              aria-pressed={viewMode === "grid"}
-              className={cn("p-2 rounded-xl transition-all", viewMode === "grid" ? "bg-primary text-primary-foreground shadow-lg" : "text-zinc-500 hover:text-white")}
-            >
-              <LayoutGrid className="h-5 w-5" />
-            </button>
-            <button 
-              onClick={() => setViewMode("list")}
-              aria-label="Visualizar em lista"
-              aria-pressed={viewMode === "list"}
-              className={cn("p-2 rounded-xl transition-all", viewMode === "list" ? "bg-primary text-primary-foreground shadow-lg" : "text-zinc-500 hover:text-white")}
-            >
-              <List className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
-          <StatCard title="Cursos Ativos" value={courses.length} icon={BookOpen} color="primary" />
-          <StatCard title="Aulas Concluídas" value={totalCompleted} description={`de ${totalLessons} totais`} icon={PlayCircle} color="success" />
-          <StatCard title="Certificados" value={certs.length} icon={Award} color="warning" />
-          <StatCard title="Nível de Foco" value="Pro" icon={Trophy} color="info" />
-        </div>
-
-      </section>
-
-      {/* ═══ Featured / Continue Watching ═══ */}
-      {featured && (
-        <section>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-white flex items-center gap-3">
-              <Clock className="h-5 w-5 text-primary" />
-              Continue de onde parou
-            </h2>
-            <Link to="/membros-area/cursos" className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 hover:text-primary transition-colors flex items-center gap-2">
-              Ver todos <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-
-          <div className="relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-[#0a0a0a] group">
-            <div className="flex flex-col lg:flex-row min-h-[400px]">
-              {/* Image Side */}
-              <div className="lg:w-1/2 relative h-64 lg:h-auto overflow-hidden">
-                <img 
-                  src={featured.thumbnail_url || ""} 
-                  alt={featured.title} 
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-transparent to-transparent hidden lg:block" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent lg:hidden" />
-              </div>
-              
-              {/* Content Side */}
-              <div className="lg:w-1/2 p-8 lg:p-14 flex flex-col justify-center">
-                <div className="flex items-center gap-3 mb-6">
-                  <span className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-bold uppercase tracking-widest text-primary">
-                    {featured.category}
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">
-                    {featured.moduleCount} Módulos
-                  </span>
-                </div>
-                
-                <h3 className="text-3xl md:text-5xl font-bold tracking-tighter text-white mb-6">
-                  {featured.title}
-                </h3>
-                
-                <p className="text-zinc-500 text-lg mb-8 line-clamp-2 max-w-xl">
-                  {featured.description || "Continue sua jornada de aprendizado e alcance seus objetivos com este curso exclusivo."}
-                </p>
-
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-[11px] font-bold uppercase tracking-widest text-zinc-500">
-                      <span>Seu progresso</span>
-                      <span className="text-emerald-400">{featured.totalLessons > 0 ? Math.round((featured.completedLessons / featured.totalLessons) * 100) : 0}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-emerald-500 transition-all duration-1000" 
-                        style={{ width: `${featured.totalLessons > 0 ? (featured.completedLessons / featured.totalLessons) * 100 : 0}%` }} 
-                      />
-                    </div>
-                  </div>
-
-                  <Link 
-                    to={`/membros-area/curso/${featured.id}${featured.lastLessonId ? `?lesson=${featured.lastLessonId}` : ""}`}
-                    className="inline-flex items-center gap-4 px-10 py-5 bg-white text-black rounded-2xl font-bold text-lg transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_20px_40px_rgba(255,255,255,0.1)]"
-                  >
-                    <Play className="h-6 w-6 fill-current" />
-                    Continuar Aula
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ═══ Main Library ═══ */}
-      <section className="space-y-8">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-            <LayoutGrid className="h-6 w-6 text-primary" />
-            Minha Biblioteca
-          </h2>
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-zinc-600">{courses.length} cursos</span>
-          </div>
-        </div>
-
-        {viewMode === "grid" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {courses.map((course, idx) => (
-              <CourseCard key={course.id} course={course} index={idx} />
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {courses.map((course, idx) => (
-              <CourseListRow key={course.id} course={course} index={idx} />
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* ═══ Certifications ═══ */}
-      {certs.length > 0 && (
-        <section className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8 lg:p-12">
-          <div className="flex items-center justify-between mb-10">
-            <div>
-              <h2 className="text-2xl font-bold text-white">Certificações</h2>
-              <p className="text-zinc-500 text-sm mt-1">Seu histórico de conquistas e domínio de habilidades</p>
-            </div>
-            <Award className="h-10 w-10 text-orange-400 opacity-20" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {certs.map((cert) => (
-              <div key={cert.id} className="bg-white/[0.03] border border-white/5 p-6 rounded-2xl flex items-center justify-between group hover:bg-white/[0.05] transition-colors">
-                <div className="flex items-center gap-5">
-                  <div className="h-14 w-14 rounded-xl bg-orange-400/10 text-orange-400 flex items-center justify-center">
-                    <Award className="h-7 w-7" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-white tracking-tight">{cert.course_title}</h4>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mt-1">Concedido em {new Date(cert.issued_at).toLocaleDateString("pt-BR")}</p>
-                  </div>
-                </div>
-                <button aria-label={`Ver certificado de ${cert.course_title}`} className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
-                  <ArrowRight className="h-5 w-5" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+    <div aria-hidden style={{ backgroundImage: `linear-gradient(135deg, hsl(${h} 55% 30%), hsl(${(h + 40) % 360} 60% 16%))` }} className={`grid place-items-center ${className ?? ""}`}>
+      <GraduationCap className="h-10 w-10 text-white/70" />
     </div>
   );
 }
 
-
-function CourseCard({ course, index }: { course: Course; index: number }) {
-  const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
-  
+function Bar({ pct }: { pct: number }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      className="group relative flex flex-col bg-[#0a0a0a] border border-white/5 rounded-3xl overflow-hidden hover:border-primary/50 transition-all hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)]"
-    >
-      <Link to={`/membros-area/curso/${course.id}`} className="block">
-        <div className="aspect-[16/10] relative overflow-hidden">
-          <img 
-            src={course.thumbnail_url || ""} 
-            alt={course.title} 
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          
-          {pct > 0 && (
-            <div className="absolute bottom-4 left-4 right-4 z-10">
-               <div className="h-1 w-full bg-white/20 rounded-full overflow-hidden">
-                  <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
-               </div>
-            </div>
-          )}
-          
-          <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-            <div className="h-10 w-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg">
-              <Play className="h-5 w-5 fill-current" />
-            </div>
-          </div>
-        </div>
-
-        <div className="p-6 flex flex-col flex-1">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-primary">{course.category}</span>
-            <div className="flex items-center gap-1 text-[10px] font-bold text-zinc-600">
-               <Clock className="h-3 w-3" />
-               {course.totalLessons} Aulas
-            </div>
-          </div>
-          
-          <h3 className="text-lg font-bold text-white tracking-tight leading-snug line-clamp-2 mb-4 group-hover:text-primary transition-colors">
-            {course.title}
-          </h3>
-
-          <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
-            <div className="flex -space-x-2">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="h-6 w-6 rounded-full border-2 border-black bg-zinc-800 flex items-center justify-center text-[8px] font-bold text-zinc-500">
-                  {i}
-                </div>
-              ))}
-            </div>
-            <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-              {pct === 100 ? "Concluído" : pct > 0 ? `${pct}%` : "Começar"}
-            </div>
-          </div>
-        </div>
-      </Link>
-    </motion.div>
+    <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.1]" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label="Progresso">
+      <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+    </div>
   );
 }
 
-function CourseListRow({ course, index }: { course: Course; index: number }) {
-  const pct = course.totalLessons > 0 ? Math.round((course.completedLessons / course.totalLessons) * 100) : 0;
+const courseLink = (c: HomeCourse) => `/membros-area/curso/${c.id}${c.summary.next && c.summary.status !== "completed" ? `?aula=${c.summary.next.id}` : ""}`;
+const statusText = (s: CourseSummary) =>
+  s.status === "completed" ? "Curso concluído" : s.status === "empty" ? "Sem aulas ainda" : `${s.done} de ${s.total} ${s.total === 1 ? "aula" : "aulas"}`;
+const ctaText = (s: CourseSummary) => (s.status === "completed" ? "Rever" : s.status === "in_progress" ? "Continuar" : "Começar");
+
+export default function MemberHome() {
+  const { user, name } = useOutletContext<MemberOutletContext>();
+  const qc = useQueryClient();
+  const home = useQuery({ queryKey: ["member-home", user.id], queryFn: () => fetchHome(user.id), staleTime: 15_000, retry: 1 });
+  const [q, setQ] = useState("");
+  const [claiming, setClaiming] = useState(false);
+  const autoClaimed = useRef(false);
+
+  const claim = async (manual: boolean) => {
+    setClaiming(true);
+    const { data, error } = await supabase.rpc("claim_my_pending_deliveries");
+    setClaiming(false);
+    if (!error && typeof data === "number" && data > 0) {
+      toast.success(data === 1 ? "Seu curso foi liberado." : `${data} cursos liberados.`);
+      await qc.invalidateQueries({ queryKey: ["member-home", user.id] });
+      return;
+    }
+    if (manual) {
+      toast.info(error ? "Não foi possível conferir agora. Tente de novo em instantes." : "Ainda não encontramos uma compra paga com o e-mail desta conta.");
+      void home.refetch();
+    }
+  };
+
+  // Quem acabou de criar a conta depois de pagar: tenta liberar sozinho uma vez, em silêncio.
+  const empty = home.isSuccess && home.data.courses.length === 0;
+  useEffect(() => {
+    if (empty && !autoClaimed.current) { autoClaimed.current = true; void claim(false); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [empty]);
+
+  const courses = useMemo(() => home.data?.courses ?? [], [home.data]);
+  const featuredIdx = useMemo(() => pickContinueIndex(courses), [courses]);
+  const featured = featuredIdx >= 0 ? courses[featuredIdx] : null;
+  const filtered = useMemo(() => {
+    const t = q.trim().toLowerCase();
+    return t ? courses.filter((c) => c.title.toLowerCase().includes(t)) : courses;
+  }, [courses, q]);
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+
+  if (home.isPending) {
+    return (
+      <div aria-busy="true" aria-label="Carregando seus cursos" className="space-y-8">
+        <div className="h-10 w-72 animate-pulse rounded-lg bg-white/[0.07] motion-reduce:animate-none" />
+        <div className="h-56 animate-pulse rounded-[22px] bg-white/[0.05] motion-reduce:animate-none" />
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((i) => <div key={i} className="h-64 animate-pulse rounded-[16px] bg-white/[0.05] motion-reduce:animate-none" />)}</div>
+      </div>
+    );
+  }
+
+  if (home.isError) {
+    return (
+      <div role="alert" className="mx-auto max-w-md py-20 text-center">
+        <h1 className="text-[22px] font-extrabold tracking-[-0.02em]">Não foi possível carregar seus cursos</h1>
+        <p className="mt-2 text-[15px] text-muted-foreground">Confira sua conexão e tente de novo.</p>
+        <button type="button" onClick={() => void home.refetch()} className="mt-6 inline-flex h-11 items-center rounded-full bg-primary px-6 text-[14.5px] font-bold text-primary-foreground hover:opacity-90">Tentar de novo</button>
+      </div>
+    );
+  }
+
+  const certs = home.data.certs;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.05 }}
-      className="group bg-[#0a0a0a] border border-white/5 p-4 rounded-2xl flex items-center gap-6 hover:border-primary/50 transition-all"
-    >
-      <div className="h-16 w-24 rounded-lg overflow-hidden shrink-0">
-        <img src={course.thumbnail_url || ""} alt="" className="h-full w-full object-cover" />
-      </div>
-      
-      <div className="flex-1 min-w-0">
-        <h4 className="text-white font-bold tracking-tight truncate group-hover:text-primary transition-colors">{course.title}</h4>
-        <div className="flex items-center gap-4 mt-1">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-primary">{course.category}</span>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">{course.totalLessons} Aulas</span>
-        </div>
-      </div>
+    <div className="space-y-12">
+      <Seo title="Meus cursos — Área de membros" description="Seus cursos, progresso e certificados." path="/membros-area" noindex />
 
-      <div className="w-48 hidden md:block">
-        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1.5">
-          <span>Progresso</span>
-          <span>{pct}%</span>
-        </div>
-        <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-          <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
-        </div>
-      </div>
+      <header>
+        <h1 className="text-[30px] font-extrabold leading-tight tracking-[-0.03em] sm:text-[40px]">{greeting}, {name}</h1>
+        <p className="mt-1.5 text-[16px] text-muted-foreground">
+          {courses.length === 0 ? "Seus cursos aparecem aqui." : courses.length === 1 ? "Você tem 1 curso." : `Você tem ${courses.length} cursos.`}
+        </p>
+      </header>
 
-      <Link 
-        to={`/membros-area/curso/${course.id}`}
-        className="h-12 w-12 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center text-zinc-500 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all group-hover:scale-105"
-      >
-        <ArrowRight className="h-5 w-5" />
-      </Link>
-    </motion.div>
+      {courses.length === 0 ? (
+        <section className="mx-auto max-w-xl rounded-[22px] bg-white/[0.05] px-6 py-12 text-center sm:px-10">
+          <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-primary/15 text-primary"><GraduationCap className="h-7 w-7" /></span>
+          <h2 className="mt-5 text-[22px] font-extrabold tracking-[-0.02em]">Nenhum curso por aqui ainda</h2>
+          <p className="mx-auto mt-2 max-w-md text-[15px] leading-relaxed text-muted-foreground">
+            Se você acabou de comprar, o acesso é liberado assim que o pagamento é confirmado. Entre com o <strong className="font-semibold text-foreground">mesmo e-mail da compra</strong>.
+          </p>
+          {user.email && (
+            <p className="mx-auto mt-3 w-fit max-w-full rounded-[16px] bg-white/[0.06] px-4 py-2 text-[13.5px] text-muted-foreground">
+              Conta atual: <span className="break-all font-semibold text-foreground">{user.email}</span>
+            </p>
+          )}
+          <button type="button" onClick={() => void claim(true)} disabled={claiming} className="mt-6 inline-flex h-12 items-center gap-2 rounded-full bg-primary px-6 text-[15px] font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60">
+            {claiming ? <Loader2 className="h-[18px] w-[18px] animate-spin motion-reduce:animate-none" aria-hidden /> : <RefreshCw className="h-[18px] w-[18px]" aria-hidden />}
+            Atualizar acesso
+          </button>
+        </section>
+      ) : (
+        <>
+          {featured && (
+            <section aria-labelledby="continuar">
+              <h2 id="continuar" className="sr-only">Continuar</h2>
+              <Link to={courseLink(featured)} className="group grid overflow-hidden rounded-[22px] bg-white/[0.05] transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+                <Cover course={featured} className="aspect-video h-full w-full md:aspect-auto md:min-h-[260px]" />
+                <div className="flex flex-col justify-center p-6 sm:p-8">
+                  <p className="text-[14px] font-semibold text-primary">{featured.summary.status === "in_progress" ? "Continue de onde parou" : "Comece por aqui"}</p>
+                  <h3 className="mt-2 text-[24px] font-extrabold leading-tight tracking-[-0.03em] sm:text-[28px]">{featured.title}</h3>
+                  {featured.summary.next && (
+                    <p className="mt-2 text-[15px] text-muted-foreground">
+                      {featured.summary.status === "in_progress" ? "Próxima aula" : "Primeira aula"}: <span className="text-foreground/90">{featured.summary.next.title}</span>
+                    </p>
+                  )}
+                  <div className="mt-5 max-w-sm">
+                    <Bar pct={featured.summary.pct} />
+                    <p className="mt-2 text-[13.5px] text-muted-foreground">{statusText(featured.summary)}{featured.summary.total > 0 ? ` (${featured.summary.pct}%)` : ""}</p>
+                  </div>
+                  <span className="mt-6 inline-flex h-12 w-fit items-center gap-2 rounded-full bg-primary px-6 text-[15px] font-bold text-primary-foreground">
+                    <Play className="h-4 w-4 fill-current" aria-hidden /> {ctaText(featured.summary)}
+                  </span>
+                </div>
+              </Link>
+            </section>
+          )}
+
+          <section aria-labelledby="meus-cursos">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+              <h2 id="meus-cursos" className="text-[22px] font-extrabold tracking-[-0.02em]">Meus cursos</h2>
+              {courses.length > 3 && (
+                <div className="relative w-full sm:w-72">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+                  <input
+                    type="search"
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    placeholder="Buscar curso"
+                    aria-label="Buscar curso"
+                    className="h-11 w-full rounded-full border border-white/10 bg-white/[0.04] pl-11 pr-4 text-[15px] text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                  />
+                </div>
+              )}
+            </div>
+            {filtered.length === 0 ? (
+              <p className="py-10 text-center text-[15px] text-muted-foreground">Nenhum curso com “{q.trim()}”.</p>
+            ) : (
+              <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map((c) => (
+                  <li key={c.id}>
+                    <Link to={courseLink(c)} className="group block h-full overflow-hidden rounded-[16px] bg-white/[0.05] transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                      <Cover course={c} className="aspect-[16/10] w-full" />
+                      <div className="p-5">
+                        <h3 className="line-clamp-2 min-h-[2.6em] text-[17px] font-extrabold leading-snug tracking-[-0.02em]">{c.title}</h3>
+                        <div className="mt-4"><Bar pct={c.summary.pct} /></div>
+                        <div className="mt-2.5 flex items-center justify-between gap-3 text-[13.5px]">
+                          <span className={c.summary.status === "completed" ? "font-semibold text-primary" : "text-muted-foreground"}>{statusText(c.summary)}</span>
+                          <span className="font-bold text-foreground group-hover:text-primary">{ctaText(c.summary)}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </>
+      )}
+
+      {certs.length > 0 && (
+        <section id="certificados" aria-labelledby="certs" className="scroll-mt-24">
+          <h2 id="certs" className="mb-5 text-[22px] font-extrabold tracking-[-0.02em]">Certificados</h2>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {certs.map((c) => (
+              <li key={c.id}>
+                <Link to={`/certificado/${c.code}`} className="flex items-center gap-4 rounded-[16px] bg-white/[0.05] p-4 transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-primary/15 text-primary"><Award className="h-6 w-6" /></span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[15.5px] font-bold">{c.course_title}</span>
+                    <span className="block text-[13.5px] text-muted-foreground">Emitido em {new Date(c.issued_at).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}</span>
+                  </span>
+                  <span className="shrink-0 text-[14px] font-bold text-primary">Ver</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
   );
 }

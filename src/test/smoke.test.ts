@@ -43,7 +43,9 @@ const screens: Array<[string, () => Promise<unknown>]> = [
   ["Seller: Checkout",       () => import("@/pages/vendas/Checkout")],
   ["Financeiro: Saques",     () => import("@/pages/financeiro/Saques")],
   ["Membros: MemberHome",    () => import("@/pages/membros/MemberHome")],
-  ["Membros: MemberArea",    () => import("@/pages/membros/MemberArea")],
+  ["Membros: MemberAuth",    () => import("@/pages/membros/MemberAuth")],
+  ["Membros: MemberLayout",  () => import("@/pages/membros/MemberLayout")],
+  ["Membros: MemberCourse",  () => import("@/pages/membros/MemberCourse")],
 ];
 
 describe("smoke: main admin & seller screens load", () => {

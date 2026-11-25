@@ -1,26 +1,30 @@
 /**
- * MemberLayout — Cinematic Noir
- * Minimal floating top nav, transparent over hero, solid on scroll.
- * No sidebar. No chrome. The content is the experience.
+ * Moldura da área do aluno: exige sessão, mantém o tema escuro e mostra a barra do topo
+ * (menos no player, que tem a própria). O contexto do <Outlet> leva o usuário e o primeiro nome.
  */
 import { useEffect, useState } from "react";
-import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { User } from "@supabase/supabase-js";
-import { LogOut, Search } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Award, BookOpen, LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useMemberSkin } from "@/hooks/useMemberSkin";
+import { VenxpayLogo } from "@/components/VenxpayLogo";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { MemberSidebar } from "@/components/member/MemberSidebar";
 
+export type MemberOutletContext = { user: User; name: string };
+
+const navClass = ({ isActive }: { isActive: boolean }) =>
+  cn("inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-full px-3 text-[14.5px] font-semibold transition-colors sm:px-4", isActive ? "bg-white/10 text-foreground" : "text-muted-foreground hover:text-foreground");
 
 export default function MemberLayout() {
+  useMemberSkin();
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [scrolled, setScrolled] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [stats, setStats] = useState<{ xp: number; streak: number }>({ xp: 0, streak: 0 });
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -28,7 +32,7 @@ export default function MemberLayout() {
       setUser(session.user);
       setLoading(false);
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) { navigate("/membros-area/login", { replace: true }); return; }
       setUser(session.user);
       setLoading(false);
@@ -36,141 +40,80 @@ export default function MemberLayout() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Lightweight stats (XP = lessons completed * 50, streak = consecutive days with progress)
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const { data } = await supabase
-        .from("user_progress")
-        .select("completed, updated_at")
-        .eq("user_id", user.id)
-        .order("updated_at", { ascending: false })
-        .limit(200);
-      if (!data) return;
-      const completed = data.filter(d => d.completed).length;
-      const days = new Set(data.map(d => new Date(d.updated_at).toDateString()));
-      let streak = 0;
-      const today = new Date();
-      for (let i = 0; i < 60; i++) {
-        const d = new Date(today); d.setDate(today.getDate() - i);
-        if (days.has(d.toDateString())) streak++;
-        else if (i > 0) break;
-      }
-      setStats({ xp: completed * 50, streak });
-    })();
-  }, [user]);
+  const profile = useQuery({
+    queryKey: ["member-profile", user?.id],
+    enabled: !!user,
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("full_name, nickname").eq("user_id", (user as User).id).maybeSingle();
+      return data;
+    },
+  });
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => { setProfileOpen(false); }, [location.pathname]);
-
-  useEffect(() => {
-    if (!profileOpen) return;
-    const handler = () => setProfileOpen(false);
-    document.addEventListener("click", handler);
-    return () => document.removeEventListener("click", handler);
-  }, [profileOpen]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/membros-area/login");
+  const signOut = async () => {
+    try { await supabase.auth.signOut(); } catch { /* sem rede: a sessão local já foi descartada */ }
+    queryClient.clear();
+    navigate("/membros-area/login", { replace: true });
   };
 
-  if (loading) return (
-    <div className="min-h-dvh bg-background flex items-center justify-center">
-      <div className="h-1 w-32 bg-white/5 overflow-hidden">
-        <motion.div
-          className="h-full w-full bg-emerald-500"
-          animate={{ x: ["-100%", "100%"] }}
-          transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-        />
+  if (loading || !user) {
+    return (
+      <div className="grid min-h-dvh place-items-center bg-background">
+        <div className="h-1 w-32 overflow-hidden rounded-full bg-white/10" role="status" aria-label="Carregando">
+          <div className="h-full w-1/2 animate-[member-load_1.2s_ease-in-out_infinite] rounded-full bg-primary motion-reduce:animate-none" />
+        </div>
+        <style>{"@keyframes member-load{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}"}</style>
       </div>
-    </div>
-  );
+    );
+  }
 
   const isCourse = location.pathname.includes("/curso/");
-  const initial = user?.email?.charAt(0).toUpperCase() || "U";
-  const displayName = user?.email?.split("@")[0] || "Membro";
+  const full = profile.data?.full_name?.trim() || profile.data?.nickname?.trim() || "";
+  const email = user.email ?? "";
+  const first = (full.split(/\s+/)[0] || email.split("@")[0] || "aluno");
+  const name = first.charAt(0).toUpperCase() + first.slice(1);
+  const ctx: MemberOutletContext = { user, name };
 
+  if (isCourse) {
+    return <div className="min-h-dvh bg-background text-foreground antialiased"><Outlet context={ctx} /></div>;
+  }
 
   return (
-    <div className="min-h-dvh bg-background text-zinc-100 font-display antialiased selection:bg-emerald-500/30 flex">
-      {!isCourse && <MemberSidebar />}
-
-      <div className="flex-1 flex flex-col relative overflow-x-hidden">
-        {/* Top cinematic bar — only shows when not in course player (which has its own header) */}
-        {!isCourse && (
-          <header className={cn(
-            "h-20 shrink-0 flex items-center justify-between px-6 lg:px-10 z-40 transition-all duration-500 sticky top-0",
-            scrolled ? "bg-background/80 backdrop-blur-2xl border-b border-white/[0.05]" : "bg-transparent"
-          )}>
-            <div className="flex-1 max-w-2xl relative group hidden md:block">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 transition-colors group-focus-within:text-primary" />
-              <input 
-                type="text" 
-                placeholder="Pesquisar por cursos, aulas ou materiais..."
-                className="w-full h-11 bg-white/[0.03] border border-white/5 rounded-xl pl-12 pr-4 text-sm font-medium text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-all focus:bg-white/[0.05]"
-              />
-            </div>
-
-            <div className="flex items-center gap-6 ml-auto">
-              <div className="hidden sm:flex flex-col items-end">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-600">Pontos XP</p>
-                <p className="text-sm font-bold text-emerald-400 tabular-nums">{stats.xp.toLocaleString("pt-BR")}</p>
-              </div>
-              <div className="h-10 w-px bg-white/5 hidden sm:block" />
-              <div className="flex items-center gap-4">
-                <div className="flex flex-col items-end hidden xs:flex">
-                  <p className="text-[12px] font-bold text-white leading-none">{displayName}</p>
-                  <p className="text-[10px] text-zinc-500 mt-1 uppercase tracking-widest font-bold">Membro Premium</p>
-                </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setProfileOpen(!profileOpen); }}
-                  className="h-10 w-10 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center font-bold text-sm text-zinc-200 hover:border-primary/40 transition-all relative"
-                >
-                  {initial}
-                  <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-emerald-500 border-2 border-background shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+    <div className="min-h-dvh bg-background text-foreground antialiased">
+      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-background/90 backdrop-blur">
+        <div className="mx-auto flex h-16 w-full max-w-[1180px] items-center gap-2 px-4 sm:px-6 lg:px-8">
+          <Link to="/membros-area" className="mr-2 flex items-center gap-2.5" aria-label="Área de membros, início">
+            <VenxpayLogo size={30} />
+            <span className="hidden text-[16px] font-extrabold tracking-[-0.02em] sm:inline">Área de membros</span>
+          </Link>
+          <nav aria-label="Principal" className="flex items-center gap-1">
+            <NavLink to="/membros-area" end className={navClass}><BookOpen className="hidden h-4 w-4 sm:block" aria-hidden /> Meus cursos</NavLink>
+            <NavLink to="/membros-area#certificados" className={() => navClass({ isActive: false })}><Award className="hidden h-4 w-4 sm:block" aria-hidden /> Certificados</NavLink>
+          </nav>
+          <div className="ml-auto">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button type="button" aria-label="Minha conta" className="grid h-10 w-10 place-items-center rounded-full bg-white/10 text-[15px] font-extrabold text-foreground transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                  {name.charAt(0)}
                 </button>
-              </div>
-            </div>
-
-            <AnimatePresence>
-              {profileOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute right-10 top-24 w-72 rounded-2xl bg-card border border-white/10 shadow-2xl overflow-hidden z-50 p-2"
-                  onClick={e => e.stopPropagation()}
-                >
-                  <div className="p-4 border-b border-white/5">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500 font-bold mb-1">Conta Vemprapay</p>
-                    <p className="font-bold text-white truncate">{displayName}</p>
-                  </div>
-                  <div className="py-2">
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-400/5 rounded-xl transition-colors text-zinc-400 hover:text-red-400"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      <span className="text-[13px] font-bold">Sair da conta</span>
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </header>
-        )}
-
-        <main className={cn("flex-1", !isCourse && "px-6 lg:px-10 pb-20")}>
-          <Outlet context={{ user }} />
-        </main>
-      </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" collisionPadding={16} className="w-64 rounded-[16px] p-1.5">
+                <DropdownMenuLabel className="px-3 py-2.5">
+                  <span className="block truncate text-[15px] font-bold text-foreground">{full || name}</span>
+                  <span className="block truncate text-[13px] font-normal text-muted-foreground">{email}</span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => void signOut()} className="cursor-pointer gap-2.5 rounded-[12px] px-3 py-2.5 text-[14.5px] font-semibold">
+                  <LogOut className="h-4 w-4" aria-hidden /> Sair da conta
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </header>
+      <main className="mx-auto w-full max-w-[1180px] px-4 pb-20 pt-8 sm:px-6 lg:px-8 lg:pt-12">
+        <Outlet context={ctx} />
+      </main>
     </div>
   );
 }
-

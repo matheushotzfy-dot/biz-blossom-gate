@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { Loader2 } from "lucide-react";
 import Index from "./pages/Index";
@@ -57,8 +57,6 @@ const ControleGastos = lazy(() => import("./pages/financeiro/ControleGastos"));
 const Taxas = lazy(() => import("./pages/financeiro/Taxas"));
 const Suporte = lazy(() => import("./pages/Suporte"));
 const Gamificacao = lazy(() => import("./pages/Gamificacao"));
-const MemberArea = lazy(() => import("./pages/membros/MemberArea"));
-const CoursePage = lazy(() => import("./pages/membros/CoursePage"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const PublicCheckout = lazy(() => import("./pages/PublicCheckout"));
@@ -78,6 +76,11 @@ const MemberLayout = lazy(() => import("./pages/membros/MemberLayout"));
 const MemberHome = lazy(() => import("./pages/membros/MemberHome"));
 const MemberCourse = lazy(() => import("./pages/membros/MemberCourse"));
 const CourseAnalytics = lazy(() => import("./pages/membros/CourseAnalytics"));
+
+function LegacyMemberCourseRedirect() {
+  const { courseId } = useParams();
+  return <Navigate to={`/membros-area/curso/${encodeURIComponent(courseId ?? "")}`} replace />;
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -148,6 +151,9 @@ const App = () => (
                   <Route index element={<MemberHome />} />
                   <Route path="curso/:courseId" element={<MemberCourse />} />
                 </Route>
+                {/* Endereços antigos da área do aluno (links já enviados por e-mail ou salvos). */}
+                <Route path="/membros" element={<Navigate to="/membros-area" replace />} />
+                <Route path="/membros/curso/:courseId" element={<LegacyMemberCourseRedirect />} />
 
                 <Route path="/admin-matheus" element={<AdminLogin />} />
                 <Route path="/admin-matheus/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
@@ -218,8 +224,6 @@ const App = () => (
                   <Route path="/financeiro/taxas" element={<Taxas />} />
 
                   <Route path="/marketplace" element={<Navigate to="/vendas/afiliados?tab=explore" replace />} />
-                  <Route path="/membros" element={<MemberArea />} />
-                  <Route path="/membros/curso/:courseId" element={<CoursePage />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

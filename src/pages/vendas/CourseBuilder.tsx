@@ -22,7 +22,8 @@ import StudentPreviewPanel from "@/components/course/StudentPreviewPanel";
 import { CurriculumPanel } from "@/components/course/builder/CurriculumPanel";
 import { LessonEditor } from "@/components/course/builder/LessonEditor";
 import { CourseSettingsDialog } from "@/components/course/builder/CourseSettingsDialog";
-import { courseContentPathFromUrl, isValidVideoLink } from "@/components/course/builder/videoUtils";
+import { isValidVideoLink } from "@/components/course/builder/videoUtils";
+import { courseContentPathFromUrl, courseFilePath } from "@/lib/courseFiles";
 import type { BuilderAttachment, BuilderCourse, BuilderLesson, BuilderModule, LessonField, SaveStatus } from "@/components/course/builder/types";
 
 const SAVE_DELAY = 1000;
@@ -382,14 +383,14 @@ export default function CourseBuilder() {
   // ─── Uploads ─────────────────────────────────────────────────────
   const handleVideoFile = async (file: File) => {
     const lessonId = selectedIdRef.current;
-    if (!user || !lessonId) return;
+    if (!user || !lessonId || !courseId) return;
     if (uploadingVideoRef.current) { toast.info("Espere o envio do vídeo atual terminar."); return; }
     if (!VIDEO_TYPES.includes(file.type)) { toast.error("Formato não aceito. Envie MP4, WebM, OGG ou MOV."); return; }
     if (file.size > MAX_VIDEO_BYTES) { toast.error("O vídeo passa de 500 MB. Comprima o arquivo ou cole o link de um vídeo hospedado."); return; }
     uploadingVideoRef.current = true;
     setUploadingVideo({ lessonId, name: file.name });
-    const ext = file.name.split(".").pop() || "mp4";
-    const path = `${user.id}/videos/${crypto.randomUUID()}.${ext}`;
+    // {dono}/{curso}/…: é o que a política do storage exige para gravar e para o aluno matriculado ler.
+    const path = courseFilePath(user.id, courseId, "videos", file.name.split(".").pop() || "mp4");
     const { error } = await supabase.storage.from("course-content").upload(path, file);
     if (error) {
       uploadingVideoRef.current = false;
@@ -415,11 +416,10 @@ export default function CourseBuilder() {
 
   const handleAttachmentFile = async (file: File) => {
     const lessonId = selectedIdRef.current;
-    if (!user || !lessonId) return;
+    if (!user || !lessonId || !courseId) return;
     if (file.size > MAX_ATTACHMENT_BYTES) { toast.error("O arquivo passa de 50 MB."); return; }
     setUploadingAttachment(true);
-    const ext = file.name.split(".").pop() || "bin";
-    const path = `${user.id}/attachments/${crypto.randomUUID()}.${ext}`;
+    const path = courseFilePath(user.id, courseId, "attachments", file.name.split(".").pop() || "bin");
     const { error: uploadError } = await supabase.storage.from("course-content").upload(path, file);
     if (uploadError) {
       setUploadingAttachment(false);

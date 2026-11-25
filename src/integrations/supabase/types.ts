@@ -6026,6 +6026,11 @@ export type Database = {
       get_ledger_integrity_report: { Args: never; Returns: Json }
       get_my_goal_progress: { Args: { _goal_id: string }; Returns: number }
       get_my_lifetime_revenue: { Args: never; Returns: number }
+      get_lesson_comment_authors: {
+        Args: { _lesson_id: string }
+        Returns: { user_id: string; display_name: string | null; is_producer: boolean }[]
+      }
+      claim_my_pending_deliveries: { Args: never; Returns: number }
       get_my_max_ticket: { Args: never; Returns: number }
       get_my_payment_link_dashboard: {
         Args: {

@@ -21,7 +21,7 @@ export function getVideoThumbnail(url: string) {
 }
 
 export function isDirectVideoUrl(url: string) {
-  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
+  return /\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i.test(url);
 }
 
 /** Link aceito no campo de vídeo: vazio (remove o vídeo) ou http(s). */
@@ -30,17 +30,5 @@ export function isValidVideoLink(url: string) {
   return v === "" || /^https?:\/\/\S+$/i.test(v);
 }
 
-// O bucket "course-content" devolve URLs públicas neste formato; links externos (YouTube etc.) não têm arquivo para apagar.
-const COURSE_CONTENT_MARKER = "/storage/v1/object/public/course-content/";
-
-export function courseContentPathFromUrl(url: string | null | undefined): string | null {
-  if (!url) return null;
-  const idx = url.indexOf(COURSE_CONTENT_MARKER);
-  if (idx === -1) return null;
-  const raw = url.slice(idx + COURSE_CONTENT_MARKER.length);
-  try {
-    return decodeURIComponent(raw);
-  } catch {
-    return raw;
-  }
-}
+// Os arquivos do bucket "course-content" ficam em src/lib/courseFiles.ts (caminho, link assinado e pasta de envio).
+export { courseContentPathFromUrl } from "@/lib/courseFiles";

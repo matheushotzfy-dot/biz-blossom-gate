@@ -8,6 +8,8 @@ import { FieldHint, FieldLabel } from "@/components/seller-ui/form";
 import { StudioPanel } from "@/components/seller-ui/studio";
 import { cn } from "@/lib/utils";
 import { formatFileSize, getVideoEmbed, isDirectVideoUrl, isValidVideoLink } from "@/components/course/builder/videoUtils";
+import { SignedFileLink } from "@/components/course/SignedFileLink";
+import { courseContentPathFromUrl, useCourseFileUrl } from "@/lib/courseFiles";
 import type { BuilderAttachment } from "@/components/course/builder/types";
 
 export const VIDEO_ACCEPT = "video/mp4,video/webm,video/ogg,video/quicktime";
@@ -46,7 +48,8 @@ export function LessonEditor(p: LessonEditorProps) {
   const videoInput = useRef<HTMLInputElement>(null);
   const attachmentInput = useRef<HTMLInputElement>(null);
   const embed = p.savedVideoUrl ? getVideoEmbed(p.savedVideoUrl) : null;
-  const direct = p.savedVideoUrl ? isDirectVideoUrl(p.savedVideoUrl) : false;
+  const direct = p.savedVideoUrl ? isDirectVideoUrl(p.savedVideoUrl) || !!courseContentPathFromUrl(p.savedVideoUrl) : false;
+  const videoFile = useCourseFileUrl(direct ? p.savedVideoUrl : null);
   const linkValid = isValidVideoLink(p.videoUrl);
   const titleEmpty = p.title.trim() === "";
 
@@ -88,7 +91,20 @@ export function LessonEditor(p: LessonEditorProps) {
           <div className="space-y-3">
             <div className="vp-r16 aspect-video overflow-hidden border border-border bg-black">
               {direct ? (
-                <video controls preload="metadata" className="h-full w-full" src={p.savedVideoUrl} />
+                videoFile.status === "ready" ? (
+                  <video controls preload="metadata" className="h-full w-full" src={videoFile.src} />
+                ) : (
+                  <div role="status" className="grid h-full w-full place-items-center bg-muted px-6 text-center">
+                    {videoFile.status === "error" ? (
+                      <div>
+                        <p className="text-[14.5px] font-semibold text-foreground">Não foi possível abrir o vídeo.</p>
+                        <button type="button" onClick={videoFile.retry} className="vp-ghost mt-3 h-10 px-4 text-[13.5px]">Tentar de novo</button>
+                      </div>
+                    ) : (
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground motion-reduce:animate-none" aria-label="Carregando o vídeo" />
+                    )}
+                  </div>
+                )
               ) : embed ? (
                 <iframe src={embed} title={`Vídeo da aula ${p.title}`} className="h-full w-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
               ) : (
@@ -180,9 +196,9 @@ export function LessonEditor(p: LessonEditorProps) {
                   <span className="block truncate text-[14.5px] font-semibold text-foreground">{att.file_name}</span>
                   <span className="block text-[13px] text-muted-foreground">{formatFileSize(att.file_size)}</span>
                 </span>
-                <a href={att.file_url} target="_blank" rel="noopener noreferrer" aria-label={`Baixar ${att.file_name}`} title="Baixar" className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                <SignedFileLink fileUrl={att.file_url} fileName={att.file_name} label={`Baixar ${att.file_name}`} className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                   <Download className="h-[18px] w-[18px]" />
-                </a>
+                </SignedFileLink>
                 <button type="button" onClick={() => p.onDeleteAttachment(att)} aria-label={`Remover ${att.file_name}`} title="Remover" className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                   <Trash2 className="h-[18px] w-[18px]" />
                 </button>

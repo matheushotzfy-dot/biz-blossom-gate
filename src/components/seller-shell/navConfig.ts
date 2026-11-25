@@ -41,7 +41,7 @@ export const SELLER_NAV: SellerNavSection[] = [
     ],
   },
   {
-    id: "products", label: "Produtos", url: "/vendas/produtos", icon: Package, match: ["/vendas/produtos", "/vendas/conteudo", "/vendas/checkout", "/membros"],
+    id: "products", label: "Produtos", url: "/vendas/produtos", icon: Package, match: ["/vendas/produtos", "/vendas/conteudo", "/vendas/checkout"],
     links: [
       { title: "Meus produtos", desc: "Catálogo e aprovação", url: "/vendas/produtos", icon: Package },
       { title: "Checkouts", desc: "Aparência das páginas de pagamento", url: "/vendas/checkout", icon: LayoutTemplate },

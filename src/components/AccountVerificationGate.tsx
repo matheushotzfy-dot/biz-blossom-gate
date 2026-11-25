@@ -18,7 +18,6 @@ const OPERATIONAL_PATHS = [
   "/financeiro",
   "/integracoes",
   "/marketplace",
-  "/membros",
   "/premiacoes",
   "/gamificacao",
 ];
