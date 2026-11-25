@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
   Plus, Search, Shield, Snowflake, Sun, KeyRound, History, ArrowUpDown,
   UserCog, Users, RefreshCw, Copy, Eye, EyeOff, Activity, Percent, UsersRound,
@@ -49,6 +49,8 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
   const [passwordTarget, setPasswordTarget] = useState<StaffRow | null>(null);
   const [rows, setRows] = useState<StaffRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [auditError, setAuditError] = useState(false);
   const [filter, setFilter] = useState("");
   const [sort, setSort] = useState<SortKey>("name");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "frozen">("all");
@@ -62,8 +64,9 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
 
   const load = async () => {
     setLoading(true);
+    setLoadError(false);
     const { data: ur, error: roleError } = await supabase.from("user_roles").select("user_id").eq("role", role);
-    if (roleError) { toast.error("Não foi possível consultar a equipe"); setLoading(false); return; }
+    if (roleError) { setLoadError(true); setLoading(false); return; }
     const ids = (ur ?? []).map((r) => r.user_id);
     if (ids.length === 0) { setRows([]); setLoading(false); return; }
 
@@ -76,7 +79,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
       supabase.from("staff_fee_limits").select("*").in("user_id", ids),
     ]);
 
-    if (cfgError || permsError || limitsError) { toast.error("Não foi possível carregar a configuração da equipe"); setLoading(false); return; }
+    if (cfgError || permsError || limitsError) { setLoadError(true); setLoading(false); return; }
     const cfgMap = new Map((cfg ?? []).map((c) => [c.user_id, Number(c.base_pct)]));
     const permMap = new Map<string, string[]>();
     (perms ?? []).forEach((p) => {
@@ -130,11 +133,14 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
 
   const openAudit = async (row: StaffRow) => {
     setShowAudit(row);
-    const { data } = await supabase
+    setAuditError(false);
+    setAuditRows([]);
+    const { data, error } = await supabase
       .from("staff_audit_log").select("*")
       .eq("staff_user_id", row.user_id)
       .order("created_at", { ascending: false })
       .limit(200);
+    if (error) { setAuditError(true); return; }
     setAuditRows(data ?? []);
   };
 
@@ -156,7 +162,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
   const resetPassword = (row: StaffRow) => setPasswordTarget(row);
 
   const setPct = async (row: StaffRow, value: number) => {
-    if (!Number.isFinite(value) || value < 0 || value > 50) return;
+    if (!Number.isFinite(value) || value < 0 || value > 50) { toast.error("A comissão precisa ficar entre 0% e 50%."); load(); return; }
     const { error } = await supabase.rpc("admin_configure_staff", { _user_id: row.user_id, _permissions: row.permissions.filter(k => STAFF_PERMISSIONS.some(p => p.key === k)), _percentage: row.limits.min_transaction_percentage, _fixed: row.limits.min_transaction_fixed, _withdrawal: row.limits.min_withdrawal_fee, _commission: value });
     if (error) { toast.error(friendlyError(error)); return; }
     toast.success("% atualizada.");
@@ -169,9 +175,18 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
   const avgPct = rows.length ? rows.reduce((s, r) => s + r.pct, 0) / rows.length : 0;
   const totalAssigned = rows.reduce((s, r) => s + r.assignedCount, 0);
 
+  const rowActions = (row: StaffRow) => (
+    <div className="flex items-center gap-1 md:justify-end">
+      <ActionBtn icon={Shield} label="Permissões" onClick={() => setShowPerm(row)} hoverTone="primary" />
+      <ActionBtn icon={History} label="Auditoria" onClick={() => openAudit(row)} hoverTone="primary" />
+      <ActionBtn icon={KeyRound} label="Resetar senha" onClick={() => resetPassword(row)} hoverTone="warning" />
+      <ActionBtn icon={row.frozen ? Sun : Snowflake} label={row.frozen ? "Restaurar acesso staff" : "Suspender acesso staff"} onClick={() => toggleFreeze(row)} hoverTone="info" />
+    </div>
+  );
+
   const SortBtn = ({ k, label }: { k: SortKey; label: string }) => (
     <button onClick={() => setSort(k)}
-      className={cn("inline-flex h-7 items-center gap-1 rounded-md border px-2 text-[10px] font-black uppercase tracking-wider transition-colors",
+      className={cn("inline-flex h-7 items-center gap-1 rounded-md border px-2 text-[11.5px] font-semibold transition-colors",
         sort === k ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40")}>
       <ArrowUpDown className="h-3 w-3" /> {label}
     </button>
@@ -213,13 +228,13 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
         <div className="flex flex-1 flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[240px] max-w-sm group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
-            <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Buscar por nome ou email..."
+            <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Buscar por nome ou e-mail" aria-label="Buscar conta" style={{ paddingLeft: 40 }}
               className="h-9 w-full rounded-lg border border-border bg-card pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
           </div>
           <div className="flex items-center gap-1 rounded-lg border border-border bg-muted/30 p-0.5">
             {(["all", "active", "frozen"] as const).map(s => (
               <button key={s} onClick={() => setStatusFilter(s)}
-                className={cn("h-7 rounded-md px-3 text-[10px] font-black uppercase tracking-wider transition-all duration-150",
+                className={cn("h-7 rounded-md px-3 text-[11.5px] font-semibold transition-all duration-150",
                   statusFilter === s ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground")}>
                 {s === "all" ? "Todas" : s === "active" ? "Ativas" : "Congeladas"}
               </button>
@@ -227,7 +242,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">Ordenar</span>
+          <span className="text-[11.5px] font-semibold text-muted-foreground">Ordenar por</span>
           <SortBtn k="name" label="Nome" />
           <SortBtn k="pct" label="%" />
           <SortBtn k="permissions" label="Permissões" />
@@ -241,15 +256,20 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
         icon={isManager ? Users : UserCog}
       >
         {loading ? (
-          <div className="flex items-center justify-center py-20 text-muted-foreground">
+          <div role="status" className="flex items-center justify-center py-20 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
             <span className="ml-2 text-xs font-bold">Carregando contas…</span>
+          </div>
+        ) : loadError ? (
+          <div role="alert" className="flex flex-col items-center gap-3 py-16 text-center">
+            <p className="text-sm font-bold text-destructive">Não foi possível carregar a equipe. Isso não quer dizer que não existam contas.</p>
+            <Button variant="outline" size="sm" onClick={load}><RefreshCw className="mr-1.5 h-3.5 w-3.5" />Tentar de novo</Button>
           </div>
         ) : filtered.length === 0 ? (
           <PremiumEmpty
             icon={isManager ? Users : UserCog}
-            title="Nenhuma conta encontrada"
-            subtitle='Use "Criar conta" para adicionar um novo membro'
+            title={rows.length === 0 ? "Nenhuma conta ainda" : "Nenhuma conta com esses filtros"}
+            subtitle={rows.length === 0 ? 'Use "Criar conta" para adicionar um novo membro' : "Limpe a busca ou troque o filtro de status"}
           />
         ) : (
         <div className={premiumTable.wrapper}>
@@ -261,7 +281,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
                 <th className={cn(premiumTable.th, "text-right")}>% Comissão</th>
                 {isManager && <th className={cn(premiumTable.th, "text-right")}>Sellers</th>}
                 <th className={premiumTable.th}>Permissões</th>
-                <th className={cn(premiumTable.th, "text-right")}>Ações</th>
+                <th className={cn(premiumTable.th, "hidden text-right md:table-cell")}>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -273,8 +293,9 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
                         {(row.full_name || row.email || "?").slice(0, 2).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <div className="truncate text-xs font-black text-foreground">{row.full_name || "—"}</div>
-                        <div className="truncate text-[10px] font-bold text-muted-foreground">{row.email}</div>
+                        <div className="truncate text-xs font-black text-foreground">{row.full_name || row.email || "Conta sem perfil"}</div>
+                        <div className="truncate text-[10px] font-bold text-muted-foreground">{row.full_name ? row.email : row.user_id.slice(0, 8)}</div>
+                        <div className="mt-2 md:hidden">{rowActions(row)}</div>
                       </div>
                     </div>
                   </td>
@@ -327,15 +348,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
                       {row.permissions.length}<span className="text-muted-foreground">/{STAFF_PERMISSIONS.length}</span>
                     </button>
                   </td>
-                  <td className={cn(premiumTable.td, "text-right")}>
-                    <div className="flex items-center justify-end gap-1">
-                      <ActionBtn icon={Shield} label="Permissões" onClick={() => setShowPerm(row)} hoverTone="primary" />
-                      <ActionBtn icon={History} label="Auditoria" onClick={() => openAudit(row)} hoverTone="primary" />
-                      <ActionBtn icon={KeyRound} label="Resetar senha" onClick={() => resetPassword(row)} hoverTone="warning" />
-                      <ActionBtn icon={row.frozen ? Sun : Snowflake} label={row.frozen ? "Restaurar acesso staff" : "Suspender acesso staff"} onClick={() => toggleFreeze(row)} hoverTone="info" />
-                      
-                    </div>
-                  </td>
+                  <td className={cn(premiumTable.td, "hidden text-right md:table-cell")}>{rowActions(row)}</td>
                 </tr>
               ))}
             </tbody>
@@ -362,6 +375,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
       <AuditDialog
         row={showAudit}
         rows={auditRows}
+        failed={auditError}
         onClose={() => { setShowAudit(null); setAuditRows([]); }}
       />
     </div>
@@ -379,7 +393,7 @@ function ActionBtn({ icon: Icon, label, onClick, hoverTone }: {
     destructive: "hover:border-destructive hover:text-destructive",
   }[hoverTone];
   return (
-    <button onClick={onClick} title={label}
+    <button onClick={onClick} title={label} aria-label={label}
       className={cn(
         "flex h-7 w-7 items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition-all duration-150 active:scale-[0.95]",
         hoverCls
@@ -406,8 +420,8 @@ function DetailDialogHeader({ title, subtitle, icon: Icon, onClose, tone = "prim
           <Icon className="h-5 w-5" />
         </div>
         <div className="min-w-0">
-          <p className="font-display text-base font-black tracking-tight text-foreground">{title}</p>
-          {subtitle && <p className="truncate text-[11px] font-bold text-muted-foreground">{subtitle}</p>}
+          <DialogTitle className="font-display text-base font-black tracking-tight text-foreground">{title}</DialogTitle>
+          <DialogDescription className="truncate text-[11px] font-bold text-muted-foreground">{subtitle || "Conta da equipe"}</DialogDescription>
         </div>
       </div>
       <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 shrink-0 p-0">
@@ -643,8 +657,8 @@ function PermissionsGrid({ grouped, perms, onToggle }: {
 }
 
 // ---------------- Audit dialog ----------------
-function AuditDialog({ row, rows, onClose }: {
-  row: StaffRow | null; rows: Tables<"staff_audit_log">[]; onClose: () => void;
+function AuditDialog({ row, rows, failed = false, onClose }: {
+  row: StaffRow | null; rows: Tables<"staff_audit_log">[]; failed?: boolean; onClose: () => void;
 }) {
   if (!row) return null;
   return (
@@ -656,7 +670,9 @@ function AuditDialog({ row, rows, onClose }: {
           icon={History} onClose={onClose}
         />
         <div className="max-h-[65vh] overflow-y-auto bg-card">
-          {rows.length === 0 ? (
+          {failed ? (
+            <p role="alert" className="py-14 text-center text-sm font-bold text-destructive">Não foi possível carregar a auditoria desta conta. Feche e abra de novo para tentar outra vez.</p>
+          ) : rows.length === 0 ? (
             <PremiumEmpty icon={History} title="Nenhuma ação registrada" subtitle="As ações desta conta aparecem aqui" />
           ) : (
             <table className="w-full text-xs">

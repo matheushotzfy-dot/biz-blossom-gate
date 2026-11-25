@@ -384,7 +384,7 @@ export default function AdminDashboard() {
         aria-label="Menu do painel"
         {...(drawerClosed ? ({ inert: "" } as object) : {})}
         className={cn(
-          "relative z-[70] h-full flex flex-col shrink-0 transition-[width] duration-200 af-surface af-border border-r",
+          "relative z-[70] lg:z-20 h-full flex flex-col shrink-0 transition-[width] duration-200 af-surface af-border border-r",
           collapsed ? "w-[72px]" : "w-[264px]",
           "max-lg:fixed max-lg:left-0 max-lg:top-0 max-lg:max-w-[86vw]",
           mobileMenuOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full"
