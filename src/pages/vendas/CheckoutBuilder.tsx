@@ -4,6 +4,7 @@
  * Tela cheia, fora do DashboardLayout: usa useSellerSkin() e a raiz `vp-seller-shell vp-stage`.
  */
 
+import { INSTALLMENT_MAX, installmentOption } from "@/features/public-checkout/pricing";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -243,7 +244,7 @@ function CheckoutPreview(p: PreviewProps) {
           </div>
           <div className="shrink-0 text-right">
             <p className="text-[19px] font-extrabold leading-none tracking-tight" style={{ color }}>{formatCurrency(p.price)}</p>
-            {p.card && <p className="mt-1 text-[10.5px]" style={{ color: T.muted }}>ou 12x de {formatCurrency((p.price * 1.2189) / 12)}</p>}
+            {p.card && <p className="mt-1 text-[10.5px]" style={{ color: T.muted }}>ou 12x de {formatCurrency(installmentOption(p.price, INSTALLMENT_MAX).perInstallment)}</p>}
           </div>
         </div>
 

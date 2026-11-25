@@ -6,13 +6,15 @@ const brazilianPhoneSchema = z.string().trim().refine((value) => {
   return digits.length === 10 || digits.length === 11;
 }, "Informe um telefone com DDD");
 
+const checkoutDocumentSchema = z.string().trim().min(1, "Informe seu CPF ou CNPJ").pipe(documentSchema);
+
 const emailSchema = z.string().trim().toLowerCase().email("Informe um e-mail válido").max(255);
 
 export const checkoutCustomerSchema = z.object({
   name: z.string().trim().min(3, "Informe seu nome completo").max(120),
   email: emailSchema,
   emailConfirm: z.string().trim().toLowerCase().max(255).optional(),
-  document: documentSchema,
+  document: checkoutDocumentSchema,
   phone: brazilianPhoneSchema,
   addressRequired: z.boolean(),
   cep: z.string().trim().optional(),

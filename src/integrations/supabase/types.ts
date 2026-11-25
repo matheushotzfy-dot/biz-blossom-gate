@@ -6329,6 +6329,7 @@ export type Database = {
         }
         Returns: Json
       }
+      register_affiliate_click: { Args: { _product_id: string; _slug: string }; Returns: boolean }
       release_due_card_holds: { Args: never; Returns: number }
       remove_seller_manager: {
         Args: { _reason: string; _seller: string }
@@ -6393,6 +6394,7 @@ export type Database = {
       resolve_admin_alert: { Args: { _kind: string }; Returns: undefined }
       resend_failed_webhook_deliveries: { Args: { _config_id: string }; Returns: number }
       resend_webhook_delivery: { Args: { _delivery_id: string }; Returns: string }
+      resolve_affiliate_link: { Args: { _product_id: string; _slug: string }; Returns: string }
       resolve_commission_pct: {
         Args: { _seller: string; _staff: string }
         Returns: number
