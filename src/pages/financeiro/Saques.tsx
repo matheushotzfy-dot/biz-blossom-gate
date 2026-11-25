@@ -2,10 +2,11 @@ import { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { usePlatformPauses } from "@/hooks/usePlatformPauses";
 import { useProfile } from "@/hooks/useProfile";
 import { usePrivacyMode } from "@/hooks/usePrivacyMode";
 import { useWithdrawals, usePixKeys, useBankAccounts, useInvalidateAll } from "@/hooks/useQueryData";
-import { ArrowDownToLine, Building2, ChevronRight, Clock, Eye, EyeOff, Landmark, MapPin, Wallet } from "lucide-react";
+import { ArrowDownToLine, Building2, ChevronRight, Clock, Eye, EyeOff, Landmark, MapPin, PauseCircle, Wallet } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DialogBody, DialogFoot, DialogHead, dialogBox } from "@/components/seller-ui/form";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ import { ReauthenticationDialog } from "@/components/security/ReauthenticationDi
 import { WithdrawDestinationPicker, getPixKeyLabel, getPixKeyMeta } from "@/components/financeiro/WithdrawDestinationPicker";
 import { Money } from "@/components/home/Money";
 import { PageHead } from "@/components/seller-ui/PageHead";
+import { Notice } from "@/components/seller-ui/studio";
 import { SectionTabs } from "@/components/seller-ui/SectionTabs";
 import { FilterPills } from "@/components/seller-ui/FilterPills";
 import { SearchField } from "@/components/seller-ui/SearchField";
@@ -62,6 +64,7 @@ export default function Saques() {
   const { profile, loading: profileLoading } = useProfile();
   const { hidden, toggle: togglePrivacy } = usePrivacyMode();
   const navigate = useNavigate();
+  const pauses = usePlatformPauses();
   const { data: withdrawals = [], isLoading: withdrawalsLoading, isError: withdrawalsError, refetch: refetchWithdrawals } = useWithdrawals();
   const { data: pixKeys = [] } = usePixKeys();
   const { data: bankAccounts = [] } = useBankAccounts();
@@ -193,6 +196,10 @@ export default function Saques() {
   const pageItems = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleOpenChange = (next: boolean) => {
+    if (next && pauses.withdrawals) {
+      toast.error("Os saques estão pausados no momento. Tente de novo mais tarde.");
+      return;
+    }
     if (next && !hasAddress) {
       toast.error("Preencha seu endereço antes de solicitar saques");
       navigate("/perfil?focus=address");
@@ -283,6 +290,11 @@ export default function Saques() {
       />
       <SectionTabs section="money" />
       <PageHead title="Saldo e saques" subtitle="Veja quanto já é seu, quanto está a caminho e peça o saque por Pix." />
+      {pauses.withdrawals && (
+        <Notice tone="warn" icon={<PauseCircle className="h-5 w-5" aria-hidden />} title="Os saques estão pausados no momento">
+          Não dá para pedir novos saques agora. Seu saldo continua seguro e os pedidos que já estão na fila seguem o fluxo normal. Assim que a equipe liberar, o botão volta a funcionar.
+        </Notice>
+      )}
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className={dialogBox("xl", "max-w-[780px]")}>

@@ -57,7 +57,7 @@ const RewardsCenter = lazy(() => import("@/features/admin-rewards/RewardsCenter"
 const RaceCenter = lazy(() => import("@/features/admin-race/RaceCenter"));
 const GoalsCenter = lazy(() => import("@/features/admin-goals/GoalsCenter"));
 const AdminCommandCenterTab = lazy(() => import("./tabs/AdminCommandCenterTab"));
-const AdminToolsTab = lazy(() => import("./tabs/AdminToolsTab"));
+const ToolsCenter = lazy(() => import("@/features/admin-tools/ToolsCenter"));
 const AdminPaymentLinksTab = lazy(() => import("./tabs/AdminPaymentLinksTab"));
 const AdminCheckoutDeliveriesTab = lazy(() => import("./tabs/AdminCheckoutDeliveriesTab"));
 
@@ -656,9 +656,7 @@ export default function AdminDashboard() {
                 />
                 </>
               )}
-              {activeTab === "tools" && isAdmin && (
-                <AdminToolsTab transactions={transactions} profiles={profiles} withdrawals={withdrawals} />
-              )}
+              {activeTab === "tools" && <ToolsCenter isAdmin={isAdmin} dateRange={dateRange} />}
               {activeTab === "command-center" && isAdmin && (
                 <AdminCommandCenterTab
                   dateRange={dateRange}
