@@ -15,6 +15,8 @@ import { SearchField } from "@/components/seller-ui/SearchField";
 import { PlansGrid } from "@/components/subscriptions/PlansGrid";
 import { SubscribersLedger } from "@/components/subscriptions/SubscribersLedger";
 import { NewPlanDialog } from "@/components/subscriptions/NewPlanDialog";
+import { trialDays, validatePlan } from "@/components/subscriptions/planMeta";
+import { parseBRL } from "@/components/seller-ui/money";
 import type { Plan, PlanFormValues, Subscription } from "@/components/subscriptions/types";
 
 type TabId = "plans" | "subscribers";
@@ -44,9 +46,9 @@ export default function Assinaturas() {
   useEffect(() => { fetchData(); }, [user?.id]);
 
   const handleCreate = async (v: PlanFormValues): Promise<boolean> => {
-    if (!v.name.trim() || !v.price) { toast.error("Preencha nome e preço"); return false; }
-    const price = parseFloat(v.price.replace(",", "."));
-    if (isNaN(price) || price < 1) { toast.error("Preço mínimo: R$ 1,00"); return false; }
+    const problem = Object.values(validatePlan(v))[0];
+    if (problem) { toast.error(problem); return false; }
+    const price = parseBRL(v.price);
 
     const { error } = await supabase.from("subscription_plans").insert({
       user_id: user!.id,
@@ -54,7 +56,7 @@ export default function Assinaturas() {
       description: v.description.trim() || null,
       price,
       interval: v.interval,
-      trial_days: parseInt(v.trial) || 0,
+      trial_days: trialDays(v.trial),
       product_id: v.product && v.product !== "none" ? v.product : null,
     });
     if (error) { toast.error(friendlyError(error)); return false; }

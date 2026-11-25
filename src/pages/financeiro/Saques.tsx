@@ -6,7 +6,8 @@ import { useProfile } from "@/hooks/useProfile";
 import { usePrivacyMode } from "@/hooks/usePrivacyMode";
 import { useWithdrawals, usePixKeys, useBankAccounts, useInvalidateAll } from "@/hooks/useQueryData";
 import { ArrowDownToLine, Building2, ChevronRight, Clock, Eye, EyeOff, Landmark, MapPin, Wallet } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DialogBody, DialogFoot, DialogHead, dialogBox } from "@/components/seller-ui/form";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 import { differenceInCalendarDays, format } from "date-fns";
@@ -284,23 +285,22 @@ export default function Saques() {
       <PageHead title="Saldo e saques" subtitle="Veja quanto já é seu, quanto está a caminho e peça o saque por Pix." />
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-h-[92dvh] w-[calc(100vw-1.5rem)] max-w-[780px] gap-0 overflow-y-auto rounded-[28px] border-border bg-card p-0">
-          <DialogHeader className="flex-row items-center gap-4 space-y-0 border-b border-border px-6 py-5 text-left sm:px-8">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
-              <ArrowDownToLine className="h-5 w-5" strokeWidth={2.4} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <DialogTitle className="font-heading text-[22px] font-extrabold tracking-[-0.03em]">Solicitar saque</DialogTitle>
-              <DialogDescription className="mt-0.5 text-[14px] text-muted-foreground">O dinheiro sai do seu saldo disponível, por Pix.</DialogDescription>
-            </div>
-            <div className="mr-8 hidden rounded-2xl bg-accent px-4 py-2 text-right sm:block">
-              <p className="text-[12.5px] font-semibold text-accent-foreground/80">Disponível</p>
-              <Money value={availableBalance} hidden={hidden} className="text-[18px] font-extrabold text-accent-foreground" />
-            </div>
-          </DialogHeader>
+        <DialogContent className={dialogBox("xl", "max-w-[780px]")}>
+          <DialogHead
+            icon={<ArrowDownToLine className="h-5 w-5" strokeWidth={2.4} />}
+            title="Solicitar saque"
+            subtitle="O dinheiro sai do seu saldo disponível, por Pix."
+            aside={
+              <div className="vp-r16 bg-accent px-4 py-2 text-right">
+                <p className="text-[12.5px] font-semibold text-accent-foreground/80">Disponível</p>
+                <Money value={availableBalance} hidden={hidden} className="text-[18px] font-extrabold text-accent-foreground" />
+              </div>
+            }
+          />
 
-          <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 gap-7 px-6 py-6 sm:px-8 md:grid-cols-2">
+          <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+            <DialogBody className="!space-y-0">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-7 md:grid-cols-[repeat(2,minmax(0,1fr))]">
               <section className="flex flex-col gap-3.5" aria-labelledby="saque-step-valor">
                 <StepLabel id="saque-step-valor" n={1} title="Quanto sacar" />
                 <div className="relative">
@@ -357,19 +357,24 @@ export default function Saques() {
               </section>
             </div>
 
-            <div className="sticky bottom-0 z-10 flex flex-col gap-3 border-t border-border bg-card px-6 py-4 shadow-[0_-12px_24px_-18px_hsl(222_47%_11%/.25)] sm:flex-row sm:items-center sm:px-8 sm:py-5">
-              <div className="min-w-0 flex-1">
-                <p className="text-[12.5px] font-semibold text-muted-foreground">Destino</p>
-                <p className="truncate text-[14px] font-bold text-foreground">{destinationSummary}</p>
-              </div>
-              <button type="submit" disabled={balanceUnknown} className="vp-cta h-[52px] w-full sm:w-auto sm:min-w-[260px]">
+            </DialogBody>
+
+            <DialogFoot
+              lead={
+                <>
+                  <p className="text-[12.5px] font-semibold text-muted-foreground">Destino</p>
+                  <p className="truncate text-[14px] font-bold text-foreground">{destinationSummary}</p>
+                </>
+              }
+            >
+              <button type="submit" disabled={balanceUnknown} className="vp-cta !h-12 w-full justify-center sm:w-auto sm:min-w-[240px]">
                 {balanceUnknown
                   ? "Carregando saldo…"
                   : netPreview > 0
                   ? `Confirmar saque de ${fmt(parsedAmount)}`
                   : "Confirmar solicitação"}
               </button>
-            </div>
+            </DialogFoot>
           </form>
         </DialogContent>
       </Dialog>
