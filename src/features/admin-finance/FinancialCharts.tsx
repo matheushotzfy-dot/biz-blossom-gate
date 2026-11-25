@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { PremiumPanel } from "@/pages/admin/tabs/AdminPremium";
 import { brl, rpcErrorMessage } from "./types";
 
 interface Series {
@@ -22,39 +24,56 @@ export function FinancialCharts({ from, to, seller, acquirer }: { from: string; 
       return data as unknown as Series;
     },
   });
-  if (q.isError) return <p className="text-xs text-destructive">{(q.error as Error).message}</p>;
   const s = q.data;
+  const noMovement = !!s && s.days.every((d) => d.entradas === 0 && d.saidas === 0 && d.taxas === 0);
+  if (q.isError) {
+    return (
+      <div role="alert" className="flex flex-col items-center gap-3 rounded-[12px] border border-destructive/30 bg-destructive/5 px-4 py-8 text-center">
+        <p className="text-[13px] font-semibold text-destructive">Não foi possível carregar os gráficos.</p>
+        <p className="max-w-md text-[12px] text-muted-foreground">{(q.error as Error).message}</p>
+        <Button type="button" variant="outline" size="sm" onClick={() => void q.refetch()}>Tentar de novo</Button>
+      </div>
+    );
+  }
   return (
-    <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
-      <section className="rounded-xl border border-border bg-card p-4 lg:col-span-2" aria-label="Entradas, saídas e taxas por dia">
-        <h3 className="mb-3 text-xs font-semibold">Entradas, saídas e taxas por dia</h3>
-        <div className="h-64">{s && (
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={s.days} margin={{ left: 0, right: 8, top: 4 }}>
-              <CartesianGrid stroke="hsl(var(--border))" vertical={false} />
-              <XAxis dataKey="day" tickFormatter={short} {...axis} minTickGap={16} />
-              <YAxis tickFormatter={compact} {...axis} width={44} />
-              <Tooltip {...tip} labelFormatter={(l: string) => short(l)} />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
-              <Area type="monotone" dataKey="entradas" name="Entradas" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.15} strokeWidth={2} />
-              <Area type="monotone" dataKey="saidas" name="Saídas" stroke="hsl(var(--destructive))" fill="hsl(var(--destructive))" fillOpacity={0.1} strokeWidth={2} />
-              <Area type="monotone" dataKey="taxas" name="Taxas" stroke="hsl(var(--accent-foreground))" fill="transparent" strokeWidth={2} strokeDasharray="4 3" />
-            </AreaChart>
-          </ResponsiveContainer>)}</div>
-      </section>
-      <section className="rounded-xl border border-border bg-card p-4" aria-label="Top sellers no período">
-        <h3 className="mb-3 text-xs font-semibold">Top sellers no período</h3>
-        <div className="h-64">{s && (s.sellers.length === 0 ? <p className="pt-24 text-center text-xs text-muted-foreground">Sem vendas no período</p> : (
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={s.sellers} layout="vertical" margin={{ left: 0, right: 8 }}>
-              <XAxis type="number" tickFormatter={compact} {...axis} />
-              <YAxis type="category" dataKey="name" width={90} {...axis} tickFormatter={(n: string) => (n.length > 12 ? `${n.slice(0, 12)}…` : n)} />
-              <Tooltip {...tip} />
-              <Bar dataKey="entradas" name="Entradas" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-              <Bar dataKey="taxas" name="Taxas" fill="hsl(var(--muted-foreground))" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>))}</div>
-      </section>
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <PremiumPanel title="Entradas, saídas e taxas por dia">
+        <div className="h-64" role="img" aria-label="Gráfico de entradas, saídas e taxas por dia">
+          {!s ? <div className="h-full animate-pulse rounded-lg bg-muted/30" role="status" aria-label="Carregando gráfico" />
+          : noMovement ? <p className="pt-24 text-center text-xs text-muted-foreground">Sem movimentação no período</p>
+          : (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={s.days} margin={{ left: 0, right: 8, top: 4 }}>
+                <CartesianGrid stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="day" tickFormatter={short} {...axis} minTickGap={16} />
+                <YAxis tickFormatter={compact} {...axis} width={44} />
+                <Tooltip {...tip} labelFormatter={(l: string) => short(l)} />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Area type="monotone" dataKey="entradas" name="Entradas" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.15} strokeWidth={2} />
+                <Area type="monotone" dataKey="saidas" name="Saídas" stroke="hsl(var(--destructive))" fill="hsl(var(--destructive))" fillOpacity={0.1} strokeWidth={2} />
+                <Area type="monotone" dataKey="taxas" name="Taxas" stroke="hsl(var(--accent-foreground))" fill="transparent" strokeWidth={2} strokeDasharray="4 3" />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </PremiumPanel>
+      <PremiumPanel title="Top sellers no período">
+        <div className="h-64" role="img" aria-label="Ranking de sellers por entradas e taxas">
+          {!s ? <div className="h-full animate-pulse rounded-lg bg-muted/30" role="status" aria-label="Carregando ranking" />
+          : s.sellers.length === 0 ? <p className="pt-24 text-center text-xs text-muted-foreground">Sem vendas no período</p>
+          : (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={s.sellers} layout="vertical" margin={{ left: 0, right: 8 }}>
+                <XAxis type="number" tickFormatter={compact} {...axis} />
+                <YAxis type="category" dataKey="name" width={96} {...axis} tickFormatter={(n: string) => (n.length > 13 ? `${n.slice(0, 13)}…` : n)} />
+                <Tooltip {...tip} />
+                <Bar dataKey="entradas" name="Entradas" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="taxas" name="Taxas" fill="hsl(var(--muted-foreground))" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </PremiumPanel>
     </div>
   );
 }

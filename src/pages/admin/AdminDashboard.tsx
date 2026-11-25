@@ -21,6 +21,7 @@ import { todayInSaoPaulo } from "@/components/period/periodMeta";
 import type { AdminFinancialOverview } from "./tabs/AdminOverviewTab";
 import AdminDateBar from "./AdminDateBar";
 import { canOpenTab, compactBRL, resolveActiveTab, searchSections, sectionsFor, NAV_SECTIONS } from "./adminNav";
+import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 
 const AdminOverviewTab = lazy(() => import("./tabs/AdminOverviewTab"));
 const AdminSellersTab = lazy(() => import("./tabs/AdminSellersTab"));
@@ -695,7 +696,14 @@ export default function AdminDashboard() {
               {activeTab === "staff-requests" && isAdmin && <StaffRequestsTab profiles={profiles} />}
               {activeTab === "acquirers-panel" && isAdmin && <AcquirersPanel profiles={profiles} />}
               {activeTab === "fin-metrics" && isAdmin && (
-                <div className="space-y-4"><div><h2 className="text-lg font-semibold">Métricas financeiras</h2><p className="text-xs text-muted-foreground">Quanto entra, quanto sai e cada tipo de taxa, por período, seller e adquirente.</p></div><FinancialMetricsPanel profiles={profiles} /></div>
+                <div className="space-y-6 animate-fade-in">
+                  <FinanceiroHero
+                    eyebrow="Financeiro · Métricas"
+                    title="Métricas financeiras"
+                    subtitle="Quanto entra, quanto sai e cada tipo de taxa, por período, seller e adquirente. O período daqui é próprio e não segue o seletor do topo."
+                  />
+                  <FinancialMetricsPanel profiles={profiles} />
+                </div>
               )}
               {["medpix", "refunds", "chargeback", "premed"].includes(activeTab) && isAdmin && (
                 <DisputesCenter

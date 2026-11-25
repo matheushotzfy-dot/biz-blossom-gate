@@ -93,6 +93,8 @@ export function PremiumSegmented<T extends string>({ value, options, onChange }:
       {options.map((option) => (
         <button
           key={option.value}
+          type="button"
+          aria-pressed={value === option.value}
           onClick={() => onChange(option.value)}
           className={cn(
             "rounded-[8px] px-3 py-1.5 text-[11.5px] font-medium transition-colors",
