@@ -2,23 +2,24 @@
  * Credenciais de API: chaves para o sistema do vendedor falar com a Vemprapay.
  * A chave secreta nasce na edge function `generate-api-key` e só aparece uma vez; o banco guarda o hash.
  * Pausar é reversível. Revogar é permanente (o banco recusa reativar) e exige confirmação.
+ * Trocar cria uma chave nova com a antiga ainda valendo; só depois de o vendedor trocar no sistema dele é que revoga.
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { AlertCircle, BookOpenText, KeyRound, Plus } from "lucide-react";
+import { AlertCircle, BookOpenText, Hourglass, KeyRound, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Seo } from "@/components/Seo";
 import { PageHead } from "@/components/seller-ui/PageHead";
-import { StatBand } from "@/components/seller-ui/StatBand";
 import { SearchField } from "@/components/seller-ui/SearchField";
 import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
 import { copyText } from "@/components/seller-ui/copy";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { KeyNameDialog, SecretDialog, type KeyNameTarget, type RevealedKey, type SaveResult } from "@/components/integrations/KeyDialogs";
-import { KeysLedger } from "@/components/integrations/KeysLedger";
-import { MAX_API_KEYS, ago, daysUntil, functionErrorMessage, keyState, type ApiKeyRow } from "@/components/integrations/intMeta";
+import { KeyList } from "@/components/integrations/KeyList";
+import { MAX_API_KEYS, functionErrorMessage, keyState, nextKeyName, type ApiKeyRow } from "@/components/integrations/intMeta";
+import { cn } from "@/lib/utils";
 
 const COLUMNS = "id, name, public_key, secret_key_prefix, is_active, created_at, last_used_at, expires_at, revoked_at";
 
@@ -30,7 +31,8 @@ export default function ApiKeys() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [q, setQ] = useState("");
-  const [nameTarget, setNameTarget] = useState<{ target: KeyNameTarget; id?: string } | null>(null);
+  const [nameTarget, setNameTarget] = useState<{ target: KeyNameTarget; id?: string; replaces?: ApiKeyRow } | null>(null);
+  const [swapId, setSwapId] = useState<string | null>(null);
   const [revealed, setRevealed] = useState<RevealedKey | null>(null);
   const [confirm, setConfirm] = useState<Confirm>(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
@@ -45,13 +47,6 @@ export default function ApiKeys() {
 
   useEffect(() => { void load(); }, [load]);
 
-  const stats = useMemo(() => {
-    const live = keys.filter((k) => keyState(k) === "active");
-    const used = keys.map((k) => k.last_used_at).filter((v): v is string => !!v).sort().pop() ?? null;
-    const soon = live.filter((k) => k.expires_at && daysUntil(k.expires_at) <= 14).length;
-    return { live: live.length, used, soon };
-  }, [keys]);
-
   const shown = useMemo(() => {
     const term = q.trim().toLowerCase();
     return term ? keys.filter((k) => k.name.toLowerCase().includes(term) || k.public_key.toLowerCase().includes(term)) : keys;
@@ -61,11 +56,15 @@ export default function ApiKeys() {
 
   const saveName = async (name: string): Promise<SaveResult> => {
     const editing = nameTarget?.id;
+    const replaces = nameTarget?.replaces;
     const { data, error } = await supabase.functions.invoke("generate-api-key", { body: editing ? { action: "rename", keyId: editing, name } : { action: "create", name } });
     if (error || !data?.success) return { ok: false, message: await functionErrorMessage(error, editing ? "Não foi possível renomear a chave." : "Não foi possível criar a chave.") };
     setNameTarget(null);
     if (editing) { toast.success("Nome atualizado."); }
-    else { setRevealed({ name: data.data.name, public_key: data.data.public_key, secret_key: data.data.secret_key }); }
+    else {
+      setRevealed({ name: data.data.name, public_key: data.data.public_key, secret_key: data.data.secret_key, replaces: replaces?.name });
+      if (replaces) setSwapId(replaces.id);
+    }
     await load();
     return { ok: true };
   };
@@ -99,12 +98,20 @@ export default function ApiKeys() {
       toast.success("Chave excluída.");
     }
     setConfirm(null);
+    if (swapId === key.id) setSwapId(null);
     await load();
   };
 
+  const noRoom = () => toast.error(`Você já tem ${MAX_API_KEYS} chaves. Chaves revogadas e expiradas também contam: exclua uma da lista para criar outra.`);
+
   const newKey = () => {
-    if (full) { toast.error(`Você já tem ${MAX_API_KEYS} chaves. Exclua uma para criar outra.`); return; }
+    if (full) { noRoom(); return; }
     setNameTarget({ target: { mode: "create" } });
+  };
+
+  const swapKey = (k: ApiKeyRow) => {
+    if (full) { noRoom(); return; }
+    setNameTarget({ target: { mode: "replace", name: nextKeyName(k.name, keys.map((x) => x.name)), from: k.name }, replaces: k });
   };
 
   const empty = !loading && !loadError && keys.length === 0;
@@ -115,7 +122,7 @@ export default function ApiKeys() {
 
       <PageHead
         title="Credenciais de API"
-        subtitle="Chaves para o seu sistema falar com a Vemprapay. A chave secreta aparece uma única vez, na hora de criar."
+        subtitle="As chaves que o seu sistema usa para falar com a Vemprapay."
         actions={
           <>
             <Link to="/integracoes?tab=api" className="vp-ghost"><BookOpenText className="h-[18px] w-[18px]" />Documentação</Link>
@@ -124,56 +131,73 @@ export default function ApiKeys() {
         }
       />
 
-      <StatBand
-        label="Resumo das chaves"
-        cells={[
-          { label: "Chaves ativas", featured: true, loading, value: String(stats.live), sub: stats.live === 0 ? "Nenhuma autenticando agora" : "Autenticando requisições" },
-          { label: "Último uso", loading, value: stats.used ? ago(stats.used) : "Nunca", sub: stats.used ? "Em qualquer chave" : "Nenhuma requisição ainda" },
-          { label: "Perto de expirar", loading, value: String(stats.soon), sub: stats.soon > 0 ? "Vencem em até 14 dias" : "Nada vencendo em breve" },
-          { label: "Espaço", loading, value: `${keys.length} de ${MAX_API_KEYS}`, sub: full ? "Exclua uma chave para criar outra" : "Chaves criadas" },
-        ]}
-      />
-
-      <p role="note" className="rounded-[16px] bg-muted px-4 py-3 text-[13.5px] font-medium leading-snug text-foreground/80">
-        A API pública de cobranças ainda não está aberta para uso. Você já pode criar e guardar suas chaves: elas passam a valer assim que a API for liberada.
-      </p>
+      <aside className="flex items-start gap-4 rounded-[22px] bg-accent/60 px-5 py-4" aria-label="Situação da API">
+        <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-card text-accent-foreground"><Hourglass className="h-[18px] w-[18px]" strokeWidth={2} /></span>
+        <p className="min-w-0 text-[14px] leading-snug text-accent-foreground">
+          <span className="font-bold">A API de cobranças ainda não está aberta.</span>{" "}
+          Suas chaves ficam guardadas e passam a valer quando ela abrir.{" "}
+          <Link to="/integracoes?tab=api" className="font-bold underline underline-offset-2 hover:no-underline">Ver como vai funcionar</Link>
+        </p>
+      </aside>
 
       {loadError ? (
         <section className="vp-sheet">
           <EmptyPanel icon={<AlertCircle className="h-7 w-7" strokeWidth={1.8} />} title="Não foi possível carregar as chaves" text="Confira sua conexão e tente de novo. Suas chaves continuam salvas." action={<button type="button" className="vp-ghost" onClick={() => { setLoading(true); void load(); }}>Tentar de novo</button>} />
         </section>
       ) : loading ? (
-        <div className="space-y-3" aria-busy="true">{Array.from({ length: 3 }, (_, i) => <div key={i} className="vp-skel h-[84px] !rounded-[22px]" />)}</div>
+        <div className="space-y-3" aria-busy="true">{Array.from({ length: 2 }, (_, i) => <div key={i} className="vp-skel h-[150px] !rounded-[22px]" />)}</div>
       ) : empty ? (
-        <section className="vp-sheet">
-          <EmptyPanel
-            icon={<KeyRound className="h-7 w-7" strokeWidth={1.8} />}
-            title="Crie sua primeira chave"
-            text="Use uma chave por sistema ou ambiente. Se uma vazar, você revoga só ela e o resto continua funcionando."
-            action={<button type="button" className="vp-cta" onClick={newKey}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} />Nova chave</button>}
-          />
+        <section className="vp-sheet overflow-hidden">
+          <div className="grid gap-8 px-6 py-10 sm:px-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-center md:gap-12 md:py-12">
+            <div>
+              <span className="grid h-14 w-14 place-items-center rounded-full bg-accent text-accent-foreground"><KeyRound className="h-6 w-6" strokeWidth={1.9} /></span>
+              <h2 className="mt-5 font-heading text-[24px] font-extrabold leading-tight tracking-[-0.03em] text-foreground">Cada chave vem em duas partes</h2>
+              <p className="mt-2 max-w-[420px] text-[14.5px] leading-relaxed text-muted-foreground">Crie uma chave para cada sistema ou ambiente. Se uma vazar, você revoga só ela e o resto continua funcionando.</p>
+              <button type="button" className="vp-cta mt-6" onClick={newKey}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} />Criar a primeira chave</button>
+            </div>
+            <dl className="space-y-3">
+              <div className="rounded-[18px] bg-muted/70 px-5 py-4">
+                <dt className="font-mono text-[13px] font-semibold text-foreground">pk_live_••••••••••••</dt>
+                <dd className="mt-1.5 text-[13.5px] leading-snug text-muted-foreground"><span className="font-bold text-foreground">Pública.</span> Identifica a sua conta. Pode aparecer em telas e registros.</dd>
+              </div>
+              <div className="rounded-[18px] bg-[hsl(222_47%_8%)] px-5 py-4 text-white">
+                <dt className="font-mono text-[13px] font-semibold">sk_live_••••••••••••••••••••</dt>
+                <dd className="mt-1.5 text-[13.5px] leading-snug text-white/65"><span className="font-bold text-white">Secreta.</span> Autoriza as ações. Aparece inteira uma única vez, na hora de criar.</dd>
+              </div>
+            </dl>
+          </div>
         </section>
       ) : (
         <>
-          {keys.length > 3 && <SearchField label="Buscar chave" value={q} onChange={setQ} placeholder="Nome ou chave pública" className="sm:w-[320px]" />}
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+            <p className={cn("flex items-center gap-3 text-[13.5px] font-semibold", full ? "text-warning" : "text-muted-foreground")}>
+              <span aria-hidden className="flex gap-1">
+                {Array.from({ length: MAX_API_KEYS }, (_, i) => <i key={i} className={cn("block h-1.5 w-5 rounded-full", i < keys.length ? (full ? "bg-warning" : "bg-primary") : "bg-muted-foreground/20")} />)}
+              </span>
+              {keys.length} de {MAX_API_KEYS} chaves{full ? ". Exclua uma para criar outra." : ""}
+            </p>
+            {keys.length > 3 && <SearchField label="Buscar chave" value={q} onChange={setQ} placeholder="Nome ou chave pública" className="sm:w-[320px]" />}
+          </div>
           {shown.length === 0 ? (
             <section className="vp-sheet">
               <EmptyPanel title="Nenhuma chave encontrada" text="Tente outro nome." action={<button type="button" className="vp-ghost" onClick={() => setQ("")}>Limpar busca</button>} />
             </section>
           ) : (
-            <KeysLedger
-              keys={shown} busyId={busyId}
+            <KeyList
+              keys={shown} busyId={busyId} swapId={swapId}
               onCopy={copyPublic}
               onRename={(k) => setNameTarget({ target: { mode: "rename", name: k.name }, id: k.id })}
+              onSwap={swapKey}
               onToggle={(k) => void toggle(k)}
               onRevoke={(k) => setConfirm({ kind: "revoke", key: k })}
               onDelete={(k) => setConfirm({ kind: "delete", key: k })}
+              onDismissSwap={() => setSwapId(null)}
             />
           )}
         </>
       )}
 
-      <KeyNameDialog target={nameTarget?.target ?? null} onOpenChange={(o) => { if (!o) setNameTarget(null); }} onSave={saveName} />
+      <KeyNameDialog target={nameTarget?.target ?? null} taken={keys.map((k) => k.name)} onOpenChange={(o) => { if (!o) setNameTarget(null); }} onSave={saveName} />
       <SecretDialog value={revealed} onClose={() => setRevealed(null)} />
 
       <AlertDialog open={!!confirm} onOpenChange={(o) => { if (!o && !confirmBusy) setConfirm(null); }}>
