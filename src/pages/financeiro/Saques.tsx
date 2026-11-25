@@ -5,11 +5,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { usePrivacyMode } from "@/hooks/usePrivacyMode";
 import { useWithdrawals, usePixKeys, useBankAccounts, useInvalidateAll } from "@/hooks/useQueryData";
-import { ArrowDownToLine, Building2, ChevronRight, Eye, EyeOff, Landmark, MapPin } from "lucide-react";
+import { ArrowDownToLine, Building2, ChevronRight, Clock, Eye, EyeOff, Landmark, MapPin, Wallet } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
-import { format } from "date-fns";
+import { differenceInCalendarDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import AutoWithdrawalSettings from "@/components/financeiro/AutoWithdrawalSettings";
 import { friendlyError } from "@/lib/friendlyError";
@@ -84,6 +84,7 @@ export default function Saques() {
   const [availableBalance, setAvailableBalance] = useState<number>(0);
   const [balanceUnknown, setBalanceUnknown] = useState<boolean>(true);
   const [retainedAmount, setRetainedAmount] = useState<number>(0);
+  const [retainedItems, setRetainedItems] = useState<{ amount: number; until: string | null }[]>([]);
   const [withdrawFee, setWithdrawFee] = useState<number>(DEFAULT_WITHDRAW_FEE);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusKey | "all">("all");
@@ -112,13 +113,16 @@ export default function Saques() {
 
       const { data: tx, error: txError } = await supabase
         .from("transactions")
-        .select("retained_amount")
+        .select("retained_amount, retained_until")
         .eq("user_id", user.id)
         .in("status", ["approved", "paid", "completed"])
         .eq("retention_released", false);
       if (ignore) return;
       if (txError) toast.error("Não foi possível carregar os valores retidos.");
-      else if (tx) setRetainedAmount(tx.reduce((acc, t) => acc + Number(t.retained_amount || 0), 0));
+      else if (tx) {
+        setRetainedAmount(tx.reduce((acc, t) => acc + Number(t.retained_amount || 0), 0));
+        setRetainedItems(tx.map((t) => ({ amount: Number(t.retained_amount || 0), until: t.retained_until })).filter((t) => t.amount > 0));
+      }
 
       const { data: feeRows, error: feeError } = await supabase.rpc("get_platform_fees");
       if (ignore) return;
@@ -148,6 +152,46 @@ export default function Saques() {
     () => withdrawals.filter((w) => statusKey(w.status) === "pending").reduce((acc, w) => acc + Number(w.amount || 0), 0),
     [withdrawals],
   );
+
+  // Valores retidos agrupados pelo dia em que caem no saldo: até 3 datas e, se houver mais, um bloco que soma as demais.
+  const releaseTiles = useMemo(() => {
+    const groups = new Map<string, number>();
+    let undated = 0;
+    for (const item of retainedItems) {
+      if (!item.until) { undated += item.amount; continue; }
+      const key = format(new Date(item.until), "yyyy-MM-dd");
+      groups.set(key, (groups.get(key) ?? 0) + item.amount);
+    }
+    const dated = Array.from(groups.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, amount]) => ({ key, date: new Date(`${key}T12:00:00`), amount }));
+    const tiles: { key: string; title: string; note: string; amount: number }[] = [];
+    const dateTile = (g: { key: string; date: Date; amount: number }) => {
+      const days = differenceInCalendarDays(g.date, new Date());
+      return {
+        key: g.key,
+        title: format(g.date, "d 'de' MMM", { locale: ptBR }),
+        note: days <= 0 ? "Hoje ou em breve" : days === 1 ? "Amanhã" : `Em ${days} dias`,
+        amount: g.amount,
+      };
+    };
+    // No máximo 3 blocos: se não couber tudo, as últimas datas viram um bloco só que soma o restante.
+    const slots = undated > 0 ? 2 : 3;
+    if (dated.length <= slots) {
+      dated.forEach((g) => tiles.push(dateTile(g)));
+    } else {
+      dated.slice(0, slots - 1).forEach((g) => tiles.push(dateTile(g)));
+      const rest = dated.slice(slots - 1);
+      tiles.push({
+        key: "rest",
+        title: `Mais ${rest.length} datas`,
+        note: `Até ${format(rest[rest.length - 1].date, "d 'de' MMM", { locale: ptBR })}`,
+        amount: rest.reduce((acc, g) => acc + g.amount, 0),
+      });
+    }
+    if (undated > 0) tiles.push({ key: "undated", title: "Sem data definida", note: "Ainda não agendada", amount: undated });
+    return tiles;
+  }, [retainedItems]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -344,43 +388,69 @@ export default function Saques() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_372px] lg:items-start">
         <div className="min-w-0 space-y-6">
-          <section className="vp-bal flex flex-col p-6 sm:p-8" aria-label="Saldo disponível">
-            <span aria-hidden className="vp-bal-ring" />
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-[15px] font-semibold text-white/85">Disponível para saque</p>
-              <button onClick={togglePrivacy} aria-label={hidden ? "Mostrar valores" : "Ocultar valores"} aria-pressed={hidden} className="vp-bal-eye">
-                {hidden ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
-              </button>
-            </div>
-
-            {balanceUnknown ? (
-              <span aria-label="Carregando saldo" className="mt-4 block h-[52px] w-64 rounded-2xl bg-white/20 motion-safe:animate-pulse sm:h-[62px]" />
-            ) : (
-              <Money value={Math.max(availableBalance, 0)} hidden={hidden} className="mt-3 block text-[46px] font-extrabold leading-none tracking-[-0.045em] sm:text-[64px]" centsClassName="opacity-70" />
-            )}
-
-            <div className="mt-6 flex flex-wrap gap-x-8 gap-y-4">
-              <div>
-                <p className="text-[12.5px] text-white/75">Aguardando liberação</p>
-                <Money value={retainedAmount} hidden={hidden} className="text-[17px] font-bold" centsClassName="opacity-75" />
-              </div>
-              {inReview > 0 && (
-                <div className="border-white/25 sm:border-l sm:pl-8">
-                  <p className="text-[12.5px] text-white/75">Saques em análise</p>
-                  <Money value={inReview} hidden={hidden} className="text-[17px] font-bold" centsClassName="opacity-75" />
+          <div className="space-y-4">
+            <section className="vp-sheet relative overflow-hidden p-6 sm:p-8" aria-label="Saldo disponível">
+              <Wallet aria-hidden strokeWidth={1} className="pointer-events-none absolute -bottom-12 -right-8 h-56 w-56 -rotate-[8deg] text-primary/[0.06]" />
+              <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between sm:gap-8">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent text-accent-foreground"><Wallet className="h-5 w-5" strokeWidth={2} /></span>
+                    <h2 className="text-[15px] font-semibold text-muted-foreground">Disponível para saque</h2>
+                    <button type="button" onClick={togglePrivacy} aria-label={hidden ? "Mostrar valores" : "Ocultar valores"} aria-pressed={hidden} className="vp-orb !h-9 !w-9 shrink-0">
+                      {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  <div className="mt-5">
+                    {balanceUnknown ? (
+                      <span aria-label="Carregando saldo" className="vp-skel block h-[52px] w-56 sm:h-[62px]" />
+                    ) : (
+                      <Money value={Math.max(availableBalance, 0)} hidden={hidden} className="block text-[44px] font-extrabold leading-none tracking-[-0.045em] text-foreground sm:text-[58px]" centsClassName="text-muted-foreground" />
+                    )}
+                  </div>
+                  <p className="mt-3.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-muted-foreground">
+                    <span>{balanceUnknown ? "Buscando o seu saldo…" : <>Cada saque custa <span className="font-semibold text-foreground">{fmt(withdrawFee)}</span></>}</span>
+                    {inReview > 0 && (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/15 px-2.5 py-1 text-[12.5px] font-semibold text-foreground">
+                        <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-warning" />
+                        {hidden ? "R$ ••••" : fmt(inReview)}&nbsp;em análise
+                      </span>
+                    )}
+                  </p>
                 </div>
-              )}
-              <div className="border-white/25 sm:border-l sm:pl-8">
-                <p className="text-[12.5px] text-white/75">Taxa por saque</p>
-                <p className="vp-num text-[17px] font-bold">{fmt(withdrawFee)}</p>
+                <div className="flex shrink-0 flex-col gap-2.5 sm:w-[220px]">
+                  <button type="button" onClick={requestWithdrawal} className="vp-cta h-12 w-full justify-center px-6"><ArrowDownToLine className="h-[18px] w-[18px]" strokeWidth={2.2} />Solicitar saque</button>
+                  <Link to="/financeiro/config" className="vp-ghost h-12 w-full justify-center px-5"><Landmark className="h-[18px] w-[18px]" strokeWidth={2.2} />Dados bancários</Link>
+                </div>
               </div>
-            </div>
+            </section>
 
-            <div className="mt-auto flex flex-wrap gap-2.5 pt-8">
-              <button onClick={requestWithdrawal} className="vp-bal-btn vp-bal-btn-main flex-1 justify-center sm:flex-none"><ArrowDownToLine className="h-[18px] w-[18px]" strokeWidth={2.2} />Solicitar saque</button>
-              <Link to="/financeiro/config" className="vp-bal-btn vp-bal-btn-ghost flex-1 justify-center sm:flex-none"><Landmark className="h-[18px] w-[18px]" strokeWidth={2.2} />Dados bancários</Link>
-            </div>
-          </section>
+            <section className="vp-sheet p-6 sm:p-7" aria-label="Aguardando liberação">
+              <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-muted text-muted-foreground"><Clock className="h-5 w-5" strokeWidth={2} /></span>
+                  <div>
+                    <h2 className="text-[15px] font-semibold text-muted-foreground">Aguardando liberação</h2>
+                    <p className="text-[13px] text-muted-foreground">Vendas já aprovadas que ainda vão cair no saldo.</p>
+                  </div>
+                </div>
+                <Money value={retainedAmount} hidden={hidden} className="text-[30px] font-extrabold leading-none tracking-[-0.04em] text-foreground sm:text-[34px]" centsClassName="text-muted-foreground" />
+              </div>
+
+              {retainedAmount <= 0 ? (
+                <p className="mt-5 rounded-[16px] border border-dashed border-border px-4 py-4 text-[14px] leading-relaxed text-muted-foreground">Nada retido agora. Quando uma venda ficar retida, o dia em que ela cai no saldo aparece aqui.</p>
+              ) : (
+                <ul className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-2.5 sm:grid-cols-[repeat(3,minmax(0,1fr))]" aria-label="Datas de liberação">
+                  {releaseTiles.map((t) => (
+                    <li key={t.key} className="min-w-0 rounded-[16px] border border-border bg-background px-4 py-3.5">
+                      <p className="truncate text-[15px] font-bold text-foreground">{t.title}</p>
+                      <p className="truncate text-[12.5px] text-muted-foreground">{t.note}</p>
+                      <Money value={t.amount} hidden={hidden} className="mt-2 block text-[17px] font-extrabold tracking-[-0.02em] text-foreground" centsClassName="text-muted-foreground" />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
 
           {!profileLoading && profile && !hasAddress && (
             <div role="status" className="flex items-start gap-3.5 rounded-2xl bg-warning/15 p-4 sm:items-center sm:p-5">
