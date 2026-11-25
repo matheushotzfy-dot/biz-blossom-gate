@@ -5861,7 +5861,7 @@ export type Database = {
       decrypt_field: { Args: { _cipher: string }; Returns: string }
       detect_negative_balances: { Args: never; Returns: Json }
       encrypt_field: { Args: { _plain: string }; Returns: string }
-      enqueue_test_webhook: { Args: { _config_id: string }; Returns: string }
+      enqueue_test_webhook: { Args: { _config_id: string; _event?: string }; Returns: string }
       expire_stale_pix_transactions: { Args: never; Returns: number }
       get_acquirer_overview: {
         Args: { _from: string; _to: string }
@@ -6391,6 +6391,8 @@ export type Database = {
         Returns: string
       }
       resolve_admin_alert: { Args: { _kind: string }; Returns: undefined }
+      resend_failed_webhook_deliveries: { Args: { _config_id: string }; Returns: number }
+      resend_webhook_delivery: { Args: { _delivery_id: string }; Returns: string }
       resolve_commission_pct: {
         Args: { _seller: string; _staff: string }
         Returns: number

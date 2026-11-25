@@ -104,7 +104,7 @@ export function EndpointDialog({ target, existingUrls, onOpenChange, onSave }: {
 export interface RevealedSecret { url: string; secret: string; rotated: boolean }
 
 /** A chave de assinatura é mostrada inteira só aqui; depois a lista mostra só o começo. */
-export function WebhookSecretDialog({ value, onClose }: { value: RevealedSecret | null; onClose: () => void }) {
+export function WebhookSecretDialog({ value, onClose, onTest }: { value: RevealedSecret | null; onClose: () => void; /** Fecha e já manda um teste: o próximo passo natural depois de guardar a chave. */ onTest?: () => void }) {
   const [copied, setCopied] = useState(false);
   useEffect(() => { if (value) setCopied(false); }, [value]);
 
@@ -128,7 +128,8 @@ export function WebhookSecretDialog({ value, onClose }: { value: RevealedSecret 
             </div>
           </div>
         </div>
-        <div className="flex justify-end border-t border-border bg-card px-6 py-4 sm:px-8">
+        <div className="flex flex-col-reverse gap-2 border-t border-border bg-card px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
+          {onTest && <button type="button" className="vp-ghost !h-12 justify-center" onClick={onTest}>Guardei, enviar um teste</button>}
           <button type="button" className="vp-cta !h-12 justify-center" onClick={onClose}>Já guardei a chave</button>
         </div>
       </DialogContent>

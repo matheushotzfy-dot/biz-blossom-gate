@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-  ALL_EVENTS, DELIVERY_META, MAX_ATTEMPTS, deliveryErrorText, deliveryKind, deliveryOutcome, eventLabel, eventsSummary,
-  generateWebhookSecret, hostOf, isStuck, pathOf, validateWebhookUrl, webhookErrorMessage, type DeliveryRow,
+  ALL_EVENTS, DEFAULT_TEST_EVENT, DELIVERY_META, MAX_ATTEMPTS, PULSE_SIZE, deliveryErrorText, deliveryHint, deliveryKind, deliveryOutcome,
+  endpointEventLabels, eventLabel, eventsSummary, generateWebhookSecret, hostOf, isStuck, isTestDelivery, pathOf, pulseSummary, pulseTicks,
+  retryIn, testableEvents, validateWebhookUrl, webhookErrorMessage, type DeliveryRow,
 } from "@/components/integrations/webhookMeta";
 import { VERIFY_SNIPPET } from "@/components/integrations/SignatureGuide";
 
@@ -117,6 +118,98 @@ describe("webhookErrorMessage", () => {
     expect(webhookErrorMessage({ message: "Endpoint pausado" }, "x")).toMatch(/pausado/);
     expect(webhookErrorMessage({ message: "Endpoint não encontrado" }, "x")).toMatch(/não existe/);
     expect(webhookErrorMessage({ message: "algo estranho" }, "padrão")).toBe("padrão");
+  });
+});
+
+describe("webhookErrorMessage (teste, reenvio e limites)", () => {
+  it("traduz o que as RPCs novas devolvem", () => {
+    expect(webhookErrorMessage({ message: "Muitos testes seguidos. Aguarde um minuto." }, "x")).toMatch(/Aguarde um minuto/);
+    expect(webhookErrorMessage({ message: "Há muitas entregas na fila. Aguarde alguns minutos e tente de novo." }, "x")).toMatch(/fila/);
+    expect(webhookErrorMessage({ message: "Essa entrega ainda está em andamento" }, "x")).toMatch(/em andamento/);
+    expect(webhookErrorMessage({ message: "Entrega não encontrada" }, "x")).toMatch(/não existe/);
+    expect(webhookErrorMessage({ message: "Limite de 10 endpoints por conta" }, "x")).toMatch(/10 endpoints/);
+    expect(webhookErrorMessage({ message: "Evento inválido" }, "x")).toMatch(/simulado/);
+  });
+  it("função ainda não criada no banco não vira erro técnico", () => {
+    expect(webhookErrorMessage({ code: "PGRST202", message: "Could not find the function public.resend_webhook_delivery" }, "x")).toMatch(/ainda não está disponível/);
+  });
+});
+
+describe("deliveryHint", () => {
+  const hint = (over: Partial<DeliveryRow>) => deliveryHint(delivery({ status: "exhausted", attempt: 5, ...over }));
+  it("só explica o que falhou ou está falhando", () => {
+    expect(deliveryHint(delivery({ status: "success", attempt: 1, response_status: 200 }))).toBeNull();
+    expect(deliveryHint(delivery({ status: "pending", attempt: 0 }))).toBeNull();
+    expect(deliveryHint(delivery({ status: "pending", attempt: 2, response_status: 500 }))).toMatch(/erro dentro do seu servidor/);
+  });
+  it("diz o que fazer para cada resposta do servidor", () => {
+    expect(hint({ response_status: 404 })).toMatch(/URL/);
+    expect(hint({ response_status: 403 })).toMatch(/POST sem login/);
+    expect(hint({ response_status: 405 })).toMatch(/POST/);
+    expect(hint({ response_status: 429 })).toMatch(/chamadas por minuto/);
+    expect(hint({ response_status: 502 })).toMatch(/log/);
+    expect(hint({ response_status: 301 })).toMatch(/redirecionamento/);
+    expect(hint({ response_status: 422 })).toMatch(/recusou os dados/);
+  });
+  it("diz o que fazer quando nem houve resposta", () => {
+    expect(hint({ error: "The signal has been aborted" })).toMatch(/200 assim que receber/);
+    expect(hint({ error: "invalid peer certificate: UnknownIssuer" })).toMatch(/certificado HTTPS/);
+    expect(hint({ error: "Webhook config disabled or removed." })).toMatch(/Reative/);
+    expect(hint({ error: "Webhook secret is missing; unsigned delivery blocked." })).toMatch(/nova chave/);
+    expect(hint({ error: "dns error: failed to lookup address" })).toMatch(/no ar/);
+  });
+});
+
+describe("pulso das entregas", () => {
+  const rows = (...s: Array<[string, number]>) => s.map(([status, attempt]) => ({ status, attempt }));
+  it("completa até 30 com pontos vazios à esquerda e a mais nova à direita", () => {
+    const t = pulseTicks(rows(["pending", 0], ["exhausted", 5], ["success", 1])); // da mais nova para a mais antiga
+    expect(t).toHaveLength(PULSE_SIZE);
+    expect(t.slice(0, 27).every((k) => k === "none")).toBe(true);
+    expect(t.slice(27)).toEqual(["ok", "bad", "wait"]);
+  });
+  it("ignora o que passa de 30", () => {
+    const many = Array.from({ length: 45 }, () => ({ status: "success", attempt: 1 }));
+    expect(pulseTicks(many).filter((k) => k === "ok")).toHaveLength(30);
+  });
+  it("resume em português", () => {
+    expect(pulseSummary([])).toBe("Nenhuma entrega ainda");
+    expect(pulseSummary(rows(["success", 1], ["success", 1], ["exhausted", 5]))).toBe("2 de 3 entregues");
+    expect(pulseSummary(rows(["success", 1]))).toBe("1 de 1 entregue");
+    expect(pulseSummary(rows(["exhausted", 5]))).toBe("0 de 1 entregue");
+    expect(pulseSummary(rows(["pending", 0]))).toBe("Nada concluído ainda · 1 em andamento");
+    expect(pulseSummary(rows(["success", 1], ["pending", 1]), PULSE_SIZE, false)).toBe("1 de 1 entregue");
+  });
+});
+
+describe("eventos do endpoint e do teste", () => {
+  it("sem filtro ou com todos = todos os eventos", () => {
+    expect(endpointEventLabels([])).toEqual({ all: true, labels: [] });
+    expect(endpointEventLabels(null).all).toBe(true);
+    expect(endpointEventLabels(ALL_EVENTS).all).toBe(true);
+  });
+  it("com filtro lista os rótulos na ordem do catálogo", () => {
+    expect(endpointEventLabels(["payment.refunded", "payment.approved"])).toEqual({ all: false, labels: ["Pagamento aprovado", "Reembolso"] });
+  });
+  it("o teste só oferece o que o endpoint recebe", () => {
+    expect(testableEvents([]).map((e) => e.key)).toEqual(ALL_EVENTS);
+    expect(testableEvents(["payout.approved", "payment.approved"]).map((e) => e.key)).toEqual(["payment.approved", "payout.approved"]);
+    expect(ALL_EVENTS).toContain(DEFAULT_TEST_EVENT);
+  });
+});
+
+describe("teste, retryIn", () => {
+  it("reconhece teste pelo corpo ou pelo evento antigo", () => {
+    expect(isTestDelivery({ event: "payment.approved", is_test: "true" })).toBe(true);
+    expect(isTestDelivery({ event: "webhook.test", is_test: null })).toBe(true);
+    expect(isTestDelivery({ event: "payment.approved", is_test: null })).toBe(false);
+  });
+  it("conta o tempo até a próxima tentativa", () => {
+    const now = new Date("2026-11-24T12:00:00Z").getTime();
+    expect(retryIn(null, now)).toBe("em instantes");
+    expect(retryIn("2026-11-24T12:00:02Z", now)).toBe("em instantes");
+    expect(retryIn("2026-11-24T12:00:30Z", now)).toBe("em 30 s");
+    expect(retryIn("2026-11-24T12:10:00Z", now)).toBe("em 10 min");
   });
 });
 

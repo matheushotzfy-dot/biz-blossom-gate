@@ -145,7 +145,7 @@ export default function Documentacao({ standalone = false }: { standalone?: bool
                   <ParamList label={g.label} rows={g.events.map((e) => ({ name: e.key, desc: `${e.label}. ${e.hint}.` }))} />
                 </div>
               ))}
-              <Prose>O botão Enviar teste dispara <C>webhook.test</C>, com dados de exemplo, só para checar a conexão. Um endpoint sem eventos escolhidos recebe todos.</Prose>
+              <Prose>O botão Enviar teste simula qualquer um desses eventos, com o mesmo formato do real e dados de exemplo, e coloca <C>"test": true</C> no corpo. Ignore esses no seu sistema de pedidos. Um endpoint sem eventos escolhidos recebe todos.</Prose>
             </Sub>
 
             <Sub title="Formato do evento">

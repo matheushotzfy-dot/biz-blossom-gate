@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { ChevronDown, Copy, ShieldCheck } from "lucide-react";
 import { copyText } from "@/components/seller-ui/copy";
 import { cn } from "@/lib/utils";
@@ -30,8 +31,8 @@ export function SignatureGuide() {
       <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-controls="sig-guide" className="flex w-full items-center gap-4 px-5 py-4 text-left sm:px-7">
         <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent text-accent-foreground"><ShieldCheck className="h-5 w-5" /></span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[15px] font-bold text-foreground">Como conferir que o evento veio da Vemprapay</span>
-          <span className="block text-[13.5px] text-muted-foreground">Cada envio vai assinado com a chave do endpoint. Confira a assinatura antes de confiar nos dados.</span>
+          <span className="block text-[15px] font-bold text-foreground">Para quem programa: conferir a assinatura</span>
+          <span className="block text-[13.5px] text-muted-foreground">Cada envio leva uma assinatura feita com a chave do endpoint. Confira antes de confiar nos dados.</span>
         </span>
         <ChevronDown className={cn("h-5 w-5 shrink-0 text-muted-foreground transition-transform motion-reduce:transition-none", open && "rotate-180")} />
       </button>
@@ -59,7 +60,9 @@ export function SignatureGuide() {
             <li>Responda com status 2xx em até 10 segundos. Qualquer outra resposta conta como falha.</li>
             <li>Se falhar, tentamos de novo até 5 vezes, esperando {RETRY_PLAN}.</li>
             <li>Pode chegar o mesmo evento mais de uma vez. Use o ID da entrega para ignorar repetidos.</li>
+            <li>Testes chegam com <span className="font-mono">"test": true</span> no corpo. Ignore esses no seu sistema de pedidos.</li>
           </ul>
+          <Link to="/integracoes?tab=api" className="inline-block text-[13.5px] font-semibold text-primary hover:underline">Ver a documentação completa</Link>
         </div>
       )}
     </section>
