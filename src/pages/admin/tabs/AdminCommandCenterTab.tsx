@@ -49,7 +49,7 @@ function Panel({ title, icon: Icon, action, children }: {
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[14px] border border-border bg-card">
+    <section className="min-w-0 rounded-[14px] border border-border bg-card">
       <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2 min-w-0">
           {Icon && <Icon className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={2} />}
@@ -61,6 +61,21 @@ function Panel({ title, icon: Icon, action, children }: {
     </section>
   );
 }
+
+function PanelLink({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
+  return (
+    <Button type="button" variant="ghost" size="sm" onClick={onClick}
+      className="h-8 shrink-0 gap-1 px-2 text-[11.5px] font-semibold text-muted-foreground hover:bg-muted hover:text-foreground">
+      {children}<ArrowRight className="h-3 w-3" />
+    </Button>
+  );
+}
+
+const SEARCH_STATUS: Record<string, string> = {
+  approved: "Pago", completed: "Pago", paid: "Pago", pending: "Pendente", processing: "Processando", waiting_payment: "Aguardando",
+  failed: "Recusado", refused: "Recusado", expired: "Expirado", cancelled: "Cancelado", canceled: "Cancelado",
+  refunded: "Estornado", partially_refunded: "Estorno parcial", chargeback: "Chargeback",
+};
 
 function Empty({ label }: { label: string }) {
   return <p className="py-6 text-center text-[12px] text-muted-foreground">{label}</p>;
@@ -117,12 +132,12 @@ export default function AdminCommandCenterTab({
       list.push({ id: "wd", tone: "warning", label: "Saque parado há mais de 24h", detail: `Mais antigo: ${oldestWithdrawalHours.toFixed(0)}h na fila` });
     }
     if (webhookStats.failed > 0) {
-      list.push({ id: "wh", tone: "warning", label: "Webhooks falhando", detail: `${webhookStats.failed} entregas com falha nas últimas 24h` });
+      list.push({ id: "wh", tone: "warning", label: "Webhooks falhando", detail: `${webhookStats.failed} ${webhookStats.failed === 1 ? "entrega com falha" : "entregas com falha"} nas últimas 24h` });
     }
     if (errorCount > 0) {
-      list.push({ id: "err", tone: "warning", label: "Erros não resolvidos acumulando", detail: `${errorCount} registros abertos; revisar a causa antes de encerrar` });
+      list.push({ id: "err", tone: "warning", label: "Erros não resolvidos acumulando", detail: `${errorCount} ${errorCount === 1 ? "registro aberto" : "registros abertos"}; revisar a causa antes de encerrar` });
     }
-    if (appStats.failed > 0) list.push({ id: "apps", tone: "warning", label: "Integrações com falha", detail: `${appStats.failed} eventos não entregues nas últimas 24h` });
+    if (appStats.failed > 0) list.push({ id: "apps", tone: "warning", label: "Integrações com falha", detail: `${appStats.failed} ${appStats.failed === 1 ? "evento não entregue" : "eventos não entregues"} nas últimas 24h` });
     return list;
   }, [stats.total, stats.approvalRate, stats.chargebackRate, oldestWithdrawalHours, webhookStats.failed, appStats.failed, errorCount]);
 
@@ -139,26 +154,36 @@ export default function AdminCommandCenterTab({
 
   const runSearch = async () => {
     if (searching) return;
+    let q: string;
+    try { q = validateCommandSearch(query); } catch (e) { toast.error(e instanceof Error ? e.message : "Digite entre 3 e 120 caracteres"); return; }
     const request = ++searchRequest.current;
+    setSearching(true);
+    setHits(null);
     try {
-      const q = validateCommandSearch(query);
-      setSearching(true);
-      setHits(null);
       const { data, error } = await supabase.rpc("admin_search_transactions", { _query: q });
       if (error) throw error;
       if (request === searchRequest.current) setHits(data ?? []);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Não foi possível buscar a transação");
+    } catch {
+      // mensagem crua do banco não ajuda o admin: diz o que aconteceu e o que fazer
+      if (request === searchRequest.current) toast.error("Não foi possível buscar agora. Tente de novo em instantes.");
     } finally {
       if (request === searchRequest.current) setSearching(false);
     }
   };
 
   if (command.isPending) return <div role="status" aria-label="Carregando Centro de comando" className="space-y-4"><Skeleton className="h-28" /><Skeleton className="h-64" /></div>;
-  if (command.isError || !command.data) return <div role="alert" className="space-y-3 rounded-lg border border-destructive p-5"><h2 className="font-semibold text-destructive">Centro de comando indisponível</h2><p className="text-sm text-muted-foreground">Não foi possível verificar as filas. O estado da operação não foi confirmado.</p><Button variant="outline" disabled={loading} onClick={() => void command.refetch()}>Tentar novamente</Button></div>;
+  if (!command.data) return <div role="alert" className="space-y-3 rounded-lg border border-destructive p-5"><h2 className="font-semibold text-destructive">Centro de comando indisponível</h2><p className="text-sm text-muted-foreground">Não foi possível verificar as filas. O estado da operação não foi confirmado.</p><Button variant="outline" disabled={loading} onClick={() => void command.refetch()}>Tentar novamente</Button></div>;
 
   return (
     <div className="space-y-5 animate-fade-in">
+      {command.isError && (
+        <div role="alert" className="flex flex-wrap items-center gap-3 rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3">
+          <p className="min-w-0 flex-1 text-[12.5px] font-medium text-destructive">
+            Não foi possível atualizar as filas. Os números abaixo são de {new Date(command.data.operations.checked_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} e podem estar desatualizados.
+          </p>
+          <Button variant="outline" size="sm" disabled={loading} onClick={() => void command.refetch()}>Tentar de novo</Button>
+        </div>
+      )}
       <FinanceiroHero
         eyebrow="Admin · Operações"
         title="Centro de Comando"
@@ -171,7 +196,7 @@ export default function AdminCommandCenterTab({
       />
 
       {/* Resumo do período */}
-      <div className="grid gap-px overflow-hidden rounded-[14px] border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-px overflow-hidden rounded-[14px] border border-border bg-border lg:grid-cols-[repeat(4,minmax(0,1fr))]">
         {[
           { label: "TPV aprovado", value: fmtCurrency(stats.tpv), sub: `${stats.approvedCount} vendas` },
           { label: "Taxa de aprovação", value: `${stats.approvalRate.toFixed(1)}%`, sub: `${stats.total} tentativas` },
@@ -217,7 +242,7 @@ export default function AdminCommandCenterTab({
 
       {/* Filas operacionais */}
       <Panel title="Filas que exigem ação" icon={Activity}>
-        <div className="grid gap-px overflow-hidden rounded-[12px] border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-px overflow-hidden rounded-[12px] border border-border bg-border sm:grid-cols-[repeat(2,minmax(0,1fr))]">
           {queues.map(q => (
             <Button
               key={q.key}
@@ -239,10 +264,10 @@ export default function AdminCommandCenterTab({
         </div>
       </Panel>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[repeat(2,minmax(0,1fr))]">
         {/* Webhooks */}
         <Panel title="Entregas de webhook (24h)" icon={Webhook}>
-          <div className="grid grid-cols-3 gap-px overflow-hidden rounded-[12px] border border-border bg-border">
+          <div className="grid grid-cols-[repeat(3,minmax(0,1fr))] gap-px overflow-hidden rounded-[12px] border border-border bg-border">
             {[
               { label: "Entregues", value: webhookStats.delivered, tone: "success" as const },
               { label: "Na fila", value: webhookStats.pending, tone: "neutral" as const },
@@ -270,7 +295,7 @@ export default function AdminCommandCenterTab({
 
         {/* Sellers em risco */}
         <Panel title="Sellers em risco" icon={ShieldCheck}
-          action={<Button onClick={() => onNavigate("sellers")} className="text-[11.5px] font-medium text-muted-foreground hover:text-foreground">Ver sellers</Button>}>
+          action={<PanelLink onClick={() => onNavigate("sellers")}>Ver sellers</PanelLink>}>
           {riskySellers.length === 0 ? <Empty label="Nenhum seller com reembolso/chargeback relevante." /> : (
             <ul className="divide-y divide-border">
               {riskySellers.map(s => (
@@ -289,8 +314,8 @@ export default function AdminCommandCenterTab({
         </Panel>
 
         {/* Bloqueios anti-fraude */}
-        <Panel title="Últimos bloqueios anti-fraude" icon={ShieldAlert}
-          action={<Button onClick={() => onNavigate("risk-compliance")} className="text-[11.5px] font-medium text-muted-foreground hover:text-foreground">Anti-fraude</Button>}>
+        <Panel title="Últimos bloqueios" icon={ShieldAlert}
+          action={<PanelLink onClick={() => onNavigate("risk-compliance")}>Anti-fraude</PanelLink>}>
           {fraud.length === 0 ? <Empty label="Nenhum bloqueio registrado." /> : (
             <ul className="divide-y divide-border">
               {fraud.map(f => (
@@ -315,8 +340,8 @@ export default function AdminCommandCenterTab({
         <div className="flex flex-wrap gap-6 text-sm tabular-nums"><span>Entregues: {appStats.delivered}</span><span>Na fila: {appStats.pending}</span><span className={cn(appStats.failed > 0 && "text-destructive")}>Falhas: {appStats.failed}</span></div>
       </Panel>
       {/* Erros abertos */}
-      <Panel title="Erros de aplicação em aberto" icon={Bug}
-        action={<Button onClick={() => onNavigate("error-logs")} className="text-[11.5px] font-medium text-muted-foreground hover:text-foreground">Ver todos</Button>}>
+      <Panel title="Erros em aberto" icon={Bug}
+        action={<PanelLink onClick={() => onNavigate("error-logs")}>Ver todos</PanelLink>}>
         {errors.length === 0 ? <Empty label="Nenhum erro pendente." /> : (
           <ul className="divide-y divide-border">
             {errors.map(e => (
@@ -350,7 +375,7 @@ export default function AdminCommandCenterTab({
             value={query}
             onChange={(e) => { setQuery(e.target.value); searchRequest.current += 1; setHits(null); setSearching(false); }}
             onKeyDown={(e) => { if (e.key === "Enter") void runSearch(); }}
-            placeholder="ID da transação, e-mail, nome ou documento do cliente"
+            placeholder="ID, e-mail, nome ou documento"
             className="h-9 flex-1 rounded-md border border-border bg-background px-3 text-[12.5px] text-foreground outline-none focus:ring-1 focus:ring-ring"
           />
           <Button
@@ -375,7 +400,7 @@ export default function AdminCommandCenterTab({
                       {h.id.slice(0, 8)} · {new Date(h.created_at).toLocaleString("pt-BR")}
                     </p>
                   </div>
-                  <span className="shrink-0 text-[11.5px] text-muted-foreground">{h.status}</span>
+                  <span className="shrink-0 text-[11.5px] text-muted-foreground">{SEARCH_STATUS[h.status] ?? h.status}</span>
                   <span className="shrink-0 text-[12.5px] font-semibold tabular-nums text-foreground">
                     {fmtCurrency(Number(h.amount || 0))}
                   </span>
