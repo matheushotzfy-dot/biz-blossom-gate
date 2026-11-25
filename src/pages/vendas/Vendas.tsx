@@ -155,23 +155,18 @@ export default function Vendas() {
     URL.revokeObjectURL(url);
   };
 
+  // Registra a exportação na auditoria pelo servidor (o insert direto falhava em silêncio e gravava o texto da busca, que pode ser o e-mail de um cliente).
   const logExport = async (format: "csv" | "xlsx", count: number) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      await supabase.from("activity_logs").insert([{
-        user_id: user.id,
-        action: "export_sales",
-        entity_type: "transactions",
-        new_data: {
-          format,
-          count,
-          range_from: range?.from?.toISOString() ?? null,
-          range_to: range?.to?.toISOString() ?? null,
-          search: search || null,
-          privacy_mode: privacyHidden,
-        },
-      }]);
+      const { error } = await supabase.rpc("log_seller_export" as never, {
+        _format: format,
+        _count: count,
+        _range_from: range?.from?.toISOString() ?? null,
+        _range_to: range?.to?.toISOString() ?? null,
+        _has_search: !!search,
+        _privacy: privacyHidden,
+      } as never);
+      if (error) throw error;
     } catch (err) {
       console.error("[Vendas] export audit log failed:", err);
     }

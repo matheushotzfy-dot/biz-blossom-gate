@@ -36,7 +36,7 @@ const AdminTransactionsTab = lazy(() => import("./tabs/AdminTransactionsTab"));
 const AdminWithdrawalsTab = lazy(() => import("./tabs/AdminWithdrawalsTab"));
 const CouponsCenter = lazy(() => import("@/features/admin-coupons/CouponsCenter"));
 const CoursesCenter = lazy(() => import("@/features/admin-courses/CoursesCenter"));
-const AdminAuditTab = lazy(() => import("./tabs/AdminAuditTab"));
+const AuditCenter = lazy(() => import("@/features/admin-audit/AuditCenter"));
 const SettingsCenter = lazy(() => import("@/features/admin-settings/SettingsCenter"));
 const AdminEmployeesTab = lazy(() => import("./tabs/AdminEmployeesTab"));
 const AdminTopSellersTab = lazy(() => import("./tabs/AdminTopSellersTab"));
@@ -722,7 +722,7 @@ export default function AdminDashboard() {
               {activeTab === "rewards" && <RewardsCenter isAdmin={isAdmin} />}
               {activeTab === "corridas" && <RaceCenter isAdmin={isAdmin} />}
               {activeTab === "goals" && <GoalsCenter isAdmin={isAdmin} />}
-              {activeTab === "audit" && isAdmin && <AdminAuditTab profiles={profiles} />}
+              {activeTab === "audit" && isAdmin && <AuditCenter isAdmin={isAdmin} />}
               {activeTab === "error-logs" && isAdmin && <ErrorsCenter isAdmin={isAdmin} />}
               {activeTab === "inactive-sellers" && isAdmin && (
                 <AdminInactiveSellersTab fmtCurrency={fmtCurrency} />
