@@ -2,8 +2,8 @@ import type { LucideIcon } from "lucide-react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-/** Painel dos menus ⋯ do construtor (mesmo desenho do menu da lista de áreas). */
-export const builderMenuContent = "max-h-[var(--radix-dropdown-menu-content-available-height)] w-64 overflow-y-auto rounded-[22px] border border-border bg-popover p-2";
+/** Painel dos menus ⋯ do seller. Use com `collisionPadding={16}` no DropdownMenuContent. */
+export const sellerMenuContent = "max-h-[var(--radix-dropdown-menu-content-available-height)] w-64 overflow-y-auto rounded-[22px] border border-border bg-popover p-2";
 
 interface Props {
   icon: LucideIcon;
@@ -13,7 +13,8 @@ interface Props {
   disabled?: boolean;
 }
 
-export function BuilderMenuItem({ icon: Icon, label, onSelect, destructive, disabled }: Props) {
+/** Item de menu: círculo com ícone + rótulo. `rounded-[16px]` (não `vp-r16`) para o CSS legado não pôr borda. */
+export function SellerMenuItem({ icon: Icon, label, onSelect, destructive, disabled }: Props) {
   return (
     <DropdownMenuItem
       disabled={disabled}

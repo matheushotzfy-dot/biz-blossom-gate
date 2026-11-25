@@ -164,6 +164,31 @@ export default function PublicCheckout() {
   const [couponInput, setCouponInput] = useState("");
   const [couponApplying, setCouponApplying] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<null | { code: string; coupon_id: string; discount_amount: number; apply_to_bumps: boolean; discount_type: string; discount_value: number; }>(null);
+  // Link com desconto: ?cupom=CODIGO aplica o cupom assim que o produto carrega (o servidor continua validando).
+  const couponFromLink = useRef<string | null>(
+    (typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("cupom") || new URLSearchParams(window.location.search).get("coupon")
+      : null
+    )?.toUpperCase().replace(/[^A-Z0-9_-]/g, "").slice(0, 30) || null,
+  );
+  useEffect(() => {
+    const code = couponFromLink.current;
+    if (!product || !code) return;
+    couponFromLink.current = null; // só tenta uma vez
+    setCouponInput(code);
+    void (async () => {
+      try {
+        const { data, error } = await supabase.rpc("validate_coupon", { _code: code, _product_id: product.id, _amount: Number(product.price) });
+        const row = Array.isArray(data) ? data[0] : data;
+        if (error || !row?.valid) { toast.error(row?.error || "Cupom inválido"); return; }
+        setAppliedCoupon({
+          code, coupon_id: row.coupon_id, discount_amount: Number(row.discount_amount), apply_to_bumps: !!row.apply_to_bumps,
+          discount_type: row.discount_type, discount_value: Number(row.discount_value),
+        });
+        toast.success("Cupom aplicado!");
+      } catch { /* o cliente ainda pode digitar o código na mão */ }
+    })();
+  }, [product]);
 
 
  // Timer

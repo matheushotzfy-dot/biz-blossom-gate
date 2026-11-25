@@ -14,7 +14,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { BuilderMenuItem, builderMenuContent } from "@/components/course/builder/BuilderMenu";
+import { SellerMenuItem as BuilderMenuItem, sellerMenuContent as builderMenuContent } from "@/components/seller-ui/menu";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { StatusPill } from "@/components/seller-ui/tx";
 import { StepEmpty } from "@/components/seller-ui/studio";

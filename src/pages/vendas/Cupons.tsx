@@ -1,583 +1,260 @@
 /**
- * Cupons — Gestão de cupons de desconto
- * @module Cupons
- * @version 5.0.0 — Operational Table Redesign
+ * Cupons: códigos de desconto do vendedor.
+ * O checkout valida tudo no servidor (validate_coupon); aqui só criamos, editamos e acompanhamos.
  */
-
 import { useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { AlertCircle, Loader2, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useProducts, useCoupons } from "@/hooks/useQueryData";
+import { usePrivacyMode } from "@/hooks/usePrivacyMode";
+import { useCoupons, useProducts } from "@/hooks/useQueryData";
+import { Seo } from "@/components/Seo";
+import { Money } from "@/components/home/Money";
+import { getCheckoutLink } from "@/components/products/productPresentation";
+import { PageHead } from "@/components/seller-ui/PageHead";
+import { StatBand } from "@/components/seller-ui/StatBand";
+import { SectionTabs } from "@/components/seller-ui/SectionTabs";
+import { FilterPills } from "@/components/seller-ui/FilterPills";
+import { SearchField } from "@/components/seller-ui/SearchField";
+import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
+import { CouponDialog, type CouponFormValues, type CouponSaveResult } from "@/components/marketing/CouponDialog";
+import { CouponsLedger } from "@/components/marketing/CouponsLedger";
+import { couponErrorMessage, couponState, endOfDayIso, toDateInput, type Coupon } from "@/components/marketing/couponMeta";
 import {
-  Ticket, Search, Plus, Trash2, Percent, TrendingDown, Calendar,
-  Zap, Copy, Tag, Sparkles, Power, Infinity as InfinityIcon, AlertCircle,
-  Layers, CheckCircle2, PauseCircle, XCircle, DollarSign, MousePointerClick, X,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { toast } from "sonner";
-import { EmptyState, Panel } from "@/components/PageShell";
-import { HDStat, HDStatGrid } from "@/components/hd/HDPage";
-import { cn, formatCurrency } from "@/lib/utils";
-import type { Tables } from "@/integrations/supabase/types";
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-const fmt = formatCurrency;
+type Filter = "all" | "active" | "paused" | "closed";
+type DialogState = { mode: "create" | "edit" | "duplicate"; coupon: Coupon | null } | null;
 
-type Coupon = Tables<"coupons">;
-type StatusFilter = "all" | "active" | "inactive" | "expired";
-
-const isExpired = (c: Coupon) => !!c.expires_at && new Date(c.expires_at) < new Date();
-const isExhausted = (c: Coupon) => !!c.max_uses && c.current_uses >= c.max_uses;
-
-function CouponStatusPill({ coupon }: { coupon: Coupon }) {
-  const expired = isExpired(coupon);
-  const exhausted = isExhausted(coupon);
-
-  let cfg: { label: string; dot: string; pill: string };
-  if (expired) cfg = { label: "Expirado", dot: "bg-destructive", pill: "bg-destructive/10 text-destructive border-destructive/20" };
-  else if (exhausted) cfg = { label: "Esgotado", dot: "bg-warning", pill: "bg-warning/10 text-warning border-warning/20" };
-  else if (coupon.is_active) cfg = { label: "Ativo", dot: "bg-success", pill: "bg-success/10 text-success border-success/20" };
-  else cfg = { label: "Pausado", dot: "bg-muted-foreground", pill: "bg-muted/15 text-muted-foreground border-border/30" };
-
-  return (
-    <span className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-bold border tabular-nums", cfg.pill)}>
-      <span className={cn("h-1.5 w-1.5 rounded-full", cfg.dot)} />
-      {cfg.label}
-    </span>
-  );
+async function copyText(text: string, ok: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast.success(ok);
+  } catch {
+    toast.error("Não foi possível copiar. Selecione e copie manualmente.");
+  }
 }
 
 export default function Cupons() {
   const { user } = useAuth();
+  const qc = useQueryClient();
+  const { hidden } = usePrivacyMode();
   const { data: products = [] } = useProducts();
-  const { data: coupons = [], refetch, isLoading, isError } = useCoupons();
+  const { data: coupons = [], isLoading, isError, refetch } = useCoupons();
+
+  const [filter, setFilter] = useState<Filter>("all");
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [openCreate, setOpenCreate] = useState(false);
-  const [deleting, setDeleting] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [dialog, setDialog] = useState<DialogState>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Coupon | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
-  const [form, setForm] = useState({
-    code: "",
-    product_id: "",
-    discount_type: "percentage" as "percentage" | "fixed",
-    discount_value: "",
-    max_uses: "",
-    expires_at: "",
-    apply_to_bumps: false,
-  });
+  const now = Date.now();
+  const sellable = useMemo(() => products.filter((p) => p.status !== "draft").map((p) => ({ id: p.id, name: p.name, price: Number(p.price), status: p.status })), [products]);
+  const productById = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
+  const takenCodes = useMemo(() => coupons.map((c) => c.code.toUpperCase()), [coupons]);
 
-  const activeProducts = products.filter(p => p.status === "active");
-  const activeCoupons = coupons.filter(c => c.is_active && !isExpired(c) && !isExhausted(c));
-  const totalUses = coupons.reduce((a, c) => a + Number(c.current_uses || 0), 0);
-  const totalDiscount = coupons.reduce((a, c) => a + Number(c.total_discount_amount || 0), 0);
+  const productName = (id: string | null) => (id ? productById.get(id)?.name ?? "Produto removido" : "Todos os produtos");
+  const productLink = (id: string | null) => {
+    const p = id ? productById.get(id) : undefined;
+    return p?.checkout_url ? getCheckoutLink(p.checkout_url) : "";
+  };
 
-  const filtered = useMemo(() => {
-    return coupons.filter(c => {
-      if (search && !c.code.toLowerCase().includes(search.toLowerCase())) return false;
-      if (statusFilter === "active") return c.is_active && !isExpired(c) && !isExhausted(c);
-      if (statusFilter === "inactive") return !c.is_active;
-      if (statusFilter === "expired") return isExpired(c) || isExhausted(c);
-      return true;
+  const stats = useMemo(() => {
+    const usable = coupons.filter((c) => couponState(c, now) === "active");
+    const uses = coupons.reduce((s, c) => s + Number(c.current_uses || 0), 0);
+    const discount = coupons.reduce((s, c) => s + Number(c.total_discount_amount || 0), 0);
+    const top = [...coupons].sort((a, b) => b.current_uses - a.current_uses)[0];
+    return { usable: usable.length, uses, discount, usedCoupons: coupons.filter((c) => c.current_uses > 0).length, top: top && top.current_uses > 0 ? top : null };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coupons]);
+
+  const counts = useMemo(() => ({
+    all: coupons.length,
+    active: coupons.filter((c) => couponState(c, now) === "active").length,
+    paused: coupons.filter((c) => couponState(c, now) === "paused").length,
+    closed: coupons.filter((c) => ["expired", "exhausted"].includes(couponState(c, now))).length,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [coupons]);
+
+  const shown = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return coupons.filter((c) => {
+      const st = couponState(c, now);
+      if (filter === "active" && st !== "active") return false;
+      if (filter === "paused" && st !== "paused") return false;
+      if (filter === "closed" && st !== "expired" && st !== "exhausted") return false;
+      if (!q) return true;
+      return c.code.toLowerCase().includes(q) || productName(c.product_id).toLowerCase().includes(q);
     });
-  }, [coupons, search, statusFilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coupons, filter, search, productById]);
 
-  const getProductName = (pid: string | null) => {
-    if (!pid) return "Todos os produtos";
-    return products.find(p => p.id === pid)?.name || "—";
-  };
+  const refresh = () => qc.invalidateQueries({ queryKey: ["coupons"], exact: false });
 
-  const resetForm = () => {
-    setForm({ code: "", product_id: "", discount_type: "percentage", discount_value: "", max_uses: "", expires_at: "", apply_to_bumps: false });
-  };
+  const save = async (v: CouponFormValues): Promise<CouponSaveResult> => {
+    if (!user || !dialog) return { ok: false, message: "Sua sessão expirou. Entre de novo para continuar." };
+    const editing = dialog.mode === "edit" && dialog.coupon;
+    const fields = {
+      discount_type: v.type,
+      discount_value: v.value,
+      product_id: v.productId,
+      max_uses: v.maxUses,
+      apply_to_bumps: v.applyToBumps,
+    };
 
-  const handleCreate = async () => {
-    if (!user || !form.code.trim() || !form.discount_value) {
-      toast.error("Preencha o código e o valor do desconto.");
-      return;
+    if (editing) {
+      const original = dialog.coupon!;
+      // Só mexe na validade quando o dia mudou, para não trocar o horário de um cupom que já existe.
+      const keepsExpiry = toDateInput(original.expires_at) === v.expires;
+      const patch = { ...fields, ...(keepsExpiry ? {} : { expires_at: v.expires ? endOfDayIso(v.expires) : null }) };
+      const { error } = await supabase.from("coupons").update(patch).eq("id", original.id).eq("user_id", user.id);
+      if (error) return { ok: false, message: couponErrorMessage(error, "Não foi possível salvar o cupom. Tente de novo.") };
+      toast.success(`Cupom ${original.code} atualizado.`);
+    } else {
+      const { error } = await supabase.from("coupons").insert({
+        ...fields, user_id: user.id, code: v.code, expires_at: v.expires ? endOfDayIso(v.expires) : null,
+      });
+      if (error) {
+        const message = couponErrorMessage(error, "Não foi possível criar o cupom. Tente de novo.");
+        return { ok: false, field: message.startsWith("Você já tem") ? "code" : undefined, message };
+      }
+      toast.success(`Cupom ${v.code} criado.`);
     }
-    setSaving(true);
-    const { error } = await supabase.from("coupons").insert({
-      user_id: user.id,
-      code: form.code.trim().toUpperCase(),
-      product_id: form.product_id || null,
-      discount_type: form.discount_type,
-      discount_value: Number(form.discount_value),
-      max_uses: form.max_uses ? Number(form.max_uses) : null,
-      expires_at: form.expires_at || null,
-      apply_to_bumps: form.apply_to_bumps,
-    });
-
-    setSaving(false);
-    if (error) {
-      const isDup = (error as { code?: string }).code === "23505" || error.message.toLowerCase().includes("duplicate");
-      toast.error(isDup ? "Cupom já existe." : "Erro ao criar cupom.");
-      return;
-    }
-    toast.success("Cupom criado com sucesso!");
-    resetForm();
-    setOpenCreate(false);
-    refetch();
+    setDialog(null);
+    void refresh();
+    return { ok: true };
   };
 
-  const handleDelete = async (id: string) => {
-    if (!user) return;
-    if (!window.confirm("Excluir este cupom permanentemente?")) return;
-    setDeleting(id);
-    const { error } = await supabase.from("coupons").delete().eq("id", id).eq("user_id", user.id);
-    setDeleting(null);
-    if (error) { toast.error("Erro ao remover cupom."); return; }
-    toast.success("Cupom removido.");
-    refetch();
+  const toggle = async (c: Coupon) => {
+    if (!user || busyId) return;
+    setBusyId(c.id);
+    const next = !c.is_active;
+    const { error } = await supabase.from("coupons").update({ is_active: next }).eq("id", c.id).eq("user_id", user.id);
+    setBusyId(null);
+    if (error) { toast.error(couponErrorMessage(error, "Não foi possível alterar o cupom. Tente de novo.")); return; }
+    toast.success(next ? `Cupom ${c.code} reativado.` : `Cupom ${c.code} pausado.`);
+    void refresh();
   };
 
-  const handleToggle = async (coupon: Coupon) => {
-    if (!user) return;
-    const { error } = await supabase.from("coupons").update({ is_active: !coupon.is_active }).eq("id", coupon.id).eq("user_id", user.id);
-    if (error) { toast.error("Erro ao alterar status do cupom."); return; }
-    refetch();
+  const confirmDelete = async () => {
+    if (!user || !deleteTarget) return;
+    setDeleting(true);
+    const { error } = await supabase.from("coupons").delete().eq("id", deleteTarget.id).eq("user_id", user.id);
+    setDeleting(false);
+    if (error) { toast.error(couponErrorMessage(error, "Não foi possível excluir o cupom. Tente de novo.")); return; }
+    toast.success(`Cupom ${deleteTarget.code} excluído.`);
+    setDeleteTarget(null);
+    void refresh();
   };
 
-  const copyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
-    toast.success("Código copiado!");
-  };
-
-  const previewValue = form.discount_value ? Number(form.discount_value) : 0;
-
-  const tabAccent: Record<StatusFilter, string> = {
-    all: "text-foreground",
-    active: "text-success",
-    inactive: "text-muted-foreground",
-    expired: "text-destructive",
-  };
-  const tabIcon: Record<StatusFilter, JSX.Element> = {
-    all: <Layers className="h-3 w-3" strokeWidth={2.5} />,
-    active: <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />,
-    inactive: <PauseCircle className="h-3 w-3" strokeWidth={2.5} />,
-    expired: <XCircle className="h-3 w-3" strokeWidth={2.5} />,
-  };
-  const filterTabs: { id: StatusFilter; label: string; count: number }[] = [
-    { id: "all", label: "Todos", count: coupons.length },
-    { id: "active", label: "Ativos", count: activeCoupons.length },
-    { id: "inactive", label: "Pausados", count: coupons.filter(c => !c.is_active).length },
-    { id: "expired", label: "Expirados", count: coupons.filter(c => isExpired(c) || isExhausted(c)).length },
-  ];
+  const clearFilters = () => { setFilter("all"); setSearch(""); };
+  const money = (v: number) => (hidden ? "R$ ••••" : <Money value={v} centsClassName="opacity-70" />);
 
   return (
-    <div className="mx-auto -mt-2 w-full max-w-[1440px] pb-24 md:-mt-3 md:pb-10">
-      {/* ── Hero header ── */}
-      <div className="relative flex flex-col gap-7 px-5 pt-1 sm:px-7 md:pt-1">
-        {/* Subtle radial accent behind title */}
+    <div className="vp-fade space-y-5 pb-6 md:space-y-6">
+      <Seo title="Cupons | Vemprapay" description="Códigos de desconto para o seu checkout." path="/vendas/cupons" noindex />
 
-        <div className="flex flex-wrap items-end justify-between gap-4 animate-fade-in">
-          <div>
-            <h1 className="font-display text-[30px] font-bold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[34px]">
-              Cupons
-            </h1>
-            <p className="mt-2 text-[13px] font-medium text-muted-foreground/80">
-              Crie e gerencie estratégias de desconto para seus checkouts.
-            </p>
-          </div>
+      <SectionTabs section="growth" />
+      <PageHead
+        title="Cupons"
+        subtitle="Dê um código de desconto para campanhas e parcerias. O cliente digita no checkout e você acompanha quanto cada cupom rendeu."
+        actions={!isError && <button type="button" className="vp-cta" onClick={() => setDialog({ mode: "create", coupon: null })}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} />Novo cupom</button>}
+      />
 
-          <Dialog open={openCreate} onOpenChange={setOpenCreate}>
-            <DialogTrigger asChild>
-              <button className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-[12.5px] font-semibold text-primary-foreground hover:bg-primary/90">
-                <Plus className="h-4 w-4" strokeWidth={2.5} />
-                Novo cupom
-              </button>
-            </DialogTrigger>
-          <DialogContent className="w-[calc(100vw-1.5rem)] max-w-3xl max-h-[92vh] rounded-3xl border border-border/40 bg-card p-0 overflow-hidden flex flex-col">
-            <div className="px-6 pt-6 pb-4 border-b border-border/20">
-              <DialogHeader>
-                <DialogTitle className="font-display text-lg flex items-center gap-2.5">
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center ring-1 ring-primary/15">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                  </div>
-                  Criar Novo Cupom
-                </DialogTitle>
-              </DialogHeader>
-            </div>
-
-            <div className="grid flex-1 grid-cols-1 gap-5 overflow-y-auto p-6 md:grid-cols-2">
-              {/* Step 1: Identification */}
-              <div className="space-y-4 md:col-span-2">
-                <div className="flex items-center gap-2">
-                  <span className="h-5 w-5 rounded-md bg-primary/10 text-primary text-[10px] font-black flex items-center justify-center">1</span>
-                  <span className="text-[11px] font-medium text-muted-foreground/60">Identificação</span>
-                </div>
-                <div>
-                  <Label className="text-[11px] font-medium text-muted-foreground/60 ">Código do Cupom</Label>
-                  <Input
-                    placeholder="EX: BLACKFRIDAY10"
-                    value={form.code}
-                    onChange={e => setForm(f => ({ ...f, code: e.target.value.toUpperCase().replace(/\s/g, "") }))}
-                    className="mt-1.5 h-11 rounded-xl font-mono text-sm font-bold tracking-wider"
-                  />
-                  <p className="text-[10px] text-muted-foreground/50 mt-1.5">Apenas letras e números, sem espaços</p>
-                </div>
-              </div>
-
-              {/* Step 2: Discount */}
-              <div className="space-y-4 border-t border-border/20 pt-4 md:border-t-0 md:pt-0">
-                <div className="flex items-center gap-2">
-                  <span className="h-5 w-5 rounded-md bg-primary/10 text-primary text-[10px] font-black flex items-center justify-center">2</span>
-                  <span className="text-[11px] font-medium text-muted-foreground/60">Valor do Desconto</span>
-                </div>
-                <div className="grid grid-cols-[1fr_auto] gap-2">
-                  <div>
-                    <Label className="text-[11px] font-medium text-muted-foreground/60 ">Valor</Label>
-                    <Input
-                      type="number"
-                      placeholder="10"
-                      value={form.discount_value}
-                      onChange={e => setForm(f => ({ ...f, discount_value: e.target.value }))}
-                      className="mt-1.5 h-11 rounded-xl tabular-nums font-display font-bold text-base"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-[11px] font-medium text-muted-foreground/60 ">Tipo</Label>
-                    <Select value={form.discount_type} onValueChange={v => setForm(f => ({ ...f, discount_type: v as "percentage" | "fixed" }))}>
-                      <SelectTrigger className="mt-1.5 h-11 w-24 rounded-xl font-bold">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="percentage">% Off</SelectItem>
-                        <SelectItem value="fixed">R$ Off</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                {previewValue > 0 && (
-                  <div className="p-3 rounded-xl bg-primary/5 border border-primary/15 flex items-center justify-between">
-                    <span className="text-[11px] text-muted-foreground/70">Cliente recebe</span>
-                    <span className="text-[15px] font-display font-black text-primary tabular-nums">
-                      {form.discount_type === "percentage" ? `${previewValue}% OFF` : `${fmt(previewValue)} OFF`}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Step 3: Restrictions */}
-              <div className="space-y-4 border-t border-border/20 pt-4 md:border-t-0 md:pt-0">
-                <div className="flex items-center gap-2">
-                  <span className="h-5 w-5 rounded-md bg-primary/10 text-primary text-[10px] font-black flex items-center justify-center">3</span>
-                  <span className="text-[11px] font-medium text-muted-foreground/60">Restrições <span className="text-muted-foreground/30 font-medium normal-case tracking-normal">(opcional)</span></span>
-                </div>
-
-                <div>
-                  <Label className="text-[11px] font-medium text-muted-foreground/60 ">Aplicar em</Label>
-                  <Select value={form.product_id || "all"} onValueChange={v => setForm(f => ({ ...f, product_id: v === "all" ? "" : v }))}>
-                    <SelectTrigger className="mt-1.5 h-11 rounded-xl">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent position="popper" className="z-[120] max-h-[280px]">
-                      <SelectItem value="all">Todos os produtos</SelectItem>
-                      {products.filter(p => p.status !== "draft").map(p => (
-                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-[10px] text-muted-foreground/50 mt-1.5">
-                    {products.filter(p => p.status !== "draft").length === 0
-                      ? "Crie um produto primeiro para vincular cupom a um produto específico."
-                      : `${products.filter(p => p.status !== "draft").length} produto(s) disponíveis`}
-                  </p>
-                </div>
-
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-[11px] font-medium text-muted-foreground/60 ">Limite de Usos</Label>
-                    <Input
-                      type="number"
-                      placeholder="Ilimitado"
-                      value={form.max_uses}
-                      onChange={e => setForm(f => ({ ...f, max_uses: e.target.value }))}
-                      className="mt-1.5 h-11 rounded-xl tabular-nums"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-[11px] font-medium text-muted-foreground/60 ">Expira em</Label>
-                    <Input
-                      type="date"
-                      value={form.expires_at}
-                      onChange={e => setForm(f => ({ ...f, expires_at: e.target.value }))}
-                      className="mt-1.5 h-11 rounded-xl text-[12px]"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-3 rounded-xl bg-muted/5 border border-border/20">
-                  <div>
-                    <p className="text-[12px] font-bold text-foreground">Aplicar aos Order Bumps</p>
-                    <p className="text-[10.5px] text-muted-foreground/50 mt-0.5">Estende o desconto para ofertas adicionais</p>
-                  </div>
-                  <Switch checked={form.apply_to_bumps} onCheckedChange={v => setForm(f => ({ ...f, apply_to_bumps: v }))} />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 px-6 py-4 border-t border-border/20 bg-muted/5">
-              <Button variant="outline" className="flex-1 rounded-xl h-10 font-display font-bold" onClick={() => { resetForm(); setOpenCreate(false); }}>
-                Cancelar
-              </Button>
-              <Button
-                className="flex-1 rounded-lg h-10 font-semibold"
-                onClick={handleCreate}
-                disabled={saving || !form.code.trim() || !form.discount_value}
-              >
-                {saving ? "Salvando..." : "Criar Cupom"}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-        {/* ── KPIs (High-density) ── */}
-        <HDStatGrid>
-          <HDStat label="Total de cupons" value={String(coupons.length)} sub={`${coupons.length === 1 ? "1 cupom criado" : `${coupons.length} cupons criados`}`} icon={Ticket} />
-          <HDStat label="Cupons ativos" value={String(activeCoupons.length)} sub={`${coupons.filter(c => !c.is_active).length} pausados`} icon={Zap} />
-          <HDStat label="Utilizações" value={String(totalUses)} sub={totalUses === 1 ? "1 resgate no checkout" : `${totalUses} resgates no checkout`} icon={MousePointerClick} />
-          <HDStat label="Desconto concedido" value={fmt(totalDiscount)} sub={totalDiscount > 0 ? "valor aplicado" : "nenhum aplicado"} icon={TrendingDown} />
-        </HDStatGrid>
-
-
-        {/* ── Tabs + Search row ── */}
-        <div className="flex flex-col gap-3 pb-1 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between">
-          <div role="tablist" aria-label="Filtrar cupons por status" className="inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-xl border border-border/50 bg-card p-1">
-            {filterTabs.map((t) => {
-              const active = statusFilter === t.id;
-              return (
-                <button
-                  key={t.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  aria-controls="coupons-panel"
-                  onClick={() => setStatusFilter(t.id)}
-                  className={cn(
- "group/tab relative inline-flex shrink-0 items-center gap-2 rounded-lg h-8 px-3 text-[12px] font-bold tracking-tight transition-colors duration-200",
-                    active
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  )}
-                >
-                  <span className={cn(
- "flex h-4 w-4 items-center justify-center transition-colors",
-                    active ? "text-primary-foreground" : tabAccent[t.id]
-                  )}>
-                    {tabIcon[t.id]}
-                  </span>
-                  <span className="font-display">{t.label}</span>
-                  {t.count > 0 && (
-                    <span className={cn(
- "inline-flex h-[18px] min-w-[20px] items-center justify-center rounded-md px-1.5 text-[10px] font-black tabular-nums tracking-tight border transition-colors",
-                      active
-                        ? "bg-background/20 text-primary-foreground border-primary-foreground/20"
-                        : "bg-muted text-muted-foreground border-border"
-                    )}>
-                      {t.count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="relative group">
-            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-primary" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar código..."
-              className="h-9 w-full rounded-lg border border-border/60 bg-secondary/40 pl-9 pr-8 text-xs font-mono font-medium text-foreground placeholder:text-muted-foreground/60 placeholder:font-sans transition-all focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary/15 sm:w-72"
-            />
-            {search && (
-              <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground/50 transition-colors hover:bg-secondary hover:text-foreground">
-                <X className="h-3 w-3" />
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Workspace ── */}
-      <div className="px-5 pt-6 sm:px-7">
-        <Panel id="coupons-panel" role="tabpanel" className="p-0 overflow-hidden">
-
-        {/* Column headers */}
-        {filtered.length > 0 && (
-          <div className="hidden md:grid grid-cols-[minmax(0,1.5fr)_minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_auto_auto] items-center gap-4 px-4 py-2.5 border-b border-border/30 bg-muted/10">
-            <span className="text-[11px] font-medium text-muted-foreground/50">Cupom</span>
-            <span className="text-[11px] font-medium text-muted-foreground/50">Produto</span>
-            <span className="text-[11px] font-medium text-muted-foreground/50 text-right">Desconto</span>
-            <span className="text-[11px] font-medium text-muted-foreground/50 text-right">Uso</span>
-            <span className="text-[11px] font-medium text-muted-foreground/50">Validade</span>
-            <span className="text-[11px] font-medium text-muted-foreground/50">Status</span>
-            <span className="text-[11px] font-medium text-muted-foreground/50 w-[72px] text-right">Ações</span>
-          </div>
-        )}
-
-        {/* Rows */}
-        {isLoading ? (
-          <div className="space-y-2 animate-pulse">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-14 rounded-xl bg-muted/30" />
-            ))}
-          </div>
-        ) : isError ? (
-          <EmptyState
-            icon={<AlertCircle className="h-7 w-7" />}
+      {isError ? (
+        <section className="vp-sheet">
+          <EmptyPanel
+            icon={<AlertCircle className="h-7 w-7" strokeWidth={1.8} />}
             title="Não foi possível carregar os cupons"
-            subtitle="Verifique sua conexão e tente novamente."
-            action={<Button variant="outline" onClick={() => void refetch()}>Tentar novamente</Button>}
+            text="Confira sua conexão e tente de novo. Seus cupons continuam salvos."
+            action={<button type="button" className="vp-ghost" onClick={() => void refetch()}>Tentar de novo</button>}
           />
-        ) : filtered.length === 0 ? (
-          <EmptyState
-            icon={<Ticket className="h-7 w-7" />}
-            title={coupons.length === 0 ? "Nenhum cupom ainda" : "Nenhum resultado"}
-            subtitle={coupons.length === 0 ? "Crie seu primeiro cupom para começar a oferecer descontos" : "Tente ajustar a busca ou os filtros"}
-            action={coupons.length === 0 ? (
-              <Button onClick={() => setOpenCreate(true)} className="gap-2 rounded-lg font-semibold">
-                <Plus className="h-4 w-4" /> Criar Primeiro Cupom
-              </Button>
-            ) : undefined}
+        </section>
+      ) : (
+        <>
+          <StatBand
+            label="Resumo dos cupons"
+            cells={[
+              { label: "Desconto concedido", featured: true, loading: isLoading, value: money(stats.discount), sub: stats.discount > 0 ? "Abatido de vendas já pagas" : "Nenhuma venda usou cupom ainda" },
+              { label: "Resgates", loading: isLoading, value: stats.uses.toLocaleString("pt-BR"), sub: stats.uses === 0 ? "Ninguém usou um cupom ainda" : `em ${stats.usedCoupons} ${stats.usedCoupons === 1 ? "cupom" : "cupons"}` },
+              { label: "Cupons ativos", loading: isLoading, value: String(stats.usable), sub: coupons.length === 0 ? "Nenhum cupom criado" : `${coupons.length} ${coupons.length === 1 ? "cupom criado" : "cupons criados"}` },
+              { label: "Mais usado", loading: isLoading, value: stats.top ? <span className="font-mono !text-[22px] tracking-[0.02em] sm:!text-[24px]">{stats.top.code}</span> : "—", sub: stats.top ? `${stats.top.current_uses.toLocaleString("pt-BR")} ${stats.top.current_uses === 1 ? "resgate" : "resgates"}` : "Aparece com o primeiro resgate" },
+            ]}
           />
-        ) : (
-          <div>
-            {filtered.map(c => {
-              const expired = isExpired(c);
-              const exhausted = isExhausted(c);
-              const usagePct = c.max_uses ? Math.min(100, (c.current_uses / c.max_uses) * 100) : 0;
-              return (
-                <div
-                  key={c.id}
-                  className="group grid grid-cols-1 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1.4fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_auto_auto] items-center gap-3 md:gap-4 px-4 py-3 border-b border-border/20 last:border-b-0 hover:bg-muted/5 transition-colors"
-                >
-                  {/* Code */}
-                  <div className="flex items-center gap-2 min-w-0">
-                    <button
-                      onClick={() => copyCode(c.code)}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-primary/10 border border-primary/15 hover:bg-primary/15 transition-colors group/code"
-                      title="Copiar código"
-                    >
-                      <span className="font-mono text-[12px] font-black text-primary tracking-wider">{c.code}</span>
-                      <Copy className="h-3 w-3 text-primary/40 group-hover/code:text-primary/80 transition-colors" />
-                    </button>
-                  </div>
 
-                  {/* Product */}
-                  <div className="min-w-0">
-                    <p className={cn("text-[12px] truncate", c.product_id ? "text-foreground font-medium" : "text-muted-foreground/60 italic")}>
-                      {getProductName(c.product_id)}
-                    </p>
-                  </div>
-
-                  {/* Discount */}
-                  <div className="text-right">
-                    <p className="text-[14px] font-display font-black text-foreground tabular-nums leading-none">
-                      {c.discount_type === "percentage" ? `${Number(c.discount_value)}%` : fmt(Number(c.discount_value))}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground/40 font-medium mt-0.5">
-                      {c.discount_type === "percentage" ? "percentual" : "fixo"}
-                    </p>
-                  </div>
-
-                  {/* Usage */}
-                  <div className="min-w-0 text-right">
-                    <p className="text-[12px] font-display font-bold text-foreground tabular-nums leading-none">
-                      {c.current_uses}
-                      {c.max_uses && <span className="text-muted-foreground/40"> / {c.max_uses}</span>}
-                    </p>
-                    {c.max_uses ? (
-                      <div className="mt-1.5 h-1 rounded-full bg-muted/15 overflow-hidden ml-auto w-16">
-                        <div
-                          className={cn(
- "h-full rounded-full",
-                            exhausted ? "bg-warning" : usagePct > 75 ? "bg-warning/70" : "bg-success"
-                          )}
-                          style={{ width: `${usagePct}%` }}
-                        />
-                      </div>
-                    ) : (
-                      <p className="text-[11px] text-muted-foreground/40 font-medium mt-0.5 inline-flex items-center gap-1 justify-end">
-                        <InfinityIcon className="h-2.5 w-2.5" /> ilimitado
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Validity */}
-                  <div className="min-w-0">
-                    {c.expires_at ? (
-                      <div className={cn("inline-flex items-center gap-1", expired && "text-destructive")}>
-                        <Calendar className="h-3 w-3 text-muted-foreground/50 shrink-0" />
-                        <span className="text-[11px] tabular-nums font-medium">
-                          {new Date(c.expires_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "2-digit" })}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-[10.5px] text-muted-foreground/50 font-medium">
-                        <InfinityIcon className="h-3 w-3" /> sem prazo
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Status */}
-                  <div className="shrink-0">
-                    <CouponStatusPill coupon={c} />
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-0.5 shrink-0 justify-end">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className={cn(
- "h-7 w-7 rounded-md transition-colors",
-                        c.is_active ? "text-success hover:text-success hover:bg-success/10" : "text-muted-foreground/40 hover:text-foreground hover:bg-muted/10"
-                      )}
-                      onClick={() => handleToggle(c)}
-                      disabled={expired}
-                      title={c.is_active ? "Pausar" : "Ativar"}
-                    >
-                      <Power className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 rounded-md text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10"
-                      onClick={() => handleDelete(c.id)}
-                      disabled={deleting === c.id}
-                      title="Excluir"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <FilterPills<Filter>
+              label="Filtrar cupons por situação"
+              value={filter}
+              onChange={setFilter}
+              options={[
+                { value: "all", label: "Todos", count: counts.all },
+                { value: "active", label: "Ativos", count: counts.active },
+                { value: "paused", label: "Pausados", count: counts.paused },
+                { value: "closed", label: "Encerrados", count: counts.closed },
+              ]}
+            />
+            <SearchField label="Buscar cupom" value={search} onChange={setSearch} placeholder="Código ou produto" className="sm:w-[300px]" />
           </div>
-        )}
 
-        {/* Footer */}
-        {filtered.length > 0 && (
-          <div className="flex items-center justify-between px-4 py-2.5 border-t border-border/30 bg-muted/5">
-            <span className="text-[10.5px] text-muted-foreground/50 font-medium tabular-nums">
-              Mostrando <strong className="text-foreground/80">{filtered.length}</strong> de <strong className="text-foreground/80">{coupons.length}</strong> cupons
-            </span>
-            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/40">
-              <AlertCircle className="h-3 w-3" />
-              Cupons expirados não podem ser ativados
-            </div>
-          </div>
-        )}
-      </Panel>
-      </div>
+          <CouponsLedger
+            coupons={shown}
+            productName={productName}
+            productLink={productLink}
+            loading={isLoading}
+            filtering={coupons.length > 0}
+            busyId={busyId}
+            onCreate={() => setDialog({ mode: "create", coupon: null })}
+            onEdit={(c) => setDialog({ mode: "edit", coupon: c })}
+            onDuplicate={(c) => setDialog({ mode: "duplicate", coupon: c })}
+            onToggle={(c) => void toggle(c)}
+            onDelete={setDeleteTarget}
+            onCopyCode={(c) => void copyText(c.code, `Código ${c.code} copiado.`)}
+            onCopyLink={(c) => void copyText(`${productLink(c.product_id)}?cupom=${encodeURIComponent(c.code)}`, "Link com o desconto copiado.")}
+            onClearFilters={clearFilters}
+          />
+        </>
+      )}
+
+      <CouponDialog
+        open={!!dialog}
+        onOpenChange={(o) => { if (!o) setDialog(null); }}
+        mode={dialog?.mode ?? "create"}
+        coupon={dialog?.coupon}
+        products={sellable}
+        takenCodes={takenCodes}
+        onSave={save}
+      />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o && !deleting) setDeleteTarget(null); }}>
+        <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
+          <AlertDialogHeader className="space-y-2 text-left">
+            <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive"><Trash2 className="h-5 w-5" /></span>
+            <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">Excluir este cupom?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-[14.5px] leading-relaxed text-muted-foreground">
+                <span className="block break-all font-mono text-[15px] font-bold text-foreground">{deleteTarget?.code}</span>
+                <p>
+                  O código deixa de funcionar no checkout.
+                  {deleteTarget && deleteTarget.current_uses > 0 ? ` As vendas que já usaram o cupom continuam como estão, mas o histórico de ${deleteTarget.current_uses} ${deleteTarget.current_uses === 1 ? "resgate" : "resgates"} some daqui.` : ""}
+                  {" "}Se só quer parar de oferecer, pause o cupom em vez de excluir.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <AlertDialogCancel disabled={deleting} className="vp-ghost m-0 h-11 border-border">Manter cupom</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => { e.preventDefault(); void confirmDelete(); }} disabled={deleting} className="vp-cta vp-cta-danger h-11">
+              {deleting && <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />}
+              {deleting ? "Excluindo…" : "Excluir cupom"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
