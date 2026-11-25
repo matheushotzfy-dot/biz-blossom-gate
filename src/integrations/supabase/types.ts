@@ -6027,15 +6027,6 @@ export type Database = {
           pix: boolean
         }[]
       }
-      get_goal_progress: {
-        Args: { _goal_id: string }
-        Returns: {
-          achieved: boolean
-          revenue: number
-          seller_id: string
-          seller_name: string
-        }[]
-      }
       get_ledger_balance: { Args: { _user_id: string }; Returns: number }
       get_ledger_integrity_report: { Args: never; Returns: Json }
       get_my_goal_progress: { Args: { _goal_id: string }; Returns: number }
