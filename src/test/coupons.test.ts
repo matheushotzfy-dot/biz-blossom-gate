@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { applyDiscount, cleanCode, couponState, endOfDayIso, expiryNote, parseAmount, type Coupon } from "@/components/marketing/couponMeta";
+import { STATE_META, applyDiscount, cleanCode, couponErrorMessage, couponState, endOfDayIso, expiryNote, parseAmount, type Coupon } from "@/components/marketing/couponMeta";
 
 const base: Coupon = {
   id: "c", user_id: "u", code: "X", discount_type: "percentage", discount_value: 10, max_uses: null, current_uses: 0, is_active: true,
-  expires_at: null, created_at: "2026-01-01T00:00:00Z", product_id: null, total_discount_amount: 0, apply_to_bumps: false,
+  expires_at: null, created_at: "2026-01-01T00:00:00Z", product_id: null, total_discount_amount: 0, apply_to_bumps: false, admin_hold_at: null, admin_hold_reason: null,
 };
 
 describe("cupons: regras de desconto (espelham validate_coupon)", () => {
@@ -42,6 +42,16 @@ describe("cupons: situação", () => {
     expect(couponState({ ...base, is_active: false }, now)).toBe("paused");
     expect(couponState({ ...base, max_uses: 5, current_uses: 5 }, now)).toBe("exhausted");
     expect(couponState({ ...base, expires_at: "2026-11-20T23:59:59-03:00", is_active: false }, now)).toBe("expired");
+  });
+  it("pausa da equipe vence qualquer outra situação e tem rótulo próprio", () => {
+    const held = { ...base, admin_hold_at: "2026-11-23T12:00:00Z", admin_hold_reason: "Autocompra", is_active: false };
+    expect(couponState(held, now)).toBe("held");
+    expect(couponState({ ...held, expires_at: "2026-11-20T23:59:59-03:00" }, now)).toBe("held");
+    expect(STATE_META.held.label).toBe("Pausado pela equipe");
+  });
+  it("traduz a recusa do banco quando o vendedor tenta reativar", () => {
+    expect(couponErrorMessage({ code: "42501", message: "A equipe pausou este cupom e ele só volta com a liberação do suporte." }, "x"))
+      .toBe("A equipe pausou este cupom. Fale com o suporte para liberar.");
   });
   it("avisa quando o prazo está perto", () => {
     expect(expiryNote(base, now).text).toBe("Sem prazo");

@@ -1230,6 +1230,8 @@ export type Database = {
       }
       coupons: {
         Row: {
+          admin_hold_at: string | null
+          admin_hold_reason: string | null
           apply_to_bumps: boolean
           code: string
           created_at: string
@@ -1245,6 +1247,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_hold_at?: string | null
+          admin_hold_reason?: string | null
           apply_to_bumps?: boolean
           code: string
           created_at?: string
@@ -1260,6 +1264,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_hold_at?: string | null
+          admin_hold_reason?: string | null
           apply_to_bumps?: boolean
           code?: string
           created_at?: string

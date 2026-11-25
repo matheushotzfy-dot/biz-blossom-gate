@@ -79,6 +79,11 @@ export function CouponsLedger(p: CouponsLedgerProps) {
                     <Copy className="h-3.5 w-3.5 shrink-0 opacity-60 transition-opacity group-hover/code:opacity-100" aria-hidden />
                   </button>
                   <span className="mt-1.5 block truncate text-[13px] text-muted-foreground">{p.productName(c.product_id)}{c.apply_to_bumps ? " e order bumps" : ""}</span>
+                  {c.admin_hold_at && (
+                    <span className="mt-1.5 block text-[13px] font-medium text-destructive">
+                      A equipe pausou este cupom{c.admin_hold_reason ? `: ${c.admin_hold_reason}` : ""}. Fale com o suporte para liberar.
+                    </span>
+                  )}
                 </span>
 
                 {/* Ações (no celular ficam ao lado do código) */}
@@ -146,7 +151,7 @@ function RowMenu({ c, st, hasLink, busyId, onEdit, onDuplicate, onToggle, onDele
         <SellerMenuItem icon={Copy} label="Copiar o código" onSelect={() => onCopyCode(c)} />
         {hasLink && <SellerMenuItem icon={Link2} label="Copiar link com desconto" onSelect={() => onCopyLink(c)} />}
         <SellerMenuItem icon={Plus} label="Duplicar" onSelect={() => onDuplicate(c)} />
-        {st !== "expired" && st !== "exhausted" && (
+        {st !== "expired" && st !== "exhausted" && st !== "held" && (
           <SellerMenuItem icon={paused ? Play : Pause} label={paused ? "Reativar" : "Pausar"} onSelect={() => onToggle(c)} />
         )}
         <DropdownMenuSeparator className="my-1.5" />

@@ -34,7 +34,7 @@ const AcquirersPanel = lazy(() => import("@/features/admin-finance/AcquirersPane
 const FinancialMetricsPanel = lazy(() => import("@/features/admin-finance/FinancialMetricsPanel").then((m) => ({ default: m.FinancialMetricsPanel })));
 const AdminTransactionsTab = lazy(() => import("./tabs/AdminTransactionsTab"));
 const AdminWithdrawalsTab = lazy(() => import("./tabs/AdminWithdrawalsTab"));
-const AdminCouponsTab = lazy(() => import("./tabs/AdminCouponsTab"));
+const CouponsCenter = lazy(() => import("@/features/admin-coupons/CouponsCenter"));
 const CoursesCenter = lazy(() => import("@/features/admin-courses/CoursesCenter"));
 const AdminAuditTab = lazy(() => import("./tabs/AdminAuditTab"));
 const AdminSettingsTab = lazy(() => import("./tabs/AdminSettingsTab"));
@@ -713,7 +713,7 @@ export default function AdminDashboard() {
               {activeTab === "managers" && isAdmin && <AdminManagersTab profiles={profiles} onReload={loadData} />}
               {activeTab === "staff-commissions" && isAdmin && <AdminStaffCommissionsTab profiles={profiles} />}
               {activeTab === "notifications" && isAdmin && <AdminNotificationsTab profiles={profiles} />}
-              {activeTab === "coupons" && isAdmin && <AdminCouponsTab profiles={profiles} products={products} transactions={transactions} fmtCurrency={fmtCurrency} />}
+              {activeTab === "coupons" && isAdmin && <CouponsCenter isAdmin={isAdmin} />}
               {activeTab === "courses" && isAdmin && <CoursesCenter isAdmin={isAdmin} />}
               {activeTab === "affiliates" && isAdmin && <AdminAffiliateSalesTab profiles={profiles} products={products} fmtCurrency={fmtCurrency} />}
               {activeTab === "subscriptions" && isAdmin && <AdminSubscriptionsTab profiles={profiles} fmtCurrency={fmtCurrency} />}

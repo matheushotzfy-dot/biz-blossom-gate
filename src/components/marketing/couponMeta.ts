@@ -3,15 +3,19 @@ import type { TxTone } from "@/components/seller-ui/txMeta";
 import { formatCurrency } from "@/lib/utils";
 
 export type Coupon = Tables<"coupons">;
-export type CouponState = "active" | "paused" | "expired" | "exhausted";
+export type CouponState = "active" | "paused" | "held" | "expired" | "exhausted";
 
 const SP = "America/Sao_Paulo";
 
 export const isExpired = (c: Coupon, now = Date.now()) => !!c.expires_at && new Date(c.expires_at).getTime() < now;
 export const isExhausted = (c: Coupon) => !!c.max_uses && c.current_uses >= c.max_uses;
 
-/** Mesma ordem de prioridade que o checkout usa para recusar um cupom. */
+/** Cupom pausado pela equipe: o vendedor não consegue reativar sozinho. */
+export const isHeld = (c: Pick<Coupon, "admin_hold_at">) => !!c.admin_hold_at;
+
+/** Mesma ordem de prioridade que o checkout usa para recusar um cupom (a pausa da equipe vem primeiro, porque é a que o vendedor precisa ver). */
 export function couponState(c: Coupon, now = Date.now()): CouponState {
+  if (isHeld(c)) return "held";
   if (isExpired(c, now)) return "expired";
   if (isExhausted(c)) return "exhausted";
   if (!c.is_active) return "paused";
@@ -21,6 +25,7 @@ export function couponState(c: Coupon, now = Date.now()): CouponState {
 export const STATE_META: Record<CouponState, { label: string; tone: TxTone }> = {
   active: { label: "Ativo", tone: "ok" },
   paused: { label: "Pausado", tone: "idle" },
+  held: { label: "Pausado pela equipe", tone: "alert" },
   expired: { label: "Expirado", tone: "alert" },
   exhausted: { label: "Esgotado", tone: "wait" },
 };
@@ -94,6 +99,7 @@ export function expiryNote(c: Coupon, now = Date.now()): { text: string; sub?: s
 export function couponErrorMessage(err: { code?: string; message?: string } | null | undefined, fallback: string): string {
   const m = (err?.message || "").toLowerCase();
   if (err?.code === "23505" || m.includes("duplicate")) return "Você já tem um cupom com esse código.";
+  if (m.includes("equipe pausou")) return "A equipe pausou este cupom. Fale com o suporte para liberar.";
   if (m.includes("rate_limit")) return "Você criou cupons demais em pouco tempo. Espere um minuto e tente de novo.";
   if (m.includes("porcentagem")) return "A porcentagem precisa ficar entre 1% e 99%.";
   if (m.includes("positivo")) return "O valor do desconto precisa ser maior que zero.";

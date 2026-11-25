@@ -73,7 +73,7 @@ export default function Cupons() {
   const counts = useMemo(() => ({
     all: coupons.length,
     active: coupons.filter((c) => couponState(c, now) === "active").length,
-    paused: coupons.filter((c) => couponState(c, now) === "paused").length,
+    paused: coupons.filter((c) => ["paused", "held"].includes(couponState(c, now))).length,
     closed: coupons.filter((c) => ["expired", "exhausted"].includes(couponState(c, now))).length,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [coupons]);
@@ -83,7 +83,7 @@ export default function Cupons() {
     return coupons.filter((c) => {
       const st = couponState(c, now);
       if (filter === "active" && st !== "active") return false;
-      if (filter === "paused" && st !== "paused") return false;
+      if (filter === "paused" && st !== "paused" && st !== "held") return false;
       if (filter === "closed" && st !== "expired" && st !== "exhausted") return false;
       if (!q) return true;
       return c.code.toLowerCase().includes(q) || productName(c.product_id).toLowerCase().includes(q);
@@ -129,6 +129,7 @@ export default function Cupons() {
 
   const toggle = async (c: Coupon) => {
     if (!user || busyId) return;
+    if (c.admin_hold_at) { toast.error(couponErrorMessage({ message: "A equipe pausou este cupom" }, "")); return; }
     setBusyId(c.id);
     const next = !c.is_active;
     const { error } = await supabase.from("coupons").update({ is_active: next }).eq("id", c.id).eq("user_id", user.id);
