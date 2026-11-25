@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRight, LifeBuoy, Trophy, UserRound } from "lucide-react";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
@@ -15,11 +16,17 @@ const EXTRA = [
 /**
  * Navegação lateral do painel (desktop), na identidade do cadastro.
  * A seção ativa vira um mini-logo (quadrado verde, ícone branco) e abre seus atalhos.
+ * Clicar na seção aberta recolhe os atalhos (sem sair da página); clicar de novo abre. Ir para outra seção
+ * (pelo menu ou por um botão de página) abre a de destino e fecha a anterior.
  */
 export function SellerRail() {
   const { pathname, search } = useLocation();
   const here = pathname + search;
   const supportUnread = useSupportUnread();
+
+  const activeId = SELLER_NAV.find((s) => isSectionActive(pathname, s))?.id ?? null;
+  const [openId, setOpenId] = useState<string | null>(activeId);
+  useEffect(() => { setOpenId(activeId); }, [activeId]);
 
   return (
     <aside className="vp-rail sticky top-0 hidden h-[100dvh] w-[272px] shrink-0 flex-col md:flex" aria-label="Menu principal">
@@ -34,16 +41,29 @@ export function SellerRail() {
         <ul className="space-y-1">
           {SELLER_NAV.map((s) => {
             const active = isSectionActive(pathname, s);
+            const expanded = !!s.links && openId === s.id;
+            const chevron = s.links && <ChevronRight aria-hidden className={cn("h-4 w-4 opacity-40 transition-transform duration-200", expanded && "rotate-90 opacity-70")} />;
+            const inner = (
+              <>
+                <span className="vp-nav-chip"><s.icon className="h-[18px] w-[18px]" strokeWidth={2.1} /></span>
+                <span className="flex-1 truncate">{s.label}</span>
+                {chevron}
+              </>
+            );
             return (
               <li key={s.id}>
-                <Link to={s.url} data-active={active} aria-current={active ? "page" : undefined} onMouseEnter={() => prefetchRoute(s.url)} className="vp-nav">
-                  <span className="vp-nav-chip"><s.icon className="h-[18px] w-[18px]" strokeWidth={2.1} /></span>
-                  <span className="flex-1 truncate">{s.label}</span>
-                  {s.links && <ChevronRight aria-hidden className={cn("h-4 w-4 opacity-40 transition-transform duration-200", active && "rotate-90 opacity-70")} />}
-                </Link>
+                {s.links && active ? (
+                  <button type="button" data-active={active} aria-expanded={expanded} aria-controls={`nav-${s.id}`} onClick={() => setOpenId(expanded ? null : s.id)} className="vp-nav w-full text-left">
+                    {inner}
+                  </button>
+                ) : (
+                  <Link to={s.url} data-active={active} aria-current={active ? "page" : undefined} onMouseEnter={() => prefetchRoute(s.url)} onClick={() => setOpenId(s.id)} className="vp-nav">
+                    {inner}
+                  </Link>
+                )}
 
-                {active && s.links && (
-                  <ul className="vp-fade mb-2 ml-[29px] mt-1 space-y-0.5 border-l-2 border-border pl-4">
+                {expanded && s.links && (
+                  <ul id={`nav-${s.id}`} className="vp-fade mb-2 ml-[29px] mt-1 space-y-0.5 border-l-2 border-border pl-4">
                     {s.links.map((l) => {
                       const current = here === l.url;
                       if (l.soon) {
@@ -97,7 +117,8 @@ export function SellerRail() {
         </ul>
       </nav>
 
-      <div className="shrink-0 p-3.5 pt-0">
+      {/* Em tela baixa o card some: com uma seção aberta ele cobriria Premiações/Minha conta/Suporte. */}
+      <div className="shrink-0 p-3.5 pt-0 [@media(max-height:820px)]:hidden">
         <Link to="/vendas/link-pagamento" className="vp-promo group block p-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card">
           <p className="font-heading text-[18px] font-extrabold leading-[1.15] tracking-[-0.03em]">Cobre em segundos.</p>
           <p className="mt-1.5 text-[13px] leading-snug text-white/80">Pix ou cartão, direto de um link.</p>
