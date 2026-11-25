@@ -39,3 +39,13 @@ export function planSummary(v: PlanFormValues): string {
   const trial = trialDays(v.trial);
   return `${money} ${per}${trial > 0 ? `, com ${trial} ${trial === 1 ? "dia" : "dias"} de teste grátis` : ""}`;
 }
+
+/** Erro do servidor em linguagem do seller (pausa da equipe, plano com assinantes). */
+export function planErrorMessage(err: { message?: string } | null | undefined, fallback: string): string {
+  const m = (err?.message || "").toLowerCase();
+  if (m.includes("equipe pausou")) return "A equipe pausou este plano. Fale com o suporte para liberar.";
+  if (m.includes("tem assinantes")) return "Este plano tem assinantes e não pode ser apagado. Pause o plano em vez disso.";
+  if (m.includes("jwt") || m.includes("401")) return "Sua sessão expirou. Entre de novo para continuar.";
+  if (m.includes("permission") || m.includes("row-level")) return "Você não tem permissão para esta ação.";
+  return fallback;
+}

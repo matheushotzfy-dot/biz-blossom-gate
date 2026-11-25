@@ -4340,6 +4340,8 @@ export type Database = {
       }
       subscription_plans: {
         Row: {
+          admin_hold_at: string | null
+          admin_hold_reason: string | null
           created_at: string
           description: string | null
           id: string
@@ -4354,6 +4356,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_hold_at?: string | null
+          admin_hold_reason?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -4368,6 +4372,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_hold_at?: string | null
+          admin_hold_reason?: string | null
           created_at?: string
           description?: string | null
           id?: string

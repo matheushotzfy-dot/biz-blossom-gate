@@ -4,7 +4,11 @@ export type Plan = {
   id: string; user_id: string; product_id: string | null; name: string; description: string | null;
   price: number; interval: string; interval_count: number; trial_days: number; is_active: boolean;
   created_at: string; updated_at: string;
+  /** Pausa da equipe: o seller não reativa nem apaga o plano até o suporte liberar. */
+  admin_hold_at?: string | null;
+  admin_hold_reason?: string | null;
 };
+export const isHeldPlan = (p: Pick<Plan, "admin_hold_at">) => !!p.admin_hold_at;
 
 export type Subscription = {
   id: string; plan_id: string; subscriber_email: string; subscriber_name: string | null;

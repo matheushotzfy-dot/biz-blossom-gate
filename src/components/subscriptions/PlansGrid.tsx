@@ -3,7 +3,7 @@ import { Switch } from "@/components/ui/switch";
 import { Money } from "@/components/home/Money";
 import { cn } from "@/lib/utils";
 import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
-import { INTERVAL_UNIT, type Plan, type Subscription } from "./types";
+import { INTERVAL_UNIT, isHeldPlan, type Plan, type Subscription } from "./types";
 
 export interface PlansGridProps {
   plans: Plan[];
@@ -36,11 +36,12 @@ export function PlansGrid({ plans, subs, loading, searching, onToggle, onCreate 
     <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {plans.map((plan) => {
         const count = subs.filter((s) => s.plan_id === plan.id && (s.status === "active" || s.status === "trialing")).length;
+        const held = isHeldPlan(plan);
         return (
           <li key={plan.id} className={cn("vp-sheet flex flex-col p-6 transition-opacity", !plan.is_active && "opacity-80")}>
             <div className="flex items-start justify-between gap-3">
               <h3 className="min-w-0 truncate text-[17px] font-extrabold tracking-[-0.025em] text-foreground">{plan.name}</h3>
-              <Switch checked={plan.is_active} onCheckedChange={() => onToggle(plan)} aria-label={plan.is_active ? `Pausar ${plan.name}` : `Ativar ${plan.name}`} />
+              <Switch checked={plan.is_active && !held} disabled={held} onCheckedChange={() => onToggle(plan)} aria-label={held ? `${plan.name} está pausado pela equipe` : plan.is_active ? `Pausar ${plan.name}` : `Ativar ${plan.name}`} />
             </div>
             <p className="mt-1 line-clamp-2 min-h-[40px] text-[13.5px] leading-snug text-muted-foreground">{plan.description || "Sem descrição."}</p>
 
@@ -49,8 +50,15 @@ export function PlansGrid({ plans, subs, loading, searching, onToggle, onCreate 
               <span className="text-[14px] font-medium text-muted-foreground">por {INTERVAL_UNIT[plan.interval] ?? plan.interval}</span>
             </p>
 
+            {held && (
+              <p role="status" className="mt-4 rounded-[14px] bg-destructive/10 px-3.5 py-2.5 text-[13px] font-medium leading-snug text-destructive">
+                Pausado pela equipe. Você não consegue reativar nem apagar este plano; fale com o suporte para liberar.
+                {plan.admin_hold_reason && <span className="mt-0.5 block whitespace-pre-wrap break-words">Motivo: {plan.admin_hold_reason}</span>}
+              </p>
+            )}
+
             <div className="mt-auto flex flex-wrap items-center gap-2 pt-5">
-              <span className={cn("inline-flex h-7 items-center rounded-full px-3 text-[12.5px] font-bold", plan.is_active ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground")}>{plan.is_active ? "Ativo" : "Pausado"}</span>
+              <span className={cn("inline-flex h-7 items-center rounded-full px-3 text-[12.5px] font-bold", held ? "bg-destructive/10 text-destructive" : plan.is_active ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground")}>{held ? "Pausado pela equipe" : plan.is_active ? "Ativo" : "Pausado"}</span>
               {plan.trial_days > 0 && <span className="inline-flex h-7 items-center rounded-full bg-info/15 px-3 text-[12.5px] font-bold text-info">{plan.trial_days} {plan.trial_days === 1 ? "dia" : "dias"} de teste</span>}
               <span className="ml-auto text-[13px] tabular-nums text-muted-foreground">{count} {count === 1 ? "assinante" : "assinantes"}</span>
             </div>

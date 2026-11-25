@@ -15,9 +15,9 @@ import { SearchField } from "@/components/seller-ui/SearchField";
 import { PlansGrid } from "@/components/subscriptions/PlansGrid";
 import { SubscribersLedger } from "@/components/subscriptions/SubscribersLedger";
 import { NewPlanDialog } from "@/components/subscriptions/NewPlanDialog";
-import { trialDays, validatePlan } from "@/components/subscriptions/planMeta";
+import { planErrorMessage, trialDays, validatePlan } from "@/components/subscriptions/planMeta";
 import { parseBRL } from "@/components/seller-ui/money";
-import type { Plan, PlanFormValues, Subscription } from "@/components/subscriptions/types";
+import { isHeldPlan, type Plan, type PlanFormValues, type Subscription } from "@/components/subscriptions/types";
 
 type TabId = "plans" | "subscribers";
 
@@ -68,8 +68,10 @@ export default function Assinaturas() {
 
   const togglePlan = async (plan: Plan) => {
     if (!user) return;
-    await supabase.from("subscription_plans").update({ is_active: !plan.is_active }).eq("id", plan.id).eq("user_id", user.id);
-    toast.success(plan.is_active ? "Plano desativado" : "Plano ativado");
+    if (isHeldPlan(plan)) { toast.error("A equipe pausou este plano. Fale com o suporte para liberar."); return; }
+    const { error } = await supabase.from("subscription_plans").update({ is_active: !plan.is_active }).eq("id", plan.id).eq("user_id", user.id);
+    if (error) { toast.error(planErrorMessage(error, "Não foi possível mudar o plano. Nada foi alterado.")); fetchData(); return; }
+    toast.success(plan.is_active ? "Plano pausado" : "Plano ativado");
     fetchData();
   };
 
@@ -77,7 +79,7 @@ export default function Assinaturas() {
   const trialingCount = subs.filter(s => s.status === "trialing").length;
   const pastDueCount = subs.filter(s => s.status === "past_due").length;
   const canceledCount = subs.filter(s => s.status === "canceled").length;
-  const activePlans = plans.filter(p => p.is_active).length;
+  const activePlans = plans.filter(p => p.is_active && !isHeldPlan(p)).length;
   const orphanSubsCount = subs.filter(s => !plans.some(p => p.id === s.plan_id)).length;
 
   const mrr = activeSubs.reduce((acc, s) => {
