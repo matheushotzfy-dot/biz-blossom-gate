@@ -108,9 +108,12 @@ function PieceInfo({ award, state, revenue, revenueKnown, claimsKnown, hidden, o
           </>
         )}
         {state.kind === "cancelled" && (
-          <p className="vw-dim text-[14px] leading-relaxed">
-            O resgate desta peça foi cancelado e não dá para pedir de novo pela plataforma. Fale com o suporte para entender o motivo ou reabrir.
-          </p>
+          <>
+            <p className="vw-dim text-[14px] leading-relaxed">
+              O resgate desta peça foi cancelado e não dá para pedir de novo pela plataforma. {state.claim?.admin_notes ? "Se algo não estiver certo, fale com o suporte para reabrir." : "Fale com o suporte para entender o motivo ou reabrir."}
+            </p>
+            {state.claim?.admin_notes && <p className="vw-ink mt-2 text-[14px] leading-relaxed">Motivo: {state.claim.admin_notes}</p>}
+          </>
         )}
         {hasAction && (
           <div className="mt-4 flex flex-wrap items-center gap-2.5">

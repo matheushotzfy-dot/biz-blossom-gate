@@ -17,7 +17,7 @@ function statusPill(claim: RewardClaim): { label: string; tone: TxTone } {
 
 function Steps({ claim }: { claim: RewardClaim }) {
   if (isCancelled(claim.status)) {
-    return <p className="text-[14px] text-muted-foreground">Este resgate foi cancelado. Fale com o suporte para saber o motivo.</p>;
+    return <p className="text-[14px] text-muted-foreground">{claim.admin_notes ? "Este resgate foi cancelado. O motivo está ao lado. Se algo não estiver certo, fale com o suporte." : "Este resgate foi cancelado. Fale com o suporte para saber o motivo."}</p>;
   }
   const current = claimStepIndex(claim.status);
   return (
@@ -86,7 +86,7 @@ function Row({ claim, award }: { claim: RewardClaim; award?: AwardItem }) {
         ) : (
           !isCancelled(claim.status) && <p className="mt-1 text-[13.5px] text-muted-foreground">Rastreio ainda não informado.</p>
         )}
-        {claim.admin_notes && <p className="mt-2 rounded-[12px] bg-muted px-3 py-2 text-left text-[13px] leading-snug text-muted-foreground">{claim.admin_notes}</p>}
+        {claim.admin_notes && <p className="mt-2 rounded-[12px] bg-muted px-3 py-2 text-left text-[13px] leading-snug text-muted-foreground">{isCancelled(claim.status) ? `Motivo: ${claim.admin_notes}` : claim.admin_notes}</p>}
       </div>
     </li>
   );

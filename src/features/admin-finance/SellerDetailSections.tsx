@@ -109,46 +109,32 @@ export function SellerWithdrawalsSection({ userId, onChanged }: { userId: string
   );
 }
 
-const REWARD_STATUS = [{ v: "pending", l: "Solicitada" }, { v: "preparing", l: "Em preparo" }, { v: "shipped", l: "Enviada / a caminho" }, { v: "delivered", l: "Entregue" }, { v: "cancelled", l: "Cancelada" }];
+const REWARD_STATUS_LABEL: Record<string, string> = { pending: "Aguardando", preparing: "Em preparo", approved: "Em preparo", shipped: "Postado", delivered: "Entregue", cancelled: "Cancelado" };
 
-/** Award claims with editable status and tracking. */
+/** Pedidos de premiação do seller, só para consulta: andamento e mudanças ficam na aba Premiações. */
 export function SellerRewardsSection({ userId }: { userId: string }) {
   const { user } = useAuth();
-  const qc = useQueryClient();
-  const [edit, setEdit] = useState<Record<string, { status: string; code: string; carrier: string }>>({});
   const q = useQuery({ queryKey: ["seller-rewards", user?.id, userId], staleTime: 30000, queryFn: async () => {
     const { data, error } = await supabase.from("reward_claims").select("id,tier_label,tier_value,status,tracking_code,tracking_carrier,shipping_city,shipping_state,created_at,delivered_at").eq("user_id", userId).order("created_at", { ascending: false });
     if (error) throw new Error(rpcErrorMessage(error)); return data;
   } });
-  const save = async (id: string) => {
-    const e = edit[id]; if (!e) return;
-    const { error } = await supabase.from("reward_claims").update({
-      status: e.status, tracking_code: e.code.trim().slice(0, 100) || null, tracking_carrier: e.carrier.trim().slice(0, 60) || null,
-      delivered_at: e.status === "delivered" ? new Date().toISOString() : null,
-    }).eq("id", id).eq("user_id", userId);
-    if (error) { toast.error(rpcErrorMessage(error)); return; }
-    toast.success("Premiação atualizada"); void qc.invalidateQueries({ queryKey: ["seller-rewards", user?.id, userId] });
-  };
   if (q.isLoading) return <Spinner />;
   if (q.isError) return <LoadError retry={() => void q.refetch()} />;
   const rows = q.data ?? [];
   if (!rows.length) return <Empty text="Nenhuma premiação solicitada" />;
   return (
     <div className="space-y-2 text-xs">
-      {rows.map((r) => {
-        const e = edit[r.id] ?? { status: r.status, code: r.tracking_code ?? "", carrier: r.tracking_carrier ?? "" };
-        const set = (p: Partial<typeof e>) => setEdit((s) => ({ ...s, [r.id]: { ...e, ...p } }));
-        return (
-          <div key={r.id} className="space-y-2 rounded-xl border border-border p-3">
-            <p><span className="font-semibold">{r.tier_label}</span> · meta {brl(r.tier_value)} · pedido {fmt(r.created_at)} · {r.shipping_city ?? "—"}/{r.shipping_state ?? ""}</p>
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
-              <Select value={e.status} onValueChange={(v) => set({ status: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent className="z-[130]">{REWARD_STATUS.map((s) => <SelectItem key={s.v} value={s.v}>{s.l}</SelectItem>)}</SelectContent></Select>
-              <Input placeholder="Transportadora" maxLength={60} value={e.carrier} onChange={(ev) => set({ carrier: ev.target.value })} />
-              <Input placeholder="Código de rastreio" maxLength={100} value={e.code} onChange={(ev) => set({ code: ev.target.value })} />
-              <Button size="sm" onClick={() => void save(r.id)}>Salvar</Button>
-            </div>
-          </div>);
-      })}
+      <p className="text-muted-foreground">Só consulta. Para aceitar, postar, cancelar ou corrigir um pedido, use a aba Premiações.</p>
+      {rows.map((r) => (
+        <div key={r.id} className="space-y-1 rounded-xl border border-border p-3">
+          <p><span className="font-semibold">{r.tier_label}</span> · meta {brl(r.tier_value)} · pedido {fmt(r.created_at)} · {r.shipping_city ?? "—"}/{r.shipping_state ?? ""}</p>
+          <p className="text-muted-foreground">
+            {REWARD_STATUS_LABEL[r.status] ?? r.status}
+            {r.tracking_code ? ` · ${r.tracking_carrier ? `${r.tracking_carrier} ` : ""}${r.tracking_code}` : ""}
+            {r.delivered_at ? ` · entregue em ${fmt(r.delivered_at)}` : ""}
+          </p>
+        </div>
+      ))}
     </div>
   );
 }

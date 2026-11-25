@@ -53,7 +53,7 @@ const AffiliatesCenter = lazy(() => import("@/features/admin-affiliates/Affiliat
 const SupportCenter = lazy(() => import("@/features/admin-support/SupportCenter"));
 const SubscriptionsCenter = lazy(() => import("@/features/admin-subscriptions/SubscriptionsCenter"));
 const ReferralsCenter = lazy(() => import("@/features/admin-referrals/ReferralsCenter"));
-const AdminRewardsTab = lazy(() => import("./tabs/AdminRewardsTab"));
+const RewardsCenter = lazy(() => import("@/features/admin-rewards/RewardsCenter"));
 const AdminCorridasTab = lazy(() => import("./tabs/AdminCorridasTab"));
 const AdminGoalsTab = lazy(() => import("./tabs/AdminGoalsTab"));
 const AdminCommandCenterTab = lazy(() => import("./tabs/AdminCommandCenterTab"));
@@ -721,7 +721,7 @@ export default function AdminDashboard() {
               {activeTab === "payment-links" && isAdmin && <AdminPaymentLinksTab />}
               {activeTab === "checkout-deliveries" && isAdmin && <AdminCheckoutDeliveriesTab />}
               {activeTab === "support" && (isAdmin || hasSupportPerm) && <SupportCenter isAdmin={isAdmin} hasSupportAccess={hasSupportPerm} />}
-              {activeTab === "rewards" && isAdmin && <AdminRewardsTab profiles={profiles} />}
+              {activeTab === "rewards" && <RewardsCenter isAdmin={isAdmin} />}
               {activeTab === "corridas" && isAdmin && <AdminCorridasTab />}
               {activeTab === "goals" && isAdmin && <AdminGoalsTab />}
               {activeTab === "audit" && isAdmin && <AdminAuditTab profiles={profiles} />}
