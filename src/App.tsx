@@ -36,7 +36,6 @@ const Checkout = lazy(() => import("./pages/vendas/Checkout"));
 const CheckoutBuilder = lazy(() => import("./pages/vendas/CheckoutBuilder"));
 const ProductEditor = lazy(() => import("./pages/vendas/ProductEditor"));
 const IntegracoesHub = lazy(() => import("./pages/IntegracoesHub"));
-const Webhooks = lazy(() => import("./pages/vendas/Webhooks"));
 const Conteudo = lazy(() => import("./pages/vendas/Conteudo"));
 const CourseBuilder = lazy(() => import("./pages/vendas/CourseBuilder"));
 const Afiliados = lazy(() => import("./pages/vendas/Afiliados"));
@@ -190,7 +189,8 @@ const App = () => (
                   <Route path="/integracoes/webhooks" element={<Navigate to="/integracoes?tab=webhooks" replace />} />
                   <Route path="/integracoes/documentacao" element={<Navigate to="/integracoes?tab=api" replace />} />
                   <Route path="/integracoes/credenciais" element={<Navigate to="/integracoes?tab=keys" replace />} />
-                  <Route path="/vendas/webhooks" element={<Webhooks />} />
+                  <Route path="/vendas/webhooks" element={<Navigate to="/integracoes?tab=webhooks" replace />} />
+                  <Route path="/vendas/documentacao" element={<Navigate to="/integracoes?tab=api" replace />} />
                   <Route path="/vendas/afiliados" element={<Afiliados />} />
                   <Route path="/vendas/cupons" element={<Cupons />} />
                   <Route path="/vendas/coproducoes" element={<Coproducoes />} />

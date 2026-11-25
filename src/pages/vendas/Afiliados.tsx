@@ -21,7 +21,7 @@ import { ProgramDialog, type ProgramSaveResult, type ProgramValues } from "@/com
 import { ProgramTab, type ProgramProductRow } from "@/components/marketing/ProgramTab";
 import { MyLinksTab, type LinkProduct } from "@/components/marketing/MyLinksTab";
 import { ExploreTab } from "@/components/marketing/ExploreTab";
-import { copyText } from "@/components/marketing/copy";
+import { copyText } from "@/components/seller-ui/copy";
 import {
   COMMISSION_DEFAULT, affiliateErrorMessage, affiliateUrl, type AffiliateLink, type AffiliateSale, type CatalogProduct,
 } from "@/components/marketing/affiliateMeta";

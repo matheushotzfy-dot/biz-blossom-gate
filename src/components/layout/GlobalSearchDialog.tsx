@@ -38,7 +38,7 @@ const PAGES = [
   { label: "Identidade & KYC", href: "/perfil?tab=identidade", icon: Shield },
   { label: "Premiações", href: "/premiacoes", icon: Trophy },
   { label: "Suporte", href: "/suporte", icon: MessageSquare },
-  { label: "API Docs", href: "/vendas/documentacao", icon: BookOpen },
+  { label: "API Docs", href: "/integracoes?tab=api", icon: BookOpen },
 ];
 
 interface SearchResult {

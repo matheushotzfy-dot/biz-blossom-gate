@@ -24,7 +24,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CoLedger, type CoRow } from "@/components/marketing/CoLedger";
 import { InviteDialog, type InviteSaveResult, type InviteTarget, type InviteValues } from "@/components/marketing/InviteDialog";
-import { copyText } from "@/components/marketing/copy";
+import { copyText } from "@/components/seller-ui/copy";
 import {
   STATE_META, coErrorMessage, coState, directionOf, holdsProduct, partnerCode, yourPct, type CoDirection, type CoProduction, type CoState,
 } from "@/components/marketing/coproMeta";

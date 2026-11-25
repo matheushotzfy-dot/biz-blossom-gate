@@ -20,7 +20,7 @@ export function SupportDialogs(p: SupportDialogsProps) {
       <DialogTitle>Perguntas frequentes</DialogTitle><DialogDescription>Ajuda Vemprapay</DialogDescription>
       <div className="divide-y divide-border">{FAQ_ITEMS.map((item, i) => <div key={item.q}><Button variant="ghost" aria-expanded={p.openFaq === i} aria-controls={`support-faq-${i}`} className="h-auto w-full justify-between whitespace-normal rounded-none px-0 py-4 text-left text-sm" onClick={() => p.onOpenFaq(p.openFaq === i ? null : i)}>{item.q}<ChevronDown className="shrink-0" /></Button>{p.openFaq === i && <p id={`support-faq-${i}`} className="pb-4 text-sm leading-relaxed text-muted-foreground">{item.a}</p>}</div>)}</div>
       <div className="border-t border-border pt-3">{HELP_CATEGORIES.map(c => <Button key={c.label} variant="ghost" className="h-9 w-full justify-between px-0 text-xs" onClick={() => p.onCategory(c.subject)}>{c.label}<ArrowUpRight /></Button>)}</div>
-      <Button asChild variant="link" className="justify-start px-0"><Link to="/vendas/documentacao">Documentação<ArrowUpRight /></Link></Button>
+      <Button asChild variant="link" className="justify-start px-0"><Link to="/integracoes?tab=api">Documentação<ArrowUpRight /></Link></Button>
     </DialogContent></Dialog>
     <Dialog open={p.showComposer} onOpenChange={v => { if (!p.submitting) p.onComposer(v); }}><DialogContent className="support-surface max-h-[90dvh] w-[calc(100%-2rem)] max-w-lg overflow-y-auto rounded-lg border-border shadow-none">
       <DialogTitle>Novo chamado</DialogTitle><DialogDescription>Suporte Vemprapay</DialogDescription>

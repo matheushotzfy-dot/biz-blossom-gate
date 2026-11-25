@@ -1,87 +1,45 @@
-import { useEffect, useState } from "react";
-import { Blocks, Webhook, BookOpen, KeyRound } from "lucide-react";
-import { HubTabs, type HubTab } from "@/components/HubTabs";
+/**
+ * Integrações: apps, webhooks, credenciais de API e documentação em um só lugar.
+ * A aba vive na URL (`?tab=`), então cada uma pode ser linkada, e o voltar do navegador funciona.
+ */
+import { useSearchParams } from "react-router-dom";
 import { Seo } from "@/components/Seo";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { SectionTabs } from "@/components/seller-ui/SectionTabs";
+import { FilterPills } from "@/components/seller-ui/FilterPills";
+import { parseIntegrationTab, type IntegrationTab } from "@/components/integrations/intMeta";
 import Apps from "./vendas/Apps";
 import Webhooks from "./vendas/Webhooks";
 import Documentacao from "./vendas/Documentacao";
 import ApiKeys from "./vendas/ApiKeys";
 
-const TABS: HubTab[] = [
- { id: "apps", label: "Integrações", icon: Blocks },
- { id: "webhooks", label: "Webhooks", icon: Webhook },
- { id: "api", label: "API Docs", icon: BookOpen },
- { id: "keys", label: "Credenciais API", icon: KeyRound },
-];
-
-const COMPONENTS: Record<string, React.FC> = {
- apps: Apps,
- webhooks: Webhooks,
- api: Documentacao,
- keys: ApiKeys,
-};
-
-// Aliases para nomes usados em links antigos
-const TAB_ALIASES: Record<string, string> = {
- documentacao: "api",
- credenciais: "keys",
-};
-
-const PATH_TABS: Record<string, string> = {
- "/integracoes/apps": "apps",
- "/integracoes/webhooks": "webhooks",
- "/integracoes/documentacao": "api",
- "/integracoes/credenciais": "keys",
-};
-
-const TAB_PATHS: Record<string, string> = {
- apps: "/integracoes/apps",
- webhooks: "/integracoes/webhooks",
- api: "/integracoes/documentacao",
- keys: "/integracoes/credenciais",
-};
+const PAGES: Record<IntegrationTab, React.FC> = { apps: Apps, webhooks: Webhooks, keys: ApiKeys, api: Documentacao };
 
 export default function IntegracoesHub() {
- const location = useLocation();
- const navigate = useNavigate();
- const [searchParams, setSearchParams] = useSearchParams();
- const routeTab = PATH_TABS[location.pathname];
- const rawInitial = routeTab || searchParams.get("tab") || "";
- const initialTab = TAB_ALIASES[rawInitial] || rawInitial;
- const [tab, setTab] = useState(initialTab && COMPONENTS[initialTab] ? initialTab : "apps");
+  const [params, setParams] = useSearchParams();
+  const tab = parseIntegrationTab(params.get("tab"));
+  const Page = PAGES[tab];
 
- useEffect(() => {
-  const pathnameTab = PATH_TABS[location.pathname];
-  if (pathnameTab) {
-   setTab(pathnameTab);
-   return;
-  }
+  const go = (next: IntegrationTab) => setParams(next === "apps" ? {} : { tab: next }, { replace: true });
 
- const rawParam = searchParams.get("tab") || "";
- const paramTab = TAB_ALIASES[rawParam] || rawParam;
- if (paramTab && COMPONENTS[paramTab]) {
-   setTab(paramTab);
- }
- }, [location.pathname, searchParams]);
-
- const handleTabChange = (nextTab: string) => {
-  setTab(nextTab);
-  const nextPath = TAB_PATHS[nextTab];
-  if (nextPath) {
-   navigate(nextPath, { replace: true });
-   return;
-  }
-  setSearchParams(nextTab === "apps" ? {} : { tab: nextTab }, { replace: true });
- };
-
- const ActiveComponent = COMPONENTS[tab] || Apps;
-
- return (
- <>
- <Seo title="Integrações | Vemprapay" description="Conecte apps, webhooks, gerencie chaves de API e consulte a documentação técnica." path="/integracoes" noindex />
- <HubTabs tabs={TABS} active={tab} onChange={handleTabChange} />
- <ActiveComponent />
- </>
- );
+  return (
+    <div className="space-y-5 md:space-y-6">
+      <Seo title="Integrações | Vemprapay" description="Conecte apps, receba eventos por webhook, gerencie chaves de API e consulte a documentação." path="/integracoes" noindex />
+      <SectionTabs section="apps" />
+      {/* No celular a navegação já está no SectionTabs acima; as pílulas entram a partir do tablet. */}
+      <div className="hidden md:block">
+        <FilterPills<IntegrationTab>
+          label="Áreas de integrações"
+          value={tab}
+          onChange={go}
+          options={[
+            { value: "apps", label: "Apps" },
+            { value: "webhooks", label: "Webhooks" },
+            { value: "keys", label: "Credenciais de API" },
+            { value: "api", label: "Documentação" },
+          ]}
+        />
+      </div>
+      <Page />
+    </div>
+  );
 }

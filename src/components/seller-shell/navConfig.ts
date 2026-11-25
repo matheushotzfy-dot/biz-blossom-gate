@@ -57,7 +57,7 @@ export const SELLER_NAV: SellerNavSection[] = [
     ],
   },
   {
-    id: "apps", label: "Integrações", url: "/integracoes", icon: Blocks, match: ["/integracoes", "/vendas/webhooks"],
+    id: "apps", label: "Integrações", url: "/integracoes", icon: Blocks, match: ["/integracoes"],
     links: [
       { title: "Apps", desc: "Conecte ferramentas", url: "/integracoes?tab=apps", icon: Puzzle },
       { title: "Webhooks", desc: "Eventos em tempo real", url: "/integracoes?tab=webhooks", icon: Webhook },

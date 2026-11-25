@@ -1,387 +1,201 @@
-import { useState, useEffect, useMemo } from "react";
-import { KeyRound, Plus, Copy, Search, Pencil, Trash2, BookOpen } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+/**
+ * Credenciais de API: chaves para o sistema do vendedor falar com a Vemprapay.
+ * A chave secreta nasce na edge function `generate-api-key` e só aparece uma vez; o banco guarda o hash.
+ * Pausar é reversível. Revogar é permanente (o banco recusa reativar) e exige confirmação.
+ */
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { AlertCircle, BookOpenText, KeyRound, Plus } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Link } from "react-router-dom";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
-} from "@/components/ui/dialog";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { Seo } from "@/components/Seo";
+import { PageHead } from "@/components/seller-ui/PageHead";
+import { StatBand } from "@/components/seller-ui/StatBand";
+import { SearchField } from "@/components/seller-ui/SearchField";
+import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
+import { copyText } from "@/components/seller-ui/copy";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { KeyNameDialog, SecretDialog, type KeyNameTarget, type RevealedKey, type SaveResult } from "@/components/integrations/KeyDialogs";
+import { KeysLedger } from "@/components/integrations/KeysLedger";
+import { MAX_API_KEYS, ago, daysUntil, functionErrorMessage, keyState, type ApiKeyRow } from "@/components/integrations/intMeta";
 
-interface ApiKey {
-  id: string;
-  name: string;
-  public_key: string;
-  secret_key_prefix: string;
-  is_active: boolean;
-  created_at: string;
-  last_used_at: string | null;
-}
+const COLUMNS = "id, name, public_key, secret_key_prefix, is_active, created_at, last_used_at, expires_at, revoked_at";
+
+type Confirm = { kind: "revoke" | "delete"; key: ApiKeyRow } | null;
 
 export default function ApiKeys() {
   const { user } = useAuth();
-  const [keys, setKeys] = useState<ApiKey[]>([]);
+  const [keys, setKeys] = useState<ApiKeyRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [newKeyName, setNewKeyName] = useState("Produção");
-  const [newKeyData, setNewKeyData] = useState<{ secret_key?: string } | null>(null);
-  const [creating, setCreating] = useState(false);
-  const [editingKey, setEditingKey] = useState<ApiKey | null>(null);
-  const [editName, setEditName] = useState("");
+  const [loadError, setLoadError] = useState(false);
+  const [q, setQ] = useState("");
+  const [nameTarget, setNameTarget] = useState<{ target: KeyNameTarget; id?: string } | null>(null);
+  const [revealed, setRevealed] = useState<RevealedKey | null>(null);
+  const [confirm, setConfirm] = useState<Confirm>(null);
+  const [confirmBusy, setConfirmBusy] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
-  const fetchKeys = async () => {
+  const load = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from("api_keys")
-      .select("id, name, public_key, secret_key_prefix, is_active, created_at, last_used_at")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-    if (data) setKeys(data as ApiKey[]);
+    const { data, error } = await supabase.from("api_keys").select(COLUMNS).eq("user_id", user.id).order("created_at", { ascending: false });
+    if (error) { setLoadError(true); } else { setKeys((data ?? []) as ApiKeyRow[]); setLoadError(false); }
     setLoading(false);
+  }, [user]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  const stats = useMemo(() => {
+    const live = keys.filter((k) => keyState(k) === "active");
+    const used = keys.map((k) => k.last_used_at).filter((v): v is string => !!v).sort().pop() ?? null;
+    const soon = live.filter((k) => k.expires_at && daysUntil(k.expires_at) <= 14).length;
+    return { live: live.length, used, soon };
+  }, [keys]);
+
+  const shown = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return term ? keys.filter((k) => k.name.toLowerCase().includes(term) || k.public_key.toLowerCase().includes(term)) : keys;
+  }, [keys, q]);
+
+  const full = keys.length >= MAX_API_KEYS;
+
+  const saveName = async (name: string): Promise<SaveResult> => {
+    const editing = nameTarget?.id;
+    const { data, error } = await supabase.functions.invoke("generate-api-key", { body: editing ? { action: "rename", keyId: editing, name } : { action: "create", name } });
+    if (error || !data?.success) return { ok: false, message: await functionErrorMessage(error, editing ? "Não foi possível renomear a chave." : "Não foi possível criar a chave.") };
+    setNameTarget(null);
+    if (editing) { toast.success("Nome atualizado."); }
+    else { setRevealed({ name: data.data.name, public_key: data.data.public_key, secret_key: data.data.secret_key }); }
+    await load();
+    return { ok: true };
   };
 
-  useEffect(() => { fetchKeys(); }, [user]);
-
-  const handleCreate = async () => {
-    setCreating(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("generate-api-key", {
-        body: { action: "create", name: newKeyName },
-      });
-      if (error || !data?.success) { toast.error("Erro ao criar chave"); return; }
-      setNewKeyData(data.data);
-      setShowCreateDialog(false);
-      fetchKeys();
-    } finally { setCreating(false); }
+  const toggle = async (k: ApiKeyRow) => {
+    if (!user || busyId) return;
+    const next = !k.is_active;
+    setBusyId(k.id);
+    const { error } = await supabase.from("api_keys").update({ is_active: next }).eq("id", k.id).eq("user_id", user.id);
+    setBusyId(null);
+    if (error) { toast.error(next ? "Não foi possível reativar a chave." : "Não foi possível pausar a chave."); return; }
+    toast.success(next ? "Chave reativada." : "Chave pausada. Ela não autentica enquanto estiver assim.");
+    await load();
   };
 
-  const handleRename = async () => {
-    if (!editingKey || !editName.trim()) return;
-    const { error } = await supabase.functions.invoke("generate-api-key", {
-      body: { action: "rename", keyId: editingKey.id, name: editName.trim() },
-    });
-    if (error) { toast.error("Erro ao renomear"); return; }
-    toast.success("Nome atualizado");
-    setEditingKey(null);
-    fetchKeys();
+  const copyPublic = (k: ApiKeyRow) => { void copyText(k.public_key, "Chave pública copiada."); };
+
+  const runConfirm = async () => {
+    if (!confirm || !user) return;
+    const { kind, key } = confirm;
+    setConfirmBusy(true);
+    if (kind === "revoke") {
+      const { error } = await supabase.from("api_keys").update({ is_active: false, revoked_at: new Date().toISOString() }).eq("id", key.id).eq("user_id", user.id);
+      setConfirmBusy(false);
+      if (error) { toast.error("Não foi possível revogar a chave. Tente de novo."); return; }
+      toast.success("Chave revogada.");
+    } else {
+      const { error } = await supabase.functions.invoke("generate-api-key", { body: { action: "delete", keyId: key.id } });
+      setConfirmBusy(false);
+      if (error) { toast.error(await functionErrorMessage(error, "Não foi possível excluir a chave.")); return; }
+      toast.success("Chave excluída.");
+    }
+    setConfirm(null);
+    await load();
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Excluir a credencial "${name}"? Esta ação não pode ser desfeita.`)) return;
-    const { error } = await supabase.functions.invoke("generate-api-key", {
-      body: { action: "delete", keyId: id },
-    });
-    if (error) { toast.error("Erro ao excluir"); return; }
-    toast.success("Credencial excluída");
-    fetchKeys();
+  const newKey = () => {
+    if (full) { toast.error(`Você já tem ${MAX_API_KEYS} chaves. Exclua uma para criar outra.`); return; }
+    setNameTarget({ target: { mode: "create" } });
   };
 
-  const filtered = useMemo(() =>
-    keys.filter(k => !query || k.name.toLowerCase().includes(query.toLowerCase())),
-    [keys, query]
-  );
-
-  const activeCount = keys.filter(k => k.is_active).length;
+  const empty = !loading && !loadError && keys.length === 0;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Header — clean */}
-      <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl md:text-[28px] font-semibold tracking-tight text-foreground">
-            Credenciais API
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Chaves publishable e secretas para autenticar requisições na API Vemprapay.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link
-            to="/vendas/documentacao"
-            className="h-10 px-3.5 rounded-lg border border-border/60 bg-card text-sm text-muted-foreground hover:text-foreground hover:bg-muted/40 inline-flex items-center gap-2 transition-colors"
-          >
-            <BookOpen className="h-4 w-4" /> Documentação
-          </Link>
-          <Button
-            onClick={() => setShowCreateDialog(true)}
-            className="h-10 px-4 rounded-lg text-sm font-medium gap-2"
-          >
-            <Plus className="h-4 w-4" /> Nova chave
-          </Button>
-        </div>
-      </header>
+    <div className="vp-fade space-y-5 pb-6 md:space-y-6">
+      <Seo title="Credenciais de API | Vemprapay" description="Crie e gerencie as chaves que conectam o seu sistema à Vemprapay." path="/integracoes?tab=keys" noindex />
 
-      {/* Minimal metric strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 rounded-[12px] border border-border/60 bg-card divide-x divide-border/60">
-        {[
-          { label: "Credenciais", value: String(keys.length) },
-          { label: "Ativas", value: String(activeCount) },
-          { label: "Criptografia", value: "SHA-256" },
-          { label: "Autenticação", value: "Bearer" },
-        ].map((item, i) => (
-          <div key={item.label} className={cn("px-5 py-4", i >= 2 && "hidden md:block")}>
-            <p className="text-[11px] text-muted-foreground">{item.label}</p>
-            <p className="mt-1 text-lg font-semibold text-foreground tabular-nums tracking-tight">{item.value}</p>
-          </div>
-        ))}
-      </div>
+      <PageHead
+        title="Credenciais de API"
+        subtitle="Chaves para o seu sistema falar com a Vemprapay. A chave secreta aparece uma única vez, na hora de criar."
+        actions={
+          <>
+            <Link to="/integracoes?tab=api" className="vp-ghost"><BookOpenText className="h-[18px] w-[18px]" />Documentação</Link>
+            <button type="button" className="vp-cta" onClick={newKey}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} />Nova chave</button>
+          </>
+        }
+      />
 
-      {/* Table */}
-      <div className="bg-card rounded-[12px] border border-border/60 overflow-hidden">
-        <div className="px-5 py-4 border-b border-border/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-semibold text-foreground">Suas credenciais</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {keys.length === 0 ? "Nenhuma chave gerada" : `${keys.length} ${keys.length === 1 ? "chave" : "chaves"}`}
-            </p>
-          </div>
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60" size={14} />
-            <input
-              type="text"
-              placeholder="Buscar por nome…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="w-full h-9 pl-9 pr-3 bg-background border border-border/60 rounded-lg text-sm focus:outline-none focus:border-border"
-            />
-          </div>
-        </div>
+      <StatBand
+        label="Resumo das chaves"
+        cells={[
+          { label: "Chaves ativas", featured: true, loading, value: String(stats.live), sub: stats.live === 0 ? "Nenhuma autenticando agora" : "Autenticando requisições" },
+          { label: "Último uso", loading, value: stats.used ? ago(stats.used) : "Nunca", sub: stats.used ? "Em qualquer chave" : "Nenhuma requisição ainda" },
+          { label: "Perto de expirar", loading, value: String(stats.soon), sub: stats.soon > 0 ? "Vencem em até 14 dias" : "Nada vencendo em breve" },
+          { label: "Espaço", loading, value: `${keys.length} de ${MAX_API_KEYS}`, sub: full ? "Exclua uma chave para criar outra" : "Chaves criadas" },
+        ]}
+      />
 
-        {/* Mobile cards */}
-        <div className="md:hidden divide-y divide-border/60">
-          {loading ? (
-            Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="px-4 py-4 space-y-2 animate-pulse">
-                <div className="h-4 w-32 rounded bg-muted/60" />
-                <div className="h-8 rounded bg-muted/30" />
-              </div>
-            ))
-          ) : filtered.length === 0 ? (
-            <div className="px-6 py-12 text-center">
-              <KeyRound size={20} className="mx-auto text-muted-foreground/40" />
-              <p className="mt-3 text-sm text-foreground">Nenhuma credencial ainda</p>
-              <p className="text-xs text-muted-foreground mt-1">Gere uma chave para integrar via API.</p>
-            </div>
+      <p role="note" className="rounded-[16px] bg-muted px-4 py-3 text-[13.5px] font-medium leading-snug text-foreground/80">
+        A API pública de cobranças ainda não está aberta para uso. Você já pode criar e guardar suas chaves: elas passam a valer assim que a API for liberada.
+      </p>
+
+      {loadError ? (
+        <section className="vp-sheet">
+          <EmptyPanel icon={<AlertCircle className="h-7 w-7" strokeWidth={1.8} />} title="Não foi possível carregar as chaves" text="Confira sua conexão e tente de novo. Suas chaves continuam salvas." action={<button type="button" className="vp-ghost" onClick={() => { setLoading(true); void load(); }}>Tentar de novo</button>} />
+        </section>
+      ) : loading ? (
+        <div className="space-y-3" aria-busy="true">{Array.from({ length: 3 }, (_, i) => <div key={i} className="vp-skel h-[84px] !rounded-[22px]" />)}</div>
+      ) : empty ? (
+        <section className="vp-sheet">
+          <EmptyPanel
+            icon={<KeyRound className="h-7 w-7" strokeWidth={1.8} />}
+            title="Crie sua primeira chave"
+            text="Use uma chave por sistema ou ambiente. Se uma vazar, você revoga só ela e o resto continua funcionando."
+            action={<button type="button" className="vp-cta" onClick={newKey}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} />Nova chave</button>}
+          />
+        </section>
+      ) : (
+        <>
+          {keys.length > 3 && <SearchField label="Buscar chave" value={q} onChange={setQ} placeholder="Nome ou chave pública" className="sm:w-[320px]" />}
+          {shown.length === 0 ? (
+            <section className="vp-sheet">
+              <EmptyPanel title="Nenhuma chave encontrada" text="Tente outro nome." action={<button type="button" className="vp-ghost" onClick={() => setQ("")}>Limpar busca</button>} />
+            </section>
           ) : (
-            filtered.map((k) => (
-              <div key={k.id} className="px-4 py-4 space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{k.name}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      {k.last_used_at ? `Usada ${format(new Date(k.last_used_at), "dd MMM HH:mm", { locale: ptBR })}` : "Nunca utilizada"}
-                    </p>
-                  </div>
-                  <span className={cn(
- "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium",
-                    k.is_active ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-muted text-muted-foreground"
-                  )}>
-                    <span className={cn("h-1.5 w-1.5 rounded-full", k.is_active ? "bg-emerald-500" : "bg-muted-foreground/40")} />
-                    {k.is_active ? "Ativa" : "Revogada"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 rounded-lg bg-muted/40 border border-border/60 px-2.5 py-1.5">
-                  <code className="flex-1 text-[11px] font-mono text-muted-foreground truncate">{k.public_key}</code>
-                  <button
-                    onClick={() => { navigator.clipboard.writeText(k.public_key); toast.success("Chave pública copiada"); }}
-                    className="h-6 w-6 rounded-md hover:bg-background inline-flex items-center justify-center text-muted-foreground"
-                  >
-                    <Copy size={12} />
-                  </button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => { setEditingKey(k); setEditName(k.name); }}
-                    className="flex-1 h-8 rounded-lg border border-border/60 text-xs text-foreground inline-flex items-center justify-center gap-1.5 hover:bg-muted/40"
-                  >
-                    <Pencil size={12} /> Renomear
-                  </button>
-                  <button
-                    onClick={() => handleDelete(k.id, k.name)}
-                    className="h-8 w-8 rounded-lg border border-border/60 text-muted-foreground hover:text-destructive hover:border-destructive/40 inline-flex items-center justify-center"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </div>
-              </div>
-            ))
+            <KeysLedger
+              keys={shown} busyId={busyId}
+              onCopy={copyPublic}
+              onRename={(k) => setNameTarget({ target: { mode: "rename", name: k.name }, id: k.id })}
+              onToggle={(k) => void toggle(k)}
+              onRevoke={(k) => setConfirm({ kind: "revoke", key: k })}
+              onDelete={(k) => setConfirm({ kind: "delete", key: k })}
+            />
           )}
-        </div>
+        </>
+      )}
 
-        {/* Desktop table */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="text-xs text-muted-foreground border-b border-border/60">
-                <th className="px-5 py-3 font-medium">Nome / Chave pública</th>
-                <th className="px-5 py-3 font-medium">Último uso</th>
-                <th className="px-5 py-3 font-medium">Status</th>
-                <th className="px-5 py-3 font-medium text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/60">
-              {loading ? (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <tr key={i} className="animate-pulse">
-                    <td className="px-5 py-4"><div className="h-4 w-40 rounded bg-muted/60" /></td>
-                    <td className="px-5 py-4"><div className="h-4 w-20 rounded bg-muted/60" /></td>
-                    <td className="px-5 py-4"><div className="h-4 w-14 rounded bg-muted/60" /></td>
-                    <td className="px-5 py-4"><div className="h-4 w-16 ml-auto rounded bg-muted/60" /></td>
-                  </tr>
-                ))
-              ) : filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-5 py-16 text-center">
-                    <KeyRound size={20} className="mx-auto text-muted-foreground/40" />
-                    <p className="mt-3 text-sm text-foreground">Nenhuma credencial gerada</p>
-                    <p className="text-xs text-muted-foreground mt-1">Clique em "Nova chave" para começar.</p>
-                  </td>
-                </tr>
-              ) : (
-                filtered.map((k) => (
-                  <tr key={k.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-5 py-4">
-                      <p className="font-medium text-foreground">{k.name}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <code className="text-[11px] font-mono text-muted-foreground truncate max-w-[300px]">{k.public_key}</code>
-                        <button
-                          onClick={() => { navigator.clipboard.writeText(k.public_key); toast.success("Chave pública copiada"); }}
-                          className="p-1 rounded hover:bg-muted text-muted-foreground/70 hover:text-foreground transition-colors"
-                          title="Copiar chave pública"
-                        >
-                          <Copy size={11} />
-                        </button>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 text-muted-foreground tabular-nums">
-                      {k.last_used_at
-                        ? format(new Date(k.last_used_at), "dd MMM yyyy 'às' HH:mm", { locale: ptBR })
-                        : "—"}
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className={cn(
- "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium",
-                        k.is_active ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-muted text-muted-foreground"
-                      )}>
-                        <span className={cn("h-1.5 w-1.5 rounded-full", k.is_active ? "bg-emerald-500" : "bg-muted-foreground/40")} />
-                        {k.is_active ? "Ativa" : "Revogada"}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <div className="inline-flex items-center gap-1">
-                        <button
-                          onClick={() => { setEditingKey(k); setEditName(k.name); }}
-                          className="h-8 w-8 rounded-lg inline-flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                          title="Renomear"
-                        >
-                          <Pencil size={14} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(k.id, k.name)}
-                          className="h-8 w-8 rounded-lg inline-flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                          title="Excluir"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <KeyNameDialog target={nameTarget?.target ?? null} onOpenChange={(o) => { if (!o) setNameTarget(null); }} onSave={saveName} />
+      <SecretDialog value={revealed} onClose={() => setRevealed(null)} />
 
-      {/* Create dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-md bg-card border-border/60 rounded-[12px]">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">Nova credencial</DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground">
-              Escolha um nome para identificar essa chave.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-2 space-y-4">
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Nome da chave</Label>
-              <Input
-                value={newKeyName}
-                onChange={(e) => setNewKeyName(e.target.value)}
-                placeholder="Ex: App Produção"
-                className="h-10 rounded-lg"
-              />
-            </div>
-            <Button onClick={handleCreate} disabled={creating} className="w-full h-10 rounded-lg">
-              {creating ? "Gerando…" : "Gerar credencial"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Secret reveal dialog */}
-      <Dialog open={!!newKeyData} onOpenChange={() => setNewKeyData(null)}>
-        <DialogContent className="max-w-lg bg-card border-border/60 rounded-[12px]">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">Credencial gerada</DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground">
-              Copie a <code className="font-mono text-foreground">secret key</code> agora. Por segurança, ela não será exibida novamente.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-2 space-y-4">
-            <div className="p-4 rounded-xl bg-muted/40 border border-border/60">
-              <p className="text-[11px] text-muted-foreground mb-2">Secret key</p>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 font-mono text-xs text-foreground truncate">{newKeyData?.secret_key}</code>
-                <button
-                  onClick={() => { navigator.clipboard.writeText(newKeyData?.secret_key ?? ""); toast.success("Copiado!"); }}
-                  className="h-8 w-8 rounded-lg bg-background border border-border/60 inline-flex items-center justify-center text-muted-foreground hover:text-foreground"
-                >
-                  <Copy size={14} />
-                </button>
-              </div>
-            </div>
-            <Button onClick={() => setNewKeyData(null)} className="w-full h-10 rounded-lg">
-              Já salvei minha chave
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Rename dialog */}
-      <Dialog open={!!editingKey} onOpenChange={(o) => !o && setEditingKey(null)}>
-        <DialogContent className="max-w-md bg-card border-border/60 rounded-[12px]">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">Renomear credencial</DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground">
-              Apenas o nome de exibição é alterado. As chaves continuam as mesmas.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-2 space-y-4">
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Novo nome</Label>
-              <Input
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                placeholder="Ex: Produção"
-                className="h-10 rounded-lg"
-                autoFocus
-              />
-            </div>
-            <Button onClick={handleRename} disabled={!editName.trim()} className="w-full h-10 rounded-lg">
-              Salvar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AlertDialog open={!!confirm} onOpenChange={(o) => { if (!o && !confirmBusy) setConfirm(null); }}>
+        <AlertDialogContent className="rounded-[28px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirm?.kind === "revoke" ? `Revogar "${confirm.key.name}"?` : `Excluir "${confirm?.key.name}"?`}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirm?.kind === "revoke"
+                ? "A chave para de funcionar na hora e não pode ser reativada. Quem usa essa chave vai receber erro de autenticação. A chave continua na lista como revogada."
+                : confirm && keyState(confirm.key) === "active"
+                  ? "A chave deixa de funcionar e some da lista. Quem usa essa chave vai receber erro de autenticação. Isso não pode ser desfeito."
+                  : "A chave some da lista. Isso não pode ser desfeito."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={confirmBusy}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction className="vp-cta vp-cta-danger" disabled={confirmBusy} onClick={(e) => { e.preventDefault(); void runConfirm(); }}>
+              {confirmBusy ? "Aguarde…" : confirm?.kind === "revoke" ? "Revogar chave" : "Excluir chave"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
