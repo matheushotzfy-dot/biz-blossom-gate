@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { buildCorsHeaders as buildCors, safeError } from "../_shared/security.ts";
 
-/** Password validation followed by a mandatory, single-use email OTP. */
+/** Password login for admin/employee accounts. The email-code step is currently off (owner's decision); failures answer 4xx with { success:false, error, locked? }. */
 Deno.serve(async (req) => {
   const corsHeaders = buildCors(req);
   if (req.method === "OPTIONS") {

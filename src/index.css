@@ -4953,3 +4953,6 @@ html.vp-seller .fixed.inset-0[aria-hidden="true"][data-state="open"] {
 html.vp-noir .fixed.inset-0[aria-hidden="true"][data-state="open"] { background-color: hsl(0 0% 0% / .62); }
 @keyframes vp-scrim { from { background-color: hsl(222 47% 11% / 0); } }
 @media (prefers-reduced-motion: reduce) { html.vp-seller .fixed.inset-0[aria-hidden="true"][data-state="open"] { animation: none; } }
+
+/* Campo do login do admin com erro de preenchimento. */
+.admin-frame .af-input[aria-invalid="true"] { border-color: var(--as-danger) !important; }
