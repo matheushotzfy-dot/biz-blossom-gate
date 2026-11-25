@@ -57,7 +57,7 @@ export default function AdminManagersTab({ profiles, onReload }: Props) {
     setSaving(false);
     if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Limites salvos.");
-    await logAdminAction("update_manager_fee_limits", "manager_fee_limits", limitsId ?? "global", payload as any);
+    await logAdminAction("update_manager_fee_limits", "manager_fee_limits", limitsId ?? "global", payload);
   };
 
   return (

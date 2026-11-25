@@ -19,6 +19,8 @@ import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { friendlyError } from "@/lib/friendlyError";
 import { logAdminAction } from "@/lib/auditLog";
+import { functionErrorMessage } from "@/lib/functionError";
+import { StaffPasswordDialog, generateStaffPassword } from "./StaffPasswordDialog";
 
 import { STAFF_PERMISSIONS, DEFAULT_STAFF_LIMITS, validStaffLimits, type StaffFeeLimits } from "@/features/staff/staffPolicy";
 export { STAFF_PERMISSIONS };
@@ -43,13 +45,8 @@ interface StaffRow {
 
 type SortKey = "name" | "pct" | "permissions" | "assigned" | "status";
 
-function genPassword(len = 14) {
-  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%";
-  const arr = crypto.getRandomValues(new Uint8Array(len));
-  return Array.from(arr).map((b) => chars[b % chars.length]).join("");
-}
-
 export default function StaffManagementTab({ profiles, onReload, role }: Props) {
+  const [passwordTarget, setPasswordTarget] = useState<StaffRow | null>(null);
   const [rows, setRows] = useState<StaffRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
@@ -147,7 +144,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
       body: { action, target_user_id: row.user_id },
     });
     if (error || (data as { error?: string })?.error) {
-      toast.error((data as { error?: string })?.error ?? error?.message ?? "Erro");
+      toast.error(await functionErrorMessage(error, data, "Não foi possível alterar a conta."));
       return;
     }
     toast.success(row.frozen ? "Conta descongelada" : "Conta congelada");
@@ -156,20 +153,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
     onReload?.();
   };
 
-  const resetPassword = async (row: StaffRow) => {
-    const pw = prompt("Nova senha (mín. 8):", genPassword());
-    if (!pw || pw.length < 8) return;
-    const { data, error } = await supabase.functions.invoke("admin-manage-staff", {
-      body: { action: "reset_password", target_user_id: row.user_id, password: pw },
-    });
-    if (error || (data as { error?: string })?.error) {
-      toast.error((data as { error?: string })?.error ?? error?.message ?? "Erro");
-      return;
-    }
-    const copied = await navigator.clipboard.writeText(pw).then(() => true).catch(() => false);
-    toast.success(copied ? "Senha redefinida e copiada." : "Senha redefinida; cópia indisponível neste navegador.");
-    await logAdminAction("reset_staff_password", "staff", row.user_id);
-  };
+  const resetPassword = (row: StaffRow) => setPasswordTarget(row);
 
   const setPct = async (row: StaffRow, value: number) => {
     if (!Number.isFinite(value) || value < 0 || value > 50) return;
@@ -373,6 +357,8 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
         onSaved={load}
       />
 
+      <StaffPasswordDialog target={passwordTarget} onClose={() => setPasswordTarget(null)} />
+
       <AuditDialog
         row={showAudit}
         rows={auditRows}
@@ -437,7 +423,7 @@ function CreateStaffDialog({ open, onOpenChange, role, onCreated }: {
 }) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-  const [password, setPassword] = useState(genPassword());
+  const [password, setPassword] = useState(generateStaffPassword());
   const [pct, setPct] = useState(role === "manager" ? 0.20 : 0.10);
   const [showPw, setShowPw] = useState(false);
   const [perms, setPerms] = useState<Set<string>>(new Set());
@@ -446,7 +432,7 @@ function CreateStaffDialog({ open, onOpenChange, role, onCreated }: {
 
   useEffect(() => {
     if (open) {
-      setEmail(""); setName(""); setPassword(genPassword()); setSubmitting(false);
+      setEmail(""); setName(""); setPassword(generateStaffPassword()); setSubmitting(false);
       setPct(role === "manager" ? 0.20 : 0.10);
       setPerms(new Set()); setLimits(DEFAULT_STAFF_LIMITS);
     }
@@ -469,13 +455,13 @@ function CreateStaffDialog({ open, onOpenChange, role, onCreated }: {
     });
     setSubmitting(false);
     if (error || (data as { error?: string })?.error) {
-      toast.error((data as { error?: string })?.error ?? error?.message ?? "Falha");
+      toast.error(await functionErrorMessage(error, data, "Não foi possível criar a conta."));
       return;
     }
+    await logAdminAction("create_staff", "staff", (data as { user_id?: string })?.user_id ?? email, { email, role, permissions: Array.from(perms), commission_pct: pct });
     const copied = await navigator.clipboard.writeText(`Email: ${email}\nSenha: ${password}`).then(() => true).catch(() => false);
     toast.success(copied ? "Conta criada. Credenciais copiadas." : "Conta criada; cópia indisponível. Anote a senha antes de fechar.");
     if (!copied) { onCreated(); return; }
-    await logAdminAction("create_staff", "staff", (data as { user_id?: string })?.user_id ?? email, { email, role, permissions: Array.from(perms), commission_pct: pct });
     onOpenChange(false);
     onCreated();
   };
@@ -523,7 +509,7 @@ function CreateStaffDialog({ open, onOpenChange, role, onCreated }: {
                   <Button type="button" size="sm" variant="outline" onClick={() => setShowPw((v) => !v)} className="h-9 w-9 p-0">
                     {showPw ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                   </Button>
-                  <Button type="button" size="sm" variant="outline" onClick={() => setPassword(genPassword())} className="h-9 w-9 p-0">
+                  <Button type="button" size="sm" variant="outline" onClick={() => setPassword(generateStaffPassword())} className="h-9 w-9 p-0">
                     <RefreshCw className="h-3.5 w-3.5" />
                   </Button>
                   <Button type="button" size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(password); toast.success("Copiada"); }} className="h-9 w-9 p-0">

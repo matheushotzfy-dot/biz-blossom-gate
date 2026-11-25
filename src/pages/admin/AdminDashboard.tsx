@@ -4,6 +4,8 @@ import { uniqueChannelName } from "@/lib/realtime";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTheme } from "@/hooks/useTheme";
+import { useSellerSkin } from "@/hooks/useSellerSkin";
+import { useConfirm, useReason } from "@/components/seller-ui/confirm";
 import { useIdleLogout } from "@/hooks/useIdleLogout";
 import {
   Shield, LogOut, Zap, LayoutDashboard, Users, Package, AlertTriangle,
@@ -159,6 +161,10 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { theme, toggleTheme } = useTheme();
+  // Os diálogos do admin (portais fora da casca) usam o kit seller-ui, que depende destas classes no <html>.
+  useSellerSkin();
+  const { ask: askReason, dialog: reasonDialog } = useReason();
+  const { ask: askConfirm, dialog: confirmDialog } = useConfirm();
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
   const [profiles, setProfiles] = useState<Tables<"profiles">[]>([]);
   const [products, setProducts] = useState<Tables<"products">[]>([]);
@@ -342,8 +348,15 @@ export default function AdminDashboard() {
       toast.error("Saques estão indisponíveis sem uma adquirente configurada.");
       return;
     } else {
-      const reason = window.prompt("Motivo da recusa (mínimo 5 caracteres):")?.trim() ?? "";
-      if (reason.length < 5) { toast.error("Informe um motivo com pelo menos 5 caracteres."); return; }
+      const reason = await askReason({
+        title: "Recusar este saque",
+        description: "O valor reservado volta para o saldo do seller. O motivo fica registrado na auditoria; o seller recebe só o aviso de saque recusado.",
+        label: "Motivo da recusa",
+        minLength: 5,
+        confirmLabel: "Recusar saque",
+        tone: "danger",
+      });
+      if (!reason) return;
       const { error, data: updated } = await supabase.from("withdrawals").update({ status: "rejected", rejection_reason: reason.slice(0, 500), processed_by: user?.id ?? null }).eq("id", id).eq("status", "pending").select("id");
       if (error) { toast.error("Erro ao recusar"); return; }
       if (!updated || updated.length === 0) { toast.error("Saque já foi processado"); loadData(); return; }
@@ -356,7 +369,14 @@ export default function AdminDashboard() {
   const handleUserStatus = async (userId: string, status: string) => {
     // Alterar status de conta é ação privilegiada: apenas admin.
     if (!isAdmin) { toast.error("Sem permissão"); return; }
-    if (!window.confirm(status === "approved" ? "Confirmar aprovação desta conta?" : "Confirmar bloqueio desta conta?")) return;
+    const approving = status === "approved";
+    const ok = await askConfirm({
+      title: approving ? "Aprovar esta conta?" : "Bloquear esta conta?",
+      description: approving ? "O seller passa a poder vender e sacar." : "O seller perde o acesso até você liberar de novo.",
+      confirmLabel: approving ? "Aprovar conta" : "Bloquear conta",
+      tone: approving ? "default" : "danger",
+    });
+    if (!ok) return;
     const { error } = await supabase.from("profiles").update({ account_status: status }).eq("user_id", userId);
     if (error) { toast.error("Erro ao atualizar"); return; }
     toast.success(`Conta ${status === "approved" ? "aprovada" : "bloqueada"}!`);
@@ -798,6 +818,8 @@ export default function AdminDashboard() {
           </div>
         </main>
       </div>
+      {reasonDialog}
+      {confirmDialog}
     </div>
   );
 }

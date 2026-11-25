@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { logAdminAction } from "@/lib/auditLog";
 import { friendlyError } from "@/lib/friendlyError";
+import { useConfirm } from "@/components/seller-ui/confirm";
 import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 import AdminPager from "@/components/admin/AdminPager";
 
@@ -33,6 +34,7 @@ const NOTIF_TYPES = [
 ];
 
 export default function AdminNotificationsTab({ profiles }: Props) {
+  const { ask: askConfirm, dialog: confirmDialog } = useConfirm();
  const { user } = useAuth();
  const [notifications, setNotifications] = useState<Notification[]>([]);
  const [loading, setLoading] = useState(true);
@@ -111,7 +113,12 @@ export default function AdminNotificationsTab({ profiles }: Props) {
   };
 
   const handlePurgeOrphans = async () => {
-    if (!window.confirm("Remover notificações antigas que nenhum seller conseguia ler (user_id nulo)?")) return;
+    const ok = await askConfirm({
+      title: "Remover notificações órfãs?",
+      description: "São notificações antigas sem destinatário, que nenhum seller consegue ler. Isso não afeta as notificações dos sellers.",
+      confirmLabel: "Remover órfãs",
+    });
+    if (!ok) return;
     setPurging(true);
     const { data, error } = await supabase.rpc("admin_purge_orphan_notifications");
     setPurging(false);
@@ -122,7 +129,8 @@ export default function AdminNotificationsTab({ profiles }: Props) {
   };
 
  const handleDelete = async (id: string) => {
- if (!window.confirm("Excluir esta notificação?")) return;
+ const ok = await askConfirm({ title: "Excluir esta notificação?", description: "Se o seller ainda não leu, ela some da caixa dele.", confirmLabel: "Excluir" });
+ if (!ok) return;
  const { error } = await supabase.from("notifications").delete().eq("id", id);
  if (error) { toast.error("Erro ao excluir notificação"); return; }
  toast.success("Notificação excluída");
@@ -300,6 +308,7 @@ export default function AdminNotificationsTab({ profiles }: Props) {
  </DialogFooter>
  </DialogContent>
  </Dialog>
+ {confirmDialog}
  </div>
  );
 }

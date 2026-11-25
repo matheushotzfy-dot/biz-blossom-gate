@@ -10,7 +10,7 @@ export async function logAdminAction(
   action: string,
   entityType: string,
   entityId?: string,
-  details?: Record<string, Json>
+  details?: object
 ) {
   try {
     const { data: { user } } = await supabase.auth.getUser();
@@ -31,7 +31,7 @@ export async function logAdminAction(
       action: sanitizedAction,
       entity_type: sanitizedEntityType,
       entity_id: sanitizedEntityId,
-      details: details || {},
+      details: (details ?? {}) as Json,
       user_agent: userAgent,
     }]);
 

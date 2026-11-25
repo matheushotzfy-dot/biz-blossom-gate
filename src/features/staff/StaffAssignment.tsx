@@ -8,11 +8,13 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { friendlyError } from "@/lib/friendlyError";
+import { useReason } from "@/components/seller-ui/confirm";
 
 interface AccountOption { user_id: string; email: string | null; full_name: string | null }
 interface AssignmentRow { id: string; manager_user_id: string; seller_user_id: string; started_at: string; ended_at: string | null; end_reason: string | null }
 
 export function StaffAssignment({ staff, sellers }: { staff: AccountOption[]; sellers: AccountOption[] }) {
+  const { ask: askReason, dialog: reasonDialog } = useReason();
   const [member, setMember] = useState("");
   const [seller, setSeller] = useState("");
   const [reason, setReason] = useState("");
@@ -48,9 +50,16 @@ export function StaffAssignment({ staff, sellers }: { staff: AccountOption[]; se
   };
 
   const remove = async (sellerId: string) => {
-    const removalReason = window.prompt("Motivo da remoção do gerente (mínimo 5 caracteres)");
-    if (!removalReason || removalReason.trim().length < 5) return;
-    const { error } = await supabase.rpc("remove_seller_manager" as never, { _seller: sellerId, _reason: removalReason.trim() } as never);
+    const removalReason = await askReason({
+      title: "Encerrar o vínculo com o gerente?",
+      description: "O seller deixa a carteira do gerente. O histórico e as comissões já geradas continuam registrados.",
+      label: "Motivo da remoção",
+      minLength: 5,
+      confirmLabel: "Encerrar vínculo",
+      tone: "danger",
+    });
+    if (!removalReason) return;
+    const { error } = await supabase.rpc("remove_seller_manager" as never, { _seller: sellerId, _reason: removalReason } as never);
     if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Vínculo encerrado. O histórico foi preservado.");
     await load();
@@ -87,6 +96,7 @@ export function StaffAssignment({ staff, sellers }: { staff: AccountOption[]; se
           </article>;
         })}
       </div>
+      {reasonDialog}
     </section>
   );
 }

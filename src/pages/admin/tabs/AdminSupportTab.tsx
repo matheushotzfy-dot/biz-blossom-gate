@@ -14,7 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { logAdminAction } from "@/lib/auditLog";
 import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Json, Tables } from "@/integrations/supabase/types";
 import { useTicketTyping } from "@/hooks/useTicketTyping";
 import {
   uploadTicketAttachments, purgeTicketAttachments, playIncomingBeep, humanSize,
@@ -117,7 +117,7 @@ export default function AdminSupportTab({
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) toast.error("Não foi possível carregar os tickets.");
-    if (data) setTickets(data as any);
+    if (data) setTickets(data as Ticket[]);
     setLoading(false);
   };
 
@@ -145,27 +145,28 @@ export default function AdminSupportTab({
   useEffect(() => {
     if (!selectedId) { setMessages([]); return; }
     setLoadingThread(true);
-    (supabase as any).from("ticket_messages").select("*")
+    supabase.from("ticket_messages").select("*")
       .eq("ticket_id", selectedId)
       .order("created_at", { ascending: true })
-      .then(({ data }: any) => {
-        setMessages((data as TicketMessage[]) ?? []);
+      .then(({ data }) => {
+        setMessages((data as unknown as TicketMessage[]) ?? []);
         setLoadingThread(false);
         setTimeout(() => threadEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
       });
     // clear unread for staff
-    (supabase as any).from("support_tickets").update({ unread_by_staff: 0 }).eq("id", selectedId)
+    supabase.from("support_tickets").update({ unread_by_staff: 0 }).eq("id", selectedId)
       .then(() => setTickets(prev => prev.map(t => t.id === selectedId ? { ...t, unread_by_staff: 0 } : t)));
 
-    const channel = (supabase as any).channel(uniqueChannelName(`admin_ticket_${selectedId}`))
+    const channel = supabase.channel(uniqueChannelName(`admin_ticket_${selectedId}`))
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "ticket_messages", filter: `ticket_id=eq.${selectedId}` },
-        (payload: any) => {
-          setMessages(prev => prev.some(m => m.id === payload.new.id) ? prev : [...prev, payload.new]);
-          if (payload.new.sender_type === "customer") playIncomingBeep();
+        (payload) => {
+          const incoming = payload.new as TicketMessage;
+          setMessages(prev => prev.some(m => m.id === incoming.id) ? prev : [...prev, incoming]);
+          if (incoming.sender_type === "customer") playIncomingBeep();
           setTimeout(() => threadEndRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
         })
       .subscribe();
-    return () => { (supabase as any).removeChannel(channel); };
+    return () => { void supabase.removeChannel(channel); };
   }, [selectedId]);
 
   const handleSendReply = async () => {
@@ -176,14 +177,14 @@ export default function AdminSupportTab({
     let attachments: Attachment[] = [];
     try {
       attachments = await uploadTicketAttachments(selectedId, replyFiles);
-    } catch (e: any) {
+    } catch (e) {
       setSending(false);
-      return toast.error(e?.message || "Falha ao enviar anexos.");
+      return toast.error(e instanceof Error && e.message ? e.message : "Falha ao enviar anexos.");
     }
-    const { error } = await (supabase as any).from("ticket_messages").insert({
+    const { error } = await supabase.from("ticket_messages").insert({
       ticket_id: selectedId, sender_id: me.id, sender_type: "staff",
       sender_name: me.name, sender_role: me.role,
-      body: body || "(anexo)", attachments,
+      body: body || "(anexo)", attachments: attachments as unknown as Json,
     });
     setSending(false);
     if (error) return toast.error("Falha ao enviar resposta.");

@@ -23,6 +23,7 @@ import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { formatCurrency } from "@/lib/utils";
 import { friendlyError } from "@/lib/friendlyError";
+import { useReason } from "@/components/seller-ui/confirm";
 import AdminPager from "@/components/admin/AdminPager";
 import { displayPixKey } from "@/lib/financial-input";
 
@@ -152,6 +153,7 @@ type SubTab = "queue" | "adjustments" | "statement";
 
 
 export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawalAction, onReload, fmtCurrency }: Props) {
+  const { ask: askReason, dialog: reasonDialog } = useReason();
  const { user } = useAuth();
  const [search, setSearch] = useState("");
  const [statusFilter, setStatusFilter] = useState("all");
@@ -218,7 +220,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  const filtered = useMemo(() => {
  return withdrawals.filter(w => {
  if (statusFilter !== "all" && w.status !== statusFilter) return false;
- if (originFilter !== "all" && ((w as any).origin || "manual") !== originFilter) return false;
+ if (originFilter !== "all" && (w.origin || "manual") !== originFilter) return false;
  if (riskFilter === "new_seller" && !isNewSeller(getProfile(w.user_id))) return false;
  if (riskFilter === "high_value" && !isHighValue(Number(w.amount))) return false;
  if (riskFilter === "flagged" && !isNewSeller(getProfile(w.user_id)) && !isHighValue(Number(w.amount))) return false;
@@ -242,8 +244,16 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
 
   const handleBatchReject = async () => {
   if (selectedIds.size === 0) { toast.error("Selecione ao menos 1 saque"); return; }
-  const reason = window.prompt("Motivo da rejeição em lote (mín. 3 caracteres):", "Rejeitado em lote pela administração");
-  if (!reason || reason.trim().length < 3) { toast.error("Motivo obrigatório (mín. 3 caracteres)"); return; }
+  const reason = await askReason({
+    title: `Recusar ${selectedIds.size} ${selectedIds.size === 1 ? "saque" : "saques"}`,
+    description: "Cada valor reservado volta para o saldo do seller. O mesmo motivo vale para todos.",
+    label: "Motivo da recusa",
+    defaultValue: "Rejeitado em lote pela administração",
+    minLength: 5,
+    confirmLabel: "Recusar saques",
+    tone: "danger",
+  });
+  if (!reason) return;
   setBatchProcessing(true);
   let ok = 0, fail = 0;
   for (const id of selectedIds) {
@@ -510,7 +520,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                   <td className={`${premiumTable.td} font-mono text-[10px] text-muted-foreground`}>
                     <div className="flex items-center gap-1.5">
                       <span>{w.id.slice(0, 8)}</span>
-                      {(w as any).origin === "auto" && (
+                      {w.origin === "auto" && (
                         <span className="rounded border border-primary/20 bg-primary/10 px-1 py-0.5 text-[8px] font-black uppercase text-primary">AUTO</span>
                       )}
                     </div>
@@ -534,17 +544,19 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                           </span>
                         )}
                       </div>
-                      {(w as any).pix_copy_paste_code && (
+                      {w.pix_copy_paste_code && (
                         <button
                           type="button"
                           onClick={() => {
-                            navigator.clipboard.writeText((w as any).pix_copy_paste_code);
-                            toast.success("Código PIX copiado");
+                            navigator.clipboard.writeText(w.pix_copy_paste_code ?? "").then(
+                              () => toast.success("Código PIX copiado"),
+                              () => toast.error("Não foi possível copiar. Selecione o código e copie manualmente."),
+                            );
                           }}
                           className="max-w-[180px] truncate rounded-md border border-border/60 bg-muted/40 px-1.5 py-0.5 font-mono text-[9px] text-foreground/80 hover:bg-muted"
-                          title={(w as any).pix_copy_paste_code}
+                          title={w.pix_copy_paste_code}
                         >
-                          {(w as any).pix_copy_paste_code}
+                          {w.pix_copy_paste_code}
                         </button>
                       )}
                     </div>
@@ -608,11 +620,11 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
                         </label>
                       )
                     )}
-                    {(w.rejection_reason || (w as any).failure_code) && (
+                    {(w.rejection_reason || w.failure_code) && (
                       <div className="max-w-[220px]">
                         <p className="text-[10px] font-bold uppercase text-destructive">
                           {w.status === "rejected" ? "Motivo" : "Última falha"}
-                          {(w as any).failure_code ? ` · ${(w as any).failure_code}` : ""}
+                          {w.failure_code ? ` · ${w.failure_code}` : ""}
                         </p>
                         <p className="line-clamp-3 text-[10px] text-muted-foreground">{w.rejection_reason || "Processamento não concluído"}</p>
                       </div>
@@ -820,6 +832,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onWithdrawa
  </div>
  </DialogContent>
  </Dialog>
+ {reasonDialog}
  </div>
  );
 }

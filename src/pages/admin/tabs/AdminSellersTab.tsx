@@ -2,6 +2,7 @@ import { WithdrawalBlockControl } from "@/features/staff/WithdrawalBlockControl"
 import { useEffect, useState, useRef } from "react";
 import { SellersDirectory } from "@/features/admin-finance/SellersDirectory";
 import { BalanceAdjustCard } from "@/features/admin-finance/BalanceAdjustCard";
+import { useConfirm, useReason } from "@/components/seller-ui/confirm";
 import { useSensitiveConfirm } from "@/features/admin-finance/useSensitiveConfirm";
 import { validateSellerNumbers } from "@/features/admin-finance/sellersModel";
 import { useQueryClient } from "@tanstack/react-query";
@@ -36,6 +37,7 @@ import { PremiumPanel, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
 import { cn, isApprovedTransaction } from "@/lib/utils";
 import { z } from "zod";
+import { functionErrorMessage } from "@/lib/functionError";
 import { friendlyError } from "@/lib/friendlyError";
 import AdminPager from "@/components/admin/AdminPager";
 import { displayPixKey } from "@/lib/financial-input";
@@ -140,6 +142,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { confirm, dialog: sensitiveDialog } = useSensitiveConfirm();
+  const { ask: askReason, dialog: reasonDialog } = useReason();
+  const { ask: askConfirm, dialog: confirmDialog } = useConfirm();
   const [detailError, setDetailError] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState("overview");
   const reloadSeller = () => { void queryClient.invalidateQueries({ queryKey: ["admin-sellers-page"] }); onReload(); };
@@ -340,10 +344,17 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     if (selectedUser?.user_id === rejectTargetUserId) setSelectedUser(null);
   };
 
-  const handleFreezeBalance = (userId: string, freeze: boolean) => {
+  const handleFreezeBalance = async (userId: string, freeze: boolean) => {
     if (!isAdmin) return;
-    const reason = window.prompt("Justificativa (mínimo 5 caracteres)");
-    if (!reason || reason.trim().length < 5) return;
+    const reason = await askReason({
+      title: freeze ? "Congelar esta conta?" : "Descongelar esta conta?",
+      description: freeze ? "Os saques do seller ficam bloqueados até você descongelar." : "Os saques do seller voltam a ser liberados.",
+      label: "Justificativa",
+      minLength: 5,
+      confirmLabel: freeze ? "Continuar e congelar" : "Continuar e descongelar",
+      tone: freeze ? "danger" : "default",
+    });
+    if (!reason) return;
     confirm(freeze ? "Congelar a conta e bloquear saques deste seller." : "Descongelar a conta e liberar saques deste seller.", async () => {
       const { error } = await supabase.rpc("admin_freeze_account", { _user_id: userId, _freeze: freeze, _reason: reason.trim() });
       if (error) { toast.error(friendlyError(error)); return; }
@@ -359,7 +370,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       const { data, error } = await supabase.functions.invoke("admin-set-email-verified", {
         body: { targetUserId: userId, action: "set", verified },
       });
-      if (error || !data?.success) { toast.error(data?.error || "Erro ao alterar verificação"); return; }
+      if (error || !data?.success) { toast.error(await functionErrorMessage(error, data, "Não foi possível alterar a verificação do e-mail.")); return; }
       setEmailVerified(verified);
       toast.success(verified ? "E-mail marcado como verificado." : "Verificação de e-mail removida.");
       await logAdminAction(verified ? "email_verify" : "email_unverify", "auth.user", userId, { verified });
@@ -372,7 +383,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     if (!isAdmin) return;
     confirm("Banir este seller, congelar seu saldo e suspender seus checkouts.", async () => {
       const { data, error } = await supabase.functions.invoke("admin-ban-seller", { body: { targetUserId: userId } });
-      if (error || !data?.success) { toast.error(data?.error || "Erro ao banir seller"); return; }
+      if (error || !data?.success) { toast.error(await functionErrorMessage(error, data, "Não foi possível banir o seller.")); return; }
       toast.success("Seller banido. Conta bloqueada, saldo congelado e checkouts suspensos.");
       await logAdminAction("ban_seller", "profile", userId, { action: "atomic_block+freeze+suspend" });
       reloadSeller(); ++detailRequestRef.current; setSelectedUser(null);
@@ -384,7 +395,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     setImpersonating(true);
     try {
       const { data, error } = await supabase.functions.invoke("admin-impersonate", { body: { targetUserId: userId } });
-      if (error || !data?.success) { toast.error(data?.error || "Erro ao acessar como usuário"); return; }
+      if (error || !data?.success) { toast.error(await functionErrorMessage(error, data, "Não foi possível acessar como este usuário.")); return; }
        const { impersonation_token, target_email, target_name, target_user_id, expires_at } = data;
        if (!impersonation_token || !expires_at) { toast.error("Sessão de impersonação indisponível"); return; }
       const expectedOrigin = window.location.origin;
@@ -450,7 +461,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
   const handleUserStatus = async (userId: string, status: string) => {
     if (!isAdmin) { toast.error("Sem permissão"); return; }
-    if (!window.confirm(status === "approved" ? "Confirmar aprovação desta conta?" : "Confirmar bloqueio desta conta?")) return;
+    const approving = status === "approved";
+    const ok = await askConfirm({
+      title: approving ? "Aprovar esta conta?" : "Bloquear esta conta?",
+      description: approving ? "O seller passa a poder vender e sacar." : "O seller perde o acesso até você liberar de novo.",
+      confirmLabel: approving ? "Aprovar conta" : "Bloquear conta",
+      tone: approving ? "default" : "danger",
+    });
+    if (!ok) return;
     const { error } = await supabase.from("profiles").update({ account_status: status }).eq("user_id", userId);
     if (error) { toast.error("Erro ao atualizar"); return; }
     toast.success(`Conta ${status === "approved" ? "aprovada" : "bloqueada"}!`);
@@ -460,7 +478,13 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
   const handleSetSellerType = async (userId: string, sellerType: string | null) => {
     if (!isAdmin) return;
-    if (!window.confirm(`Classificar seller como ${sellerType || "sem classificação"}?`)) return;
+    const ok = await askConfirm({
+      title: sellerType ? `Classificar como ${sellerType}?` : "Remover a classificação?",
+      description: sellerType ? "A classificação fica registrada na auditoria." : "O seller fica sem classificação.",
+      confirmLabel: sellerType ? "Classificar" : "Remover classificação",
+      tone: "default",
+    });
+    if (!ok) return;
     const { error } = await supabase.from("profiles").update({ seller_type: sellerType }).eq("user_id", userId);
     if (error) { toast.error("Erro ao classificar seller"); return; }
     toast.success(`Seller classificado como ${sellerType || "sem classificação"}!`);
@@ -490,11 +514,18 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     await logAdminAction("update_custom_fees", "custom_user_fees", selectedUser.user_id, payload);
   };
 
-  const handleResolveDispute = (disputeId: string, side: "seller" | "buyer") => {
+  const handleResolveDispute = async (disputeId: string, side: "seller" | "buyer") => {
     if (!isAdmin || !selectedUser) return;
     const profile = selectedUser;
-    const reason = window.prompt("Justificativa da decisão (mínimo 5 caracteres)");
-    if (!reason || reason.trim().length < 5) { toast.error("Informe uma justificativa válida"); return; }
+    const reason = await askReason({
+      title: side === "seller" ? "Disputa a favor do seller" : "Disputa perdida pelo seller",
+      description: side === "seller" ? "O saldo retido volta para o seller." : "O débito do seller continua.",
+      label: "Justificativa da decisão",
+      minLength: 5,
+      confirmLabel: "Continuar",
+      tone: side === "seller" ? "default" : "danger",
+    });
+    if (!reason) return;
     confirm(side === "seller" ? "Liberar o saldo retido desta disputa para o seller." : "Confirmar a perda da disputa, mantendo o débito do seller.", async () => {
       const { error } = await supabase.rpc("admin_resolve_dispute", { _dispute_id: disputeId, _outcome: side, _fee: 0, _note: reason.trim() });
       if (error) { toast.error(friendlyError(error)); return; }
@@ -505,7 +536,12 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
   const handleDeletePixKey = async (pixKeyId: string) => {
     if (!isAdmin) return;
-    if (!window.confirm("Remover esta chave PIX do seller?")) return;
+    const ok = await askConfirm({
+      title: "Remover esta chave Pix?",
+      description: "A chave sai do cadastro do seller. Ele precisará cadastrar outra para sacar.",
+      confirmLabel: "Remover chave",
+    });
+    if (!ok) return;
     const { error } = await supabase.from("pix_keys").delete().eq("id", pixKeyId);
     if (error) { toast.error("Erro ao remover chave: " + friendlyError(error)); return; }
     toast.success("Chave PIX removida.");
@@ -560,6 +596,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       }} /> : <WithdrawalBlockControl sellers={profiles} />}
       {isAdmin && <WithdrawalBlockControl sellers={profiles} owner />}
       {sensitiveDialog}
+      {reasonDialog}
+      {confirmDialog}
 
       {/* ═══ KYC Reject Dialog ═══ */}
       <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
@@ -1130,8 +1168,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                                       onClick={async () => {
                                         if (!lastCompleted || !selectedUser || !isAdmin) return;
                                         const profile = selectedUser;
-                                        const reason = window.prompt("Motivo do reembolso (mínimo 5 caracteres)");
-                                        if (!reason || reason.trim().length < 5) return;
+                                        const reason = await askReason({ title: "Estornar a última compra", description: "O pedido vai para a fila de aprovação manual; nenhum dinheiro sai agora.", label: "Motivo do reembolso", minLength: 5, confirmLabel: "Continuar", tone: "danger" });
+                                        if (!reason) return;
                                         confirm(`Reservar ${fmtCurrency(Number(lastCompleted.amount))} do saldo do seller e enviar à fila de aprovação manual. Nenhum dinheiro será enviado automaticamente.`, async () => {
                                           const { error } = await supabase.rpc("admin_refund_transaction", { _transaction_id: lastCompleted.id, _amount: Number(lastCompleted.amount), _reason: reason.trim() });
                                           if (error) { toast.error(friendlyError(error)); return; }
@@ -1147,8 +1185,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                                       onClick={async () => {
                                         if (!lastCompleted || !selectedUser || !isAdmin) return;
                                         const profile = selectedUser;
-                                        const reason = window.prompt("Motivo da reclamação da adquirente (mínimo 5 caracteres)");
-                                        if (!reason || reason.trim().length < 5) return;
+                                        const reason = await askReason({ title: "Abrir MED Pix ou chargeback", description: "O valor desta venda fica retido enquanto a disputa estiver aberta.", label: "Motivo da reclamação da adquirente", minLength: 5, confirmLabel: "Continuar", tone: "danger" });
+                                        if (!reason) return;
                                         const type = lastCompleted.payment_method === "pix" ? "medpix" : "chargeback";
                                         confirm(`Abrir ${type === "medpix" ? "MED PIX" : "chargeback"} e congelar o valor desta venda, sem devolução automática.`, async () => {
                                           const { error } = await supabase.rpc("admin_open_dispute", { _transaction_id: lastCompleted.id, _type: type, _reason: reason.trim(), _deadline_days: 7 });
@@ -1164,7 +1202,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                                       disabled={!b.email}
                                       onClick={async () => {
                                         if (!b.email || !user) return;
-                                        const reason = window.prompt("Motivo da blacklist:", "Comportamento abusivo");
+                                        const reason = await askReason({ title: "Adicionar e-mail à blacklist", description: b.email, label: "Motivo da blacklist", defaultValue: "Comportamento abusivo", minLength: 5, confirmLabel: "Adicionar à blacklist", tone: "danger" });
                                         if (!reason) return;
                                         const { error } = await supabase.from("global_blacklist").upsert({
                                           entry_type: "email", entry_value: b.email.toLowerCase(),
@@ -1184,7 +1222,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                                         if (!b.document || !user) return;
                                         const doc = b.document.replace(/\D/g, "");
                                         const type = doc.length === 11 ? "cpf" : "cnpj";
-                                        const reason = window.prompt(`Motivo da blacklist (${type.toUpperCase()}):`, "Fraude confirmada");
+                                        const reason = await askReason({ title: `Adicionar ${type.toUpperCase()} à blacklist`, label: "Motivo da blacklist", defaultValue: "Fraude confirmada", minLength: 5, confirmLabel: "Adicionar à blacklist", tone: "danger" });
                                         if (!reason) return;
                                         const { error } = await supabase.from("global_blacklist").upsert({
                                           entry_type: type, entry_value: doc,

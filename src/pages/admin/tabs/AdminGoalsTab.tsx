@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Target, Calendar, Trash2, Edit3, Users, TrendingUp, Trophy, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useConfirm } from "@/components/seller-ui/confirm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ const fmt = (v: number) => Number(v).toLocaleString("pt-BR", { style: "currency"
 const toInput = (iso: string) => new Date(iso).toISOString().slice(0, 16);
 
 export default function AdminGoalsTab() {
+  const { ask: askConfirm, dialog: confirmDialog } = useConfirm();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -91,12 +93,13 @@ export default function AdminGoalsTab() {
       : await supabase.from("revenue_goals").insert(payload as never).select().maybeSingle();
     if (error) { toast.error("Erro: " + error.message); return; }
     toast.success(editing ? "Meta atualizada!" : "Meta criada!");
-    await logAdminAction(editing ? "update_goal" : "create_goal", "revenue_goal", editing?.id ?? (saved as Goal | null)?.id, payload as any);
+    await logAdminAction(editing ? "update_goal" : "create_goal", "revenue_goal", editing?.id ?? (saved as Goal | null)?.id, payload);
     setOpen(false); load();
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Remover esta meta e seus registros?")) return;
+    const ok = await askConfirm({ title: "Remover esta meta?", description: "Os registros de progresso dela também são apagados.", confirmLabel: "Remover meta" });
+    if (!ok) return;
     const { error } = await supabase.from("revenue_goals").delete().eq("id", id);
     if (error) { toast.error("Erro ao remover"); return; }
     toast.success("Meta removida");
@@ -256,6 +259,7 @@ export default function AdminGoalsTab() {
           )}
         </DialogContent>
       </Dialog>
+      {confirmDialog}
     </div>
   );
 }

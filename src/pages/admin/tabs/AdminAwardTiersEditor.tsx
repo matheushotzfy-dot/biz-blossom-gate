@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useConfirm } from "@/components/seller-ui/confirm";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ interface Tier {
 
 /** Admin editor for award milestones shown on the seller "Premiações" page. */
 export function AdminAwardTiersEditor() {
+  const { ask: askConfirm, dialog: confirmDialog } = useConfirm();
   const [tiers, setTiers] = useState<Tier[]>([]);
   const [saving, setSaving] = useState<string | null>(null);
 
@@ -41,7 +43,8 @@ export function AdminAwardTiersEditor() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Remover este marco? Resgates já feitos continuam registrados.")) return;
+    const ok = await askConfirm({ title: "Remover este marco?", description: "Resgates já feitos continuam registrados.", confirmLabel: "Remover marco" });
+    if (!ok) return;
     const { error } = await supabase.from("award_tiers").delete().eq("id", id);
     if (error) { toast.error("Erro ao remover"); return; }
     void logAdminAction("award_tier_deleted", "award_tiers", id, {});
@@ -84,6 +87,7 @@ export function AdminAwardTiersEditor() {
           </div>
         ))}
       </div>
+      {confirmDialog}
     </section>
   );
 }

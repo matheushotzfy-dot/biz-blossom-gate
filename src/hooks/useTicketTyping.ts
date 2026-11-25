@@ -10,6 +10,7 @@
  *  - `notifyTyping()`: call on every keystroke; the hook debounces the "stop"
  */
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
 type Role = "customer" | "staff";
@@ -21,7 +22,7 @@ export function useTicketTyping(
   me: { role: Role; name: string } | null,
 ) {
   const [others, setOthers] = useState<Presence[]>([]);
-  const channelRef = useRef<any>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
   const stopTimerRef = useRef<number | null>(null);
   const isTypingRef = useRef(false);
 

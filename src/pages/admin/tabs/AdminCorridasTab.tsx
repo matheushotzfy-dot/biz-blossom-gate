@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { Flag, Plus, Trash2, Upload, Gift, Save, Eye, EyeOff, RefreshCw, Users, Sparkles, Trophy, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,8 @@ type Prize = {
   sort_order: number;
 };
 
+type Leader = Database["public"]["Functions"]["race_leaderboard"]["Returns"][number];
+
 type Override = {
   id: string;
   race_id: string;
@@ -53,7 +56,7 @@ export default function AdminCorridasTab() {
   const [races, setRaces] = useState<Race[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [prizes, setPrizes] = useState<Prize[]>([]);
-  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [leaderboard, setLeaderboard] = useState<Leader[]>([]);
   const [overrides, setOverrides] = useState<Override[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -101,7 +104,7 @@ export default function AdminCorridasTab() {
     const { error } = await supabase.from("revenue_race_overrides").update(patch).eq("id", id);
     if (error) { toast.error(error.message); return; }
     setOverrides(prev => prev.map(o => o.id === id ? { ...o, ...patch } as Override : o));
-    await logAdminAction("update_race_override", "revenue_race_override", id, patch as any);
+    await logAdminAction("update_race_override", "revenue_race_override", id, patch);
     if (selected) loadPrizes(selected.id);
   };
 
@@ -168,7 +171,7 @@ export default function AdminCorridasTab() {
     if (error) { toast.error(error.message); return; }
     setRaces(prev => prev.map(r => r.id === selected.id ? { ...r, ...patch } as Race : r));
     toast.success("Salvo");
-    await logAdminAction("update_race", "revenue_race", selected.id, patch as any);
+    await logAdminAction("update_race", "revenue_race", selected.id, patch);
   };
 
   const deleteRace = () => {
@@ -223,7 +226,7 @@ export default function AdminCorridasTab() {
     const { error } = await supabase.from("revenue_race_prizes").update(patch).eq("id", id);
     if (error) { toast.error(error.message); return; }
     setPrizes(prev => prev.map(p => p.id === id ? { ...p, ...patch } as Prize : p));
-    await logAdminAction("update_race_prize", "revenue_race_prize", id, patch as any);
+    await logAdminAction("update_race_prize", "revenue_race_prize", id, patch);
   };
 
   const deletePrize = (id: string) => {
@@ -467,7 +470,7 @@ export default function AdminCorridasTab() {
                       </tr>
                     </thead>
                     <tbody>
-                      {leaderboard.slice(0, 5).map((l: any, idx: number) => (
+                      {leaderboard.slice(0, 5).map((l, idx) => (
                         <tr key={(l.seller_id ?? "manual") + "-" + idx} className="border-b border-border/10">
                           <td className="py-2 px-2 font-bold tabular-nums">{l.rank_position}</td>
                           <td className="py-2 px-2">{l.seller_name}</td>

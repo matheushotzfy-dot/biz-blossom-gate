@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { GlassPanel as Panel } from "./AdminOverviewTab";
 import { useAuth } from "@/hooks/useAuth";
+import { functionErrorMessage } from "@/lib/functionError";
 
 type Finding = Tables<"security_findings">;
 type Recommendation = { priority: number; title: string; action: string; rationale: string };
@@ -44,7 +45,7 @@ export function SecurityFindingsPanel() {
   const analyze = async (id: string) => {
     setItems((current) => current.map((item) => item.id === id ? { ...item, status: "analyzing" } : item));
     const { data, error } = await supabase.functions.invoke("analyze-security-finding", { body: { findingId: id } });
-    if (error || !data?.success) toast.error(data?.error || "A análise não pôde ser concluída");
+    if (error || !data?.success) toast.error(await functionErrorMessage(error, data, "A análise não pôde ser concluída."));
     else toast.success("Risco classificado e recomendações priorizadas");
     await load();
   };

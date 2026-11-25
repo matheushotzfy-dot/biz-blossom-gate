@@ -197,8 +197,8 @@ export default function AdminTransactionsTab({ transactions, profiles, products,
     const amount = refundType === "full" ? Number(selectedTx.amount) : Number(refundAmount);
     if (isNaN(amount) || amount <= 0 || amount > Number(selectedTx.amount)) { toast.error("Valor inválido"); return; }
     if (!isApprovedTransaction(selectedTx.status)) { toast.error("Só é possível estornar transações aprovadas"); return; }
-    if (!window.confirm(`Confirma estorno de R$ ${amount.toFixed(2)}?`)) return;
-    toast.error("Estornos temporariamente indisponíveis sem uma adquirente configurada.");
+    // Sem adquirente configurada não existe estorno a fazer: avisa direto, sem pedir confirmação de algo que não acontece.
+    toast.error("Estornos estão indisponíveis até haver uma adquirente configurada.");
   };
 
   const buildTimeline = (t: Tables<"transactions">) => {

@@ -92,13 +92,16 @@ export default function AdminAuditTab({ profiles }: Props) {
           setLoading(false);
           return;
         }
-        const merged: UnifiedLog[] = (data || []).map((r: any) => {
+        const merged: UnifiedLog[] = (data || []).map((row) => {
           if (table === "audit_logs") {
+            const r = row as Tables<"audit_logs">;
             return { id: `a-${r.id}`, source: "admin" as const, actor_id: r.admin_user_id, actor_role: "admin", action: r.action, entity_type: r.entity_type, entity_id: r.entity_id, details: (r.details as Record<string, unknown>) || {}, created_at: r.created_at };
           }
           if (table === "staff_audit_log") {
+            const r = row as Tables<"staff_audit_log">;
             return { id: `s-${r.id}`, source: "staff" as const, actor_id: r.staff_user_id, actor_role: "staff", action: r.action, entity_type: r.entity_type, entity_id: r.entity_id, details: { before: r.before, after: r.after, ...((r.metadata as Record<string, unknown>) || {}) }, created_at: r.created_at };
           }
+          const r = row as Tables<"activity_logs">;
           return { id: `l-${r.id}`, source: "activity" as const, actor_id: r.user_id, actor_role: "user", action: r.action, entity_type: r.entity_type, entity_id: r.entity_id, details: { old: r.old_data, new: r.new_data }, created_at: r.created_at };
         });
         setLogs(merged);
@@ -111,7 +114,6 @@ export default function AdminAuditTab({ profiles }: Props) {
       // "all" sources: merge is required across three distinct tables, so we
       // pull a bounded recent window from each, filter/sort in memory, and
       // paginate the merged result client-side with AdminPager.
-      const empty = Promise.resolve({ data: [] as any[], error: null as any });
       const [aRes, sRes, lRes] = await Promise.all([
         supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(1000),
         supabase.from("staff_audit_log").select("*").order("created_at", { ascending: false }).limit(1000),

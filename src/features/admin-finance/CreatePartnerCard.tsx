@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { functionErrorMessage } from "@/lib/functionError";
 
 const schema = z.object({ name: z.string().trim().min(2, "Nome obrigatório").max(120), email: z.string().trim().email("E-mail inválido").max(254) });
 
@@ -17,8 +18,7 @@ export function CreatePartnerCard() {
     setBusy(true);
     const { data, error } = await supabase.functions.invoke("admin-create-staff", { body: { full_name: p.data.name, email: p.data.email, role: "partner", send_invite: true } });
     setBusy(false);
-    const msg = (data as { error?: string } | null)?.error;
-    if (error || msg) { toast.error(msg ?? "Não foi possível criar o sócio"); return; }
+    if (error || (data as { error?: string } | null)?.error) { toast.error(await functionErrorMessage(error, data, "Não foi possível criar o sócio.")); return; }
     toast.success("Convite enviado. O sócio acessa em /socio"); setName(""); setEmail("");
   };
   return (
