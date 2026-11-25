@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { useKycStatus } from "@/hooks/useKycStatus";
 import { usePrivacyMode } from "@/hooks/usePrivacyMode";
 import { prefetchIdleRoutes } from "@/lib/routePrefetch";
+import { kycBanner, topbarKyc, type KycKey } from "@/components/account/accountMeta";
 
 
 
@@ -30,6 +31,8 @@ function DashboardLayoutInner() {
  const { theme, toggleTheme } = useTheme();
  const { profile } = useProfile();
  const kyc = useKycStatus();
+ const kycLook = kyc.resolved ? topbarKyc(kyc.state as KycKey) : { label: "Verificação pendente", tone: "warn" as const };
+ const kycBannerInfo = kyc.resolved ? kycBanner(kyc.state as KycKey) : null;
  usePrefetchDashboardData();
  useRealtimeSync();
  // Aquece os chunks das abas mais usadas em segundo plano (evita "só carregando").
@@ -123,6 +126,8 @@ function DashboardLayoutInner() {
             avatarUrl={profile?.avatar_url}
             name={profile?.full_name}
             kycApproved={kyc.approved}
+            kycLabel={kycLook.label}
+            kycTone={kycLook.tone}
             balance={balance}
             hidden={privacyHidden}
             onToggleHidden={togglePrivacy}
@@ -130,19 +135,19 @@ function DashboardLayoutInner() {
 
 
 
- {/* ─── VERIFICATION BANNER ─── */}
- {kyc.resolved && kyc.showOnboarding && (
+{/* ─── VERIFICATION BANNER ─── */}
+ {kyc.resolved && kycBannerInfo && (
  <button
- onClick={() => navigate("/perfil?tab=identidade&scrollTo=kyc")}
-  className="seller-clickable relative z-20 flex w-full cursor-pointer items-center gap-2.5 border-b border-warning/20 bg-warning/[0.08] px-4 py-2.5 text-warning hover:bg-warning/[0.12] lg:px-8"
+ type="button"
+ onClick={() => navigate(kycBannerInfo.to)}
+ className={cn(
+ "seller-clickable relative z-20 flex w-full cursor-pointer items-center gap-2.5 border-b px-4 py-2.5 lg:px-8",
+ kycBannerInfo.tone === "alert" ? "border-destructive/20 bg-destructive/[0.08] text-destructive hover:bg-destructive/[0.12]" : "border-warning/20 bg-warning/[0.08] text-warning hover:bg-warning/[0.12]",
+ )}
  >
- <AlertTriangle className="h-4 w-4 shrink-0" />
- <p className="flex-1 text-left text-[12.5px] font-semibold leading-snug">
- {profile?.document_number
- ? "Conta em análise — será aprovada o quanto antes!"
- : "Complete sua verificação para realizar saques na plataforma"}
- </p>
- <ArrowRight className="h-4 w-4 shrink-0" />
+ <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+ <p className="flex-1 text-left text-[13px] font-semibold leading-snug">{kycBannerInfo.text}</p>
+ <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
  </button>
  )}
 

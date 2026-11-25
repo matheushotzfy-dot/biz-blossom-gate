@@ -1,0 +1,26 @@
+/* Minha conta. Prefixo va-: nada de "border" no nome (o reset legado recolore classes assim). */
+.va-drop {
+  position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 4 / 3; padding: 16px; text-align: center; cursor: pointer;
+  background: hsl(var(--muted) / .45); outline: 2px dashed hsl(var(--muted-foreground) / .35); outline-offset: -2px;
+  transition: background-color .15s ease, outline-color .15s ease;
+}
+.va-drop:hover, .va-drop[data-over="true"] { background: hsl(var(--accent)); outline-color: hsl(var(--primary) / .75); }
+.va-drop:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.va-drop[data-bad="true"] { outline-color: hsl(var(--destructive) / .7); }
+.va-drop:disabled { cursor: progress; opacity: .8; }
+
+.va-shot { position: relative; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; background: hsl(var(--muted)); box-shadow: inset 0 0 0 1px hsl(var(--border)); }
+.va-shot img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.va-shot-veil { position: absolute; inset: 0; display: grid; place-items: center; background: hsl(var(--card) / .78); }
+
+.va-avatar { position: relative; flex-shrink: 0; width: 104px; height: 104px; border-radius: 9999px; overflow: hidden; background: hsl(var(--accent)); color: hsl(var(--accent-foreground)); box-shadow: 0 0 0 4px hsl(var(--card)), 0 0 0 5px hsl(var(--border)); }
+.va-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.va-flash { box-shadow: 0 0 0 3px hsl(var(--warning) / .65), 0 0 0 9px hsl(var(--warning) / .16); }
+@media (prefers-reduced-motion: no-preference) { .va-flash { animation: va-pulse 1.4s ease-in-out 3; } }
+@keyframes va-pulse { 50% { box-shadow: 0 0 0 3px hsl(var(--warning) / .65), 0 0 0 14px hsl(var(--warning) / 0); } }
+
+.va-rule { height: 4px; border-radius: 9999px; background: hsl(var(--muted)); }
+.va-rule[data-state="done"] { background: hsl(var(--primary)); }
+.va-rule[data-state="current"] { background: linear-gradient(90deg, hsl(var(--primary)) 50%, hsl(var(--muted)) 50%); }
+.va-rule[data-state="alert"] { background: hsl(var(--destructive)); }

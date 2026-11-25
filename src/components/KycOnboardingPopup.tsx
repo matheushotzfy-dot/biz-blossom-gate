@@ -29,16 +29,19 @@ export function KycOnboardingPopup() {
   const [current, setCurrent] = useState(0);
   const [uploading, setUploading] = useState<KycDocType | null>(null);
   const [finished, setFinished] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const snoozedUntil = profile?.kyc_popup_snoozed_until ?? null;
 
   useEffect(() => {
     if (!user?.id || !profile || !kyc.resolved) return;
-    if (kyc.approved) { setOpen(false); return; }
+    // Só pede documentos de quem ainda precisa enviar (nova ou reprovada).
+    // Conta aprovada, em análise ou bloqueada não recebe o popup.
+    if (kyc.state !== "pending" && kyc.state !== "rejected") { setOpen(false); return; }
     if (snoozedUntil && new Date(snoozedUntil).getTime() > Date.now()) return;
     const t = window.setTimeout(() => setOpen(true), 800);
     return () => window.clearTimeout(t);
-  }, [user?.id, profile, kyc.approved, kyc.resolved, snoozedUntil]);
+  }, [user?.id, profile, kyc.state, kyc.resolved, snoozedUntil]);
 
   // Descobre o que já foi enviado para retomar de onde parou.
   useEffect(() => {
@@ -60,6 +63,15 @@ export function KycOnboardingPopup() {
   const allDone = doneCount === steps.length;
   const step = steps[current];
 
+  // Só entra em análise quando TODOS os documentos estão enviados.
+  const submit = useCallback(async () => {
+    setSubmitting(true);
+    const { error } = await supabase.rpc("mark_kyc_submitted");
+    setSubmitting(false);
+    if (error) { toast.error("Os documentos foram salvos, mas não conseguimos enviar para análise. Toque em Concluir para tentar de novo."); return; }
+    setFinished(true);
+  }, []);
+
   const upload = useCallback(async (file: File) => {
     if (!user || !step) return;
     const err = validateKycFile(file);
@@ -69,19 +81,12 @@ export function KycOnboardingPopup() {
     const { error } = await supabase.storage.from("kyc-documents").upload(path, file, { upsert: true, contentType: file.type });
     setUploading(null);
     if (error) { toast.error("Não foi possível enviar. Verifique a conexão e tente de novo."); return; }
-    // Documento real no bucket → conta entra oficialmente em análise.
-    // Falha aqui não bloqueia o envio (a equipe ainda vê os arquivos).
-    supabase.rpc("mark_kyc_submitted").then(({ error: rpcErr }) => {
-      if (rpcErr) console.warn("[kyc] mark_kyc_submitted failed", rpcErr.message);
-    });
-    setDocs((prev) => {
-      const next = { ...prev, [step.type]: true };
-      const nextMissing = steps.findIndex((s) => !next[s.type]);
-      if (nextMissing >= 0) window.setTimeout(() => setCurrent(nextMissing), 450);
-      else window.setTimeout(() => setFinished(true), 450);
-      return next;
-    });
-  }, [user, step, steps]);
+    const next = { ...docs, [step.type]: true };
+    setDocs(next);
+    const nextMissing = steps.findIndex((s) => !next[s.type]);
+    if (nextMissing >= 0) window.setTimeout(() => setCurrent(nextMissing), 450);
+    else void submit();
+  }, [user, step, steps, docs, submit]);
 
   const later = useCallback(async () => {
     setOpen(false);
@@ -156,7 +161,7 @@ export function KycOnboardingPopup() {
                 <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-4">
                   <button onClick={later} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"><Clock className="h-3.5 w-3.5" /> Fazer depois</button>
                   {allDone ? (
-                    <Button onClick={() => setFinished(true)}>Concluir</Button>
+                    <Button onClick={() => void submit()} disabled={submitting}>{submitting ? "Enviando…" : "Concluir"}</Button>
                   ) : (
                     <Button variant="outline" disabled={current >= steps.length - 1} onClick={() => setCurrent((c) => Math.min(c + 1, steps.length - 1))}>Próxima etapa</Button>
                   )}

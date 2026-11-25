@@ -14,6 +14,9 @@ export interface SellerTopbarProps {
   avatarUrl?: string | null;
   name?: string | null;
   kycApproved: boolean;
+  /** Texto curto da situação da conta ("Em análise", "Reprovada"…). */
+  kycLabel?: string;
+  kycTone?: "ok" | "warn" | "alert";
   /** Saldo disponível do razão (mesma fonte do Início). */
   balance: number;
   hidden: boolean;
@@ -25,6 +28,8 @@ export function SellerTopbar(p: SellerTopbarProps) {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const first = (p.name || "").split(" ")[0] || "Vendedor";
+  const tone = p.kycApproved ? "ok" : p.kycTone ?? "warn";
+  const label = p.kycApproved ? "Conta verificada" : p.kycLabel ?? "Verificação pendente";
   const logout = async () => { await supabase.auth.signOut(); navigate("/auth"); };
 
   return (
@@ -73,14 +78,14 @@ export function SellerTopbar(p: SellerTopbarProps) {
                 <AvatarImage src={p.avatarUrl || undefined} className="object-cover" />
                 <AvatarFallback className="bg-accent text-[15px] font-bold text-accent-foreground">{first.charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
-              <span className={cn("absolute -bottom-0.5 -right-0.5 grid h-[17px] w-[17px] place-items-center rounded-full text-white ring-2 ring-background", p.kycApproved ? "bg-primary" : "bg-warning")}>
+              <span className={cn("absolute -bottom-0.5 -right-0.5 grid h-[17px] w-[17px] place-items-center rounded-full text-white ring-2 ring-background", tone === "ok" ? "bg-primary" : tone === "alert" ? "bg-destructive" : "bg-warning")}>
                 <ShieldCheck className="h-[10px] w-[10px]" strokeWidth={3} />
               </span>
             </span>
             <span className="hidden min-w-0 text-left leading-tight lg:block">
               <span className="block max-w-[140px] truncate text-[14px] font-bold text-foreground">{first}</span>
-              <span className={cn("block whitespace-nowrap text-[12px] font-medium", p.kycApproved ? "vp-green-ink" : "text-warning")}>
-                {p.kycApproved ? "Conta verificada" : "Verificação pendente"}
+              <span className={cn("block whitespace-nowrap text-[12px] font-medium", tone === "ok" ? "vp-green-ink" : tone === "alert" ? "text-destructive" : "text-warning")}>
+                {label}
               </span>
             </span>
             <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -88,7 +93,7 @@ export function SellerTopbar(p: SellerTopbarProps) {
           <DropdownMenuContent align="end" className="w-60 rounded-2xl p-1.5">
             <DropdownMenuLabel className="px-2.5 py-2">
               <span className="block truncate text-[14px] font-bold text-foreground">{p.name || first}</span>
-              <span className={cn("mt-0.5 block text-[12.5px] font-medium", p.kycApproved ? "vp-green-ink" : "text-warning")}>{p.kycApproved ? "Conta verificada" : "Verificação pendente"}</span>
+              <span className={cn("mt-0.5 block text-[12.5px] font-medium", tone === "ok" ? "vp-green-ink" : tone === "alert" ? "text-destructive" : "text-warning")}>{label}</span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="rounded-xl py-2.5" onClick={() => navigate("/perfil")}><UserRound className="mr-2.5 h-4 w-4" />Minha conta</DropdownMenuItem>
