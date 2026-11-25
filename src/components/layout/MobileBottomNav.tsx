@@ -1,3 +1,4 @@
+import { useSupportUnread } from "@/hooks/useSupportUnread";
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard, ShoppingCart, Package, Wallet, MoreHorizontal,
@@ -58,6 +59,7 @@ export function MobileBottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const [moreOpen, setMoreOpen] = useState(false);
+  const supportUnread = useSupportUnread();
 
   // Lock body scroll when sheet is open
   useEffect(() => {
@@ -140,6 +142,9 @@ export function MobileBottomNav() {
                               <p className="text-[11px] font-medium text-muted-foreground/70 truncate">{item.subtitle}</p>
                             )}
                           </div>
+                          {item.url === "/suporte" && supportUnread > 0 && (
+                            <span aria-label={`${supportUnread} ${supportUnread === 1 ? "resposta nova" : "respostas novas"}`} className="grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1.5 text-[11px] font-bold tabular-nums text-primary-foreground">{supportUnread}</span>
+                          )}
                           <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
                         </NavLink>
                       );
@@ -204,6 +209,7 @@ export function MobileBottomNav() {
                     )}
                   >
                     <tab.icon className={cn("h-[19px] w-[19px]", isActive && "stroke-[2.5]")} />
+                    {isMore && supportUnread > 0 && <span aria-hidden className="absolute right-[calc(50%-20px)] top-1.5 h-2 w-2 rounded-full bg-primary ring-2 ring-card" />}
                   </span>
                   <span
                     className={cn(

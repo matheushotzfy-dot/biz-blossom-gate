@@ -6,10 +6,9 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 
-export const MAX_FILE_SIZE_MB = 5;
-export const MAX_FILES_PER_MESSAGE = 3;
-export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-export const ACCEPTED_MIME = "image/*,application/pdf,.doc,.docx,.txt,.csv,.xls,.xlsx";
+import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB, MAX_FILES_PER_MESSAGE } from "@/lib/ticketLimits";
+
+export { ACCEPTED_EXT, ACCEPTED_MIME, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB, MAX_FILES_PER_MESSAGE } from "@/lib/ticketLimits";
 
 export type Attachment = {
   path: string;
@@ -32,16 +31,31 @@ export async function uploadTicketAttachments(
   const uploaded: Attachment[] = [];
   for (const f of files) {
     if (f.size > MAX_FILE_SIZE_BYTES) {
+      await discardAttachments(uploaded);
       throw new Error(`"${f.name}" excede ${MAX_FILE_SIZE_MB}MB.`);
     }
     const path = `${ticketId}/${crypto.randomUUID()}-${sanitize(f.name)}`;
     const { error } = await supabase.storage
       .from("ticket-attachments")
       .upload(path, f, { contentType: f.type || "application/octet-stream", upsert: false });
-    if (error) throw new Error(`Falha ao enviar "${f.name}".`);
+    if (error) {
+      // Não deixa arquivos soltos de uma mensagem que não chegou a ser enviada.
+      await discardAttachments(uploaded);
+      throw new Error(`Falha ao enviar "${f.name}".`);
+    }
     uploaded.push({ path, name: f.name, size: f.size, type: f.type });
   }
   return uploaded;
+}
+
+/** Apaga anexos já enviados quando a mensagem não pôde ser salva. Nunca lança. */
+export async function discardAttachments(list: Attachment[]): Promise<void> {
+  if (!list.length) return;
+  try {
+    await supabase.storage.from("ticket-attachments").remove(list.map((a) => a.path));
+  } catch {
+    /* melhor esforço */
+  }
 }
 
 export async function getSignedUrl(path: string): Promise<string | null> {
@@ -70,7 +84,7 @@ export function humanSize(bytes: number): string {
 /** Soft beep for new incoming messages. No asset file needed. */
 export function playIncomingBeep() {
   try {
-    const AC = (window as any).AudioContext || (window as any).webkitAudioContext;
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AC) return;
     const ctx = new AC();
     const o = ctx.createOscillator();
@@ -84,6 +98,6 @@ export function playIncomingBeep() {
     o.connect(g).connect(ctx.destination);
     o.start();
     o.stop(ctx.currentTime + 0.28);
-    setTimeout(() => ctx.close().catch(() => {}), 400);
-  } catch {}
+    setTimeout(() => { void ctx.close().catch(() => undefined); }, 400);
+  } catch { /* sem som: tudo bem */ }
 }

@@ -16,6 +16,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { ProfileProvider, useProfile } from "@/hooks/useProfile";
 import { usePrefetchDashboardData, useWithdrawals, useLedgerBalance } from "@/hooks/useQueryData";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
+import { useSupportAlerts } from "@/hooks/useSupportUnread";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,7 @@ function DashboardLayoutInner() {
  const kycBannerInfo = kyc.resolved ? kycBanner(kyc.state as KycKey) : null;
  usePrefetchDashboardData();
  useRealtimeSync();
+ useSupportAlerts();
  // Aquece os chunks das abas mais usadas em segundo plano (evita "só carregando").
  useEffect(() => { prefetchIdleRoutes(); }, []);
  // Identidade do seller: clara (a do cadastro) por padrão; escura só se o perfil escolher "escuro".
@@ -48,7 +50,9 @@ function DashboardLayoutInner() {
  const navigate = useNavigate();
 
   const { pathname, search } = useLocation();
-  const routeKey = pathname + search;
+  // O Suporte guarda rascunhos e a conversa aberta no estado da página e limpa ?novo=/?chamado= depois de usar:
+  // trocar a query ali não pode remontar a tela.
+  const routeKey = pathname === "/suporte" ? pathname : pathname + search;
  const scrollRef = useRef<HTMLDivElement>(null);
  const [showApproved, setShowApproved] = useState(false);
  const [searchOpen, setSearchOpen] = useState(false);

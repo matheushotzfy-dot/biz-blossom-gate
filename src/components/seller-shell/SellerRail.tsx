@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { ChevronRight, LifeBuoy, Trophy, UserRound } from "lucide-react";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
 import { prefetchRoute } from "@/lib/routePrefetch";
+import { useSupportUnread } from "@/hooks/useSupportUnread";
 import { cn } from "@/lib/utils";
 import { SELLER_NAV, isSectionActive } from "./navConfig";
 
@@ -18,6 +19,7 @@ const EXTRA = [
 export function SellerRail() {
   const { pathname, search } = useLocation();
   const here = pathname + search;
+  const supportUnread = useSupportUnread();
 
   return (
     <aside className="vp-rail sticky top-0 hidden h-[100dvh] w-[272px] shrink-0 flex-col md:flex" aria-label="Menu principal">
@@ -85,7 +87,10 @@ export function SellerRail() {
             <li key={i.url}>
               <Link to={i.url} data-active={pathname.startsWith(i.url)} onMouseEnter={() => prefetchRoute(i.url)} className="vp-nav vp-nav-sm">
                 <span className="vp-nav-chip"><i.icon className="h-[16px] w-[16px]" strokeWidth={2.1} /></span>
-                {i.label}
+                <span className="flex-1">{i.label}</span>
+                {i.url === "/suporte" && supportUnread > 0 && (
+                  <span aria-label={`${supportUnread} ${supportUnread === 1 ? "resposta nova" : "respostas novas"}`} className="grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1.5 text-[11px] font-bold tabular-nums text-primary-foreground">{supportUnread}</span>
+                )}
               </Link>
             </li>
           ))}

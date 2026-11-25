@@ -1,0 +1,99 @@
+/* Suporte. Prefixo sp-: classes com a palavra "border" e os raios do Tailwind (rounded-xl/2xl) são recoloridos por regras antigas,
+   e botões/campos ganham raio de 8px, então os raios vivem aqui com html.vp-seller. */
+
+.sp-page { display: flex; flex: 1; min-height: 0; width: 100%; max-width: 1440px; margin-inline: auto; flex-direction: column; gap: 16px; padding: 12px 12px 8px; }
+@media (min-width: 640px) { .sp-page { padding: 12px 20px 12px; } }
+@media (min-width: 768px) { .sp-page { gap: 20px; padding: 4px 32px 28px; } }
+
+/* Painel principal: uma coluna no celular e no tablet, duas colunas a partir de 1280px. */
+.sp-shell { display: grid; flex: 1; min-height: 0; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); overflow: hidden; }
+@media (min-width: 1280px) { .sp-shell { grid-template-columns: 384px minmax(0, 1fr); } }
+.sp-inbox { min-height: 0; min-width: 0; flex-direction: column; background: hsl(var(--card)); }
+@media (min-width: 1280px) { .sp-inbox { border-right: 1px solid hsl(var(--border)); } }
+.sp-pane { min-height: 0; min-width: 0; flex-direction: column; background: hsl(var(--background)); }
+
+/* Lista de conversas */
+.sp-row { display: flex; width: 100%; flex-direction: column; gap: 6px; padding: 14px 16px; text-align: left; background: transparent; transition: background-color .15s ease; }
+html.vp-seller .sp-row { border-radius: 18px !important; }
+.sp-row:hover { background: hsl(var(--muted)); }
+.sp-row[aria-current="true"] { background: hsl(var(--accent)); box-shadow: inset 0 0 0 1px hsl(var(--primary) / .28); }
+.sp-row:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: -2px; }
+.sp-state { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; }
+.sp-state > i { display: block; width: 7px; height: 7px; border-radius: 9999px; background: currentColor; }
+.sp-state[data-tone="ok"] { color: hsl(var(--primary)); }
+.sp-state[data-tone="wait"] { color: hsl(var(--warning)); }
+.sp-state[data-tone="info"] { color: hsl(var(--info)); }
+.sp-state[data-tone="alert"] { color: hsl(var(--destructive)); }
+.sp-state[data-tone="idle"] { color: hsl(var(--muted-foreground)); }
+.sp-dot { display: block; width: 9px; height: 9px; flex: none; border-radius: 9999px; background: hsl(var(--primary)); box-shadow: 0 0 0 3px hsl(var(--primary) / .18); }
+
+/* Atalhos de assunto na central de ajuda */
+.sp-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px; text-align: left; background: hsl(var(--card)); border: 1px solid hsl(var(--border)); transition: border-color .15s ease, background-color .15s ease, transform .15s ease; }
+html.vp-seller .sp-tile { border-radius: 20px !important; }
+.sp-tile:hover { border-color: hsl(var(--primary) / .45); }
+.sp-tile:active { transform: scale(.98); }
+.sp-tile[aria-pressed="true"] { background: hsl(var(--accent)); border-color: hsl(var(--primary) / .6); }
+.sp-tile:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.sp-tile[data-action] { background: hsl(var(--accent)); border-color: hsl(var(--primary) / .28); }
+.sp-tile[data-action]:hover { border-color: hsl(var(--primary) / .6); }
+.sp-tile[data-action] .sp-tile-icon { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+.sp-tile-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 9999px; background: hsl(var(--muted)); color: hsl(var(--muted-foreground)); transition: background-color .15s ease, color .15s ease; }
+.sp-tile[aria-pressed="true"] .sp-tile-icon { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+
+/* Perguntas frequentes */
+.sp-faq-q { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px; text-align: left; background: transparent; transition: background-color .15s ease; }
+html.vp-seller .sp-faq-q { border-radius: 0 !important; }
+.sp-faq-q:hover { background: hsl(var(--muted) / .6); }
+.sp-faq-q:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: -2px; }
+.sp-faq-q svg { flex: none; color: hsl(var(--muted-foreground)); transition: transform .2s ease; }
+.sp-faq-q[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+/* Conversa */
+.sp-note { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 13.5px; line-height: 1.4; color: hsl(var(--muted-foreground)); background: hsl(var(--muted) / .7); }
+.sp-note[data-tone="ok"] { background: hsl(var(--accent)); color: hsl(var(--accent-foreground)); }
+.sp-bubble { max-width: min(78%, 560px); padding: 12px 16px; font-size: 15px; line-height: 1.55; background: hsl(var(--muted)); color: hsl(var(--foreground)); border-radius: 20px 20px 20px 6px; }
+.sp-bubble[data-mine="true"] { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border-radius: 20px 20px 6px 20px; }
+@media (max-width: 639px) { .sp-bubble { max-width: 88%; } }
+.sp-bubble a { text-decoration: underline; text-underline-offset: 2px; font-weight: 600; overflow-wrap: anywhere; }
+.sp-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 3px 10px; border-radius: 9999px; font-size: 12.5px; font-weight: 600; background: hsl(var(--foreground) / .07); }
+.sp-bubble[data-mine="true"] .sp-chip { background: hsl(var(--primary-foreground) / .18); }
+.sp-day { display: flex; align-items: center; gap: 14px; margin: 4px 0; font-size: 12.5px; font-weight: 600; color: hsl(var(--muted-foreground)); }
+.sp-day::before, .sp-day::after { content: ""; flex: 1; height: 1px; background: hsl(var(--border)); }
+.sp-dots { display: inline-flex; gap: 4px; align-items: center; height: 18px; }
+.sp-dots i { display: block; width: 6px; height: 6px; border-radius: 9999px; background: hsl(var(--muted-foreground)); animation: sp-bounce 1.2s ease-in-out infinite; }
+.sp-dots i:nth-child(2) { animation-delay: .15s; }
+.sp-dots i:nth-child(3) { animation-delay: .3s; }
+@keyframes sp-bounce { 0%, 60%, 100% { transform: translateY(0); opacity: .45; } 30% { transform: translateY(-4px); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .sp-dots i { animation: none; opacity: .7; } }
+
+/* Campo de mensagem */
+.sp-compose { display: flex; align-items: flex-end; gap: 4px; padding: 6px 6px 6px 18px; background: hsl(var(--background)); border: 1px solid hsl(var(--border)); border-radius: 26px; transition: border-color .15s ease, box-shadow .15s ease; }
+.sp-compose:focus-within { border-color: hsl(var(--primary) / .6); box-shadow: 0 0 0 3px hsl(var(--primary) / .16); }
+.sp-compose textarea { flex: 1; min-width: 0; max-height: 160px; padding: 10px 4px 10px 0 !important; resize: none; font-size: 15px; line-height: 1.5; color: hsl(var(--foreground)); background: transparent !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; outline: none !important; }
+.sp-compose textarea::placeholder { color: hsl(var(--muted-foreground) / .75); }
+.sp-compose textarea:disabled { opacity: .6; }
+.sp-icon { display: grid; place-items: center; width: 40px; height: 40px; flex: none; color: hsl(var(--muted-foreground)); background: transparent; transition: background-color .15s ease, color .15s ease; }
+html.vp-seller .sp-icon, html.vp-seller .sp-send { border-radius: 9999px !important; }
+.sp-icon:hover:not(:disabled) { background: hsl(var(--muted)); color: hsl(var(--foreground)); }
+.sp-icon:disabled { opacity: .45; }
+.sp-icon:focus-visible, .sp-send:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.sp-send { display: grid; place-items: center; width: 40px; height: 40px; flex: none; color: hsl(var(--primary-foreground)); background: hsl(var(--primary)); box-shadow: 0 10px 20px -12px hsl(var(--primary) / .8); transition: filter .15s ease, transform .15s ease, opacity .15s ease; }
+.sp-send:hover:not(:disabled) { filter: brightness(1.07); }
+.sp-send:active:not(:disabled) { transform: scale(.94); }
+.sp-send:disabled { opacity: .35; box-shadow: none; }
+
+/* Arquivos escolhidos */
+.sp-file { display: inline-flex; max-width: 100%; align-items: center; gap: 8px; padding: 5px 6px 5px 12px; font-size: 13px; background: hsl(var(--muted)); border: 1px solid hsl(var(--border)); border-radius: 9999px; }
+.sp-file button { display: grid; place-items: center; width: 24px; height: 24px; flex: none; color: hsl(var(--muted-foreground)); background: transparent; }
+html.vp-seller .sp-file button { border-radius: 9999px !important; }
+.sp-file button:hover { background: hsl(var(--foreground) / .08); color: hsl(var(--foreground)); }
+
+/* Arrastar arquivos sobre a conversa */
+.sp-drop { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; gap: 4px; text-align: center; pointer-events: none; color: hsl(var(--primary)); background: hsl(var(--background) / .88); outline: 2px dashed hsl(var(--primary) / .6); outline-offset: -12px; }
+
+/* Urgência no novo chamado */
+.sp-radio { display: flex; width: 100%; flex-direction: column; gap: 2px; padding: 12px 14px; text-align: left; background: hsl(var(--card)); border: 1px solid hsl(var(--border)); transition: border-color .15s ease, background-color .15s ease; }
+html.vp-seller .sp-radio { border-radius: 16px !important; }
+.sp-radio:hover { border-color: hsl(var(--primary) / .4); }
+.sp-radio[aria-checked="true"] { background: hsl(var(--accent)); border-color: hsl(var(--primary) / .6); }
+.sp-radio:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }

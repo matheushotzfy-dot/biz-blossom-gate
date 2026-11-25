@@ -1,18 +1,16 @@
 /**
- * Renders a message's attachments.
- * - Images: signed thumbnail (128x128) that opens a full-screen lightbox on click.
- * - Other files: chip with icon + download.
+ * Anexos de uma mensagem.
+ * - Imagens: miniatura com endereço assinado; abre em tela cheia (setas e Esc).
+ * - Outros arquivos: botão com ícone, nome e tamanho; abre em outra aba.
  */
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import {
-  Paperclip, Download, ImageIcon, FileText, X, ChevronLeft, ChevronRight, Loader2,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, FileText, ImageIcon, Loader2, Paperclip, X } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getSignedUrl, humanSize, type Attachment } from "@/lib/ticketAttachments";
 
-const isImage = (a: Attachment) =>
-  a.type?.startsWith("image/") || /\.(png|jpe?g|gif|webp|avif|bmp|svg)$/i.test(a.name);
+const isImage = (a: Attachment) => a.type?.startsWith("image/") || /\.(png|jpe?g|gif|webp|avif|bmp|svg)$/i.test(a.name);
 
 function Thumb({ att, onOpen }: { att: Attachment; onOpen: () => void }) {
   const [url, setUrl] = useState<string | null>(null);
@@ -20,55 +18,34 @@ function Thumb({ att, onOpen }: { att: Attachment; onOpen: () => void }) {
 
   useEffect(() => {
     let ok = true;
-    getSignedUrl(att.path).then(u => { if (ok) setUrl(u); });
+    void getSignedUrl(att.path).then((u) => { if (ok) { setUrl(u); if (!u) setErrored(true); } });
     return () => { ok = false; };
   }, [att.path]);
 
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="group relative h-24 w-24 rounded-xl overflow-hidden border border-border/60 bg-muted/40 hover:border-primary/50 transition-colors shrink-0"
-      title={`${att.name} · ${humanSize(att.size)}`}
-    >
+    <button type="button" onClick={onOpen} title={`${att.name} · ${humanSize(att.size)}`} aria-label={`Abrir imagem ${att.name}`}
+      className="group relative h-28 w-28 shrink-0 overflow-hidden rounded-[16px] bg-background/60 shadow-[inset_0_0_0_1px_hsl(var(--foreground)/.12)] transition-transform hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none">
       {url && !errored ? (
-        <img
-          src={url}
-          alt={att.name}
-          className="h-full w-full object-cover"
-          loading="lazy"
-          onError={() => setErrored(true)}
-        />
+        <img src={url} alt={att.name} className="h-full w-full object-cover" loading="lazy" onError={() => setErrored(true)} />
       ) : (
-        <div className="h-full w-full flex items-center justify-center">
-          {errored ? <ImageIcon className="h-5 w-5 text-muted-foreground" /> : <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-        </div>
+        <span className="grid h-full w-full place-items-center text-muted-foreground">
+          {errored ? <ImageIcon className="h-5 w-5" /> : <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />}
+        </span>
       )}
-      <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-1.5 py-1 text-[9px] font-bold text-white truncate text-left">
-        {att.name}
-      </span>
+      <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/70 to-transparent px-2 pb-1.5 pt-4 text-left text-[11px] font-semibold text-white">{att.name}</span>
     </button>
   );
 }
 
-function Lightbox({
-  images,
-  index,
-  onClose,
-  onIndex,
-}: {
-  images: Attachment[];
-  index: number;
-  onClose: () => void;
-  onIndex: (i: number) => void;
-}) {
+function Lightbox({ images, index, onClose, onIndex }: { images: Attachment[]; index: number; onClose: () => void; onIndex: (i: number) => void }) {
   const [url, setUrl] = useState<string | null>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
   const current = images[index];
 
   useEffect(() => {
     setUrl(null);
     let ok = true;
-    getSignedUrl(current.path).then(u => { if (ok) setUrl(u); });
+    void getSignedUrl(current.path).then((u) => { if (ok) setUrl(u); });
     return () => { ok = false; };
   }, [current.path]);
 
@@ -76,106 +53,55 @@ function Lightbox({
   const next = useCallback(() => onIndex((index + 1) % images.length), [index, images.length, onIndex]);
 
   useEffect(() => {
+    closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
       else if (e.key === "ArrowLeft") prev();
       else if (e.key === "ArrowRight") next();
     };
     window.addEventListener("keydown", onKey);
-    const prevOverflow = document.body.style.overflow;
+    const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
-    };
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = previous; };
   }, [onClose, prev, next]);
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-150"
-      onClick={onClose}
-    >
-      {/* Top bar */}
-      <div className="absolute top-0 inset-x-0 p-4 flex items-center justify-between text-white z-10" onClick={e => e.stopPropagation()}>
+    <div role="dialog" aria-modal="true" aria-label={`Imagem ${current.name}`} className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-sm animate-in fade-in duration-150" onClick={onClose}>
+      <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-3 p-4 text-white" onClick={(e) => e.stopPropagation()}>
         <div className="min-w-0">
-          <p className="text-sm font-black truncate">{current.name}</p>
-          <p className="text-[11px] text-white/60 tabular-nums">
-            {humanSize(current.size)} · {index + 1}/{images.length}
-          </p>
+          <p className="truncate text-[15px] font-bold">{current.name}</p>
+          <p className="text-[12.5px] tabular-nums text-white/65">{humanSize(current.size)}{images.length > 1 ? ` · ${index + 1} de ${images.length}` : ""}</p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex shrink-0 items-center gap-2">
           {url && (
-            <a
-              href={url}
-              download={current.name}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="h-10 px-3 rounded-lg bg-white/10 border border-white/20 hover:bg-white/20 flex items-center gap-2 text-xs font-black uppercase tracking-widest"
-            >
-              <Download className="h-3.5 w-3.5" /> Baixar
+            <a href={url} download={current.name} target="_blank" rel="noopener noreferrer" className="vp-r12 inline-flex h-10 items-center gap-2 bg-white/10 px-4 text-[13.5px] font-semibold hover:bg-white/20">
+              <Download className="h-4 w-4" /> Baixar
             </a>
           )}
-          <button
-            onClick={onClose}
-            className="h-10 w-10 rounded-lg bg-white/10 border border-white/20 hover:bg-white/20 flex items-center justify-center"
-            aria-label="Fechar"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <button ref={closeRef} type="button" onClick={onClose} aria-label="Fechar" className="vp-r12 grid h-10 w-10 place-items-center bg-white/10 hover:bg-white/20"><X className="h-4 w-4" /></button>
         </div>
       </div>
-
-      {/* Prev / Next */}
       {images.length > 1 && (
         <>
-          <button
-            onClick={e => { e.stopPropagation(); prev(); }}
-            className="absolute left-4 h-12 w-12 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 text-white flex items-center justify-center z-10"
-            aria-label="Anterior"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button
-            onClick={e => { e.stopPropagation(); next(); }}
-            className="absolute right-4 h-12 w-12 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 text-white flex items-center justify-center z-10"
-            aria-label="Próxima"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
+          <button type="button" onClick={(e) => { e.stopPropagation(); prev(); }} aria-label="Imagem anterior" className="absolute left-3 z-10 grid h-12 w-12 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20 sm:left-5"><ChevronLeft className="h-5 w-5" /></button>
+          <button type="button" onClick={(e) => { e.stopPropagation(); next(); }} aria-label="Próxima imagem" className="absolute right-3 z-10 grid h-12 w-12 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20 sm:right-5"><ChevronRight className="h-5 w-5" /></button>
         </>
       )}
-
-      {/* Image */}
-      <div className="max-w-[92vw] max-h-[85vh] flex items-center justify-center" onClick={e => e.stopPropagation()}>
-        {url ? (
-          <img
-            src={url}
-            alt={current.name}
-            className="max-w-[92vw] max-h-[85vh] object-contain rounded-lg animate-in zoom-in-95 duration-200"
-          />
-        ) : (
-          <Loader2 className="h-8 w-8 animate-spin text-white/60" />
-        )}
+      <div className="flex max-h-[85vh] max-w-[92vw] items-center justify-center" onClick={(e) => e.stopPropagation()}>
+        {url ? <img src={url} alt={current.name} className="max-h-[85vh] max-w-[92vw] rounded-[16px] object-contain animate-in zoom-in-95 duration-200" /> : <Loader2 className="h-8 w-8 animate-spin text-white/60 motion-reduce:animate-none" />}
       </div>
     </div>,
     document.body,
   );
 }
 
-export function AttachmentChips({
-  attachments,
-  tone = "muted",
-}: {
-  attachments: Attachment[] | null | undefined;
-  tone?: "muted" | "primary" | "emerald";
-}) {
+/** `mine` pinta os anexos para o balão verde; `tone` é o nome antigo (a tela do admin ainda usa). */
+export function AttachmentChips({ attachments, tone, mine = tone === "primary" }: { attachments: Attachment[] | null | undefined; mine?: boolean; tone?: string }) {
   const [busy, setBusy] = useState<string | null>(null);
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-
-  const list = attachments ?? [];
+  const [open, setOpen] = useState<number | null>(null);
+  const list = useMemo(() => attachments ?? [], [attachments]);
   const images = useMemo(() => list.filter(isImage), [list]);
-  const others = useMemo(() => list.filter(a => !isImage(a)), [list]);
-
+  const others = useMemo(() => list.filter((a) => !isImage(a)), [list]);
   if (list.length === 0) return null;
 
   const openFile = async (a: Attachment) => {
@@ -183,57 +109,29 @@ export function AttachmentChips({
     const url = await getSignedUrl(a.path);
     setBusy(null);
     if (url) window.open(url, "_blank", "noopener,noreferrer");
+    else toast.error(`Não foi possível abrir "${a.name}". Tente de novo.`);
   };
 
-  const toneClasses =
-    tone === "primary"
-      ? "bg-primary-foreground/10 border-primary-foreground/25 text-primary-foreground hover:bg-primary-foreground/20"
-      : tone === "emerald"
-      ? "bg-emerald-500/10 border-emerald-500/30 text-foreground hover:bg-emerald-500/20"
-      : "bg-muted/40 border-border/60 text-foreground hover:bg-muted/60";
-
   return (
-    <div className="mt-2 flex flex-col gap-2">
-      {images.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {images.map((a, i) => (
-            <Thumb key={a.path} att={a} onOpen={() => setLightboxIndex(i)} />
-          ))}
-        </div>
-      )}
+    <div className="mt-2.5 flex flex-col gap-2">
+      {images.length > 0 && <div className="flex flex-wrap gap-2">{images.map((a, i) => <Thumb key={a.path} att={a} onOpen={() => setOpen(i)} />)}</div>}
       {others.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {others.map(a => {
+        <div className="flex flex-wrap gap-2">
+          {others.map((a) => {
             const Icon = /pdf/i.test(a.type) || /\.pdf$/i.test(a.name) ? FileText : Paperclip;
             return (
-              <button
-                key={a.path}
-                onClick={() => openFile(a)}
-                disabled={busy === a.path}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold transition-colors max-w-[220px]",
-                  toneClasses,
-                  busy === a.path && "opacity-60",
-                )}
-                title={a.name}
-              >
-                <Icon className="h-3 w-3 shrink-0" />
+              <button key={a.path} type="button" onClick={() => { void openFile(a); }} disabled={busy === a.path} title={a.name}
+                className={cn("inline-flex h-10 max-w-[260px] items-center gap-2 rounded-full px-3.5 text-[13px] font-semibold transition-colors disabled:opacity-60",
+                  mine ? "bg-primary-foreground/15 text-primary-foreground hover:bg-primary-foreground/25" : "bg-background text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border))] hover:bg-card")}>
+                {busy === a.path ? <Loader2 className="h-4 w-4 shrink-0 animate-spin motion-reduce:animate-none" /> : <Icon className="h-4 w-4 shrink-0" />}
                 <span className="truncate">{a.name}</span>
-                <span className="opacity-60 tabular-nums">{humanSize(a.size)}</span>
-                <Download className="h-3 w-3 shrink-0 opacity-70" />
+                <span className="shrink-0 font-medium tabular-nums opacity-70">{humanSize(a.size)}</span>
               </button>
             );
           })}
         </div>
       )}
-      {lightboxIndex !== null && (
-        <Lightbox
-          images={images}
-          index={lightboxIndex}
-          onIndex={setLightboxIndex}
-          onClose={() => setLightboxIndex(null)}
-        />
-      )}
+      {open !== null && <Lightbox images={images} index={open} onIndex={setOpen} onClose={() => setOpen(null)} />}
     </div>
   );
 }
