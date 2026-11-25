@@ -6,7 +6,11 @@ export type AffiliateLink = {
   slug: string; commission_pct: number; clicks: number; is_active: boolean; created_at: string;
   /** true quando foi o produtor (ou o encerramento do programa) que pausou: o afiliado não consegue reativar sozinho. */
   paused_by_owner: boolean;
+  /** Pausa da equipe: ninguém reativa, nem o produtor nem o afiliado, até o suporte liberar. */
+  admin_hold_at?: string | null;
+  admin_hold_reason?: string | null;
 };
+export const isHeldLink = (l: Pick<AffiliateLink, "admin_hold_at">) => !!l.admin_hold_at;
 export type AffiliateSale = {
   id: string; affiliate_link_id: string; transaction_id: string; product_id: string;
   affiliate_user_id: string; seller_user_id: string; sale_amount: number;
@@ -49,6 +53,7 @@ export const sinceLabel = (iso: string) => new Date(iso).toLocaleDateString("pt-
 
 export function affiliateErrorMessage(err: { code?: string; message?: string } | null | undefined, fallback: string): string {
   const m = (err?.message || "").toLowerCase();
+  if (m.includes("equipe pausou")) return "A equipe pausou este link. Fale com o suporte para liberar.";
   if (m.includes("jwt") || m.includes("401")) return "Sua sessão expirou. Entre de novo para continuar.";
   if (m.includes("rate") && m.includes("limit")) return "Muitas tentativas em pouco tempo. Espere um minuto e tente de novo.";
   if (m.includes("permission") || m.includes("row-level")) return "Você não tem permissão para esta ação.";

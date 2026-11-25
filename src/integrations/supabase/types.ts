@@ -375,6 +375,8 @@ export type Database = {
       }
       affiliate_links: {
         Row: {
+          admin_hold_at: string | null
+          admin_hold_reason: string | null
           affiliate_user_id: string
           clicks: number
           commission_pct: number
@@ -387,6 +389,8 @@ export type Database = {
           slug: string
         }
         Insert: {
+          admin_hold_at?: string | null
+          admin_hold_reason?: string | null
           affiliate_user_id: string
           clicks?: number
           commission_pct?: number
@@ -399,6 +403,8 @@ export type Database = {
           slug: string
         }
         Update: {
+          admin_hold_at?: string | null
+          admin_hold_reason?: string | null
           affiliate_user_id?: string
           clicks?: number
           commission_pct?: number

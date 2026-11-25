@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { affiliateCode, affiliateUrl, commissionOf, isPaidSale, shortUrl, type AffiliateSale } from "@/components/marketing/affiliateMeta";
+import { affiliateCode, affiliateErrorMessage, affiliateUrl, commissionOf, isHeldLink, isPaidSale, shortUrl, type AffiliateSale } from "@/components/marketing/affiliateMeta";
 
 describe("regras de afiliados", () => {
   it("calcula a comissão sobre o líquido com centavos", () => {
@@ -27,5 +27,12 @@ describe("regras de afiliados", () => {
     expect(isPaidSale(sale("approved"))).toBe(true);
     expect(isPaidSale(sale("pending"))).toBe(false);
     expect(isPaidSale(sale("refunded"))).toBe(false);
+  });
+  it("pausa da equipe: link retido não reativa e a recusa do banco vira frase clara", () => {
+    expect(isHeldLink({ admin_hold_at: null })).toBe(false);
+    expect(isHeldLink({})).toBe(false);
+    expect(isHeldLink({ admin_hold_at: "2026-11-25T12:00:00Z" })).toBe(true);
+    expect(affiliateErrorMessage({ code: "42501", message: "A equipe pausou este link e ele só volta com a liberação do suporte." }, "x"))
+      .toBe("A equipe pausou este link. Fale com o suporte para liberar.");
   });
 });

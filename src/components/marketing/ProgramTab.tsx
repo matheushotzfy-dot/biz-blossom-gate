@@ -9,7 +9,7 @@ import { Pager } from "@/components/seller-ui/Pager";
 import { StatBand } from "@/components/seller-ui/StatBand";
 import { StatusPill } from "@/components/seller-ui/tx";
 import { cn } from "@/lib/utils";
-import { SALE_STATUS, affiliateCode, isPaidSale, sinceLabel, type AffiliateLink, type AffiliateSale } from "./affiliateMeta";
+import { SALE_STATUS, affiliateCode, isHeldLink, isPaidSale, sinceLabel, type AffiliateLink, type AffiliateSale } from "./affiliateMeta";
 import { CodeBadge, Thumb } from "./Thumb";
 
 export interface ProgramProductRow {
@@ -149,9 +149,9 @@ export function ProgramTab(p: ProgramTabProps) {
                     <li key={l.id} role="row" className={cn("grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 border-t border-border px-5 py-3.5 first:border-t-0 sm:px-7 lg:gap-4", LINK_COLS, p.busyLinkId === l.id && "opacity-60", !l.is_active && "opacity-75")}>
                       <span role="cell" className="flex min-w-0 items-center gap-3.5">
                         <CodeBadge code={affiliateCode(l.affiliate_user_id)} active={l.is_active} />
-                        <span className="min-w-0"><span className="block truncate text-[14.5px] font-bold text-foreground">Afiliado {affiliateCode(l.affiliate_user_id)}</span><span className="block text-[12.5px] text-muted-foreground">Desde {sinceLabel(l.created_at)}</span></span>
+                        <span className="min-w-0"><span className="block truncate text-[14.5px] font-bold text-foreground">Afiliado {affiliateCode(l.affiliate_user_id)}</span><span className="block text-[12.5px] text-muted-foreground">{isHeldLink(l) ? <span className="font-medium text-destructive">Pausado pela equipe</span> : <>Desde {sinceLabel(l.created_at)}</>}</span></span>
                       </span>
-                      <span role="cell" className="col-start-2 row-start-1 justify-self-end lg:col-start-6 lg:row-start-1"><Switch checked={l.is_active} onCheckedChange={() => p.onToggleLink(l)} disabled={p.busyLinkId === l.id} aria-label={l.is_active ? `Pausar o link do afiliado ${affiliateCode(l.affiliate_user_id)}` : `Reativar o link do afiliado ${affiliateCode(l.affiliate_user_id)}`} /></span>
+                      <span role="cell" className="col-start-2 row-start-1 justify-self-end lg:col-start-6 lg:row-start-1"><Switch checked={l.is_active} onCheckedChange={() => p.onToggleLink(l)} disabled={p.busyLinkId === l.id || isHeldLink(l)} aria-label={isHeldLink(l) ? `A equipe pausou o link do afiliado ${affiliateCode(l.affiliate_user_id)}; só o suporte libera` : l.is_active ? `Pausar o link do afiliado ${affiliateCode(l.affiliate_user_id)}` : `Reativar o link do afiliado ${affiliateCode(l.affiliate_user_id)}`} /></span>
                       <span role="cell" className="col-span-2 truncate text-[13.5px] font-medium text-foreground lg:col-span-1 lg:col-start-2 lg:row-start-1">{p.productName(l.product_id)}</span>
                       <span role="cell" className="col-span-2 flex items-center justify-between gap-3 text-[13px] text-muted-foreground lg:contents">
                         <span className="lg:text-right lg:text-[14px] lg:font-semibold lg:text-foreground">{Number(l.commission_pct)}% <span className="lg:hidden">de comissão</span></span>

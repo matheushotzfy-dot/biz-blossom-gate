@@ -142,6 +142,7 @@ export default function Afiliados() {
 
   const toggleLink = async (l: AffiliateLink) => {
     if (busyLinkId) return;
+    if (l.admin_hold_at) { toast.error("A equipe pausou este link. Fale com o suporte para liberar."); return; }
     if (!l.is_active && l.affiliate_user_id === user?.id && !catalogById.has(l.product_id)) { toast.error("O produtor encerrou o programa deste produto."); return; }
     if (!l.is_active && l.paused_by_owner && l.affiliate_user_id === user?.id) { toast.error("O produtor pausou este link. Só ele pode reativar."); return; }
     setBusyLinkId(l.id);

@@ -7,7 +7,7 @@ import { Pager } from "@/components/seller-ui/Pager";
 import { StatBand } from "@/components/seller-ui/StatBand";
 import { StatusPill } from "@/components/seller-ui/tx";
 import { cn } from "@/lib/utils";
-import { SALE_STATUS, affiliateUrl, isPaidSale, shortUrl, sinceLabel, type AffiliateLink, type AffiliateSale } from "./affiliateMeta";
+import { SALE_STATUS, affiliateUrl, isHeldLink, isPaidSale, shortUrl, sinceLabel, type AffiliateLink, type AffiliateSale } from "./affiliateMeta";
 import { Thumb } from "./Thumb";
 
 const COLS = "lg:grid-cols-[130px_minmax(0,1.4fr)_90px_130px_130px_120px]";
@@ -70,6 +70,7 @@ export function MyLinksTab(p: MyLinksTabProps) {
             const mine = paid.filter((s) => s.affiliate_link_id === l.id);
             const open = p.inProgram(l.product_id);
             const gain = mine.reduce((a, x) => a + Number(x.commission_amount), 0);
+            const held = isHeldLink(l);
             return (
               <li key={l.id} className={cn("vp-sheet flex flex-col p-5 sm:p-6", !l.is_active && "opacity-80", p.busyLinkId === l.id && "opacity-60")}>
                 <div className="flex items-start gap-3.5">
@@ -93,9 +94,14 @@ export function MyLinksTab(p: MyLinksTabProps) {
                 </dl>
 
                 <div className="mt-auto pt-5">
+                  {held && (
+                    <p className="mb-3 text-[13px] font-medium leading-snug text-destructive">
+                      A equipe pausou este link{l.admin_hold_reason ? `: ${l.admin_hold_reason}` : ""}. Fale com o suporte para liberar.
+                    </p>
+                  )}
                   <div className="flex items-center justify-between gap-3 border-t border-border pt-4">
-                    {open ? <StatusPill label={l.is_active ? "Link ativo" : l.paused_by_owner ? "Pausado pelo produtor" : "Link pausado"} tone={l.is_active ? "ok" : "idle"} /> : <StatusPill label="Programa encerrado" tone="idle" />}
-                    <Switch checked={l.is_active && open} onCheckedChange={() => p.onToggle(l)} disabled={p.busyLinkId === l.id || !open || (!l.is_active && l.paused_by_owner)} aria-label={!open ? "Este produto não aceita mais afiliados" : !l.is_active && l.paused_by_owner ? "O produtor pausou este link e só ele pode reativar" : l.is_active ? "Pausar este link" : "Reativar este link"} />
+                    {held ? <StatusPill label="Pausado pela equipe" tone="alert" /> : open ? <StatusPill label={l.is_active ? "Link ativo" : l.paused_by_owner ? "Pausado pelo produtor" : "Link pausado"} tone={l.is_active ? "ok" : "idle"} /> : <StatusPill label="Programa encerrado" tone="idle" />}
+                    <Switch checked={l.is_active && open} onCheckedChange={() => p.onToggle(l)} disabled={p.busyLinkId === l.id || !open || held || (!l.is_active && l.paused_by_owner)} aria-label={held ? "A equipe pausou este link e só o suporte pode liberar" : !open ? "Este produto não aceita mais afiliados" : !l.is_active && l.paused_by_owner ? "O produtor pausou este link e só ele pode reativar" : l.is_active ? "Pausar este link" : "Reativar este link"} />
                   </div>
                 </div>
               </li>

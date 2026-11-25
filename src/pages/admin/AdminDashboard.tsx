@@ -49,7 +49,7 @@ const AdminAnalyticsTab = lazy(() => import("./tabs/AdminAnalyticsTab"));
 const AdminManagersTab = lazy(() => import("./tabs/AdminManagersTab"));
 const AdminStaffCommissionsTab = lazy(() => import("./tabs/AdminStaffCommissionsTab"));
 const AdminNotificationsTab = lazy(() => import("./tabs/AdminNotificationsTab"));
-const AdminAffiliateSalesTab = lazy(() => import("./tabs/AdminAffiliateSalesTab"));
+const AffiliatesCenter = lazy(() => import("@/features/admin-affiliates/AffiliatesCenter"));
 const AdminSupportTab = lazy(() => import("./tabs/AdminSupportTab"));
 const AdminSubscriptionsTab = lazy(() => import("./tabs/AdminSubscriptionsTab"));
 const AdminReferralsTab = lazy(() => import("./tabs/AdminReferralsTab"));
@@ -715,7 +715,7 @@ export default function AdminDashboard() {
               {activeTab === "notifications" && isAdmin && <AdminNotificationsTab profiles={profiles} />}
               {activeTab === "coupons" && isAdmin && <CouponsCenter isAdmin={isAdmin} />}
               {activeTab === "courses" && isAdmin && <CoursesCenter isAdmin={isAdmin} />}
-              {activeTab === "affiliates" && isAdmin && <AdminAffiliateSalesTab profiles={profiles} products={products} fmtCurrency={fmtCurrency} />}
+              {activeTab === "affiliates" && isAdmin && <AffiliatesCenter isAdmin={isAdmin} />}
               {activeTab === "subscriptions" && isAdmin && <AdminSubscriptionsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
               {activeTab === "referrals" && isAdmin && <AdminReferralsTab profiles={profiles} fmtCurrency={fmtCurrency} />}
               {activeTab === "payment-links" && isAdmin && <AdminPaymentLinksTab />}
