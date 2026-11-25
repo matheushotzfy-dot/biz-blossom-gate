@@ -1,204 +1,210 @@
-import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { AlertTriangle, Check, ChevronLeft, ChevronRight, ExternalLink, Package, Trophy } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Bell, Gift, LifeBuoy, Play, ReceiptText, Trophy } from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { ArtifactViewer } from "@/features/awards/ArtifactViewer";
-import { AwardGallery } from "@/features/awards/AwardGallery";
+import { PageHead } from "@/components/seller-ui/PageHead";
+import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
+import { Notice } from "@/components/seller-ui/studio";
+import { usePrivacyMode } from "@/hooks/usePrivacyMode";
 import { ClaimDialog } from "@/features/awards/ClaimDialog";
-import { formatMoney } from "@/features/awards/awards-data";
-import { useAwards, type RewardClaim } from "@/features/awards/use-awards";
-import { cn } from "@/lib/utils";
-import "@/features/awards/vault.css";
+import { ClaimsList } from "@/features/awards/ClaimsList";
+import { Journey } from "@/features/awards/Journey";
+import { Stage } from "@/features/awards/Stage";
+import { VaultIntro } from "@/features/awards/VaultIntro";
+import type { AwardItem } from "@/features/awards/awards-data";
+import { pieceState, type PieceState } from "@/features/awards/awardMeta";
+import { useAwards } from "@/features/awards/use-awards";
+import "@/features/awards/awards.css";
 
-const STEPS = [
-  { id: "pending", label: "Análise" },
-  { id: "approved", label: "Aprovado" },
-  { id: "shipped", label: "Enviado" },
-  { id: "delivered", label: "Entregue" },
+const INTRO_KEY = "vp-awards-intro";
+
+/** A abertura toca uma vez por sessão e nunca com movimento reduzido. */
+function introEligible(): boolean {
+  try {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
+    return sessionStorage.getItem(INTRO_KEY) !== "1";
+  } catch { return false; }
+}
+
+const reducedMotion = () => {
+  try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; }
+};
+
+const HOW = [
+  { icon: ReceiptText, title: "O que conta", text: "O valor líquido das suas vendas aprovadas, já descontadas as taxas. Vendas de teste não entram na conta." },
+  { icon: Gift, title: "Como pedir", text: "Quando uma peça é liberada, o botão de resgate aparece no palco. Você informa o endereço, revisa e confirma. Cada peça pode ser pedida uma vez por conta." },
+  { icon: Bell, title: "Acompanhamento", text: "Cada mudança de etapa chega como notificação, e o rastreio aparece em Seus resgates assim que a equipe informar." },
+  { icon: LifeBuoy, title: "Endereço errado?", text: "Depois do pedido, só o suporte consegue alterar o endereço. Fale com a gente antes do envio." },
 ] as const;
 
-/** Linha de rastreio de um resgate: 4 etapas espelhando o status definido no admin. */
-function ClaimRow({ claim }: { claim: RewardClaim }) {
-  const cancelled = claim.status === "cancelled";
-  const current = Math.max(STEPS.findIndex((s) => s.id === claim.status), 0);
+function StageSkeleton() {
   return (
-    <li className="grid gap-4 border-t border-border py-4 first:border-t-0 md:grid-cols-[minmax(180px,1fr)_2fr_auto] md:items-center">
-      <div className="flex min-w-0 items-center gap-3">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-border bg-muted"><Package className="h-4 w-4 text-primary" /></span>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-foreground">{claim.tier_label}</p>
-          <p className="font-mono text-[10px] text-muted-foreground">{new Date(claim.created_at).toLocaleDateString("pt-BR")}</p>
-        </div>
-      </div>
-      {cancelled ? (
-        <p className="text-xs font-semibold text-destructive">Resgate cancelado</p>
-      ) : (
-        <ol className="flex items-center" aria-label="Etapas do resgate">
-          {STEPS.map((step, i) => {
-            const done = i <= current;
-            return (
-              <li key={step.id} className="flex flex-1 items-center last:flex-none">
-                <span className="flex flex-col items-center gap-1">
-                  <span className={cn("grid h-5 w-5 place-items-center rounded-full border text-[9px]", done ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground")}>
-                    {done ? <Check className="h-3 w-3" /> : i + 1}
-                  </span>
-                  <span className={cn("text-[10px] font-medium", done ? "text-foreground" : "text-muted-foreground")}>{step.label}</span>
-                </span>
-                {i < STEPS.length - 1 && <span className={cn("mx-1 mb-4 h-px flex-1", i < current ? "bg-primary" : "bg-border")} />}
-              </li>
-            );
-          })}
-        </ol>
-      )}
-      <div className="text-left md:text-right">
-        {claim.tracking_code ? (
-          <a href={claim.tracking_url || undefined} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-mono text-[11px] text-primary hover:underline">
-            {claim.tracking_carrier ? `${claim.tracking_carrier} · ` : ""}{claim.tracking_code}{claim.tracking_url && <ExternalLink className="h-3 w-3" />}
-          </a>
-        ) : <span className="font-mono text-[10px] text-muted-foreground">Sem rastreio ainda</span>}
-        {claim.admin_notes && <p className="mt-1 max-w-[260px] text-[11px] text-muted-foreground md:ml-auto">{claim.admin_notes}</p>}
-      </div>
-    </li>
+    <div className="vw-stage flex min-h-[560px] items-center justify-center" aria-hidden>
+      <div className="h-[300px] w-[min(420px,80%)] animate-pulse rounded-[28px] bg-white/[0.05] motion-reduce:animate-none" />
+    </div>
   );
 }
 
 export default function Premiacoes() {
-  const { user, revenue, claims, setClaims, loading, failed, reload, unlocked, next, targetProgress, awards } = useAwards();
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [claimOpen, setClaimOpen] = useState(false);
+  const a = useAwards();
+  const { hidden } = usePrivacyMode();
+  const { awards, claims, revenue, loading, errors } = a;
+
+  const states: PieceState[] = useMemo(() => awards.map((x) => pieceState(x, revenue, claims)), [awards, revenue, claims]);
+  const revenueKnown = !errors.revenue;
+  const claimsKnown = !errors.claims;
+
+  const [index, setIndex] = useState(0);
+  const dir = useRef<1 | -1>(1);
   const touched = useRef(false);
-  const reduceMotion = useReducedMotion();
+  const [claimFor, setClaimFor] = useState<AwardItem | null>(null);
 
-  const safeIndex = Math.min(activeIndex, awards.length - 1);
-  const award = awards[safeIndex];
-  const claimed = claims.some((c) => c.tier_id === award.id && c.status !== "cancelled");
-  const top = awards[awards.length - 1]?.value || 1;
-
+  // Abre na peça que pede ação: a que dá para resgatar, senão a próxima da jornada.
   useEffect(() => {
-    if (loading || touched.current) return;
-    setActiveIndex(Math.max(awards.findIndex((a) => a.id === next.id), 0));
-  }, [loading, next.id, awards]);
+    if (loading || touched.current || awards.length === 0) return;
+    const ready = states.findIndex((s) => s.kind === "ready");
+    const next = a.next ? awards.findIndex((x) => x.id === a.next?.id) : awards.length - 1;
+    setIndex(ready >= 0 ? ready : Math.max(next, 0));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, awards, a.next?.id, states.map((s) => s.kind).join(",")]);
 
-  const select = (index: number) => {
-    if (index < 0 || index >= awards.length) return;
+  const safeIndex = Math.min(index, Math.max(awards.length - 1, 0));
+  const select = useCallback((i: number) => {
+    if (i < 0 || i >= awards.length) return;
     touched.current = true;
-    setActiveIndex(index);
+    dir.current = i >= safeIndex ? 1 : -1;
+    setIndex(i);
+  }, [awards.length, safeIndex]);
+
+  // Abertura: portas fechadas enquanto carrega, abrem quando os dados chegam.
+  const [intro, setIntro] = useState<"off" | "wait" | "open">(() => (introEligible() ? "wait" : "off"));
+  const fast = useRef(false);
+  useEffect(() => {
+    if (intro !== "wait" || loading) return;
+    const t = setTimeout(() => setIntro("open"), fast.current ? 150 : 650);
+    return () => clearTimeout(t);
+  }, [intro, loading]);
+  const finishIntro = useCallback(() => {
+    setIntro("off");
+    try { sessionStorage.setItem(INTRO_KEY, "1"); } catch { /* sem armazenamento: toca de novo, sem problema */ }
+  }, []);
+  const replay = () => {
+    if (reducedMotion()) { toast.message("A abertura fica desligada porque seu dispositivo pede menos movimento."); return; }
+    fast.current = true;
+    setIntro("wait");
   };
 
-  const share = async () => {
-    const text = revenue >= award.value ? `Conquistei ${award.title} na Vemprapay.` : `Minha próxima meta na Vemprapay é ${award.label}.`;
+  const scrollToClaims = useCallback(() => {
+    document.getElementById("resgates")?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "start" });
+  }, []);
+
+  const share = async (award: AwardItem, state: PieceState) => {
+    const text = state.unlocked ? `Conquistei a peça ${award.title} na Vemprapay.` : `Minha próxima meta na Vemprapay: ${award.title}.`;
     try {
-      if (navigator.share) await navigator.share({ title: `Vemprapay · ${award.title}`, text });
-      else { await navigator.clipboard.writeText(text); toast.success("Marco copiado"); }
-    } catch { /* cancelado */ }
+      if (navigator.share) { await navigator.share({ title: `Vemprapay: ${award.title}`, text }); return; }
+      await navigator.clipboard.writeText(text);
+      toast.success("Texto copiado");
+    } catch (e) {
+      if ((e as Error)?.name !== "AbortError") toast.error("Não foi possível compartilhar. Copie o texto manualmente.");
+    }
   };
+
+  const stageVisible = intro === "off" || intro === "open";
+  const hasProblem = errors.revenue || errors.tiers || a.revenueCapped;
 
   return (
-    <main
-      className="venx-vault -mx-3 min-h-[calc(100dvh-5rem)] pb-14 sm:-mx-5 lg:-mx-8"
-      onKeyDown={(e) => { if (e.key === "ArrowLeft") select(safeIndex - 1); if (e.key === "ArrowRight") select(safeIndex + 1); }}
-    >
-      <section className="venx-vault-bg relative isolate min-h-[calc(100dvh-5rem)] overflow-hidden border-y border-border">
-        <header className="relative z-10 grid gap-4 border-b border-border px-6 py-5 sm:px-10 lg:grid-cols-[1fr_auto] lg:items-end lg:px-14 lg:py-6">
-          <div>
-            <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-primary"><Trophy className="h-3.5 w-3.5" /> Hall de conquistas</p>
-            <h1 className="mt-2 max-w-4xl font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl lg:text-5xl">Sua operação merece ser vista.</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Cada marco libera uma peça física Vemprapay, produzida para registrar o tamanho da sua operação.</p>
-          </div>
-          <dl className="grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-border bg-border">
-            {[
-              ["Faturamento", loading ? "—" : formatMoney(revenue)],
-              ["Conquistadas", `${unlocked}/${awards.length}`],
-              ["Resgates", String(claims.filter((c) => c.status !== "cancelled").length)],
-            ].map(([k, v]) => (
-              <div key={k} className="bg-card px-4 py-4">
-                <dt className="font-mono text-[9px] uppercase text-muted-foreground">{k}</dt>
-                <dd className="mt-1 font-display text-lg font-bold tabular-nums text-foreground">{v}</dd>
-              </div>
-            ))}
-          </dl>
-        </header>
+    <div className="vp-fade space-y-5 pb-6 md:space-y-6">
+      <PageHead
+        title="Premiações"
+        subtitle="Peças físicas que marcam o tamanho da sua operação. Cada marco de faturamento libera uma."
+        actions={
+          <button type="button" className="vp-ghost" onClick={replay} disabled={loading || awards.length === 0 || intro !== "off"}>
+            <Play className="h-[18px] w-[18px]" />Rever abertura
+          </button>
+        }
+      />
 
-        {/* Linha do tempo dos marcos com a posição atual */}
-        <div className="relative z-10 border-b border-border px-6 py-4 sm:px-10 lg:px-14">
-          <div className="flex justify-between font-mono text-[10px] uppercase text-muted-foreground">
-            <span>{Math.round(targetProgress)}% até {next.label}</span>
-            <span>{revenue >= next.value ? "Jornada concluída" : `Faltam ${formatMoney(Math.max(next.value - revenue, 0))}`}</span>
-          </div>
-          <div className="relative mt-3 h-1 rounded-full bg-muted">
-            <motion.div
-              className="absolute inset-y-0 left-0 rounded-full bg-primary"
-              initial={reduceMotion ? false : { width: 0 }}
-              animate={{ width: `${Math.min((Math.log10(Math.max(revenue, 1)) / Math.log10(Math.max(top, 10))) * 100, 100)}%` }}
-              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            />
-            {awards.map((a, i) => {
-              const denominator = Math.log10(Math.max(top, 10));
-              const left = (Math.log10(Math.max(a.value, 1)) / denominator) * 100;
-              const done = revenue >= a.value;
-              return (
-                <button
-                  key={a.id}
-                  type="button"
-                  onClick={() => select(i)}
-                  aria-label={`Marco ${a.label}`}
-                  style={{ left: `${left}%` }}
-                  className={cn(
-                    "absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition-transform hover:scale-125",
-                    done ? "border-primary bg-primary" : "border-border bg-background",
-                    i === safeIndex && "ring-4 ring-primary/25",
-                  )}
-                />
-              );
-            })}
-          </div>
-          <div className="relative mt-3 hidden h-4 sm:block">
-            {awards.map((a) => (
-              <span key={a.id} style={{ left: `${(Math.log10(Math.max(a.value, 1)) / Math.log10(Math.max(top, 10))) * 100}%` }} className="absolute max-w-24 -translate-x-1/2 truncate font-mono text-[10px] text-muted-foreground">{a.label}</span>
-            ))}
-          </div>
-        </div>
-
-        <div className="relative z-10 border-b border-border">
-          <ArtifactViewer award={award} revenue={revenue} claimed={claimed} onClaim={() => setClaimOpen(true)} onShare={share} />
-          <div className="absolute left-3 top-1/2 z-20 -translate-y-1/2 sm:left-5">
-            <Button variant="outline" size="icon" aria-label="Marco anterior" disabled={safeIndex === 0} onClick={() => select(safeIndex - 1)} className="h-10 w-10 rounded-full"><ChevronLeft /></Button>
-          </div>
-          <div className="absolute right-3 top-1/2 z-20 -translate-y-1/2 sm:right-5">
-            <Button variant="outline" size="icon" aria-label="Próximo marco" disabled={safeIndex === awards.length - 1} onClick={() => select(safeIndex + 1)} className="h-10 w-10 rounded-full"><ChevronRight /></Button>
-          </div>
-        </div>
-
-        <div className="relative z-10 px-6 py-5 sm:px-10 lg:px-14">
-          <p className="mb-3 font-mono text-[10px] uppercase text-muted-foreground">Coleção Vemprapay · selecione uma peça</p>
-          <AwardGallery awards={awards} activeIndex={safeIndex} revenue={revenue} onSelect={select} />
-        </div>
-      </section>
-
-      {failed && (
-        <div role="alert" className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-          <span className="flex items-center gap-2"><AlertTriangle className="h-4 w-4" /> Alguns dados não puderam ser sincronizados.</span>
-          <Button variant="outline" size="sm" onClick={() => void reload()} className="h-7 shrink-0 border-destructive/40 text-destructive hover:bg-destructive/10">Tentar novamente</Button>
-        </div>
+      {hasProblem && (
+        <Notice tone="warn" title={errors.revenue ? "Não foi possível conferir seu faturamento" : errors.tiers ? "Mostrando as peças padrão" : "Parte do seu histórico ficou de fora da soma"}>
+          <p>
+            {errors.revenue
+              ? "Enquanto isso, os resgates ficam bloqueados para não mostrar um valor errado."
+              : errors.tiers
+                ? "Não conseguimos carregar as peças atualizadas agora. O valor e a imagem de alguma peça podem estar diferentes do combinado."
+                : "Seu histórico é maior do que conseguimos somar aqui, então o total pode estar abaixo do real. Fale com o suporte para conferir."}
+          </p>
+          {(errors.revenue || errors.tiers) && <button type="button" className="vp-ghost mt-3 !h-10" onClick={() => { void a.reload(); }}>Tentar de novo</button>}
+        </Notice>
       )}
 
-      <section className="mt-4 border-y border-border bg-card px-6 py-7 sm:px-10 lg:px-14">
-        <div className="flex items-end justify-between">
-          <div>
-            <p className="font-mono text-[10px] uppercase text-muted-foreground">Registro logístico</p>
-            <h2 className="mt-1 font-display text-lg font-bold text-foreground">Seus resgates</h2>
+      <div className="relative rounded-[28px]">
+        {loading ? (
+          <StageSkeleton />
+        ) : awards.length === 0 ? (
+          <div className="vp-sheet">
+            <EmptyPanel icon={<Trophy className="h-7 w-7" />} title="Nenhuma premiação disponível" text="As peças estão em preparação. Assim que forem abertas, elas aparecem aqui." />
           </div>
-          <span className="font-mono text-[10px] uppercase text-muted-foreground">Atualiza em tempo real</span>
-        </div>
-        {claims.length === 0 ? (
-          <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">Nenhuma peça solicitada ainda. Ao conquistar um marco, o resgate aparece aqui com rastreio completo.</p>
         ) : (
-          <ul className="mt-2">{claims.map((c) => <ClaimRow key={c.id} claim={c} />)}</ul>
+          <Stage
+            awards={awards}
+            index={safeIndex}
+            dir={dir.current}
+            onSelect={select}
+            revenue={revenue}
+            revenueKnown={revenueKnown}
+            claimsKnown={claimsKnown}
+            hidden={hidden}
+            unlocked={a.unlocked}
+            next={a.next}
+            states={states}
+            show={stageVisible && !loading}
+            onClaim={setClaimFor}
+            onShare={(x, s) => { void share(x, s); }}
+            onTrack={scrollToClaims}
+          />
         )}
+        {intro !== "off" && <VaultIntro open={intro === "open" && !loading} onFinish={finishIntro} />}
+      </div>
+
+      {!loading && awards.length > 0 && (
+        <Journey
+          awards={awards}
+          states={states}
+          index={safeIndex}
+          revenue={revenue}
+          revenueKnown={revenueKnown}
+          hidden={hidden}
+          unlocked={a.unlocked}
+          onSelect={select}
+        />
+      )}
+
+      <ClaimsList claims={claims} awards={awards} loading={loading} failed={errors.claims} onRetry={() => { void a.reload(); }} />
+
+      <section className="vp-sheet p-5 sm:p-7" aria-labelledby="como-funciona">
+        <h2 id="como-funciona" className="font-heading text-[22px] font-extrabold tracking-[-0.03em] text-foreground">Como funciona</h2>
+        <dl className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-x-10 gap-y-6 md:grid-cols-[repeat(2,minmax(0,1fr))]">
+          {HOW.map(({ icon: Icon, title, text }) => (
+            <div key={title} className="flex items-start gap-4">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent text-accent-foreground"><Icon className="h-5 w-5" aria-hidden /></span>
+              <div className="min-w-0">
+                <dt className="text-[15.5px] font-bold text-foreground">{title}</dt>
+                <dd className="mt-1 text-[14.5px] leading-relaxed text-muted-foreground">
+                  {text}
+                  {title === "Endereço errado?" && <> <Link to="/suporte" className="font-semibold text-primary hover:underline">Abrir o suporte</Link></>}
+                </dd>
+              </div>
+            </div>
+          ))}
+        </dl>
       </section>
 
-      <ClaimDialog open={claimOpen} userId={user?.id} award={award} onOpenChange={setClaimOpen} onCreated={(claim) => setClaims((cur) => [claim, ...cur])} />
-    </main>
+      <ClaimDialog
+        award={claimFor}
+        onOpenChange={(o) => { if (!o) setClaimFor(null); }}
+        onCreated={(claim) => { a.setClaims((cur) => [claim, ...cur.filter((c) => c.id !== claim.id)]); setTimeout(scrollToClaims, 350); }}
+        onConflict={() => { void a.reload(); }}
+      />
+    </div>
   );
 }

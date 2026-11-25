@@ -1,11 +1,15 @@
 import { Award, Crown, Flame, Gem, Sparkles, Star, Trophy, type LucideIcon } from "lucide-react";
-import braceletCard from "@/assets/awards/venx-bracelet-10k.png";
-import plaque100k from "@/assets/awards/venx-plaque-100k.png";
-import plaque250k from "@/assets/awards/venx-plaque-250k.png";
-import plaque500k from "@/assets/awards/venx-plaque-500k.png";
-import plaque1m from "@/assets/awards/venx-plaque-1m.png";
-import plaque5m from "@/assets/awards/venx-plaque-5m.png";
-import plaque10m from "@/assets/awards/venx-plaque-10m.png";
+import braceletCard from "@/assets/awards/venx-bracelet-10k.webp";
+import plaque100k from "@/assets/awards/venx-plaque-100k.webp";
+import plaque250k from "@/assets/awards/venx-plaque-250k.webp";
+import plaque500k from "@/assets/awards/venx-plaque-500k.webp";
+import plaque1m from "@/assets/awards/venx-plaque-1m.webp";
+import plaque5m from "@/assets/awards/venx-plaque-5m.webp";
+import plaque10m from "@/assets/awards/venx-plaque-10m.webp";
+
+/** Todas as imagens das peças usam a mesma tela (781 x 712), com o piso na mesma linha. */
+export const ART_W = 781;
+export const ART_H = 712;
 
 export interface AwardItem {
   id: string;
@@ -15,14 +19,28 @@ export interface AwardItem {
   roman: string;
   title: string;
   description: string;
-  image: string;
+  /** null quando a peça foi criada no admin sem imagem: a tela desenha uma placa no lugar. */
+  image: string | null;
+  /** Imagem enviada pelo admin (não é a arte que acompanha o app). */
+  custom: boolean;
+  /** Cor da luz do palco para a peça, como "H S% L%". */
+  glow: string;
   rewards: string[];
   phrase: string;
   reference: string;
   icon: LucideIcon;
 }
 
-export const AWARDS: AwardItem[] = [
+export const EMERALD_GLOW = "158 70% 42%";
+const GLOW: Record<string, string> = {
+  "5m": "200 18% 84%",
+  "10m": "42 94% 58%",
+};
+export const glowFor = (id: string) => GLOW[id] ?? EMERALD_GLOW;
+
+type Base = Omit<AwardItem, "glow" | "custom">;
+
+const BASE: Base[] = [
   { id: "10k", roman: "I", value: 10_000, label: "R$ 10K", tier: "Iniciante", title: "Kit Pulseiras Vemprapay", description: "Duas pulseiras em preto e esmeralda com fecho metálico gravado, entregues em estojo lacrado.", image: braceletCard, rewards: ["Pulseira preta", "Pulseira esmeralda"], phrase: "Toda jornada bilionária começa com a primeira venda.", reference: "VNX-001", icon: Flame },
   { id: "100k", roman: "II", value: 100_000, label: "R$ 100K", tier: "Bronze", title: "Placa 100 MIL", description: "Madeira escura, fundo esmeralda profundo e monograma Vemprapay em destaque.", image: plaque100k, rewards: ["Placa 100 MIL emoldurada"], phrase: "O primeiro marco prova que o sistema funciona.", reference: "VNX-100", icon: Award },
   { id: "250k", roman: "III", value: 250_000, label: "R$ 250K", tier: "Prata", title: "Placa 250 MIL", description: "Obsidiana técnica com iluminação esmeralda e monograma retroiluminado.", image: plaque250k, rewards: ["Placa 250 MIL iluminada"], phrase: "Constância pesa mais que sorte.", reference: "VNX-250", icon: Star },
@@ -31,6 +49,8 @@ export const AWARDS: AwardItem[] = [
   { id: "5m", roman: "VI", value: 5_000_000, label: "R$ 5M", tier: "Platina", title: "Placa 5 MILHÕES", description: "Platina polida e moldura esmeralda, reservada à elite da operação.", image: plaque5m, rewards: ["Placa em platina", "Encontro privado"], phrase: "Elite não é título. É hábito.", reference: "VNX-5MM", icon: Sparkles },
   { id: "10m", roman: "VII", value: 10_000_000, label: "R$ 10M", tier: "Lenda", title: "Placa 10 MILHÕES", description: "Peça numerada em ouro 24K, assinada e registrada no Hall of Fame Vemprapay.", image: plaque10m, rewards: ["Placa em ouro 24K", "Hall of Fame", "Premiação exclusiva"], phrase: "Lendas não morrem. Faturam.", reference: "VNX-10M", icon: Trophy },
 ];
+
+export const AWARDS: AwardItem[] = BASE.map((a) => ({ ...a, custom: false, glow: glowFor(a.id) }));
 
 export const formatMoney = (value: number) => new Intl.NumberFormat("pt-BR", {
   style: "currency", currency: "BRL", maximumFractionDigits: 0,

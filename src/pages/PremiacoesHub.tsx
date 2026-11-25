@@ -1,43 +1,38 @@
-import { useState, useEffect } from "react";
+/**
+ * Premiações: as peças físicas e a corrida de faturamento. A aba vive na URL (`?tab=`),
+ * então cada uma pode ser linkada e o voltar do navegador funciona.
+ */
 import { useSearchParams } from "react-router-dom";
-import { Trophy, Flag } from "lucide-react";
-import { HubTabs, type HubTab } from "@/components/HubTabs";
 import { Seo } from "@/components/Seo";
+import { FilterPills } from "@/components/seller-ui/FilterPills";
 import Premiacoes from "./Premiacoes";
 import CorridaFaturamento from "./CorridaFaturamento";
 
-const TABS: HubTab[] = [
-  { id: "premiacoes", label: "Premiações", icon: Trophy },
-  { id: "corrida", label: "Corrida de Faturamento", icon: Flag },
-];
+type Tab = "pecas" | "corrida";
 
 export default function PremiacoesHub() {
   const [params, setParams] = useSearchParams();
-  const initial = params.get("tab") === "corrida" ? "corrida" : "premiacoes";
-  const [active, setActive] = useState<string>(initial);
-
-  useEffect(() => {
-    const t = params.get("tab");
-    if (t && t !== active) setActive(t);
-  }, [params]);
-
-  const onChange = (id: string) => {
-    setActive(id);
-    const next = new URLSearchParams(params);
-    next.set("tab", id);
-    setParams(next, { replace: true });
-  };
+  const tab: Tab = params.get("tab") === "corrida" ? "corrida" : "pecas";
+  const go = (next: Tab) => setParams(next === "pecas" ? {} : { tab: next }, { replace: true });
 
   return (
-    <>
+    <div className="space-y-5 md:space-y-6">
       <Seo
-        title={active === "corrida" ? "Corrida de Faturamento | Vemprapay" : "Premiações | Vemprapay"}
-        description="Conquiste prêmios, troféus e marcos de faturamento na sua jornada de vendas."
+        title={tab === "corrida" ? "Corrida de faturamento | Vemprapay" : "Premiações | Vemprapay"}
+        description="Conquiste peças físicas e prêmios pelo faturamento da sua operação."
         path="/premiacoes"
         noindex
       />
-      <HubTabs tabs={TABS} active={active} onChange={onChange} />
-      {active === "corrida" ? <CorridaFaturamento /> : <Premiacoes />}
-    </>
+      <FilterPills<Tab>
+        label="Áreas de premiações"
+        value={tab}
+        onChange={go}
+        options={[
+          { value: "pecas", label: "Peças" },
+          { value: "corrida", label: "Corrida de faturamento" },
+        ]}
+      />
+      {tab === "corrida" ? <CorridaFaturamento /> : <Premiacoes />}
+    </div>
   );
 }
