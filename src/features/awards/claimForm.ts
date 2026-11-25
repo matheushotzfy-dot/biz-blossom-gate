@@ -80,6 +80,8 @@ export function normalizeClaim(form: ClaimForm) {
 export function claimErrorMessage(error: { message?: string; code?: string } | null | undefined): string {
   const text = `${error?.message ?? ""}`;
   if (text.includes("reward_already_claimed")) return "Esta peça já foi solicitada nesta conta. Veja o andamento em Seus resgates.";
+  if (text.includes("reward_not_reached")) return "O faturamento da sua conta ainda não chegou ao valor desta peça. Atualize a página e confira a sua jornada.";
+  if (text.includes("reward_tier_unavailable")) return "Esta peça não está disponível agora. Atualize a página para ver as peças abertas.";
   if (error?.code === "42501" || /row-level security/i.test(text)) return "Sua conta não pode solicitar este resgate agora. Fale com o suporte.";
   return "Não foi possível registrar o resgate. Confira a conexão e tente de novo.";
 }

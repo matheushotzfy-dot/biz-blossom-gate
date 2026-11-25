@@ -195,6 +195,8 @@ describe("formulário de resgate", () => {
   });
   it("traduz os erros do banco", () => {
     expect(claimErrorMessage({ message: "reward_already_claimed" })).toMatch(/já foi solicitada/);
+    expect(claimErrorMessage({ message: "reward_not_reached" })).toMatch(/ainda não chegou/);
+    expect(claimErrorMessage({ message: "reward_tier_unavailable" })).toMatch(/não está disponível/);
     expect(claimErrorMessage({ code: "42501", message: "new row violates row-level security policy" })).toMatch(/suporte/);
     expect(claimErrorMessage({ message: "Failed to fetch" })).toMatch(/Não foi possível/);
     expect(claimErrorMessage(null)).toMatch(/Não foi possível/);
