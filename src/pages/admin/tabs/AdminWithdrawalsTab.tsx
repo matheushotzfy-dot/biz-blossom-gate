@@ -13,6 +13,7 @@ import { friendlyError } from "@/lib/friendlyError";
 import AdminPager from "@/components/admin/AdminPager";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
 import { brl } from "@/features/admin-finance/types";
+import { usePeople } from "@/features/admin-finance/usePeople";
 import { PremiumEmpty, PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented } from "./AdminPremium";
 import { AdjustmentDialog } from "@/features/admin-withdrawals/AdjustmentDialog";
 import { AutoApprovalDialog, type AutoConfig } from "@/features/admin-withdrawals/AutoApprovalDialog";
@@ -25,7 +26,6 @@ import {
 
 type SubTab = "queue" | "adjustments" | "statement";
 type StatusFilter = "pending" | "approved" | "rejected" | "all";
-type PersonRow = Pick<Tables<"profiles">, "user_id" | "full_name" | "email" | "created_at" | "seller_type">;
 
 const PAGE_SIZE = 50;
 /** Limite com que o painel carrega os saques (ver AdminDashboard). */
@@ -84,36 +84,12 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onReload }:
   });
   const adjustments = adjQ.data ?? [];
 
-  /* ── Nomes: a lista do painel tem só os perfis mais novos; o resto é buscado sob demanda ── */
-  const knownProfiles = useMemo(() => new Map<string, PersonRow>(profiles.map((p) => [p.user_id, p])), [profiles]);
-  const missingIds = useMemo(() => {
-    const need = new Set<string>();
-    for (const w of withdrawals) { need.add(w.user_id); if (w.processed_by) need.add(w.processed_by); }
-    for (const a of adjustments) { need.add(a.user_id); need.add(a.admin_user_id); }
-    return [...need].filter((id) => !knownProfiles.has(id)).sort().slice(0, 100);
-  }, [withdrawals, adjustments, knownProfiles]);
-  const extraQ = useQuery({
-    queryKey: ["wd-extra-profiles", missingIds.join(",")],
-    enabled: missingIds.length > 0,
-    queryFn: async () => {
-      const { data, error } = await supabase.from("profiles").select("user_id, full_name, email, created_at, seller_type").in("user_id", missingIds);
-      if (error) throw error;
-      return (data ?? []) as PersonRow[];
-    },
-  });
-  const people = useMemo(() => {
-    const m = new Map(knownProfiles);
-    for (const p of extraQ.data ?? []) m.set(p.user_id, p);
-    return m;
-  }, [knownProfiles, extraQ.data]);
-
-  const nameOf = useCallback((id: string | null) => {
-    if (!id) return "—";
-    const p = people.get(id);
-    return p?.full_name || p?.email || `Conta ${id.slice(0, 8)}`;
-  }, [people]);
-  const emailOf = useCallback((id: string) => people.get(id)?.email || "", [people]);
-  const createdAtOf = useCallback((id: string) => people.get(id)?.created_at, [people]);
+  /* ── Nomes: perfis que o painel não carregou são buscados sob demanda ── */
+  const wantedIds = useMemo(() => [
+    ...withdrawals.flatMap((w) => [w.user_id, w.processed_by]),
+    ...adjustments.flatMap((a) => [a.user_id, a.admin_user_id]),
+  ], [withdrawals, adjustments]);
+  const { nameOf, emailOf, createdAtOf, lookupFailed, retry: retryPeople } = usePeople(profiles, wantedIds);
   const autoOf = useCallback((id: string) => (autoQ.data ?? []).find((c) => c.user_id === id), [autoQ.data]);
 
   const now = useMemo(() => Date.now(), [withdrawals]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -325,11 +301,11 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onReload }:
                 </SelectContent>
               </Select>
             </div>
-            {(autoQ.isError || extraQ.isError) && (
+            {(autoQ.isError || lookupFailed) && (
               <p role="alert" className="flex flex-wrap items-center gap-2 text-[12.5px] text-warning">
                 <AlertTriangle className="h-3.5 w-3.5" />
                 {autoQ.isError ? "As regras de auto-aprovação não carregaram." : "Alguns nomes de seller não carregaram."}
-                <button type="button" className="font-semibold underline" onClick={() => void (autoQ.isError ? autoQ.refetch() : extraQ.refetch())}>Tentar de novo</button>
+                <button type="button" className="font-semibold underline" onClick={() => void (autoQ.isError ? autoQ.refetch() : retryPeople())}>Tentar de novo</button>
               </p>
             )}
           </div>

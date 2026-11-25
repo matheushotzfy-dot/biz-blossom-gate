@@ -1,704 +1,229 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
-import {
-  Search, Download, CreditCard, Smartphone, FileText, ChevronDown, Eye,
-  RotateCcw, Upload, Clock, CheckCircle2, AlertTriangle, ShieldAlert,
-  Code2, DollarSign, User, Mail, Hash, ArrowUpDown, Filter, X, Copy,
-  MapPin, Tag, Globe, Key, Beaker, Timer, ShieldCheck, Zap,
-} from "lucide-react";
-import { StatusBadge } from "@/components/StatusBadge";
-import { TransactionTimeline } from "@/components/transactions/TransactionTimeline";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import type { Tables } from "@/integrations/supabase/types";
-import { supabase } from "@/integrations/supabase/client";
-import { logAdminAction } from "@/lib/auditLog";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { AlertTriangle, CheckCircle2, ChevronDown, CreditCard, DollarSign, Download, Loader2, RefreshCw, Search, ShieldAlert, X } from "lucide-react";
 import { toast } from "sonner";
-import { cn, deriveTransactionStatus, isApprovedTransaction } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
-import { PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented, PremiumEmpty, premiumTable } from "./AdminPremium";
+import { brl } from "@/features/admin-finance/types";
+import { SellerSelect } from "@/features/admin-finance/SellerSelect";
+import { usePeople } from "@/features/admin-finance/usePeople";
+import { friendlyError } from "@/lib/friendlyError";
+import { PremiumEmpty, PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented } from "./AdminPremium";
+import { TxCards, TxTable, type TxContext } from "@/features/admin-transactions/TransactionRows";
+import { TransactionSheet } from "@/features/admin-transactions/TransactionSheet";
+import {
+  CHARGEBACK_ALERT_PCT, EXPORT_PAGE, PAGE_SIZE, approvalRate, chargebackRate, exportPlan, parsePage, pct, transactionsCsv,
+  type StatusKey, type Tx, type TxPage,
+} from "@/features/admin-transactions/transactionsModel";
 
 interface Props {
-  transactions: Tables<"transactions">[];
   profiles: Tables<"profiles">[];
   products: Tables<"products">[];
-  fmtCurrency: (v: number) => string;
-  onReload: () => void;
-  dateRange?: { from: Date; to: Date };
+  dateRange: { from: Date; to: Date };
+  /** Só para quem pode abrir as outras abas (Chargeback, Reembolsos). */
+  onNavigate?: (tab: string) => void;
 }
 
-const PAGE_SIZE = 80;
+interface Filters { status: StatusKey; method: string; seller: string; search: string }
 
-const _dateFmt = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" });
-const _dateCache = new Map<string, string>();
-const fmtDateCached = (d: string) => {
-  let v = _dateCache.get(d);
-  if (!v) { v = _dateFmt.format(new Date(d)); _dateCache.set(d, v); }
-  return v;
-};
-const _fullDateFmt = new Intl.DateTimeFormat("pt-BR", { dateStyle: "long", timeStyle: "medium" });
+async function fetchPage(from: string, to: string, f: Filters, page: number, size: number): Promise<TxPage> {
+  const { data, error } = await supabase.rpc("get_admin_transactions_page" as never, {
+    _from: from, _to: to, _page: page, _page_size: size, _status: f.status, _method: f.method,
+    _seller_id: f.seller || null, _search: f.search.trim() || null,
+  } as never);
+  if (error) throw error;
+  return parsePage(data);
+}
 
-const copy = (v: string) => { navigator.clipboard.writeText(v); toast.success("Copiado"); };
-
-type StatusKey = "all" | "completed" | "pending" | "failed" | "refunded" | "chargeback";
-
-type PageResponse = { items: Tables<"transactions">[]; total: number; page: number; page_size: number };
-
-export default function AdminTransactionsTab({ transactions, profiles, products, fmtCurrency, onReload, dateRange }: Props) {
+export default function AdminTransactionsTab({ profiles, products, dateRange, onNavigate }: Props) {
+  const [status, setStatus] = useState<StatusKey>("all");
+  const [method, setMethod] = useState("all");
+  const [seller, setSeller] = useState("");
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusKey>("all");
-  const [methodFilter, setMethodFilter] = useState("all");
-  const [sellerFilter, setSellerFilter] = useState("all");
-  const [sortField, setSortField] = useState<"date" | "amount">("date");
-  const [sortAsc, setSortAsc] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [serverItems, setServerItems] = useState<Tables<"transactions">[]>(transactions.slice(0, PAGE_SIZE));
-  const [serverTotal, setServerTotal] = useState(transactions.length);
-  const [serverPage, setServerPage] = useState(1);
-  const [serverLoading, setServerLoading] = useState(false);
-
-  const [selectedTx, setSelectedTx] = useState<Tables<"transactions"> | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
-
-  const [refundOpen, setRefundOpen] = useState(false);
-  const [refundType, setRefundType] = useState<"full" | "partial">("full");
-  const [refundAmount, setRefundAmount] = useState("");
-  const [refundReason, setRefundReason] = useState("");
-  const [refunding, setRefunding] = useState(false);
-  const [disputeOpen, setDisputeOpen] = useState(false);
-
-  const profileNameMap = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const p of profiles) m.set(p.user_id, p.full_name || "—");
-    return m;
-  }, [profiles]);
-  const productMap = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const p of products) m.set(p.id, p.name);
-    return m;
-  }, [products]);
-
-  const getSellerName = (userId: string) => profileNameMap.get(userId) || "—";
-  const getProductName = (productId: string | null) => (productId && productMap.get(productId)) || "Transação Interna";
-
-  const methodLabel = (m: string | null) =>
-    m === "pix" ? "PIX" : m === "credit_card" ? "Cartão" : m === "boleto" ? "Boleto" : (m || "—");
-  const MethodIcon = ({ m }: { m: string | null }) => {
-    if (m === "pix") return <Smartphone className="h-3 w-3 text-emerald-500" />;
-    if (m === "credit_card") return <CreditCard className="h-3 w-3 text-sky-500" />;
-    if (m === "boleto") return <FileText className="h-3 w-3 text-amber-500" />;
-    return <span className="h-3 w-3 inline-block" />;
-  };
-
-  const effectiveTransactions = dateRange ? serverItems : transactions;
-
-  const loadPage = useCallback(async (page: number, append: boolean) => {
-    if (!dateRange) return;
-    setServerLoading(true);
-    const { data, error } = await supabase.rpc("get_admin_transactions_page" as never, {
-      _from: dateRange.from.toISOString(), _to: dateRange.to.toISOString(), _page: page, _page_size: PAGE_SIZE,
-      _status: statusFilter, _method: methodFilter, _seller_id: sellerFilter === "all" ? null : sellerFilter,
-      _search: search.trim() || null,
-    } as never);
-    setServerLoading(false);
-    if (error) { toast.error("Erro ao carregar transações"); return; }
-    const payload = data as unknown as PageResponse;
-    setServerItems(current => append ? [...current, ...(payload.items || [])] : (payload.items || []));
-    setServerTotal(Number(payload.total || 0));
-    setServerPage(page);
-  }, [dateRange, statusFilter, methodFilter, sellerFilter, search]);
+  const [debounced, setDebounced] = useState("");
+  const [selected, setSelected] = useState<Tx | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => { void loadPage(1, false); }, 250);
-    return () => window.clearTimeout(timer);
-  }, [loadPage]);
+    const t = window.setTimeout(() => setDebounced(search), 300);
+    return () => window.clearTimeout(t);
+  }, [search]);
 
-  const sellerOptions = useMemo(() => {
-    const s = new Map<string, string>();
-    for (const p of profiles) s.set(p.user_id, p.full_name || p.email || "—");
-    return Array.from(s.entries()).sort((a, b) => a[1].localeCompare(b[1]));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profiles, profileNameMap]);
+  const fromIso = dateRange.from.toISOString();
+  const toIso = dateRange.to.toISOString();
+  const filters = useMemo<Filters>(() => ({ status, method, seller, search: debounced }), [status, method, seller, debounced]);
 
-  const filtered = useMemo(() => {
-    const s = search.toLowerCase();
-    const result = effectiveTransactions.filter(t => {
-      if (dateRange) return true;
-      if (statusFilter !== "all") {
-        if (statusFilter === "completed" && !isApprovedTransaction(t.status)) return false;
-        if (statusFilter !== "completed" && t.status !== statusFilter) return false;
+  const q = useInfiniteQuery({
+    queryKey: ["admin-tx", fromIso, toIso, filters],
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => fetchPage(fromIso, toIso, filters, pageParam, PAGE_SIZE),
+    getNextPageParam: (last, all) => (all.reduce((n, p) => n + p.items.length, 0) < last.total && last.items.length > 0 ? all.length + 1 : undefined),
+    placeholderData: keepPreviousData,
+  });
+  const pages = q.data?.pages ?? [];
+  const items = useMemo(() => pages.flatMap((p) => p.items), [q.data]); // eslint-disable-line react-hooks/exhaustive-deps
+  const matching = pages[0]?.total ?? 0;
+  const summary = pages[0]?.summary;
+
+  /* ── Nomes de seller e de produto: o que o painel não carregou é buscado sob demanda ── */
+  const { nameOf, lookupFailed, retry: retryPeople } = usePeople(profiles, useMemo(() => items.map((t) => t.user_id), [items]));
+  const knownProducts = useMemo(() => new Map(products.map((p) => [p.id, p.name])), [products]);
+  const missingProducts = useMemo(() => [...new Set(items.map((t) => t.product_id).filter((id): id is string => !!id && !knownProducts.has(id)))].sort().slice(0, 100), [items, knownProducts]);
+  const extraProducts = useQuery({
+    queryKey: ["admin-tx-products", missingProducts.join(",")],
+    enabled: missingProducts.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("products").select("id, name").in("id", missingProducts);
+      if (error) throw error;
+      return (data ?? []) as { id: string; name: string }[];
+    },
+  });
+  const productOf = useCallback((id: string | null) => {
+    if (!id) return "Sem produto";
+    return knownProducts.get(id) ?? extraProducts.data?.find((p) => p.id === id)?.name ?? `Produto ${id.slice(0, 8)}`;
+  }, [knownProducts, extraProducts.data]);
+
+  const ctx: TxContext = { nameOf: (id) => nameOf(id), productOf, onOpen: setSelected };
+
+  const filtersActive = status !== "all" || method !== "all" || !!seller || !!search.trim();
+  const clearFilters = () => { setStatus("all"); setMethod("all"); setSeller(""); setSearch(""); setDebounced(""); };
+
+  const cbRate = summary ? chargebackRate(summary) : 0;
+  const waiting = q.isError ? "Indisponível" : "Carregando…";
+  const heroStatus = !summary ? (q.isError ? { tone: "destructive" as const, label: "Não foi possível carregar" } : { tone: "neutral" as const, label: "Carregando…" })
+    : cbRate >= CHARGEBACK_ALERT_PCT ? { tone: "destructive" as const, label: `Chargeback em ${pct(cbRate, 2)}, acima de ${CHARGEBACK_ALERT_PCT}%`, pulse: true }
+      : summary.chargeback > 0 ? { tone: "warning" as const, label: `${summary.chargeback} ${summary.chargeback === 1 ? "chargeback" : "chargebacks"} no período` }
+        : { tone: "success" as const, label: "Sem chargebacks no período" };
+
+  /* ── Exportação: busca TODAS as linhas do filtro (até o limite), não só as que estão na tela ── */
+  const exportCsv = async () => {
+    if (matching === 0) { toast.error("Não há transações para exportar."); return; }
+    const plan = exportPlan(matching);
+    setExporting(true);
+    try {
+      const rows: Tx[] = [];
+      for (let page = 1; page <= plan.pages; page++) {
+        const res = await fetchPage(fromIso, toIso, filters, page, EXPORT_PAGE);
+        rows.push(...res.items);
+        if (res.items.length === 0) break;
       }
-      if (methodFilter !== "all" && t.payment_method !== methodFilter) return false;
-      if (sellerFilter !== "all" && t.user_id !== sellerFilter) return false;
-      if (!search) return true;
-      return (
-        t.customer_name?.toLowerCase().includes(s) ||
-        t.customer_email?.toLowerCase().includes(s) ||
-        t.customer_document?.toLowerCase().includes(s) ||
-        t.id.includes(s) ||
-        (t.external_id || "").toLowerCase().includes(s) ||
-        getSellerName(t.user_id).toLowerCase().includes(s)
-      );
-    });
-    result.sort((a, b) => {
-      if (sortField === "date") return sortAsc ? new Date(a.created_at).getTime() - new Date(b.created_at).getTime() : new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      return sortAsc ? Number(a.amount) - Number(b.amount) : Number(b.amount) - Number(a.amount);
-    });
-    return result;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [effectiveTransactions, search, statusFilter, methodFilter, sellerFilter, sortField, sortAsc, dateRange]);
-
-  const visibleItems = useMemo(() => dateRange ? filtered : filtered.slice(0, visibleCount), [filtered, visibleCount, dateRange]);
-  const loadMore = useCallback(() => {
-    if (dateRange) void loadPage(serverPage + 1, true);
-    else setVisibleCount(c => c + PAGE_SIZE);
-  }, [dateRange, loadPage, serverPage]);
-
-  const kpis = useMemo(() => {
-    const todayStr = new Date().toDateString();
-    let completed = 0, pending = 0, failed = 0, chargebacks = 0, refunded = 0, todayN = 0, todayV = 0;
-    let totalGross = 0, totalFees = 0, totalNet = 0, retained = 0, simulated = 0, discountTotal = 0;
-    for (const t of effectiveTransactions) {
-      if (isApprovedTransaction(t.status)) { completed++; totalGross += Number(t.amount); totalFees += Number(t.fee_amount); totalNet += Number(t.net_amount); }
-      else if (t.status === "pending") pending++;
-      else if (t.status === "failed" || t.status === "expired") failed++;
-      else if (t.status === "chargeback") chargebacks++;
-      else if (t.status === "refunded") refunded++;
-      if (t.is_simulated) simulated++;
-      if (t.retained_amount && Number(t.retained_amount) > 0 && !t.retention_released) retained += Number(t.retained_amount);
-      if (t.discount_amount) discountTotal += Number(t.discount_amount);
-      if (new Date(t.created_at).toDateString() === todayStr) {
-        todayN++;
-        if (isApprovedTransaction(t.status)) todayV += Number(t.amount);
-      }
+      const names = new Map<string, string>();
+      for (const t of rows) if (!names.has(t.user_id)) names.set(t.user_id, nameOf(t.user_id));
+      const csv = transactionsCsv(rows.slice(0, plan.count), (id) => names.get(id) ?? "—", productOf);
+      const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+      const a = document.createElement("a");
+      a.href = url; a.download = `transacoes-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+      URL.revokeObjectURL(url);
+      const n = Math.min(rows.length, plan.count);
+      if (plan.truncated) toast.warning(`${n.toLocaleString("pt-BR")} de ${matching.toLocaleString("pt-BR")} transações exportadas (limite de ${plan.count.toLocaleString("pt-BR")}). Estreite o período ou os filtros para o resto.`);
+      else toast.success(`${n.toLocaleString("pt-BR")} ${n === 1 ? "transação exportada" : "transações exportadas"}.`);
+    } catch (e) {
+      toast.error("Não foi possível exportar. Nada foi baixado.", { description: friendlyError(e, "Tente de novo em instantes.") });
+    } finally {
+      setExporting(false);
     }
-    const approvalRate = effectiveTransactions.length ? (completed / effectiveTransactions.length) * 100 : 0;
-    const cbRate = (completed + chargebacks) ? (chargebacks / (completed + chargebacks)) * 100 : 0;
-    return { completed, pending, failed, chargebacks, refunded, todayN, todayV, totalGross, totalFees, totalNet, approvalRate, cbRate, retained, simulated, discountTotal };
-  }, [effectiveTransactions]);
-
-  const openXRay = (t: Tables<"transactions">) => { setSelectedTx(t); setSheetOpen(true); };
-
-  const openRefund = () => {
-    if (!selectedTx) return;
-    setRefundType("full");
-    setRefundAmount(String(Number(selectedTx.amount)));
-    setRefundReason("");
-    setRefundOpen(true);
   };
 
-  const handleRefund = async () => {
-    if (!selectedTx) return;
-    if (!refundReason.trim() || refundReason.trim().length < 5) { toast.error("Justificativa obrigatória (mín. 5 caracteres)"); return; }
-    const amount = refundType === "full" ? Number(selectedTx.amount) : Number(refundAmount);
-    if (isNaN(amount) || amount <= 0 || amount > Number(selectedTx.amount)) { toast.error("Valor inválido"); return; }
-    if (!isApprovedTransaction(selectedTx.status)) { toast.error("Só é possível estornar transações aprovadas"); return; }
-    // Sem adquirente configurada não existe estorno a fazer: avisa direto, sem pedir confirmação de algo que não acontece.
-    toast.error("Estornos estão indisponíveis até haver uma adquirente configurada.");
-  };
-
-  const buildTimeline = (t: Tables<"transactions">) => {
-    const events: { time: string; label: string; tone: "neutral" | "success" | "warning" | "danger" }[] = [];
-    events.push({ time: t.created_at, label: "Transação criada", tone: "neutral" });
-    if (t.payment_method === "pix" && t.pix_expires_at) events.push({ time: t.pix_expires_at, label: "Expiração PIX agendada", tone: "neutral" });
-    if (t.status === "pending") events.push({ time: t.updated_at || t.created_at, label: "Aguardando pagamento", tone: "warning" });
-    if (isApprovedTransaction(t.status)) events.push({ time: t.updated_at || t.created_at, label: "Pagamento aprovado", tone: "success" });
-    if (t.status === "failed") events.push({ time: t.updated_at || t.created_at, label: "Pagamento recusado", tone: "danger" });
-    if (t.status === "expired") events.push({ time: t.updated_at || t.created_at, label: "Transação expirada", tone: "neutral" });
-    if (t.status === "refunded") events.push({ time: t.updated_at || t.created_at, label: "Estorno processado", tone: "warning" });
-    if (t.status === "chargeback") events.push({ time: t.updated_at || t.created_at, label: "Chargeback recebido", tone: "danger" });
-    if (t.retained_amount && Number(t.retained_amount) > 0) {
-      events.push({ time: t.updated_at || t.created_at, label: `Retenção ${t.retention_released ? "liberada" : "ativa"} · ${fmtCurrency(Number(t.retained_amount))}`, tone: t.retention_released ? "success" : "warning" });
-    }
-    return events;
-  };
-
-  const exportCsv = () => {
-    const headers = ["id", "external_id", "data", "cliente", "email", "documento", "vendedor", "produto", "metodo", "bruto", "desconto", "taxa", "liquido", "status", "simulada", "source"];
-    const rows = filtered.map(t => [
-      t.id, t.external_id || "", t.created_at, t.customer_name || "", t.customer_email || "", t.customer_document || "",
-      getSellerName(t.user_id), getProductName(t.product_id),
-      methodLabel(t.payment_method), Number(t.amount), Number(t.discount_amount || 0), Number(t.fee_amount), Number(t.net_amount), t.status,
-      t.is_simulated ? "sim" : "nao", t.source || "",
-    ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(","));
-    const csv = [headers.join(","), ...rows].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `transacoes-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success(`${filtered.length} transações exportadas`);
-  };
-
-  const statusPills: { value: StatusKey; label: string }[] = [
-    { value: "all", label: `Tudo · ${dateRange ? serverTotal : transactions.length}` },
-    { value: "completed", label: `Aprovadas · ${kpis.completed}` },
-    { value: "pending", label: `Pendentes · ${kpis.pending}` },
-    { value: "failed", label: `Recusadas · ${kpis.failed}` },
-    { value: "refunded", label: `Estornadas · ${kpis.refunded}` },
-    { value: "chargeback", label: `Chargebacks · ${kpis.chargebacks}` },
+  const withCount = (label: string, n?: number) => (n === undefined ? label : `${label} · ${n.toLocaleString("pt-BR")}`);
+  const pills: { value: StatusKey; label: string }[] = [
+    { value: "all", label: withCount("Tudo", summary?.total) },
+    { value: "completed", label: withCount("Aprovadas", summary?.approved) },
+    { value: "pending", label: withCount("Pendentes", summary?.pending) },
+    { value: "failed", label: withCount("Recusadas e expiradas", summary?.failed) },
+    { value: "refunded", label: withCount("Estornadas", summary?.refunded) },
+    { value: "chargeback", label: withCount("Chargebacks", summary?.chargeback) },
   ];
-  const activeFilters = (statusFilter !== "all" ? 1 : 0) + (methodFilter !== "all" ? 1 : 0) + (sellerFilter !== "all" ? 1 : 0);
 
   return (
     <div className="space-y-5 animate-fade-in">
-      {/* Hero */}
       <FinanceiroHero
-        eyebrow="Operações · Pagamentos"
-        title="Transações"
-        subtitle="Console operacional — aprovações, chargebacks, retenções e compliance em tempo real."
-        status={{
-          tone: kpis.cbRate >= 1 ? "destructive" : kpis.chargebacks > 0 ? "warning" : "success",
-          label: kpis.cbRate >= 1 ? `CB ${kpis.cbRate.toFixed(2)}% (acima do limite)` : kpis.chargebacks > 0 ? `${kpis.chargebacks} chargebacks` : "Operação saudável",
-          pulse: kpis.cbRate >= 1,
-        }}
-        actions={
-          <Button size="sm" variant="outline" className="h-9 text-[11px] gap-1.5 rounded-lg" onClick={exportCsv}>
-            <Download className="h-3.5 w-3.5" /> Exportar CSV
-          </Button>
-        }
+        eyebrow="Financeiro · Transações" title="Transações"
+        subtitle="Todas as vendas da plataforma no período escolhido no topo. Clique numa transação para ver o dossiê."
+        status={heroStatus}
+        actions={(
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => void q.refetch()} disabled={q.isFetching}>
+              <RefreshCw className={`h-3.5 w-3.5 ${q.isFetching ? "animate-spin" : ""}`} /> Atualizar
+            </Button>
+            <Button type="button" size="sm" className="gap-1.5" onClick={() => void exportCsv()} disabled={exporting || q.isError}>
+              {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} {exporting ? "Exportando…" : "Exportar CSV"}
+            </Button>
+          </div>
+        )}
       />
 
-      {/* KPIs */}
-      <PremiumMetricGrid cols={6}>
-        <PremiumMetric icon={DollarSign} label="Volume bruto" value={fmtCurrency(kpis.totalGross)} sub={`${kpis.completed} aprovadas`} tone="info" />
-        <PremiumMetric icon={CheckCircle2} label="Líquido" value={fmtCurrency(kpis.totalNet)} sub={`Taxas ${fmtCurrency(kpis.totalFees)}`} tone="success" />
-        <PremiumMetric icon={ArrowUpDown} label="Aprovação" value={`${kpis.approvalRate.toFixed(1)}%`} sub={`${transactions.length} total`} tone="primary" />
-        <PremiumMetric icon={CreditCard} label="Hoje" value={fmtCurrency(kpis.todayV)} sub={`${kpis.todayN} transações`} tone="info" />
-        <PremiumMetric icon={Clock} label="Pendentes" value={kpis.pending.toLocaleString("pt-BR")} sub={`Retido ${fmtCurrency(kpis.retained)}`} tone="warning" />
-        <PremiumMetric icon={ShieldAlert} label="Chargeback" value={`${kpis.cbRate.toFixed(2)}%`} sub={`${kpis.chargebacks} CB · ${kpis.refunded} estornos`} tone={kpis.cbRate >= 1 ? "destructive" : "neutral"} />
+      <PremiumMetricGrid cols={4}>
+        <PremiumMetric icon={DollarSign} label="Volume aprovado" value={summary ? brl(summary.gross) : "—"} sub={summary ? `${summary.approved.toLocaleString("pt-BR")} vendas aprovadas` : waiting} tone="info" />
+        <PremiumMetric icon={CheckCircle2} label="Líquido dos sellers" value={summary ? brl(summary.net) : "—"} sub={summary ? `Taxas ${brl(summary.fees)}` : waiting} tone="success" />
+        <PremiumMetric icon={CreditCard} label="Aprovação" value={summary ? pct(approvalRate(summary)) : "—"} sub={summary ? `${summary.approved.toLocaleString("pt-BR")} de ${summary.total.toLocaleString("pt-BR")}` : waiting} tone="primary" />
+        <PremiumMetric icon={ShieldAlert} label="Chargeback" value={summary ? pct(cbRate, 2) : "—"} sub={summary ? `${summary.chargeback} ${summary.chargeback === 1 ? "chargeback" : "chargebacks"}` : waiting} tone={cbRate >= CHARGEBACK_ALERT_PCT ? "destructive" : "neutral"} />
       </PremiumMetricGrid>
+      <p className="-mt-2 text-[12px] text-muted-foreground">Os números acima consideram o período inteiro e os filtros de método, seller e busca, não só as linhas que aparecem abaixo.</p>
 
-      {/* Compliance strip */}
-      <div className="flex flex-wrap items-center gap-2 text-[11px]">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-info/20 bg-info/10 px-2.5 py-1 font-bold uppercase tracking-wider text-info">
-          <ShieldCheck className="h-3 w-3" /> Compliance · BACEN/PCI
-        </span>
-        {kpis.simulated > 0 && (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-warning/20 bg-warning/10 px-2.5 py-1 font-bold uppercase tracking-wider text-warning">
-            <Beaker className="h-3 w-3" /> {kpis.simulated} simuladas
-          </span>
-        )}
-        {kpis.retained > 0 && (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 font-bold uppercase tracking-wider text-amber-500">
-            <Timer className="h-3 w-3" /> Retido {fmtCurrency(kpis.retained)}
-          </span>
-        )}
-        {kpis.discountTotal > 0 && (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/30 px-2.5 py-1 font-bold uppercase tracking-wider text-muted-foreground">
-            <Tag className="h-3 w-3" /> Cupons {fmtCurrency(kpis.discountTotal)}
-          </span>
-        )}
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/30 px-2.5 py-1 font-bold uppercase tracking-wider text-muted-foreground">
-          Retenção D+30 · LGPD ativa
-        </span>
-      </div>
-
-      <PremiumPanel
-        eyebrow="Ledger"
-        title={`Transações · ${filtered.length}`}
-        icon={DollarSign}
-        action={
-          <PremiumSegmented<StatusKey>
-            value={statusFilter}
-            onChange={setStatusFilter}
-            options={statusPills}
-          />
-        }
-      >
-        {/* Toolbar */}
-        <div className="mb-5 flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[240px] max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              placeholder="Buscar cliente, CPF, e-mail, ID, external_id…"
-              value={search} onChange={e => setSearch(e.target.value)}
-              className="h-10 w-full rounded-xl border border-border bg-muted/30 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none"
-            />
+      <PremiumPanel eyebrow="Vendas" title={summary ? `Transações · ${matching.toLocaleString("pt-BR")}` : "Transações"} icon={DollarSign}>
+        <div className="mb-4 space-y-3">
+          <PremiumSegmented<StatusKey> value={status} onChange={setStatus} options={pills} />
+          <p className="text-[12px] text-muted-foreground">Pendente há mais de 24 horas (ou com o Pix vencido) conta como expirada. Mais recentes primeiro.</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative min-w-[240px] max-w-md flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input aria-label="Buscar transação" placeholder="Cliente, CPF, e-mail, seller ou código" value={search} onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: 40 }}
+                className="h-10 w-full rounded-xl border border-border bg-muted/30 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none" />
+            </div>
+            <Select value={method} onValueChange={setMethod}>
+              <SelectTrigger aria-label="Filtrar por método" className="h-10 w-[180px] rounded-xl text-xs"><SelectValue placeholder="Método" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os métodos</SelectItem>
+                <SelectItem value="pix">Pix</SelectItem>
+                <SelectItem value="credit_card">Cartão</SelectItem>
+                <SelectItem value="boleto">Boleto</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="w-[230px]"><SellerSelect profiles={profiles} value={seller} onChange={setSeller} allowAll /></div>
+            {filtersActive && <Button type="button" variant="ghost" size="sm" className="gap-1" onClick={clearFilters}><X className="h-3.5 w-3.5" /> Limpar filtros</Button>}
           </div>
-          <Select value={methodFilter} onValueChange={setMethodFilter}>
-            <SelectTrigger className="h-10 w-[140px] rounded-xl text-xs"><SelectValue placeholder="Método" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos métodos</SelectItem>
-              <SelectItem value="pix">PIX</SelectItem>
-              <SelectItem value="credit_card">Cartão</SelectItem>
-              <SelectItem value="boleto">Boleto</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={sellerFilter} onValueChange={setSellerFilter}>
-            <SelectTrigger className="h-10 w-[210px] rounded-xl text-xs"><SelectValue placeholder="Vendedor" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos vendedores</SelectItem>
-              {sellerOptions.map(([id, name]) => <SelectItem key={id} value={id}>{name}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <Button size="sm" variant="outline" className="h-10 text-xs gap-1.5 rounded-xl"
-            onClick={() => { if (sortField === "date") setSortField("amount"); else { setSortField("date"); setSortAsc(!sortAsc); } }}>
-            <ArrowUpDown className="h-3 w-3" /> {sortField === "date" ? "Data" : "Valor"} {sortAsc ? "↑" : "↓"}
-          </Button>
-          {activeFilters > 0 && (
-            <Button size="sm" variant="ghost" className="h-10 text-xs gap-1"
-              onClick={() => { setStatusFilter("all"); setMethodFilter("all"); setSellerFilter("all"); }}>
-              <X className="h-3 w-3" /> Limpar ({activeFilters})
-            </Button>
-          )}
-          <div className="ml-auto text-[11px] text-muted-foreground tabular-nums">
-            {serverLoading ? "Atualizando…" : <>Mostrando <span className="font-bold text-foreground">{visibleItems.length.toLocaleString("pt-BR")}</span> de <span className="font-bold text-foreground">{(dateRange ? serverTotal : filtered.length).toLocaleString("pt-BR")}</span></>}
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className={premiumTable.wrapper}>
-          <table className={premiumTable.table}>
-            <thead><tr className={premiumTable.headRow}>
-              {["ID", "Cliente", "Vendedor", "Produto", "Método", "Bruto", "Taxa", "Líquido", "Status", "Data", ""].map((h, i) => (
-                <th key={h + i} className={cn(premiumTable.th, ["Bruto", "Taxa", "Líquido"].includes(h) && "text-right")}>{h}</th>
-              ))}
-            </tr></thead>
-            <tbody>
-              {visibleItems.map(t => {
-                const isCharge = t.status === "chargeback";
-                const isRefund = t.status === "refunded";
-                const isSim = t.is_simulated;
-                return (
-                  <tr key={t.id}
-                    className={cn(
-                      premiumTable.row, "cursor-pointer",
-                      isCharge && "bg-destructive/[0.04]",
-                      isRefund && "bg-warning/[0.04]",
-                      isSim && "bg-info/[0.03]",
-                    )}
-                    onClick={() => openXRay(t)}>
-                    <td className={cn(premiumTable.td, "font-mono text-[10px] text-muted-foreground whitespace-nowrap")}>
-                      <div className="flex items-center gap-1">
-                        {t.id.slice(0, 8)}
-                        {isSim && <Beaker className="h-2.5 w-2.5 text-info" />}
-                      </div>
-                      {t.external_id && <div className="text-[9px] text-muted-foreground/70 truncate max-w-[100px]">ext: {t.external_id}</div>}
-                    </td>
-                    <td className={cn(premiumTable.td, "min-w-[160px]")}>
-                      <div className="text-xs font-bold text-foreground truncate">{t.customer_name || "—"}</div>
-                      <div className="text-[10px] text-muted-foreground truncate">{t.customer_email}</div>
-                    </td>
-                    <td className={cn(premiumTable.td, "text-xs text-foreground/80 truncate max-w-[160px]")}>{getSellerName(t.user_id)}</td>
-                    <td className={cn(premiumTable.td, "text-xs text-muted-foreground truncate max-w-[180px]")}>{getProductName(t.product_id)}</td>
-                    <td className={premiumTable.td}>
-                      <span className="inline-flex items-center gap-1.5 text-[11px] text-foreground/80">
-                        <MethodIcon m={t.payment_method} />
-                        {methodLabel(t.payment_method)}
-                      </span>
-                    </td>
-                    <td className={cn(premiumTable.td, "text-right tabular-nums text-xs font-semibold text-foreground")}>{fmtCurrency(Number(t.amount))}</td>
-                    <td className={cn(premiumTable.td, "text-right tabular-nums text-[11px] text-warning")}>−{fmtCurrency(Number(t.fee_amount))}</td>
-                    <td className={cn(premiumTable.td, "text-right tabular-nums text-xs font-bold text-emerald-500")}>{fmtCurrency(Number(t.net_amount))}</td>
-                    <td className={premiumTable.td}><StatusBadge status={deriveTransactionStatus(t)} /></td>
-                    <td className={cn(premiumTable.td, "text-[10px] text-muted-foreground whitespace-nowrap")}>{fmtDateCached(t.created_at)}</td>
-                    <td className={premiumTable.td}>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); openXRay(t); }}>
-                        <Eye className="h-3.5 w-3.5 text-muted-foreground" />
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          {filtered.length === 0 && (
-            <PremiumEmpty icon={Filter} title="Nenhuma transação encontrada" subtitle="Ajuste os filtros e tente novamente" />
+          {(lookupFailed || extraProducts.isError) && (
+            <p role="alert" className="flex flex-wrap items-center gap-2 text-[12.5px] text-warning">
+              <AlertTriangle className="h-3.5 w-3.5" /> Alguns nomes de seller ou produto não carregaram.
+              <button type="button" className="font-semibold underline" onClick={() => { retryPeople(); void extraProducts.refetch(); }}>Tentar de novo</button>
+            </p>
           )}
         </div>
-        {(dateRange ? visibleItems.length < serverTotal : visibleCount < filtered.length) && (
-          <div className="mt-4 text-center">
-            <Button variant="outline" size="sm" onClick={loadMore} className="h-8 text-[11px] gap-1.5 rounded-xl">
-              <ChevronDown className="h-3.5 w-3.5" /> Carregar mais ({((dateRange ? serverTotal - visibleItems.length : filtered.length - visibleCount)).toLocaleString("pt-BR")} restantes)
-            </Button>
+
+        {q.isError && !q.isFetching ? (
+          <div role="alert" className="flex flex-col items-start gap-2 rounded-[12px] border border-destructive/30 bg-destructive/5 p-4 text-[13px]">
+            <p className="flex items-center gap-2 font-semibold text-destructive"><AlertTriangle className="h-4 w-4" /> Não foi possível carregar as transações.</p>
+            <p className="text-muted-foreground">{friendlyError(q.error, "Tente de novo em instantes.")}</p>
+            <Button type="button" size="sm" variant="outline" onClick={() => void q.refetch()}>Tentar de novo</Button>
+          </div>
+        ) : q.isPending ? (
+          <p className="flex items-center gap-2 py-10 text-[13px] text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Carregando transações…</p>
+        ) : items.length === 0 ? (
+          <div>
+            <PremiumEmpty icon={CreditCard} title="Nenhuma transação aqui" subtitle={filtersActive ? "Nenhuma transação bate com esses filtros neste período." : "Ainda não houve transações neste período."} />
+            {filtersActive && <div className="-mt-8 pb-6 text-center"><Button type="button" variant="outline" size="sm" onClick={clearFilters}>Limpar filtros</Button></div>}
+          </div>
+        ) : (
+          <div aria-busy={q.isPlaceholderData} className={q.isPlaceholderData ? "opacity-60 transition-opacity" : undefined}>
+            <TxTable rows={items} ctx={ctx} />
+            <TxCards rows={items} ctx={ctx} />
+            <div className="mt-4 flex flex-col items-center gap-2">
+              <p className="text-[12px] tabular-nums text-muted-foreground">Mostrando {items.length.toLocaleString("pt-BR")} de {matching.toLocaleString("pt-BR")}</p>
+              {q.hasNextPage && (
+                <Button type="button" variant="outline" size="sm" className="gap-1.5" disabled={q.isFetchingNextPage} onClick={() => void q.fetchNextPage()}>
+                  {q.isFetchingNextPage ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ChevronDown className="h-3.5 w-3.5" />} Carregar mais
+                </Button>
+              )}
+              {q.isFetchNextPageError && <p role="alert" className="text-[12.5px] text-destructive">Não foi possível carregar mais. Tente de novo.</p>}
+            </div>
           </div>
         )}
       </PremiumPanel>
 
-      {/* ── X-Ray Sheet ─────────────────────────────────── */}
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto p-0 bg-background">
-          {selectedTx && (
-            <>
-              <SheetHeader className="px-5 py-4 border-b border-border bg-muted/30">
-                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">Transação</div>
-                <SheetTitle className="text-[15px] font-bold text-foreground flex items-center gap-2 flex-wrap">
-                  <button onClick={() => copy(selectedTx.id)} className="inline-flex items-center gap-1 font-mono text-xs text-foreground/80 hover:text-foreground">
-                    {selectedTx.id.slice(0, 12)}… <Copy className="h-3 w-3" />
-                  </button>
-                  <StatusBadge status={deriveTransactionStatus(selectedTx)} />
-                  {selectedTx.is_simulated && (
-                    <span className="inline-flex items-center gap-1 rounded border border-info/20 bg-info/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-info">
-                      <Beaker className="h-2.5 w-2.5" /> Simulada
-                    </span>
-                  )}
-                </SheetTitle>
-              </SheetHeader>
-
-              <div className="p-5 space-y-5">
-                {/* Financial summary */}
-                <div className="grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-border bg-border">
-                  <div className="bg-card p-3">
-                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">Bruto</div>
-                    <div className="mt-1 text-base font-extrabold tabular-nums text-foreground">{fmtCurrency(Number(selectedTx.amount))}</div>
-                    {Number(selectedTx.discount_amount || 0) > 0 && (
-                      <div className="mt-0.5 text-[10px] text-muted-foreground">−{fmtCurrency(Number(selectedTx.discount_amount))} cupom</div>
-                    )}
-                  </div>
-                  <div className="bg-card p-3">
-                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">Taxa</div>
-                    <div className="mt-1 text-base font-extrabold tabular-nums text-warning">−{fmtCurrency(Number(selectedTx.fee_amount))}</div>
-                    <div className="mt-0.5 text-[10px] text-muted-foreground">
-                      {Number(selectedTx.amount) > 0 ? ((Number(selectedTx.fee_amount) / Number(selectedTx.amount)) * 100).toFixed(2) : "0"}%
-                    </div>
-                  </div>
-                  <div className="bg-card p-3">
-                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">Líquido</div>
-                    <div className="mt-1 text-base font-extrabold tabular-nums text-emerald-500">{fmtCurrency(Number(selectedTx.net_amount))}</div>
-                  </div>
-                </div>
-
-                {/* Retention alert */}
-                {Number(selectedTx.retained_amount || 0) > 0 && (
-                  <div className={cn(
-                    "flex items-start gap-2 rounded-xl border p-3 text-xs",
-                    selectedTx.retention_released ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-500" : "border-amber-500/20 bg-amber-500/10 text-amber-500"
-                  )}>
-                    <Timer className="mt-0.5 h-4 w-4" />
-                    <div>
-                      <p className="font-bold">{selectedTx.retention_released ? "Retenção liberada" : "Retenção ativa"}</p>
-                      <p className="text-foreground/70">
-                        {fmtCurrency(Number(selectedTx.retained_amount))}
-                        {selectedTx.retained_until && ` · até ${fmtDateCached(selectedTx.retained_until)}`}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Dossier — Cliente */}
-                <PremiumPanel eyebrow="KYC" title="Cliente" icon={User}>
-                  <dl className="grid grid-cols-[120px_1fr] gap-x-3 text-xs">
-                    <Row icon={<User className="h-3 w-3" />} label="Nome" value={selectedTx.customer_name || "—"} />
-                    <Row icon={<Mail className="h-3 w-3" />} label="E-mail" value={selectedTx.customer_email || "—"} />
-                    <Row icon={<FileText className="h-3 w-3" />} label="CPF/CNPJ" value={selectedTx.customer_document || "—"} mono />
-                    <Row icon={<Smartphone className="h-3 w-3" />} label="Telefone" value={selectedTx.customer_phone || "—"} />
-                    <Row icon={<MapPin className="h-3 w-3" />} label="Endereço" value={selectedTx.customer_address || "—"} />
-                  </dl>
-                </PremiumPanel>
-
-                {/* Dossier — Pagamento */}
-                <PremiumPanel eyebrow="Pagamento" title="Detalhes da operação" icon={CreditCard}>
-                  <dl className="grid grid-cols-[120px_1fr] gap-x-3 text-xs">
-                    <Row icon={<Hash className="h-3 w-3" />} label="ID" value={selectedTx.id} mono />
-                    {selectedTx.external_id && <Row icon={<Hash className="h-3 w-3" />} label="External ID" value={selectedTx.external_id} mono />}
-                    <Row icon={<CreditCard className="h-3 w-3" />} label="Método" value={methodLabel(selectedTx.payment_method)} />
-                    <Row icon={<User className="h-3 w-3" />} label="Vendedor" value={getSellerName(selectedTx.user_id)} />
-                    <Row icon={<FileText className="h-3 w-3" />} label="Produto" value={getProductName(selectedTx.product_id)} />
-                    <Row icon={<Globe className="h-3 w-3" />} label="Origem" value={selectedTx.source || "checkout"} />
-                    {selectedTx.api_key_id && <Row icon={<Key className="h-3 w-3" />} label="API Key" value={selectedTx.api_key_id} mono />}
-                    {selectedTx.coupon_id && <Row icon={<Tag className="h-3 w-3" />} label="Cupom" value={`${selectedTx.coupon_id.slice(0, 8)} · −${fmtCurrency(Number(selectedTx.discount_amount || 0))}`} mono />}
-                    {selectedTx.checkout_session_id && <Row icon={<Hash className="h-3 w-3" />} label="Checkout" value={selectedTx.checkout_session_id} mono />}
-                    {selectedTx.pix_expires_at && (
-                      <Row icon={<Timer className="h-3 w-3" />} label="PIX expira" value={fmtDateCached(selectedTx.pix_expires_at)} />
-                    )}
-                  </dl>
-                </PremiumPanel>
-
-                {/* Timeline — real audit events for the transaction lifecycle. */}
-                <PremiumPanel eyebrow="Auditoria completa" title="Timeline da transação" icon={Clock}>
-                  <TransactionTimeline transactionId={selectedTx.id} variant="admin" />
-                </PremiumPanel>
-
-                {/* Raw */}
-                <Accordion type="single" collapsible>
-                  <AccordionItem value="raw" className="rounded-xl border border-border bg-card px-3">
-                    <AccordionTrigger className="py-2.5 text-[11px] font-black uppercase tracking-wider text-muted-foreground hover:no-underline">
-                      <span className="flex items-center gap-1.5"><Code2 className="h-3.5 w-3.5" /> Raw data + metadata</span>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <pre className="max-h-[300px] overflow-auto whitespace-pre-wrap rounded border border-border bg-muted/30 p-3 font-mono text-[10px] text-foreground/80">
-{JSON.stringify({
-  transaction_id: selectedTx.id,
-  external_id: selectedTx.external_id,
-  checkout_session_id: selectedTx.checkout_session_id,
-  api_key_id: selectedTx.api_key_id,
-  source: selectedTx.source,
-  status: selectedTx.status,
-  is_simulated: selectedTx.is_simulated,
-  payment_method: selectedTx.payment_method,
-  amount: Number(selectedTx.amount),
-  discount_amount: Number(selectedTx.discount_amount || 0),
-  fee_amount: Number(selectedTx.fee_amount),
-  net_amount: Number(selectedTx.net_amount),
-  retained_amount: selectedTx.retained_amount,
-  retained_until: selectedTx.retained_until,
-  retention_released: selectedTx.retention_released,
-  customer: {
-    name: selectedTx.customer_name,
-    email: selectedTx.customer_email,
-    document: selectedTx.customer_document,
-    phone: selectedTx.customer_phone,
-    address: selectedTx.customer_address,
-  },
-  product_id: selectedTx.product_id,
-  user_id: selectedTx.user_id,
-  coupon_id: selectedTx.coupon_id,
-  pix_expires_at: selectedTx.pix_expires_at,
-  metadata: selectedTx.metadata,
-  created_at: selectedTx.created_at,
-  updated_at: selectedTx.updated_at,
-}, null, 2)}
-                      </pre>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-
-                {/* Actions */}
-                <div className="flex flex-wrap gap-2 pt-3 border-t border-border">
-                  {isApprovedTransaction(selectedTx.status) && (
-                    <Button variant="destructive" size="sm" className="h-8 gap-1.5 text-[11px] rounded-xl" onClick={openRefund}>
-                      <RotateCcw className="h-3.5 w-3.5" /> Estornar pagamento
-                    </Button>
-                  )}
-                  {selectedTx.status === "chargeback" && (
-                    <Button variant="outline" size="sm" className="h-8 gap-1.5 text-[11px] rounded-xl border-amber-500/40 text-amber-500 hover:bg-amber-500/10" onClick={() => setDisputeOpen(true)}>
-                      <Upload className="h-3.5 w-3.5" /> Upload comprovante (disputa)
-                    </Button>
-                  )}
-                  <Button variant="outline" size="sm" className="h-8 gap-1.5 text-[11px] rounded-xl ml-auto" onClick={() => copy(selectedTx.id)}>
-                    <Copy className="h-3.5 w-3.5" /> Copiar ID
-                  </Button>
-                </div>
-              </div>
-            </>
-          )}
-        </SheetContent>
-      </Sheet>
-
-      {/* ── Refund Dialog ─────────────────────────────────── */}
-      <Dialog open={refundOpen} onOpenChange={setRefundOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-destructive text-sm">
-              <RotateCcw className="h-4 w-4" /> Estornar pagamento
-            </DialogTitle>
-          </DialogHeader>
-          {selectedTx && (
-            <div className="space-y-3">
-              <div className="rounded-xl border border-border bg-muted/30 p-3 text-[11px] space-y-1">
-                <p><span className="text-muted-foreground">Transação:</span> <span className="font-mono text-foreground/80">{selectedTx.id.slice(0, 12)}…</span></p>
-                <p><span className="text-muted-foreground">Valor original:</span> <span className="font-bold text-foreground tabular-nums">{fmtCurrency(Number(selectedTx.amount))}</span></p>
-                <p><span className="text-muted-foreground">Vendedor:</span> <span className="text-foreground/80">{getSellerName(selectedTx.user_id)}</span></p>
-              </div>
-              <div className="flex gap-2">
-                <Button size="sm" variant={refundType === "full" ? "default" : "outline"} className="flex-1 h-8 text-[11px] rounded-xl"
-                  onClick={() => { setRefundType("full"); setRefundAmount(String(Number(selectedTx.amount))); }}>
-                  Estorno total
-                </Button>
-                <Button size="sm" variant={refundType === "partial" ? "default" : "outline"} className="flex-1 h-8 text-[11px] rounded-xl"
-                  onClick={() => setRefundType("partial")}>
-                  Estorno parcial
-                </Button>
-              </div>
-              {refundType === "partial" && (
-                <div>
-                  <label className="text-[11px] font-medium text-muted-foreground">Valor (R$)</label>
-                  <Input type="number" step="0.01" min="0.01" max={Number(selectedTx.amount)} value={refundAmount}
-                    onChange={e => setRefundAmount(e.target.value)} className="mt-1 h-8 text-xs" placeholder="0,00" />
-                </div>
-              )}
-              <div>
-                <label className="text-[11px] font-medium text-muted-foreground">Justificativa (audit trail)</label>
-                <Textarea value={refundReason} onChange={e => setRefundReason(e.target.value)}
-                  placeholder="Ex.: Cliente solicitou reembolso por insatisfação…"
-                  className="mt-1 text-xs" rows={3} />
-                <p className="mt-1 text-[10px] text-muted-foreground">Mín. 5 caracteres · registrado permanentemente.</p>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="ghost" size="sm" className="h-8 text-[11px]" onClick={() => setRefundOpen(false)}>Cancelar</Button>
-            <Button variant="destructive" size="sm" className="h-8 text-[11px] gap-1.5 rounded-xl" onClick={handleRefund} disabled={refunding}>
-              {refunding ? "Processando…" : "Confirmar estorno"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ── Dispute Upload ─────────────────────────────────── */}
-      <Dialog open={disputeOpen} onOpenChange={setDisputeOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-amber-500 text-sm">
-              <Upload className="h-4 w-4" /> Comprovante para disputa
-            </DialogTitle>
-          </DialogHeader>
-          {selectedTx && (
-            <div className="space-y-3">
-              <p className="text-[11px] text-muted-foreground">
-                Anexe a evidência (entrega, contrato, log) para contestar o chargeback da transação{" "}
-                <span className="font-mono text-foreground/80">{selectedTx.id.slice(0, 12)}</span>.
-              </p>
-              <div className="rounded-xl border-2 border-dashed border-border bg-muted/30 p-6 text-center">
-                <Upload className="mx-auto mb-2 h-7 w-7 text-muted-foreground" />
-                <p className="text-[11px] text-muted-foreground">Arraste ou clique para enviar (PDF, JPG, PNG · máx. 10MB)</p>
-                <input type="file" accept=".pdf,.png,.jpg,.jpeg" className="mx-auto mt-3 block text-[11px]"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    const ALLOWED = ["application/pdf", "image/jpeg", "image/png"];
-                    if (!ALLOWED.includes(file.type)) { toast.error("Use PDF, JPG ou PNG"); return; }
-                    if (file.size > 10 * 1024 * 1024) { toast.error("Máximo 10MB"); return; }
-                    const mimeExt: Record<string, string> = { "application/pdf": "pdf", "image/jpeg": "jpg", "image/png": "png" };
-                    const ext = mimeExt[file.type];
-                    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80);
-                    const filePath = `disputes/${selectedTx.id}/${crypto.randomUUID()}.${ext}`;
-                    const { error } = await supabase.storage.from("dispute-evidence").upload(filePath, file, { upsert: true, contentType: file.type });
-                    if (error) { toast.error("Erro no upload"); return; }
-                    toast.success("Comprovante enviado!");
-                    await logAdminAction("upload_dispute_evidence", "transaction", selectedTx.id, { file: safeName });
-                    setDisputeOpen(false);
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <TransactionSheet tx={selected} onClose={() => setSelected(null)} nameOf={(id) => nameOf(id)} productOf={productOf} onNavigate={onNavigate} />
     </div>
   );
 }
-
-/* ── Row helper ─────────────────────────────────────────────── */
-function Row({ icon, label, value, mono }: { icon: React.ReactNode; label: string; value: string; mono?: boolean }) {
-  const handleCopy = () => {
-    navigator.clipboard.writeText(value).then(() => toast.success("Copiado"));
-  };
-  return (
-    <>
-      <dt className="flex items-center gap-1.5 border-b border-border/40 py-1.5 text-[11px] text-muted-foreground">
-        <span className="text-muted-foreground/60">{icon}</span> {label}
-      </dt>
-      <dd className={cn("group flex items-start gap-1.5 border-b border-border/40 py-1.5 text-xs text-foreground", mono ? "font-mono text-[11px] break-all" : "truncate")}>
-        <span className="flex-1 min-w-0">{value}</span>
-        {mono && value !== "—" && (
-          <button
-            onClick={handleCopy}
-            className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 h-5 w-5 rounded-md hover:bg-muted/60 flex items-center justify-center text-muted-foreground hover:text-foreground"
-            title="Copiar"
-          >
-            <Copy className="h-3 w-3" />
-          </button>
-        )}
-      </dd>
-    </>
-  );
-}
-

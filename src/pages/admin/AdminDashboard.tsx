@@ -670,7 +670,7 @@ export default function AdminDashboard() {
                 <AdminAnalyticsTab dateRange={dateRange} fmtCurrency={fmtCurrency} />
               )}
               {activeTab === "transactions" && (
-                <AdminTransactionsTab transactions={transactions} profiles={profiles} products={products} fmtCurrency={fmtCurrency} onReload={loadData} dateRange={dateRange} />
+                <AdminTransactionsTab profiles={profiles} products={products} dateRange={dateRange} onNavigate={isAdmin ? (id) => handleTabChange(id as TabId) : undefined} />
               )}
               {activeTab === "sellers" && isAdmin && (
                 <AdminSellersTab profiles={profiles} transactions={transactions} withdrawals={withdrawals} onReload={loadData} fmtCurrency={fmtCurrency} isAdmin={isAdmin} dateRange={dateRange} />
