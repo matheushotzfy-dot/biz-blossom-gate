@@ -382,6 +382,7 @@ export type Database = {
           id: string
           is_active: boolean
           owner_user_id: string
+          paused_by_owner: boolean
           product_id: string
           slug: string
         }
@@ -393,6 +394,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           owner_user_id: string
+          paused_by_owner?: boolean
           product_id: string
           slug: string
         }
@@ -404,6 +406,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           owner_user_id?: string
+          paused_by_owner?: boolean
           product_id?: string
           slug?: string
         }

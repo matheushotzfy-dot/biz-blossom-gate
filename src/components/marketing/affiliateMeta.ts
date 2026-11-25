@@ -4,6 +4,8 @@ import { getCheckoutLink } from "@/components/products/productPresentation";
 export type AffiliateLink = {
   id: string; product_id: string; affiliate_user_id: string; owner_user_id: string;
   slug: string; commission_pct: number; clicks: number; is_active: boolean; created_at: string;
+  /** true quando foi o produtor (ou o encerramento do programa) que pausou: o afiliado não consegue reativar sozinho. */
+  paused_by_owner: boolean;
 };
 export type AffiliateSale = {
   id: string; affiliate_link_id: string; transaction_id: string; product_id: string;

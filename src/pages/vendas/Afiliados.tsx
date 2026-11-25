@@ -135,6 +135,7 @@ export default function Afiliados() {
     await load();
     setConfiguringId(null);
     if (partial) toast.warning("O produto foi salvo, mas não deu para atualizar os links dos afiliados. Ajuste pela lista de afiliados.");
+    else if (v.enabled && !configuring.enabled && programLinks.some((l) => l.product_id === configuring.id && !l.is_active)) toast.success("Programa aberto. Os links que estavam pausados continuam assim: reative na lista de afiliados.");
     else toast.success(v.enabled ? (configuring.enabled ? "Programa atualizado." : "Programa aberto. O produto já aparece em Explorar produtos.") : "Programa encerrado neste produto.");
     return { ok: true };
   };
@@ -142,10 +143,13 @@ export default function Afiliados() {
   const toggleLink = async (l: AffiliateLink) => {
     if (busyLinkId) return;
     if (!l.is_active && l.affiliate_user_id === user?.id && !catalogById.has(l.product_id)) { toast.error("O produtor encerrou o programa deste produto."); return; }
+    if (!l.is_active && l.paused_by_owner && l.affiliate_user_id === user?.id) { toast.error("O produtor pausou este link. Só ele pode reativar."); return; }
     setBusyLinkId(l.id);
-    const { error } = await supabase.from("affiliate_links").update({ is_active: !l.is_active }).eq("id", l.id);
+    const { data, error } = await supabase.from("affiliate_links").update({ is_active: !l.is_active }).eq("id", l.id).select("is_active").maybeSingle();
     setBusyLinkId(null);
     if (error) { toast.error(affiliateErrorMessage(error, "Não foi possível alterar o link. Tente de novo.")); return; }
+    // O servidor é quem decide (ex.: o produtor pausou e o afiliado não pode reativar): confere o que ficou.
+    if (!data || data.is_active === l.is_active) { toast.error("Não foi possível alterar o link. Ele continua como estava."); void load(); return; }
     toast.success(l.is_active ? "Link pausado." : "Link reativado.");
     void load();
   };

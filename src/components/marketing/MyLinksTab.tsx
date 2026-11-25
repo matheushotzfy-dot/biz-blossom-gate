@@ -94,8 +94,8 @@ export function MyLinksTab(p: MyLinksTabProps) {
 
                 <div className="mt-auto pt-5">
                   <div className="flex items-center justify-between gap-3 border-t border-border pt-4">
-                    {open ? <StatusPill label={l.is_active ? "Link ativo" : "Link pausado"} tone={l.is_active ? "ok" : "idle"} /> : <StatusPill label="Programa encerrado" tone="idle" />}
-                    <Switch checked={l.is_active && open} onCheckedChange={() => p.onToggle(l)} disabled={p.busyLinkId === l.id || !open} aria-label={!open ? "Este produto não aceita mais afiliados" : l.is_active ? "Pausar este link" : "Reativar este link"} />
+                    {open ? <StatusPill label={l.is_active ? "Link ativo" : l.paused_by_owner ? "Pausado pelo produtor" : "Link pausado"} tone={l.is_active ? "ok" : "idle"} /> : <StatusPill label="Programa encerrado" tone="idle" />}
+                    <Switch checked={l.is_active && open} onCheckedChange={() => p.onToggle(l)} disabled={p.busyLinkId === l.id || !open || (!l.is_active && l.paused_by_owner)} aria-label={!open ? "Este produto não aceita mais afiliados" : !l.is_active && l.paused_by_owner ? "O produtor pausou este link e só ele pode reativar" : l.is_active ? "Pausar este link" : "Reativar este link"} />
                   </div>
                 </div>
               </li>
