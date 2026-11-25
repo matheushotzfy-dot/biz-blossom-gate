@@ -24,23 +24,11 @@ import { SearchField } from "@/components/seller-ui/SearchField";
 import { Pager } from "@/components/seller-ui/Pager";
 import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
 import { StatusPill } from "@/components/seller-ui/tx";
+import { maskBRL, parseBRL } from "@/components/seller-ui/money";
 import type { TxTone } from "@/components/seller-ui/txMeta";
 
 const fmt = formatCurrency;
 
-// Mask raw digits into BR currency string "1.234,56"
-const maskBRL = (raw: string): string => {
-  const digits = raw.replace(/\D/g, "").slice(0, 12);
-  if (!digits) return "";
-  const n = Number(digits) / 100;
-  return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-};
-
-// Parse BR currency string back to number
-const parseBRL = (masked: string): number => {
-  const digits = masked.replace(/\D/g, "");
-  return digits ? Number(digits) / 100 : 0;
-};
 const DEFAULT_WITHDRAW_FEE = 5;
 const PAGE_SIZE = 8;
 

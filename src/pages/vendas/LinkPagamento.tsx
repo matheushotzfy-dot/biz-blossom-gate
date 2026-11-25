@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Plus } from "lucide-react";
+import { Archive, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,6 +10,7 @@ import { SectionTabs } from "@/components/seller-ui/SectionTabs";
 import { FilterPills } from "@/components/seller-ui/FilterPills";
 import { SearchField } from "@/components/seller-ui/SearchField";
 import { Pager } from "@/components/seller-ui/Pager";
+import { useConfirm } from "@/components/seller-ui/confirm";
 import { Money } from "@/components/home/Money";
 import { PaymentLinkDialog } from "@/features/payment-links/PaymentLinkDialog";
 import { PaymentLinkList } from "@/features/payment-links/PaymentLinkList";
@@ -32,6 +33,7 @@ export default function LinkPagamento() {
   const [status, setStatus] = useState<PaymentLinkStatus>("all");
   const [page, setPage] = useState(1);
   const requestRef = useRef(0);
+  const { ask, dialog: confirmDialog } = useConfirm();
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -89,8 +91,13 @@ export default function LinkPagamento() {
   };
 
   const remove = async (link: PaymentLink) => {
-    if (!user || !window.confirm(link.current_uses > 0 ? "Este link possui histórico e será arquivado. Continuar?" : "Remover este link?")) return;
-    if (link.current_uses > 0) { await mutateLink(link, { archived_at: new Date().toISOString(), is_active: false }, "Link arquivado"); return; }
+    if (!user) return;
+    const archive = link.current_uses > 0;
+    const ok = await ask(archive
+      ? { title: "Arquivar este link?", description: `"${link.title}" já recebeu pagamentos. Ele sai da lista e deixa de aceitar novos, mas o histórico continua guardado.`, confirmLabel: "Arquivar link", tone: "warning", icon: <Archive className="h-5 w-5" /> }
+      : { title: "Remover este link?", description: `"${link.title}" deixa de existir e quem tiver o endereço não consegue mais abrir.`, confirmLabel: "Remover link" });
+    if (!ok) return;
+    if (archive) { await mutateLink(link, { archived_at: new Date().toISOString(), is_active: false }, "Link arquivado"); return; }
     const { data, error } = await supabase.from("payment_links").delete().eq("id", link.id).eq("user_id", user.id).select("id").maybeSingle();
     if (error || !data) { toast.error(error?.message || "Não foi possível remover o link"); return; }
     toast.success("Link removido"); await load();
@@ -110,6 +117,7 @@ export default function LinkPagamento() {
   return (
     <div className="vp-fade space-y-5 pb-6 md:space-y-6">
       <Seo title="Links de Pagamento | Vemprapay" description="Crie e gerencie links de pagamento avulsos." path="/vendas/link-pagamento" noindex />
+      {confirmDialog}
       <PaymentLinkDialog open={dialogOpen} busy={busy} permissions={permissions} editing={editing} onOpenChange={(open) => { setDialogOpen(open); if (!open) setEditing(null); }} onSubmit={save} />
 
       <SectionTabs section="sales" />

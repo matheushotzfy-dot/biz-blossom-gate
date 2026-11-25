@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
+import { useConfirm } from "@/components/seller-ui/confirm";
 import { PageShell, PageTitle, EmptyState, Panel as SharedPanel } from "@/components/PageShell";
 import { cn, isApprovedTransaction, formatCurrency } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -41,6 +42,7 @@ export default function ControleGastos() {
   const { data: expensesData = [] } = useExpenses();
   const expenses = expensesData as Expense[];
   const invalidateAll = useInvalidateAll();
+  const { ask, dialog: confirmDialog } = useConfirm();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({
@@ -127,12 +129,12 @@ export default function ControleGastos() {
 
   const handleDelete = useCallback(async (id: string) => {
     if (!user) return;
-    if (!window.confirm("Tem certeza que deseja excluir este gasto?")) return;
+    if (!(await ask({ title: "Excluir este gasto?", description: "Ele sai do seu controle de gastos e deixa de entrar nas contas do mês.", confirmLabel: "Excluir gasto" }))) return;
     const { error } = await supabase.from("expenses").delete().eq("id", id).eq("user_id", user.id);
     if (error) { toast.error("Erro ao remover gasto"); return; }
     toast.success("Gasto removido");
     invalidateAll(["expenses"]);
-  }, [user, invalidateAll]);
+  }, [user, invalidateAll, ask]);
 
   const getCatInfo = (cat: string) => CATEGORIES.find((c) => c.value === cat) || CATEGORIES[5];
 
@@ -146,6 +148,7 @@ export default function ControleGastos() {
 
   return (
     <PageShell>
+      {confirmDialog}
       {/* ═══ Header ═══ */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <PageTitle

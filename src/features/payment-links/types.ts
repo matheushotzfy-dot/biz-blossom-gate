@@ -1,4 +1,5 @@
 import type { Tables } from "@/integrations/supabase/types";
+import { toMaskedBRL } from "@/components/seller-ui/money";
 
 export type PaymentLink = Tables<"payment_links">;
 
@@ -50,13 +51,22 @@ export const emptyPaymentLinkDraft = (permissions: PaymentLinkPermissions): Paym
   accept_boleto: false,
 });
 
+/** ISO → valor de <input type="datetime-local"> no horário do navegador (o campo é local; toISOString() daria UTC). */
+export const toLocalInput = (iso: string | null | undefined): string => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
 export const paymentLinkToDraft = (link: PaymentLink, permissions: PaymentLinkPermissions): PaymentLinkDraft => ({
   title: link.title,
   description: link.description ?? "",
-  amount: Number(link.amount).toFixed(2).replace(".", ","),
+  amount: toMaskedBRL(Number(link.amount)),
   slug: link.slug,
   max_uses: link.max_uses ? String(link.max_uses) : "",
-  expires_at: link.expires_at ? new Date(link.expires_at).toISOString().slice(0, 16) : "",
+  expires_at: toLocalInput(link.expires_at),
   pix_expiration_minutes: String(link.pix_expiration_minutes ?? 30),
   instructions: link.instructions ?? "",
   redirect_url: link.redirect_url ?? "",
