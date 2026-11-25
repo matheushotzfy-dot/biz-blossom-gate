@@ -9,7 +9,8 @@ import type { Tables } from "@/integrations/supabase/types";
 import { useProfile } from "@/hooks/useProfile";
 import { useKycStatus } from "@/hooks/useKycStatus";
 import { useDashboardStats, useLedgerBalance, useProducts, useTransactions, type DashboardBucket } from "@/hooks/useQueryData";
-import { PeriodPicker, buildPeriod, type PeriodPresetId, type PeriodValue } from "@/components/PeriodPicker";
+import { PeriodPicker } from "@/components/PeriodPicker";
+import { buildPeriod, periodLabel, type PeriodValue } from "@/components/period/periodMeta";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import { SellerOnboarding } from "@/components/dashboard/SellerOnboarding";
 import { Seo } from "@/components/Seo";
@@ -18,9 +19,6 @@ import { saoPauloHour } from "@/components/home/time";
 import type { SalesPoint } from "@/components/home/RevenueChart";
 import type { PendingTask } from "@/components/home/PendingTasks";
 
-const PRESET_LABEL: Record<string, string> = { today: "Hoje", yesterday: "Ontem", "7d": "7 dias", "15d": "15 dias", "30d": "30 dias", month: "Este mês" };
-const periodLabel = (p: PeriodValue) =>
-  (p.presetId && PRESET_LABEL[p.presetId]) || `${format(p.from, "dd MMM", { locale: ptBR }).replace(".", "")} a ${format(p.to, "dd MMM", { locale: ptBR }).replace(".", "")}`;
 const rate = (a: number, t: number) => (t > 0 ? Math.round((a / t) * 100) : 0);
 const pad = (n: number) => String(n).padStart(2, "0");
 const keyOf = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
