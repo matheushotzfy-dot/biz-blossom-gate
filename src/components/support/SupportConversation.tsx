@@ -17,6 +17,7 @@ export interface SupportConversationProps {
   reply: string; files: File[]; sending: boolean; typing: { name: string }[];
   onBack: () => void; onRetry: () => void; onReply: (value: string) => void; onTyping: () => void;
   onFiles: (files: File[]) => void; onAddFiles: (files: File[]) => void; onSend: () => void;
+  statusBusy: boolean; onStatus: (status: 'resolved' | 'open') => void;
 }
 
 function Text({ body }: { body: string }) {
@@ -99,12 +100,23 @@ export function SupportConversation(p: SupportConversationProps) {
             </button>
             <span aria-hidden>·</span>
             <span title={formatFull(p.ticket.created_at)}>Aberto em {formatDate(p.ticket.created_at)}</span>
+            {stage !== 'done' && (
+              <button type="button" className="sp-action ml-auto" disabled={p.statusBusy} onClick={() => p.onStatus('resolved')}>
+                {p.statusBusy ? <Loader2 aria-hidden className="h-3.5 w-3.5 animate-spin" /> : <Check aria-hidden className="h-3.5 w-3.5" />}Marcar como resolvido
+              </button>
+            )}
           </p>
         </div>
       </header>
 
       {stage === 'done' ? (
-        <p className="sp-note"><Info aria-hidden className="h-4 w-4 shrink-0" />Este chamado foi encerrado. Se ainda precisar de ajuda, escreva abaixo e ele é reaberto.</p>
+        <div className="sp-note">
+          <Info aria-hidden className="h-4 w-4 shrink-0" />
+          <span className="min-w-0 flex-1">{p.ticket.status === 'closed' ? 'A equipe encerrou este chamado.' : 'Chamado resolvido.'} Precisa de ajuda? Escreva abaixo ou reabra.</span>
+          <button type="button" className="sp-action" disabled={p.statusBusy} onClick={() => p.onStatus('open')}>
+            {p.statusBusy && <Loader2 aria-hidden className="h-3.5 w-3.5 animate-spin" />}Reabrir chamado
+          </button>
+        </div>
       ) : !answered && !p.loading && !p.error ? (
         <p className="sp-note" data-tone="ok"><Info aria-hidden className="h-4 w-4 shrink-0" />Recebemos seu chamado. A equipe responde por aqui e você recebe um aviso.</p>
       ) : null}

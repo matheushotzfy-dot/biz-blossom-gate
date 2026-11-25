@@ -91,9 +91,10 @@ export function ticketPreview(t: SupportTicket): { who: 'team' | 'you' | 'none';
   return { who: 'you', text: splitTicketBody(t.message).text };
 }
 
-/* ───────── "Não lido" (guardado neste aparelho) ─────────
-   A coluna `unread_by_customer` não pode ser zerada pelo próprio cliente (não há política de UPDATE),
-   então o "visto" fica no navegador: marcamos a data da última resposta da equipe que a pessoa abriu. */
+/* ───────── "Não lido" ─────────
+   Só é "não lido" quando os dois lados concordam: o banco ainda conta resposta nova (`unread_by_customer`, zerado
+   por `mark_my_ticket_read` em qualquer aparelho) e este aparelho ainda não abriu a resposta (data guardada no
+   navegador, que também cobre o caso de o aviso ao banco falhar). */
 
 export type SeenMap = Record<string, string>;
 
@@ -116,7 +117,7 @@ export function seedSeen(tickets: SupportTicket[]): SeenMap {
 }
 
 export function isUnread(t: SupportTicket, seen: SeenMap): boolean {
-  if (!t.replied_at) return false;
+  if (!t.replied_at || (t.unread_by_customer ?? 0) <= 0) return false;
   const replied = Date.parse(t.replied_at);
   const mine = seen[t.id] ? Date.parse(seen[t.id]) : 0;
   if (Number.isNaN(replied)) return false;

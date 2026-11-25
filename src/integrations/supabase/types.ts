@@ -6268,6 +6268,7 @@ export type Database = {
         Returns: string
       }
       mark_kyc_submitted: { Args: never; Returns: undefined }
+      mark_my_ticket_read: { Args: { _ticket_id: string }; Returns: undefined }
       mask_pix: { Args: { _kind: string; _v: string }; Returns: string }
       mask_tail: { Args: { _keep?: number; _v: string }; Returns: string }
       peek_rate_limit: {
@@ -6419,6 +6420,7 @@ export type Database = {
         Returns: Json
       }
       set_my_theme_preference: { Args: { _theme: string }; Returns: string }
+      set_my_ticket_status: { Args: { _status: string; _ticket_id: string }; Returns: string }
       set_seller_withdrawal_block: {
         Args: { _block: boolean; _reason: string; _seller: string }
         Returns: undefined

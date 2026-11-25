@@ -69,6 +69,15 @@ export default function Suporte() {
     apply(merged.files);
   };
 
+  const changeStatus = async (status: 'resolved' | 'open') => {
+    const ticket = support.selected;
+    if (!ticket) return;
+    const ok = await support.setStatus(ticket.id, status);
+    if (!ok) return;
+    if (status === 'open') { toast.success('Chamado reaberto.'); return; }
+    toast.success('Chamado marcado como resolvido.', { action: { label: 'Desfazer', onClick: () => { void support.setStatus(ticket.id, 'open'); } } });
+  };
+
   const send = async () => {
     if (!id) return;
     const ok = await support.sendReply(reply, files);
@@ -107,7 +116,7 @@ export default function Suporte() {
             onReply={(v) => setReplies((r) => ({ ...r, [support.selected!.id]: v }))} onTyping={notifyTyping}
             onFiles={(next) => setReplyFiles((f) => ({ ...f, [support.selected!.id]: next }))}
             onAddFiles={(incoming) => addFiles(incoming, files, (next) => setReplyFiles((f) => ({ ...f, [support.selected!.id]: next })))}
-            onSend={() => { void send(); }} />
+            onSend={() => { void send(); }} statusBusy={support.changingStatus} onStatus={(status) => { void changeStatus(status); }} />
         ) : (
           <SupportHelp visible={showPaneNarrow} tab={tab} ticketCount={support.tickets.length} unread={unread} onTab={pickTab} onOpenTicket={openTicket} onNew={openComposer} />
         )}

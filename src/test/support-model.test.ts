@@ -82,18 +82,22 @@ describe('Filters and search', () => {
   it('formats the ticket number', () => { expect(ticketCode(base.id)).toBe('#847A1C39'); });
 });
 
-describe('Unread replies (kept on this device)', () => {
-  const answered = t({ status: 'answered', replied_at: '2026-11-21T10:00:00Z', last_message_at: '2026-11-21T10:00:00Z' });
+describe('Unread replies (server count + what this device has seen)', () => {
+  const answered = t({ status: 'answered', replied_at: '2026-11-21T10:00:00Z', last_message_at: '2026-11-21T10:00:00Z', unread_by_customer: 1 });
   it('flags a reply newer than what was seen', () => {
     expect(isUnread(answered, {})).toBe(true);
     expect(isUnread(answered, { [answered.id]: '2026-11-21T10:00:00Z' })).toBe(false);
     expect(isUnread(answered, { [answered.id]: '2026-11-20T10:00:00Z' })).toBe(true);
     expect(isUnread(base, {})).toBe(false);
   });
+  it('is read once the server count is cleared, even if this device never opened it', () => {
+    expect(isUnread({ ...answered, unread_by_customer: 0 }, {})).toBe(false);
+    expect(unreadCount([{ ...answered, unread_by_customer: 0 }], {})).toBe(0);
+  });
   it('marks a reply as seen and a newer one as unread again', () => {
     const seen = markSeen({}, answered);
     expect(unreadCount([answered], seen)).toBe(0);
-    expect(unreadCount([{ ...answered, replied_at: '2026-11-22T09:00:00Z' }], seen)).toBe(1);
+    expect(unreadCount([{ ...answered, replied_at: '2026-11-22T09:00:00Z', unread_by_customer: 2 }], seen)).toBe(1);
     expect(markSeen(seen, answered)).toBe(seen);
   });
   it('treats everything that exists on the first visit as already seen', () => {

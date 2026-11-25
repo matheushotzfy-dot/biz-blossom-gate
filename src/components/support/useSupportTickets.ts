@@ -19,6 +19,7 @@ export function useSupportTickets(userId: string | undefined) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [changingStatus, setChangingStatus] = useState(false);
   const operation = useRef(false);
   const clearedOnServer = useRef(new Set<string>());
   const listKey = supportListKey(userId);
@@ -54,13 +55,18 @@ export function useSupportTickets(userId: string | undefined) {
   const repliedAt = selected?.replied_at ?? null;
   useEffect(() => { if (userId && activeId) recordSeen(userId, { id: activeId, replied_at: repliedAt }); }, [userId, activeId, repliedAt]);
   useEffect(() => { setActiveSupportTicket(activeId); return () => setActiveSupportTicket(null); }, [activeId]);
+  // Abrir o chamado zera o contador no banco (vale em qualquer aparelho). Repete quando chega resposta nova com ele aberto.
   const unreadOnServer = selected?.unread_by_customer ?? 0;
   useEffect(() => {
-    // Melhor esforço: o banco só aceita isso de quem tem permissão; o "visto" local é o que vale para o vendedor.
-    if (!userId || !activeId || unreadOnServer <= 0 || clearedOnServer.current.has(activeId)) return;
-    clearedOnServer.current.add(activeId);
-    void supabase.from('support_tickets').update({ unread_by_customer: 0 }).eq('id', activeId).eq('user_id', userId).then(() => undefined);
-  }, [userId, activeId, unreadOnServer]);
+    if (!userId || !activeId || unreadOnServer <= 0) return;
+    const mark = `${activeId}|${repliedAt ?? ''}`;
+    if (clearedOnServer.current.has(mark)) return;
+    clearedOnServer.current.add(mark);
+    void supabase.rpc('mark_my_ticket_read', { _ticket_id: activeId }).then(({ error }) => {
+      if (error) { clearedOnServer.current.delete(mark); return; } // o "visto" deste aparelho segura a barra até a próxima tentativa
+      client.setQueryData<SupportTicket[]>(listKey, (old) => old?.map((t) => (t.id === activeId ? { ...t, unread_by_customer: 0 } : t)));
+    });
+  }, [userId, activeId, unreadOnServer, repliedAt, client, listKey]);
 
   useEffect(() => {
     if (!activeId || !userId) return;
@@ -95,6 +101,20 @@ export function useSupportTickets(userId: string | undefined) {
     finally { operation.current = false; setSending(false); }
   };
 
+  /** Marca o chamado como resolvido ou reabre. Devolve true se o banco aceitou. */
+  const setStatus = async (ticketId: string, status: 'resolved' | 'open'): Promise<boolean> => {
+    if (!userId || operation.current) return false;
+    operation.current = true; setChangingStatus(true);
+    try {
+      const { data, error } = await supabase.rpc('set_my_ticket_status', { _ticket_id: ticketId, _status: status });
+      if (error) throw error;
+      client.setQueryData<SupportTicket[]>(listKey, (old) => old?.map((t) => (t.id === ticketId ? { ...t, status: data } : t)));
+      void client.invalidateQueries({ queryKey: listKey });
+      return true;
+    } catch { toast.error(status === 'resolved' ? 'Não foi possível marcar como resolvido. Tente de novo.' : 'Não foi possível reabrir o chamado. Tente de novo.'); return false; }
+    finally { operation.current = false; setChangingStatus(false); }
+  };
+
   /** Devolve o id do chamado criado, ou null se não foi possível. */
   const createTicket = async (input: NewTicket, files: File[]): Promise<string | null> => {
     if (!userId || operation.current) return null;
@@ -123,6 +143,6 @@ export function useSupportTickets(userId: string | undefined) {
     tickets, seen, selected, selectedId: activeId, select: setSelectedId, messages,
     loading: list.isPending, listError: list.isError && !list.data, reloadList: () => { void list.refetch(); },
     loadingThread: thread.isLoading, threadError: thread.isError, reloadThread: () => { void thread.refetch(); },
-    sending, submitting, sendReply, createTicket,
+    sending, submitting, changingStatus, sendReply, createTicket, setStatus,
   };
 }

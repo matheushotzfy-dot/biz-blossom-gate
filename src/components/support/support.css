@@ -57,6 +57,11 @@ html.vp-seller .sp-faq-q { border-radius: 0 !important; }
 .sp-bubble a { text-decoration: underline; text-underline-offset: 2px; font-weight: 600; overflow-wrap: anywhere; }
 .sp-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 3px 10px; border-radius: 9999px; font-size: 12.5px; font-weight: 600; background: hsl(var(--foreground) / .07); }
 .sp-bubble[data-mine="true"] .sp-chip { background: hsl(var(--primary-foreground) / .18); }
+.sp-action { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 12px; flex: none; font-size: 13px; font-weight: 600; white-space: nowrap; color: hsl(var(--foreground)); background: hsl(var(--card)); border: 1px solid hsl(var(--border)); transition: background-color .15s ease; }
+html.vp-seller .sp-action { border-radius: 9999px !important; }
+.sp-action:hover:not(:disabled) { background: hsl(var(--muted)); }
+.sp-action:disabled { opacity: .55; cursor: default; }
+.sp-action:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
 .sp-day { display: flex; align-items: center; gap: 14px; margin: 4px 0; font-size: 12.5px; font-weight: 600; color: hsl(var(--muted-foreground)); }
 .sp-day::before, .sp-day::after { content: ""; flex: 1; height: 1px; background: hsl(var(--border)); }
 .sp-dots { display: inline-flex; gap: 4px; align-items: center; height: 18px; }
