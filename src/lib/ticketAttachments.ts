@@ -65,16 +65,6 @@ export async function getSignedUrl(path: string): Promise<string | null> {
   return data?.signedUrl ?? null;
 }
 
-/** Delete every stored file for a ticket. Called when a ticket is closed/resolved. */
-export async function purgeTicketAttachments(ticketId: string): Promise<void> {
-  const { data, error } = await supabase.storage
-    .from("ticket-attachments")
-    .list(ticketId, { limit: 1000 });
-  if (error || !data?.length) return;
-  const paths = data.map(o => `${ticketId}/${o.name}`);
-  await supabase.storage.from("ticket-attachments").remove(paths);
-}
-
 export function humanSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
