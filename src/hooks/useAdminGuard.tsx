@@ -15,6 +15,9 @@ export function useAdminGuard() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEmployee, setIsEmployee] = useState(false);
   const [loading, setLoading] = useState(true);
+  // Falha de rede/servidor ao conferir o papel: diferente de "sem permissão", que manda para o login.
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (authLoading) return;
@@ -25,6 +28,8 @@ export function useAdminGuard() {
     }
 
     let cancelled = false;
+    setFailed(false);
+    setLoading(true);
     (async () => {
       try {
         const [adminRes, employeeRes] = await Promise.all([
@@ -32,6 +37,7 @@ export function useAdminGuard() {
           supabase.rpc("current_user_has_role", { _role: "employee" }),
         ]);
         if (cancelled) return;
+        if (adminRes.error || employeeRes.error) { setFailed(true); return; }
         const hasAdmin = adminRes.data === true;
         const hasEmployee = employeeRes.data === true;
         if (!hasAdmin && !hasEmployee) {
@@ -41,7 +47,7 @@ export function useAdminGuard() {
         setIsAdmin(hasAdmin);
         setIsEmployee(hasEmployee && !hasAdmin);
       } catch {
-        if (!cancelled) navigate("/admin-matheus", { replace: true });
+        if (!cancelled) setFailed(true);
       } finally {
         // Always release loading — even if unmounted, state setter on
         // unmounted component is a no-op and React swallows it.
@@ -50,9 +56,9 @@ export function useAdminGuard() {
     })();
 
     return () => { cancelled = true; };
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, attempt]);
 
-  return { isAdmin, isEmployee, loading, user };
+  return { isAdmin, isEmployee, loading, failed, retry: () => setAttempt((n) => n + 1), user };
 }
 
 /**
@@ -60,7 +66,7 @@ export function useAdminGuard() {
  * Blocks rendering until server-side verification completes.
  */
 export function RequireAdmin({ children }: { children: React.ReactNode }) {
-  const { isAdmin, isEmployee, loading } = useAdminGuard();
+  const { isAdmin, isEmployee, loading, failed, retry } = useAdminGuard();
 
   if (loading) {
     return (
@@ -72,6 +78,23 @@ export function RequireAdmin({ children }: { children: React.ReactNode }) {
           <p className="text-[11px] text-muted-foreground font-medium tracking-wider uppercase">
             Verificando permissões...
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (failed) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-6">
+        <div role="alert" className="flex max-w-[360px] flex-col items-center gap-3 text-center">
+          <div className="h-12 w-12 rounded-[16px] bg-primary/15 border border-primary/30 flex items-center justify-center">
+            <Shield className="h-6 w-6 text-primary" />
+          </div>
+          <h1 className="text-[16px] font-semibold text-foreground">Não deu para confirmar seu acesso</h1>
+          <p className="text-[13px] text-muted-foreground">Costuma ser a conexão. Nenhuma permissão foi alterada.</p>
+          <button onClick={retry} className="mt-1 rounded-md bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground">
+            Tentar de novo
+          </button>
         </div>
       </div>
     );

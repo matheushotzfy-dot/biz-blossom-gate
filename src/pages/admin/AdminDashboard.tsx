@@ -7,28 +7,20 @@ import { useTheme } from "@/hooks/useTheme";
 import { useSellerSkin } from "@/hooks/useSellerSkin";
 import { useConfirm, useReason } from "@/components/seller-ui/confirm";
 import { useIdleLogout } from "@/hooks/useIdleLogout";
+import { useMinWidth } from "@/hooks/useMinWidth";
 import {
-  Shield, LogOut, Zap, LayoutDashboard, Users, Package, AlertTriangle,
-  RotateCcw, ShieldAlert, CreditCard, ArrowDownToLine, Tag, GraduationCap,
-  Activity, Settings, Bell, MessageSquare,
-  UserCog, RefreshCw, Coins,
-  Bug, UserX, ShieldCheck,
-  Package2, BarChart3, Calendar,
-  PanelLeftClose, PanelLeft,
-  Trophy, Search, ChevronDown, Sun, Moon, Target, Gauge, Lock, Clock, SearchX,
-   Link as LinkIcon, PackageCheck,
-  type LucideIcon,
+  Shield, LogOut, Bell, RefreshCw, PanelLeftClose, PanelLeft, Search, ChevronDown, Sun, Moon, Clock, SearchX, X, AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import { logAdminAction } from "@/lib/auditLog";
-import { cn, isApprovedTransaction } from "@/lib/utils";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Button } from "@/components/ui/button";
-import { subDays, startOfDay, endOfDay } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
+import { startOfDay, endOfDay } from "date-fns";
+import { todayInSaoPaulo } from "@/components/period/periodMeta";
 import type { AdminFinancialOverview } from "./tabs/AdminOverviewTab";
+import AdminDateBar from "./AdminDateBar";
+import { canOpenTab, compactBRL, resolveActiveTab, searchSections, sectionsFor, NAV_SECTIONS } from "./adminNav";
 
 const AdminOverviewTab = lazy(() => import("./tabs/AdminOverviewTab"));
 const AdminSellersTab = lazy(() => import("./tabs/AdminSellersTab"));
@@ -68,92 +60,7 @@ const AdminToolsTab = lazy(() => import("./tabs/AdminToolsTab"));
 const AdminPaymentLinksTab = lazy(() => import("./tabs/AdminPaymentLinksTab"));
 const AdminCheckoutDeliveriesTab = lazy(() => import("./tabs/AdminCheckoutDeliveriesTab"));
 
-const EMPLOYEE_ALLOWED_TABS = new Set(["god-mode", "sellers", "products", "transactions"] as string[]);
-
-const NAV_SECTIONS: { id: string; label: string; items: { id: string; label: string; icon: LucideIcon; employeeAccess: boolean }[] }[] = [
-  {
-    id: "core", label: "Operacional",
-    items: [
-      { id: "god-mode", label: "Dashboard", icon: LayoutDashboard, employeeAccess: true },
-      { id: "command-center", label: "Centro de Comando", icon: Gauge, employeeAccess: false },
-      { id: "analytics", label: "Analytics", icon: BarChart3, employeeAccess: false },
-      { id: "sellers", label: "Sellers", icon: Users, employeeAccess: true },
-      { id: "top-sellers", label: "Top Sellers", icon: Zap, employeeAccess: false },
-      { id: "inactive-sellers", label: "Inativos", icon: UserX, employeeAccess: false },
-      { id: "employees", label: "Staff", icon: UserCog, employeeAccess: false },
-      { id: "managers", label: "Gerentes", icon: Shield, employeeAccess: false },
-      { id: "staff-commissions", label: "Comissões Staff", icon: Coins, employeeAccess: false },
-    ],
-  },
-  {
-    id: "treasury", label: "Financeiro",
-    items: [
-      { id: "fin-metrics", label: "Métricas Financeiras", icon: BarChart3, employeeAccess: false },
-      { id: "refund-approvals", label: "Pendentes de aprovação", icon: Clock, employeeAccess: false },
-      { id: "staff-requests", label: "Pedidos da Equipe", icon: UserCog, employeeAccess: false },
-      { id: "acquirers-panel", label: "Adquirentes", icon: Package2, employeeAccess: false },
-      { id: "withdrawals", label: "Saques", icon: ArrowDownToLine, employeeAccess: false },
-      { id: "transactions", label: "Transações", icon: CreditCard, employeeAccess: true },
-      { id: "payment-links", label: "Links de Pagamento", icon: LinkIcon, employeeAccess: false },
-       { id: "checkout-deliveries", label: "Entregas", icon: PackageCheck, employeeAccess: false },
-      { id: "financial-audit", label: "Auditoria Financeira", icon: Activity, employeeAccess: false },
-    ],
-  },
-  {
-    id: "risk", label: "Risco & Compliance",
-    items: [
-      { id: "risk-compliance", label: "Anti-Fraude", icon: ShieldCheck, employeeAccess: false },
-      { id: "abuse-metrics", label: "Abuso & Auth", icon: ShieldAlert, employeeAccess: false },
-      { id: "medpix", label: "MedPix", icon: AlertTriangle, employeeAccess: false },
-      { id: "chargeback", label: "Chargeback", icon: CreditCard, employeeAccess: false },
-      { id: "refunds", label: "Reembolsos", icon: RotateCcw, employeeAccess: false },
-      { id: "premed", label: "Pre-Med", icon: ShieldAlert, employeeAccess: false },
-    ],
-  },
-  {
-    id: "content", label: "Conteúdo",
-    items: [
-      { id: "products", label: "Produtos", icon: Package, employeeAccess: true },
-      { id: "top-products", label: "Top Produtos", icon: Package2, employeeAccess: false },
-      { id: "courses", label: "Cursos", icon: GraduationCap, employeeAccess: false },
-      { id: "coupons", label: "Cupons", icon: Tag, employeeAccess: false },
-      { id: "affiliates", label: "Afiliados", icon: Users, employeeAccess: false },
-      { id: "subscriptions", label: "Assinaturas", icon: CreditCard, employeeAccess: false },
-      { id: "referrals", label: "Indicações", icon: Zap, employeeAccess: false },
-    ],
-  },
-  {
-    id: "system", label: "Sistema",
-    items: [
-      { id: "settings", label: "Configurações", icon: Settings, employeeAccess: false },
-      { id: "error-logs", label: "Error Logs", icon: Bug, employeeAccess: false },
-      { id: "notifications", label: "Notificações", icon: Bell, employeeAccess: false },
-      { id: "support", label: "Suporte", icon: MessageSquare, employeeAccess: false },
-      { id: "rewards", label: "Premiações", icon: Trophy, employeeAccess: false },
-      { id: "corridas", label: "Corridas Faturamento", icon: Trophy, employeeAccess: false },
-      { id: "goals", label: "Metas de Faturamento", icon: Target, employeeAccess: false },
-      { id: "tools", label: "Ferramentas", icon: Settings, employeeAccess: false },
-      { id: "audit", label: "Auditoria", icon: Activity, employeeAccess: false },
-    ],
-  },
-];
-
 type TabId = string;
-type DatePresetId = "today" | "yesterday" | "7d" | "14d" | "30d" | "40d" | "90d" | "180d" | "365d";
-
-const DATE_PRESETS: { id: DatePresetId; label: string }[] = [
-  { id: "today", label: "Hoje" },
-  { id: "yesterday", label: "Ontem" },
-  { id: "7d", label: "7d" },
-  { id: "14d", label: "14d" },
-  { id: "30d", label: "30d" },
-  { id: "40d", label: "40d" },
-  { id: "90d", label: "90d" },
-  { id: "180d", label: "180d" },
-  { id: "365d", label: "1 ano" },
-];
-
-const ALL_TAB_IDS = new Set(NAV_SECTIONS.flatMap((s) => s.items.map((i) => i.id)));
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -180,32 +87,29 @@ export default function AdminDashboard() {
   const [isEmployee, setIsEmployee] = useState(false);
   const [hasSupportPerm, setHasSupportPerm] = useState(false);
   const [roleChecked, setRoleChecked] = useState(false);
+  const [roleFailed, setRoleFailed] = useState(false);
+  const [roleAttempt, setRoleAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
+  // Falha ao carregar/atualizar os dados do painel: fica na tela até a próxima carga dar certo.
+  const [loadError, setLoadError] = useState(false);
   // A aba ativa vive na URL (?tab=...) para sobreviver a refresh e voltar/avançar.
   const urlTab = searchParams.get("tab") ?? "";
-  const isTabAllowedForEmployee = useCallback(
-    (tabId: string) => EMPLOYEE_ALLOWED_TABS.has(tabId) || (tabId === "support" && hasSupportPerm),
-    [hasSupportPerm]
-  );
-  const activeTab: TabId = (() => {
-    if (!ALL_TAB_IDS.has(urlTab)) return "god-mode";
-    if (isEmployee && !isTabAllowedForEmployee(urlTab)) {
-      return [...EMPLOYEE_ALLOWED_TABS][0] ?? "god-mode";
-    }
-    return urlTab;
-  })();
+  const access = { isEmployee, hasSupportPerm };
+  const activeTab: TabId = resolveActiveTab(urlTab, access);
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<Date | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navQuery, setNavQuery] = useState("");
   const navSearchRef = useRef<HTMLInputElement>(null);
-  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
-    from: startOfDay(new Date()),
-    to: endOfDay(new Date()),
+  const openMenuRef = useRef<HTMLButtonElement>(null);
+  const closeMenuRef = useRef<HTMLButtonElement>(null);
+  const menuWasOpen = useRef(false);
+  const isDesktop = useMinWidth(1024);
+  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>(() => {
+    const today = todayInSaoPaulo();
+    return { from: startOfDay(today), to: endOfDay(today) };
   });
-  const [datePreset, setDatePreset] = useState<DatePresetId | "custom">("today");
-  const [calOpen, setCalOpen] = useState(false);
   const latestRangeRef = useRef(dateRange);
   latestRangeRef.current = dateRange;
 
@@ -249,10 +153,11 @@ export default function AdminDashboard() {
       if ((payload.withdrawals?.length ?? 0) >= 5000) caps.push({ field: "saques", count: 5000 });
       setDataCapHit(caps);
       setLastSync(new Date());
+      setLoadError(false);
       lastLoadAtRef.current = Date.now();
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "desconhecido";
-      toast.error("Erro ao carregar dados: " + msg);
+    } catch {
+      // Sem toast: a atualização automática roda a cada minuto e empilharia avisos. O aviso fixo da tela basta.
+      if (requestId === loadRequestRef.current) setLoadError(true);
     } finally {
       loadInFlightRef.current = false;
       if (requestId === loadRequestRef.current) setSyncing(false);
@@ -270,6 +175,7 @@ export default function AdminDashboard() {
     if (authLoading) return;
     if (!user) { navigate("/admin-matheus", { replace: true }); return; }
     let cancelled = false;
+    setRoleFailed(false);
     (async () => {
       try {
         const [adminRes, employeeRes, permRes] = await Promise.all([
@@ -278,6 +184,8 @@ export default function AdminDashboard() {
           supabase.from("staff_permissions").select("permission_key").eq("user_id", user.id).eq("permission_key", "view_support"),
         ]);
         if (cancelled) return;
+        // Erro de rede/servidor não é "sem permissão": não manda para o login, deixa tentar de novo.
+        if (adminRes.error || employeeRes.error) throw adminRes.error ?? employeeRes.error;
         const hasAdmin = adminRes.data === true;
         const hasEmployee = employeeRes.data === true;
         const hasSupport = (permRes.data?.length ?? 0) > 0;
@@ -287,11 +195,11 @@ export default function AdminDashboard() {
         setHasSupportPerm(hasSupport);
         setRoleChecked(true);
       } catch {
-        if (!cancelled) toast.error("Falha ao verificar permissões");
+        if (!cancelled) setRoleFailed(true);
       }
     })();
     return () => { cancelled = true; };
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, roleAttempt]);
 
   // ── Data load (independent: reacts to date range changes, no role re-check) ──
   useEffect(() => {
@@ -328,19 +236,6 @@ export default function AdminDashboard() {
       void supabase.removeChannel(channel);
     };
   }, [roleChecked, loadData]);
-
-  const handleDatePreset = (preset: DatePresetId) => {
-    const now = new Date();
-    if (preset === "today") setDateRange({ from: startOfDay(now), to: endOfDay(now) });
-    else if (preset === "yesterday") {
-      const yesterday = subDays(now, 1);
-      setDateRange({ from: startOfDay(yesterday), to: endOfDay(yesterday) });
-    } else {
-      const days = Number(preset.replace("d", ""));
-      setDateRange({ from: startOfDay(subDays(now, days - 1)), to: endOfDay(now) });
-    }
-    setDatePreset(preset);
-  };
 
   const handleWithdrawalAction = async (id: string, action: "approved" | "rejected") => {
     if (!isAdmin) { toast.error("Sem permissão"); return; }
@@ -384,31 +279,29 @@ export default function AdminDashboard() {
     loadData();
   };
 
+  const queryClient = useQueryClient();
   const handleLogout = async () => {
     await logAdminAction("admin_logout", "session", user?.id ?? "unknown");
-    await supabase.auth.signOut();
-    navigate("/admin-matheus");
+    try { await supabase.auth.signOut(); } catch { /* sem rede: a sessão local é descartada do mesmo jeito */ }
+    queryClient.clear();
+    navigate("/admin-matheus", { replace: true });
   };
 
   const fmtCurrency = (v: number) => v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
   const pendingWdCount = withdrawals.filter(w => w.status === "pending").length;
-  const allItems = NAV_SECTIONS.flatMap(s => s.items);
-  const activeTabLabel = allItems.find(i => i.id === activeTab)?.label || "";
+  const activeTabLabel = NAV_SECTIONS.flatMap(s => s.items).find(i => i.id === activeTab)?.label || "";
 
   const handleTabChange = useCallback((tabId: TabId) => {
-    if (isEmployee && !EMPLOYEE_ALLOWED_TABS.has(tabId) && !(tabId === "support" && hasSupportPerm)) {
+    if (!canOpenTab(tabId, { isEmployee, hasSupportPerm })) {
       toast.error("Sem permissão para acessar esta área");
       return;
     }
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.set("tab", tabId);
-      return next;
-    }, { replace: false });
+    // Clicar na aba que já está aberta não empilha outra entrada no histórico do navegador.
+    if (tabId !== activeTab) setSearchParams({ tab: tabId });
     const scrollable = document.querySelector("[data-admin-content]");
     if (scrollable) scrollable.scrollTop = 0;
     else window.scrollTo(0, 0);
-  }, [isEmployee, hasSupportPerm, setSearchParams]);
+  }, [isEmployee, hasSupportPerm, activeTab, setSearchParams]);
 
   // ── Auto refresh silencioso a cada 60s (só com a aba do navegador visível) ──
   useEffect(() => {
@@ -433,26 +326,56 @@ export default function AdminDashboard() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Menu do celular: abre com o foco no botão de fechar e devolve o foco ao botão que o abriu.
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      menuWasOpen.current = true;
+      closeMenuRef.current?.focus();
+    } else if (menuWasOpen.current) {
+      menuWasOpen.current = false;
+      openMenuRef.current?.focus();
+    }
+  }, [mobileMenuOpen]);
 
-  const visibleSections = isEmployee
-    ? NAV_SECTIONS.map(s => ({
-        ...s,
-        items: s.items.filter(i => i.employeeAccess || (i.id === "support" && hasSupportPerm)),
-      })).filter(s => s.items.length > 0)
-    : NAV_SECTIONS;
+  // Passou para o computador com o menu do celular aberto: fecha para não deixar a película na tela.
+  useEffect(() => { if (isDesktop) setMobileMenuOpen(false); }, [isDesktop]);
 
-  const filteredSections = navQuery.trim()
-    ? visibleSections
-        .map(s => ({ ...s, items: s.items.filter(i => i.label.toLowerCase().includes(navQuery.toLowerCase())) }))
-        .filter(s => s.items.length > 0)
-    : visibleSections;
 
-  const approvedTx = transactions.filter(t => isApprovedTransaction(t.status));
-  const totalRevenue = approvedTx.reduce((a, t) => a + Number(t.net_amount), 0);
+  const filteredSections = searchSections(sectionsFor(access), navQuery);
+  const openFirstMatch = () => {
+    const first = filteredSections[0]?.items[0];
+    if (!first) return;
+    handleTabChange(first.id);
+    setNavQuery("");
+    setMobileMenuOpen(false);
+  };
+
+  // Volume aprovado do período: vem do agregado do servidor (não é limitado como as listas abaixo).
+  const periodVolume = financialOverview?.summary?.gross_volume;
+  const collapsed = sidebarCollapsed && isDesktop;
+  const drawerClosed = !isDesktop && !mobileMenuOpen;
+
+  if (roleFailed) {
+    return (
+      <div className="admin-frame min-h-screen flex items-center justify-center af-bg-soft px-6">
+        <div role="alert" className="flex max-w-[360px] flex-col items-center gap-3 text-center">
+          <div className="h-12 w-12 rounded-md af-accent-bg flex items-center justify-center"><Shield className="h-6 w-6" /></div>
+          <h1 className="text-[16px] font-semibold af-text">Não deu para confirmar seu acesso</h1>
+          <p className="text-[13px] af-muted">Costuma ser a conexão. Nenhuma permissão foi alterada. Tente de novo; se continuar, saia e entre outra vez.</p>
+          <div className="mt-1 flex items-center gap-2">
+            <button onClick={() => setRoleAttempt((n) => n + 1)} className="af-accent-bg flex items-center gap-2 rounded-md px-3.5 py-2 text-[13px] font-semibold">
+              <RefreshCw className="h-3.5 w-3.5" /> Tentar de novo
+            </button>
+            <button onClick={handleLogout} className="af-border border rounded-md px-3.5 py-2 text-[13px] font-semibold af-text-3 hover:af-surface-2">Sair</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
-      <div className="admin-frame min-h-screen flex items-center justify-center af-bg-soft">
+      <div className="admin-frame min-h-screen flex items-center justify-center af-bg-soft" role="status">
         <div className="flex flex-col items-center gap-4">
           <div className="h-12 w-12 rounded-md af-accent-bg flex items-center justify-center">
             <Shield className="h-6 w-6" />
@@ -466,37 +389,49 @@ export default function AdminDashboard() {
     );
   }
 
+  const themeButtonLabel = theme === "dark" ? "Tema claro" : "Tema escuro";
+
   return (
     <div className="admin-frame h-screen flex overflow-hidden af-bg-soft af-text">
       {/* Mobile overlay */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[60] bg-background/80 lg:hidden" onClick={() => setMobileMenuOpen(false)} />
+        <div className="fixed inset-0 z-[60] bg-background/80 lg:hidden" onClick={() => setMobileMenuOpen(false)} aria-hidden="true" />
       )}
 
       {/* ═══ SIDEBAR ═══ */}
       <aside
+        aria-label="Menu do painel"
+        {...(drawerClosed ? ({ inert: "" } as object) : {})}
         className={cn(
           "relative z-[70] h-full flex flex-col shrink-0 transition-[width] duration-200 af-surface af-border border-r",
-          sidebarCollapsed ? "w-[72px]" : "w-[264px]",
-          "max-lg:fixed max-lg:left-0 max-lg:top-0",
+          collapsed ? "w-[72px]" : "w-[264px]",
+          "max-lg:fixed max-lg:left-0 max-lg:top-0 max-lg:max-w-[86vw]",
           mobileMenuOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full"
         )}
       >
         {/* Brand */}
         <div className="h-[64px] flex items-center px-4 gap-3 af-border border-b shrink-0">
-           <div className="h-9 w-9 rounded-md af-accent-bg flex items-center justify-center shrink-0 text-primary-foreground">
+          <div className="h-9 w-9 rounded-md af-accent-bg flex items-center justify-center shrink-0 text-primary-foreground">
             <Shield className="h-[18px] w-[18px]" strokeWidth={2.25} />
           </div>
-          {!sidebarCollapsed && (
-            <div className="min-w-0">
+          {!collapsed && (
+            <div className="min-w-0 flex-1">
               <h1 className="text-[15px] font-semibold tracking-tight af-text leading-tight">Vemprapay</h1>
               <p className="text-[11px] af-muted leading-tight">{isEmployee ? "Staff Panel" : "Admin Panel"}</p>
             </div>
           )}
+          <button
+            ref={closeMenuRef}
+            onClick={() => setMobileMenuOpen(false)}
+            aria-label="Fechar menu"
+            className="lg:hidden ml-auto h-8 w-8 rounded-md flex items-center justify-center af-muted hover:af-surface-2 hover:af-text"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
 
         {/* Search */}
-        {!sidebarCollapsed && (
+        {!collapsed && (
           <div className="px-3 pt-3.5 pb-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 af-muted-2" />
@@ -504,18 +439,22 @@ export default function AdminDashboard() {
                 ref={navSearchRef}
                 value={navQuery}
                 onChange={(e) => setNavQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { e.preventDefault(); openFirstMatch(); }
+                  if (e.key === "Escape" && navQuery) { e.stopPropagation(); setNavQuery(""); }
+                }}
                 placeholder="Buscar aba..."
                 aria-label="Buscar aba do painel"
                 className="af-input w-full h-9 pl-9 pr-12 text-[13px] rounded-md focus:outline-none"
               />
-              <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold af-muted-2 pointer-events-none">⌘K</kbd>
+              <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold af-muted-2 pointer-events-none max-lg:hidden">⌘K</kbd>
             </div>
           </div>
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-3 px-2.5 scrollbar-thin">
-          {filteredSections.length === 0 && !sidebarCollapsed && (
+        <nav aria-label="Abas do painel" className="flex-1 overflow-y-auto py-3 px-2.5 scrollbar-thin">
+          {filteredSections.length === 0 && !collapsed && (
             <div className="flex flex-col items-center gap-2 py-10 px-3 text-center">
               <SearchX className="h-5 w-5 af-muted-2" />
               <p className="text-[12px] af-muted">Nenhuma aba encontrada para "{navQuery}".</p>
@@ -526,12 +465,12 @@ export default function AdminDashboard() {
           )}
           {filteredSections.map(section => (
             <div key={section.id} className="mb-4">
-              {!sidebarCollapsed && (
+              {!collapsed && (
                 <p className="text-[10.5px] font-semibold uppercase tracking-[0.08em] af-muted-2 px-2.5 mb-1.5 mt-1">
                   {section.label}
                 </p>
               )}
-              {sidebarCollapsed && <div className="h-px af-border border-t mx-2 mb-1.5" />}
+              {collapsed && <div className="h-px af-border border-t mx-2 mb-1.5" />}
               <div className="space-y-px">
                 {section.items.map((item) => {
                   const isActive = activeTab === item.id;
@@ -539,25 +478,29 @@ export default function AdminDashboard() {
                   return (
                     <button
                       key={item.id}
-                      onClick={() => { handleTabChange(item.id as TabId); setMobileMenuOpen(false); }}
-                      title={sidebarCollapsed ? item.label : undefined}
+                      onClick={() => { handleTabChange(item.id); setMobileMenuOpen(false); }}
+                      title={collapsed ? item.label : undefined}
+                      aria-label={collapsed ? item.label : undefined}
+                      aria-current={isActive ? "page" : undefined}
                       data-active={isActive ? "true" : "false"}
                       className={cn(
                         "admin-nav-item relative w-full flex items-center gap-3 rounded-md group",
-                        sidebarCollapsed ? "justify-center px-0 py-2.5" : "px-3 py-2",
+                        collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2",
                         isActive ? "af-accent-bg" : "af-text-3 hover:af-surface-2 hover:af-text"
                       )}
-                      style={!isActive ? {} : undefined}
                     >
                       <item.icon className={cn("h-4 w-4 shrink-0", isActive ? "" : "af-muted group-hover:af-text")} strokeWidth={2} />
-                      {!sidebarCollapsed && (
+                      {!collapsed && (
                         <span className={cn("text-[13.5px] truncate", isActive ? "font-semibold" : "font-medium")}>{item.label}</span>
                       )}
                       {hasBadge && (
-                        <span className={cn(
-                           "h-4 min-w-[16px] px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center",
-                          sidebarCollapsed ? "absolute -top-0.5 -right-0.5 h-3.5 min-w-[14px]" : "ml-auto"
-                         )}>
+                        <span
+                          aria-label={`${pendingWdCount} saque(s) pendente(s)`}
+                          className={cn(
+                            "h-4 min-w-[16px] px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center",
+                            collapsed ? "absolute -top-0.5 -right-0.5 h-3.5 min-w-[14px]" : "ml-auto"
+                          )}
+                        >
                           {pendingWdCount}
                         </span>
                       )}
@@ -572,19 +515,29 @@ export default function AdminDashboard() {
         {/* Sidebar footer */}
         <div className="af-border border-t p-2 space-y-0.5 shrink-0">
           <button
+            onClick={toggleTheme}
+            className="w-full flex items-center justify-center gap-2 px-2.5 py-1.5 rounded-md af-muted hover:af-surface-2 hover:af-text transition-colors sm:hidden"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <span className="text-[11.5px] font-medium">{themeButtonLabel}</span>
+          </button>
+          <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
+            title={collapsed ? "Expandir menu" : undefined}
             className="w-full flex items-center justify-center gap-2 px-2.5 py-1.5 rounded-md af-muted hover:af-surface-2 hover:af-text transition-colors max-lg:hidden"
           >
-            {sidebarCollapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
-            {!sidebarCollapsed && <span className="text-[11.5px] font-medium">Recolher</span>}
+            {collapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+            {!collapsed && <span className="text-[11.5px] font-medium">Recolher</span>}
           </button>
           <button
             onClick={handleLogout}
+            aria-label="Sair do painel"
+            title={collapsed ? "Sair" : undefined}
             className="w-full flex items-center justify-center gap-2 px-2.5 py-1.5 rounded-md af-muted hover:af-surface-2 transition-colors"
-            style={{ }}
           >
             <LogOut className="h-4 w-4" />
-            {!sidebarCollapsed && <span className="text-[11.5px] font-medium">Sair</span>}
+            {!collapsed && <span className="text-[11.5px] font-medium">Sair</span>}
           </button>
         </div>
       </aside>
@@ -592,11 +545,14 @@ export default function AdminDashboard() {
       {/* ═══ MAIN AREA ═══ */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="h-[64px] flex items-center px-4 lg:px-6 gap-3 shrink-0 af-surface af-border border-b">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
+        <header className="h-[64px] flex items-center px-3 sm:px-4 lg:px-6 gap-2 sm:gap-3 shrink-0 af-surface af-border border-b">
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
             <button
+              ref={openMenuRef}
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden h-8 w-8 rounded-md flex items-center justify-center af-border border af-text-3 hover:af-surface-2"
+              aria-label="Abrir menu"
+              aria-expanded={mobileMenuOpen}
+              className="lg:hidden h-9 w-9 shrink-0 rounded-md flex items-center justify-center af-border border af-text-3 hover:af-surface-2"
             >
               <PanelLeft className="h-4 w-4" />
             </button>
@@ -604,100 +560,53 @@ export default function AdminDashboard() {
             <div className="flex items-center gap-2 min-w-0">
               <span className="text-[12px] font-medium af-muted-2 hidden sm:inline">Admin</span>
               <ChevronDown className="h-3 w-3 af-muted-2 -rotate-90 hidden sm:inline" />
-              <h2 className="text-[16px] font-semibold af-text truncate">{activeTabLabel}</h2>
+              <h2 className="text-[15px] sm:text-[16px] font-semibold af-text truncate">{activeTabLabel}</h2>
             </div>
 
             {syncing ? (
-              <span className="hidden sm:flex items-center gap-1.5 text-[11.5px] font-medium af-muted af-surface-2 af-border border rounded-md px-2.5 py-1">
+              <span role="status" className="hidden 2xl:flex items-center gap-1.5 whitespace-nowrap text-[11.5px] font-medium af-muted af-surface-2 af-border border rounded-md px-2.5 py-1">
                 <RefreshCw className="h-3 w-3 animate-spin" />
                 Sincronizando
               </span>
+            ) : loadError ? (
+              <span className="hidden 2xl:flex items-center gap-1.5 whitespace-nowrap text-[11.5px] font-semibold text-destructive">
+                <AlertTriangle className="h-3 w-3" />
+                Falha ao atualizar
+              </span>
             ) : lastSync ? (
-              <span className="hidden xl:flex items-center gap-1.5 text-[11.5px] font-medium af-muted-2" title="Atualiza automaticamente a cada 60s">
+              <span className="hidden 2xl:flex items-center gap-1.5 whitespace-nowrap text-[11.5px] font-medium af-muted-2" title="Atualiza automaticamente a cada 60s">
                 <Clock className="h-3 w-3" />
                 {lastSync.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
               </span>
             ) : null}
           </div>
 
-          {/* Date picker */}
-          <div className="flex items-center gap-px p-0.5 rounded-md af-surface-2 af-border border max-w-[50vw] overflow-x-auto scrollbar-thin md:max-w-none md:overflow-visible">
-            {DATE_PRESETS.map(p => (
-              <Button
-                variant="ghost"
-                key={p.label}
-                onClick={() => handleDatePreset(p.id)}
-                className={cn(
-                   "px-2.5 md:px-3 py-1.5 rounded text-[12px] font-semibold transition-colors shrink-0",
-                  datePreset === p.id
-                    ? "af-surface af-text af-border border"
-                    : "af-muted hover:af-text"
-                )}
-              >
-                {p.label}
-              </Button>
-            ))}
-            <Popover open={calOpen} onOpenChange={setCalOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  aria-label="Período personalizado"
-                  title="Período personalizado"
-                  className={cn(
-                    "flex items-center gap-1.5 px-2 py-1.5 rounded transition-colors shrink-0",
-                    datePreset === "custom" ? "af-surface af-text af-border border" : "af-muted hover:af-text hover:af-surface"
-                  )}
-                >
-                  <Calendar className="h-3.5 w-3.5" />
-                  {datePreset === "custom" && (
-                    <span className="text-[11.5px] font-semibold whitespace-nowrap">
-                      {dateRange.from.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}–{dateRange.to.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
-                    </span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-popover text-popover-foreground border-border border rounded-md" align="end">
-                <CalendarComponent
-                  mode="range"
-                  disabled={{ after: new Date(), before: subDays(new Date(), 365) }}
-                  selected={{ from: dateRange.from, to: dateRange.to }}
-                  onSelect={(range) => {
-                    if (range?.from && range?.to) {
-                      setDateRange({ from: startOfDay(range.from), to: endOfDay(range.to) });
-                      setDatePreset("custom");
-                      setCalOpen(false);
-                    }
-                  }}
-                  className="p-3 pointer-events-auto"
-                  locale={ptBR}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+          <AdminDateBar range={dateRange} onChange={setDateRange} />
 
           {/* Right controls */}
           <div className="flex items-center gap-2 shrink-0">
             {isEmployee && (
               <span className="rounded-md border border-warning/30 bg-warning/10 px-2 py-0.5 text-[10px] font-semibold text-warning">STAFF</span>
             )}
-              <span className="hidden lg:flex items-center gap-1.5 text-[12px] font-medium af-muted af-surface-2 af-border border rounded-md px-3 py-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-success" />
-              Volume {totalRevenue >= 1000 ? `R$ ${(totalRevenue / 1000).toFixed(1)}K` : fmtCurrency(totalRevenue)}
-            </span>
+            {periodVolume != null && (
+              <span title="Volume bruto aprovado no período selecionado" className="hidden min-[1480px]:flex items-center gap-1.5 text-[12px] font-medium af-muted af-surface-2 af-border border rounded-md px-3 py-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                Volume {compactBRL(Number(periodVolume))}
+              </span>
+            )}
 
             <button
               onClick={toggleTheme}
-              className="h-9 w-9 rounded-md flex items-center justify-center af-border border af-text-3 hover:af-surface-2 transition-colors"
-              title={theme === "dark" ? "Tema claro" : "Tema escuro"}
+              aria-label={themeButtonLabel}
+              className="hidden sm:flex h-9 w-9 rounded-md items-center justify-center af-border border af-text-3 hover:af-surface-2 transition-colors"
+              title={themeButtonLabel}
             >
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
             <button
-              onClick={() => {
-                if (pendingWdCount > 0) handleTabChange("withdrawals");
-                else handleTabChange("notifications");
-              }}
+              onClick={() => handleTabChange(pendingWdCount > 0 && isAdmin ? "withdrawals" : isAdmin ? "notifications" : "god-mode")}
+              aria-label={pendingWdCount > 0 ? `${pendingWdCount} saque(s) pendente(s). Abrir Saques` : "Abrir Notificações"}
               className="relative h-9 w-9 rounded-md flex items-center justify-center af-border border af-text-3 hover:af-surface-2 transition-colors"
               title={pendingWdCount > 0 ? `${pendingWdCount} saque(s) pendente(s)` : "Notificações"}
             >
@@ -712,9 +621,11 @@ export default function AdminDashboard() {
             <button
               onClick={loadData}
               disabled={syncing}
-              className="af-accent-bg flex items-center gap-2 px-3 py-2 rounded-md text-[12.5px] font-semibold transition-colors disabled:opacity-60"
+              aria-label="Atualizar dados"
+              title={lastSync ? `Atualizar agora. Última atualização às ${lastSync.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}; o painel atualiza sozinho a cada minuto.` : "Atualizar agora"}
+              className="af-accent-bg flex h-9 items-center gap-2 px-2.5 sm:px-3 rounded-md text-[12.5px] font-semibold transition-colors disabled:opacity-60"
             >
-              <RefreshCw className={cn("h-3 w-3", syncing && "animate-spin")} />
+              <RefreshCw className={cn("h-3.5 w-3.5", syncing && "animate-spin")} />
               <span className="hidden sm:inline">Sync</span>
             </button>
           </div>
@@ -724,6 +635,25 @@ export default function AdminDashboard() {
         <main className="flex-1 overflow-y-auto af-bg-soft scrollbar-thin admin-shell" data-admin-content>
           <div className="p-5 lg:p-7 xl:p-9 admin-fluid" key={activeTab}>
             <div className="mx-auto max-w-[1800px]">
+              {loadError && (
+                <div role="alert" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                  <span className="flex min-w-0 items-start gap-2">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                    <span>
+                      {lastSync
+                        ? `Não foi possível atualizar os dados do painel. Vendas, sellers e saques abaixo são de ${lastSync.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}.`
+                        : "Não foi possível carregar os dados do painel (vendas, sellers, produtos e saques do período). Os números abaixo ainda não foram carregados."}
+                    </span>
+                  </span>
+                  <button
+                    onClick={loadData}
+                    disabled={syncing}
+                    className="shrink-0 rounded-md border border-destructive/40 bg-background px-3 py-1.5 text-[12.5px] font-semibold text-foreground hover:bg-muted disabled:opacity-60"
+                  >
+                    Tentar de novo
+                  </button>
+                </div>
+              )}
               <Suspense fallback={<div className="min-h-[320px] animate-pulse rounded-2xl border border-border/50 bg-card/40" aria-label="Carregando área administrativa" />}>
               {activeTab === "god-mode" && (
                 <>
