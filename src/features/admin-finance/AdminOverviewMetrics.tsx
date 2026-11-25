@@ -37,8 +37,8 @@ export function AdminOverviewMetrics({ dateRange, refreshSignal, onNavigate }: A
     { title: "KYC pendente", value: data.kyc_pending.toLocaleString("pt-BR"), sub: "Fila atual de aprovação", tab: "sellers" },
   ];
   return <div className="space-y-5">
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">{cards.map(card => <Button key={card.title} variant="outline" onClick={() => onNavigate?.(card.tab)} className="h-auto min-h-28 flex-col items-start gap-2 whitespace-normal rounded-lg border-border bg-card px-4 py-4 text-left">
-      <span className="text-xs font-medium text-muted-foreground">{card.title}</span><strong className={cn("font-display text-2xl font-semibold tabular-nums", card.danger ? "text-destructive" : "text-foreground")}>{card.value}</strong><span className="text-xs font-normal text-muted-foreground">{card.sub}</span>
+    <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-3 xl:grid-cols-[repeat(4,minmax(0,1fr))]">{cards.map(card => <Button key={card.title} variant="outline" onClick={() => onNavigate?.(card.tab)} className="h-auto min-h-28 flex-col items-start gap-2 whitespace-normal rounded-lg border-border bg-card px-3 py-4 text-left sm:px-4">
+      <span className="text-xs font-medium text-muted-foreground">{card.title}</span><strong className={cn("max-w-full break-words font-display text-xl font-semibold tabular-nums sm:text-2xl", card.danger ? "text-destructive" : "text-foreground")}>{card.value}</strong><span className="text-xs font-normal text-muted-foreground">{card.sub}</span>
     </Button>)}</div>
     <p className="text-xs text-muted-foreground">¹ Resultado das vendas pagas após adquirente; não inclui despesas administrativas, impostos ou custos não registrados.</p>
     <OverviewCharts data={data} />

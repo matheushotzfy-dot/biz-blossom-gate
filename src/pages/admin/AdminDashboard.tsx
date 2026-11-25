@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTheme } from "@/hooks/useTheme";
 import { useSellerSkin } from "@/hooks/useSellerSkin";
-import { useConfirm, useReason } from "@/components/seller-ui/confirm";
+import { useReason } from "@/components/seller-ui/confirm";
 import { useIdleLogout } from "@/hooks/useIdleLogout";
 import { useMinWidth } from "@/hooks/useMinWidth";
 import {
@@ -71,7 +71,6 @@ export default function AdminDashboard() {
   // Os diálogos do admin (portais fora da casca) usam o kit seller-ui, que depende destas classes no <html>.
   useSellerSkin();
   const { ask: askReason, dialog: reasonDialog } = useReason();
-  const { ask: askConfirm, dialog: confirmDialog } = useConfirm();
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
   const [profiles, setProfiles] = useState<Tables<"profiles">[]>([]);
   const [products, setProducts] = useState<Tables<"products">[]>([]);
@@ -258,24 +257,6 @@ export default function AdminDashboard() {
       toast.success("Saque recusado");
       await logAdminAction("reject_withdrawal", "withdrawal", id, { reason });
     }
-    loadData();
-  };
-
-  const handleUserStatus = async (userId: string, status: string) => {
-    // Alterar status de conta é ação privilegiada: apenas admin.
-    if (!isAdmin) { toast.error("Sem permissão"); return; }
-    const approving = status === "approved";
-    const ok = await askConfirm({
-      title: approving ? "Aprovar esta conta?" : "Bloquear esta conta?",
-      description: approving ? "O seller passa a poder vender e sacar." : "O seller perde o acesso até você liberar de novo.",
-      confirmLabel: approving ? "Aprovar conta" : "Bloquear conta",
-      tone: approving ? "default" : "danger",
-    });
-    if (!ok) return;
-    const { error } = await supabase.from("profiles").update({ account_status: status }).eq("user_id", userId);
-    if (error) { toast.error("Erro ao atualizar"); return; }
-    toast.success(`Conta ${status === "approved" ? "aprovada" : "bloqueada"}!`);
-    await logAdminAction(status === "approved" ? "approve_user" : "block_user", "profile", userId, { new_status: status });
     loadData();
   };
 
@@ -667,7 +648,7 @@ export default function AdminDashboard() {
                 <AdminOverviewTab
                   transactions={transactions} profiles={profiles} products={products}
                   withdrawals={withdrawals} onWithdrawalAction={handleWithdrawalAction}
-                  onUserStatus={handleUserStatus} onReload={loadData} fmtCurrency={fmtCurrency}
+                  fmtCurrency={fmtCurrency}
                   isEmployee={isEmployee} dateRange={dateRange}
                    financialOverview={financialOverview}
                   onNavigate={(id) => handleTabChange(id as TabId)}
@@ -749,7 +730,6 @@ export default function AdminDashboard() {
         </main>
       </div>
       {reasonDialog}
-      {confirmDialog}
     </div>
   );
 }

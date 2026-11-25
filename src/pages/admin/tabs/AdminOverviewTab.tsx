@@ -1,27 +1,16 @@
-import { useState, useEffect, useMemo } from "react";
-import { toast } from "sonner";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import React from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { uniqueChannelName } from "@/lib/realtime";
 import {
-  DollarSign, Users, TrendingUp, CheckCircle2, XCircle,
-  CreditCard, Package, Activity, Percent, ShieldAlert, RotateCcw, Lock,
-  Eye, Radio, AlertCircle, UserCheck, Flame, Wallet, CalendarDays,
-  Clock3, Hourglass, UserPlus, ArrowUpRight,
+  Users, CheckCircle2, XCircle, CreditCard, Package, Percent, ShieldAlert, Radio, AlertCircle, Wallet, ArrowUpRight, RefreshCw,
   type LucideIcon,
 } from "lucide-react";
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, LineChart, Line,
-} from "recharts";
-import KycReviewDialog from "@/components/admin/KycReviewDialog";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn, isApprovedTransaction } from "@/lib/utils";
-import React from "react";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
-import {
-  PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumSegmented, premiumTable,
-} from "./AdminPremium";
+import { PremiumPanel, PremiumMetric, PremiumMetricGrid, premiumTable } from "./AdminPremium";
 import { AdminOverviewMetrics } from "@/features/admin-finance/AdminOverviewMetrics";
 import { AdminAlertsBanner } from "@/components/admin/AdminAlertsBanner";
 
@@ -36,8 +25,6 @@ interface Props {
   products: Tables<"products">[];
   withdrawals: Tables<"withdrawals">[];
   onWithdrawalAction: (id: string, action: "approved" | "rejected") => void;
-  onUserStatus: (userId: string, status: string) => void;
-  onReload?: () => void;
   fmtCurrency: (v: number) => string;
   isEmployee?: boolean;
   dateRange?: { from: Date; to: Date };
@@ -75,14 +62,6 @@ const TONE_PILL: Record<Tone, string> = {
   info:        "bg-info/10 text-info border-info/20",
   neutral:     "bg-muted/40 text-muted-foreground border-border/60",
 };
-const TONE_BAR: Record<Tone, string> = {
-  primary:     "bg-primary",
-  success:     "bg-success",
-  warning:     "bg-warning",
-  destructive: "bg-destructive",
-  info:        "bg-info",
-  neutral:     "bg-muted-foreground",
-};
 
 function Pill({ tone = "neutral", children, className }: {
   tone?: Tone; children: React.ReactNode; className?: string;
@@ -97,50 +76,20 @@ function Pill({ tone = "neutral", children, className }: {
   );
 }
 
-/* Tooltip — solid card, rounded, no glow */
-type ChartTipProps = {
-  active?: boolean;
-  payload?: Array<{ name?: string; value?: number | string; color?: string }>;
-  label?: string | number;
-  fmtCurrency: (n: number) => string;
-};
-function ChartTip({ active, payload, label, fmtCurrency }: ChartTipProps) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="rounded-xl border border-border/60 bg-card px-3 py-2 shadow-sm pointer-events-none">
-      {label && (
-        <p className="mb-1 text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">{label}</p>
-      )}
-      <div className="space-y-1">
-        {payload.map((p, i) => (
-          <div key={i} className="flex items-center justify-between gap-4 text-[11px]">
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
-              <span className="text-muted-foreground">{p.name}</span>
-            </span>
-            <span className="font-bold tabular-nums text-foreground">
-              {typeof p.value === "number" && p.value > 100 ? fmtCurrency(p.value) : p.value}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /* ═════════════════════════════════════════════════════════════
    COMPONENT
    ═════════════════════════════════════════════════════════════ */
 
 export default function AdminOverviewTab({
   transactions, profiles, products, withdrawals,
-  onWithdrawalAction, onReload, fmtCurrency,
+  onWithdrawalAction, fmtCurrency,
   isEmployee = false, dateRange, onNavigate, financialOverview,
 }: Props) {
   const [disputes, setDisputes] = useState<Dispute[]>([]);
+  // MEDs abertos e bloqueios anti-fraude vêm de consultas próprias: "carregando" e "falhou" nunca podem aparecer como "nenhum".
+  const [extras, setExtras] = useState<{ disputes: "loading" | "ok" | "error"; fraud: "loading" | "ok" | "error" }>({ disputes: "loading", fraud: "loading" });
   const [realtimeTx, setRealtimeTx] = useState<Tables<"transactions">[]>([]);
   const [fraudLogs, setFraudLogs] = useState<Tables<"fraud_logs">[]>([]);
-  const [kycReview, setKycReview] = useState<Tables<"profiles"> | null>(null);
   const [selectedTx, setSelectedTx] = useState<Tables<"transactions"> | null>(null);
 
   const productsMap = useMemo(() => {
@@ -153,31 +102,20 @@ export default function AdminOverviewTab({
     return p ? { full_name: p.full_name, email: p.email, nickname: p.nickname } : null;
   };
 
-  // KYC decisions go through the audited owner routines (same as the Sellers tab):
-  // approval also assigns the default manager; never write account_status directly here.
-  const handleKycApprove = async (userId: string) => {
-    const { error } = await supabase.rpc("admin_approve_seller_with_manager", { _seller: userId });
-    if (error) { toast.error("Erro ao aprovar KYC"); return; }
-    toast.success("KYC aprovado!");
-    onReload?.();
-  };
-
-  const handleKycReject = async (userId: string, reason: string) => {
-    const { error } = await supabase.rpc("admin_reject_kyc", { _user_id: userId, _reason: reason });
-    if (error) { toast.error("Erro ao recusar KYC"); return; }
-    toast.success("KYC recusado");
-    onReload?.();
-  };
-
-  useEffect(() => {
-    Promise.all([
-      supabase.from("disputes").select("id,type,status,seller_user_id,amount,created_at,transaction_id").order("created_at", { ascending: false }).limit(500),
+  const loadExtras = useCallback(async () => {
+    setExtras({ disputes: "loading", fraud: "loading" });
+    const [dRes, fRes] = await Promise.all([
+      supabase.from("disputes").select("id,type,status,seller_user_id,amount,created_at,transaction_id")
+        .in("type", ["medpix", "pre_med_pix"]).in("status", ["open", "in_review"]).order("created_at", { ascending: false }).limit(200),
       supabase.from("fraud_logs").select("*").order("created_at", { ascending: false }).limit(20),
-    ]).then(([dRes, fRes]) => {
-      if (dRes.data) setDisputes(dRes.data as Dispute[]);
-      if (fRes.data) setFraudLogs(fRes.data);
-    });
+    ]);
+    if (dRes.error) setExtras((e) => ({ ...e, disputes: "error" }));
+    else { setDisputes((dRes.data ?? []) as Dispute[]); setExtras((e) => ({ ...e, disputes: "ok" })); }
+    if (fRes.error) setExtras((e) => ({ ...e, fraud: "error" }));
+    else { setFraudLogs(fRes.data ?? []); setExtras((e) => ({ ...e, fraud: "ok" })); }
   }, []);
+
+  useEffect(() => { void loadExtras(); }, [loadExtras]);
 
   useEffect(() => {
     setRealtimeTx(transactions.slice(0, 25));
@@ -187,10 +125,13 @@ export default function AdminOverviewTab({
     const channel = supabase
       .channel(uniqueChannelName("admin-god-mode-tx"))
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "transactions" }, (payload) => {
-        setRealtimeTx(prev => [payload.new as Tables<"transactions">, ...prev].slice(0, 25));
+        const row = payload.new as Tables<"transactions">;
+        if (row.is_simulated) return; // a lista do painel nunca mostra venda simulada
+        setRealtimeTx(prev => [row, ...prev.filter(t => t.id !== row.id)].slice(0, 25));
       })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "transactions" }, (payload) => {
-        setRealtimeTx(prev => prev.map(t => t.id === (payload.new as Tables<"transactions">).id ? payload.new as Tables<"transactions"> : t));
+        const row = payload.new as Tables<"transactions">;
+        setRealtimeTx(prev => prev.map(t => t.id === row.id ? row : t));
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -206,20 +147,23 @@ export default function AdminOverviewTab({
   const filteredApproved = useMemo(() => filteredTx.filter(t => isApprovedTransaction(t.status)), [filteredTx]);
 
   const pendingWd = withdrawals.filter(w => w.status === "pending");
-  const pendingMeds = useMemo(() => disputes.filter(d => ["medpix", "pre_med_pix"].includes(d.type) && ["open", "in_review"].includes(d.status)), [disputes]);
+  const pendingMeds = disputes;
   const summaryTotalCount = Number(financialOverview?.summary?.total_count ?? filteredTx.length);
   const summaryApprovedCount = Number(financialOverview?.summary?.approved_count ?? filteredApproved.length);
   const conversionRate = summaryTotalCount > 0 ? (summaryApprovedCount / summaryTotalCount * 100).toFixed(1) : "0.0";
   const rangeLabel = dateRange ? `${dateRange.from.toLocaleDateString("pt-BR")} → ${dateRange.to.toLocaleDateString("pt-BR")}` : "Período selecionado";
 
   const statusLabelMap: Record<string, string> = {
-    completed: "Pago", approved: "Pago", pending: "Pendente",
-    failed: "Recusado", expired: "Expirado", refunded: "Estornado", chargeback: "CB",
+    completed: "Pago", approved: "Pago", paid: "Pago", pending: "Pendente", processing: "Processando", waiting_payment: "Aguardando",
+    failed: "Recusado", refused: "Recusado", expired: "Expirado", cancelled: "Cancelado", canceled: "Cancelado",
+    refunded: "Estornado", partially_refunded: "Estorno parcial", chargeback: "Chargeback",
   };
   const statusToneMap: Record<string, Tone> = {
-    completed: "success", approved: "success", pending: "warning",
-    failed: "destructive", expired: "neutral", refunded: "info", chargeback: "destructive",
+    completed: "success", approved: "success", paid: "success", pending: "warning", processing: "warning", waiting_payment: "warning",
+    failed: "destructive", refused: "destructive", expired: "neutral", cancelled: "neutral", canceled: "neutral",
+    refunded: "info", partially_refunded: "info", chargeback: "destructive",
   };
+  const methodLabelMap: Record<string, string> = { pix: "PIX", credit_card: "Cartão", boleto: "Boleto" };
 
 
   /* ── Employee view ── */
@@ -274,32 +218,35 @@ export default function AdminOverviewTab({
               <table className={premiumTable.table}>
                 <thead>
                   <tr className={premiumTable.headRow}>
-                    <th className={premiumTable.th}>Status</th>
-                    <th className={premiumTable.th}>Cliente</th>
-                    <th className={premiumTable.th}>Método</th>
-                    <th className={cn(premiumTable.th, "text-right")}>Valor</th>
-                    <th className={cn(premiumTable.th, "text-right")}>Hora</th>
+                    <th className={cn(premiumTable.th, "px-3 sm:px-5")}>Status</th>
+                    <th className={cn(premiumTable.th, "px-3 sm:px-5")}>Cliente</th>
+                    <th className={cn(premiumTable.th, "hidden px-3 sm:table-cell sm:px-5")}>Método</th>
+                    <th className={cn(premiumTable.th, "px-3 text-right sm:px-5")}>Valor</th>
+                    <th className={cn(premiumTable.th, "hidden px-3 text-right sm:table-cell sm:px-5")}>Hora</th>
                   </tr>
                 </thead>
                 <tbody>
                   {realtimeTx.length === 0 && (
-                    <tr><td colSpan={5} className="py-12 text-center text-xs font-bold text-muted-foreground">Aguardando transações…</td></tr>
+                    <tr><td colSpan={5} className="py-12 text-center text-xs font-bold text-muted-foreground">Nenhuma transação neste período. Novas vendas aparecem aqui na hora.</td></tr>
                   )}
                   {realtimeTx.slice(0, 8).map(t => {
                     const tone = statusToneMap[t.status] || "neutral";
                     return (
                       <tr key={t.id} className={cn(premiumTable.row, "cursor-pointer")} onClick={() => setSelectedTx(t)}>
-                        <td className={premiumTable.td}><Pill tone={tone}>{statusLabelMap[t.status] || t.status}</Pill></td>
-                        <td className={cn(premiumTable.td, "max-w-[180px] truncate text-xs font-bold text-foreground")}>
+                        <td className={cn(premiumTable.td, "px-3 sm:px-5")}><Pill tone={tone}>{statusLabelMap[t.status] || t.status}</Pill></td>
+                        <td className={cn(premiumTable.td, "max-w-[120px] truncate px-3 text-xs font-bold text-foreground sm:max-w-[180px] sm:px-5")}>
                           {t.customer_name || "Anônimo"}
                         </td>
-                        <td className={cn(premiumTable.td, "text-[10.5px] font-bold uppercase text-muted-foreground")}>
-                          {t.payment_method || "—"}
+                        <td className={cn(premiumTable.td, "hidden text-[10.5px] font-bold uppercase text-muted-foreground sm:table-cell")}>
+                          {methodLabelMap[t.payment_method ?? ""] || t.payment_method || "—"}
                         </td>
-                        <td className={cn(premiumTable.td, "text-right text-xs font-black text-foreground tabular-nums")}>
+                        <td className={cn(premiumTable.td, "px-3 text-right text-xs font-black text-foreground tabular-nums sm:px-5")}>
                           {fmtCurrency(Number(t.amount))}
+                          <span className="block text-[10px] font-bold text-muted-foreground sm:hidden">
+                            {new Date(t.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                          </span>
                         </td>
-                        <td className={cn(premiumTable.td, "text-right text-[10.5px] font-bold text-muted-foreground tabular-nums")}>
+                        <td className={cn(premiumTable.td, "hidden text-right text-[10.5px] font-bold text-muted-foreground tabular-nums sm:table-cell")}>
                           {new Date(t.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                         </td>
                       </tr>
@@ -352,14 +299,14 @@ export default function AdminOverviewTab({
                         {sp?.full_name || "—"} · {sp?.email || ""}
                       </p>
                     </div>
-                    <div className="flex shrink-0 gap-1.5">
-                      <button onClick={() => onWithdrawalAction(w.id, "approved")}
-                              className="inline-flex h-8 items-center gap-1 rounded-lg border border-success/30 bg-success/10 px-2.5 text-[10.5px] font-black text-success hover:bg-success/15">
-                        <CheckCircle2 className="h-3 w-3" /> OK
-                      </button>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span title="Aprovar saque depende de uma adquirente configurada. Recusar continua disponível." className="hidden text-[10.5px] font-bold text-muted-foreground sm:inline">
+                        Aprovação indisponível
+                      </span>
                       <button onClick={() => onWithdrawalAction(w.id, "rejected")}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/15">
-                        <XCircle className="h-3.5 w-3.5" />
+                              aria-label={`Recusar saque de ${fmtCurrency(Number(w.amount))}`}
+                              className="inline-flex h-8 items-center gap-1 rounded-lg border border-destructive/30 bg-destructive/10 px-2.5 text-[10.5px] font-black text-destructive hover:bg-destructive/15">
+                        <XCircle className="h-3.5 w-3.5" /> Recusar
                       </button>
                     </div>
                   </div>
@@ -372,7 +319,7 @@ export default function AdminOverviewTab({
 
       {/* ── MEDs ── */}
       <PremiumPanel
-        title={`MEDs Pendentes (${pendingMeds.length})`}
+        title={extras.disputes === "ok" ? `MEDs pendentes (${pendingMeds.length})` : "MEDs pendentes"}
         icon={AlertCircle}
         action={onNavigate && (
           <button onClick={() => onNavigate("medpix")}
@@ -381,7 +328,11 @@ export default function AdminOverviewTab({
           </button>
         )}
       >
-        {pendingMeds.length === 0 ? (
+        {extras.disputes === "loading" ? (
+          <p role="status" className="py-10 text-center text-xs font-bold text-muted-foreground">Carregando…</p>
+        ) : extras.disputes === "error" ? (
+          <ExtraError text="Não foi possível carregar os MEDs em aberto." onRetry={() => { void loadExtras(); }} />
+        ) : pendingMeds.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 py-10 text-muted-foreground">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border/60 bg-muted/30">
               <CheckCircle2 className="h-5 w-5 opacity-50" />
@@ -432,8 +383,12 @@ export default function AdminOverviewTab({
       </PremiumPanel>
 
       {/* ── Fraud blocks ── */}
-      <PremiumPanel title="Bloqueios Anti-Fraude" icon={ShieldAlert}>
-        {fraudLogs.length > 0 ? (
+      <PremiumPanel title="Bloqueios anti-fraude" icon={ShieldAlert}>
+        {extras.fraud === "loading" ? (
+          <p role="status" className="py-10 text-center text-xs font-bold text-muted-foreground">Carregando…</p>
+        ) : extras.fraud === "error" ? (
+          <ExtraError text="Não foi possível carregar os bloqueios anti-fraude." onRetry={() => { void loadExtras(); }} />
+        ) : fraudLogs.length > 0 ? (
           <div className="grid max-h-[320px] grid-cols-1 gap-2.5 overflow-y-auto md:grid-cols-2">
             {fraudLogs.slice(0, 20).map((f) => (
               <div key={f.id} className="rounded-xl border border-destructive/20 bg-destructive/5 px-3.5 py-2.5">
@@ -463,13 +418,6 @@ export default function AdminOverviewTab({
         )}
       </PremiumPanel>
 
-      <KycReviewDialog
-        profile={kycReview}
-        open={!!kycReview}
-        onClose={() => setKycReview(null)}
-        onApprove={handleKycApprove}
-        onReject={handleKycReject}
-      />
       <TransactionDetailPanel
         tx={selectedTx}
         products={productsMap}
@@ -483,112 +431,13 @@ export default function AdminOverviewTab({
 
 /* ─── Subcomponents ───────────────────────────────────────── */
 
-function HeroStat({ label, value, tone }: { label: string; value: string; tone: Tone }) {
+function ExtraError({ text, onRetry }: { text: string; onRetry: () => void }) {
   return (
-    <div className="bg-card p-3.5">
-      <p className="text-[9.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">{label}</p>
-      <p className={cn("mt-2 font-display text-[17px] font-black tabular-nums leading-none tracking-tight", TONE_TEXT[tone])}>
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function HeroBigStat({ label, value, sub, tone, wide }: {
-  label: string; value: string; sub?: string; tone: Tone; wide?: boolean;
-}) {
-  return (
-    <div className={cn(
-      "group relative bg-card p-4 sm:p-5 transition-colors hover:bg-muted/20",
-      wide && "lg:col-span-2",
-    )}>
-      <p className="text-[9.5px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">{label}</p>
-      <p className={cn(
-        "mt-2.5 font-display font-black leading-none tracking-tight tabular-nums break-words",
-        wide ? "text-[28px] sm:text-[36px]" : "text-[20px] sm:text-[24px]",
-        TONE_TEXT[tone],
-      )}>
-        {value}
-      </p>
-      {sub && <p className="mt-2 text-[10.5px] font-bold text-muted-foreground/75 truncate">{sub}</p>}
-      <span className={cn("absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 transition-transform duration-500 group-hover:scale-x-100", TONE_BAR[tone])} />
-    </div>
-  );
-}
-
-function PulseStat({ icon: Icon, label, value, tone }: {
-  icon: LucideIcon; label: string; value: string; tone: Tone;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
-      <span className="flex min-w-0 items-center gap-1.5">
-        <Icon className={cn("h-3 w-3 shrink-0", TONE_TEXT[tone])} strokeWidth={2.4} />
-        <span className="truncate text-[10px] font-black uppercase tracking-wider text-muted-foreground">{label}</span>
-      </span>
-      <span className={cn("shrink-0 text-xs font-black tabular-nums", TONE_TEXT[tone])}>{value}</span>
-    </div>
-  );
-}
-
-function CommandMini({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="bg-primary px-3 py-2.5">
-      <p className="text-[9px] font-black uppercase tracking-[0.18em] text-primary-foreground/70">{label}</p>
-      <p className="mt-1 font-display text-lg font-black leading-none text-primary-foreground tabular-nums">{value}</p>
-    </div>
-  );
-}
-
-function DashboardKpi({ icon: Icon, label, value, sub, tone, onClick }: {
-  icon: LucideIcon; label: string; value: string; sub?: string; tone: Tone; onClick?: () => void;
-}) {
-  const isInteractive = typeof onClick === "function";
-  const Tag = (isInteractive ? "button" : "div") as React.ElementType;
-  return (
-    <Tag
-      type={isInteractive ? "button" : undefined}
-      onClick={onClick}
-      className={cn(
-        "admin-card group relative overflow-hidden rounded-xl border border-border/60 bg-card px-5 py-4 text-left transition-colors duration-200",
-        isInteractive && "cursor-pointer hover:border-border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/40",
-      )}
-    >
-      <div className="flex items-center justify-between">
-        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground/70">{label}</p>
-        <Icon className={cn("h-3.5 w-3.5 shrink-0 opacity-40 transition-opacity group-hover:opacity-90", TONE_TEXT[tone])} strokeWidth={2.2} />
-      </div>
-      <p className="mt-4 break-words font-display text-[26px] font-black leading-none tracking-tight tabular-nums text-foreground">
-        {value}
-      </p>
-      {sub && <p className="mt-2 truncate text-[11px] font-medium text-muted-foreground/75">{sub}</p>}
-      <span className={cn("pointer-events-none absolute inset-x-0 bottom-0 h-[1.5px] origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100", TONE_BAR[tone])} />
-    </Tag>
-  );
-}
-
-function RiskRow({ label, value, threshold, alert }: {
-  label: string; value: string; threshold: string; alert: boolean;
-}) {
-  return (
-    <div className={cn(
-      "flex items-center justify-between rounded-xl border px-3 py-2.5 transition-colors",
-      alert ? "border-destructive/25 bg-destructive/5" : "border-border/60 bg-muted/20",
-    )}>
-      <div className="min-w-0">
-        <p className="text-xs font-black text-foreground">{label}</p>
-        <p className="mt-0.5 text-[10px] font-bold text-muted-foreground">{threshold}</p>
-      </div>
-      <div className="flex shrink-0 items-center gap-2">
-        <span className={cn(
-          "font-display text-sm font-black tabular-nums",
-          alert ? "text-destructive" : "text-success",
-        )}>
-          {value}
-        </span>
-        {alert
-          ? <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
-          : <CheckCircle2 className="h-4 w-4 text-success" />}
-      </div>
+    <div role="alert" className="flex flex-wrap items-center justify-center gap-3 py-8 text-center">
+      <p className="text-xs font-bold text-destructive">{text}</p>
+      <button onClick={onRetry} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-background px-3 text-[11px] font-bold text-foreground hover:bg-muted">
+        <RefreshCw className="h-3 w-3" /> Tentar de novo
+      </button>
     </div>
   );
 }
