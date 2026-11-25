@@ -27,7 +27,7 @@ export function useCardReleaseDays(userId: string | undefined) {
     enabled: !!userId,
     staleTime: 5 * 60_000,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_card_release_days", { _user_id: userId! });
+      const { data, error } = await supabase.rpc("get_my_card_release_days" as never);
       if (error) throw error;
       return typeof data === "number" ? data : null;
     },

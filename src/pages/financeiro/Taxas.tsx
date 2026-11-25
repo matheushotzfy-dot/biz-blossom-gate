@@ -73,7 +73,7 @@ export default function Taxas() {
   useEffect(() => {
     if (!user?.id) return;
     let ignore = false;
-    supabase.rpc("get_card_release_days", { _user_id: user.id }).then(({ data, error }) => {
+    supabase.rpc("get_my_card_release_days" as never).then(({ data, error }) => {
       if (ignore) return;
       setCardDays(!error && typeof data === "number" ? data : null);
     });

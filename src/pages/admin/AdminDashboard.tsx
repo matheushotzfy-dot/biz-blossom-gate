@@ -37,7 +37,7 @@ const AdminWithdrawalsTab = lazy(() => import("./tabs/AdminWithdrawalsTab"));
 const CouponsCenter = lazy(() => import("@/features/admin-coupons/CouponsCenter"));
 const CoursesCenter = lazy(() => import("@/features/admin-courses/CoursesCenter"));
 const AdminAuditTab = lazy(() => import("./tabs/AdminAuditTab"));
-const AdminSettingsTab = lazy(() => import("./tabs/AdminSettingsTab"));
+const SettingsCenter = lazy(() => import("@/features/admin-settings/SettingsCenter"));
 const AdminEmployeesTab = lazy(() => import("./tabs/AdminEmployeesTab"));
 const AdminTopSellersTab = lazy(() => import("./tabs/AdminTopSellersTab"));
 const TopProductsCenter = lazy(() => import("@/features/admin-top-products/TopProductsCenter"));
@@ -729,7 +729,7 @@ export default function AdminDashboard() {
               {activeTab === "inactive-sellers" && isAdmin && (
                 <AdminInactiveSellersTab fmtCurrency={fmtCurrency} />
               )}
-              {activeTab === "settings" && isAdmin && <AdminSettingsTab />}
+              {activeTab === "settings" && isAdmin && <SettingsCenter isAdmin={isAdmin} onNavigate={(id) => handleTabChange(id as TabId)} />}
               </Suspense>
             </div>
           </div>
