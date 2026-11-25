@@ -1,17 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ChevronRight, LifeBuoy, Trophy, UserRound } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
 import { prefetchRoute } from "@/lib/routePrefetch";
 import { useSupportUnread } from "@/hooks/useSupportUnread";
 import { cn } from "@/lib/utils";
-import { SELLER_NAV, isSectionActive } from "./navConfig";
+import { SELLER_EXTRA, SELLER_NAV, isSectionActive } from "./navConfig";
 
-const EXTRA = [
-  { url: "/premiacoes", label: "Premiações", icon: Trophy },
-  { url: "/perfil", label: "Minha conta", icon: UserRound },
-  { url: "/suporte", label: "Suporte", icon: LifeBuoy },
-];
 
 /**
  * Navegação lateral do painel (desktop), na identidade do cadastro.
@@ -103,7 +98,7 @@ export function SellerRail() {
 
         <div className="my-4 h-px bg-border" />
         <ul className="space-y-0.5">
-          {EXTRA.map((i) => (
+          {SELLER_EXTRA.map((i) => (
             <li key={i.url}>
               <Link to={i.url} data-active={pathname.startsWith(i.url)} onMouseEnter={() => prefetchRoute(i.url)} className="vp-nav vp-nav-sm">
                 <span className="vp-nav-chip"><i.icon className="h-[16px] w-[16px]" strokeWidth={2.1} /></span>

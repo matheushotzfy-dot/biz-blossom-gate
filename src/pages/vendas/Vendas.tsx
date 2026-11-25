@@ -2,7 +2,7 @@ import { usePrivacyMode } from "@/hooks/usePrivacyMode";
 import { useState, useMemo, useEffect } from "react";
 import { useProducts, useDashboardStats, useTransactionsPage, fetchTransactionsForExport } from "@/hooks/useQueryData";
 import { EyeOff, Eye, Download, FileText, CalendarDays, ChevronDown } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
 import { SellerRefundDialog } from "@/components/transactions/SellerRefundDialog";
 import type { Tables } from "@/integrations/supabase/types";
@@ -16,7 +16,7 @@ import { SalesLedger } from "@/components/sales/SalesLedger";
 import type { SalesStatusKey } from "@/lib/sales-status-filter";
 import { Money } from "@/components/home/Money";
 import { PeriodPicker } from "@/components/PeriodPicker";
-import { buildPeriod, periodLabel, type PeriodValue } from "@/components/period/periodMeta";
+import { buildPeriod, periodLabel, yearPeriod, type PeriodValue } from "@/components/period/periodMeta";
 import ExcelJS from "exceljs";
 import { toast } from "sonner";
 import { Seo } from "@/components/Seo";
@@ -46,12 +46,16 @@ const PAGE_SIZE = 25;
 
 export default function Vendas() {
   const { data: products = [] } = useProducts();
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  // A busca global (Ctrl-K) chega aqui com `?search=`: já abre filtrado e olhando o último ano, não só o dia de hoje.
+  // Só lê a URL na entrada: mudar a query remonta a página (ver DashboardLayout).
+  const [params] = useSearchParams();
+  const [initialSearch] = useState(() => (params.get("search") ?? "").trim().slice(0, 120));
+  const [search, setSearch] = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
   const [detailTx, setDetailTx] = useState<Tables<"transactions"> | null>(null);
   const [refundTx, setRefundTx] = useState<Tables<"transactions"> | null>(null);
   const { hidden: privacyHidden, toggle: togglePrivacy } = usePrivacyMode();
-  const [periodValue, setPeriodValue] = useState<PeriodValue>(() => buildPeriod("today"));
+  const [periodValue, setPeriodValue] = useState<PeriodValue>(() => (initialSearch ? yearPeriod() : buildPeriod("today")));
   const range = useMemo<DateRange>(() => ({ from: periodValue.from, to: periodValue.to }), [periodValue]);
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<SalesStatusKey>("all");

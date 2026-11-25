@@ -93,7 +93,7 @@ describe("useReason (no lugar de window.prompt)", () => {
 
 function ChoiceHarness() {
   const [v, setV] = useState<"corrente" | "poupanca">("corrente");
-  return <ChoiceGrid label="Tipo de conta" value={v} onChange={setV} options={[{ value: "corrente", label: "Conta corrente" }, { value: "poupanca", label: "Poupança" }]} />;
+  return <ChoiceGrid<"corrente" | "poupanca"> label="Tipo de conta" value={v} onChange={setV} options={[{ value: "corrente", label: "Conta corrente" }, { value: "poupanca", label: "Poupança" }]} />;
 }
 
 describe("ChoiceGrid", () => {

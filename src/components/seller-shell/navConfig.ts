@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Home, Receipt, Wallet, Package, Megaphone, Blocks, Link2, TicketPercent, Users, Repeat,
   ArrowDownToLine, Landmark, Percent, FileText, BadgeDollarSign, KeyRound, Webhook, Puzzle, BookOpenText, LayoutTemplate, PlayCircle,
+  Trophy, UserRound, LifeBuoy,
 } from "lucide-react";
 
 export interface SellerNavLink {
@@ -65,6 +66,13 @@ export const SELLER_NAV: SellerNavSection[] = [
       { title: "Documentação", desc: "Guia de integração", url: "/integracoes?tab=api", icon: BookOpenText },
     ],
   },
+];
+
+/** Atalhos fixos do rodapé do menu lateral. */
+export const SELLER_EXTRA: Array<{ url: string; label: string; icon: LucideIcon }> = [
+  { url: "/premiacoes", label: "Premiações", icon: Trophy },
+  { url: "/perfil", label: "Minha conta", icon: UserRound },
+  { url: "/suporte", label: "Suporte", icon: LifeBuoy },
 ];
 
 export function isSectionActive(pathname: string, section: SellerNavSection): boolean {

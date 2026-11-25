@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Loader2, Package, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Seo } from "@/components/Seo";
@@ -35,7 +35,9 @@ export default function Produtos() {
 
   const [pixelProduct, setPixelProduct] = useState<Product | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
+  // A busca global (Ctrl-K) chega aqui com `?q=`; só lê a URL na entrada (mudar a query remonta a página).
+  const [params] = useSearchParams();
+  const [search, setSearch] = useState(() => (params.get("q") ?? "").trim().slice(0, 120));
   const [tab, setTab] = useState<FilterTab>("all");
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);

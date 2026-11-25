@@ -56,6 +56,11 @@ export function buildPeriod(id: PeriodPresetId, today: Date = todayInSaoPaulo())
   return { presetId: preset.id, ...preset.build(today) };
 }
 
+/** Últimos 365 dias como intervalo livre: usado quando a busca global leva a uma venda que pode ser antiga. */
+export function yearPeriod(today: Date = todayInSaoPaulo()): PeriodValue {
+  return { presetId: null, from: startOfDay(subDays(today, 364)), to: endOfDay(today) };
+}
+
 const sameDay = (a: Date, b: Date) => differenceInCalendarDays(a, b) === 0;
 
 /** Se o intervalo escolhido é exatamente um dos atalhos, devolve qual (para marcar o atalho e rotular certo). */
