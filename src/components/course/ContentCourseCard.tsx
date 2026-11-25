@@ -1,243 +1,95 @@
-import {
-  CheckCircle2,
-  Copy,
-  Edit,
-  Eye,
-  EyeOff,
-  ExternalLink,
-  Layers,
-  Link as LinkIcon,
-  MoreHorizontal,
-  Settings2,
-  Trash2,
-  Users,
-} from "lucide-react";
+import { memo } from "react";
+import { Check, Copy, ExternalLink, Link as LinkIcon, Pencil } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Money } from "@/components/home/Money";
+import { StatusPill } from "@/components/seller-ui/tx";
+import { CourseActionsMenu, type CourseMenuHandlers } from "@/components/course/CourseActionsMenu";
+import { getCategoryLabel, type ContentCourse, type ContentCourseStats } from "@/components/course/contentPresentation";
 import { cn } from "@/lib/utils";
-import type { ContentCourse, ContentCourseStats } from "@/components/course/contentPresentation";
 
-interface ContentCourseCardProps {
+export interface ContentCourseCardProps extends CourseMenuHandlers {
   course: ContentCourse;
   stats: ContentCourseStats;
   productName?: string;
-  students: number;
-  revenueLabel: string;
+  /** null = ainda não carregou ou falhou ao carregar. */
+  students: number | null;
+  revenue: number;
   copied: boolean;
-  onOpenBuilder: () => void;
-  onOpenEdit: () => void;
-  onTogglePublish: () => void;
-  onCopyLink: () => void;
-  onOpenPreview: () => void;
-  onDelete: () => void;
 }
 
-export function ContentCourseCard({
-  course,
-  stats,
-  productName,
-  students,
-  revenueLabel,
-  copied,
-  onOpenBuilder,
-  onOpenEdit,
-  onTogglePublish,
-  onCopyLink,
-  onOpenPreview,
-  onDelete,
-}: ContentCourseCardProps) {
+const orb = "grid h-10 w-10 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
+
+export const ContentCourseCard = memo(function ContentCourseCard({ course, stats, productName, students, revenue, copied, ...handlers }: ContentCourseCardProps) {
   const isLive = !!course.is_published;
-  const initial = course.title.charAt(0).toUpperCase();
-  const completionPct = stats.lessons > 0 ? Math.round((stats.lessons / Math.max(stats.lessons, 1)) * 100) : 0;
+  const initial = (course.title || "?").charAt(0).toUpperCase();
+  const category = getCategoryLabel(course.category);
 
   return (
-    <article
-      onClick={onOpenBuilder}
-      className="group relative flex h-full cursor-pointer flex-col overflow-hidden border border-border bg-card transition-all duration-200 hover:border-primary/40"
-    >
-      {/* Thumbnail */}
-      <div className="relative aspect-[16/9] overflow-hidden border-b border-border bg-card-elevated">
+    <article className="vp-sheet group flex h-full flex-col overflow-hidden transition-[transform,border-color] duration-200 hover:-translate-y-0.5 hover:border-primary/40 motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+      <button
+        type="button"
+        onClick={handlers.onOpenBuilder}
+        aria-label={`Editar o conteúdo de ${course.title}`}
+        className="relative block aspect-[16/10] w-full overflow-hidden bg-accent text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+      >
         {course.thumbnail_url ? (
-          <img
-            src={course.thumbnail_url}
-            alt={course.title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-            loading="lazy"
-          />
+          <img src={course.thumbnail_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100" />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-card-elevated">
-            <span className="font-display text-5xl font-black text-primary/20">{initial}</span>
-          </div>
+          <span className="grid h-full w-full place-items-center">
+            <span aria-hidden className="font-heading text-[64px] font-extrabold leading-none tracking-[-0.05em] text-primary/35">{initial}</span>
+          </span>
         )}
+        <StatusPill label={isLive ? "Publicada" : "Rascunho"} tone={isLive ? "ok" : "idle"} className="absolute left-3.5 top-3.5 bg-card/95 shadow-sm backdrop-blur-sm" />
+      </button>
 
-        {/* Gradient overlay */}
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent pointer-events-none"
-        />
+      <div className="flex flex-1 flex-col p-5">
+        <h3 title={course.title} className="truncate font-heading text-[19px] font-extrabold leading-tight tracking-[-0.03em] text-foreground">{course.title}</h3>
+        <p className="mt-1 line-clamp-2 min-h-[2.8em] text-[13.5px] leading-snug text-muted-foreground">{course.description || "Sem descrição."}</p>
 
-        {/* Status badge */}
-        <div className="absolute top-3 left-3">
-          <span
-            className={cn(
-              "inline-flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em]",
-              isLive
-                ? "bg-success text-success-foreground"
-                : "bg-muted border border-border text-muted-foreground"
-            )}
-          >
-            <span
-              className={cn(
-                "h-1.5 w-1.5 rounded-full",
-                isLive ? "bg-success-foreground animate-pulse" : "bg-muted-foreground/60"
-              )}
-            />
-            {isLive ? "Live" : "Draft"}
-          </span>
-        </div>
+        <dl className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-[13.5px]">
+          <div className="flex items-baseline gap-1.5"><dt className="sr-only">Módulos</dt><dd className="font-bold tabular-nums text-foreground">{stats.modules}</dd><span className="text-muted-foreground">{stats.modules === 1 ? "módulo" : "módulos"}</span></div>
+          <div className="flex items-baseline gap-1.5"><dt className="sr-only">Aulas</dt><dd className="font-bold tabular-nums text-foreground">{stats.lessons}</dd><span className="text-muted-foreground">{stats.lessons === 1 ? "aula" : "aulas"}</span></div>
+          <div className="flex items-baseline gap-1.5"><dt className="sr-only">Alunos</dt><dd className="font-bold tabular-nums text-foreground">{students ?? "—"}</dd><span className="text-muted-foreground">{students === 1 ? "aluno" : "alunos"}</span></div>
+        </dl>
 
-        {/* Actions */}
-        <div className="absolute top-3 right-3">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(event) => event.stopPropagation()}
-                className="h-8 w-8 rounded-none border border-border/60 bg-background/60 backdrop-blur-sm text-foreground hover:bg-background/80"
-              >
-                <MoreHorizontal className="h-3.5 w-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" sideOffset={6} className="w-48 rounded-none border-border p-1">
-              <DropdownMenuItem
-                onClick={onOpenBuilder}
-                className="gap-2.5 rounded-none px-3 py-2.5 text-[12px] font-semibold"
-              >
-                <Settings2 className="h-3.5 w-3.5 text-primary" /> Abrir Builder
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={onOpenEdit}
-                className="gap-2.5 rounded-none px-3 py-2.5 text-[12px] font-semibold"
-              >
-                <Edit className="h-3.5 w-3.5 text-primary" /> Editar detalhes
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={onTogglePublish}
-                className="gap-2.5 rounded-none px-3 py-2.5 text-[12px] font-semibold"
-              >
-                {isLive ? (
-                  <EyeOff className="h-3.5 w-3.5 text-primary" />
-                ) : (
-                  <Eye className="h-3.5 w-3.5 text-primary" />
-                )}
-                {isLive ? "Despublicar" : "Publicar"}
-              </DropdownMenuItem>
-              {isLive && (
-                <DropdownMenuItem
-                  onClick={onOpenPreview}
-                  className="gap-2.5 rounded-none px-3 py-2.5 text-[12px] font-semibold"
-                >
-                  <ExternalLink className="h-3.5 w-3.5 text-primary" /> Abrir área
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator className="mx-1 my-1" />
-              <DropdownMenuItem
-                onClick={onDelete}
-                className="gap-2.5 rounded-none px-3 py-2.5 text-[12px] font-semibold text-destructive focus:text-destructive"
-              >
-                <Trash2 className="h-3.5 w-3.5" /> Excluir
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Bottom stats overlay */}
-        <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 p-3">
-          <span className="inline-flex items-center gap-1.5 border border-foreground/15 bg-background/70 backdrop-blur-sm px-2 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-foreground/90">
-            <Layers className="h-2.5 w-2.5" /> {stats.modules} mod · {stats.lessons} aulas
-          </span>
-          <span className="inline-flex items-center gap-1.5 border border-foreground/15 bg-background/70 backdrop-blur-sm px-2 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-foreground/90">
-            <Users className="h-2.5 w-2.5" /> {students}
-          </span>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex flex-1 flex-col p-4">
-        <div className="flex-1 min-w-0">
-          <h3 className="line-clamp-1 font-display text-[15px] font-black tracking-[-0.02em] text-foreground leading-tight">
-            {course.title}
-          </h3>
-          <p className="mt-1 line-clamp-2 text-[11.5px] leading-relaxed text-muted-foreground/75">
-            {course.description || "Sem descrição definida."}
-          </p>
-        </div>
-
-        {/* Tags */}
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          {productName && (
-            <span className="inline-flex max-w-full items-center gap-1.5 border border-primary/25 bg-primary/[0.06] px-2 py-0.5 text-[10px] font-bold text-primary">
-              <LinkIcon className="h-2.5 w-2.5 shrink-0" />
+          {productName ? (
+            <span className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-accent px-2.5 py-1 text-[12.5px] font-semibold text-accent-foreground">
+              <LinkIcon className="h-3 w-3 shrink-0" />
               <span className="truncate">{productName}</span>
             </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/15 px-2.5 py-1 text-[12.5px] font-semibold text-warning">Sem produto vinculado</span>
           )}
-          {course.category && (
-            <span className="inline-flex border border-border bg-muted/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.10em] text-muted-foreground">
-              {course.category}
-            </span>
-          )}
+          {category && <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-[12.5px] font-medium text-muted-foreground">{category}</span>}
         </div>
 
-        {/* Revenue + actions */}
-        <div className="mt-4 flex items-end justify-between gap-3 border-t border-border pt-3">
-          <div>
-            <div className="font-numbers text-[18px] font-black tabular-nums text-success leading-none">
-              {revenueLabel}
-            </div>
-            <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground/60">
-              receita vinculada
-            </p>
+        <div className="mt-auto pt-5">
+          <div className="border-t border-border pt-4">
+            <p className="text-[12.5px] text-muted-foreground">Receita do produto vinculado</p>
+            <Money value={revenue} className="mt-1 block text-[24px] font-extrabold leading-none tracking-[-0.04em] text-foreground" centsClassName="opacity-65" />
           </div>
-
-          <div className="flex items-center gap-1" onClick={(event) => event.stopPropagation()}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onOpenBuilder}
-              className="h-8 rounded-none border border-border bg-card px-3 text-[10px] font-black uppercase tracking-[0.12em] text-muted-foreground hover:border-primary hover:text-primary hover:bg-primary/5"
-            >
-              <Settings2 className="h-3 w-3 mr-1" /> Builder
-            </Button>
-            {isLive && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onCopyLink}
-                className={cn(
-                  "h-8 w-8 rounded-none border",
-                  copied
-                    ? "border-success bg-success text-success-foreground"
-                    : "border-border bg-card text-muted-foreground hover:border-primary hover:text-primary"
-                )}
-              >
-                {copied ? (
-                  <CheckCircle2 className="h-3 w-3" />
-                ) : (
-                  <Copy className="h-3 w-3" />
-                )}
-              </Button>
-            )}
+          <div className="mt-4 flex items-center gap-1">
+            <button type="button" onClick={handlers.onOpenBuilder} className="vp-cta h-10 px-4 text-[13.5px]">
+              <Pencil className="h-4 w-4" strokeWidth={2.3} />
+              Editar conteúdo
+            </button>
+            <div className="ml-auto flex items-center">
+              {isLive && (
+                <>
+                  <button type="button" onClick={handlers.onCopyLink} className={cn(orb, copied && "text-primary")} title="Copiar link da área" aria-label={copied ? "Link copiado" : "Copiar link da área"}>
+                    {copied ? <Check className="h-[18px] w-[18px]" strokeWidth={2.6} /> : <Copy className="h-[18px] w-[18px]" strokeWidth={2} />}
+                  </button>
+                  <button type="button" onClick={handlers.onOpenPreview} className={orb} title="Ver como aluno" aria-label="Ver como aluno">
+                    <ExternalLink className="h-[18px] w-[18px]" strokeWidth={2} />
+                  </button>
+                </>
+              )}
+              <CourseActionsMenu title={course.title} isLive={isLive} handlers={handlers} />
+            </div>
           </div>
         </div>
       </div>
     </article>
   );
-}
+});

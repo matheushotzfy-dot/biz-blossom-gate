@@ -1,31 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  BookOpen,
-  CheckCircle2,
-  DollarSign,
-  ExternalLink,
-  FileEdit,
-  GraduationCap,
-  Grid3X3,
-  Layers,
-  List,
-  Loader2,
-  Plus,
-  Search,
-  Settings2,
-  Users,
-  X,
-} from "lucide-react";
+import { GraduationCap, LayoutGrid, List, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import CourseCreationWizard from "@/components/course/CourseCreationWizard";
-import { GridSkeleton } from "@/components/PageShell";
 import { ContentCourseCard } from "@/components/course/ContentCourseCard";
-import { ContentCourseRow } from "@/components/course/ContentCourseRow";
+import { COURSE_ROW_GRID, ContentCourseRow } from "@/components/course/ContentCourseRow";
+import type { CourseMenuHandlers } from "@/components/course/CourseActionsMenu";
 import {
   buildEditableCoursePayload,
-  formatContentCurrency,
   getMemberAreaLink,
   type ContentCourse,
   type ContentCourseStats,
@@ -33,6 +16,14 @@ import {
   type ContentProduct,
   type EditableCoursePayload,
 } from "@/components/course/contentPresentation";
+import { EmptyPanel } from "@/components/seller-ui/EmptyPanel";
+import { FilterPills } from "@/components/seller-ui/FilterPills";
+import { PageHead } from "@/components/seller-ui/PageHead";
+import { SearchField } from "@/components/seller-ui/SearchField";
+import { SectionTabs } from "@/components/seller-ui/SectionTabs";
+import { StatBand } from "@/components/seller-ui/StatBand";
+import { Money } from "@/components/home/Money";
+import { Seo } from "@/components/Seo";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,23 +35,30 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { cn, isApprovedTransaction } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useCourses as useCoursesQuery, useInvalidateAll, useProducts as useProductsQuery, useProductRevenue } from "@/hooks/useQueryData";
 
-const numberAnimator = (value: number) => new Intl.NumberFormat("pt-BR").format(value);
-
 type ViewMode = "grid" | "list";
+
+const NO_STATS: ContentCourseStats = { modules: 0, lessons: 0 };
+const nf = new Intl.NumberFormat("pt-BR");
 
 export default function AdminConteudo() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: coursesRaw = [], isLoading, isError, refetch } = useCoursesQuery();
-  const { data: productsRaw = [] } = useProductsQuery();
-  const { data: revenueByProduct = {} } = useProductRevenue();
+  const coursesQuery = useCoursesQuery();
+  const { isLoading, isError, refetch } = coursesQuery;
+  // Padrões estáveis: um [] novo a cada render refaria os efeitos abaixo em loop enquanto carrega ou falha.
+  const coursesRaw = useMemo(() => coursesQuery.data ?? [], [coursesQuery.data]);
+  const productsQuery = useProductsQuery();
+  const productsRaw = useMemo(() => productsQuery.data ?? [], [productsQuery.data]);
+  const revenueQuery = useProductRevenue();
+  const revenueByProduct = useMemo(() => revenueQuery.data ?? {}, [revenueQuery.data]);
   const invalidateAll = useInvalidateAll();
 
-  const [studentCounts, setStudentCounts] = useState<Record<string, number>>({});
+  // null = ainda carregando ou falhou; nunca mostramos "0 alunos" quando o número é desconhecido.
+  const [studentCounts, setStudentCounts] = useState<Record<string, number> | null>(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<ContentFilterId>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -69,15 +67,16 @@ export default function AdminConteudo() {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [deletingCourse, setDeletingCourse] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const busyRef = useRef(new Set<string>());
+  const copyTimer = useRef<number>();
+
+  useEffect(() => () => window.clearTimeout(copyTimer.current), []);
 
   const courses = useMemo(
     () =>
       coursesRaw.map((course) => {
         const { modules: _modules, ...rest } = course;
-        return {
-          ...rest,
-          is_published: !!rest.is_published,
-        } as ContentCourse;
+        return { ...rest, is_published: !!rest.is_published } as ContentCourse;
       }),
     [coursesRaw],
   );
@@ -86,32 +85,38 @@ export default function AdminConteudo() {
     () => productsRaw.map((product) => ({ id: product.id, name: product.name, price: Number(product.price) })) as ContentProduct[],
     [productsRaw],
   );
+  const productNames = useMemo(() => new Map(products.map((p) => [p.id, p.name])), [products]);
 
   const courseIds = useMemo(() => courses.map((course) => course.id).filter(Boolean), [courses]);
 
   useEffect(() => {
     if (courseIds.length === 0) {
-      setStudentCounts({});
+      setStudentCounts((prev) => (prev && Object.keys(prev).length === 0 ? prev : {}));
       return;
     }
-
+    let cancelled = false;
     supabase
       .from("user_access")
       .select("course_id")
       .eq("status", "active")
       .in("course_id", courseIds)
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error || !data) {
+          setStudentCounts(null);
+          return;
+        }
         const counts: Record<string, number> = {};
-        data?.forEach((item) => {
+        data.forEach((item) => {
           counts[item.course_id] = (counts[item.course_id] || 0) + 1;
         });
         setStudentCounts(counts);
       });
+    return () => { cancelled = true; };
   }, [courseIds]);
 
   const courseStats = useMemo(() => {
     const stats: Record<string, ContentCourseStats> = {};
-
     coursesRaw.forEach((course) => {
       const modules = course.modules || [];
       stats[course.id] = {
@@ -119,7 +124,6 @@ export default function AdminConteudo() {
         lessons: modules.reduce((acc, module) => acc + (module.lessons?.length || 0), 0),
       };
     });
-
     return stats;
   }, [coursesRaw]);
 
@@ -139,332 +143,277 @@ export default function AdminConteudo() {
   };
 
   const togglePublish = async (id: string, current: boolean) => {
-    if (!user) return;
-
-    await supabase.from("courses").update({ is_published: !current }).eq("id", id).eq("user_id", user.id);
-    reloadCourses();
-    toast.success(current ? "Área despublicada." : "Área publicada.");
+    if (!user || busyRef.current.has(id)) return;
+    busyRef.current.add(id);
+    try {
+      const { error } = await supabase.from("courses").update({ is_published: !current }).eq("id", id).eq("user_id", user.id);
+      if (error) throw error;
+      reloadCourses();
+      toast.success(current ? "Área despublicada." : "Área publicada.");
+    } catch {
+      toast.error(current ? "Não foi possível despublicar a área. Tente de novo." : "Não foi possível publicar a área. Tente de novo.");
+    } finally {
+      busyRef.current.delete(id);
+    }
   };
 
   const confirmDeleteCourse = async () => {
-    if (!user || !deleteTarget) return;
-
+    if (!user || !deleteTarget || deletingCourse) return;
     setDeletingCourse(true);
+    try {
+      const { data: courseModules, error: modulesError } = await supabase.from("modules").select("id").eq("course_id", deleteTarget);
+      if (modulesError) throw modulesError;
 
-    const { data: courseModules } = await supabase.from("modules").select("id").eq("course_id", deleteTarget);
+      if (courseModules && courseModules.length > 0) {
+        const { error: lessonsError } = await supabase.from("lessons").delete().in("module_id", courseModules.map((module) => module.id));
+        if (lessonsError) throw lessonsError;
+        const { error: modError } = await supabase.from("modules").delete().eq("course_id", deleteTarget);
+        if (modError) throw modError;
+      }
 
-    if (courseModules && courseModules.length > 0) {
-      await supabase.from("lessons").delete().in("module_id", courseModules.map((module) => module.id));
-      await supabase.from("modules").delete().eq("course_id", deleteTarget);
+      const { error: accessError } = await supabase.from("user_access").delete().eq("course_id", deleteTarget);
+      if (accessError) throw accessError;
+      const { error: courseError } = await supabase.from("courses").delete().eq("id", deleteTarget).eq("user_id", user.id);
+      if (courseError) throw courseError;
+
+      setDeleteTarget(null);
+      toast.success("Área excluída.");
+    } catch {
+      toast.error("Não foi possível excluir a área por completo. Atualize a página e confira o que restou.");
+    } finally {
+      setDeletingCourse(false);
+      reloadCourses();
     }
-
-    await supabase.from("user_access").delete().eq("course_id", deleteTarget);
-    await supabase.from("courses").delete().eq("id", deleteTarget).eq("user_id", user.id);
-
-    setDeletingCourse(false);
-    setDeleteTarget(null);
-    reloadCourses();
-    toast.success("Área excluída.");
   };
 
   const filteredCourses = useMemo(() => {
     const query = search.trim().toLowerCase();
-
     return courses.filter((course) => {
       const matchesSearch =
         query.length === 0 ||
         course.title.toLowerCase().includes(query) ||
         course.description?.toLowerCase().includes(query) ||
-        course.category?.toLowerCase().includes(query);
+        course.category?.toLowerCase().includes(query) ||
+        (course.product_id ? productNames.get(course.product_id)?.toLowerCase().includes(query) : false);
       const matchesFilter = filter === "all" || (filter === "published" ? course.is_published : !course.is_published);
-
       return !!matchesSearch && matchesFilter;
     });
-  }, [courses, filter, search]);
+  }, [courses, filter, search, productNames]);
 
-  const tabs = useMemo(
-    () => [
-      { label: "Todos", value: "all" as const, count: courses.length },
-      { label: "Live", value: "published" as const, count: courses.filter((course) => course.is_published).length },
-      { label: "Draft", value: "draft" as const, count: courses.filter((course) => !course.is_published).length },
-    ],
-    [courses],
-  );
+  const publishedCount = useMemo(() => courses.filter((c) => c.is_published).length, [courses]);
 
-  const totalStudents = useMemo(() => Object.values(studentCounts).reduce((acc, count) => acc + count, 0), [studentCounts]);
-  const totalModules = useMemo(() => Object.values(courseStats).reduce((acc, item) => acc + item.modules, 0), [courseStats]);
-  const totalLessons = useMemo(() => Object.values(courseStats).reduce((acc, item) => acc + item.lessons, 0), [courseStats]);
-  const totalRevenue = useMemo(() => courses.reduce((acc, course) => acc + getCourseRevenue(course), 0), [courses, revenueByProduct]);
-
-  const metricCards = [
-    { label: "Áreas", value: numberAnimator(courses.length), meta: `${tabs[1].count} live`, icon: GraduationCap },
-    { label: "Aulas", value: numberAnimator(totalLessons), meta: `${numberAnimator(totalModules)} módulos`, icon: BookOpen },
-    { label: "Alunos", value: numberAnimator(totalStudents), meta: "acesso ativo", icon: Users },
-    { label: "Receita", value: formatContentCurrency(totalRevenue), meta: "vinculada", icon: DollarSign },
-  ];
+  const totals = useMemo(() => {
+    let modules = 0;
+    let lessons = 0;
+    Object.values(courseStats).forEach((s) => { modules += s.modules; lessons += s.lessons; });
+    // Dois cursos no mesmo produto não contam a receita duas vezes.
+    const seen = new Set<string>();
+    let revenue = 0;
+    courses.forEach((c) => {
+      if (c.product_id && !seen.has(c.product_id)) {
+        seen.add(c.product_id);
+        revenue += revenueByProduct[c.product_id] || 0;
+      }
+    });
+    const students = studentCounts ? Object.values(studentCounts).reduce((acc, n) => acc + n, 0) : null;
+    return { modules, lessons, revenue, students };
+  }, [courseStats, courses, revenueByProduct, studentCounts]);
 
   const getCourseLink = (courseId: string) => getMemberAreaLink(window.location.origin, courseId);
 
   const handleCopyMemberLink = async (courseId: string) => {
-    await navigator.clipboard.writeText(getCourseLink(courseId));
+    try {
+      await navigator.clipboard.writeText(getCourseLink(courseId));
+    } catch {
+      toast.error("Não foi possível copiar. Copie o link pela barra de endereço da área.");
+      return;
+    }
     setCopiedId(courseId);
-    toast.success("Link copiado.");
-    window.setTimeout(() => {
-      setCopiedId((current) => (current === courseId ? null : current));
-    }, 1800);
+    toast.success("Link da área copiado.");
+    window.clearTimeout(copyTimer.current);
+    copyTimer.current = window.setTimeout(() => setCopiedId((current) => (current === courseId ? null : current)), 1800);
   };
 
-  const emptyFiltered = search.trim().length > 0 || filter !== "all";
+  const handlersFor = (course: ContentCourse): CourseMenuHandlers => ({
+    onOpenBuilder: () => navigate(`/vendas/conteudo/${course.id}/builder`),
+    onOpenEdit: () => openEdit(course),
+    onOpenAnalytics: () => navigate(`/vendas/conteudo/${course.id}/analytics`),
+    onTogglePublish: () => togglePublish(course.id, course.is_published),
+    onCopyLink: () => handleCopyMemberLink(course.id),
+    onOpenPreview: () => window.open(getCourseLink(course.id), "_blank", "noopener,noreferrer"),
+    onDelete: () => setDeleteTarget(course.id),
+  });
 
-  const tabIcon: Record<typeof filter, JSX.Element> = {
-    all: <Layers className="h-3 w-3" strokeWidth={2.5} />,
-    published: <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />,
-    draft: <FileEdit className="h-3 w-3" strokeWidth={2.5} />,
-  };
+  const hasFilter = search.trim() !== "" || filter !== "all";
+  const deleteCourse = courses.find((c) => c.id === deleteTarget);
+  const deleteStats = deleteTarget ? courseStats[deleteTarget] ?? NO_STATS : NO_STATS;
+  const deleteStudents = deleteTarget && studentCounts ? studentCounts[deleteTarget] || 0 : 0;
+
+  const filterOptions = [
+    { value: "all" as const, label: "Todas", count: courses.length || undefined },
+    { value: "published" as const, label: "Publicadas", count: publishedCount || undefined },
+    { value: "draft" as const, label: "Rascunhos", count: courses.length - publishedCount || undefined },
+  ];
+
+  const cardProps = (course: ContentCourse) => ({
+    course,
+    stats: courseStats[course.id] ?? NO_STATS,
+    students: studentCounts ? studentCounts[course.id] || 0 : null,
+    revenue: getCourseRevenue(course),
+    productName: course.product_id ? productNames.get(course.product_id) : undefined,
+    copied: copiedId === course.id,
+    ...handlersFor(course),
+  });
+
   return (
-    <div className="mx-auto -mt-2 w-full max-w-[1600px] pb-24 md:-mt-3 md:pb-10 bg-background min-h-screen text-foreground selection:bg-primary/30">
-      {/* ── Hero header ── */}
-      <div className="relative flex flex-col gap-10 px-6 pt-12 sm:px-10">
-        {/* Decorative background effects */}
-        <div className="absolute top-0 right-0 w-[600px] h-[400px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute top-40 left-0 w-[400px] h-[400px] bg-indigo-500/5 blur-[100px] rounded-full pointer-events-none" />
+    <div className="vp-fade space-y-5 pb-6 md:space-y-6">
+      <Seo title="Área de membros | Vemprapay" description="Crie e gerencie as áreas de membros dos seus produtos." path="/vendas/conteudo" noindex />
 
-        <div className="flex flex-wrap items-end justify-between gap-8 animate-fade-in relative z-10">
-          <div className="min-w-0">
-            <div className="flex items-center gap-3 text-[11px] font-medium text-primary mb-4">
-              <div className="h-6 w-6 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary ">V</div>
-              Vemprapay STUDIO
-            </div>
-            <h1 className="font-display text-[48px] font-bold leading-[0.9] tracking-[-0.05em] text-foreground sm:text-[72px]">
-              Gestão de <span className="text-transparent bg-clip-text bg-gradient-to-r from-foreground via-foreground to-foreground/40">Conteúdo</span>
-            </h1>
-            <p className="mt-4 text-[16px] font-medium text-muted-foreground max-w-xl leading-relaxed">
-              Sua central criativa. Organize módulos, aulas e acompanhe o engajamento dos seus alunos em tempo real.
-            </p>
-          </div>
-          <button
-            onClick={openNew}
-            className="group relative inline-flex h-12 items-center gap-2.5 overflow-hidden rounded-md bg-primary px-8 text-[12px] font-medium text-primary-foreground transition-all duration-300 hover:bg-primary/90 "
-          >
-            <Plus className="h-4.5 w-4.5" strokeWidth={3} />
-            Novo curso
+      <SectionTabs section="products" />
+      <PageHead
+        title="Área de membros"
+        subtitle="Cursos, módulos e aulas que seus alunos acessam depois da compra."
+        actions={
+          <button type="button" onClick={openNew} className="vp-cta">
+            <Plus className="h-[18px] w-[18px]" strokeWidth={2.4} />
+            Nova área
           </button>
-        </div>
-
-        {/* KPIs — Styled like screenshot */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 animate-fade-in stagger-1">
-          {metricCards.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div key={item.label} className="relative overflow-hidden rounded-xl border border-border/40 bg-card p-6 transition-all hover:border-primary/20 hover: ">
-                <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground">
-                  <div className="h-7 w-7 rounded-lg bg-primary/5 flex items-center justify-center text-primary">
-                    <Icon className="h-3.5 w-3.5" strokeWidth={2.5} />
-                  </div>
-                  {item.label}
-                </div>
-                <div className="mt-4 font-display text-[32px] font-bold leading-none tracking-[-0.03em] text-foreground tabular-nums">
-                  {item.value}
-                </div>
-                <p className="mt-2 text-[11px] font-medium text-muted-foreground/60">{item.meta}</p>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Tabs + Search row — Styled like screenshot */}
-        <div className="flex flex-col gap-4 pt-4 animate-fade-in stagger-2 sm:flex-row sm:items-center sm:justify-between border-t border-white/[0.05]">
-          <div className="inline-flex items-center gap-1 rounded-lg bg-muted/50 p-1 border border-border/40">
-            {tabs.map((tab) => {
-              const active = filter === tab.value;
-              return (
-                <button
-                  key={tab.value}
-                  onClick={() => setFilter(tab.value)}
-                  className={cn(
- "relative flex items-center gap-2.5 h-10 px-5 text-[11px] font-medium rounded-md transition-all duration-200",
-                    active
-                      ? "bg-primary text-primary-foreground "
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                  )}
-                >
-                  <span className="flex items-center justify-center">
-                    {tabIcon[tab.value]}
-                  </span>
-                  <span className="font-display">{tab.label === "published" ? "Live" : tab.label === "draft" ? "Draft" : tab.label}</span>
-                  {tab.count > 0 && (
-                    <span className={cn(
- "inline-flex h-[20px] min-w-[22px] items-center justify-center px-1.5 text-[10px] font-bold tabular-nums tracking-tight rounded",
-                      active
-                        ? "bg-primary-foreground/20 text-primary-foreground"
-                        : "bg-muted text-muted-foreground/60"
-                    )}>
-                      {tab.count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="relative group">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/40 transition-colors group-focus-within:text-primary" />
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Buscar curso..."
-                className="h-12 w-full rounded-xl border border-border/40 bg-card pl-11 pr-10 text-[13px] font-medium text-foreground placeholder:text-muted-foreground/40 transition-all focus:border-primary/50 focus:outline-none sm:w-80"
-              />
-              {search && (
-                <button onClick={() => setSearch("")} className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/40 hover:text-foreground transition-colors">
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
-
-            <div className="flex items-center gap-1 rounded-xl bg-muted/50 p-1 border border-border/40">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={cn(
- "flex h-10 w-10 items-center justify-center rounded-lg transition-all",
-                  viewMode === "grid" ? "bg-primary text-primary-foreground " : "text-muted-foreground hover:text-foreground"
-                )}
-                title="Grade"
-              >
-                <Grid3X3 className="h-4 w-4" strokeWidth={2.5} />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={cn(
- "flex h-10 w-10 items-center justify-center rounded-lg transition-all",
-                  viewMode === "list" ? "bg-primary text-primary-foreground " : "text-muted-foreground hover:text-foreground"
-                )}
-                title="Lista"
-              >
-                <List className="h-4 w-4" strokeWidth={2.5} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Workspace ── */}
-      <div className="px-6 sm:px-10 mt-10 pb-20">
-        {isLoading ? (
-          <GridSkeleton items={6} cols={4} />
-        ) : isError ? (
-          <div className="flex min-h-[400px] flex-col items-center justify-center px-6 text-center animate-fade-in">
-            <div className="h-20 w-20 rounded-[24px] bg-destructive/10 border border-destructive/30 flex items-center justify-center mb-6">
-              <GraduationCap className="h-8 w-8 text-destructive" />
-            </div>
-            <h3 className="font-display text-xl font-bold tracking-tight text-foreground mb-2">Falha ao carregar conteúdos</h3>
-            <p className="max-w-sm text-[13px] text-muted-foreground mb-6">Não foi possível buscar suas áreas. Verifique a conexão e tente novamente.</p>
-            <button onClick={() => refetch()} className="h-11 px-8 rounded-md bg-primary text-primary-foreground text-[12px] font-medium hover:bg-primary/90 transition-all">Tentar novamente</button>
-          </div>
-        ) : filteredCourses.length === 0 ? (
-          <div className="flex min-h-[500px] flex-col items-center justify-center px-6 text-center animate-fade-in">
-            <div className="h-24 w-24 rounded-[32px] bg-card border border-border/40 flex items-center justify-center mb-8  relative group">
-              <div className="absolute inset-0 bg-primary/5 rounded-[32px] blur-2xl group-hover:bg-primary/10 transition-all" />
-              <GraduationCap className="h-10 w-10 text-muted-foreground/30 relative z-10" />
-            </div>
-            <h3 className="font-display text-2xl font-bold tracking-tight text-foreground mb-3">
-              {emptyFiltered ? "Nenhum resultado encontrado" : "Sua operação de conteúdo começa aqui"}
-            </h3>
-            <p className="max-w-sm text-[14px] text-muted-foreground leading-relaxed mb-10">
-              {emptyFiltered ? "Troque a busca ou o filtro para encontrar a área certa." : "Crie a primeira área, conecte ao produto e deixe o catálogo pronto para o aluno."}
-            </p>
-            {!emptyFiltered && (
-              <button
-                onClick={openNew}
-                className="inline-flex h-12 items-center gap-3 rounded-md bg-primary px-10 text-[12px] font-medium text-primary-foreground hover:bg-primary/90 transition-all "
-              >
-                <Plus className="h-5 w-5" strokeWidth={3} />
-                Criar área
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="animate-fade-in stagger-3">
-            {viewMode === "grid" ? (
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {filteredCourses.map((course) => (
-                  <ContentCourseCard
-                    key={course.id}
-                    course={course}
-                    stats={courseStats[course.id] || { modules: 0, lessons: 0 }}
-                    students={studentCounts[course.id] || 0}
-                    revenueLabel={formatContentCurrency(getCourseRevenue(course))}
-                    productName={products.find(p => p.id === course.product_id)?.name}
-                    onOpenEdit={() => openEdit(course)}
-                    onDelete={() => setDeleteTarget(course.id)}
-                    onTogglePublish={() => togglePublish(course.id, course.is_published)}
-                    onCopyLink={() => handleCopyMemberLink(course.id)}
-                    copied={copiedId === course.id}
-                    onOpenBuilder={() => navigate(`/vendas/conteudo/${course.id}/builder`)}
-                    onOpenPreview={() => window.open(getCourseLink(course.id), "_blank")}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-[12px] border border-white/[0.06] bg-zinc-900/10 backdrop-blur-md overflow-hidden">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b border-white/[0.06] bg-zinc-900/30">
-                      <th className="px-8 py-5 text-[11px] font-semibold text-zinc-500">Área de Membros</th>
-                      <th className="px-8 py-5 text-[11px] font-semibold text-zinc-500">Status</th>
-                      <th className="px-8 py-5 text-[11px] font-semibold text-zinc-500 text-right">Configurações</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/[0.04]">
-                    {filteredCourses.map((course) => (
-                      <ContentCourseRow
-                        key={course.id}
-                        course={course}
-                        stats={courseStats[course.id] || { modules: 0, lessons: 0 }}
-                        students={studentCounts[course.id] || 0}
-                        revenueLabel={formatContentCurrency(getCourseRevenue(course))}
-                        productName={products.find(p => p.id === course.product_id)?.name}
-                        onOpenEdit={() => openEdit(course)}
-                        onDelete={() => setDeleteTarget(course.id)}
-                        onTogglePublish={() => togglePublish(course.id, course.is_published)}
-                        onCopyLink={() => handleCopyMemberLink(course.id)}
-                        copied={copiedId === course.id}
-                        onOpenBuilder={() => navigate(`/vendas/conteudo/${course.id}/builder`)}
-                        onOpenPreview={() => window.open(getCourseLink(course.id), "_blank")}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      <CourseCreationWizard
-        open={wizardOpen}
-        onOpenChange={setWizardOpen}
-        editCourse={editCourseData}
-        products={products}
-        onSaved={reloadCourses}
+        }
       />
 
-      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
-        <AlertDialogContent className="max-w-sm rounded-[12px] bg-zinc-950 border-white/10">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-base font-semibold text-white">Excluir área de membros</AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px] text-zinc-400">
-              Curso, módulos, aulas e acessos vinculados serão removidos. Esta ação é irreversível.
+      {courses.length > 0 && (
+        <StatBand
+          label="Resumo das áreas de membros"
+          cells={[
+            { label: "Áreas", value: nf.format(courses.length), sub: `${publishedCount} ${publishedCount === 1 ? "publicada" : "publicadas"}` },
+            { label: "Aulas", value: nf.format(totals.lessons), sub: `em ${nf.format(totals.modules)} ${totals.modules === 1 ? "módulo" : "módulos"}` },
+            { label: "Alunos com acesso", value: totals.students === null ? "—" : nf.format(totals.students), sub: totals.students === null ? "Não foi possível carregar" : "Acessos ativos" },
+            { label: "Receita dos produtos vinculados", value: <Money value={totals.revenue} centsClassName="opacity-65" />, featured: true },
+          ]}
+        />
+      )}
+
+      {(courses.length > 0 || isLoading) && (
+        <div className="vp-sheet flex flex-col gap-3 px-5 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+          <FilterPills<ContentFilterId> label="Filtrar áreas por situação" value={filter} options={filterOptions} onChange={setFilter} />
+          <div className="flex items-center gap-3">
+            <SearchField label="Buscar áreas" value={search} onChange={setSearch} placeholder="Buscar área ou produto" className="min-w-0 flex-1 lg:w-[300px] lg:flex-none" />
+            <div role="group" aria-label="Forma de exibição" className="flex shrink-0 items-center gap-1 rounded-full bg-muted p-1">
+              {([
+                { mode: "grid" as const, label: "Cartões", Icon: LayoutGrid },
+                { mode: "list" as const, label: "Lista", Icon: List },
+              ]).map(({ mode, label, Icon }) => (
+                <button
+                  key={mode}
+                  type="button"
+                  aria-pressed={viewMode === mode}
+                  aria-label={label}
+                  title={label}
+                  onClick={() => setViewMode(mode)}
+                  className={cn(
+                    "grid h-9 w-9 place-items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                    viewMode === mode ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isLoading ? (
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" aria-busy="true" aria-label="Carregando áreas de membros">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="vp-sheet overflow-hidden">
+              <div className="vp-skel aspect-[16/10] w-full" />
+              <div className="space-y-3 p-5">
+                <div className="vp-skel h-5 w-3/4 rounded-full" />
+                <div className="vp-skel h-4 w-1/2 rounded-full" />
+                <div className="vp-skel h-8 w-1/3 rounded-full" />
+                <div className="vp-skel h-10 w-full rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : isError ? (
+        <div className="vp-sheet">
+          <EmptyPanel
+            icon={<GraduationCap className="h-7 w-7" />}
+            title="Não foi possível carregar suas áreas"
+            text="Confira sua conexão e tente de novo. Nada foi alterado."
+            action={<button type="button" onClick={() => refetch()} className="vp-cta"><RefreshCw className="h-[18px] w-[18px]" strokeWidth={2.2} />Tentar de novo</button>}
+          />
+        </div>
+      ) : filteredCourses.length === 0 ? (
+        <div className="vp-sheet">
+          {hasFilter ? (
+            <EmptyPanel
+              icon={<GraduationCap className="h-7 w-7" />}
+              title="Nenhuma área encontrada"
+              text="Nada bate com essa busca ou filtro. Limpe os filtros para ver todas as áreas."
+              action={<button type="button" className="vp-ghost" onClick={() => { setSearch(""); setFilter("all"); }}>Limpar filtros</button>}
+            />
+          ) : (
+            <EmptyPanel
+              icon={<GraduationCap className="h-7 w-7" />}
+              title="Você ainda não tem uma área de membros"
+              text="Crie a área, organize os módulos e vincule a um produto. Quem comprar passa a ter acesso às aulas."
+              action={<button type="button" className="vp-cta" onClick={openNew}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} />Criar primeira área</button>}
+            />
+          )}
+        </div>
+      ) : viewMode === "grid" ? (
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          {filteredCourses.map((course) => (
+            <ContentCourseCard key={course.id} {...cardProps(course)} />
+          ))}
+        </div>
+      ) : (
+        <div className="vp-sheet overflow-hidden">
+          <div aria-hidden className={cn("hidden border-b border-border bg-muted/40 px-6 py-3 text-[13px] font-medium text-muted-foreground lg:grid", COURSE_ROW_GRID)}>
+            <span>Área</span>
+            <span className="text-right">Aulas</span>
+            <span className="text-right">Alunos</span>
+            <span className="text-right">Receita</span>
+            <span />
+          </div>
+          <ul className="divide-y divide-border" aria-label="Áreas de membros">
+            {filteredCourses.map((course) => (
+              <ContentCourseRow key={course.id} {...cardProps(course)} />
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <CourseCreationWizard open={wizardOpen} onOpenChange={setWizardOpen} editCourse={editCourseData} products={products} onSaved={reloadCourses} />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open && !deletingCourse) setDeleteTarget(null); }}>
+        <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
+          <AlertDialogHeader className="space-y-2 text-left">
+            <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive"><Trash2 className="h-5 w-5" /></span>
+            <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">Excluir esta área de membros?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-[14.5px] leading-relaxed text-muted-foreground">
+                <span className="block break-words font-semibold text-foreground">{deleteCourse?.title}</span>
+                <p>
+                  Somem o curso, {deleteStats.modules} {deleteStats.modules === 1 ? "módulo" : "módulos"}, {deleteStats.lessons} {deleteStats.lessons === 1 ? "aula" : "aulas"} e o acesso dos alunos. Não dá para desfazer.
+                </p>
+                {deleteStudents > 0 && (
+                  <p className="font-semibold text-foreground">
+                    {deleteStudents} {deleteStudents === 1 ? "aluno perde" : "alunos perdem"} o acesso agora.
+                  </p>
+                )}
+                <p>O produto vinculado e o histórico de vendas continuam como estão.</p>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletingCourse} className="h-10 rounded-lg text-[13px] bg-transparent text-zinc-400 border-white/10 hover:bg-white/5">
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteCourse} disabled={deletingCourse} className="h-10 rounded-lg bg-red-600 text-[13px] text-white hover:bg-red-500">
-              {deletingCourse ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              {deletingCourse ? "Excluindo..." : "Excluir"}
+          <AlertDialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <AlertDialogCancel disabled={deletingCourse} className="vp-ghost m-0 h-11 border-border">Manter área</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => { e.preventDefault(); void confirmDeleteCourse(); }} disabled={deletingCourse} className="vp-cta vp-cta-danger h-11">
+              {deletingCourse && <Loader2 className="h-4 w-4 animate-spin" />}
+              {deletingCourse ? "Excluindo…" : "Excluir área"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

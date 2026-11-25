@@ -1,1502 +1,986 @@
-import { useEffect, useState, useRef, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
+import {
+  Activity, AlertCircle, ArrowLeft, Check, ExternalLink, Eye, EyeOff, Layers, Loader2, MoreHorizontal, Plus, Settings, Trash2, Video,
+} from "lucide-react";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import type { TablesUpdate } from "@/integrations/supabase/types";
-import {
- Plus, BookOpen, Layers, Play, PlayCircle, Trash2, GripVertical, X,
- ChevronRight, Clock, Video, FileText,
- Calendar, Paperclip, ArrowLeft, Eye, EyeOff, Upload,
- Globe, Lock, CheckCircle2, Loader2, AlertCircle, Hash,
- Download, File, Sparkles, ChevronDown, MoreHorizontal,
- Zap, Settings, Star, PanelLeftClose, PanelLeft,
- GraduationCap, Flame, Shield, Copy, ExternalLink, Users,
- Activity, Award, Target, CopyPlus, Image as ImageIcon,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { toast } from "sonner";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSellerSkin } from "@/hooks/useSellerSkin";
+import { useInvalidateAll } from "@/hooks/useQueryData";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence, Reorder } from "framer-motion";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { BuilderMenuItem, builderMenuContent } from "@/components/course/builder/BuilderMenu";
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
+import { StatusPill } from "@/components/seller-ui/tx";
+import { StepEmpty } from "@/components/seller-ui/studio";
 import StudentPreviewPanel from "@/components/course/StudentPreviewPanel";
+import { CurriculumPanel } from "@/components/course/builder/CurriculumPanel";
+import { LessonEditor } from "@/components/course/builder/LessonEditor";
+import { CourseSettingsDialog } from "@/components/course/builder/CourseSettingsDialog";
+import { courseContentPathFromUrl, isValidVideoLink } from "@/components/course/builder/videoUtils";
+import type { BuilderAttachment, BuilderCourse, BuilderLesson, BuilderModule, LessonField, SaveStatus } from "@/components/course/builder/types";
 
-// ─── Types ────────────────────────────────────────────────────────
-interface Course {
- id: string; title: string; description: string | null; is_published: boolean;
- user_id: string; product_id: string | null; thumbnail_url: string | null;
-}
-interface Module {
- id: string; course_id: string; title: string; description: string | null;
- sort_order: number | null; lessons: Lesson[];
-}
-interface Lesson {
- id: string; module_id: string; title: string; description: string | null;
- video_url: string | null; duration_minutes: number | null; is_free: boolean;
- sort_order: number | null; drip_days: number | null;
-}
-interface Attachment {
- id: string; lesson_id: string; user_id: string; file_name: string;
- file_url: string; file_size: number; file_type: string; created_at: string;
-}
+const SAVE_DELAY = 1000;
+const LINK_SAVE_DELAY = 1500;
+const MAX_VIDEO_BYTES = 500 * 1024 * 1024;
+const MAX_ATTACHMENT_BYTES = 50 * 1024 * 1024;
+const MAX_COVER_BYTES = 5 * 1024 * 1024;
+const VIDEO_TYPES = ["video/mp4", "video/webm", "video/ogg", "video/quicktime"];
+const COVER_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-type SaveStatus = "idle" | "saving" | "saved" | "error";
+type FieldValue = string | number | boolean | null;
+type DeleteTarget =
+  | { type: "module"; id: string; label: string; lessons: number }
+  | { type: "lesson"; id: string; label: string }
+  | { type: "attachment"; id: string; label: string; att: BuilderAttachment };
 
-// ─── Helpers ──────────────────────────────────────────────────────
-function formatFileSize(bytes: number) {
- if (bytes < 1024) return `${bytes} B`;
- if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
- return `${(bytes / 1048576).toFixed(1)} MB`;
-}
+interface Draft { title: string; description: string; videoUrl: string; duration: number; isFree: boolean }
+const EMPTY_DRAFT: Draft = { title: "", description: "", videoUrl: "", duration: 0, isFree: false };
 
-function getVideoEmbed(url: string) {
- const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=))([^?&"'>]+)/);
- if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
- const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
- if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
- return null;
-}
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const nextOrder = (items: { sort_order: number | null }[]) => items.reduce((max, i) => Math.max(max, (i.sort_order ?? -1) + 1), 0);
+const draftOf = (l: BuilderLesson): Draft => ({
+  title: l.title,
+  description: l.description ?? "",
+  videoUrl: l.video_url ?? "",
+  duration: l.duration_minutes ?? 0,
+  isFree: l.is_free,
+});
 
-function getVideoThumbnail(url: string) {
- const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=))([^?&"'>]+)/);
- if (ytMatch) return `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg`;
- return null;
-}
 
-function isDirectVideoUrl(url: string) {
- return url.match(/\.(mp4|webm|ogg|mov)(\?|$)/i);
-}
-
-const ease = [0.16, 1, 0.3, 1] as const;
-
-// ═══════════════════════════════════════════════════════════════════
 export default function CourseBuilder() {
+  useSellerSkin();
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const invalidate = useInvalidateAll();
 
-  const [course, setCourse] = useState<Course | null>(null);
-  const [modules, setModules] = useState<Module[]>([]);
-  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
-  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
-  const [loading, setLoading] = useState(true);
-
-  const [editingLessonTitle, setEditingLessonTitle] = useState(false);
-  const [lessonTitle, setLessonTitle] = useState("");
-  const [lessonDescription, setLessonDescription] = useState("");
-  const [lessonVideoUrl, setLessonVideoUrl] = useState("");
-  const [lessonDripDays, setLessonDripDays] = useState(0);
-  const [lessonIsFree, setLessonIsFree] = useState(false);
-  const [lessonDripEnabled, setLessonDripEnabled] = useState(false);
-  const [lessonDuration, setLessonDuration] = useState(0);
-
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const [uploadingVideo, setUploadingVideo] = useState(false);
-  const [videoUploadProgress, setVideoUploadProgress] = useState(0);
-  const [uploadingAttachment, setUploadingAttachment] = useState(false);
-
-  const [newModuleTitle, setNewModuleTitle] = useState("");
-  const [showNewModule, setShowNewModule] = useState(false);
-  const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
-  const [editingModuleTitle, setEditingModuleTitle] = useState("");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeEditorTab, setActiveEditorTab] = useState<"video" | "content" | "settings">("video");
+  const [course, setCourse] = useState<BuilderCourse | null>(null);
+  const [productName, setProductName] = useState<string | null>(null);
+  const [modules, setModules] = useState<BuilderModule[]>([]);
   const [studentCount, setStudentCount] = useState(0);
-  const [lessonStats, setLessonStats] = useState<Map<string, number>>(new Map());
-  const [deleteTarget, setDeleteTarget] = useState<{ type: "module" | "lesson"; id: string; label: string } | null>(null);
-  const [deletingItem, setDeletingItem] = useState(false);
-  const [courseSettingsOpen, setCourseSettingsOpen] = useState(false);
-  const [courseTitle, setCourseTitle] = useState("");
-  const [courseDescription, setCourseDescription] = useState("");
-  const [courseCategory, setCourseCategory] = useState("");
-  const [courseThumbnail, setCourseThumbnail] = useState("");
-  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
-  const thumbnailInputRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  const titleInputRef = useRef<HTMLInputElement>(null);
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
-  const attachmentInputRef = useRef<HTMLInputElement>(null);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
+  const [attachments, setAttachments] = useState<BuilderAttachment[]>([]);
+  const [mobilePane, setMobilePane] = useState<"list" | "lesson">("list");
+  const [creatingModule, setCreatingModule] = useState(false);
 
- // ─── Load All ───────────────────────────────────────────────────
- const loadAll = useCallback(async () => {
- if (!courseId) return;
- const [courseRes, modsRes, accessRes] = await Promise.all([
- supabase.from("courses").select("*").eq("id", courseId).maybeSingle(),
- supabase.from("modules").select("*").eq("course_id", courseId).order("sort_order"),
- supabase.from("user_access").select("id", { count: "exact", head: true }).eq("course_id", courseId).eq("status", "active"),
- ]);
- if (courseRes.data) setCourse(courseRes.data as Course);
- setStudentCount(accessRes.count || 0);
- const mods = modsRes.data || [];
- const moduleIds = mods.map(m => m.id);
- let lessons: Lesson[] = [];
- if (moduleIds.length > 0) {
- const { data: l } = await supabase.from("lessons").select("*").in("module_id", moduleIds).order("sort_order");
- if (l) lessons = l as Lesson[];
- const lessonIds = lessons.map(le => le.id);
- if (lessonIds.length > 0) {
- const { data: progressData } = await supabase.from("user_progress").select("lesson_id").eq("completed", true).in("lesson_id", lessonIds);
- const statsMap = new Map<string, number>();
- progressData?.forEach(p => statsMap.set(p.lesson_id, (statsMap.get(p.lesson_id) || 0) + 1));
- setLessonStats(statsMap);
- }
- }
-  const mapped = mods.map(m => ({ ...m, lessons: lessons.filter(l => l.module_id === m.id) })) as Module[];
-  setModules(mapped);
-  setExpandedModules(new Set(mods.map(m => m.id)));
-  // Auto-select first lesson if none selected
-  setSelectedLesson(prev => {
-    if (!prev && lessons.length > 0) {
-      const firstLesson = mapped.flatMap(m => m.lessons)[0];
-      if (firstLesson) {
-        setLessonTitle(firstLesson.title);
-        setLessonDescription(firstLesson.description || "");
-        setLessonVideoUrl(firstLesson.video_url || "");
-        setLessonDripDays(firstLesson.drip_days || 0);
-        setLessonIsFree(firstLesson.is_free);
-        setLessonDripEnabled((firstLesson.drip_days || 0) > 0);
-        setLessonDuration(firstLesson.duration_minutes || 0);
-        setActiveEditorTab("video");
-        // Load attachments for auto-selected lesson
-        supabase
-          .from("lesson_attachments").select("*")
-          .eq("lesson_id", firstLesson.id).order("created_at", { ascending: false })
-          .then(({ data }) => setAttachments((data || []) as unknown as Attachment[]));
-        return firstLesson;
-      }
+  const [status, setStatus] = useState<SaveStatus>("idle");
+  const [uploadingVideo, setUploadingVideo] = useState<{ lessonId: string; name: string } | null>(null);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  // Espelhos em ref: os salvamentos com atraso e os uploads precisam do valor mais novo, não do que existia quando foram agendados.
+  const modulesRef = useRef<BuilderModule[]>([]);
+  const selectedIdRef = useRef<string | null>(null);
+  const statusRef = useRef<SaveStatus>("idle");
+  const timersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const pendingRef = useRef<Record<string, { lessonId: string; field: LessonField; value: FieldValue }>>({});
+  const failedRef = useRef<Record<string, { lessonId: string; field: LessonField; value: FieldValue }>>({});
+  const inflightRef = useRef(0);
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const attachmentRequestRef = useRef(0);
+  const savedVideoRef = useRef<Record<string, string | null>>({});
+  const persistedOrderRef = useRef<Record<string, string>>({});
+  const uploadingVideoRef = useRef(false);
+  const initialSelectDone = useRef(false);
+
+  modulesRef.current = modules;
+  selectedIdRef.current = selectedId;
+
+  const allLessons = useMemo(() => modules.flatMap((m) => m.lessons), [modules]);
+  const selectedLesson = useMemo(() => allLessons.find((l) => l.id === selectedId) ?? null, [allLessons, selectedId]);
+  const selectedModule = useMemo(() => modules.find((m) => m.lessons.some((l) => l.id === selectedId)) ?? null, [modules, selectedId]);
+  const totalLessons = allLessons.length;
+  const lessonsWithVideo = allLessons.filter((l) => l.video_url).length;
+
+  // ─── Status de salvamento ────────────────────────────────────────
+  const changeStatus = useCallback((next: SaveStatus) => {
+    statusRef.current = next;
+    setStatus(next);
+  }, []);
+
+  const settle = useCallback(() => {
+    if (inflightRef.current > 0 || Object.keys(pendingRef.current).length > 0) return;
+    if (Object.keys(failedRef.current).length > 0) { changeStatus("error"); return; }
+    changeStatus("saved");
+    if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    savedTimerRef.current = setTimeout(() => { if (statusRef.current === "saved") changeStatus("idle"); }, 2500);
+  }, [changeStatus]);
+
+  const markSaving = useCallback(() => {
+    if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    if (statusRef.current !== "error") changeStatus("saving");
+  }, [changeStatus]);
+
+  const reportFailure = useCallback((message: string) => {
+    const already = statusRef.current === "error";
+    changeStatus("error");
+    if (!already) toast.error(message);
+  }, [changeStatus]);
+
+  // ─── Arquivos do storage ─────────────────────────────────────────
+  const removeStorageFiles = useCallback(async (paths: (string | null | undefined)[]) => {
+    const unique = Array.from(new Set(paths.filter((p): p is string => !!p)));
+    if (unique.length === 0) return;
+    const { error } = await supabase.storage.from("course-content").remove(unique);
+    if (error) console.error("Falha ao remover arquivos do storage course-content:", error);
+  }, []);
+
+  /** Apaga o arquivo de vídeo só se nenhuma outra aula (por exemplo uma cópia) ainda usa o mesmo endereço. */
+  const releaseVideoFiles = useCallback((urls: (string | null | undefined)[], ignoreLessonIds: Set<string>) => {
+    const inUse = new Set(modulesRef.current.flatMap((m) => m.lessons).filter((l) => !ignoreLessonIds.has(l.id)).map((l) => l.video_url));
+    const paths = urls.filter((u) => u && !inUse.has(u)).map((u) => courseContentPathFromUrl(u));
+    void removeStorageFiles(paths);
+  }, [removeStorageFiles]);
+
+  // ─── Carregamento ────────────────────────────────────────────────
+  const loadAttachments = useCallback(async (lessonId: string) => {
+    const request = ++attachmentRequestRef.current;
+    setAttachments([]);
+    const { data, error } = await supabase.from("lesson_attachments").select("*").eq("lesson_id", lessonId).order("created_at", { ascending: false });
+    if (request !== attachmentRequestRef.current) return;
+    if (error) { toast.error("Não foi possível carregar os materiais desta aula."); return; }
+    setAttachments((data ?? []) as unknown as BuilderAttachment[]);
+  }, []);
+
+  const applySelection = useCallback((lesson: BuilderLesson) => {
+    setSelectedId(lesson.id);
+    selectedIdRef.current = lesson.id;
+    setDraft(draftOf(lesson));
+    void loadAttachments(lesson.id);
+  }, [loadAttachments]);
+
+  const fetchAll = useCallback(async (opts?: { keepView?: boolean }) => {
+    if (!courseId) return;
+    const [courseRes, modsRes, accessRes] = await Promise.all([
+      supabase.from("courses").select("*").eq("id", courseId).maybeSingle(),
+      supabase.from("modules").select("*").eq("course_id", courseId).order("sort_order"),
+      supabase.from("user_access").select("id", { count: "exact", head: true }).eq("course_id", courseId).eq("status", "active"),
+    ]);
+    if (courseRes.error || modsRes.error) { setLoadError(true); setLoading(false); return; }
+    setLoadError(false);
+    setCourse((courseRes.data as unknown as BuilderCourse | null) ?? null);
+    setStudentCount(accessRes.count ?? 0);
+
+    const mods = (modsRes.data ?? []) as unknown as Omit<BuilderModule, "lessons">[];
+    const moduleIds = mods.map((m) => m.id);
+    let lessons: BuilderLesson[] = [];
+    if (moduleIds.length > 0) {
+      const { data, error } = await supabase.from("lessons").select("*").in("module_id", moduleIds).order("sort_order");
+      if (error) { setLoadError(true); setLoading(false); return; }
+      lessons = (data ?? []) as unknown as BuilderLesson[];
     }
-    return prev;
-  });
-  setLoading(false);
-  }, [courseId]);
+    const mapped: BuilderModule[] = mods.map((m) => ({ ...m, lessons: lessons.filter((l) => l.module_id === m.id) }));
+    setModules(mapped);
+    modulesRef.current = mapped;
+    savedVideoRef.current = Object.fromEntries(lessons.map((l) => [l.id, l.video_url]));
+    persistedOrderRef.current = Object.fromEntries(mapped.map((m) => [m.id, m.lessons.map((l) => l.id).join(",")]));
+    if (!opts?.keepView) setExpanded(new Set(mods.map((m) => m.id)));
 
- useEffect(() => { loadAll(); }, [loadAll]);
+    const productId = (courseRes.data as { product_id?: string | null } | null)?.product_id;
+    if (productId) {
+      const { data: product } = await supabase.from("products").select("name").eq("id", productId).maybeSingle();
+      setProductName((product as { name?: string } | null)?.name ?? null);
+    } else {
+      setProductName(null);
+    }
 
- // Auto-select fallback: if no lesson is selected but lessons exist, pick the first
- useEffect(() => {
-   if (selectedLesson) return;
-   const firstLesson = modules.flatMap(m => m.lessons)[0];
-   if (firstLesson) {
-     selectLesson(firstLesson);
-   }
-   // eslint-disable-next-line react-hooks/exhaustive-deps
- }, [modules, selectedLesson]);
+    // Na primeira carga abre a primeira aula (no computador o editor já aparece preenchido). Depois só confere se a aula aberta ainda existe.
+    const current = selectedIdRef.current;
+    if (!initialSelectDone.current) {
+      initialSelectDone.current = true;
+      if (lessons[0]) applySelection(mapped.flatMap((m) => m.lessons)[0]);
+    } else if (current && !lessons.some((l) => l.id === current)) {
+      setSelectedId(null);
+      selectedIdRef.current = null;
+      setMobilePane("list");
+    }
+    setLoading(false);
+  }, [courseId, applySelection]);
 
- const loadAttachments = useCallback(async (lessonId: string) => {
- const { data } = await supabase
- .from("lesson_attachments").select("*")
- .eq("lesson_id", lessonId).order("created_at", { ascending: false });
- setAttachments((data || []) as unknown as Attachment[]);
- }, []);
+  const loadAll = useCallback(async (opts?: { keepView?: boolean }) => {
+    try {
+      await fetchAll(opts);
+    } catch (error) {
+      console.error("Falha ao carregar a área de membros:", error);
+      setLoadError(true);
+      setLoading(false);
+    }
+  }, [fetchAll]);
 
- // ─── Auto-save ──────────────────────────────────────────────────
- const autoSave = useCallback(async (field: string, value: unknown) => {
- if (!selectedLesson) return;
- setSaveStatus("saving");
- const { error } = await supabase.from("lessons").update({ [field]: value } as never).eq("id", selectedLesson.id);
- if (error) { setSaveStatus("error"); return; }
- setSaveStatus("saved");
- setModules(prev => prev.map(m => ({
- ...m, lessons: m.lessons.map(l => l.id === selectedLesson.id ? { ...l, [field]: value } : l)
- })));
- setSelectedLesson(prev => prev ? { ...prev, [field]: value } : prev);
- setTimeout(() => setSaveStatus("idle"), 2000);
- }, [selectedLesson]);
+  useEffect(() => { void loadAll(); }, [loadAll]);
 
- const debouncedSave = useCallback((field: string, value: unknown) => {
- if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
- setSaveStatus("saving");
- saveTimerRef.current = setTimeout(() => autoSave(field, value), 1200);
- }, [autoSave]);
+  // ─── Salvamento por campo ────────────────────────────────────────
+  const applyLocal = useCallback((lessonId: string, field: LessonField, value: FieldValue) => {
+    setModules((prev) => prev.map((m) => (m.lessons.some((l) => l.id === lessonId)
+      ? { ...m, lessons: m.lessons.map((l) => (l.id === lessonId ? { ...l, [field]: value } : l)) }
+      : m)));
+  }, []);
 
- // ─── Select Lesson ──────────────────────────────────────────────
- const selectLesson = (lesson: Lesson) => {
- setSelectedLesson(lesson);
- setLessonTitle(lesson.title);
- setLessonDescription(lesson.description || "");
- setLessonVideoUrl(lesson.video_url || "");
- setLessonDripDays(lesson.drip_days || 0);
- setLessonIsFree(lesson.is_free);
- setLessonDripEnabled((lesson.drip_days || 0) > 0);
- setLessonDuration(lesson.duration_minutes || 0);
- setEditingLessonTitle(false);
- setActiveEditorTab("video");
- loadAttachments(lesson.id);
- };
+  const persistField = useCallback(async (lessonId: string, field: LessonField, value: FieldValue): Promise<boolean> => {
+    const key = `${lessonId}:${field}`;
+    inflightRef.current += 1;
+    markSaving();
+    const { error } = await supabase.from("lessons").update({ [field]: value } as never).eq("id", lessonId);
+    inflightRef.current -= 1;
+    if (error) {
+      failedRef.current[key] = { lessonId, field, value };
+      reportFailure("Não foi possível salvar a aula. Confira a conexão e tente de novo.");
+      return false;
+    }
+    delete failedRef.current[key];
+    applyLocal(lessonId, field, value);
+    if (field === "video_url") {
+      const previous = savedVideoRef.current[lessonId];
+      savedVideoRef.current[lessonId] = value as string | null;
+      if (previous && previous !== value) releaseVideoFiles([previous], new Set([lessonId]));
+    }
+    settle();
+    return true;
+  }, [applyLocal, markSaving, releaseVideoFiles, reportFailure, settle]);
 
- // ─── Video Upload ───────────────────────────────────────────────
- const handleVideoUpload = async (file: File) => {
- if (!user || !selectedLesson) return;
- const ALLOWED = ["video/mp4", "video/webm", "video/ogg", "video/quicktime"];
- if (!ALLOWED.includes(file.type)) { toast.error("Formato inválido. Use MP4, WebM ou OGG."); return; }
- if (file.size > 500 * 1024 * 1024) { toast.error("Máximo 500MB."); return; }
- setUploadingVideo(true); setVideoUploadProgress(0);
- const ext = file.name.split(".").pop();
- const path = `${user.id}/videos/${crypto.randomUUID()}.${ext}`;
- const progressInterval = setInterval(() => {
- setVideoUploadProgress(prev => Math.min(prev + Math.random() * 15, 90));
- }, 500);
- const { error } = await supabase.storage.from("course-content").upload(path, file);
- clearInterval(progressInterval);
- if (error) { toast.error("Erro no upload"); setUploadingVideo(false); setVideoUploadProgress(0); return; }
- setVideoUploadProgress(100);
- const { data: urlData } = supabase.storage.from("course-content").getPublicUrl(path);
- setLessonVideoUrl(urlData.publicUrl);
- await autoSave("video_url", urlData.publicUrl);
- setUploadingVideo(false); setVideoUploadProgress(0);
- toast.success("Vídeo enviado!");
- };
+  const runPending = useCallback(async (field: string) => {
+    const item = pendingRef.current[field];
+    clearTimeout(timersRef.current[field]);
+    delete timersRef.current[field];
+    if (!item) return;
+    delete pendingRef.current[field];
+    await persistField(item.lessonId, item.field, item.value);
+  }, [persistField]);
 
- // ─── Attachment Upload ──────────────────────────────────────────
- const handleAttachmentUpload = async (file: File) => {
- if (!user || !selectedLesson) return;
- if (file.size > 50 * 1024 * 1024) { toast.error("Máximo 50MB."); return; }
- setUploadingAttachment(true);
- const ext = file.name.split(".").pop();
- const path = `${user.id}/attachments/${crypto.randomUUID()}.${ext}`;
- const { error: uploadError } = await supabase.storage.from("course-content").upload(path, file);
- if (uploadError) { toast.error("Erro no upload"); setUploadingAttachment(false); return; }
- const { data: urlData } = supabase.storage.from("course-content").getPublicUrl(path);
- const { error: dbError } = await supabase.from("lesson_attachments").insert({
- lesson_id: selectedLesson.id, user_id: user.id,
- file_name: file.name, file_url: urlData.publicUrl, file_size: file.size, file_type: file.type,
- });
- if (dbError) { toast.error("Erro ao salvar"); setUploadingAttachment(false); return; }
- await loadAttachments(selectedLesson.id);
- setUploadingAttachment(false); toast.success("Anexo adicionado!");
- };
+  const flushAll = useCallback(async () => {
+    await Promise.all(Object.keys(pendingRef.current).map((field) => runPending(field)));
+  }, [runPending]);
 
- const deleteAttachment = async (att: Attachment) => {
- await supabase.from("lesson_attachments").delete().eq("id", att.id);
- setAttachments(prev => prev.filter(a => a.id !== att.id));
- toast.success("Anexo removido");
- };
+  const queueSave = useCallback((field: LessonField, value: FieldValue, delay = SAVE_DELAY) => {
+    const lessonId = selectedIdRef.current;
+    if (!lessonId) return;
+    pendingRef.current[field] = { lessonId, field, value };
+    clearTimeout(timersRef.current[field]);
+    markSaving();
+    timersRef.current[field] = setTimeout(() => { void runPending(field); }, delay);
+  }, [markSaving, runPending]);
 
- // ─── Module CRUD ────────────────────────────────────────────────
- const createModule = async () => {
- if (!courseId || !newModuleTitle.trim()) return;
- await supabase.from("modules").insert({ course_id: courseId, title: newModuleTitle.trim(), sort_order: modules.length });
- setNewModuleTitle(""); setShowNewModule(false);
- toast.success("Módulo criado!"); loadAll();
- };
+  const dropPendingFor = useCallback((lessonIds: Set<string>) => {
+    Object.entries(pendingRef.current).forEach(([field, item]) => {
+      if (lessonIds.has(item.lessonId)) {
+        clearTimeout(timersRef.current[field]);
+        delete timersRef.current[field];
+        delete pendingRef.current[field];
+      }
+    });
+    Object.keys(failedRef.current).forEach((k) => { if (lessonIds.has(k.split(":")[0])) delete failedRef.current[k]; });
+  }, []);
 
- const renameModule = async (id: string, title: string) => {
- if (!title.trim()) return;
- await supabase.from("modules").update({ title: title.trim() }).eq("id", id);
- setEditingModuleId(null); loadAll();
- };
+  const retryFailed = useCallback(async () => {
+    const items = Object.values(failedRef.current);
+    changeStatus("saving");
+    await Promise.all(items.map((i) => persistField(i.lessonId, i.field, i.value)));
+    settle();
+  }, [changeStatus, persistField, settle]);
 
- const deleteModule = async (id: string) => {
- const mod = modules.find(m => m.id === id);
- setDeleteTarget({ type: "module", id, label: mod?.title || "Módulo" });
- };
+  // Ao sair da tela (ou fechar a aba) manda o que ainda estava esperando o tempo de salvar.
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (Object.keys(pendingRef.current).length > 0 || inflightRef.current > 0 || uploadingVideoRef.current) {
+        void flushAll();
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      void flushAll();
+    };
+  }, [flushAll]);
 
- // Extract the storage path (relative to the "course-content" bucket) from a
- // public URL produced by supabase.storage.from("course-content").getPublicUrl().
- // External URLs (e.g. YouTube/Vimeo links) are ignored.
- const courseContentPathFromUrl = (url: string | null | undefined): string | null => {
- if (!url) return null;
- const marker = "/storage/v1/object/public/course-content/";
- const idx = url.indexOf(marker);
- if (idx === -1) return null;
- try {
- return decodeURIComponent(url.slice(idx + marker.length));
- } catch {
- return url.slice(idx + marker.length);
- }
- };
+  // ─── Seleção ─────────────────────────────────────────────────────
+  const selectLesson = useCallback((lesson: BuilderLesson) => {
+    void flushAll();
+    const fresh = modulesRef.current.flatMap((m) => m.lessons).find((l) => l.id === lesson.id) ?? lesson;
+    applySelection(fresh);
+    setMobilePane("lesson");
+  }, [applySelection, flushAll]);
 
- const removeCourseContentFiles = async (paths: string[]) => {
- const unique = Array.from(new Set(paths.filter(Boolean)));
- if (unique.length === 0) return;
- const { error } = await supabase.storage.from("course-content").remove(unique);
- if (error) console.error("Falha ao remover arquivos do storage course-content:", error);
- };
+  const toggleExpand = useCallback((id: string) => {
+    setExpanded((prev) => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  }, []);
 
- const confirmDelete = async () => {
- if (!deleteTarget) return;
- setDeletingItem(true);
- if (deleteTarget.type === "module") {
- const mod = modules.find(m => m.id === deleteTarget.id);
- const lessonIds = (mod?.lessons || []).map(l => l.id);
- const storagePaths: string[] = [];
- (mod?.lessons || []).forEach(l => {
- const videoPath = courseContentPathFromUrl(l.video_url);
- if (videoPath) storagePaths.push(videoPath);
- });
- if (lessonIds.length > 0) {
- const { data: atts } = await supabase.from("lesson_attachments").select("file_url").in("lesson_id", lessonIds);
- (atts || []).forEach(a => {
- const attPath = courseContentPathFromUrl(a.file_url);
- if (attPath) storagePaths.push(attPath);
- });
- }
- await supabase.from("lessons").delete().in("module_id", [deleteTarget.id]);
- await supabase.from("modules").delete().eq("id", deleteTarget.id);
- await removeCourseContentFiles(storagePaths);
- if (selectedLesson && modules.find(m => m.id === deleteTarget.id)?.lessons.some(l => l.id === selectedLesson.id)) {
- setSelectedLesson(null);
- }
- toast.success("Módulo excluído");
- } else {
- const lesson = modules.flatMap(m => m.lessons).find(l => l.id === deleteTarget.id);
- const storagePaths: string[] = [];
- const videoPath = courseContentPathFromUrl(lesson?.video_url);
- if (videoPath) storagePaths.push(videoPath);
- const { data: atts } = await supabase.from("lesson_attachments").select("file_url").eq("lesson_id", deleteTarget.id);
- (atts || []).forEach(a => {
- const attPath = courseContentPathFromUrl(a.file_url);
- if (attPath) storagePaths.push(attPath);
- });
- await supabase.from("lesson_attachments").delete().eq("lesson_id", deleteTarget.id);
- await supabase.from("lessons").delete().eq("id", deleteTarget.id);
- await removeCourseContentFiles(storagePaths);
- if (selectedLesson?.id === deleteTarget.id) setSelectedLesson(null);
- toast.success("Aula excluída");
- }
- setDeletingItem(false);
- setDeleteTarget(null);
- loadAll();
- };
+  const focusTitle = () => {
+    window.setTimeout(() => {
+      const el = document.getElementById("lesson-title") as HTMLInputElement | null;
+      el?.focus();
+      el?.select();
+    }, 80);
+  };
 
- // ─── Lesson CRUD ───────────────────────────────────────────────
- const createLesson = async (moduleId: string) => {
- const mod = modules.find(m => m.id === moduleId);
- const { data, error } = await supabase.from("lessons").insert({
- module_id: moduleId, title: "Nova Aula", sort_order: mod?.lessons.length || 0
- }).select().maybeSingle();
- if (error || !data) { toast.error("Erro ao criar aula"); return; }
- toast.success("Aula criada!");
- await loadAll();
- selectLesson(data as Lesson);
- };
+  // ─── Campos da aula ──────────────────────────────────────────────
+  const onTitle = (value: string) => {
+    setDraft((d) => ({ ...d, title: value }));
+    if (value.trim() === "" || !selectedIdRef.current) return;
+    applyLocal(selectedIdRef.current, "title", value);
+    queueSave("title", value);
+  };
 
- const deleteLesson = async (id: string) => {
- const lesson = modules.flatMap(m => m.lessons).find(l => l.id === id);
- setDeleteTarget({ type: "lesson", id, label: lesson?.title || "Aula" });
- };
+  const onTitleBlur = () => {
+    if (draft.title.trim() === "" && selectedLesson) setDraft((d) => ({ ...d, title: selectedLesson.title }));
+    void runPending("title");
+  };
 
- const duplicateLesson = async (lesson: Lesson) => {
- const mod = modules.find(m => m.lessons.some(l => l.id === lesson.id));
- if (!mod) return;
- const { data, error } = await supabase.from("lessons").insert({
- module_id: lesson.module_id,
- title: `${lesson.title} (cópia)`,
- description: lesson.description,
- video_url: lesson.video_url,
- duration_minutes: lesson.duration_minutes,
- is_free: lesson.is_free,
- drip_days: lesson.drip_days,
- sort_order: mod.lessons.length,
- }).select().maybeSingle();
- if (error || !data) { toast.error("Erro ao duplicar aula"); return; }
- toast.success("Aula duplicada!");
- await loadAll();
- selectLesson(data as Lesson);
- };
+  const onDescription = (value: string) => {
+    setDraft((d) => ({ ...d, description: value }));
+    queueSave("description", value.trim() === "" ? null : value);
+  };
 
- // ─── Course Settings ───────────────────────────────────────────
- const openCourseSettings = () => {
- if (!course) return;
- setCourseTitle(course.title);
- setCourseDescription(course.description || "");
- setCourseCategory("");
- setCourseThumbnail("");
- setCourseSettingsOpen(true);
- };
+  const onVideoUrl = (value: string) => {
+    setDraft((d) => ({ ...d, videoUrl: value }));
+    if (!isValidVideoLink(value)) return;
+    queueSave("video_url", value.trim() === "" ? null : value.trim(), LINK_SAVE_DELAY);
+  };
 
- const saveCourseSettings = async () => {
- if (!course || !user) return;
- const updates: TablesUpdate<"courses"> = {};
- if (courseTitle.trim() && courseTitle !== course.title) updates.title = courseTitle.trim();
- if (courseDescription !== (course.description || "")) updates.description = courseDescription || null;
- if (Object.keys(updates).length === 0) { setCourseSettingsOpen(false); return; }
- await supabase.from("courses").update(updates).eq("id", course.id).eq("user_id", user.id);
- setCourse(prev => prev ? { ...prev, ...updates } : prev);
- setCourseSettingsOpen(false);
- toast.success("Configurações salvas!");
- };
+  const onRemoveVideo = () => {
+    const lessonId = selectedIdRef.current;
+    if (!lessonId) return;
+    clearTimeout(timersRef.current.video_url);
+    delete timersRef.current.video_url;
+    delete pendingRef.current.video_url;
+    setDraft((d) => ({ ...d, videoUrl: "" }));
+    void persistField(lessonId, "video_url", null).then((ok) => { if (ok) toast.success("Vídeo removido."); });
+  };
 
- const handleThumbnailUpload = async (file: File) => {
- if (!user || !course) return;
- const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
- if (!ALLOWED.includes(file.type)) { toast.error("Use JPG, PNG ou WebP"); return; }
- if (file.size > 5 * 1024 * 1024) { toast.error("Máximo 5MB"); return; }
- setUploadingThumbnail(true);
- const ext = file.name.split(".").pop();
- const path = `${user.id}/thumbnails/${crypto.randomUUID()}.${ext}`;
- const { error } = await supabase.storage.from("product-images").upload(path, file);
- if (error) { toast.error("Erro no upload"); setUploadingThumbnail(false); return; }
- const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(path);
- await supabase.from("courses").update({ thumbnail_url: urlData.publicUrl }).eq("id", course.id);
- setCourse(prev => prev ? { ...prev, thumbnail_url: urlData.publicUrl } : prev);
- setUploadingThumbnail(false);
- toast.success("Thumbnail atualizada!");
- };
+  const onDuration = (value: number) => {
+    setDraft((d) => ({ ...d, duration: value }));
+    if (!selectedIdRef.current) return;
+    applyLocal(selectedIdRef.current, "duration_minutes", value);
+    queueSave("duration_minutes", value);
+  };
 
- // ─── Drag & Drop ───────────────────────────────────────────────
- const reorderLessons = async (moduleId: string, newOrder: Lesson[]) => {
- setModules(prev => prev.map(m => m.id === moduleId ? { ...m, lessons: newOrder } : m));
- setSaveStatus("saving");
- const results = await Promise.all(newOrder.map((l, i) => supabase.from("lessons").update({ sort_order: i }).eq("id", l.id)));
- const failed = results.some(r => r.error);
- if (failed) {
- toast.error("Falha ao reordenar aulas. Recarregando...");
- setSaveStatus("idle");
- await loadAll();
- return;
- }
- setSaveStatus("saved");
- setTimeout(() => setSaveStatus("idle"), 2000);
- };
+  const onIsFree = (value: boolean) => {
+    const lessonId = selectedIdRef.current;
+    if (!lessonId) return;
+    setDraft((d) => ({ ...d, isFree: value }));
+    applyLocal(lessonId, "is_free", value);
+    void persistField(lessonId, "is_free", value);
+  };
 
- // ─── Publish ───────────────────────────────────────────────────
- const togglePublish = async () => {
- if (!course || !user) return;
- await supabase.from("courses").update({ is_published: !course.is_published }).eq("id", course.id).eq("user_id", user.id);
- setCourse(prev => prev ? { ...prev, is_published: !prev.is_published } : prev);
- toast.success(course.is_published ? "Despublicado" : "Publicado!");
- };
+  // ─── Uploads ─────────────────────────────────────────────────────
+  const handleVideoFile = async (file: File) => {
+    const lessonId = selectedIdRef.current;
+    if (!user || !lessonId) return;
+    if (uploadingVideoRef.current) { toast.info("Espere o envio do vídeo atual terminar."); return; }
+    if (!VIDEO_TYPES.includes(file.type)) { toast.error("Formato não aceito. Envie MP4, WebM, OGG ou MOV."); return; }
+    if (file.size > MAX_VIDEO_BYTES) { toast.error("O vídeo passa de 500 MB. Comprima o arquivo ou cole o link de um vídeo hospedado."); return; }
+    uploadingVideoRef.current = true;
+    setUploadingVideo({ lessonId, name: file.name });
+    const ext = file.name.split(".").pop() || "mp4";
+    const path = `${user.id}/videos/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("course-content").upload(path, file);
+    if (error) {
+      uploadingVideoRef.current = false;
+      setUploadingVideo(null);
+      toast.error("Não foi possível enviar o vídeo. Confira a conexão e tente de novo.");
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("course-content").getPublicUrl(path);
+    // O vídeo novo vale mais do que um link que estava esperando para ser salvo.
+    clearTimeout(timersRef.current.video_url);
+    delete timersRef.current.video_url;
+    delete pendingRef.current.video_url;
+    const ok = await persistField(lessonId, "video_url", urlData.publicUrl);
+    uploadingVideoRef.current = false;
+    setUploadingVideo(null);
+    if (!ok) {
+      void removeStorageFiles([path]);
+      return;
+    }
+    if (selectedIdRef.current === lessonId) setDraft((d) => ({ ...d, videoUrl: urlData.publicUrl }));
+    toast.success("Vídeo enviado.");
+  };
 
- const toggleExpand = (id: string) => {
- setExpandedModules(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
- };
+  const handleAttachmentFile = async (file: File) => {
+    const lessonId = selectedIdRef.current;
+    if (!user || !lessonId) return;
+    if (file.size > MAX_ATTACHMENT_BYTES) { toast.error("O arquivo passa de 50 MB."); return; }
+    setUploadingAttachment(true);
+    const ext = file.name.split(".").pop() || "bin";
+    const path = `${user.id}/attachments/${crypto.randomUUID()}.${ext}`;
+    const { error: uploadError } = await supabase.storage.from("course-content").upload(path, file);
+    if (uploadError) {
+      setUploadingAttachment(false);
+      toast.error("Não foi possível enviar o arquivo. Confira a conexão e tente de novo.");
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("course-content").getPublicUrl(path);
+    const { error: dbError } = await supabase.from("lesson_attachments").insert({
+      lesson_id: lessonId, user_id: user.id, file_name: file.name, file_url: urlData.publicUrl, file_size: file.size, file_type: file.type,
+    });
+    if (dbError) {
+      void removeStorageFiles([path]);
+      setUploadingAttachment(false);
+      toast.error("O arquivo foi enviado, mas não foi possível ligá-lo à aula. Tente de novo.");
+      return;
+    }
+    if (selectedIdRef.current === lessonId) await loadAttachments(lessonId);
+    setUploadingAttachment(false);
+    toast.success("Material adicionado.");
+  };
 
- // ─── Loading / Error ───────────────────────────────────────────
- if (loading) return (
- <div className="h-screen w-screen bg-background flex items-center justify-center">
- <div className="flex flex-col items-center gap-5">
- <div className="h-16 w-16 border border-border bg-card flex items-center justify-center">
- <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
- </div>
- <div className="text-center">
- <p className="text-[11px] font-display font-medium text-foreground">Carregando curso</p>
- <p className="text-[11px] text-muted-foreground mt-1.5 font-display ">Preparando o editor</p>
- </div>
- </div>
- </div>
- );
+  // ─── Módulos e aulas ─────────────────────────────────────────────
+  const createModule = async (title: string): Promise<boolean> => {
+    if (!courseId) return false;
+    const { data, error } = await supabase.from("modules")
+      .insert({ course_id: courseId, title, sort_order: nextOrder(modulesRef.current) }).select().maybeSingle();
+    if (error || !data) { toast.error("Não foi possível criar o módulo. Tente de novo."); return false; }
+    const created = { ...(data as unknown as Omit<BuilderModule, "lessons">), lessons: [] } as BuilderModule;
+    setModules((prev) => [...prev, created]);
+    persistedOrderRef.current[created.id] = "";
+    setExpanded((prev) => new Set(prev).add(created.id));
+    invalidate(["courses"]);
+    toast.success("Módulo criado.");
+    return true;
+  };
 
- if (!course) return (
- <div className="h-screen w-screen bg-background flex items-center justify-center flex-col gap-6">
- <div className="h-20 w-20 border border-destructive bg-destructive/10 flex items-center justify-center">
- <AlertCircle className="h-8 w-8 text-destructive" />
- </div>
- <div className="text-center">
- <p className="text-foreground text-base font-display font-black tracking-tight">Curso não encontrado</p>
- <p className="text-xs text-muted-foreground mt-1.5 font-medium">O curso pode ter sido excluído</p>
- </div>
- <Button variant="ghost" onClick={() => navigate("/vendas/conteudo")} className="rounded-none border border-border bg-card font-display font-medium gap-2 text-[11px] hover:border-primary hover:text-primary">
- <ArrowLeft className="h-4 w-4" /> Voltar
- </Button>
- </div>
- );
+  const renameModule = async (id: string, title: string) => {
+    const previous = modulesRef.current.find((m) => m.id === id)?.title;
+    if (!title.trim() || title.trim() === previous) return;
+    const { error } = await supabase.from("modules").update({ title: title.trim() }).eq("id", id);
+    if (error) { toast.error("Não foi possível renomear o módulo."); return; }
+    setModules((prev) => prev.map((m) => (m.id === id ? { ...m, title: title.trim() } : m)));
+    toast.success("Módulo renomeado.");
+  };
 
- const totalLessons = modules.reduce((a, m) => a + m.lessons.length, 0);
- const completedLessons = modules.reduce((a, m) => a + m.lessons.filter(l => l.video_url).length, 0);
- const progressPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+  const persistModuleOrder = useCallback(async (order: BuilderModule[]) => {
+    inflightRef.current += 1;
+    markSaving();
+    const results = await Promise.all(order.map((m, i) => supabase.from("modules").update({ sort_order: i }).eq("id", m.id)));
+    inflightRef.current -= 1;
+    if (results.some((r) => r.error)) {
+      toast.error("Não foi possível salvar a nova ordem dos módulos. Recarreguei a lista.");
+      settle();
+      await loadAll({ keepView: true });
+      return;
+    }
+    setModules((prev) => prev.map((m) => ({ ...m, sort_order: order.findIndex((o) => o.id === m.id) })));
+    settle();
+  }, [loadAll, markSaving, settle]);
 
-  const editorTabs = [
-    { id: "video" as const, label: "Conteúdo", icon: PlayCircle },
-    { id: "content" as const, label: "Configuração", icon: Settings },
-    { id: "settings" as const, label: "Avançado", icon: Zap },
-  ];
+  const moveModule = (id: string, dir: -1 | 1) => {
+    const list = [...modulesRef.current];
+    const from = list.findIndex((m) => m.id === id);
+    const to = from + dir;
+    if (from < 0 || to < 0 || to >= list.length) return;
+    [list[from], list[to]] = [list[to], list[from]];
+    setModules(list);
+    void persistModuleOrder(list);
+  };
+
+  const persistLessonOrder = useCallback(async (moduleId: string, order?: BuilderLesson[]) => {
+    const lessons = order ?? modulesRef.current.find((m) => m.id === moduleId)?.lessons ?? [];
+    const signature = lessons.map((l) => l.id).join(",");
+    if (persistedOrderRef.current[moduleId] === signature) return;
+    inflightRef.current += 1;
+    markSaving();
+    const results = await Promise.all(lessons.map((l, i) => supabase.from("lessons").update({ sort_order: i }).eq("id", l.id)));
+    inflightRef.current -= 1;
+    if (results.some((r) => r.error)) {
+      toast.error("Não foi possível salvar a nova ordem das aulas. Recarreguei a lista.");
+      settle();
+      await loadAll({ keepView: true });
+      return;
+    }
+    persistedOrderRef.current[moduleId] = signature;
+    setModules((prev) => prev.map((m) => (m.id === moduleId ? { ...m, lessons: m.lessons.map((l) => ({ ...l, sort_order: lessons.findIndex((o) => o.id === l.id) })) } : m)));
+    settle();
+  }, [loadAll, markSaving, settle]);
+
+  const onReorderLessons = (moduleId: string, order: BuilderLesson[]) => {
+    setModules((prev) => prev.map((m) => (m.id === moduleId ? { ...m, lessons: order } : m)));
+  };
+
+  const moveLesson = (moduleId: string, lessonId: string, dir: -1 | 1) => {
+    const mod = modulesRef.current.find((m) => m.id === moduleId);
+    if (!mod) return;
+    const list = [...mod.lessons];
+    const from = list.findIndex((l) => l.id === lessonId);
+    const to = from + dir;
+    if (from < 0 || to < 0 || to >= list.length) return;
+    [list[from], list[to]] = [list[to], list[from]];
+    onReorderLessons(moduleId, list);
+    void persistLessonOrder(moduleId, list);
+  };
+
+  const createLesson = async (moduleId: string) => {
+    const mod = modulesRef.current.find((m) => m.id === moduleId);
+    if (!mod) return;
+    const { data, error } = await supabase.from("lessons")
+      .insert({ module_id: moduleId, title: "Nova aula", sort_order: nextOrder(mod.lessons) }).select().maybeSingle();
+    if (error || !data) { toast.error("Não foi possível criar a aula. Tente de novo."); return; }
+    const lesson = data as unknown as BuilderLesson;
+    void flushAll();
+    setModules((prev) => prev.map((m) => (m.id === moduleId ? { ...m, lessons: [...m.lessons, lesson] } : m)));
+    savedVideoRef.current[lesson.id] = lesson.video_url;
+    persistedOrderRef.current[moduleId] = [...mod.lessons, lesson].map((l) => l.id).join(",");
+    setExpanded((prev) => new Set(prev).add(moduleId));
+    applySelection(lesson);
+    setMobilePane("lesson");
+    invalidate(["courses"]);
+    toast.success("Aula criada.");
+    focusTitle();
+  };
+
+  const duplicateLesson = async (lesson: BuilderLesson) => {
+    const mod = modulesRef.current.find((m) => m.id === lesson.module_id);
+    if (!mod) return;
+    const source = mod.lessons.find((l) => l.id === lesson.id) ?? lesson;
+    const { data, error } = await supabase.from("lessons").insert({
+      module_id: source.module_id,
+      title: `${source.title} (cópia)`,
+      description: source.description,
+      video_url: source.video_url,
+      duration_minutes: source.duration_minutes,
+      is_free: source.is_free,
+      drip_days: source.drip_days,
+      sort_order: nextOrder(mod.lessons),
+    }).select().maybeSingle();
+    if (error || !data) { toast.error("Não foi possível duplicar a aula. Tente de novo."); return; }
+    const copy = data as unknown as BuilderLesson;
+    void flushAll();
+    setModules((prev) => prev.map((m) => (m.id === copy.module_id ? { ...m, lessons: [...m.lessons, copy] } : m)));
+    savedVideoRef.current[copy.id] = copy.video_url;
+    persistedOrderRef.current[mod.id] = [...mod.lessons, copy].map((l) => l.id).join(",");
+    applySelection(copy);
+    setMobilePane("lesson");
+    invalidate(["courses"]);
+    toast.success("Aula duplicada.");
+  };
+
+  // ─── Exclusão ────────────────────────────────────────────────────
+  const askDeleteModule = (id: string) => {
+    const mod = modulesRef.current.find((m) => m.id === id);
+    if (mod) setDeleteTarget({ type: "module", id, label: mod.title, lessons: mod.lessons.length });
+  };
+  const askDeleteLesson = (id: string) => {
+    const lesson = modulesRef.current.flatMap((m) => m.lessons).find((l) => l.id === id);
+    if (lesson) setDeleteTarget({ type: "lesson", id, label: lesson.title || "Aula sem título" });
+  };
+  const askDeleteAttachment = (att: BuilderAttachment) => setDeleteTarget({ type: "attachment", id: att.id, label: att.file_name, att });
+
+  const afterRemoval = (removedLessonIds: Set<string>) => {
+    const current = selectedIdRef.current;
+    if (!current || !removedLessonIds.has(current)) return;
+    const next = modulesRef.current.flatMap((m) => m.lessons).find((l) => !removedLessonIds.has(l.id));
+    if (next) applySelection(next);
+    else { setSelectedId(null); selectedIdRef.current = null; setAttachments([]); }
+    setMobilePane("list");
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      if (deleteTarget.type === "attachment") {
+        const { att } = deleteTarget;
+        const { error } = await supabase.from("lesson_attachments").delete().eq("id", att.id);
+        if (error) { toast.error("Não foi possível remover o material."); return; }
+        setAttachments((prev) => prev.filter((a) => a.id !== att.id));
+        void removeStorageFiles([courseContentPathFromUrl(att.file_url)]);
+        toast.success("Material removido.");
+        return;
+      }
+
+      const isModule = deleteTarget.type === "module";
+      const mod = isModule ? modulesRef.current.find((m) => m.id === deleteTarget.id) : null;
+      const lessons = isModule ? (mod?.lessons ?? []) : modulesRef.current.flatMap((m) => m.lessons).filter((l) => l.id === deleteTarget.id);
+      const lessonIds = new Set(lessons.map((l) => l.id));
+      const ids = Array.from(lessonIds);
+      dropPendingFor(lessonIds);
+
+      const failure = () => {
+        toast.error(`Não foi possível excluir ${isModule ? "o módulo" : "a aula"}. Recarreguei o conteúdo para mostrar o que ficou.`);
+        void loadAll({ keepView: true });
+      };
+
+      let attachmentPaths: (string | null)[] = [];
+      if (ids.length > 0) {
+        const { data: rows, error: readError } = await supabase.from("lesson_attachments").select("file_url").in("lesson_id", ids);
+        if (readError) { failure(); return; }
+        attachmentPaths = (rows ?? []).map((r) => courseContentPathFromUrl(r.file_url));
+        const { error: attError } = await supabase.from("lesson_attachments").delete().in("lesson_id", ids);
+        if (attError) { failure(); return; }
+        const { error: lessonError } = isModule
+          ? await supabase.from("lessons").delete().eq("module_id", deleteTarget.id)
+          : await supabase.from("lessons").delete().eq("id", deleteTarget.id);
+        if (lessonError) { failure(); return; }
+      }
+      if (isModule) {
+        const { error: moduleError } = await supabase.from("modules").delete().eq("id", deleteTarget.id);
+        if (moduleError) { failure(); return; }
+      }
+
+      // Só depois que o banco confirmou é que os arquivos saem do storage.
+      const videoPaths = lessons.map((l) => l.video_url).filter((u): u is string => !!u);
+      const stillUsed = new Set(modulesRef.current.flatMap((m) => m.lessons).filter((l) => !lessonIds.has(l.id)).map((l) => l.video_url));
+      void removeStorageFiles([...attachmentPaths, ...videoPaths.filter((u) => !stillUsed.has(u)).map((u) => courseContentPathFromUrl(u))]);
+
+      const remaining = modulesRef.current
+        .filter((m) => !(isModule && m.id === deleteTarget.id))
+        .map((m) => ({ ...m, lessons: m.lessons.filter((l) => !lessonIds.has(l.id)) }));
+      afterRemoval(lessonIds);
+      setModules(remaining);
+      modulesRef.current = remaining;
+      invalidate(["courses"]);
+      toast.success(isModule ? "Módulo excluído." : "Aula excluída.");
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
+    }
+  };
+
+  // ─── Área de membros ─────────────────────────────────────────────
+  const saveCourseSettings = async (values: { title: string; description: string }): Promise<boolean> => {
+    if (!course || !user) return false;
+    const updates = { title: values.title, description: values.description || null };
+    const { error } = await supabase.from("courses").update(updates).eq("id", course.id).eq("user_id", user.id);
+    if (error) { toast.error("Não foi possível salvar as configurações."); return false; }
+    setCourse((prev) => (prev ? { ...prev, ...updates } : prev));
+    invalidate(["courses"]);
+    toast.success("Configurações salvas.");
+    return true;
+  };
+
+  const handleCoverFile = async (file: File) => {
+    if (!user || !course) return;
+    if (!COVER_TYPES.includes(file.type)) { toast.error("Use uma imagem JPG, PNG ou WebP."); return; }
+    if (file.size > MAX_COVER_BYTES) { toast.error("A imagem passa de 5 MB."); return; }
+    setUploadingCover(true);
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${user.id}/thumbnails/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("product-images").upload(path, file);
+    if (error) { setUploadingCover(false); toast.error("Não foi possível enviar a capa. Tente de novo."); return; }
+    const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(path);
+    const { error: dbError } = await supabase.from("courses").update({ thumbnail_url: urlData.publicUrl }).eq("id", course.id).eq("user_id", user.id);
+    setUploadingCover(false);
+    if (dbError) {
+      void supabase.storage.from("product-images").remove([path]);
+      toast.error("Não foi possível salvar a capa. Tente de novo.");
+      return;
+    }
+    setCourse((prev) => (prev ? { ...prev, thumbnail_url: urlData.publicUrl } : prev));
+    invalidate(["courses"]);
+    toast.success("Capa atualizada.");
+  };
+
+  const handleRemoveCover = async () => {
+    if (!user || !course) return;
+    const { error } = await supabase.from("courses").update({ thumbnail_url: null }).eq("id", course.id).eq("user_id", user.id);
+    if (error) { toast.error("Não foi possível remover a capa."); return; }
+    setCourse((prev) => (prev ? { ...prev, thumbnail_url: null } : prev));
+    invalidate(["courses"]);
+    toast.success("Capa removida.");
+  };
+
+  const togglePublish = async () => {
+    if (!course || !user || publishing) return;
+    setPublishing(true);
+    const next = !course.is_published;
+    const { error } = await supabase.from("courses").update({ is_published: next }).eq("id", course.id).eq("user_id", user.id);
+    setPublishing(false);
+    if (error) { toast.error(next ? "Não foi possível publicar a área." : "Não foi possível despublicar a área."); return; }
+    setCourse((prev) => (prev ? { ...prev, is_published: next } : prev));
+    invalidate(["courses"]);
+    if (next) toast.success("Área publicada.", totalLessons === 0 ? { description: "Ela ainda não tem aulas. Adicione módulos e aulas para o aluno ver conteúdo." } : undefined);
+    else toast.success("Área despublicada.");
+  };
+
+  const openAsStudent = () => window.open(`/membros-area/curso/${courseId}`, "_blank", "noopener");
+  const goBack = () => navigate("/vendas/conteudo");
+
+  // ─── Estados de tela cheia ───────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="vp-seller-shell vp-stage flex h-[100dvh] flex-col" aria-busy="true">
+        <div className="flex h-[72px] shrink-0 items-center gap-3 border-b border-border bg-background px-4 sm:px-6">
+          <span className="vp-skel h-11 w-11 rounded-full" />
+          <span className="vp-skel h-6 w-56 rounded-full" />
+        </div>
+        <div className="min-h-0 flex-1 space-y-3 p-4 sm:p-5 lg:max-w-[380px]">
+          <span className="vp-skel block h-20 w-full rounded-[22px]" />
+          <span className="vp-skel block h-20 w-full rounded-[22px]" />
+          <span className="vp-skel block h-20 w-full rounded-[22px]" />
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError || !course) {
+    return (
+      <div className="vp-seller-shell vp-stage grid h-[100dvh] place-items-center px-4">
+        <div className="w-full max-w-[460px]">
+          <StepEmpty
+            icon={<AlertCircle className="h-7 w-7" />}
+            title={loadError ? "Não foi possível abrir esta área" : "Área de membros não encontrada"}
+            action={
+              <div className="flex flex-wrap justify-center gap-2">
+                {loadError && <button type="button" onClick={() => { setLoading(true); void loadAll(); }} className="vp-cta h-11 px-6">Tentar de novo</button>}
+                <button type="button" onClick={goBack} className="vp-ghost h-11 px-6"><ArrowLeft className="h-4 w-4" />Voltar para a lista</button>
+              </div>
+            }
+          >
+            {loadError ? "Confira a conexão e tente de novo." : "Ela pode ter sido excluída ou não pertencer a esta conta."}
+          </StepEmpty>
+        </div>
+      </div>
+    );
+  }
+
+  const subtitleParts = [plural(modules.length, "módulo", "módulos"), plural(totalLessons, "aula", "aulas")];
+  if (studentCount > 0) subtitleParts.push(plural(studentCount, "aluno", "alunos"));
+  const videoPercent = totalLessons > 0 ? Math.round((lessonsWithVideo / totalLessons) * 100) : 0;
+  const lessonIndex = selectedModule && selectedLesson ? selectedModule.lessons.findIndex((l) => l.id === selectedLesson.id) : 0;
+  const uploadingHere = uploadingVideo && uploadingVideo.lessonId === selectedId ? uploadingVideo : null;
+  const deleteBody = (() => {
+    if (!deleteTarget) return null;
+    if (deleteTarget.type === "module") {
+      return deleteTarget.lessons === 0
+        ? <>Este módulo não tem aulas. Não dá para desfazer.</>
+        : <>{deleteTarget.lessons === 1 ? "A aula dele some" : `As ${deleteTarget.lessons} aulas dele somem`}, com os vídeos enviados e os materiais. Não dá para desfazer.</>;
+    }
+    if (deleteTarget.type === "lesson") return <>O vídeo enviado e os materiais desta aula também são apagados. Não dá para desfazer.</>;
+    return <>O arquivo deixa de aparecer para os alunos e é apagado. Não dá para desfazer.</>;
+  })();
+  const deleteCopy = deleteTarget?.type === "module"
+    ? { title: "Excluir este módulo?", keep: "Manter módulo", confirm: "Excluir módulo" }
+    : deleteTarget?.type === "attachment"
+      ? { title: "Remover este material?", keep: "Manter material", confirm: "Remover material" }
+      : { title: "Excluir esta aula?", keep: "Manter aula", confirm: "Excluir aula" };
+
+  const publishButton = (
+    <button
+      type="button"
+      onClick={() => void togglePublish()}
+      disabled={publishing}
+      className={cn("px-5 sm:px-6", course.is_published ? "vp-ghost" : "vp-cta")}
+    >
+      {publishing ? <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : course.is_published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      {course.is_published ? "Despublicar" : "Publicar"}
+    </button>
+  );
 
   return (
-    <div className="fixed inset-0 z-[70] bg-background text-zinc-100 flex flex-col overflow-hidden selection:bg-blue-500/30 font-sans">
-      {/* ═══ PREMIUM TOP BAR ═══ */}
-      <header className="h-16 border-b border-white/[0.04] bg-background/80 backdrop-blur-xl flex items-center justify-between px-4 sm:px-6 shrink-0 z-50 relative">
-        <div className="relative flex items-center gap-4 min-w-0">
-          <button
-            onClick={() => navigate("/vendas/conteudo")}
-            className="group h-10 w-10 rounded-xl border border-white/[0.05] bg-white/[0.02] flex items-center justify-center hover:bg-white/[0.05] hover:border-white/[0.1] transition-all duration-300"
-          >
-            <ArrowLeft className="h-4 w-4 text-zinc-400 group-hover:text-white transition-colors" />
-          </button>
-
-          {/* Brand Logo/Icon */}
-          <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600  shrink-0 overflow-hidden relative group">
-            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-            <Sparkles className="h-5 w-5 text-white relative z-10" />
-          </div>
-
-          <div className="hidden sm:flex flex-col min-w-0">
+    <div className="vp-seller-shell vp-stage flex h-[100dvh] flex-col overflow-hidden">
+      <header className="z-30 shrink-0 border-b border-border bg-background">
+        <div className="flex h-[72px] items-center gap-3 px-4 sm:px-6">
+          <button type="button" onClick={goBack} aria-label="Voltar para as áreas de membros" className="vp-orb shrink-0"><ArrowLeft className="h-[18px] w-[18px]" /></button>
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2.5">
-              <span className="text-[11px] font-semibold text-zinc-500/80">Builder</span>
-              {course.is_published ? (
-                <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-semibold text-emerald-400">
-                  <span className="h-1 w-1 rounded-full bg-emerald-400 animate-pulse" /> Live
-                </span>
-              ) : (
-                <span className="px-2 py-0.5 rounded-full bg-zinc-800 border border-white/[0.05] text-[11px] font-semibold text-zinc-500">
-                  Rascunho
-                </span>
-              )}
+              <h1 className="truncate font-heading text-[19px] font-extrabold leading-tight tracking-[-0.03em] text-foreground">{course.title}</h1>
+              <StatusPill label={course.is_published ? "Publicada" : "Rascunho"} tone={course.is_published ? "ok" : "idle"} className="hidden shrink-0 sm:inline-flex" />
             </div>
-            <div className="flex items-center gap-3 mt-1">
-              <h1 className="font-display font-black text-white leading-none truncate max-w-[220px] lg:max-w-[400px] tracking-[-0.03em] text-[16px]">
-                {course.title}
-              </h1>
-              <div className="h-1 w-1 rounded-full bg-zinc-700" />
-              <span className="text-[11px] font-bold text-zinc-500 tabular-nums">
-                {modules.length} Módulos · {totalLessons} Aulas
-              </span>
-            </div>
+            <p className="truncate text-[13px] text-muted-foreground">{subtitleParts.join(", ")}</p>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          {/* Status Indicators */}
-          <AnimatePresence mode="wait">
-            <motion.div 
-              key={saveStatus} 
-              initial={{ opacity: 0, y: 5 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              exit={{ opacity: 0, y: -5 }} 
-              className="hidden md:flex items-center gap-2 h-9 px-3 rounded-lg border border-white/[0.05] bg-white/[0.02]"
-            >
-              {saveStatus === "idle" && <span className="text-[11px] text-zinc-600 font-medium ">Aguardando</span>}
-              {saveStatus === "saving" && (
-                <div className="flex items-center gap-2">
-                  <Loader2 className="h-3 w-3 animate-spin text-emerald-400" />
-                  <span className="text-[11px] text-zinc-400 font-medium ">Salvando...</span>
-                </div>
-              )}
-              {saveStatus === "saved" && (
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-                  <span className="text-[11px] text-emerald-400 font-medium ">Sincronizado</span>
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
-
-          <div className="h-8 w-px bg-white/[0.05] mx-2 hidden sm:block" />
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => navigate(`/vendas/conteudo/${courseId}/analytics`)}
-              className="group h-10 w-10 rounded-xl border border-white/[0.05] bg-white/[0.02] flex items-center justify-center hover:bg-white/[0.05] hover:border-emerald-500/30 hover:text-emerald-400 transition-all text-zinc-400"
-              title="Estatísticas"
-            >
-              <Activity className="h-4 w-4" />
-            </button>
-
-            <button
-              onClick={openCourseSettings}
-              className="group h-10 w-10 rounded-xl border border-white/[0.05] bg-white/[0.02] flex items-center justify-center hover:bg-white/[0.05] hover:border-white/[0.1] hover:text-white transition-all text-zinc-400"
-              title="Configurações"
-            >
-              <Settings className="h-4 w-4" />
-            </button>
-
-            {course.is_published && (
-              <button
-                onClick={() => window.open(`/membros-area/curso/${courseId}`, "_blank")}
-                className="hidden lg:flex h-10 px-5 rounded-xl border border-white/[0.05] bg-white/[0.02] text-[11px] font-semibold text-zinc-300 items-center gap-2 hover:bg-white/[0.05] hover:border-white/[0.1] transition-all"
-              >
-                <Eye className="h-4 w-4" /> Visualizar
+          <div role="status" aria-live="polite" className="hidden shrink-0 items-center md:flex">
+            {status === "saving" && <span className="inline-flex items-center gap-2 text-[13.5px] text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />Salvando…</span>}
+            {status === "saved" && <span className="inline-flex items-center gap-2 text-[13.5px] font-semibold text-primary"><Check className="h-4 w-4" strokeWidth={3} />Salvo</span>}
+            {status === "idle" && <span className="text-[13.5px] text-muted-foreground">Salva sozinho</span>}
+            {status === "error" && (
+              <button type="button" onClick={() => void retryFailed()} className="inline-flex items-center gap-2 rounded-full bg-destructive/10 px-3.5 py-1.5 text-[13.5px] font-semibold text-destructive hover:bg-destructive/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-destructive">
+                <AlertCircle className="h-4 w-4" />Falhou. Tentar de novo
               </button>
             )}
+          </div>
 
-            <button
-              onClick={togglePublish}
-              className={cn(
- "h-10 px-6 rounded-xl text-[11px] font-semibold flex items-center gap-2.5 transition-all duration-300 ",
-                course.is_published
-                  ? "bg-white text-black hover:bg-zinc-200"
-                  : "bg-emerald-500 text-white hover:bg-emerald-400 shadow-emerald-500/20"
-              )}
-            >
-              {course.is_published ? (
-                <>
-                  <EyeOff className="h-4 w-4" /> 
-                  <span>Pausar</span>
-                </>
-              ) : (
-                <>
-                  <Globe className="h-4 w-4" /> 
-                  <span>Publicar</span>
-                </>
-              )}
-            </button>
+          <div className="hidden items-center gap-2 md:flex">
+            <button type="button" onClick={() => setPreviewOpen(true)} className="vp-ghost"><Eye className="h-4 w-4" />Prévia</button>
+            <button type="button" onClick={() => navigate(`/vendas/conteudo/${courseId}/analytics`)} aria-label="Ver estatísticas" title="Estatísticas" className="vp-orb"><Activity className="h-[18px] w-[18px]" /></button>
+            <button type="button" onClick={() => setSettingsOpen(true)} aria-label="Configurações da área" title="Configurações" className="vp-orb"><Settings className="h-[18px] w-[18px]" /></button>
+            {course.is_published && (
+              <button type="button" onClick={openAsStudent} aria-label="Ver como aluno" title="Ver como aluno" className="vp-orb hidden lg:grid"><ExternalLink className="h-[18px] w-[18px]" /></button>
+            )}
+          </div>
+
+          <div className="md:hidden">
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <button type="button" aria-label="Mais ações" className="vp-orb"><MoreHorizontal className="h-[18px] w-[18px]" /></button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" collisionPadding={16} sideOffset={6} className={builderMenuContent}>
+                <BuilderMenuItem icon={Eye} label="Prévia do aluno" onSelect={() => setPreviewOpen(true)} />
+                <BuilderMenuItem icon={Activity} label="Estatísticas" onSelect={() => navigate(`/vendas/conteudo/${courseId}/analytics`)} />
+                <BuilderMenuItem icon={Settings} label="Configurações" onSelect={() => setSettingsOpen(true)} />
+                {course.is_published && (
+                  <>
+                    <DropdownMenuSeparator className="my-1 bg-border" />
+                    <BuilderMenuItem icon={ExternalLink} label="Ver como aluno" onSelect={openAsStudent} />
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div className="hidden shrink-0 md:block">{publishButton}</div>
+        </div>
+        <div className="flex items-center justify-between gap-3 border-t border-border px-4 py-2.5 md:hidden">
+          <div role="status" aria-live="polite" className="min-w-0">
+            {status === "saving" && <span className="inline-flex items-center gap-2 text-[13px] text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" />Salvando…</span>}
+            {status === "saved" && <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-primary"><Check className="h-3.5 w-3.5" strokeWidth={3} />Salvo</span>}
+            {status === "idle" && <span className="text-[13px] text-muted-foreground">Salva sozinho</span>}
+            {status === "error" && (
+              <button type="button" onClick={() => void retryFailed()} className="inline-flex items-center gap-2 text-[13px] font-semibold text-destructive"><AlertCircle className="h-3.5 w-3.5" />Falhou. Tentar de novo</button>
+            )}
+          </div>
+          <div className="flex shrink-0 items-center gap-2.5">
+            <StatusPill label={course.is_published ? "Publicada" : "Rascunho"} tone={course.is_published ? "ok" : "idle"} className="!h-6 !text-[12px]" />
+            <div className="[&_button]:!h-10 [&_button]:!px-4">{publishButton}</div>
           </div>
         </div>
       </header>
 
-      {/* ═══ MAIN LAYOUT ═══ */}
-      <div className="flex-1 flex overflow-hidden relative bg-background">
-        {/* Background Gradients */}
-        <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-blue-500/[0.03] blur-[150px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-indigo-500/[0.03] blur-[150px] rounded-full pointer-events-none" />
-
-        {/* ─── LEFT: Curriculum Sidebar ─── */}
-        <AnimatePresence initial={false}>
-          {!sidebarCollapsed && (
-            <motion.aside
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 380, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-background/40 backdrop-blur-xl border-r border-white/[0.04] flex flex-col overflow-hidden shrink-0 z-20"
-            >
-              {/* Sidebar Header */}
-              <div className="px-6 py-5 border-b border-white/[0.04] flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-                    <Layers className="h-5 w-5 text-emerald-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <h2 className="text-[13px] font-display font-semibold text-white block leading-tight">Conteúdo</h2>
-                    <span className="text-[11px] text-zinc-500 font-medium ">
-                      {totalLessons} Aulas no total
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setShowNewModule(true)}
-                    className="h-8 w-8 rounded-lg flex items-center justify-center bg-emerald-500 text-white hover:bg-emerald-400  shadow-emerald-500/10 transition-all"
-                    title="Adicionar Módulo"
-                  >
-                    <Plus className="h-4 w-4" strokeWidth={3} />
-                  </button>
-                  <button
-                    onClick={() => setSidebarCollapsed(true)}
-                    className="h-8 w-8 rounded-lg flex items-center justify-center border border-white/[0.05] bg-white/[0.02] text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all"
-                  >
-                    <PanelLeftClose className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Modules list */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ WebkitOverflowScrolling: "touch" }}>
-                {modules.map((mod, idx) => {
-                  const lessonsWithVideo = mod.lessons.filter(l => l.video_url).length;
-                  const modPct = mod.lessons.length > 0 ? Math.round((lessonsWithVideo / mod.lessons.length) * 100) : 0;
-                  const isExpanded = expandedModules.has(mod.id);
-                  const containsActive = mod.lessons.some(l => l.id === selectedLesson?.id);
-
-                  return (
-                    <div
-                      key={mod.id}
-                      className={cn(
- "group/mod overflow-hidden rounded-[12px] border transition-all duration-300",
-                        containsActive 
-                          ? "border-emerald-500/40 bg-emerald-500/[0.03] " 
-                          : "border-white/[0.03] bg-white/[0.01] hover:border-white/[0.1] hover:bg-white/[0.02]"
-                      )}
-                    >
-                      {/* Module Header */}
-                      <div
-                        className={cn(
- "flex items-center gap-3 px-4 py-4 cursor-pointer relative",
-                          isExpanded ? "bg-white/[0.02]" : ""
-                        )}
-                        onClick={() => toggleExpand(mod.id)}
-                      >
-                        {containsActive && <div className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-emerald-500" />}
-                        
-                        <motion.div animate={{ rotate: isExpanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
-                          <ChevronRight className="h-4 w-4 text-zinc-600" />
-                        </motion.div>
-
-                        <div className={cn(
- "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 text-[11px] font-black border tabular-nums transition-all duration-300",
-                          containsActive 
-                            ? "bg-emerald-500 text-white border-emerald-400  shadow-emerald-500/20"
-                            : isExpanded 
-                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                            : "bg-zinc-900 text-zinc-600 border-white/[0.05]"
-                        )}>
-                          {idx + 1}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          {editingModuleId === mod.id ? (
-                            <input
-                              autoFocus
-                              value={editingModuleTitle}
-                              onChange={e => setEditingModuleTitle(e.target.value)}
-                              onBlur={() => renameModule(mod.id, editingModuleTitle)}
-                              onKeyDown={e => { 
-                                if (e.key === "Enter") renameModule(mod.id, editingModuleTitle); 
-                                if (e.key === "Escape") setEditingModuleId(null); 
-                              }}
-                              onClick={e => e.stopPropagation()}
-                              className="w-full text-[14px] font-bold text-white bg-transparent focus:outline-none border-b border-emerald-500/50 pb-0.5"
-                            />
-                          ) : (
-                            <p className="text-[14px] font-bold text-zinc-100 truncate tracking-tight group-hover/mod:text-white transition-colors">
-                              {mod.title}
-                            </p>
-                          )}
-                          <div className="flex items-center gap-3 mt-1.5">
-                            <span className="text-[11px] text-zinc-500 font-medium tabular-nums">
-                              {mod.lessons.length} {mod.lessons.length === 1 ? "aula" : "aulas"}
-                            </span>
-                            {mod.lessons.length > 0 && (
-                              <div className="flex items-center gap-2 flex-1 max-w-[80px]">
-                                <div className="h-1 flex-1 bg-white/[0.03] rounded-full overflow-hidden">
-                                  <motion.div
-                                    className={cn("h-full transition-all duration-500", modPct === 100 ? "bg-emerald-500" : "bg-zinc-700")}
-                                    animate={{ width: `${modPct}%` }}
-                                  />
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1 opacity-0 group-hover/mod:opacity-100 transition-opacity">
-                          <button
-                            onClick={e => { e.stopPropagation(); setEditingModuleId(mod.id); setEditingModuleTitle(mod.title); }}
-                            className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-white/[0.05] text-zinc-500 hover:text-white transition-all"
-                          >
-                            <Settings className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={e => { e.stopPropagation(); deleteModule(mod.id); }}
-                            className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-red-500/10 text-zinc-500 hover:text-red-400 transition-all"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Lessons List */}
-                      <AnimatePresence initial={false}>
-                        {isExpanded && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                          >
-                            <div className="px-2 pb-3 bg-black/20">
-                              <Reorder.Group 
-                                axis="y" 
-                                values={mod.lessons} 
-                                onReorder={newOrder => reorderLessons(mod.id, newOrder)} 
-                                className="space-y-1"
-                              >
-                                {mod.lessons.map((lesson, li) => {
-                                  const isActive = selectedLesson?.id === lesson.id;
-                                  const hasVideo = !!lesson.video_url;
-                                  return (
-                                    <Reorder.Item
-                                      key={lesson.id}
-                                      value={lesson}
-                                      className={cn(
- "group/lesson flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer transition-all duration-300",
-                                        isActive
-                                          ? "bg-white/[0.08] border border-white/[0.1] "
-                                          : "hover:bg-white/[0.03] border border-transparent"
-                                      )}
-                                      onClick={() => selectLesson(lesson)}
-                                    >
-                                      <GripVertical className="h-3.5 w-3.5 text-zinc-700 group-hover/lesson:text-zinc-500 opacity-0 group-hover/lesson:opacity-100 transition-all shrink-0" />
-                                      
-                                      <div className={cn(
- "h-6 w-6 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-black border transition-all duration-300",
-                                        isActive
-                                          ? "bg-emerald-500 text-white border-emerald-400 shadow-emerald-500/20"
-                                          : hasVideo
-                                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                                          : "bg-zinc-900 text-zinc-600 border-white/[0.03]"
-                                      )}>
-                                        {hasVideo ? <Play className="h-2.5 w-2.5 fill-current" /> : li + 1}
-                                      </div>
-
-                                      <div className="flex-1 min-w-0">
-                                        <p className={cn(
- "text-[13px] font-bold truncate tracking-tight transition-colors",
-                                          isActive ? "text-white" : "text-zinc-400 group-hover/lesson:text-zinc-200"
-                                        )}>
-                                          {lesson.title}
-                                        </p>
-                                        <div className="flex items-center gap-2.5 mt-1">
-                                          {lesson.is_free && (
-                                            <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">FREE</span>
-                                          )}
-                                          <div className="flex items-center gap-1.5">
-                                            <div className={cn("h-1 w-1 rounded-full", hasVideo ? "bg-emerald-500 " : "bg-zinc-700")} />
-                                            <span className="text-[11px] font-medium text-zinc-600 ">
-                                              {hasVideo ? "Pronta" : "Vazia"}
-                                            </span>
-                                          </div>
-                                        </div>
-                                      </div>
-
-                                      <div className="flex items-center gap-1 opacity-0 group-hover/lesson:opacity-100 transition-all">
-                                        <button
-                                          onClick={e => { e.stopPropagation(); duplicateLesson(lesson); }}
-                                          className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-white/[0.05] text-zinc-600 hover:text-white transition-all"
-                                        >
-                                          <Copy className="h-3.5 w-3.5" />
-                                        </button>
-                                        <button
-                                          onClick={e => { e.stopPropagation(); deleteLesson(lesson.id); }}
-                                          className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-red-500/10 text-zinc-600 hover:text-red-400 transition-all"
-                                        >
-                                          <Trash2 className="h-3.5 w-3.5" />
-                                        </button>
-                                      </div>
-                                    </Reorder.Item>
-                                  );
-                                })}
-                              </Reorder.Group>
-
-                              <button
-                                onClick={() => createLesson(mod.id)}
-                                className="w-full mt-2 flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/[0.05] bg-white/[0.01] text-zinc-500 hover:text-emerald-400 hover:border-emerald-500/30 hover:bg-emerald-500/[0.02] transition-all group/add"
-                              >
-                                <Plus className="h-4 w-4 group-hover/add:scale-110 transition-transform" />
-                                <span className="text-[11px] font-semibold ">Nova Aula</span>
-                              </button>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  );
-                })}
-
- {/* New Module */}
- {showNewModule ? (
- <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="bg-card border border-primary p-3 space-y-2.5">
-   <div className="text-[11px] font-semibold text-primary">Novo módulo</div>
- <input
- autoFocus value={newModuleTitle}
- onChange={e => setNewModuleTitle(e.target.value)}
- onKeyDown={e => { if (e.key === "Enter") createModule(); if (e.key === "Escape") setShowNewModule(false); }}
- placeholder="Ex: Introdução ao curso"
- className="w-full bg-card-elevated border border-border px-2.5 py-2 text-[13px] font-display font-semibold text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary"
- />
- <div className="flex gap-1.5">
- <button onClick={createModule} className="flex-1 h-9 bg-primary text-primary-foreground text-[11px] font-display font-semibold hover:bg-primary/90 transition-colors">Criar módulo</button>
- <button onClick={() => { setShowNewModule(false); setNewModuleTitle(""); }} className="h-9 px-3 bg-card-elevated border border-border text-muted-foreground text-[11px] font-display font-semibold hover:text-foreground transition-colors">Cancelar</button>
- </div>
- </motion.div>
- ) : (
- <button
- onClick={() => setShowNewModule(true)}
- className="w-full border border-dashed border-border py-3 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary hover:border-primary hover:bg-primary/[0.06] transition-colors"
- >
- <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
- <span className="text-[11px] font-display font-semibold ">Novo módulo</span>
- </button>
- )}
- </div>
- </motion.aside>
- )}
- </AnimatePresence>
-
- {/* Sidebar toggle */}
- <AnimatePresence>
- {sidebarCollapsed && (
- <motion.button
- initial={{ opacity: 0, x: -10 }}
- animate={{ opacity: 1, x: 0 }}
- exit={{ opacity: 0, x: -10 }}
- onClick={() => setSidebarCollapsed(false)}
- className="absolute left-3 top-3 z-40 h-9 w-9 bg-card border border-border flex items-center justify-center hover:bg-card-elevated hover:border-foreground/40 transition-colors"
- >
- <PanelLeft className="h-4 w-4 text-muted-foreground/40" />
- </motion.button>
- )}
- </AnimatePresence>
-
-        {/* ─── RIGHT: Lesson Editor ─── */}
-        <main className="flex-1 bg-background overflow-y-auto z-10" style={{ WebkitOverflowScrolling: "touch" }}>
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-500/[0.03] blur-[150px] rounded-full pointer-events-none" />
-          
-          {selectedLesson ? (
-            <div className="w-full max-w-4xl mx-auto px-6 sm:px-12 py-10 sm:py-16 space-y-12 relative z-10">
-              {/* Lesson Header */}
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.05] flex items-center gap-2">
-                    <span className="text-[11px] font-semibold text-zinc-500">
-                      {modules.find(m => m.lessons.some(l => l.id === selectedLesson.id))?.title}
-                    </span>
-                  </div>
-                  <div className="h-1 w-1 rounded-full bg-zinc-800" />
-                  <span className="text-[11px] font-semibold text-emerald-500/80">Aula Atual</span>
-                </div>
-
-                {editingLessonTitle ? (
-                  <input
-                    ref={titleInputRef}
-                    value={lessonTitle}
-                    onChange={e => setLessonTitle(e.target.value)}
-                    onBlur={() => { 
-                      setEditingLessonTitle(false); 
-                      if (lessonTitle.trim() && lessonTitle !== selectedLesson.title) autoSave("title", lessonTitle.trim()); 
-                    }}
-                    onKeyDown={e => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-                    className="w-full bg-transparent text-[44px] sm:text-[64px] font-display font-black tracking-[-0.05em] leading-[0.9] text-white focus:outline-none border-b-2 border-emerald-500/50 pb-4 "
-                    autoFocus
-                  />
-                ) : (
-                  <h2
-                    onClick={() => { setEditingLessonTitle(true); setTimeout(() => titleInputRef.current?.focus(), 50); }}
-                    className="text-[44px] sm:text-[64px] font-display font-black tracking-[-0.05em] leading-[0.9] text-white cursor-text hover:text-white/80 transition-all duration-300 drop-"
-                  >
-                    {lessonTitle || "Sem título"}
-                  </h2>
-                )}
-              </motion.div>
-
-              {/* ── Editor Tabs ── */}
-              <div className="flex items-center gap-1 p-1 rounded-[12px] bg-white/[0.02] border border-white/[0.05] w-fit">
-                {editorTabs.map(tab => {
-                  const isActive = activeEditorTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveEditorTab(tab.id)}
-                      className={cn(
- "relative flex items-center gap-2.5 px-6 h-11 rounded-xl text-[11px] font-semibold transition-all duration-300",
-                        isActive
-                          ? "bg-white text-black "
-                          : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.03]"
-                      )}
-                    >
-                      <tab.icon className="h-4 w-4" />
-                      <span>{tab.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
- {/* ── Tab Content ── */}
- <AnimatePresence mode="wait">
- <motion.div
- key={activeEditorTab}
- initial={{ opacity: 0, y: 8 }}
- animate={{ opacity: 1, y: 0 }}
- exit={{ opacity: 0, y: -8 }}
- transition={{ duration: 0.2, ease }}
- className="space-y-5"
- >
-                {/* ─── VIDEO TAB ─── */}
-                {activeEditorTab === "video" && (
-                  <div className="space-y-6">
-                    <div className="rounded-[14px] border border-white/[0.04] bg-white/[0.01] overflow-hidden group/player">
-                      {uploadingVideo ? (
-                        <div className="aspect-video flex flex-col items-center justify-center gap-8 p-12 bg-white/[0.02]">
-                          <div className="relative">
-                            <div className="h-20 w-20 rounded-[12px] border border-emerald-500/20 bg-emerald-500/5 flex items-center justify-center">
-                              <Loader2 className="h-8 w-8 animate-spin text-emerald-400" />
-                            </div>
-                            <div className="absolute -inset-2 rounded-[12px] border border-emerald-500/20 animate-pulse" />
-                          </div>
-                          <div className="w-full max-w-sm">
-                            <div className="flex justify-between text-[12px] mb-3">
-                              <span className="font-semibold text-white">Processando Vídeo</span>
-                              <span className="font-black text-emerald-400 tabular-nums">{Math.round(videoUploadProgress)}%</span>
-                            </div>
-                            <div className="h-1.5 bg-white/[0.03] rounded-full overflow-hidden border border-white/[0.05]">
-                              <motion.div className="h-full bg-emerald-500 " animate={{ width: `${videoUploadProgress}%` }} transition={{ ease: "easeOut" }} />
-                            </div>
-                          </div>
-                          <p className="text-[11px] text-zinc-500 font-medium ">Otimizando para 4K • Não feche a aba</p>
-                        </div>
-                      ) : lessonVideoUrl ? (
-                        <div className="relative aspect-video bg-black  overflow-hidden group">
-                          {isDirectVideoUrl(lessonVideoUrl) ? (
-                            <video controls className="w-full h-full" src={lessonVideoUrl} />
-                          ) : getVideoEmbed(lessonVideoUrl) ? (
-                            <iframe
-                              src={getVideoEmbed(lessonVideoUrl)!}
-                              className="w-full h-full"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
-                          ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center bg-white/[0.02] gap-4">
-                              <Video className="h-12 w-12 text-emerald-500/40" />
-                              <p className="text-zinc-500 font-medium text-sm ">Streaming Ativo</p>
-                            </div>
-                          )}
-                          
-                          <button
-                            onClick={() => { setLessonVideoUrl(""); autoSave("video_url", null); }}
-                            className="absolute top-4 right-4 h-11 w-11 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div
-                          className="aspect-video flex flex-col items-center justify-center gap-6 cursor-pointer hover:bg-white/[0.03] transition-all duration-500 group/upload relative overflow-hidden"
-                          onClick={() => videoInputRef.current?.click()}
-                          onDragOver={e => e.preventDefault()}
-                          onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleVideoUpload(f); }}
-                        >
-                          <div className="relative">
-                            <div className="h-24 w-24 rounded-[14px] border border-dashed border-white/[0.1] flex items-center justify-center group-hover/upload:border-emerald-500/40 group-hover/upload:bg-emerald-500/[0.03] transition-all duration-500">
-                              <Upload className="h-8 w-8 text-zinc-600 group-hover/upload:text-emerald-400 group-hover/upload:scale-110 transition-all duration-500" />
-                            </div>
-                            <div className="absolute -inset-4 rounded-[14px] border border-emerald-500/0 group-hover/upload:border-emerald-500/10 transition-all duration-700 animate-[ping_3s_infinite_alternate]" />
-                          </div>
-                          <div className="text-center relative z-10">
-                            <h3 className="text-[14px] font-semibold text-white">Upload de Vídeo</h3>
-                            <p className="text-[11px] text-zinc-500 mt-2 font-medium ">Arraste arquivos 4K (MP4, MKV, MOV) • Máx 500MB</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="relative group">
-                      <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                        <Globe className="h-4 w-4 text-zinc-600 group-focus-within:text-emerald-400 transition-colors" />
-                      </div>
-                      <input
-                        value={lessonVideoUrl}
-                        onChange={e => { setLessonVideoUrl(e.target.value); debouncedSave("video_url", e.target.value || null); }}
-                        placeholder="Importar via Link (Youtube, Vimeo, Wistia...)"
-                        className="w-full h-14 pl-14 pr-6 rounded-[12px] bg-white/[0.02] border border-white/[0.05] text-[14px] font-medium text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/40 focus:bg-white/[0.04] transition-all"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* ─── CONTENT TAB ─── */}
-                {activeEditorTab === "content" && (
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                    <div className="lg:col-span-8 space-y-6">
-                      <div className="rounded-[14px] border border-white/[0.04] bg-white/[0.01] overflow-hidden">
-                        <div className="flex items-center gap-3 px-6 py-5 border-b border-white/[0.04] bg-white/[0.02]">
-                          <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                            <FileText className="h-5 w-5 text-emerald-400" />
-                          </div>
-                          <div>
-                            <h3 className="text-[12px] font-semibold text-white">Resumo da Aula</h3>
-                            <span className="text-[11px] text-zinc-500 font-medium mt-0.5 block">Explique os pontos chave</span>
-                          </div>
-                        </div>
-                        <textarea
-                          value={lessonDescription}
-                          onChange={e => { setLessonDescription(e.target.value); debouncedSave("description", e.target.value || null); }}
-                          placeholder="Digite aqui as notas da aula, referências e links importantes..."
-                          rows={12}
-                          className="w-full bg-transparent p-8 text-[16px] text-zinc-300 placeholder:text-zinc-700 leading-relaxed focus:outline-none resize-none font-medium"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="lg:col-span-4 space-y-6">
-                      <div className="rounded-[14px] border border-white/[0.04] bg-white/[0.01] overflow-hidden">
-                        <div className="px-6 py-5 border-b border-white/[0.04] bg-white/[0.02] flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="h-9 w-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-                              <Paperclip className="h-4 w-4 text-blue-400" />
-                            </div>
-                            <h3 className="text-[12px] font-semibold text-white">Materiais</h3>
-                          </div>
-                          <button
-                            onClick={() => attachmentInputRef.current?.click()}
-                            disabled={uploadingAttachment}
-                            className="h-8 w-8 rounded-lg bg-white/[0.05] border border-white/[0.1] text-zinc-400 hover:text-white hover:bg-white/[0.1] transition-all flex items-center justify-center"
-                          >
-                            {uploadingAttachment ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-4 w-4" />}
-                          </button>
-                        </div>
-                        
-                        <div className="p-4">
-                          {attachments.length > 0 ? (
-                            <div className="space-y-2">
-                              {attachments.map(att => (
-                                <div key={att.id} className="group/att flex items-center gap-3 p-3 rounded-[12px] border border-white/[0.03] bg-white/[0.01] hover:border-white/[0.1] hover:bg-white/[0.03] transition-all">
-                                  <div className="h-9 w-9 rounded-lg bg-zinc-900 border border-white/[0.05] flex items-center justify-center shrink-0">
-                                    <File className="h-4 w-4 text-zinc-500" />
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-[11px] font-bold text-zinc-200 truncate tracking-tight">{att.file_name}</p>
-                                    <p className="text-[11px] text-zinc-600 font-medium mt-0.5">{formatFileSize(att.file_size)}</p>
-                                  </div>
-                                  <div className="flex items-center gap-1 opacity-0 group-hover/att:opacity-100 transition-all">
-                                    <a href={att.file_url} target="_blank" rel="noopener noreferrer" className="h-7 w-7 rounded-md bg-white/[0.05] flex items-center justify-center hover:bg-white/[0.1] transition-all">
-                                      <Download className="h-3.5 w-3.5 text-zinc-400" />
-                                    </a>
-                                    <button onClick={() => deleteAttachment(att)} className="h-7 w-7 rounded-md bg-red-500/10 flex items-center justify-center hover:bg-red-500/20 transition-all">
-                                      <Trash2 className="h-3.5 w-3.5 text-red-400/80" />
-                                    </button>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div
-                              className="border border-dashed border-white/[0.05] rounded-[12px] py-12 flex flex-col items-center gap-4 text-zinc-600 hover:text-zinc-400 hover:border-white/[0.1] hover:bg-white/[0.01] transition-all cursor-pointer"
-                              onClick={() => attachmentInputRef.current?.click()}
-                            >
-                              <div className="h-12 w-12 rounded-[12px] bg-zinc-900 border border-white/[0.05] flex items-center justify-center">
-                                <Plus className="h-5 w-5" />
-                              </div>
-                              <p className="text-[11px] font-semibold ">Adicionar Anexos</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
- {/* ─── SETTINGS TAB ─── */}
-                {activeEditorTab === "settings" && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Duration */}
-                    <div className="rounded-[14px] border border-white/[0.04] bg-white/[0.01] p-6 hover:bg-white/[0.02] transition-all group">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="h-12 w-12 rounded-[12px] bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <Clock className="h-5 w-5 text-blue-400" />
-                          </div>
-                          <div>
-                            <p className="text-[12px] font-semibold text-white leading-none">Duração Estimada</p>
-                            <p className="text-[11px] text-zinc-500 mt-1.5 font-medium ">Informação visual para o aluno</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="number" min={0} value={lessonDuration}
-                            onChange={e => { const v = parseInt(e.target.value) || 0; setLessonDuration(v); debouncedSave("duration_minutes", v); }}
-                            className="h-12 w-20 rounded-xl bg-muted border border-white/[0.05] text-center text-[15px] font-black tabular-nums text-white focus:outline-none focus:border-blue-500/40 transition-all"
-                          />
-                          <span className="text-[11px] text-zinc-600 font-medium ">min</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Free Lesson */}
-                    <div className="rounded-[14px] border border-white/[0.04] bg-white/[0.01] p-6 hover:bg-white/[0.02] transition-all group">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="h-12 w-12 rounded-[12px] bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <Globe className="h-5 w-5 text-emerald-400" />
-                          </div>
-                          <div>
-                            <p className="text-[12px] font-semibold text-white leading-none">Aula de Degustação</p>
-                            <p className="text-[11px] text-zinc-500 mt-1.5 font-medium ">Disponível sem compra ativa</p>
-                          </div>
-                        </div>
-                        <Switch checked={lessonIsFree} onCheckedChange={v => { setLessonIsFree(v); autoSave("is_free", v); }} />
-                      </div>
-                    </div>
-
-                    {/* Drip */}
-                    <div className="rounded-[14px] border border-white/[0.04] bg-white/[0.01] p-6 hover:bg-white/[0.02] transition-all group md:col-span-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="h-12 w-12 rounded-[12px] bg-orange-500/10 border border-orange-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <Calendar className="h-5 w-5 text-orange-400" />
-                          </div>
-                          <div>
-                            <p className="text-[12px] font-semibold text-white leading-none">Liberação Programada (Drip)</p>
-                            <p className="text-[11px] text-zinc-500 mt-1.5 font-medium ">Gotejamento por dias após a compra</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <Switch
-                            checked={lessonDripEnabled}
-                            onCheckedChange={v => {
-                              setLessonDripEnabled(v);
-                              if (!v) { setLessonDripDays(0); autoSave("drip_days", 0); }
-                            }}
-                          />
-                          <AnimatePresence>
-                            {lessonDripEnabled && (
-                              <motion.div initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: "auto" }} exit={{ opacity: 0, width: 0 }} className="flex items-center gap-3 overflow-hidden">
-                                <input
-                                  type="number" min={0} value={lessonDripDays}
-                                  onChange={e => { const v = parseInt(e.target.value) || 0; setLessonDripDays(v); debouncedSave("drip_days", v); }}
-                                  className="h-12 w-20 rounded-xl bg-muted border border-white/[0.05] text-center text-[15px] font-black tabular-nums text-white focus:outline-none focus:border-orange-500/40 transition-all"
-                                />
-                                <span className="text-[11px] text-zinc-600 font-medium whitespace-nowrap">dias</span>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Danger Zone */}
-                    <div className="rounded-[14px] border border-red-500/10 bg-red-500/[0.02] p-6 hover:bg-red-500/[0.04] transition-all group md:col-span-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="h-12 w-12 rounded-[12px] bg-red-500/10 border border-red-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <Trash2 className="h-5 w-5 text-red-400" />
-                          </div>
-                          <div>
-                            <p className="text-[12px] font-semibold text-red-400 leading-none">Zona Crítica</p>
-                            <p className="text-[11px] text-zinc-500 mt-1.5 font-medium ">Esta ação removerá permanentemente a aula</p>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          onClick={() => deleteLesson(selectedLesson.id)}
-                          className="h-12 px-6 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 text-[11px] font-semibold hover:bg-red-500 hover:text-white transition-all"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" /> Excluir Aula
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
- </motion.div>
- </AnimatePresence>
- </div>
-  ) : (
-   /* ── Builder CTA — never dead, always actionable ── */
-   <div className="h-full flex items-center justify-center px-6 py-10 relative overflow-hidden">
-     {/* subtle grid backdrop to feel like a "stage" */}
-     <div
-       className="absolute inset-0 opacity-[0.04] pointer-events-none"
-       style={{ backgroundImage: "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)", backgroundSize: "32px 32px" }}
-     />
-     <motion.div
-       initial={{ opacity: 0, y: 16 }}
-       animate={{ opacity: 1, y: 0 }}
-       transition={{ duration: 0.4, ease }}
-       className="relative w-full max-w-xl"
-     >
-        {modules.length === 0 ? (
-          <div className="border border-border bg-card p-8 sm:p-10">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="h-11 w-11 border border-primary bg-primary/10 flex items-center justify-center">
-                <Layers className="h-5 w-5 text-primary" strokeWidth={1.8} />
-              </div>
-              <div>
-                <div className="text-[11px] font-medium text-primary tabular-nums">Passo 01 / 02</div>
-                <h3 className="font-display text-lg font-black tracking-tight text-foreground">Crie o primeiro módulo</h3>
-              </div>
-            </div>
-            <p className="text-sm leading-relaxed text-muted-foreground mb-6">
-              Módulos são as <span className="text-foreground font-semibold">seções</span> do seu curso. Cada módulo agrupa várias aulas em vídeo, anexos e configurações de acesso.
+      <div className="min-h-0 flex-1 lg:grid lg:grid-cols-[400px_minmax(0,1fr)]">
+        <aside
+          aria-label="Módulos e aulas"
+          className={cn("h-full min-h-0 overflow-y-auto overscroll-contain bg-background lg:border-r lg:border-border", mobilePane === "lesson" ? "hidden lg:block" : "block")}
+        >
+          <div className="border-b border-border px-5 py-4">
+            <h2 className="font-heading text-[17px] font-extrabold leading-tight tracking-[-0.02em] text-foreground">Módulos e aulas</h2>
+            <p className="mt-0.5 text-[13px] text-muted-foreground">
+              {totalLessons === 0 ? "Nenhuma aula criada ainda." : `${lessonsWithVideo} de ${plural(totalLessons, "aula", "aulas")} com vídeo.`}
             </p>
-            <div className="flex items-center gap-2">
-              <Button onClick={() => { setSidebarCollapsed(false); setShowNewModule(true); }} className="gap-2 rounded-none bg-primary text-primary-foreground font-display font-medium text-[11px] h-11 px-6 hover:bg-primary/90">
-                <Plus className="h-4 w-4" /> Criar módulo
-              </Button>
-              <Button variant="ghost" onClick={openCourseSettings} className="gap-2 rounded-none border border-border bg-card font-display font-medium text-[11px] h-11 px-4 text-muted-foreground hover:border-primary hover:text-primary">
-                <Settings className="h-4 w-4" /> Configurar curso
-              </Button>
-            </div>
-            <div className="mt-6 pt-5 border-t border-border grid grid-cols-3 gap-3">
-              {[
-                { icon: Layers, label: "Módulos", value: "00" },
-                { icon: PlayCircle, label: "Aulas", value: "00" },
-                { icon: Users, label: "Alunos", value: String(studentCount).padStart(2, "0") },
-              ].map((s) => (
-                <div key={s.label} className="text-center">
-                  <s.icon className="h-3.5 w-3.5 mx-auto text-muted-foreground" strokeWidth={1.8} />
-                  <div className="mt-1 font-numbers text-base font-black tabular-nums text-foreground">{s.value}</div>
-                  <div className="text-[11px] font-medium text-muted-foreground">{s.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : totalLessons === 0 ? (
-          <div className="border border-border bg-card p-8 sm:p-10">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="h-11 w-11 border border-primary bg-primary/10 flex items-center justify-center">
-                <PlayCircle className="h-5 w-5 text-primary" strokeWidth={1.8} />
+            {totalLessons > 0 && (
+              <div role="progressbar" aria-label="Aulas com vídeo" aria-valuemin={0} aria-valuemax={100} aria-valuenow={videoPercent} className="mt-3 h-1.5 overflow-hidden rounded-full bg-border">
+                <div className="h-full rounded-full bg-primary transition-[width] duration-500 motion-reduce:transition-none" style={{ width: `${videoPercent}%` }} />
               </div>
-              <div>
-                <div className="text-[11px] font-medium text-primary tabular-nums">Passo 02 / 02</div>
-                <h3 className="font-display text-lg font-black tracking-tight text-foreground">Adicione a primeira aula</h3>
-              </div>
-            </div>
-            <p className="text-sm leading-relaxed text-muted-foreground mb-5">
-              Você tem <span className="text-foreground font-semibold tabular-nums">{modules.length}</span> módulo{modules.length !== 1 ? "s" : ""}. Escolha onde criar a primeira aula:
-            </p>
-            <div className="space-y-1.5 mb-6 max-h-[200px] overflow-y-auto">
-              {modules.map((m, i) => (
-                <button
-                  key={m.id}
-                  onClick={() => createLesson(m.id)}
-                  className="group w-full flex items-center gap-3 px-3 py-2.5 border border-border bg-card-elevated hover:border-primary hover:bg-primary/5 transition-colors text-left"
-                >
-                  <span className="h-7 w-7 bg-card border border-border flex items-center justify-center text-[11px] font-display font-black tabular-nums text-muted-foreground group-hover:text-primary group-hover:border-primary">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span className="flex-1 truncate text-sm font-semibold text-foreground">{m.title}</span>
-                  <span className="text-[11px] font-medium text-muted-foreground group-hover:text-primary">+ Aula</span>
-                </button>
-              ))}
-            </div>
-            <Button onClick={() => createLesson(modules[0].id)} className="gap-2 rounded-none bg-primary text-primary-foreground font-display font-medium text-[11px] h-11 px-6 w-full hover:bg-primary/90">
-              <Plus className="h-4 w-4" /> Criar aula no primeiro módulo
-            </Button>
+            )}
           </div>
-        ) : (
-          <div className="border border-border bg-card p-8 sm:p-10 text-center">
-            <div className="h-14 w-14 mx-auto border border-primary bg-primary/10 flex items-center justify-center mb-4">
-              <BookOpen className="h-6 w-6 text-primary" strokeWidth={1.8} />
+          <CurriculumPanel
+            modules={modules}
+            selectedLessonId={selectedId}
+            expanded={expanded}
+            onToggleExpand={toggleExpand}
+            onSelectLesson={selectLesson}
+            onCreateModule={createModule}
+            onRenameModule={(id, title) => void renameModule(id, title)}
+            onDeleteModule={askDeleteModule}
+            onMoveModule={moveModule}
+            onCreateLesson={(id) => void createLesson(id)}
+            onDuplicateLesson={(l) => void duplicateLesson(l)}
+            onDeleteLesson={askDeleteLesson}
+            onMoveLesson={moveLesson}
+            onReorderLessons={onReorderLessons}
+            onCommitLessonOrder={(id) => void persistLessonOrder(id)}
+            creatingModule={creatingModule}
+            setCreatingModule={setCreatingModule}
+          />
+        </aside>
+
+        <main className={cn("h-full min-h-0 overflow-y-auto overscroll-contain bg-muted/40 !pb-0", mobilePane === "list" ? "hidden lg:block" : "block")}>
+          {selectedLesson && selectedModule ? (
+            <LessonEditor
+              key={selectedLesson.id}
+              moduleTitle={selectedModule.title}
+              lessonNumber={lessonIndex + 1}
+              lessonTotal={selectedModule.lessons.length}
+              title={draft.title}
+              onTitle={onTitle}
+              onTitleBlur={onTitleBlur}
+              description={draft.description}
+              onDescription={onDescription}
+              videoUrl={draft.videoUrl}
+              savedVideoUrl={selectedLesson.video_url ?? ""}
+              onVideoUrl={onVideoUrl}
+              onRemoveVideo={onRemoveVideo}
+              uploadingVideo={!!uploadingHere}
+              uploadingVideoName={uploadingHere?.name ?? ""}
+              onVideoFile={(f) => void handleVideoFile(f)}
+              duration={draft.duration}
+              onDuration={onDuration}
+              isFree={draft.isFree}
+              onIsFree={onIsFree}
+              attachments={attachments}
+              uploadingAttachment={uploadingAttachment}
+              onAttachmentFile={(f) => void handleAttachmentFile(f)}
+              onDeleteAttachment={askDeleteAttachment}
+              onDeleteLesson={() => askDeleteLesson(selectedLesson.id)}
+              onBack={() => setMobilePane("list")}
+            />
+          ) : (
+            <div className="mx-auto grid min-h-full w-full max-w-[560px] place-items-center px-4 py-10">
+              <StepEmpty
+                icon={totalLessons === 0 ? <Layers className="h-7 w-7" /> : <Video className="h-7 w-7" />}
+                title={totalLessons === 0 ? "Crie a primeira aula" : "Escolha uma aula para editar"}
+                action={
+                  <button type="button" onClick={() => setMobilePane("list")} className="vp-ghost h-11 px-6 lg:hidden"><ArrowLeft className="h-4 w-4" />Voltar para as aulas</button>
+                }
+              >
+                {totalLessons === 0
+                  ? "Crie um módulo e adicione aulas dentro dele. Aqui você manda o vídeo, escreve a descrição e anexa materiais."
+                  : "Toque em uma aula na lista ao lado para mexer no vídeo, na descrição e nos materiais."}
+              </StepEmpty>
             </div>
-            <h3 className="font-display text-lg font-black tracking-tight text-foreground mb-2">Continue editando</h3>
-            <p className="text-sm leading-relaxed text-muted-foreground mb-6">
-              Selecione uma aula para continuar de onde parou ou crie uma nova.
-           </p>
-           <div className="flex items-center justify-center gap-2">
-             {(() => {
-               const firstLesson = modules.flatMap(m => m.lessons)[0];
-               return firstLesson ? (
-                  <Button onClick={() => selectLesson(firstLesson)} className="gap-2 rounded-none bg-primary text-primary-foreground font-display font-medium text-[11px] h-11 px-6 hover:bg-primary/90">
-                    <PlayCircle className="h-4 w-4" /> Abrir "{firstLesson.title.length > 24 ? firstLesson.title.slice(0, 24) + "…" : firstLesson.title}"
-                  </Button>
-                ) : null;
-              })()}
-              <Button variant="ghost" onClick={() => createLesson(modules[0].id)} className="gap-2 rounded-none border border-border bg-card font-display font-medium text-[11px] h-11 px-4 text-muted-foreground hover:border-primary hover:text-primary">
-                <Plus className="h-4 w-4" /> Nova aula
-              </Button>
-           </div>
-         </div>
-       )}
-     </motion.div>
-   </div>
-  )}
- </main>
- {/* ─── RIGHT: Student Preview Panel ─── */}
- <StudentPreviewPanel
- course={course}
- modules={modules.map(m => ({
- ...m,
- lessons: m.lessons.map(l => ({
- id: l.id, title: l.title, video_url: l.video_url,
- is_free: l.is_free, duration_minutes: l.duration_minutes,
- }))
- }))}
- selectedLessonId={selectedLesson?.id || null}
- />
- </div>
+          )}
+        </main>
+      </div>
 
- {/* ═══ Delete Confirmation Dialog ═══ */}
- <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
- <AlertDialogContent className="rounded-none border-border bg-card max-w-md">
- <AlertDialogHeader>
- <AlertDialogTitle className="font-display font-black text-lg tracking-tight">
- Excluir {deleteTarget?.type === "module" ? "módulo" : "aula"}
- </AlertDialogTitle>
- <AlertDialogDescription className="text-muted-foreground font-display text-sm">
- {deleteTarget?.type === "module"
- ? `Tem certeza que deseja excluir o módulo "${deleteTarget.label}" e todas as suas aulas? Esta ação não pode ser desfeita.`
- : `Tem certeza que deseja excluir a aula "${deleteTarget?.label}"? Esta ação não pode ser desfeita.`}
- </AlertDialogDescription>
- </AlertDialogHeader>
- <AlertDialogFooter>
- <AlertDialogCancel disabled={deletingItem} className="rounded-none border border-border bg-card font-display font-medium text-[11px] hover:border-primary hover:text-primary">Cancelar</AlertDialogCancel>
- <AlertDialogAction
- onClick={confirmDelete}
- disabled={deletingItem}
- className="rounded-none font-display font-medium text-[11px] bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
- >
- {deletingItem && <Loader2 className="h-4 w-4 animate-spin" />}
- {deletingItem ? "Excluindo..." : "Excluir"}
- </AlertDialogAction>
- </AlertDialogFooter>
- </AlertDialogContent>
- </AlertDialog>
+      <CourseSettingsDialog
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        course={course}
+        uploadingCover={uploadingCover}
+        onCoverFile={(f) => void handleCoverFile(f)}
+        onRemoveCover={() => void handleRemoveCover()}
+        onSave={saveCourseSettings}
+      />
 
-  {/* ═══ Course Settings Sheet ═══ */}
-  <Sheet open={courseSettingsOpen} onOpenChange={setCourseSettingsOpen}>
-  <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-background border-white/[0.05] text-white">
-  <SheetHeader className="mb-8">
-  <SheetTitle className="font-display font-black text-2xl tracking-tight flex items-center gap-4">
-  <div className="h-12 w-12 rounded-[12px] bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-  <Settings className="h-6 w-6 text-blue-400" />
-  </div>
-  Ajustes da Área
-  </SheetTitle>
-  </SheetHeader>
+      <Sheet open={previewOpen} onOpenChange={setPreviewOpen}>
+        <SheetContent className="flex w-full flex-col gap-0 border-border bg-background p-0 sm:max-w-[460px]">
+          <SheetTitle className="sr-only">Prévia do aluno</SheetTitle>
+          <SheetDescription className="sr-only">Como o aluno enxerga esta área de membros.</SheetDescription>
+          <StudentPreviewPanel
+            course={{ id: course.id, title: course.title, description: course.description, is_published: course.is_published, thumbnail_url: course.thumbnail_url, category: course.category }}
+            modules={modules.map((m) => ({ id: m.id, title: m.title, banner_url: m.banner_url, lessons: m.lessons }))}
+            selectedLessonId={selectedId}
+            productName={productName}
+          />
+        </SheetContent>
+      </Sheet>
 
- <div className="space-y-6">
- {/* Thumbnail */}
- <div>
- <Label className="text-[11px] font-display font-medium text-muted-foreground mb-2.5 block">Thumbnail</Label>
- <div
- onClick={() => thumbnailInputRef.current?.click()}
- className="relative border border-dashed border-border hover:border-primary transition-colors cursor-pointer overflow-hidden h-44 group bg-card-elevated"
- >
- {course?.thumbnail_url ? (
- <>
- <img src={course.thumbnail_url} alt="" className="w-full h-full object-cover" />
- <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
- <ImageIcon className="h-8 w-8 text-foreground" />
- </div>
- </>
- ) : (
- <div className="w-full h-full flex flex-col items-center justify-center">
- <ImageIcon className="h-9 w-9 text-primary mb-3" />
- <p className="text-[11px] font-display font-medium text-foreground">
- {uploadingThumbnail ? "Enviando..." : "Clique para enviar"}
- </p>
- <p className="text-[11px] text-muted-foreground mt-1.5 font-display font-medium ">JPG, PNG até 5MB</p>
- </div>
- )}
- </div>
- <input ref={thumbnailInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleThumbnailUpload(f); }} />
- </div>
-
-  {/* Title */}
-  <div className="space-y-3">
-  <Label className="text-[11px] font-semibold text-zinc-500">Título da Área</Label>
-  <input
-  value={courseTitle}
-  onChange={e => setCourseTitle(e.target.value)}
-  className="w-full h-14 px-5 rounded-xl bg-white/[0.02] border border-white/[0.05] text-[15px] font-bold text-white focus:outline-none focus:border-blue-500/40 transition-all"
-  />
-  </div>
-
- {/* Description */}
- <div>
- <Label className="text-[11px] font-display font-medium text-muted-foreground mb-2.5 block">Descrição</Label>
- <textarea
- value={courseDescription}
- onChange={e => setCourseDescription(e.target.value)}
- rows={4}
- className="w-full px-4 py-3 rounded-none bg-card-elevated border border-border text-sm font-display text-foreground focus:outline-none focus:border-primary transition-colors resize-none"
- placeholder="Descreva o conteúdo deste curso..."
- />
- </div>
-
- {/* Stats */}
- <div className="border border-border bg-card-elevated p-4">
- <p className="text-[11px] font-display font-medium text-muted-foreground mb-3">Informações</p>
- <div className="grid grid-cols-3 gap-3">
- <div className="text-center">
- <p className="text-lg font-display font-black text-foreground tabular-nums">{String(modules.length).padStart(2, "0")}</p>
- <p className="text-[11px] text-muted-foreground font-display font-medium mt-1">Módulos</p>
- </div>
- <div className="text-center">
- <p className="text-lg font-display font-black text-foreground tabular-nums">{String(totalLessons).padStart(2, "0")}</p>
- <p className="text-[11px] text-muted-foreground font-display font-medium mt-1">Aulas</p>
- </div>
- <div className="text-center">
- <p className="text-lg font-display font-black text-primary tabular-nums">{String(studentCount).padStart(2, "0")}</p>
- <p className="text-[11px] text-muted-foreground font-display font-medium mt-1">Alunos</p>
- </div>
- </div>
- </div>
-
- {/* Save */}
- <Button onClick={saveCourseSettings} className="w-full h-11 rounded-none bg-primary text-primary-foreground font-display font-medium text-[11px] gap-2 hover:bg-primary/90">
- <CheckCircle2 className="h-4 w-4" /> Salvar Configurações
- </Button>
- </div>
- </SheetContent>
- </Sheet>
- </div>
- );
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open && !deleting) setDeleteTarget(null); }}>
+        <AlertDialogContent className="max-w-md rounded-[28px] border-border bg-card p-6 sm:p-8">
+          <AlertDialogHeader className="space-y-2 text-left">
+            <span className="mb-2 grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive"><Trash2 className="h-5 w-5" /></span>
+            <AlertDialogTitle className="font-heading text-[21px] font-extrabold tracking-[-0.03em]">{deleteCopy.title}</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-[14.5px] leading-relaxed text-muted-foreground">
+                <span className="block break-words font-semibold text-foreground">{deleteTarget?.label}</span>
+                <p>{deleteBody}</p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <AlertDialogCancel disabled={deleting} className="vp-ghost m-0 h-11 border-border">{deleteCopy.keep}</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => { e.preventDefault(); void confirmDelete(); }} disabled={deleting} className="vp-cta vp-cta-danger h-11">
+              {deleting && <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />}
+              {deleting ? "Excluindo…" : deleteCopy.confirm}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
 }

@@ -58,3 +58,25 @@ export const buildEditableCoursePayload = (
     lessonsCount: module.lessons?.length ?? 0,
   })),
 });
+
+export const COURSE_CATEGORIES = [
+  { value: "marketing", label: "Marketing digital" },
+  { value: "vendas", label: "Vendas" },
+  { value: "negocios", label: "Negócios" },
+  { value: "financas", label: "Finanças" },
+  { value: "tecnologia", label: "Tecnologia" },
+  { value: "design", label: "Design" },
+  { value: "saude", label: "Saúde e bem-estar" },
+  { value: "educacao", label: "Educação" },
+  { value: "desenvolvimento-pessoal", label: "Desenvolvimento pessoal" },
+  { value: "produtividade", label: "Produtividade" },
+  { value: "idiomas", label: "Idiomas" },
+  { value: "fitness", label: "Fitness" },
+  { value: "ecommerce", label: "E-commerce" },
+  { value: "programacao", label: "Programação" },
+  { value: "geral", label: "Outros" },
+] as const;
+
+/** Nome legível da categoria; valores antigos ou livres aparecem como foram salvos. */
+export const getCategoryLabel = (value: string | null | undefined) =>
+  COURSE_CATEGORIES.find((c) => c.value === value)?.label ?? (value || "");
