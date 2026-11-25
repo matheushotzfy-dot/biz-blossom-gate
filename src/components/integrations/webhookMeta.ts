@@ -88,8 +88,8 @@ export const normalizeUrl = (raw: string) => raw.trim();
 export type DeliveryKind = "success" | "queued" | "retrying" | "sending" | "exhausted";
 
 export const MAX_ATTEMPTS = 5;
-/** Esperas entre tentativas, iguais às do worker (RETRY_DELAYS_SECONDS). */
-export const RETRY_PLAN = "10 segundos, 30 segundos, 2 minutos, 10 minutos e 1 hora";
+/** Esperas entre as 5 tentativas. O worker tem 5 valores em RETRY_DELAYS_SECONDS, mas a 5ª falha já encerra a entrega, então só os 4 primeiros são usados. */
+export const RETRY_PLAN = "10 segundos, 30 segundos, 2 minutos e 10 minutos";
 
 export function deliveryKind(d: Pick<DeliveryRow, "status" | "attempt">): DeliveryKind {
   if (d.status === "success" || d.status === "delivered") return "success";

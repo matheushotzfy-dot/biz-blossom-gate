@@ -1,53 +1,44 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, Webhook } from "lucide-react";
 import { Seo } from "@/components/Seo";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
+import { useSellerSkin } from "@/hooks/useSellerSkin";
 import Documentacao from "./vendas/Documentacao";
 
 /**
- * Public API reference — https://hotzfy.com.br/documentacao
- *
- * Rendered outside the dashboard shell (no auth required) so it can be shared
- * with developers or pasted into an AI agent for integration.
+ * Documentação pública da API (/documentacao). Fica fora do painel, sem login, para poder ser
+ * enviada a quem vai integrar. Usa a mesma página da aba Integrações, na identidade do seller.
  */
 export default function DocumentacaoPublica() {
+  useSellerSkin();
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="vp-seller-shell vp-stage min-h-screen text-foreground">
       <Seo
-        title="Documentação da API PIX | Vemprapay"
-        description="Referência completa da API Vemprapay: autenticação por chave secreta, criação de cobranças PIX, consulta de status e webhooks assinados com HMAC-SHA256."
+        title="Documentação da API | Vemprapay"
+        description="Como receber vendas e saques por webhook assinado com HMAC-SHA256 na Vemprapay, e a prévia da API de cobranças PIX."
         path="/documentacao"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "TechArticle",
-          headline: "Documentação da API PIX Vemprapay",
-          description:
-            "Guia de integração da API Vemprapay: autenticação, cobranças PIX e webhooks.",
+          headline: "Documentação da API Vemprapay",
+          description: "Webhooks assinados, chaves de API e a prévia da API de cobranças PIX.",
           inLanguage: "pt-BR",
           publisher: { "@type": "Organization", name: "Vemprapay" },
         }}
       />
 
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-[1400px] items-center justify-between gap-4 px-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-[1240px] items-center justify-between gap-4 px-4 sm:px-6">
+          <Link to="/" className="flex items-center gap-2.5 rounded-full text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Voltar para o início">
             <ArrowLeft className="h-4 w-4" />
-            <VenxpayLogo className="h-5 w-auto" />
+            <VenxpayLogo className="h-6 w-auto" />
           </Link>
-          <div className="flex items-center gap-2">
-            <span className="hidden text-[12px] text-muted-foreground sm:inline">Documentação pública da API</span>
-            <Link
-              to="/integracoes?tab=keys"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3 text-[12px] font-semibold text-primary-foreground hover:bg-primary/90"
-            >
-              Gerar chave <ExternalLink className="h-3.5 w-3.5" />
-            </Link>
-          </div>
+          <Link to="/integracoes?tab=webhooks" className="vp-cta !h-10 !px-5"><Webhook className="h-4 w-4" />Configurar webhooks</Link>
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1400px] px-4 pb-24 pt-6 sm:px-6">
-        <Documentacao />
+      <main className="mx-auto max-w-[1240px] px-4 pb-20 pt-8 sm:px-6">
+        <Documentacao standalone />
       </main>
     </div>
   );
