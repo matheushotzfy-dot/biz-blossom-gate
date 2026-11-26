@@ -99,6 +99,13 @@
       "when": 1794415003423,
       "tag": "0013_grant_mark_kyc_submitted",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795687729793,
+      "tag": "0014_block_self_credit_and_cert_quiz_gate",
+      "breakpoints": true
     }
   ]
 }

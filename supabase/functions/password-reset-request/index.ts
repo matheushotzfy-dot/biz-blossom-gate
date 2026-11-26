@@ -31,8 +31,14 @@ function isAllowedRedirect(url: string): boolean {
   try {
     const u = new URL(url);
     if (ALLOWED_REDIRECT_HOSTS.includes(u.hostname)) return true;
-    if (u.protocol !== "https:" || !u.hostname.includes(PREVIEW_PROJECT_ID)) return false;
-    return u.hostname.endsWith(".lovable.app") || u.hostname.endsWith(".lovableproject.com");
+    if (u.protocol !== "https:") return false;
+    // Só os formatos exatos de prévia deste projeto (nada de "<id>-qualquer-coisa.lovable.app").
+    const allowed = [
+      `id-preview--${PREVIEW_PROJECT_ID}.lovable.app`,
+      `preview--${PREVIEW_PROJECT_ID}.lovable.app`,
+      `${PREVIEW_PROJECT_ID}.lovableproject.com`,
+    ];
+    return allowed.includes(u.hostname);
   } catch {
     return false;
   }
