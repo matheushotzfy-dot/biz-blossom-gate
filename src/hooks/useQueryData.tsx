@@ -325,6 +325,8 @@ export function useDashboardStats(from: Date, to: Date, bucket: DashboardBucket)
         _bucket: bucket,
       });
       if (error) throw error;
+      // Resposta vazia não pode virar esqueleto eterno nos cartões: vira erro com "Tentar de novo".
+      if (!data || typeof data !== "object" || !("current" in (data as object))) throw new Error("dashboard_stats_empty");
       return data as unknown as DashboardStats;
     },
     enabled: !!user?.id,

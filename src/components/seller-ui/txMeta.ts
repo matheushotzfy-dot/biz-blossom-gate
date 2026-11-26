@@ -23,6 +23,7 @@ export const isPixMethod = (m: string | null | undefined) => (m || "").toLowerCa
 /** "Hoje, 18:29" / "Ontem, 14:13" / "22 nov, 14:53" (horário de São Paulo). */
 export function whenLabel(iso: string): string {
   const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
   const key = d.toLocaleDateString("pt-BR", { timeZone: SP });
   const t = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: SP });
   if (key === new Date().toLocaleDateString("pt-BR", { timeZone: SP })) return `Hoje, ${t}`;

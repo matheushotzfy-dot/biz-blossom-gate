@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { AlertCircle, BarChart3, Eye, EyeOff, Loader2, Lock, LogOut, Moon, Send, Sun } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { signInSeller } from "@/features/auth/authApi";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useSellerSkin } from "@/hooks/useSellerSkin";
@@ -139,9 +140,10 @@ function PartnerLogin({ head, themeButton }: { head: React.ReactNode; themeButto
     setErrors(invalid); setProblem(null);
     if (invalid.email || invalid.password) return;
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: clean, password });
+    // Mesma porta do login do vendedor: limite de tentativas por e-mail e IP, conta bloqueada/congelada barrada e registro do acesso.
+    const result = await signInSeller(clean, password);
     setBusy(false);
-    if (error) setProblem(/fetch|network/i.test(error.message) ? "Não foi possível conectar. Verifique sua internet e tente de novo." : "E-mail ou senha incorretos.");
+    if (!result.ok) setProblem(result.message);
   };
 
   return (
