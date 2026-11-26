@@ -1,92 +1,105 @@
-import { motion, useReducedMotion } from "framer-motion";
-import { ArrowDownLeft, ArrowUpRight, Check, QrCode, ShieldCheck, Zap } from "lucide-react";
+import painelInicio from "@/assets/landing/painel-inicio.webp";
 import { cn } from "@/lib/utils";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
+import { STEP_REASONS } from "@/features/auth/authModel";
 
 /**
- * Painel institucional do login/cadastro (desktop).
- * Verde Vemprapay + mockup do app em formato de celular.
- * Os valores do mockup são ilustrativos (marcados como exemplo) — nunca dados reais.
+ * Painel ao lado do formulário (computador). Muda com a tela:
+ * - entrar: a tela real do painel (captura com dados de exemplo, avisado);
+ * - cadastro: por que pedimos o dado daquele passo e o que acontece depois do cadastro;
+ * - recuperação: os três passos e o que muda depois da troca.
+ * Tudo aqui precisa ser verdade sobre o produto (sem prazo, número ou selo inventado).
  */
+export type AsideMode = "login" | "signup" | "recovery";
+
 export interface AuthAsideProps {
+  mode?: AsideMode;
+  /** Passo atual do cadastro (1 a 6). */
+  step?: number;
   className?: string;
 }
 
-const MOVES = [
-  { label: "Pix recebido", meta: "Curso completo · agora", value: "+ R$ 197,00", in: true },
-  { label: "Cartão aprovado", meta: "Mentoria · 2 min", value: "+ R$ 497,00", in: true },
-  { label: "Saque via Pix", meta: "Chave cadastrada", value: "− R$ 1.200,00", in: false },
+const AFTER_SIGNUP = [
+  { t: "Conta criada", d: "Você entra no painel e já pode montar o primeiro produto." },
+  { t: "Documentos enviados", d: "Documento com foto e uma selfie, pelo próprio painel. O saque é liberado depois da aprovação." },
+  { t: "Produto revisado", d: "A equipe revisa cada produto antes do checkout começar a receber." },
+  { t: "Primeira venda", d: "O Pix aprovado entra no saldo, e o saque sai por Pix para a sua chave." },
 ] as const;
 
-export function AuthAside({ className }: AuthAsideProps) {
-  const reduced = useReducedMotion() ?? false;
-  const rise = (delay: number) =>
-    reduced ? {} : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] as const } };
+const RECOVERY_STEPS = [
+  "Informe o e-mail da sua conta.",
+  "Digite o código de 6 números que chega no e-mail.",
+  "Crie a nova senha.",
+] as const;
+
+function Brand() {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className="vp-auth-logo-tile"><VenxpayLogo size={30} plate={false} /></span>
+      <span className="text-[19px] font-extrabold tracking-[-0.035em]">vemprapay</span>
+    </div>
+  );
+}
+
+export function AuthAside({ mode = "login", step = 1, className }: AuthAsideProps) {
+  const reason = STEP_REASONS[Math.min(Math.max(step, 1), STEP_REASONS.length) - 1];
 
   return (
-    <aside className={cn("vp-auth-aside relative isolate flex h-full flex-col overflow-hidden px-10 py-9", className)} aria-label="Vemprapay">
+    <aside className={cn("vp-auth-aside relative isolate flex h-full flex-col overflow-hidden px-10 py-9 xl:px-14", className)} aria-label="Sobre a Vemprapay" data-mode={mode}>
       <span aria-hidden className="vp-auth-ring vp-auth-ring-a" />
       <span aria-hidden className="vp-auth-ring vp-auth-ring-b" />
+      <Brand />
 
-      <motion.div {...rise(0.05)} className="flex items-center gap-2.5">
-        <span className="vp-auth-logo-tile"><VenxpayLogo size={30} plate={false} /></span>
-        <span className="font-heading text-[19px] font-extrabold tracking-[-0.035em]">vemprapay</span>
-      </motion.div>
+      {mode === "login" && (
+        <>
+          <div className="relative mt-14 max-w-[460px]">
+            <h2 className="vp-auth-title">Saldo, vendas e saques do jeito que estão agora.</h2>
+            <p className="vp-auth-text mt-4">Entre para ver cada venda com o status real e o seu saldo separado entre disponível, em análise e aguardando liberação.</p>
+          </div>
+          <figure className="vp-auth-shot" aria-label="Tela real do painel">
+            <img src={painelInicio} width={1440} height={900} alt="Painel do vendedor com saldo disponível, vendas de hoje e faturamento" decoding="async" />
+            <figcaption>Tela real do painel. Nomes e valores são exemplos.</figcaption>
+          </figure>
+        </>
+      )}
 
-      <div className="relative mt-8 flex min-h-0 flex-1 items-center justify-center">
-        <motion.div {...rise(0.2)} className="vp-phone">
-          <div className="vp-phone-notch" aria-hidden />
-          <div className="flex items-center justify-between px-1">
-            <span className="text-[11px] font-semibold text-muted-foreground">Olá, Ana</span>
-            <span className="rounded-full bg-accent px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-accent-foreground">Exemplo</span>
+      {mode === "signup" && (
+        <div className="relative mt-auto flex min-h-0 flex-col gap-10 pb-2 pt-10">
+          <div key={step} className="vp-auth-swap max-w-[460px]" aria-live="polite">
+            <h2 className="vp-auth-title">{reason.title}</h2>
+            <p className="vp-auth-text mt-4">{reason.text}</p>
           </div>
-          <div className="mt-3 rounded-2xl bg-primary p-4 text-primary-foreground">
-            <p className="text-[11px] font-medium opacity-80">Saldo disponível</p>
-            <p className="mt-1 font-heading text-[24px] font-extrabold tracking-[-0.03em] tabular-nums">R$ 12.480,90</p>
-            <p className="mt-0.5 text-[10px] opacity-75">A liberar: R$ 3.215,00</p>
+          <div className="vp-auth-after">
+            <h3 className="text-[15px] font-bold">Depois do cadastro</h3>
+            <ol className="mt-4 grid gap-0">
+              {AFTER_SIGNUP.map((item, i) => (
+                <li key={item.t} className="vp-auth-after-item" data-current={i === 0 ? "" : undefined}>
+                  <span className="vp-auth-dot" aria-hidden>{i + 1}</span>
+                  <div className="min-w-0">
+                    <p className="text-[14.5px] font-bold leading-snug">{item.t}{i === 0 && <span className="vp-auth-here">você está aqui</span>}</p>
+                    <p className="vp-auth-text mt-1 text-[13.5px]">{item.d}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            {[{ i: QrCode, l: "Pix" }, { i: ArrowUpRight, l: "Sacar" }, { i: Zap, l: "Vendas" }].map(({ i: I, l }) => (
-              <div key={l} className="flex flex-col items-center gap-1 rounded-xl border border-border py-2">
-                <I className="h-4 w-4 text-primary" />
-                <span className="text-[10px] font-semibold text-foreground">{l}</span>
-              </div>
-            ))}
-          </div>
-          <p className="mt-4 px-1 text-[11px] font-bold text-foreground">Movimentações</p>
-          <ul className="mt-1.5 divide-y divide-border">
-            {MOVES.map((m) => (
-              <li key={m.label} className="flex items-center gap-2.5 py-2">
-                <span className={cn("grid h-7 w-7 shrink-0 place-items-center rounded-full", m.in ? "bg-accent text-primary" : "bg-muted text-muted-foreground")}>
-                  {m.in ? <ArrowDownLeft className="h-3.5 w-3.5" /> : <ArrowUpRight className="h-3.5 w-3.5" />}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[11px] font-semibold text-foreground">{m.label}</span>
-                  <span className="block truncate text-[9.5px] text-muted-foreground">{m.meta}</span>
-                </span>
-                <span className={cn("text-[11px] font-bold tabular-nums", m.in ? "text-primary" : "text-foreground")}>{m.value}</span>
+        </div>
+      )}
+
+      {mode === "recovery" && (
+        <div className="relative my-auto max-w-[460px] py-10">
+          <h2 className="vp-auth-title">Recupere o acesso em três passos.</h2>
+          <ol className="mt-8 grid gap-0">
+            {RECOVERY_STEPS.map((t, i) => (
+              <li key={t} className="vp-auth-after-item">
+                <span className="vp-auth-dot" aria-hidden>{i + 1}</span>
+                <p className="pt-1 text-[15px] font-semibold leading-snug">{t}</p>
               </li>
             ))}
-          </ul>
-        </motion.div>
-
-        <motion.div {...rise(0.55)} className="vp-auth-toast" role="presentation">
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-primary text-primary-foreground"><Check className="h-4 w-4" strokeWidth={3} /></span>
-          <span>
-            <span className="block text-[12px] font-bold text-foreground">Pix aprovado</span>
-            <span className="block text-[10.5px] text-muted-foreground">Entra no seu saldo</span>
-          </span>
-        </motion.div>
-      </div>
-
-      <motion.div {...rise(0.4)} className="relative mt-8 max-w-[440px]">
-        <h2 className="font-heading text-[30px] font-extrabold leading-[1.1] tracking-[-0.03em]">Receba, acompanhe e saque. Tudo em um só lugar.</h2>
-        <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[13px] font-semibold opacity-90">
-          <li className="flex items-center gap-1.5"><Check className="h-4 w-4" /> Pix, cartão e boleto</li>
-          <li className="flex items-center gap-1.5"><Check className="h-4 w-4" /> Saque por Pix com a sua senha</li>
-          <li className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4" /> Verificação de identidade</li>
-        </ul>
-      </motion.div>
+          </ol>
+          <p className="vp-auth-text mt-8">Depois da troca, todos os aparelhos conectados saem da conta. Quem estava usando a sua senha antiga perde o acesso na hora.</p>
+        </div>
+      )}
     </aside>
   );
 }

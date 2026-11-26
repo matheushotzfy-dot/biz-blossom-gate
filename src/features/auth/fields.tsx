@@ -11,15 +11,15 @@ import { cn } from "@/lib/utils";
 import { passwordRules, passwordStrength, secondsLeft } from "./authModel";
 
 export const inputClass =
-  "h-11 rounded-md border-border bg-card px-4 text-base sm:text-[14px] text-foreground placeholder:text-muted-foreground/60 hover:border-foreground/25 focus-visible:border-primary focus-visible:bg-card focus-visible:ring-2 focus-visible:ring-primary/15";
+  "h-12 rounded-md border-border bg-card px-4 text-base sm:text-[14px] text-foreground placeholder:text-muted-foreground/60 hover:border-foreground/25 focus-visible:border-primary focus-visible:bg-card focus-visible:ring-2 focus-visible:ring-primary/15";
 
-export const labelClass = "mb-2 block text-[12px] font-semibold text-foreground/85";
+export const labelClass = "mb-2 block text-[13px] font-semibold text-foreground/85";
 
 export const primaryButtonClass =
-  "h-11 w-full rounded-md bg-primary text-[14px] font-semibold text-primary-foreground hover:brightness-105 disabled:cursor-not-allowed";
+  "h-12 w-full rounded-full bg-primary text-[15px] font-bold text-primary-foreground hover:brightness-105 disabled:cursor-not-allowed";
 
 export const secondaryButtonClass =
-  "h-11 rounded-md border-border bg-transparent text-[14px] font-medium text-muted-foreground hover:bg-muted/40 hover:text-foreground";
+  "h-12 rounded-full border-border bg-transparent text-[15px] font-semibold text-muted-foreground hover:bg-muted/40 hover:text-foreground";
 
 export const linkButtonClass =
   "font-medium text-primary underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60 disabled:no-underline";
@@ -35,10 +35,10 @@ export function describedBy(id: string, error?: string, hint?: ReactNode): strin
 export function AuthHeading({ title, sub }: { title: string; sub: string }) {
   return (
     <div>
-      <h1 data-auth-heading tabIndex={-1} className="text-[24px] font-heading font-semibold leading-[1.15] text-foreground outline-none sm:text-[26px]">
+      <h1 data-auth-heading tabIndex={-1} className="auth-title text-foreground outline-none">
         {title}
       </h1>
-      <p className="mt-2 max-w-[390px] text-[13px] leading-relaxed text-muted-foreground">{sub}</p>
+      <p className="mt-2.5 max-w-[420px] text-[14.5px] leading-relaxed text-muted-foreground">{sub}</p>
     </div>
   );
 }
@@ -185,7 +185,7 @@ export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(funct
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy(id, error, hint)}
           className={cn(
-            "h-11 w-full appearance-none rounded-md border border-border bg-card pl-4 pr-10 text-base sm:text-[14px] outline-none transition-colors hover:border-foreground/25 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/15",
+            "h-12 w-full appearance-none rounded-md border border-border bg-card pl-4 pr-10 text-base sm:text-[14px] outline-none transition-colors hover:border-foreground/25 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/15",
             value ? "text-foreground" : "text-muted-foreground/70",
             className,
           )}
@@ -213,14 +213,16 @@ interface ChoiceGroupProps {
   options: ReadonlyArray<Choice>;
   /** `card` mostra ícone, título e frase; `chip` é só o texto. */
   variant?: "card" | "chip";
+  /** Colunas dos chips no celular e a partir de 640 px (padrão: 2 e 2). */
+  columns?: 2 | 3;
   error?: string;
 }
 
-export function ChoiceGroup({ id, name, legend, value, onChange, options, variant = "chip", error }: ChoiceGroupProps) {
+export function ChoiceGroup({ id, name, legend, value, onChange, options, variant = "chip", columns = 2, error }: ChoiceGroupProps) {
   return (
     <fieldset id={id} className="min-w-0" aria-describedby={error ? `${id}-error` : undefined} aria-invalid={error ? true : undefined}>
       <legend className={labelClass}>{legend}</legend>
-      <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-2.5">
+      <div className={cn("grid grid-cols-[repeat(2,minmax(0,1fr))] gap-2", columns === 3 && "sm:grid-cols-[repeat(3,minmax(0,1fr))]")}>
         {options.map((option) => {
           const checked = value === option.value;
           return (
@@ -255,7 +257,7 @@ export function ChoiceGroup({ id, name, legend, value, onChange, options, varian
               ) : (
                 <span
                   className={cn(
-                    "flex min-h-[44px] items-center justify-center rounded-[10px] border px-3 py-2.5 text-center text-[13px] font-medium tabular-nums transition-colors duration-200",
+                    "flex min-h-[44px] items-center justify-center rounded-[12px] border px-3 py-2.5 text-center text-[13px] font-medium leading-snug tabular-nums transition-colors duration-200",
                     "border-border bg-card text-muted-foreground hover:border-foreground/25 hover:text-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40",
                     checked && "border-primary bg-primary/[0.07] text-foreground hover:border-primary",
                   )}

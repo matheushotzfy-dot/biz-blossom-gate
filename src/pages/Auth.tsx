@@ -27,7 +27,7 @@ const SEO: Record<Mode, { title: string; description: string }> = {
   },
   signup: {
     title: "Criar conta grátis — Vemprapay",
-    description: "Crie sua conta Vemprapay gratuitamente e comece a vender infoprodutos com checkout de alta conversão.",
+    description: "Crie sua conta Vemprapay grátis e venda com checkout, área de membros, divisão de vendas e saque por Pix.",
   },
   recovery: {
     title: "Recuperar acesso — Vemprapay",
@@ -42,6 +42,8 @@ export default function Auth() {
   // E-mail e aviso que passam de um fluxo para o outro (ex.: depois de trocar a senha, o login já vem com o e-mail).
   const [carry, setCarry] = useState<{ email: string; notice: LoginNotice | null }>({ email: "", notice: null });
   const modeChanged = useRef(false);
+  // Passo do cadastro, para o painel ao lado explicar por que pedimos cada dado.
+  const [signupStep, setSignupStep] = useState(1);
 
   const go = (next: Mode, email = "", notice: LoginNotice | null = null) => {
     modeChanged.current = true;
@@ -74,7 +76,7 @@ export default function Auth() {
             </a>
 
             <div className="flex flex-1 flex-col">
-              <div className="m-auto w-full max-w-[390px] py-8">
+              <div className="m-auto w-full max-w-[420px] py-8">
                 <motion.div key={mode} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }}>
                   {mode === "login" && (
                     <LoginForm
@@ -87,6 +89,7 @@ export default function Auth() {
                   )}
                   {mode === "signup" && (
                     <SignupFlow
+                      onStepChange={setSignupStep}
                       onSuccess={() => navigate("/dashboard", { replace: true })}
                       onLogin={(email, notice) => go("login", email ?? "", notice ?? null)}
                       onRecover={(email) => go("recovery", email)}
@@ -112,7 +115,7 @@ export default function Auth() {
           </div>
 
           {/* ═══ DIREITA — painel autoral (sem fotos de terceiros) ═══ */}
-          <AuthAside className="hidden lg:flex" />
+          <AuthAside className="hidden lg:flex" mode={mode} step={signupStep} />
         </div>
       </div>
     </MotionConfig>

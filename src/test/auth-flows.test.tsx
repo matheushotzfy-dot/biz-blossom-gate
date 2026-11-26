@@ -169,10 +169,11 @@ describe("tela de cadastro", () => {
   const fillIdentity = () => { type("su-fullName", "Maria da Silva"); type("su-nickname", "Mari"); next(); };
   const fillContact = () => { type("su-email", "maria@gmail.com"); type("su-phone", "11912345678"); next(); };
   const fillDocument = () => { type("su-document", "52998224725"); next(); };
+  // Os três campos do negócio são escolhas rápidas (rádios nativos), não listas suspensas.
   const fillBusiness = () => {
-    type("su-segment", "infoproduto");
+    fireEvent.click(screen.getByLabelText("Curso / Infoproduto"));
     fireEvent.click(screen.getByLabelText("R$ 10 a 50 mil"));
-    type("su-referralSource", "instagram");
+    fireEvent.click(screen.getByLabelText("Instagram"));
     next();
   };
   const fillPassword = () => { type("su-password", "Abcdef12!"); type("su-confirmPassword", "Abcdef12!"); next(); };
@@ -584,5 +585,29 @@ describe("recuperação de senha", () => {
     type("recovery-email", " Lucker@Example.com ");
     click("Voltar para o login");
     expect(onBack).toHaveBeenCalledWith("lucker@example.com");
+  });
+});
+
+/* ───────────────────────── painel ao lado ───────────────────────── */
+
+describe("painel ao lado do formulário", () => {
+  it("tem um motivo para cada passo do cadastro, sem promessa de prazo", async () => {
+    const { SIGNUP_STEPS, STEP_REASONS } = await import("@/features/auth/authModel");
+    expect(STEP_REASONS).toHaveLength(SIGNUP_STEPS.length);
+    const all = JSON.stringify(STEP_REASONS).toLowerCase();
+    for (const banned of ["minutos", "horas", "24h", "garantid", "instantâne"]) expect(all).not.toContain(banned);
+  });
+
+  it("muda com a tela e com o passo do cadastro", async () => {
+    const { AuthAside } = await import("@/components/auth/AuthAside");
+    const { STEP_REASONS } = await import("@/features/auth/authModel");
+    const { rerender } = render(<AuthAside mode="login" />);
+    expect(screen.getByRole("img", { name: /Painel do vendedor/ })).toBeTruthy();
+    expect(screen.getByText(/Nomes e valores são exemplos/)).toBeTruthy();
+    rerender(<AuthAside mode="signup" step={3} />);
+    expect(screen.getByRole("heading", { level: 2 }).textContent).toBe(STEP_REASONS[2].title);
+    expect(screen.getByText("você está aqui")).toBeTruthy();
+    rerender(<AuthAside mode="recovery" />);
+    expect(screen.getByText(/todos os aparelhos conectados saem da conta/)).toBeTruthy();
   });
 });

@@ -86,6 +86,16 @@ export const SIGNUP_STEPS = [
   { tag: "Revisão", title: "Tudo certo?", sub: "Confira os dados antes de criar a conta." },
 ] as const;
 
+/** Por que cada passo do cadastro pede o que pede. A ordem segue `SIGNUP_STEPS`. */
+export const STEP_REASONS = [
+  { title: "Seu nome precisa bater com o documento.", text: "A verificação de identidade compara este nome com os documentos que você envia antes de liberar o saque." },
+  { title: "O e-mail é a chave da sua conta.", text: "É com ele que você entra e recupera a senha. O WhatsApp fica no cadastro como contato da conta." },
+  { title: "A conta fica em nome deste documento.", text: "O CPF ou CNPJ fica criptografado, nunca aparece para os seus clientes e não muda depois do cadastro sem passar pela equipe." },
+  { title: "Só a equipe vê estas respostas.", text: "Elas ajudam a revisar a sua conta e os seus produtos. Nada daqui aparece para quem compra de você." },
+  { title: "A senha protege o seu dinheiro.", text: "Pedir saque, trocar a chave Pix ou ligar o saque automático pedem a sua senha de novo, na hora." },
+  { title: "Confira antes de criar.", text: "Dá para voltar e corrigir qualquer passo. Os termos e a política de privacidade abrem numa aba nova." },
+] as const;
+
 export const TOTAL_STEPS = SIGNUP_STEPS.length;
 
 /** Campos que cada passo valida (o passo 6 só tem o aceite). */

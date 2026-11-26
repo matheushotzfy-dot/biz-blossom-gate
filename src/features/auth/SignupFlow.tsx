@@ -8,12 +8,12 @@ import {
   requestSignup, resendSignupEmail, signInSeller, type SignupFailureKind,
 } from "./authApi";
 import {
-  EMPTY_SIGNUP, PASSWORD_MAX, REFERRAL_OPTIONS, REVENUE_OPTIONS, SEGMENT_OPTIONS, SIGNUP_STEPS, TOTAL_STEPS, ACCOUNT_TYPE_OPTIONS,
+  EMPTY_SIGNUP, PASSWORD_MAX, REFERRAL_OPTIONS, REVENUE_OPTIONS, SEGMENT_OPTIONS, SIGNUP_STEPS, STEP_REASONS, TOTAL_STEPS, ACCOUNT_TYPE_OPTIONS,
   buildSignupRequest, fieldsOfStep, firstInvalidStep, formatDocument, formatPhone, normalizeEmail, stepErrors, suggestEmail,
   summarySections, type SignupField, type SignupForm,
 } from "./authModel";
 import {
-  AuthHeading, ChoiceGroup, FormNotice, PasswordField, PasswordHelp, SelectField, Spinner, TextField,
+  AuthHeading, ChoiceGroup, FormNotice, PasswordField, PasswordHelp, Spinner, TextField,
   linkButtonClass, primaryButtonClass, secondaryButtonClass, useCountdown, type Choice,
 } from "./fields";
 import type { LoginNotice } from "./LoginForm";
@@ -23,6 +23,8 @@ export const VERIFY_RESEND_SECONDS = 60;
 type Phase = "form" | "creating" | "signing-in" | "verify";
 
 interface SignupFlowProps {
+  /** Avisa o passo atual (o painel ao lado muda o texto com ele). */
+  onStepChange?: (step: number) => void;
   onSuccess: () => void;
   onLogin: (email?: string, notice?: LoginNotice) => void;
   onRecover: (email: string) => void;
@@ -33,7 +35,7 @@ const ACCOUNT_CHOICES: Choice[] = ACCOUNT_TYPE_OPTIONS.map((o) => ({
   icon: o.value === "cnpj" ? <Building2 className="h-[18px] w-[18px]" aria-hidden="true" /> : <User className="h-[18px] w-[18px]" aria-hidden="true" />,
 }));
 
-export function SignupFlow({ onSuccess, onLogin, onRecover }: SignupFlowProps) {
+export function SignupFlow({ onStepChange, onSuccess, onLogin, onRecover }: SignupFlowProps) {
   const [form, setForm] = useState<SignupForm>(EMPTY_SIGNUP);
   const [step, setStep] = useState(1);
   const [touched, setTouched] = useState<Partial<Record<SignupField, boolean>>>({});
@@ -56,6 +58,8 @@ export function SignupFlow({ onSuccess, onLogin, onRecover }: SignupFlowProps) {
   const touch = (fields: SignupField[]) =>
     setTouched((current) => ({ ...current, ...Object.fromEntries(fields.map((f) => [f, true])) }));
   const set = <K extends SignupField>(key: K, value: SignupForm[K]) => setForm((current) => ({ ...current, [key]: value }));
+
+  useEffect(() => { onStepChange?.(step); }, [step, onStepChange]);
 
   // Cada passo novo leva o foco ao primeiro campo (ou ao título, na revisão), para teclado e leitor de tela.
   useEffect(() => {
@@ -170,6 +174,11 @@ export function SignupFlow({ onSuccess, onLogin, onRecover }: SignupFlowProps) {
               Enviamos um link de confirmação para <span className="font-medium text-foreground [overflow-wrap:anywhere]">{email}</span>. Abra o e-mail e clique no link para ativar a conta. Se não encontrar, olhe o spam.
             </p>
           </div>
+          <ol className="grid gap-2.5 text-[13.5px] leading-relaxed text-muted-foreground" aria-label="O que vem agora">
+            <li className="flex gap-3"><span className="auth-step-n" aria-hidden>1</span><span>Abra o e-mail e clique no link de confirmação.</span></li>
+            <li className="flex gap-3"><span className="auth-step-n" aria-hidden>2</span><span>Entre com o e-mail e a senha que você acabou de criar.</span></li>
+            <li className="flex gap-3"><span className="auth-step-n" aria-hidden>3</span><span>No painel, envie os documentos e monte o primeiro produto.</span></li>
+          </ol>
           {resend && <FormNotice tone={resend.tone}>{resend.text}</FormNotice>}
           <Button type="button" variant="outline" disabled={resending || cooldown.seconds > 0} onClick={() => void handleResend()} className={`w-full ${secondaryButtonClass}`}>
             {resending ? "Enviando…" : cooldown.seconds > 0 ? `Reenviar e-mail em ${cooldown.seconds} s` : "Reenviar e-mail"}
@@ -194,7 +203,7 @@ export function SignupFlow({ onSuccess, onLogin, onRecover }: SignupFlowProps) {
       <AuthHeading title={heading.title} sub={heading.sub} />
 
       <div
-        className="mt-5 border-y border-border py-3"
+        className="mt-6"
         role="progressbar"
         aria-label="Etapas do cadastro"
         aria-valuemin={1}
@@ -204,7 +213,7 @@ export function SignupFlow({ onSuccess, onLogin, onRecover }: SignupFlowProps) {
       >
         <div className="flex items-center gap-2" aria-hidden="true">
           {SIGNUP_STEPS.map((_, index) => (
-            <div key={index} className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
+            <div key={index} className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
               <motion.div
                 className="h-full bg-primary"
                 initial={false}
@@ -214,11 +223,17 @@ export function SignupFlow({ onSuccess, onLogin, onRecover }: SignupFlowProps) {
             </div>
           ))}
         </div>
-        <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground" aria-hidden="true">
-          <span className="font-semibold text-foreground/70">{heading.tag}</span>
-          <span className="font-medium tabular-nums">{String(step).padStart(2, "0")} / {String(TOTAL_STEPS).padStart(2, "0")}</span>
+        <div className="mt-3 flex items-center justify-between text-[12.5px] text-muted-foreground" aria-hidden="true">
+          <span className="font-semibold text-foreground/80">{heading.tag}</span>
+          <span className="font-medium tabular-nums">Passo {step} de {TOTAL_STEPS}</span>
         </div>
       </div>
+
+      {/* No celular o painel ao lado não aparece: o motivo de cada passo fica aqui, fechado. */}
+      <details className="auth-why mt-4 lg:hidden">
+        <summary>Por que pedimos isso?</summary>
+        <p>{STEP_REASONS[step - 1]?.text}</p>
+      </details>
 
       <form ref={formRef} onSubmit={handleSubmit} noValidate className="mt-5" aria-label={`Cadastro, passo ${step} de ${TOTAL_STEPS}`}>
         <motion.div key={step} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="space-y-4">
@@ -335,15 +350,13 @@ export function SignupFlow({ onSuccess, onLogin, onRecover }: SignupFlowProps) {
 
           {step === 4 && (
             <>
-              <SelectField
+              <ChoiceGroup
                 id="su-segment"
-                data-autofocus=""
-                label="O que você vende?"
+                name="segment"
+                legend="O que você vende?"
                 value={form.segment}
-                onValueChange={(v) => { set("segment", v); touch(["segment"]); }}
-                onBlur={() => touch(["segment"])}
+                onChange={(v) => { set("segment", v); touch(["segment"]); }}
                 options={SEGMENT_OPTIONS}
-                placeholder="Selecione o segmento"
                 error={shown("segment")}
               />
               <ChoiceGroup
@@ -355,14 +368,14 @@ export function SignupFlow({ onSuccess, onLogin, onRecover }: SignupFlowProps) {
                 options={REVENUE_OPTIONS}
                 error={shown("monthlyRevenue")}
               />
-              <SelectField
+              <ChoiceGroup
                 id="su-referralSource"
-                label="Onde conheceu a Vemprapay?"
+                name="referralSource"
+                legend="Onde conheceu a Vemprapay?"
                 value={form.referralSource}
-                onValueChange={(v) => { set("referralSource", v); touch(["referralSource"]); }}
-                onBlur={() => touch(["referralSource"])}
+                onChange={(v) => { set("referralSource", v); touch(["referralSource"]); }}
                 options={REFERRAL_OPTIONS}
-                placeholder="Selecione uma opção"
+                columns={3}
                 error={shown("referralSource")}
               />
             </>
