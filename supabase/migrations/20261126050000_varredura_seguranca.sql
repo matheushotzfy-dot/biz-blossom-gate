@@ -54,6 +54,9 @@ DO $$
 DECLARE d text;
 BEGIN
   SELECT pg_get_functiondef('app_private.get_admin_inactive_sellers_page(integer,integer,text,text)'::regprocedure) INTO d;
+  IF position('public.seller_admin_notes n' in d) > 0 THEN
+    RETURN; -- já trocado (migração rodando de novo)
+  END IF;
   IF position('p.admin_notes,' in d) = 0 THEN
     RAISE EXCEPTION 'get_admin_inactive_sellers_page mudou: revise a troca de admin_notes';
   END IF;
