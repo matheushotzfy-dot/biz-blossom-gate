@@ -19,6 +19,7 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { friendlyError } from "@/lib/friendlyError";
 import { logAdminAction } from "@/lib/auditLog";
+import { actionLabel, entityLabel } from "@/features/admin-audit/auditModel";
 import { functionErrorMessage } from "@/lib/functionError";
 import { StaffPasswordDialog, generateStaffPassword } from "./StaffPasswordDialog";
 
@@ -199,7 +200,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
         title={heading}
         subtitle={isManager
           ? "Gerentes de contas com permissões delegadas e carteira de sellers."
-          : "Funcionários operacionais com permissões granulares e auditoria completa."}
+          : "Contas da equipe, as permissões de cada uma e o que cada conta fez."}
         status={{ tone: rows.length ? "success" : "neutral", label: `${rows.length} conta${rows.length !== 1 ? "s" : ""}`, pulse: rows.length > 0 }}
         actions={
           <div className="flex gap-2">
@@ -216,7 +217,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
       <PremiumMetricGrid cols={isManager ? 4 : 3}>
         <PremiumMetric label="Ativas" value={String(activeCount)} sub="contas operacionais" icon={Activity} tone="success" />
         <PremiumMetric label="Congeladas" value={String(frozenCount)} sub="acesso suspenso" icon={Snowflake} tone="info" />
-        <PremiumMetric label="% Média" value={`${avgPct.toFixed(2)}%`} sub="comissão sobre net" icon={Percent} tone="primary" />
+        <PremiumMetric label="Comissão média" value={`${avgPct.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`} sub="sobre o valor líquido das vendas" icon={Percent} tone="primary" />
         {isManager && (
           <PremiumMetric label="Sellers" value={String(totalAssigned)} sub="atribuídos no total" icon={UsersRound} tone="warning" />
         )}
@@ -681,24 +682,20 @@ function AuditDialog({ row, rows, failed = false, onClose }: {
               <thead className={cn(premiumTable.headRow, "bg-muted/30")}>
                 <tr>
                   <th className={premiumTable.th}>Quando</th>
-                  <th className={premiumTable.th}>Ação</th>
-                  <th className={premiumTable.th}>Entidade</th>
-                  <th className={premiumTable.th}>ID</th>
+                  <th className={premiumTable.th}>O que fez</th>
+                  <th className={premiumTable.th}>Em</th>
+                  <th className={premiumTable.th}>Código</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.id} className="border-t border-border transition-colors hover:bg-muted/30">
-                    <td className="px-5 py-3 font-mono text-[11px] text-muted-foreground">
-                      {new Date(r.created_at).toLocaleString("pt-BR")}
+                    <td className="whitespace-nowrap px-5 py-3 text-[12.5px] tabular-nums text-muted-foreground">
+                      {new Date(r.created_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </td>
-                    <td className="px-5 py-3">
-                      <span className="inline-flex items-center rounded border border-border bg-muted/30 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-foreground">
-                        {r.action}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 text-muted-foreground">{r.entity_type}</td>
-                    <td className="px-5 py-3 truncate max-w-[180px] font-mono text-[10px] text-muted-foreground">{r.entity_id}</td>
+                    <td className="px-5 py-3 text-[13px] font-semibold text-foreground" title={r.action}>{actionLabel(r.action, r.entity_type ?? "")}</td>
+                    <td className="px-5 py-3 text-[13px] text-muted-foreground">{r.entity_type ? entityLabel(r.entity_type) : "—"}</td>
+                    <td className="max-w-[180px] truncate px-5 py-3 font-mono text-[11px] text-muted-foreground" title={r.entity_id ?? undefined}>{r.entity_id ? r.entity_id.slice(0, 8) : "—"}</td>
                   </tr>
                 ))}
               </tbody>

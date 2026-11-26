@@ -78,3 +78,13 @@ export const SELLER_EXTRA: Array<{ url: string; label: string; icon: LucideIcon 
 export function isSectionActive(pathname: string, section: SellerNavSection): boolean {
   return section.match.some((m) => (m.endsWith("$") ? pathname === m.slice(0, -1) : pathname === m || pathname.startsWith(m + "/") || pathname === m));
 }
+
+/** Qual aba de baixo está acesa. "Vendas" é só a seção de vendas (extrato, assinaturas): Produtos, Marketing e o resto moram em "Mais". */
+export function mobileTabActive(pathname: string, tabPath: string): boolean {
+  if (tabPath === "/dashboard") return pathname === "/dashboard";
+  if (tabPath === "/vendas") return pathname === "/vendas" || pathname.startsWith("/vendas/assinaturas");
+  if (tabPath === "/vendas/link-pagamento") return pathname.startsWith("/vendas/link-pagamento");
+  if (tabPath === "/financeiro/saques") return pathname.startsWith("/financeiro") && !pathname.startsWith("/financeiro/taxas");
+  return pathname === tabPath;
+}
+

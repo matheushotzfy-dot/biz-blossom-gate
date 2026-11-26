@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { prefetchRoute } from "@/lib/routePrefetch";
 
 import { useSignOut } from "@/hooks/useSignOut";
+import { mobileTabActive as tabActive } from "@/components/seller-shell/navConfig";
 
 const tabs = [
   { label: "Início", icon: LayoutDashboard, path: "/dashboard" },
@@ -57,6 +58,7 @@ const ACCENTS: Record<string, { wrap: string; icon: string }> = {
 
 export function MobileBottomNav() {
   const location = useLocation();
+  const moreSectionActive = !tabs.some((t) => t.path !== "__more__" && tabActive(location.pathname, t.path));
   const navigate = useNavigate();
   const [moreOpen, setMoreOpen] = useState(false);
   const supportUnread = useSupportUnread();
@@ -171,10 +173,7 @@ export function MobileBottomNav() {
           <div className="flex items-stretch justify-around px-1.5 pt-2 pb-[max(env(safe-area-inset-bottom,0px),8px)]">
             {tabs.map((tab) => {
               const isMore = tab.path === "__more__";
-              const isActive = isMore
-                ? moreOpen
-                : location.pathname === tab.path ||
-                  (tab.path !== "/dashboard" && location.pathname.startsWith(tab.path));
+              const isActive = isMore ? moreOpen || (!moreOpen && moreSectionActive) : !moreOpen && tabActive(location.pathname, tab.path);
               if (tab.path === "/vendas/link-pagamento") {
                 return (
                   <button
