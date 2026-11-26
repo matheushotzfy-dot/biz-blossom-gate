@@ -18,7 +18,7 @@ import {
   Trash2, Edit, Plus, Clock, Wallet, ArrowDownToLine, ShoppingCart,
   FileText, Globe, DollarSign, XCircle, Save, CreditCard, Shield,
   Key, TrendingUp, Percent, BarChart3, MessageSquareText, AlertTriangle,
-  Snowflake, LogIn, Lock, Unlock, UserX, Send,
+  Snowflake, LogIn, Lock, Unlock, UserX, Send, CalendarClock, Copy,
   type LucideIcon,
 } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -46,6 +46,12 @@ import { friendlyError } from "@/lib/friendlyError";
 import AdminPager from "@/components/admin/AdminPager";
 import { displayPixKey } from "@/lib/financial-input";
 import { dateKey } from "@/features/admin-finance/overviewModel";
+import { formatPhone } from "@/features/kyc/kycReviewModel";
+import { statusInfo as disputeStatus, typeLabel as disputeTypeLabel } from "@/features/admin-disputes/disputesModel";
+import { SellerDialog as SellerReleaseDialog } from "@/features/admin-settings/ReleasePanel";
+import { ReasonDialog } from "@/features/admin-settings/ReasonDialog";
+import { callRpc } from "@/features/admin-settings/settingsApi";
+import { REASON_PRESETS, releaseLabel } from "@/features/admin-settings/settingsModel";
 
 type Dispute = Tables<"disputes"> & { buyer_name?: string | null };
 type BalanceAdjustment = Tables<"balance_adjustments">;
@@ -175,7 +181,9 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [managerOptions, setManagerOptions] = useState<{ user_id: string; label: string }[]>([]);
   const [approvalManager, setApprovalManager] = useState("default");
   const [userRetention, setUserRetention] = useState<RetentionSettings | null>(null);
-  const [retentionForm, setRetentionForm] = useState({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
+  const [releaseEdit, setReleaseEdit] = useState<{ seller: { user_id: string; name: string; email: string | null }; days: number | null } | null>(null);
+  const [releaseClear, setReleaseClear] = useState(false);
+  const [notesFailed, setNotesFailed] = useState(false);
   const [impersonating, setImpersonating] = useState(false);
   const [ipHistory, setIpHistory] = useState<IpLog[]>([]);
   const detailRequestRef = useRef(0);
@@ -237,7 +245,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     setUserLogs([]); setUserProducts([]); setUserWithdrawals([]);
     setUserTransactions([]); setUserPixKeys([]); setUserDisputes([]);
     setBalanceAdjustments([]); setIpHistory([]);
-    setUserRetention(null); setRetentionForm({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
+    setUserRetention(null);
     setAdminNotes("");
     setPiiRevealed(false); setRevealedDoc(null); setRevealedPixKeys(null); setRevealedLegacyPix(null);
 
@@ -256,7 +264,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         supabase.from("seller_admin_notes").select("notes").eq("user_id", profile.user_id).maybeSingle(),
       ]);
       if (requestId !== detailRequestRef.current) return;
-      const failed = [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, disputesRes, retRes, ipRes, notesRes].find(result => result.error);
+      // As observações carregam à parte: se falharem, o resto da ficha abre e só o salvar das observações fica travado.
+      const failed = [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, disputesRes, retRes, ipRes].find(result => result.error);
       if (failed?.error) throw failed.error;
       if (logsRes.data) {
         const parsed = z.array(activityLogSchema).safeParse(logsRes.data);
@@ -271,19 +280,9 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       if (ipRes.data) setIpHistory(ipRes.data as IpLog[]);
       setUserPixKeys([]);
 
+      setNotesFailed(Boolean(notesRes.error));
       setAdminNotes(notesRes.data?.notes ?? "");
-      if (retRes.data) {
-        setUserRetention(retRes.data as RetentionSettings);
-        setRetentionForm({
-          pix_pct: String(retRes.data.pix_retention_pct ?? ""),
-          card_pct: String(retRes.data.card_retention_pct ?? ""),
-          days: String(retRes.data.retention_days ?? ""),
-          card_release_days: String(retRes.data.card_release_days ?? 7),
-        });
-      } else {
-        setUserRetention(null);
-        setRetentionForm({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
-      }
+      setUserRetention(retRes.data ? (retRes.data as RetentionSettings) : null);
       if (feesRes.data) {
         setCustomFees({
           pix_percentage:    feesRes.data.pix_percentage?.toString()    || "",
@@ -419,27 +418,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     }
   };
 
-  const handleSaveRetention = async () => {
-    if (!selectedUser || !user || !isAdmin) return;
-    if (!validateSellerNumbers(retentionForm, ["pix_pct", "card_pct"], ["days", "card_release_days"])) { toast.error("Informe percentuais de 0 a 100 e dias inteiros de 1 a 365"); return; }
-    const payload = {
-      user_id: selectedUser.user_id,
-      pix_retention_pct: retentionForm.pix_pct ? Number(retentionForm.pix_pct) : 0,
-      card_retention_pct: retentionForm.card_pct ? Number(retentionForm.card_pct) : 0,
-      retention_days: retentionForm.days ? Number(retentionForm.days) : 14,
-      card_release_days: retentionForm.card_release_days ? Number(retentionForm.card_release_days) : 7,
-      updated_by: user.id,
-      updated_at: new Date().toISOString(),
-    };
-    const { error } = await supabase.from("retention_settings").upsert(payload, { onConflict: "user_id" });
-    if (error) { toast.error("Erro ao salvar retenção"); return; }
-    setUserRetention({ ...payload });
-    toast.success("Rolling Reserve atualizado!");
-    await logAdminAction("update_retention", "retention_settings", selectedUser.user_id, payload);
-  };
-
   const handleSaveAdminNotes = async () => {
-    if (!selectedUser || !isAdmin) return;
+    if (!selectedUser || !isAdmin || notesFailed) return;
     const notes = adminNotes.trim().slice(0, 5000);
     const { error } = await supabase.from("seller_admin_notes").upsert({ user_id: selectedUser.user_id, notes }, { onConflict: "user_id" });
     if (error) { toast.error("Não foi possível salvar as observações."); return; }
@@ -614,6 +594,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       {/* ═══ Seller Detail Dialog ═══ */}
       <Dialog open={!!selectedUser} onOpenChange={v => { if (!v) { ++detailRequestRef.current; setSelectedUser(null); } }}>
         <DialogContent className="seller-detail-dialog z-[100] flex h-[min(92dvh,1000px)] w-[calc(100vw-32px)] max-w-6xl flex-col overflow-hidden rounded-lg border border-border p-0 gap-0">
+          <div className="min-h-0 flex-1 overflow-y-auto lg:flex lg:flex-col lg:overflow-hidden">
           <DialogHeader className="shrink-0 bg-card border-b border-border pl-4 pr-14 sm:pl-6 sm:pr-16 pt-5 pb-4 space-y-0">
             <DialogTitle className="sr-only">
               Detalhes do seller {selectedUser?.full_name || selectedUser?.email || ""}
@@ -638,19 +619,23 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       <StatusBadge status={selectedUser.account_status || "pending_review"} />
                     )}
                   </div>
-                  <p className="text-[11.5px] text-muted-foreground mt-0.5 truncate">
-                    {selectedUser?.email}{selectedUser?.phone ? <> · <span className="font-mono">{selectedUser.phone}</span></> : null}
+                  <p className="mt-0.5 flex flex-wrap gap-x-3 text-[13px] text-muted-foreground">
+                    <span className="min-w-0 truncate">{selectedUser?.email}</span>
+                    {selectedUser?.phone ? <span className="tabular-nums">{formatPhone(selectedUser.phone)}</span> : null}
                   </p>
-                  <p className="text-[10px] text-muted-foreground/60 font-mono mt-0.5 break-all">
-                    <Button variant="link"
-                      onClick={() => { if (selectedUser?.user_id) { navigator.clipboard.writeText(selectedUser.user_id); toast.success("ID copiado"); } }}
-                      className="h-auto p-0 text-[10px] text-muted-foreground"
-                      title="Clique para copiar o ID completo"
-                    >
-                      ID {selectedUser?.user_id || "—"}
-                    </Button>
-                    <span className="text-muted-foreground/40"> · IP {selectedUser?.last_ip || "—"}</span>
-                  </p>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                    <span>ID <span className="font-mono">{selectedUser?.user_id ? `${selectedUser.user_id.slice(0, 8)}…` : "—"}</span></span>
+                    {selectedUser?.user_id && (
+                      <Button type="button" variant="ghost" size="sm"
+                        onClick={() => { navigator.clipboard.writeText(selectedUser.user_id).then(() => toast.success("ID copiado"), () => toast.error("Não foi possível copiar")); }}
+                        className="h-7 gap-1 px-2 text-xs text-muted-foreground"
+                        aria-label="Copiar o ID completo do seller"
+                      >
+                        <Copy className="h-3 w-3" /> Copiar ID
+                      </Button>
+                    )}
+                    <span>IP <span className="font-mono">{selectedUser?.last_ip || "não registrado"}</span></span>
+                  </div>
 
                 </div>
               </div>
@@ -686,21 +671,19 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
             </div>
           </DialogHeader>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-4 sm:px-6">
-
-
+          <div className="px-4 pb-6 pt-4 sm:px-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pt-0">
           {detailError ? <div role="alert" className="space-y-3 border border-destructive/30 p-5 text-sm text-destructive">{detailError}<Button variant="outline" onClick={() => selectedUser && openUserDetail(selectedUser)}>Tentar novamente</Button></div> : loading ? (
             <div className="text-center py-12 text-muted-foreground">Carregando...</div>
           ) : (
             <>
               {(userTransactions.length >= 1000 || userWithdrawals.length >= 500 || userProducts.length >= 200 || userDisputes.length >= 200 || userLogs.length >= 300) && <p role="status" className="mb-4 text-xs text-warning">Históricos exibem os registros mais recentes: até 1.000 transações, 500 saques, 200 produtos/disputas e 300 logs. Os totais da Visão 360 usam todos os registros.</p>}
-              <Tabs value={detailTab} onValueChange={setDetailTab} className="min-w-0">
-                <TabsList className="seller-detail-tabs sticky top-0 z-10 flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-none border-b border-border bg-card p-1">
+              <Tabs value={detailTab} onValueChange={setDetailTab} className="min-w-0 lg:pt-4">
+                <TabsList className="seller-detail-tabs sticky top-0 z-10 flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-none border-b border-border bg-card p-1 lg:flex-wrap lg:overflow-visible">
                   {[
                     { v: "overview", l: "Visão 360", i: Activity },
                     { v: "info", l: "Info & KYC", i: FileText },
                     { v: "notes", l: "Observações", i: MessageSquareText },
-                    { v: "retention", l: "Rolling Reserve", i: Lock },
+                    { v: "retention", l: "Liberação do cartão", i: CalendarClock },
                     { v: "compliance", l: "Compliance", i: Shield },
                     { v: "disputes", l: `Disputas (${userMedTotal})`, i: AlertTriangle },
                     { v: "pix", l: "Chaves PIX", i: Key },
@@ -709,8 +692,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     { v: "logs", l: "Logs", i: Activity },
                     { v: "fees", l: "Taxas", i: CreditCard },
                   ].map(t => (
-                    <TabsTrigger key={t.v} value={t.v} className="shrink-0 gap-1.5 rounded-md px-3 py-2 text-xs">
-                      <t.i className="h-3 w-3" />{t.l}
+                    <TabsTrigger key={t.v} value={t.v} className="shrink-0 gap-1.5 rounded-md px-3 py-2 text-[13px]">
+                      <t.i className="h-3.5 w-3.5" />{t.l}
                     </TabsTrigger>
                   ))}
                 </TabsList>
@@ -721,37 +704,37 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
                 {/* ── Info & KYC ── */}
                 <TabsContent value="info" className="mt-4 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <InfoRow label="Nome completo" value={selectedUser?.full_name} />
                     <InfoRow label="E-mail" value={selectedUser?.email} />
-                    <InfoRow label="Telefone" value={selectedUser?.phone} />
+                    <InfoRow label="Telefone" value={formatPhone(selectedUser?.phone ?? null)} />
                     <InfoRow label="Documento" value={piiRevealed ? (revealedDoc ?? selectedUser?.document_number) : maskDoc(selectedUser?.document_number)} mono />
-                    <InfoRow label="Tipo documento" value={selectedUser?.document_type} />
-                    <InfoRow label="Status conta" value={selectedUser?.account_status} />
-                    <InfoRow label="Tipo Seller" value={selectedUser?.seller_type || "Não classificado"} />
+                    <InfoRow label="Tipo de documento" value={docTypeLabel(selectedUser?.document_type)} />
+                    <InfoRow label="Situação da conta" value={accountStatusLabel(selectedUser?.account_status)} />
+                    <InfoRow label="Classificação" value={sellerTypeLabel(selectedUser?.seller_type)} />
                     <InfoRow label="Último IP" value={selectedUser?.last_ip} mono />
-                    <InfoRow label="Cadastro" value={selectedUser ? new Date(selectedUser.created_at).toLocaleString("pt-BR") : ""} />
-                    <InfoRow label="Saldo Congelado" value={selectedUser && isFrozen(selectedUser) ? "SIM" : "NÃO"} />
-                    <InfoRow label="E-mail verificado" value={emailVerified === null ? "—" : emailVerified ? "SIM" : "NÃO"} />
+                    <InfoRow label="Cadastro" value={selectedUser ? new Date(selectedUser.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : ""} />
+                    <InfoRow label="Saldo congelado" value={selectedUser ? (isFrozen(selectedUser) ? "Sim" : "Não") : null} />
+                    <InfoRow label="E-mail verificado" value={emailVerified === null ? "Conferindo…" : emailVerified ? "Sim" : "Não"} />
                     {selectedUser && <SignupInfoRows userId={selectedUser.user_id} />}
                   </div>
 
                   {/* ── Histórico de IP ── */}
                   <div className="rounded-xl border border-border bg-muted/20 p-4">
-                    <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-                      <Globe className="h-3 w-3" /> Histórico de IP ({ipHistory.length})
+                    <p className="mb-3 flex items-center gap-2 text-[13px] font-semibold text-foreground">
+                      <Globe className="h-3.5 w-3.5 text-muted-foreground" /> Histórico de IP ({ipHistory.length})
                     </p>
                     {ipHistory.length === 0 ? (
-                      <p className="text-xs text-muted-foreground/70">Nenhum acesso registrado ainda.</p>
+                      <p className="text-[13px] text-muted-foreground">Nenhum acesso registrado ainda.</p>
                     ) : (
                       <div className="max-h-48 overflow-y-auto space-y-1">
                         {ipHistory.map((h, i) => (
-                          <div key={i} className="flex items-center justify-between gap-2 text-[11px] py-1.5 px-2 rounded-lg hover:bg-muted/30 border-b border-border/40 last:border-0">
+                          <div key={i} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-border/40 px-2 py-2 text-[12.5px] last:border-0">
                             <span className="font-mono text-foreground">{h.ip}</span>
-                            <span className="text-muted-foreground/70 truncate max-w-[200px]" title={h.user_agent || ""}>{h.user_agent?.split(" ").slice(-2).join(" ") || "—"}</span>
-                            <span className="text-[9px] uppercase font-bold text-muted-foreground/60 px-1.5 py-0.5 rounded bg-muted/50">{h.source || "login"}</span>
-                            {h.country && <span className="text-[9px] uppercase font-bold text-info">{h.country}</span>}
-                            <span className="text-muted-foreground/60 tabular-nums">{new Date(h.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}</span>
+                            <span className="min-w-0 max-w-[220px] truncate text-muted-foreground" title={h.user_agent || ""}>{h.user_agent?.split(" ").slice(-2).join(" ") || "Navegador não informado"}</span>
+                            <span className="rounded bg-muted/50 px-1.5 py-0.5 text-[11.5px] text-muted-foreground">{h.source === "signup" ? "Cadastro" : "Login"}</span>
+                            {h.country && <span className="text-[11.5px] font-medium text-muted-foreground">{h.country}</span>}
+                            <span className="tabular-nums text-muted-foreground">{new Date(h.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}</span>
                           </div>
                         ))}
                       </div>
@@ -761,12 +744,13 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
                   {selectedUser?.kyc_rejection_reason && (
                     <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4">
-                      <p className="text-xs font-bold text-destructive mb-1">Motivo da última recusa KYC:</p>
+                      <p className="mb-1 text-[13px] font-semibold text-destructive">Motivo da última recusa da verificação</p>
                       <p className="text-sm text-foreground">{selectedUser.kyc_rejection_reason}</p>
                     </div>
                   )}
                   <div className="rounded-xl border border-border bg-muted/20 p-4">
-                    <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-3">Classificação do Seller</p>
+                    <p className="mb-1 text-[13px] font-semibold text-foreground">Classificação do seller</p>
+                    <p className="mb-3 text-[12.5px] text-muted-foreground">Marcação interna de risco. Agora: {sellerTypeLabel(selectedUser?.seller_type)}.</p>
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={() => handleSetSellerType(selectedUser?.user_id ?? "", "black")}>
                         <Shield className="h-3 w-3 mr-1" /> Black
@@ -782,8 +766,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
                   {/* ── Métodos de Pagamento Permitidos ── */}
                   <div className="rounded-xl border border-border bg-muted/20 p-4">
-                    <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-1">Métodos de Pagamento</p>
-                    <p className="text-[10px] text-muted-foreground/70 mb-3">O bloqueio vale para produtos, links e checkouts públicos.</p>
+                    <p className="mb-1 text-[13px] font-semibold text-foreground">Formas de pagamento</p>
+                    <p className="mb-3 text-[12.5px] text-muted-foreground">O bloqueio vale para produtos, links e checkouts públicos.</p>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       {([
                         { key: "pix_enabled", label: "Pix" },
@@ -817,9 +801,9 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                                 : "border-destructive/30 bg-destructive/5 hover:bg-destructive/10"
                             )}
                           >
-                            <span className="text-xs font-bold text-foreground">{opt.label}</span>
+                            <span className="text-[13px] font-semibold text-foreground">{opt.label}</span>
                             <span className={cn(
-                              "text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded",
+                              "rounded px-1.5 py-0.5 text-[11.5px] font-semibold",
                               enabled ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"
                             )}>
                               {enabled ? "Ativo" : "Bloqueado"}
@@ -834,95 +818,75 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
                 {/* ── Observações Admin ── */}
                 <TabsContent value="notes" className="mt-4 space-y-4">
-                  <PremiumPanel title="Observações sobre o Seller" icon={MessageSquareText}>
+                  <PremiumPanel title="Observações internas" icon={MessageSquareText} description="Só a administração vê. O seller nunca tem acesso a este texto.">
                     <div className="space-y-3">
-                      <textarea value={adminNotes} onChange={e => setAdminNotes(e.target.value)} rows={8}
-                        placeholder="Escreva observações, anotações internas, histórico de comunicação..."
-                        className="w-full px-4 py-3 bg-muted/20 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30 resize-none" />
-                      <Button size="sm" variant="outline" className="rounded-xl text-xs border-primary/30 text-primary" onClick={handleSaveAdminNotes}>
-                        <Save className="h-3 w-3 mr-1" /> Salvar Observações
-                      </Button>
+                      {notesFailed && <p role="alert" className="text-[13px] text-destructive">Não conseguimos carregar as observações salvas. Para não apagar o que já existe, salvar fica travado até a ficha abrir de novo.</p>}
+                      <textarea value={adminNotes} onChange={e => setAdminNotes(e.target.value)} rows={8} maxLength={5000} disabled={notesFailed}
+                        aria-label="Observações internas sobre o seller"
+                        placeholder="Anotações internas, combinados com o seller, histórico de contato…"
+                        className="w-full resize-y rounded-xl border border-border bg-muted/20 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/30 focus:outline-none disabled:opacity-60" />
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="text-xs tabular-nums text-muted-foreground">{adminNotes.length.toLocaleString("pt-BR")} de 5.000 caracteres</span>
+                        <Button size="sm" variant="outline" className="gap-1.5 border-primary/30 text-primary" disabled={notesFailed} onClick={handleSaveAdminNotes}>
+                          <Save className="h-3.5 w-3.5" /> Salvar observações
+                        </Button>
+                      </div>
                     </div>
                   </PremiumPanel>
                 </TabsContent>
 
-                {/* ── Rolling Reserve ── */}
+                {/* ── Liberação do cartão ── */}
                 <TabsContent value="retention" className="mt-4 space-y-4">
-                  <PremiumPanel title="Rolling Reserve (Retenção de Segurança)" icon={Lock}>
-                    <p className="text-xs text-muted-foreground mb-4">
-                      Reserva de segurança (% retido por X dias) e janela de liberação do cartão (D+N). Deixe em branco para usar o global.
+                  <PremiumPanel title="Liberação do cartão" icon={CalendarClock}>
+                    <p className="mb-4 max-w-3xl text-[13px] leading-relaxed text-muted-foreground">
+                      Quanto tempo o valor de uma venda no cartão deste seller fica retido antes de virar saldo. A mudança vale só para as vendas feitas depois dela.
                     </p>
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div>
-                        <Label className="text-[10px] text-muted-foreground">Retenção PIX (%)</Label>
-                        <NumberInput step={0.1} min={0} max={100} value={retentionForm.pix_pct}
-                          onChange={v => setRetentionForm(p => ({ ...p, pix_pct: v }))}
-                          placeholder="0" className="mt-1 text-xs" />
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="mr-2">
+                        <p className="text-xs text-muted-foreground">Prazo deste seller</p>
+                        <p className="text-[15px] font-semibold tabular-nums text-foreground">
+                          {userRetention?.card_release_days ? `${releaseLabel(userRetention.card_release_days)}, prazo próprio` : "Segue o padrão da plataforma"}
+                        </p>
                       </div>
-                      <div>
-                        <Label className="text-[10px] text-muted-foreground">Retenção Cartão (%)</Label>
-                        <NumberInput step={0.1} min={0} max={100} value={retentionForm.card_pct}
-                          onChange={v => setRetentionForm(p => ({ ...p, card_pct: v }))}
-                          placeholder="5" className="mt-1 text-xs" />
-                      </div>
-                      <div>
-                        <Label className="text-[10px] text-muted-foreground">Dias Reserva</Label>
-                        <NumberInput min={1} max={365} value={retentionForm.days}
-                          onChange={v => setRetentionForm(p => ({ ...p, days: v }))}
-                          placeholder="14" className="mt-1 text-xs" />
-                      </div>
-                      <div>
-                        <Label className="text-[10px] text-muted-foreground">Liberação Cartão</Label>
-                        <Select value={retentionForm.card_release_days} onValueChange={v => setRetentionForm(p => ({ ...p, card_release_days: v }))}>
-                          <SelectTrigger className="mt-1 h-9 text-xs rounded-xl bg-muted/30 border-border"><SelectValue /></SelectTrigger>
-                          <SelectContent className="z-[130]">
-                            <SelectItem value="1">D+1</SelectItem>
-                            <SelectItem value="7">D+7 (padrão)</SelectItem>
-                            <SelectItem value="15">D+15</SelectItem>
-                            <SelectItem value="30">D+30</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      <Button size="sm" variant="outline" className="gap-1.5" disabled={!isAdmin || !selectedUser}
+                        onClick={() => selectedUser && setReleaseEdit({ seller: { user_id: selectedUser.user_id, name: selectedUser.full_name || selectedUser.email || "Seller", email: selectedUser.email }, days: userRetention?.card_release_days ?? null })}>
+                        <Edit className="h-3.5 w-3.5" /> {userRetention?.card_release_days ? "Alterar prazo" : "Definir prazo próprio"}
+                      </Button>
+                      {userRetention?.card_release_days ? (
+                        <Button size="sm" variant="ghost" className="text-muted-foreground" disabled={!isAdmin} onClick={() => setReleaseClear(true)}>Voltar ao padrão</Button>
+                      ) : null}
                     </div>
-                    {userRetention && (
-                      <div className="mt-3 rounded-xl border border-border bg-muted/20 p-3 text-xs text-muted-foreground">
-                        Atual: PIX {userRetention.pix_retention_pct}% | Cartão {userRetention.card_retention_pct}% | {userRetention.retention_days}d reserva | Liberação cartão D+{userRetention.card_release_days ?? 7}
-                      </div>
-                    )}
-                    <Button size="sm" variant="outline" className="rounded-xl text-xs border-primary/30 text-primary mt-4" onClick={handleSaveRetention}>
-                      <Save className="h-3 w-3 mr-1" /> Salvar Rolling Reserve
-                    </Button>
+                    <p className="mt-4 text-[12.5px] text-muted-foreground">O prazo padrão e a lista de quem tem prazo próprio ficam em Configurações. Reter uma porcentagem das vendas (rolling reserve) ainda não existe na plataforma.</p>
                   </PremiumPanel>
                 </TabsContent>
 
                 {/* ── Disputas do Seller ── */}
                 <TabsContent value="disputes" className="mt-4 space-y-4">
                   <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-                    <MiniKpi label="Total Disputas" value={String(userMedTotal)} tone="warning" />
-                    <MiniKpi label="Abertas" value={String(userMedOpen)} tone="warning" />
-                    <MiniKpi label="Resolvidas" value={String(userMedResolved)} tone="success" />
-                    <MiniKpi label="Valor Total" value={fmtCurrency(userMedAmount)} tone="warning" />
-                    <MiniKpi label="Ocorrências (%)" value={`${userMedRate}%`} tone="info" />
+                    <MiniKpi label="Disputas" value={String(userMedTotal)} />
+                    <MiniKpi label="Abertas" value={String(userMedOpen)} tone={userMedOpen > 0 ? "warning" : "neutral"} />
+                    <MiniKpi label="Encerradas" value={String(userMedResolved)} />
+                    <MiniKpi label="Valor contestado" value={fmtCurrency(userMedAmount)} />
+                    <MiniKpi label="Disputas por venda paga" value={pctLabel(userMedRate)} />
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    {[
-                      { label: "MedPix", count: userDisputes.filter(d => d.type === "medpix").length, amount: userDisputes.filter(d => d.type === "medpix").reduce((a, d) => a + Number(d.amount || 0), 0), tone: "text-warning" },
-                      { label: "Pre-Med PIX", count: userDisputes.filter(d => d.type === "pre_med_pix").length, amount: userDisputes.filter(d => d.type === "pre_med_pix").reduce((a, d) => a + Number(d.amount || 0), 0), tone: "text-warning" },
-                      { label: "Reembolso", count: userDisputes.filter(d => d.type === "refund").length, amount: userDisputes.filter(d => d.type === "refund").reduce((a, d) => a + Number(d.amount || 0), 0), tone: "text-destructive" },
-                    ].map(dt => (
-                      <div key={dt.label} className="rounded-xl border border-border bg-muted/20 p-4 text-center">
-                        <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{dt.label}</p>
-                        <p className={`font-display text-xl font-black mt-1 ${dt.tone}`}>{dt.count}</p>
-                        <p className="text-[10px] text-muted-foreground mt-1">{fmtCurrency(dt.amount)}</p>
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                    {(["medpix", "pre_med_pix", "chargeback", "refund"] as const).map(type => {
+                      const list = userDisputes.filter(d => d.type === type);
+                      return (
+                        <div key={type} className="rounded-xl border border-border bg-muted/20 p-4">
+                          <p className="text-xs text-muted-foreground">{disputeTypeLabel(type)}</p>
+                          <p className="mt-1 text-xl font-semibold tabular-nums text-foreground">{list.length}</p>
+                          <p className="mt-0.5 text-xs tabular-nums text-muted-foreground">{fmtCurrency(list.reduce((a, d) => a + Number(d.amount || 0), 0))}</p>
+                        </div>
+                      );
+                    })}
                   </div>
-                  <PremiumPanel title="Histórico de Disputas" icon={AlertTriangle}>
+                  <PremiumPanel title="Histórico de disputas" icon={AlertTriangle}>
                     <div className={premiumTable.wrapper}>
                       <table className={premiumTable.table}>
                         <thead>
                           <tr className={premiumTable.headRow}>
-                            {["Tipo", "Valor", "Status", "Comprador", "Motivo", "Data", "Ações"].map(h => <th key={h} className={premiumTable.th}>{h}</th>)}
+                            {["Tipo", "Valor", "Situação", "Comprador", "Motivo", "Aberta em", "Decisão"].map(h => <th key={h} className={premiumTable.th}>{h}</th>)}
                           </tr>
                         </thead>
                         <tbody>
@@ -930,30 +894,30 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                             const isOpen = d.status === "open" || d.status === "in_review" || d.status === "pending_recorrer";
                             return (
                               <tr key={d.id} className={premiumTable.row}>
-                                <td className={premiumTable.td}><span className="text-[10px] font-bold uppercase text-foreground">{d.type}</span></td>
-                                <td className={premiumTable.td}><span className="font-display text-[12px] font-black tabular-nums text-warning">{fmtCurrency(Number(d.amount))}</span></td>
-                                <td className={premiumTable.td}><StatusBadge status={d.status} /></td>
-                                <td className={premiumTable.td}><span className="text-[11px] text-muted-foreground">{d.buyer_name || "—"}</span></td>
-                                <td className={premiumTable.td}><span className="text-[11px] text-muted-foreground max-w-[200px] truncate block">{d.reason || "—"}</span></td>
-                                <td className={premiumTable.td}><span className="text-[10px] text-muted-foreground">{new Date(d.created_at).toLocaleDateString("pt-BR")}</span></td>
+                                <td className={premiumTable.td}><span className="text-[13px] font-medium text-foreground">{disputeTypeLabel(d.type)}</span></td>
+                                <td className={premiumTable.td}><span className="text-[13px] font-semibold tabular-nums text-foreground">{fmtCurrency(Number(d.amount))}</span></td>
+                                <td className={premiumTable.td}>{(() => { const st = disputeStatus({ status: d.status, seller_response: (d as { seller_response?: string | null }).seller_response ?? null }); return <span className="ax-tag" data-tone={st.tone === "neutral" ? undefined : st.tone}>{st.label}</span>; })()}</td>
+                                <td className={premiumTable.td}><span className="text-[13px] text-muted-foreground">{d.buyer_name || "—"}</span></td>
+                                <td className={premiumTable.td}><span className="block max-w-[220px] truncate text-[13px] text-muted-foreground" title={d.reason || ""}>{d.reason || "—"}</span></td>
+                                <td className={premiumTable.td}><span className="text-[13px] tabular-nums text-muted-foreground">{new Date(d.created_at).toLocaleDateString("pt-BR")}</span></td>
                                 <td className={premiumTable.td}>
                                   {isOpen ? (
                                     <div className="flex gap-1">
-                                      <Button size="sm" variant="outline" className="h-7 text-[10px] rounded-lg border-success/30 text-success" onClick={() => handleResolveDispute(d.id, "seller")}>
-                                        <CheckCircle2 className="h-3 w-3 mr-1" /> Seller
+                                      <Button size="sm" variant="outline" className="h-8 gap-1 text-xs border-success/30 text-success" title="Decidir a favor do seller" onClick={() => handleResolveDispute(d.id, "seller")}>
+                                        <CheckCircle2 className="h-3.5 w-3.5" /> A favor do seller
                                       </Button>
-                                      <Button size="sm" variant="outline" className="h-7 text-[10px] rounded-lg border-destructive/30 text-destructive" onClick={() => handleResolveDispute(d.id, "buyer")}>
-                                        <XCircle className="h-3 w-3 mr-1" /> Comprador
+                                      <Button size="sm" variant="outline" className="h-8 gap-1 text-xs border-destructive/30 text-destructive" title="Decidir a favor do comprador" onClick={() => handleResolveDispute(d.id, "buyer")}>
+                                        <XCircle className="h-3.5 w-3.5" /> A favor do comprador
                                       </Button>
                                     </div>
                                   ) : (
-                                    <span className="text-[10px] text-muted-foreground">—</span>
+                                    <span className="text-[13px] text-muted-foreground">Decidida</span>
                                   )}
                                 </td>
                               </tr>
                             );
                           })}
-                          {userDisputes.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-muted-foreground text-xs">Sem disputas</td></tr>}
+                          {userDisputes.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-[13px] text-muted-foreground">Nenhuma disputa deste seller.</td></tr>}
                         </tbody>
                       </table>
                     </div>
@@ -981,11 +945,11 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                               <Key className="h-4 w-4 text-primary" />
                             </div>
                             <div className="flex-1">
-                              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{pk.key_type}</p>
+                              <p className="text-xs text-muted-foreground">{pixTypeLabel(pk.key_type)}</p>
                               <p className="break-all text-sm font-mono text-foreground mt-0.5">{displayPixKey(pk.key_value, pk.key_type)}</p>
                             </div>
-                            <p className="text-[10px] text-muted-foreground">{new Date(pk.created_at).toLocaleDateString("pt-BR")}</p>
-                            <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => handleDeletePixKey(pk.id)} title="Remover chave">
+                            <p className="text-xs tabular-nums text-muted-foreground">{new Date(pk.created_at).toLocaleDateString("pt-BR")}</p>
+                            <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" onClick={() => handleDeletePixKey(pk.id)} title="Remover chave" aria-label="Remover esta chave Pix">
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </div>
@@ -994,9 +958,9 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     )}
                     {selectedUser?.pix_key && (
                       <div className="mt-4 rounded-xl border border-warning/15 bg-warning/5 p-3">
-                        <p className="text-[10px] text-warning font-bold mb-1">PIX Legado (perfil)</p>
-                        <p className="text-xs font-mono text-muted-foreground">
-                          {selectedUser.pix_key_type}: {piiRevealed ? (revealedLegacyPix ?? selectedUser.pix_key) : maskPixValue(selectedUser.pix_key)}
+                        <p className="mb-1 text-[13px] font-semibold text-warning">Chave Pix antiga, salva no perfil</p>
+                        <p className="text-[13px] text-muted-foreground">
+                          {pixTypeLabel(selectedUser.pix_key_type)}: <span className="font-mono">{piiRevealed ? (revealedLegacyPix ?? selectedUser.pix_key) : maskPixValue(selectedUser.pix_key)}</span>
                         </p>
                       </div>
                     )}
@@ -1008,17 +972,17 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                 <TabsContent value="financial" className="mt-4 space-y-4">
                   {selectedUser && <BalanceAdjustCard userId={selectedUser.user_id} onDone={() => { reloadSeller(); if (selectedUser) void openUserDetail(selectedUser); }} />}
                   {balanceAdjustments.length > 0 && (
-                    <PremiumPanel title="Histórico de Ajustes" icon={DollarSign}>
+                    <PremiumPanel title="Histórico de ajustes" icon={DollarSign}>
                       <div className="space-y-2 max-h-[200px] overflow-y-auto">
                         {balanceAdjustments.map(adj => (
-                          <div key={adj.id} className="flex items-center justify-between text-[11px] py-2 border-b border-border/50">
-                            <div>
-                              <span className={adj.type === "credit" ? "text-success font-bold" : "text-destructive font-bold"}>
-                                {adj.type === "credit" ? "+" : "-"} R$ {Number(adj.amount).toFixed(2)}
+                          <div key={adj.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 border-b border-border/50 py-2 text-[13px]">
+                            <div className="min-w-0">
+                              <span className={cn("font-semibold tabular-nums", adj.type === "credit" ? "text-success" : "text-destructive")}>
+                                {adj.type === "credit" ? "+" : "−"} {fmtCurrency(Number(adj.amount))}
                               </span>
-                              <span className="text-muted-foreground ml-2">{adj.reason}</span>
+                              <span className="ml-2 text-muted-foreground">{adj.reason}</span>
                             </div>
-                            <span className="text-muted-foreground">{new Date(adj.created_at).toLocaleString("pt-BR")}</span>
+                            <span className="tabular-nums text-muted-foreground">{new Date(adj.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}</span>
                           </div>
                         ))}
                       </div>
@@ -1029,7 +993,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
                 {/* ── Compliance ── */}
                 <TabsContent value="compliance" className="mt-4 space-y-5">
-                  <PremiumPanel title={`Produtos cadastrados (${userProducts.length})`} icon={Package}>
+                  <PremiumPanel title={`Produtos (${userProducts.length})`} icon={Package}>
                     <div className="space-y-3">
                       {userProducts.length === 0 && <PremiumEmpty icon={Package} title="Nenhum produto cadastrado" />}
                       {userProducts.map(p => {
@@ -1049,22 +1013,22 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                                   <p className="text-sm font-bold text-foreground">{p.name}</p>
                                   <StatusBadge status={p.status} />
                                 </div>
-                                <p className="text-[10px] text-muted-foreground font-mono mt-0.5">ID: {p.id}</p>
+                                <p className="mt-0.5 text-xs text-muted-foreground">ID <span className="font-mono">{p.id.slice(0, 8)}…</span></p>
                               </div>
-                              <p className="font-display text-lg font-black text-primary">R$ {Number(p.price).toFixed(2)}</p>
+                              <p className="text-base font-semibold tabular-nums text-foreground">{fmtCurrency(Number(p.price))}</p>
                             </div>
                             <div className="grid grid-cols-3 lg:grid-cols-6 gap-2">
                               {[
-                                { l: "Vendas", v: String(prodApproved.length), c: "text-primary" },
-                                { l: "Bruto", v: fmtCurrency(prodGross), c: "text-info" },
-                                { l: "Líquido", v: fmtCurrency(prodNet), c: "text-primary" },
-                                { l: "Taxas", v: fmtCurrency(prodFees), c: "text-warning" },
-                                { l: "Estornos", v: String(prodRefunds), c: "text-destructive" },
-                                { l: "Chargebacks", v: String(prodChargebacks), c: "text-destructive" },
+                                { l: "Vendas", v: String(prodApproved.length), c: "text-foreground" },
+                                { l: "Bruto", v: fmtCurrency(prodGross), c: "text-foreground" },
+                                { l: "Líquido", v: fmtCurrency(prodNet), c: "text-foreground" },
+                                { l: "Taxas", v: fmtCurrency(prodFees), c: "text-foreground" },
+                                { l: "Estornos", v: String(prodRefunds), c: prodRefunds > 0 ? "text-destructive" : "text-foreground" },
+                                { l: "Chargebacks", v: String(prodChargebacks), c: prodChargebacks > 0 ? "text-destructive" : "text-foreground" },
                               ].map(k => (
-                                <div key={k.l} className="bg-muted/20 rounded-lg p-2 text-center border border-border/50">
-                                  <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">{k.l}</p>
-                                  <p className={`text-xs font-black mt-0.5 ${k.c}`}>{k.v}</p>
+                                <div key={k.l} className="rounded-lg border border-border/50 bg-muted/20 p-2">
+                                  <p className="text-xs text-muted-foreground">{k.l}</p>
+                                  <p className={`mt-0.5 text-[13px] font-semibold tabular-nums ${k.c}`}>{k.v}</p>
                                 </div>
                               ))}
                             </div>
@@ -1075,24 +1039,24 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                   </PremiumPanel>
 
                   {deletedProducts.length > 0 && (
-                    <PremiumPanel title={`Produtos Excluídos (${deletedProducts.length})`} icon={Trash2}>
+                    <PremiumPanel title={`Produtos excluídos (${deletedProducts.length})`} icon={Trash2}>
                       <div className="space-y-2">
                         {deletedProducts.map((dp, i) => (
                           <div key={i} className="rounded-xl border border-destructive/15 bg-destructive/5 p-3">
                             <p className="text-sm font-bold text-destructive">{dp.name}</p>
-                            <p className="text-[10px] text-muted-foreground">Preço: R$ {Number(dp.price).toFixed(2)} • Excluído em {new Date(dp.deletedAt).toLocaleString("pt-BR")}</p>
+                            <p className="text-xs text-muted-foreground">Preço {fmtCurrency(Number(dp.price))}, excluído em {new Date(dp.deletedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}</p>
                           </div>
                         ))}
                       </div>
                     </PremiumPanel>
                   )}
 
-                  <PremiumPanel title="Resumo de Compliance" icon={BarChart3}>
+                  <PremiumPanel title="Resumo" icon={BarChart3} description="Contado sobre o histórico carregado nesta ficha.">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                      <MiniKpi label="Produtos Ativos" value={String(userProducts.filter(product => product.status === "active").length)} tone="success" />
-                      <MiniKpi label="Produtos Excluídos" value={String(deletedProducts.length)} tone="warning" />
-                      <MiniKpi label="Transações Totais" value={String(userTransactions.length)} tone="info" />
-                      <MiniKpi label="Taxa Estorno" value={`${userTransactions.length > 0 ? ((userTransactions.filter(t => t.status === "refunded" || t.status === "chargeback").length / userTransactions.length) * 100).toFixed(2) : "0.00"}%`} tone="warning" />
+                      <MiniKpi label="Produtos ativos" value={String(userProducts.filter(product => product.status === "active").length)} />
+                      <MiniKpi label="Produtos excluídos" value={String(deletedProducts.length)} />
+                      <MiniKpi label="Transações" value={String(userTransactions.length)} />
+                      <MiniKpi label="Estornos e chargebacks" value={pctLabel(userTransactions.length > 0 ? (userTransactions.filter(t => t.status === "refunded" || t.status === "chargeback").length / userTransactions.length) * 100 : 0)} />
                     </div>
                   </PremiumPanel>
                 </TabsContent>
@@ -1103,7 +1067,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <table className={premiumTable.table}>
                       <thead>
                         <tr className={premiumTable.headRow}>
-                          {["Cliente", "Contato", "Doc", "Compras", "Total", "Última", "Ações"].map(h => <th key={h} className={premiumTable.th}>{h}</th>)}
+                          {["Cliente", "Telefone", "Documento", "Compras", "Total", "Última compra", "Ações"].map(h => <th key={h} className={premiumTable.th}>{h}</th>)}
                         </tr>
                       </thead>
                       <tbody>
@@ -1114,19 +1078,19 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                             <tr key={i} className={premiumTable.row}>
                               <td className={premiumTable.td}>
                                 <div className="flex flex-col">
-                                  <span className="text-[12px] font-bold text-foreground">{b.name || "—"}</span>
-                                  <span className="text-[10px] text-muted-foreground">{b.email || "—"}</span>
+                                  <span className="text-[13px] font-semibold text-foreground">{b.name || "—"}</span>
+                                  <span className="text-xs text-muted-foreground">{b.email || "—"}</span>
                                 </div>
                               </td>
-                              <td className={premiumTable.td}><span className="text-[11px] text-muted-foreground font-mono">{b.phone || "—"}</span></td>
-                              <td className={premiumTable.td}><span className="text-[10px] text-muted-foreground font-mono">{b.document || "—"}</span></td>
-                              <td className={premiumTable.td}><span className="text-[11px] font-bold text-foreground bg-muted/30 px-2 py-0.5 rounded-md">{b.count}</span></td>
-                              <td className={premiumTable.td}><span className="font-display text-[13px] font-black tabular-nums text-primary">{fmtCurrency(b.total)}</span></td>
-                              <td className={premiumTable.td}><span className="text-[10px] text-muted-foreground tabular-nums">{b.lastAt ? new Date(b.lastAt).toLocaleDateString("pt-BR") : "—"}</span></td>
+                              <td className={premiumTable.td}><span className="text-[13px] tabular-nums text-muted-foreground">{formatPhone(b.phone || null) || "—"}</span></td>
+                              <td className={premiumTable.td}><span className="font-mono text-xs text-muted-foreground">{b.document || "—"}</span></td>
+                              <td className={premiumTable.td}><span className="text-[13px] font-semibold tabular-nums text-foreground">{b.count}</span></td>
+                              <td className={premiumTable.td}><span className="text-[13px] font-semibold tabular-nums text-foreground">{fmtCurrency(b.total)}</span></td>
+                              <td className={premiumTable.td}><span className="text-[13px] tabular-nums text-muted-foreground">{b.lastAt ? new Date(b.lastAt).toLocaleDateString("pt-BR") : "—"}</span></td>
                               <td className={premiumTable.td}>
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0"><MoreHorizontal className="h-3.5 w-3.5" /></Button>
+                                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0" aria-label={`Ações para ${b.name || b.email || "este cliente"}`}><MoreHorizontal className="h-4 w-4" /></Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end" className="w-56">
                                     <DropdownMenuItem
@@ -1208,11 +1172,11 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                             </tr>
                           );
                         })}
-                        {buyers.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-muted-foreground text-xs">Nenhum cliente</td></tr>}
+                        {buyers.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-[13px] text-muted-foreground">Nenhum cliente comprou deste seller ainda.</td></tr>}
                       </tbody>
                     </table>
                   </div>
-                  <p className="text-[10px] text-muted-foreground/60 mt-2 px-1">Reembolsos seguem para aprovação manual; MED PIX e chargebacks retêm o valor da venda com registro auditável.</p>
+                  <p className="mt-2 px-1 text-xs text-muted-foreground">Reembolsos seguem para aprovação manual. MED Pix e chargeback retêm o valor da venda e ficam registrados na auditoria.</p>
                 </TabsContent>
 
 
@@ -1228,8 +1192,8 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                             <div className={`h-7 w-7 rounded-lg bg-muted/30 flex items-center justify-center shrink-0 ${meta.color}`}><Icon className="h-3.5 w-3.5" /></div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">
-                                <span className={`text-[11px] font-bold ${meta.color}`}>{meta.label}</span>
-                                <span className="text-[10px] text-muted-foreground">{new Date(log.created_at).toLocaleString("pt-BR")}</span>
+                                <span className={`text-[13px] font-semibold ${meta.color}`}>{meta.label}</span>
+                                <span className="text-xs tabular-nums text-muted-foreground">{new Date(log.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}</span>
                               </div>
                               {log.old_data && log.action.includes("deleted") && (
                                 <div className="mt-2 rounded-lg bg-destructive/5 border border-destructive/10 p-2 text-[10px]">
@@ -1254,26 +1218,27 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                         </div>
                       );
                     })}
-                    {userLogs.length === 0 && <p className="text-xs text-muted-foreground text-center py-8">Sem logs</p>}
+                    {userLogs.length === 0 && <p className="py-8 text-center text-[13px] text-muted-foreground">Nenhuma alteração registrada nos produtos e cursos deste seller.</p>}
                   </div>
                 </TabsContent>
 
                 {/* ── Taxas Customizadas ── */}
                 <TabsContent value="fees" className="mt-4">
-                  <PremiumPanel title="Taxas Personalizadas" eyebrow="Override por seller" icon={CreditCard}>
-                    <p className="text-[11px] text-muted-foreground mb-4">Em branco = usa a taxa padrão da plataforma</p>
+                  <PremiumPanel title="Taxas deste seller" icon={CreditCard}>
+                    <p className="mb-1 text-[13px] text-muted-foreground">Campo em branco usa a taxa padrão da plataforma.</p>
+                    <p className="mb-4 text-[13px] text-muted-foreground">Hoje só a taxa de saque e o limite por venda são aplicados. As taxas de venda ficam guardadas e passam a valer quando houver adquirente.</p>
                     <div className="space-y-4">
                       <div className="space-y-3">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-success">PIX</p>
+                        <p className="text-[13px] font-semibold text-foreground">Pix</p>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">PIX — Percentual (%)</Label>
+                            <Label className="text-xs text-muted-foreground">Percentual (%)</Label>
                             <NumberInput step={0.01} min={0} value={customFees.pix_percentage}
                               onChange={v => setCustomFees(p => ({ ...p, pix_percentage: v }))}
                               placeholder="4.99" className="mt-1 text-xs" />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">PIX — Fixa (R$)</Label>
+                            <Label className="text-xs text-muted-foreground">Valor fixo (R$)</Label>
                             <NumberInput step={0.01} min={0} value={customFees.pix_fixed}
                               onChange={v => setCustomFees(p => ({ ...p, pix_fixed: v }))}
                               placeholder="3.99" className="mt-1 text-xs" />
@@ -1281,16 +1246,16 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                         </div>
                       </div>
                       <div className="space-y-3">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-info">Cartão</p>
+                        <p className="text-[13px] font-semibold text-foreground">Cartão</p>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">Cartão — Percentual (%)</Label>
+                            <Label className="text-xs text-muted-foreground">Percentual (%)</Label>
                             <NumberInput step={0.01} min={0} value={customFees.card_percentage}
                               onChange={v => setCustomFees(p => ({ ...p, card_percentage: v }))}
                               placeholder="5.99" className="mt-1 text-xs" />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">Cartão — Fixa (R$)</Label>
+                            <Label className="text-xs text-muted-foreground">Valor fixo (R$)</Label>
                             <NumberInput step={0.01} min={0} value={customFees.card_fixed}
                               onChange={v => setCustomFees(p => ({ ...p, card_fixed: v }))}
                               placeholder="0.00" className="mt-1 text-xs" />
@@ -1298,16 +1263,16 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                         </div>
                       </div>
                       <div className="space-y-3">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-warning">Boleto</p>
+                        <p className="text-[13px] font-semibold text-foreground">Boleto</p>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">Boleto — Percentual (%)</Label>
+                            <Label className="text-xs text-muted-foreground">Percentual (%)</Label>
                             <NumberInput step={0.01} min={0} value={customFees.boleto_percentage}
                               onChange={v => setCustomFees(p => ({ ...p, boleto_percentage: v }))}
                               placeholder="0.00" className="mt-1 text-xs" />
                           </div>
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">Boleto — Fixa (R$)</Label>
+                            <Label className="text-xs text-muted-foreground">Valor fixo (R$)</Label>
                             <NumberInput step={0.01} min={0} value={customFees.boleto_fixed}
                               onChange={v => setCustomFees(p => ({ ...p, boleto_fixed: v }))}
                               placeholder="3.49" className="mt-1 text-xs" />
@@ -1315,10 +1280,10 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                         </div>
                       </div>
                       <div className="space-y-3">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-warning">Saque</p>
+                        <p className="text-[13px] font-semibold text-foreground">Saque</p>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">Saque PIX (R$)</Label>
+                            <Label className="text-xs text-muted-foreground">Taxa por saque (R$)</Label>
                             <NumberInput step={0.01} min={0} value={customFees.withdrawal_fee}
                               onChange={v => setCustomFees(p => ({ ...p, withdrawal_fee: v }))}
                               placeholder="5.00" className="mt-1 text-xs" />
@@ -1326,21 +1291,21 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                         </div>
                       </div>
                       <div className="space-y-3">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-success">Limites Operacionais</p>
+                        <p className="text-[13px] font-semibold text-foreground">Limite por venda</p>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <Label className="text-[10px] text-muted-foreground">Ticket Máximo (R$)</Label>
+                            <Label className="text-xs text-muted-foreground">Valor máximo por venda (R$)</Label>
                             <NumberInput step={0.01} min={0} value={customFees.max_ticket}
                               onChange={v => setCustomFees(p => ({ ...p, max_ticket: v }))}
                               placeholder="10000.00" className="mt-1 text-xs" />
-                            <p className="text-[10px] text-muted-foreground mt-1">
-                              Em vigor: <span className="font-mono text-foreground">R$ {(effectiveMaxTicket ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              Em vigor: <span className="tabular-nums text-foreground">{fmtCurrency(effectiveMaxTicket ?? 0)}</span>
                             </p>
                           </div>
                         </div>
                       </div>
                       <Button size="sm" variant="outline" className="rounded-xl text-xs border-primary/30 text-primary" onClick={handleSaveCustomFees}>
-                        <Save className="h-3 w-3 mr-1" /> Salvar Taxas
+                        <Save className="h-3 w-3 mr-1" /> Salvar taxas
                       </Button>
                     </div>
                   </PremiumPanel>
@@ -1349,8 +1314,25 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
             </>
           )}
           </div>
+          </div>
         </DialogContent>
       </Dialog>
+      <SellerReleaseDialog
+        state={releaseEdit}
+        onClose={() => setReleaseEdit(null)}
+        globalDays={null}
+        onSaved={() => { if (selectedUser) void openUserDetail(selectedUser); }}
+      />
+      <ReasonDialog open={releaseClear} onClose={() => setReleaseClear(false)} icon={<CalendarClock className="h-5 w-5" />} title="Voltar ao prazo padrão?"
+        subtitle={selectedUser?.full_name || selectedUser?.email || undefined} confirmLabel="Voltar ao padrão" reason="required" presets={REASON_PRESETS.release}
+        confirmText={`Remover o prazo próprio de ${selectedUser?.full_name || "este seller"}: ele volta ao prazo padrão da plataforma.`}
+        onSubmit={async (reason) => {
+          await callRpc("admin_clear_card_release", { _user_id: selectedUser!.user_id, _reason: reason });
+          toast.success("Prazo próprio removido. O seller foi avisado.");
+          if (selectedUser) await openUserDetail(selectedUser);
+        }}>
+        <p className="text-[14px] leading-relaxed text-foreground/90">As próximas vendas no cartão deste seller seguem o prazo padrão da plataforma, e ele é avisado. As vendas já feitas mantêm a data que tinham.</p>
+      </ReasonDialog>
 
     </div>
   );
@@ -1385,12 +1367,19 @@ function SignupInfoRows({ userId }: { userId: string }) {
   );
 }
 
+const ACCOUNT_STATUS_LABEL: Record<string, string> = { approved: "Aprovada", pending: "Pendente, sem documentos enviados", pending_review: "Em análise", rejected: "Recusada", blocked: "Bloqueada" };
+function accountStatusLabel(v?: string | null) { return v ? ACCOUNT_STATUS_LABEL[v] ?? v : null; }
+function sellerTypeLabel(v?: string | null) { return v === "white" ? "White" : v === "black" ? "Black" : v === "gray" ? "Gray" : "Não classificado"; }
+function docTypeLabel(v?: string | null) { return v === "cpf" ? "CPF" : v === "cnpj" ? "CNPJ" : v ? v.toUpperCase() : null; }
+const PIX_TYPE_LABEL: Record<string, string> = { cpf: "CPF", cnpj: "CNPJ", email: "E-mail", phone: "Telefone", random: "Chave aleatória", evp: "Chave aleatória" };
+function pixTypeLabel(v?: string | null) { return v ? PIX_TYPE_LABEL[v.toLowerCase()] ?? v : "Chave"; }
+function pctLabel(v: number | string) { return `${Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}%`; }
+
 function InfoRow({ label, value, mono }: { label: string; value?: string | null; mono?: boolean }) {
   return (
-    <div className="group/info relative overflow-hidden rounded-xl border border-border bg-card p-3 transition-all duration-200 hover:border-primary/40 hover:-translate-y-px hover:bg-muted/20">
-      <span className="absolute inset-y-0 left-0 w-0.5 bg-primary scale-y-0 group-hover/info:scale-y-100 transition-transform duration-300 origin-top" />
-      <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/80 mb-1">{label}</p>
-      <p className={`break-words text-[12px] font-semibold ${mono ? "font-mono" : ""} ${value ? "text-foreground" : "text-muted-foreground/50 italic"}`}>{value || "Não informado"}</p>
+    <div className="min-w-0 rounded-xl border border-border bg-card px-3 py-2.5">
+      <p className="mb-0.5 text-xs text-muted-foreground">{label}</p>
+      <p className={cn("break-words text-[13.5px]", mono && "font-mono", value ? "font-medium text-foreground" : "text-muted-foreground")}>{value || "Não informado"}</p>
     </div>
   );
 }
@@ -1405,19 +1394,10 @@ function MiniKpi({ label, value, tone = "neutral" }: { label: string; value: str
     destructive: "text-destructive",
     neutral: "text-foreground",
   };
-  const barCls: Record<MiniTone, string> = {
-    success: "bg-success",
-    warning: "bg-warning",
-    info: "bg-info",
-    primary: "bg-primary",
-    destructive: "bg-destructive",
-    neutral: "bg-foreground/40",
-  };
   return (
-    <div className="group/kpi relative overflow-hidden rounded-xl border border-border bg-card p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-muted/20">
-      <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/80">{label}</p>
-      <p className={`font-display text-[19px] font-black mt-1 tabular-nums leading-tight ${valueCls[tone]}`}>{value}</p>
-      <span className={cn("absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 transition-transform duration-300 group-hover/kpi:scale-x-100", barCls[tone])} />
+    <div className="min-w-0 rounded-xl border border-border bg-card p-4">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className={`mt-1 text-[19px] font-semibold leading-tight tabular-nums ${valueCls[tone]}`}>{value}</p>
     </div>
   );
 }

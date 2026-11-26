@@ -10,6 +10,9 @@ import { fmtDateTime } from "@/features/admin-finance/format";
 import { PremiumPanel } from "@/pages/admin/tabs/AdminPremium";
 import { cn, deriveTransactionStatus, isApprovedTransaction } from "@/lib/utils";
 import { methodLabel, type Tx } from "./transactionsModel";
+import { formatPhone } from "@/features/kyc/kycReviewModel";
+
+const SOURCE_LABEL: Record<string, string> = { checkout: "Checkout", api: "API", payment_link: "Link de pagamento", link: "Link de pagamento", subscription: "Assinatura", manual: "Manual" };
 
 const copy = (value: string, label: string) => {
   navigator.clipboard.writeText(value).then(
@@ -90,7 +93,7 @@ export function TransactionSheet({ tx, onClose, nameOf, productOf, onNavigate }:
                   <Field label="Nome" value={tx.customer_name || "—"} />
                   <Field label="E-mail" value={tx.customer_email || "—"} copyable />
                   <Field label="CPF/CNPJ" value={tx.customer_document || "—"} mono copyable />
-                  <Field label="Telefone" value={tx.customer_phone || "—"} />
+                  <Field label="Telefone" value={formatPhone(tx.customer_phone || null) || "—"} />
                   <Field label="Endereço" value={tx.customer_address || "—"} />
                 </dl>
               </PremiumPanel>
@@ -102,9 +105,9 @@ export function TransactionSheet({ tx, onClose, nameOf, productOf, onNavigate }:
                   <Field label="Método" value={methodLabel(tx.payment_method)} />
                   <Field label="Seller" value={nameOf(tx.user_id)} />
                   <Field label="Produto" value={productOf(tx.product_id)} />
-                  <Field label="Origem" value={tx.source || "checkout"} />
+                  <Field label="Origem" value={SOURCE_LABEL[tx.source || "checkout"] ?? tx.source} />
                   {tx.api_key_id && <Field label="Chave de API" value={tx.api_key_id} mono copyable />}
-                  {tx.coupon_id && <Field label="Cupom" value={`${tx.coupon_id.slice(0, 8)} · −${brl(tx.discount_amount)}`} mono />}
+                  {tx.coupon_id && <Field label="Cupom" value={`${tx.coupon_id.slice(0, 8)}, desconto de ${brl(tx.discount_amount)}`} />}
                   {tx.checkout_session_id && <Field label="Sessão" value={tx.checkout_session_id} mono copyable />}
                   {tx.pix_expires_at && <Field label="Pix expira" value={fmtDateTime(tx.pix_expires_at)} />}
                 </dl>

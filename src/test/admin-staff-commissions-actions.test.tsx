@@ -77,7 +77,7 @@ const goTo = async (dialog: HTMLElement, name: RegExp) => {
 describe("Painel de comissão do staff", () => {
   it("salva a % padrão (o campo numérico entrega ponto decimal) e barra valor fora de 0–100 ou com 3 casas", async () => {
     const dialog = await openPanel();
-    const input = within(dialog).getByLabelText(/% padrão sobre o líquido/);
+    const input = within(dialog).getByLabelText(/Comissão padrão/);
     const save = () => fireEvent.click(within(dialog).getByRole("button", { name: "Salvar" }));
 
     for (const bad of ["101", "-1", "12.345", ""]) {
@@ -102,7 +102,7 @@ describe("Painel de comissão do staff", () => {
     expect(toast.error).toHaveBeenLastCalledWith("Escolha o seller do override.");
 
     fireEvent.change(within(dialog).getByLabelText("Seller"), { target: { value: SELLER } });
-    fireEvent.change(within(dialog).getByLabelText(/% específica/), { target: { value: "4" } });
+    fireEvent.change(within(dialog).getByLabelText(/Comissão \(%\)/), { target: { value: "4" } });
     add();
     await waitFor(() => expect(toast.error).toHaveBeenLastCalledWith("Esse seller já tem override. Remova o atual antes de criar outro."));
     expect(writesTo("staff_commission_overrides")).toHaveLength(0);
@@ -112,7 +112,7 @@ describe("Painel de comissão do staff", () => {
     const dialog = await openPanel();
     await goTo(dialog, /^Overrides/);
     fireEvent.change(within(dialog).getByLabelText("Seller"), { target: { value: SELLER } });
-    fireEvent.change(within(dialog).getByLabelText(/% específica/), { target: { value: "7.5" } });
+    fireEvent.change(within(dialog).getByLabelText(/Comissão \(%\)/), { target: { value: "7.5" } });
     fireEvent.click(within(dialog).getByRole("button", { name: /Adicionar/ }));
     await waitFor(() => expect(writesTo("staff_commission_overrides")).toHaveLength(1));
     expect(writesTo("staff_commission_overrides")[0].payload).toEqual({ staff_user_id: STAFF, seller_user_id: SELLER, pct: 7.5 });

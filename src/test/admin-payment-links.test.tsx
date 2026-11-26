@@ -60,7 +60,7 @@ describe("linksModel", () => {
     const p = parseLinksPage({ items: [link("a", { net_revenue: "x", pending_count: null })], total: "7", summary: { total: "oi" } });
     expect(p.items[0].net_revenue).toBe(0); expect(p.total).toBe(7); expect(p.summary.total).toBe(0);
   });
-  it("endereço público usa /pay/", () => expect(publicLinkUrl("meu-link", "https://x.com")).toBe("https://x.com/pay/meu-link"));
+  it("endereço público é o da página do link (/pl/), não o checkout de produto", () => expect(publicLinkUrl("meu-link", "https://x.com")).toBe("https://x.com/pl/meu-link"));
 });
 
 function renderTab() {

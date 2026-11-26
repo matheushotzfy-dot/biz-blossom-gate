@@ -709,9 +709,9 @@ function AuditDialog({ row, rows, failed = false, onClose }: {
 
 function StaffLimitsFields({ limits, onChange }: { limits: StaffFeeLimits; onChange: (v: StaffFeeLimits) => void }) {
   const fields: { key: keyof StaffFeeLimits; label: string; max: number }[] = [
-    { key: "min_transaction_percentage", label: "Taxa percentual mínima (%)", max: 100 },
-    { key: "min_transaction_fixed", label: "Taxa fixa mínima (R$)", max: 1000000 },
-    { key: "min_withdrawal_fee", label: "Taxa de saque mínima (R$)", max: 1000000 },
+    { key: "min_transaction_percentage", label: "Percentual (%)", max: 100 },
+    { key: "min_transaction_fixed", label: "Valor fixo (R$)", max: 1000000 },
+    { key: "min_withdrawal_fee", label: "Saque (R$)", max: 1000000 },
   ];
-  return <section className="space-y-3 border-t border-border pt-4"><h3 className="text-sm font-semibold">Pisos de taxas por seller</h3><div className="grid grid-cols-1 gap-3 sm:grid-cols-3">{fields.map(f => <div key={f.key} className="space-y-1"><Label htmlFor={f.key}>{f.label}</Label><Input id={f.key} type="number" min={0} max={f.max} step="0.01" value={Number.isNaN(limits[f.key]) ? "" : limits[f.key]} onChange={e => onChange({ ...limits, [f.key]: e.target.value === "" ? NaN : Number(e.target.value) })} /></div>)}</div></section>;
+  return <section className="space-y-3 border-t border-border pt-4"><div><h3 className="text-sm font-semibold">Pisos de taxas por seller</h3><p className="mt-0.5 text-[12.5px] text-muted-foreground">O menor valor que esta conta pode cobrar ao mudar as taxas de um seller da carteira.</p></div><div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-3">{fields.map(f => <div key={f.key} className="space-y-1"><Label htmlFor={f.key}>{f.label}</Label><Input id={f.key} type="number" min={0} max={f.max} step="0.01" value={Number.isNaN(limits[f.key]) ? "" : limits[f.key]} onChange={e => onChange({ ...limits, [f.key]: e.target.value === "" ? NaN : Number(e.target.value) })} /></div>)}</div></section>;
 }

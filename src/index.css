@@ -4441,6 +4441,7 @@ html body .tech-scope section { scroll-margin-top: 80px; }
   box-shadow: none;
 }
 .seller-detail-dialog .seller-detail-tabs { flex-wrap: nowrap; }
+@media (min-width: 1024px) { .seller-detail-dialog .seller-detail-tabs { flex-wrap: wrap; overflow: visible; } }
 .seller-detail-dialog [role="tabpanel"] { min-width: 0; }
 .seller-detail-dialog [role="tabpanel"] > * { max-width: 100%; }
 
@@ -5296,3 +5297,6 @@ html.vp-admin :is([role="dialog"], [role="alertdialog"]) thead th { font-size: 1
 @media (max-width: 640px) {
   .admin-shell button[data-no-fluid] { min-height: 32px !important; }
 }
+
+/* Tabelas em diálogos: o navegador centraliza <th> quando a tabela não define alinhamento. */
+:where([role="dialog"], [role="alertdialog"]) table { text-align: left; }

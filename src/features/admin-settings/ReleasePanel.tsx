@@ -98,7 +98,8 @@ export function ReleasePanel({ data }: { data: SettingsData }) {
   );
 }
 
-function SellerDialog({ state, onClose, globalDays }: { state: { seller: SellerHit | null; days: number | null } | null; onClose: () => void; globalDays: number }) {
+/** Prazo próprio de um seller (também usado na ficha do seller, em Sellers). */
+export function SellerDialog({ state, onClose, globalDays, onSaved }: { state: { seller: SellerHit | null; days: number | null } | null; onClose: () => void; globalDays: number | null; onSaved?: () => void }) {
   const qc = useQueryClient();
   const open = !!state;
   const editing = !!state?.seller;
@@ -117,6 +118,7 @@ function SellerDialog({ state, onClose, globalDays }: { state: { seller: SellerH
         await callRpc("admin_set_card_release", { _user_id: seller!.user_id, _days: days, _reason: reason });
         toast.success(`Prazo de ${seller!.name} agora é ${releaseLabel(days!)}. O seller foi avisado.`);
         await qc.invalidateQueries({ queryKey: SETTINGS_KEY });
+        onSaved?.();
       }}>
       {editing ? (
         <div>
@@ -128,7 +130,7 @@ function SellerDialog({ state, onClose, globalDays }: { state: { seller: SellerH
         <SellerPicker id="settings-release-seller" value={seller} onChange={setSeller} error={touched && !seller ? "Escolha o seller." : null} />
       )}
       <div>
-        <FieldLabel hint={`O padrão da plataforma é ${releaseLabel(globalDays)}.`}>Prazo</FieldLabel>
+        <FieldLabel hint={globalDays ? `O padrão da plataforma é ${releaseLabel(globalDays)}.` : undefined}>Prazo</FieldLabel>
         <ChipRow value={days} label="Prazo do seller" onPick={setDays} />
         {touched && days === null && <p role="alert" className="mt-1.5 text-[12.5px] font-medium text-destructive">Escolha o prazo.</p>}
       </div>

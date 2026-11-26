@@ -125,7 +125,7 @@ export default function AdminStaffCommissionsTab({ profiles }: Props) {
       return {
         user_id: uid,
         full_name: p?.full_name || p?.email || "Conta sem perfil",
-        email: p?.email ?? uid.slice(0, 8),
+        email: p?.email ?? "",
         role: roleMap.get(uid) ?? "employee",
         base_pct: cfgMap.get(uid) ?? 0,
         accrued: s.accrued,
@@ -289,7 +289,7 @@ export default function AdminStaffCommissionsTab({ profiles }: Props) {
                         </div>
                         <div className="min-w-0">
                           <p className="truncate font-medium text-foreground">{r.full_name}</p>
-                          <p className="truncate text-xs text-muted-foreground">{r.email}</p>
+                          <p className="truncate text-xs text-muted-foreground">{r.email || `ID ${r.user_id.slice(0, 8)}, sem e-mail no cadastro`}</p>
                         </div>
                       </div>
                     </td>
@@ -473,11 +473,13 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
                   ? <span className="ax-tag" data-tone="success">Gerente</span>
                   : <span className="ax-tag" data-tone="info">Staff</span>}
               </div>
-              <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] font-bold text-muted-foreground">
-                <span className="inline-flex items-center gap-1"><Mail className="h-3 w-3" />{selected.email}</span>
-                <button onClick={() => onCopy(selected.email, "Email")} aria-label="Copiar e-mail" className="rounded p-0.5 hover:text-primary"><Copy className="h-3 w-3" /></button>
-                <span className="text-muted-foreground/40">·</span>
-                <span className="inline-flex items-center gap-1"><UserIcon className="h-3 w-3" />ID: {selected.user_id.slice(0, 8)}…</span>
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-muted-foreground">
+                {selected.email ? (
+                  <span className="inline-flex items-center gap-1"><Mail className="h-3.5 w-3.5" />{selected.email}
+                    <Button type="button" variant="ghost" size="sm" onClick={() => onCopy(selected.email, "E-mail")} aria-label="Copiar e-mail" className="h-7 w-7 p-0"><Copy className="h-3.5 w-3.5" /></Button>
+                  </span>
+                ) : <span>Sem e-mail no cadastro</span>}
+                <span className="inline-flex items-center gap-1 text-xs"><UserIcon className="h-3.5 w-3.5" />ID <span className="font-mono">{selected.user_id.slice(0, 8)}…</span></span>
               </div>
             </div>
           </div>
@@ -486,30 +488,30 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
 
         {/* KPIs */}
         <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-3 border-b border-border bg-muted/10 p-4 sm:p-5 md:grid-cols-[repeat(4,minmax(0,1fr))]">
-          <MiniKpi icon={Wallet} label="Saldo a pagar" value={fmt(selected.balance)} tone="success" />
-          <MiniKpi icon={Coins} label="Gerado" value={fmt(selected.accrued)} tone="primary" />
-          <MiniKpi icon={TrendingDown} label="Estornos" value={fmt(selected.clawbacks)} tone="destructive" />
-          <MiniKpi icon={CheckCircle2} label="Pago" value={fmt(selected.paid)} tone="info" />
+          <MiniKpi icon={Wallet} label="Saldo a pagar" value={fmt(selected.balance)} tone={selected.balance > 0 ? "success" : "neutral"} />
+          <MiniKpi icon={Coins} label="Gerado" value={fmt(selected.accrued)} tone="neutral" />
+          <MiniKpi icon={TrendingDown} label="Estornos" value={fmt(selected.clawbacks)} tone={selected.clawbacks > 0 ? "destructive" : "neutral"} />
+          <MiniKpi icon={CheckCircle2} label="Pago" value={fmt(selected.paid)} tone="neutral" />
         </div>
 
         {/* % padrão + Tabs */}
         <div className="flex flex-col gap-3 border-b border-border p-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/20 p-2">
-            <Label htmlFor="commission-base-pct" className="ml-1 inline-flex items-center gap-1 text-[12px] font-semibold text-muted-foreground">
-              <Percent className="h-3 w-3" />% padrão sobre o líquido
+            <Label htmlFor="commission-base-pct" className="ml-1 text-[13px] font-medium text-muted-foreground">
+              Comissão padrão (% do líquido)
             </Label>
             <Input id="commission-base-pct" value={newPct} onChange={(e) => setNewPct(e.target.value)} type="number" step="0.01" min="0" max="100"
-              className="h-8 w-24 shrink-0 font-mono text-sm" />
+              className="h-8 w-24 shrink-0 text-sm tabular-nums" />
             <Button size="sm" onClick={saveBasePct} disabled={busyKey !== null} className="h-8">{busyKey === "base" ? "Salvando…" : "Salvar"}</Button>
           </div>
 
           <div className="flex max-w-full gap-1 overflow-x-auto rounded-lg border border-border bg-muted/30 p-0.5">
             {tabs.map((t) => (
               <button key={t.id} onClick={() => setTab(t.id)}
-                className={cn("inline-flex h-8 shrink-0 items-center gap-2 rounded-md px-3 text-[12px] font-semibold transition-all duration-150",
+                className={cn("inline-flex h-8 shrink-0 items-center gap-2 rounded-md px-3 text-[13px] font-medium transition-all duration-150",
                   tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground")}>
                 <t.icon className="h-3.5 w-3.5" /> {t.label}
-                <span className={cn("rounded px-1.5 py-0 text-[9px] tabular-nums",
+                <span className={cn("rounded px-1.5 py-0 text-[11.5px] tabular-nums",
                   tab === t.id ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground")}>{t.count}</span>
               </button>
             ))}
@@ -518,7 +520,7 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
 
         {/* Body */}
         <div className="max-h-[55vh] min-h-[340px] overflow-auto bg-card">
-          {detailState === "loading" && <p role="status" className="py-14 text-center text-xs font-bold text-muted-foreground">Carregando…</p>}
+          {detailState === "loading" && <p role="status" className="py-14 text-center text-[13px] text-muted-foreground">Carregando…</p>}
           {detailState === "error" && (
             <div role="alert" className="flex flex-col items-center gap-3 py-14 text-center">
               <p className="text-sm font-bold text-destructive">Não foi possível carregar movimentações, overrides e pagamentos desta conta.</p>
@@ -530,8 +532,8 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
               ? <PremiumEmpty icon={Activity} title="Sem movimentações" subtitle="Comissões geradas, estornos e pagamentos aparecem aqui" />
               : (
                 <>
-                {ledger.length >= 500 && <p className="border-b border-border bg-muted/30 px-5 py-2 text-[11px] font-bold text-muted-foreground">Mostrando as 500 movimentações mais recentes. Os totais acima consideram todo o histórico.</p>}
-                <table className="w-full min-w-[560px] text-xs">
+                {ledger.length >= 500 && <p className="border-b border-border bg-muted/30 px-5 py-2 text-xs text-muted-foreground">Mostrando as 500 movimentações mais recentes. Os totais acima consideram todo o histórico.</p>}
+                <table className="w-full min-w-[560px] text-left text-[13px]">
                   <thead className={cn(premiumTable.headRow, "bg-muted/30")}>
                     <tr>
                       <th className={premiumTable.th}>Quando</th>
@@ -545,20 +547,17 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
                   <tbody>
                     {ledger.map((e) => (
                       <tr key={e.id} className="border-t border-border transition-colors hover:bg-muted/30">
-                        <td className="px-5 py-3 font-mono text-[11px] text-muted-foreground">{new Date(e.created_at).toLocaleString("pt-BR")}</td>
+                        <td className="whitespace-nowrap px-5 py-3 tabular-nums text-muted-foreground">{when(e.created_at)}</td>
                         <td className="px-5 py-3">
-                          <span className={cn("inline-flex items-center gap-1 rounded border px-2 py-0.5 text-[9px] font-black uppercase tracking-wider",
-                            e.type === "accrual" ? "border-success/40 bg-success/10 text-success" :
-                            e.type === "payout" ? "border-info/40 bg-info/10 text-info" :
-                            "border-destructive/40 bg-destructive/10 text-destructive")}>
+                          <span className="ax-tag" data-tone={e.type === "accrual" ? "success" : e.type === "payout" ? "info" : "destructive"}>
                             {e.type === "accrual" ? "Comissão" : e.type === "payout" ? "Pagamento" : "Estorno"}
                           </span>
                         </td>
-                        <td className="px-5 py-3 text-right font-mono tabular-nums text-foreground">{fmt(Number(e.base_amount))}</td>
-                        <td className="px-5 py-3 text-right font-mono tabular-nums text-muted-foreground">{Number(e.pct).toFixed(2)}%</td>
-                        <td className={cn("px-5 py-3 text-right font-mono font-black tabular-nums",
+                        <td className="px-5 py-3 text-right tabular-nums text-foreground">{e.type === "payout" ? "—" : fmt(Number(e.base_amount))}</td>
+                        <td className="px-5 py-3 text-right tabular-nums text-muted-foreground">{e.type === "payout" ? "—" : pctText(Number(e.pct))}</td>
+                        <td className={cn("px-5 py-3 text-right font-semibold tabular-nums",
                           Number(e.amount) >= 0 ? "text-success" : "text-destructive")}>{fmt(Number(e.amount))}</td>
-                        <td className="px-5 py-3 text-right font-mono font-bold tabular-nums text-foreground">{fmt(Number(e.balance_after))}</td>
+                        <td className="px-5 py-3 text-right font-semibold tabular-nums text-foreground">{fmt(Number(e.balance_after))}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -570,10 +569,10 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
           {detailState === "ok" && tab === "overrides" && (
             <div className="space-y-4 p-5">
               <div className="rounded-lg border border-border bg-muted/20 p-4">
-                <p className="mb-3 text-[12px] font-semibold text-muted-foreground">Novo override: percentual específico para um seller</p>
+                <p className="mb-3 text-[13px] font-medium text-foreground">Comissão diferente para um seller <span className="font-normal text-muted-foreground">(override)</span></p>
                 <div className="flex flex-col gap-3 md:flex-row md:items-end">
                   <div className="flex-1">
-                    <Label htmlFor="override-seller" className="text-[12px] font-semibold text-muted-foreground">Seller</Label>
+                    <Label htmlFor="override-seller" className="text-xs text-muted-foreground">Seller</Label>
                     <select id="override-seller" value={newOverrideSeller} onChange={(e) => setNewOverrideSeller(e.target.value)}
                       className="mt-1 h-9 w-full rounded-md border border-border bg-card px-3 text-sm text-foreground transition-colors focus:border-primary focus:outline-none">
                       <option value="">Selecione um seller…</option>
@@ -583,9 +582,9 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
                     </select>
                   </div>
                   <div className="w-32">
-                    <Label htmlFor="override-pct" className="text-[12px] font-semibold text-muted-foreground">% específica</Label>
+                    <Label htmlFor="override-pct" className="text-xs text-muted-foreground">Comissão (%)</Label>
                     <Input id="override-pct" value={newOverridePct} onChange={(e) => setNewOverridePct(e.target.value)}
-                      type="number" step="0.01" min="0" max="100" placeholder="0,00" className="mt-1 h-9 font-mono text-sm" />
+                      type="number" step="0.01" min="0" max="100" placeholder="0,00" className="mt-1 h-9 text-sm tabular-nums" />
                   </div>
                   <Button size="sm" onClick={addOverride} disabled={busyKey !== null} className="h-9 gap-1.5"><Plus className="h-3.5 w-3.5" /> {busyKey === "override" ? "Adicionando…" : "Adicionar"}</Button>
                 </div>
@@ -595,11 +594,11 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
                 ? <PremiumEmpty icon={Settings2} title="Sem overrides" subtitle="O staff usa a % padrão para todos os sellers" />
                 : (
                   <div className={premiumTable.wrapper}>
-                    <table className="w-full min-w-[560px] text-xs">
+                    <table className="w-full min-w-[560px] text-left text-[13px]">
                       <thead className={premiumTable.headRow}>
                         <tr>
                           <th className={premiumTable.th}>Seller</th>
-                          <th className={cn(premiumTable.th, "text-right")}>% override</th>
+                          <th className={cn(premiumTable.th, "text-right")}>Comissão</th>
                           <th className={cn(premiumTable.th, "w-12")}></th>
                         </tr>
                       </thead>
@@ -609,13 +608,11 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
                           return (
                             <tr key={o.id} className="border-t border-border transition-colors hover:bg-muted/30">
                               <td className="px-5 py-3">
-                                <p className="text-xs font-bold text-foreground">{p?.full_name || "—"}</p>
-                                <p className="text-[10px] font-bold text-muted-foreground">{p?.email || o.seller_user_id}</p>
+                                <p className="text-[13px] font-semibold text-foreground">{p?.full_name || "Seller sem nome"}</p>
+                                <p className="text-xs text-muted-foreground">{p?.email || o.seller_user_id}</p>
                               </td>
                               <td className="px-5 py-3 text-right">
-                                <span className="inline-flex items-center gap-1 rounded border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] font-black tabular-nums text-primary">
-                                  <Percent className="h-2.5 w-2.5" />{Number(o.pct).toFixed(2)}%
-                                </span>
+                                <span className="text-[13px] font-semibold tabular-nums text-foreground">{pctText(Number(o.pct))}</span>
                               </td>
                               <td className="px-5 py-3 text-right">
                                 <Button size="sm" variant="ghost" onClick={() => void removeOverride(o.id)} disabled={busyKey !== null} aria-label="Remover override"
@@ -636,23 +633,23 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
           {detailState === "ok" && tab === "payouts" && (
             <div className="space-y-4 p-5">
               <div className="rounded-lg border border-border bg-muted/20 p-4">
-                <p className="mb-3 text-[12px] font-semibold text-muted-foreground">Registrar novo pagamento</p>
+                <p className="mb-3 text-[13px] font-medium text-foreground">Registrar pagamento feito por fora</p>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
                   <div>
-                    <Label htmlFor="payout-amount" className="text-[12px] font-semibold text-muted-foreground">Valor (R$)</Label>
-                    <Input id="payout-amount" value={payoutAmount} onChange={(e) => setPayoutAmount(e.target.value)} type="number" step="0.01" min="0" placeholder="0,00" className="mt-1 h-9 font-mono" />
+                    <Label htmlFor="payout-amount" className="text-xs text-muted-foreground">Valor (R$)</Label>
+                    <Input id="payout-amount" value={payoutAmount} onChange={(e) => setPayoutAmount(e.target.value)} type="number" step="0.01" min="0" placeholder="0,00" className="mt-1 h-9 tabular-nums" />
                   </div>
                   <div>
-                    <Label htmlFor="payout-method" className="text-[12px] font-semibold text-muted-foreground">Método</Label>
+                    <Label htmlFor="payout-method" className="text-xs text-muted-foreground">Método</Label>
                     <Input id="payout-method" value={payoutMethod} onChange={(e) => setPayoutMethod(e.target.value)} maxLength={40} className="mt-1 h-9" />
                   </div>
                   <div className="md:col-span-2">
-                    <Label htmlFor="payout-notes" className="text-[12px] font-semibold text-muted-foreground">Observação</Label>
+                    <Label htmlFor="payout-notes" className="text-xs text-muted-foreground">Observação</Label>
                     <Input id="payout-notes" value={payoutNotes} onChange={(e) => setPayoutNotes(e.target.value)} maxLength={300} placeholder="ID da transação, comprovante…" className="mt-1 h-9" />
                   </div>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-2">
-                  <p className="text-[10px] font-bold text-muted-foreground">Saldo disponível: <span className="font-mono font-black text-success">{fmt(selected.balance)}</span></p>
+                  <p className="text-[13px] text-muted-foreground">Saldo a pagar: <span className="font-semibold tabular-nums text-foreground">{fmt(selected.balance)}</span></p>
                   <Button size="sm" onClick={createPayout} disabled={busyKey !== null} className="h-9 gap-1.5">
                     <ArrowDownToLine className="h-3.5 w-3.5" /> Registrar pagamento
                   </Button>
@@ -663,13 +660,13 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
                 ? <PremiumEmpty icon={Receipt} title="Sem pagamentos" subtitle="Os pagamentos aparecem aqui após registrados" />
                 : (
                   <div className={premiumTable.wrapper}>
-                    <table className="w-full min-w-[560px] text-xs">
+                    <table className="w-full min-w-[560px] text-left text-[13px]">
                       <thead className={premiumTable.headRow}>
                         <tr>
                           <th className={premiumTable.th}>Quando</th>
                           <th className={cn(premiumTable.th, "text-right")}>Valor</th>
                           <th className={premiumTable.th}>Método</th>
-                          <th className={premiumTable.th}>Status</th>
+                          <th className={premiumTable.th}>Situação</th>
                           <th className={premiumTable.th}>Observação</th>
                           <th className={cn(premiumTable.th, "text-right")}></th>
                         </tr>
@@ -677,22 +674,19 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
                       <tbody>
                         {payouts.map((p) => (
                           <tr key={p.id} className="border-t border-border transition-colors hover:bg-muted/30">
-                            <td className="px-5 py-3 font-mono text-[11px] text-muted-foreground">{new Date(p.created_at).toLocaleString("pt-BR")}</td>
-                            <td className="px-5 py-3 text-right font-mono font-black tabular-nums text-foreground">{fmt(Number(p.amount))}</td>
-                            <td className="px-5 py-3 text-foreground">{p.method}</td>
+                            <td className="whitespace-nowrap px-5 py-3 tabular-nums text-muted-foreground">{when(p.created_at)}</td>
+                            <td className="px-5 py-3 text-right font-semibold tabular-nums text-foreground">{fmt(Number(p.amount))}</td>
+                            <td className="px-5 py-3 text-foreground">{p.method || "—"}</td>
                             <td className="px-5 py-3">
-                              <span className={cn("inline-flex items-center gap-1 rounded border px-2 py-0.5 text-[9px] font-black uppercase tracking-wider",
-                                p.status === "paid" ? "border-info/40 bg-info/10 text-info" :
-                                p.status === "pending" ? "border-warning/40 bg-warning/10 text-warning" :
-                                "border-destructive/40 bg-destructive/10 text-destructive")}>
-                                {p.status === "paid" ? "Pago" : p.status === "pending" ? "Pendente" : p.status}
+                              <span className="ax-tag" data-tone={p.status === "paid" ? "success" : p.status === "pending" ? "warning" : "destructive"}>
+                                {p.status === "paid" ? "Pago" : p.status === "pending" ? "Pendente" : p.status === "rejected" ? "Recusado" : p.status === "cancelled" ? "Cancelado" : p.status}
                               </span>
                             </td>
-                            <td className="px-5 py-3 text-[11px] text-muted-foreground truncate max-w-[200px]">{p.notes || "—"}</td>
+                            <td className="max-w-[220px] truncate px-5 py-3 text-muted-foreground" title={p.notes || ""}>{p.notes || "—"}</td>
                             <td className="px-5 py-3 text-right">
                               {p.status === "pending" && (
-                                <Button size="sm" onClick={() => markPaid(p.id)} disabled={busyKey !== null} className="h-7 gap-1 text-[10px]">
-                                  <CheckCircle2 className="h-3 w-3" /> {busyKey === `paid:${p.id}` ? "Efetivando…" : "Marcar pago"}
+                                <Button size="sm" onClick={() => markPaid(p.id)} disabled={busyKey !== null} className="h-8 gap-1 text-xs">
+                                  <CheckCircle2 className="h-3.5 w-3.5" /> {busyKey === `paid:${p.id}` ? "Efetivando…" : "Marcar pago"}
                                 </Button>
                               )}
                             </td>
@@ -711,22 +705,20 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
   );
 }
 
+const when = (d: string) => new Date(d).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+const pctText = (n: number) => `${(Number.isFinite(n) ? n : 0).toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}%`;
+
 function MiniKpi({ icon: Icon, label, value, tone }: {
-  icon: LucideIcon; label: string; value: string; tone: "success" | "primary" | "destructive" | "info";
+  icon: LucideIcon; label: string; value: string; tone: "success" | "destructive" | "neutral";
 }) {
-  const toneText = {
-    success: "text-success", primary: "text-primary", destructive: "text-destructive", info: "text-info",
-  }[tone];
-  const toneBorder = {
-    success: "border-success/30", primary: "border-primary/30", destructive: "border-destructive/30", info: "border-info/30",
-  }[tone];
+  const toneText = { success: "text-success", destructive: "text-destructive", neutral: "text-foreground" }[tone];
   return (
-    <div className={cn("group rounded-lg border border-border bg-card p-3 transition-all duration-200 hover:-translate-y-0.5", `hover:${toneBorder}`)}>
+    <div className="rounded-lg border border-border bg-card p-3">
       <div className="flex items-center gap-2">
-        <Icon className={cn("h-3.5 w-3.5", toneText)} />
-        <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">{label}</p>
+        <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+        <p className="text-xs text-muted-foreground">{label}</p>
       </div>
-      <p className={cn("mt-1 font-display text-base font-black tabular-nums", toneText)}>{value}</p>
+      <p className={cn("mt-1 text-base font-semibold tabular-nums", toneText)}>{value}</p>
     </div>
   );
 }

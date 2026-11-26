@@ -79,7 +79,7 @@ export function LinkTable({ rows, ctx }: { rows: LinkRow[]; ctx: LinkContext }) 
             <tr key={l.id} className="border-b border-border/40 align-top last:border-b-0">
               <td className="max-w-[300px] px-4 py-3.5">
                 <p className="truncate text-[13px] font-semibold text-foreground">{l.title}</p>
-                <p className="truncate font-mono text-[11.5px] text-muted-foreground">/pay/{l.slug}</p>
+                <p className="truncate font-mono text-[11.5px] text-muted-foreground">/pl/{l.slug}</p>
                 <p className="mt-0.5 text-[12px] text-muted-foreground">Criado em {fmtDateTime(l.created_at)}</p>
                 <BlockReason l={l} />
               </td>
@@ -102,7 +102,7 @@ export function LinkCards({ rows, ctx }: { rows: LinkRow[]; ctx: LinkContext }) 
         <li key={l.id} className="flex min-w-0 flex-col gap-3 rounded-[12px] border border-border/60 p-4">
           <div className="min-w-0">
             <p className="truncate text-[13.5px] font-semibold text-foreground">{l.title}</p>
-            <p className="truncate font-mono text-[11.5px] text-muted-foreground">/pay/{l.slug}</p>
+            <p className="truncate font-mono text-[11.5px] text-muted-foreground">/pl/{l.slug}</p>
           </div>
           <SituationBadges l={l} />
           <BlockReason l={l} />

@@ -14,18 +14,17 @@ interface Seller360PanelProps {
   onChanged?: () => void;
 }
 
-const RISK_STYLE: Record<Seller360["risk_level"], string> = {
-  low: "bg-primary/10 text-primary border-primary/30",
-  medium: "bg-accent text-accent-foreground border-border",
-  high: "bg-destructive/10 text-destructive border-destructive/30",
-};
+const RISK_TONE: Record<Seller360["risk_level"], string> = { low: "success", medium: "warning", high: "destructive" };
+const pct = (n: number) => `${Number(n || 0).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`;
+/** Valor zerado fica apagado; valor com conteúdo nunca. */
+const quiet = (n: number) => (Number(n) ? undefined : "muted" as const);
 const RISK_LABEL: Record<Seller360["risk_level"], string> = { low: "Risco baixo", medium: "Risco médio", high: "Risco alto" };
 
 function Tile({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone?: "danger" | "muted" }) {
   return (
     <div className="min-w-0 rounded-lg border border-border bg-card p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className={cn("mt-1 break-words font-mono text-base font-semibold tabular-nums", tone === "danger" && "text-destructive", tone === "muted" && "text-muted-foreground")}>{value}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className={cn("mt-1 break-words text-base font-semibold tabular-nums", tone === "danger" && "text-destructive", tone === "muted" && "text-muted-foreground")}>{value}</p>
       {sub && <p className="mt-0.5 text-[11px] text-muted-foreground">{sub}</p>}
     </div>
   );
@@ -62,20 +61,20 @@ export function Seller360Panel({ userId, onChanged }: Seller360PanelProps) {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-2">
-        <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold", RISK_STYLE[data.risk_level])}>
-          <ShieldAlert className="h-3.5 w-3.5" />{RISK_LABEL[data.risk_level]} · {data.risk_score}/100
+        <span className="ax-tag" data-tone={RISK_TONE[data.risk_level]}>
+          <ShieldAlert className="h-3.5 w-3.5" />{RISK_LABEL[data.risk_level]}, {data.risk_score} de 100
         </span>
-        <span className="text-xs text-muted-foreground">Conta com {data.account_age_days} dias · Chargeback/MED {data.chargeback_rate}% · Reembolso {data.refund_rate}%</span>
+        <span className="text-xs text-muted-foreground">Conta com {data.account_age_days} {data.account_age_days === 1 ? "dia" : "dias"}, chargeback e MED em {pct(data.chargeback_rate)}, reembolso em {pct(data.refund_rate)}</span>
         {data.chargeback_rate > 1 && <span className="text-xs font-semibold text-destructive">Acima do limite de 1%</span>}
       </div>
 
       <Section icon={Wallet} title="Saldo">
         <Tile label="Disponível" value={brl(b.available)} />
         <Tile label="Bloqueado em disputas" value={brl(b.held_disputes)} tone={b.held_disputes > 0 ? "danger" : "muted"} />
-        <Tile label="Reserva retida" value={brl(b.retained)} tone="muted" />
-        <Tile label="Saques pendentes" value={brl(b.pending_withdrawals)} tone="muted" />
+        <Tile label="Reserva retida" value={brl(b.retained)} tone={quiet(b.retained)} />
+        <Tile label="Saques pendentes" value={brl(b.pending_withdrawals)} tone={quiet(b.pending_withdrawals)} />
         <Tile label="Saldo negativo" value={brl(b.negative)} tone={b.negative < 0 ? "danger" : "muted"} sub={b.negative < 0 ? "Saques travados até quitar" : undefined} />
-        <Tile label="Livro-caixa" value={brl(b.ledger)} tone="muted" />
+        <Tile label="Livro-caixa" value={brl(b.ledger)} tone={quiet(b.ledger)} />
       </Section>
 
       <Section icon={TrendingUp} title="Vendas">
@@ -84,7 +83,7 @@ export function Seller360Panel({ userId, onChanged }: Seller360PanelProps) {
         <Tile label="Ticket médio" value={brl(ticket)} />
         <Tile label="Líquido do seller" value={brl(s.net_amount)} />
         <Tile label="Taxas da plataforma" value={brl(s.fees_amount)} />
-        <Tile label="Última venda" value={s.last_sale_at ? new Date(s.last_sale_at).toLocaleDateString("pt-BR") : "—"} tone="muted" />
+        <Tile label="Última venda" value={s.last_sale_at ? new Date(s.last_sale_at).toLocaleDateString("pt-BR") : "—"} tone={s.last_sale_at ? undefined : "muted"} />
       </Section>
 
       <Section icon={RotateCcw} title="Reembolsos e disputas">
@@ -95,8 +94,8 @@ export function Seller360Panel({ userId, onChanged }: Seller360PanelProps) {
 
       <Section icon={ArrowDownToLine} title="Saques">
         <Tile label="Pagos" value={brl(w.paid)} sub={`${w.count} ${w.count === 1 ? "pedido" : "pedidos"}`} />
-        <Tile label="Pendentes" value={brl(w.pending)} tone="muted" />
-        <Tile label="Recusados" value={String(w.rejected_count)} tone="muted" />
+        <Tile label="Pendentes" value={brl(w.pending)} tone={quiet(w.pending)} />
+        <Tile label="Recusados" value={String(w.rejected_count)} tone={quiet(w.rejected_count)} />
       </Section>
 
       <Tabs defaultValue="tx">

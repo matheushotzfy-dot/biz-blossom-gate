@@ -69,4 +69,4 @@ export function dedupeEvents(events: LinkEvent[]): LinkEvent[] {
   return events.filter((e) => !(e.event_type === "admin_status_changed" && specific.has(e.created_at)));
 }
 
-export const publicLinkUrl = (slug: string, origin = typeof window !== "undefined" ? window.location.origin : "") => `${origin}/pay/${slug}`;
+export const publicLinkUrl = (slug: string, origin = typeof window !== "undefined" ? window.location.origin : "") => `${origin}/pl/${slug}`;
