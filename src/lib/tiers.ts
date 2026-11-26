@@ -1,6 +1,6 @@
 /**
  * Single source of truth for seller revenue tiers.
- * Used by AppSidebar RevenueCard, Perfil progress, and anywhere else
+ * Used by Perfil progress and anywhere else
  * we display "tier / próximo milestone / % da meta".
  */
 

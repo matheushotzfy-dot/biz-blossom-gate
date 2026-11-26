@@ -3950,6 +3950,12 @@ export type Database = {
           },
         ]
       }
+      seller_admin_notes: {
+        Row: { notes: string; updated_at: string; updated_by: string | null; user_id: string }
+        Insert: { notes?: string; updated_at?: string; updated_by?: string | null; user_id: string }
+        Update: { notes?: string; updated_at?: string; updated_by?: string | null; user_id?: string }
+        Relationships: []
+      }
       seller_notes: {
         Row: {
           author_role: string

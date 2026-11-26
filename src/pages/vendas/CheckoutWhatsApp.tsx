@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { getCheckoutLink } from "@/components/products/productPresentation";
+import { copyText } from "@/features/public-checkout/copyText";
 
 export default function CheckoutWhatsApp() {
  const { user } = useAuth();
@@ -28,16 +30,16 @@ export default function CheckoutWhatsApp() {
  .from("products")
  .select("id, name, price, checkout_url")
  .eq("user_id", user.id)
- .eq("status", "approved");
+ .eq("status", "active")
+ .is("deleted_at", null);
  return data || [];
  },
  enabled: !!user?.id,
  });
 
  const selectedProd = products.find((p) => p.id === selectedProduct);
- const checkoutUrl = selectedProd?.checkout_url
- ? `${window.location.origin}/pay/${selectedProd.checkout_url}`
- : "";
+ // `checkout_url` já vem como "/pay/<slug>" (ou só o slug): getCheckoutLink monta o endereço certo.
+ const checkoutUrl = selectedProd?.checkout_url ? getCheckoutLink(selectedProd.checkout_url) : "";
 
  const whatsappLink = selectedProd
  ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(
@@ -48,9 +50,9 @@ export default function CheckoutWhatsApp() {
  )}`
  : "";
 
- const copyLink = (text: string) => {
- navigator.clipboard.writeText(text);
- toast.success("Link copiado!");
+ const copyLink = async (text: string) => {
+ if (await copyText(text)) toast.success("Link copiado.");
+ else toast.error("Não foi possível copiar. Selecione o link e copie.");
  };
 
  return (
@@ -139,7 +141,7 @@ export default function CheckoutWhatsApp() {
  <div className="flex gap-2">
  <Button
  className="flex-1 gap-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700"
- onClick={() => window.open(whatsappLink, "_blank")}
+ onClick={() => window.open(whatsappLink, "_blank", "noopener,noreferrer")}
  >
  <ExternalLink className="h-4 w-4" /> Testar no WhatsApp
  </Button>
@@ -220,9 +222,7 @@ export default function CheckoutWhatsApp() {
  variant="outline"
  className="gap-1 rounded-xl text-emerald-600 border-emerald-200 hover:bg-emerald-50"
  onClick={() => {
- const url = p.checkout_url
- ? `${window.location.origin}/pay/${p.checkout_url}`
- : "";
+ const url = p.checkout_url ? getCheckoutLink(p.checkout_url) : "";
  if (!url) {
  toast.error("Configure a URL de checkout do produto primeiro");
  return;
@@ -230,7 +230,8 @@ export default function CheckoutWhatsApp() {
  const msg = `Confira *${p.name}* por apenas R$ ${Number(p.price).toFixed(2)}!\n\n${url}`;
  window.open(
  `https://wa.me/?text=${encodeURIComponent(msg)}`,
- "_blank"
+ "_blank",
+ "noopener,noreferrer"
  );
  }}
  >

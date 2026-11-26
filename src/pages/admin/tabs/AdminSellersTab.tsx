@@ -242,7 +242,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     setPiiRevealed(false); setRevealedDoc(null); setRevealedPixKeys(null); setRevealedLegacyPix(null);
 
     try {
-      const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, disputesRes, retRes, ipRes] = await Promise.all([
+      const [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, disputesRes, retRes, ipRes, notesRes] = await Promise.all([
         supabase.from("activity_logs").select("id, user_id, action, entity_type, entity_id, old_data, new_data, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(300),
         supabase.from("products").select("id, user_id, name, price, status, created_at, image_url").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
         supabase.from("withdrawals").select("id, user_id, amount, fee_amount, net_amount, status, created_at, withdrawal_type").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(500),
@@ -252,9 +252,11 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         supabase.from("disputes").select("id, seller_user_id, transaction_id, amount, type, status, reason, created_at").eq("seller_user_id", profile.user_id).order("created_at", { ascending: false }).limit(200),
         supabase.from("retention_settings").select("id, user_id, pix_retention_pct, card_retention_pct, retention_days, card_release_days").eq("user_id", profile.user_id).maybeSingle(),
         supabase.from("ip_logs").select("ip, user_agent, country, source, created_at").eq("user_id", profile.user_id).order("created_at", { ascending: false }).limit(100),
+        // Observações internas ficam fora de `profiles` (o próprio seller lê a linha inteira do perfil dele).
+        supabase.from("seller_admin_notes").select("notes").eq("user_id", profile.user_id).maybeSingle(),
       ]);
       if (requestId !== detailRequestRef.current) return;
-      const failed = [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, disputesRes, retRes, ipRes].find(result => result.error);
+      const failed = [logsRes, productsRes, wdRes, txRes, feesRes, adjRes, disputesRes, retRes, ipRes, notesRes].find(result => result.error);
       if (failed?.error) throw failed.error;
       if (logsRes.data) {
         const parsed = z.array(activityLogSchema).safeParse(logsRes.data);
@@ -269,7 +271,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       if (ipRes.data) setIpHistory(ipRes.data as IpLog[]);
       setUserPixKeys([]);
 
-      setAdminNotes(profile.admin_notes || "");
+      setAdminNotes(notesRes.data?.notes ?? "");
       if (retRes.data) {
         setUserRetention(retRes.data as RetentionSettings);
         setRetentionForm({
@@ -438,11 +440,11 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
 
   const handleSaveAdminNotes = async () => {
     if (!selectedUser || !isAdmin) return;
-    const sanitized = adminNotes.replace(/[<>]/g, "").replace(/javascript:/gi, "").trim().slice(0, 5000);
-    const { error } = await supabase.from("profiles").update({ admin_notes: sanitized }).eq("user_id", selectedUser.user_id);
-    if (error) { toast.error("Erro ao salvar notas"); return; }
-    toast.success("Observações salvas!");
-    await logAdminAction("update_admin_notes", "profile", selectedUser.user_id, { notes: sanitized });
+    const notes = adminNotes.trim().slice(0, 5000);
+    const { error } = await supabase.from("seller_admin_notes").upsert({ user_id: selectedUser.user_id, notes }, { onConflict: "user_id" });
+    if (error) { toast.error("Não foi possível salvar as observações."); return; }
+    toast.success("Observações salvas.");
+    await logAdminAction("update_admin_notes", "profile", selectedUser.user_id, { length: notes.length });
   };
 
   const handleUserStatus = async (userId: string, status: string) => {
