@@ -8,7 +8,7 @@ import {
   RotateCcw, ShieldAlert, CreditCard, ArrowDownToLine, Tag, GraduationCap,
   Activity, Settings, Bell, MessageSquare, UserCog, Coins, Bug, UserX, ShieldCheck,
   Package2, BarChart3, Trophy, Target, Gauge, Clock, Link as LinkIcon, PackageCheck,
-  TrendingUp, Wrench, Flag, Repeat, Share2, Handshake, Undo2,
+  TrendingUp, Wrench, Flag, Repeat, Share2, Handshake, Undo2, IdCard,
   type LucideIcon,
 } from "lucide-react";
 import { differenceInCalendarDays, endOfDay, startOfDay, subDays } from "date-fns";
@@ -29,6 +29,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { id: "command-center", label: "Centro de Comando", icon: Gauge, employeeAccess: false },
       { id: "analytics", label: "Analytics", icon: BarChart3, employeeAccess: false },
       { id: "sellers", label: "Sellers", icon: Users, employeeAccess: true },
+      { id: "kyc", label: "Verificações", icon: IdCard, employeeAccess: false },
       { id: "top-sellers", label: "Top Sellers", icon: Zap, employeeAccess: false },
       { id: "inactive-sellers", label: "Inativos", icon: UserX, employeeAccess: false },
       { id: "employees", label: "Staff", icon: UserCog, employeeAccess: false },

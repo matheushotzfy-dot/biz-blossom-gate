@@ -12,5 +12,6 @@ export function staffActionFlags(permissions: readonly string[] | undefined): St
   };
 }
 
-export const KYC_PENDING_STATUSES = ["pending", "pending_review"] as const;
+/** A equipe só decide conta em análise (o seller enviou os documentos); o servidor recusa as outras. */
+export const KYC_PENDING_STATUSES = ["pending_review"] as const;
 export const isKycPending = (status: string | null | undefined) => (KYC_PENDING_STATUSES as readonly string[]).includes(status ?? "");

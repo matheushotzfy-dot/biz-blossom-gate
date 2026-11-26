@@ -2,12 +2,12 @@ import { forwardRef, useState } from "react";
 import { useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Send } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { BASE_STEPS, CNPJ_STEP, validateKycFile, type KycDocType } from "@/components/kyc/kycSteps";
+import { BASE_STEPS, CNPJ_STEP, type KycDocType } from "@/components/kyc/kycSteps";
+import { prepareKycFile, submitKyc, uploadKycDoc } from "@/features/kyc/kycFiles";
 import { Notice } from "@/components/seller-ui/studio";
-import { docObjectName, kycSubmitError, staleNames, type KycKey } from "./accountMeta";
+import type { KycKey } from "./accountMeta";
 import { DocSlot } from "./DocSlot";
 import { PanelHead } from "./parts";
 import { kycDocsKey, type KycDocsData } from "./useAccountData";
@@ -35,19 +35,15 @@ export const DocsSection = forwardRef<HTMLElement, { kyc: KycKey; isCnpj: boolea
   const mark = (t: KycDocType, v: boolean) => setBusy((b) => ({ ...b, [t]: v }));
   const fail = (t: KycDocType, m: string | null) => setProblems((p) => ({ ...p, [t]: m }));
 
-  const upload = async (type: KycDocType, file: File) => {
+  const upload = async (type: KycDocType, raw: File) => {
     if (!user?.id || busy[type]) return;
-    const bad = validateKycFile(file);
-    if (bad) { fail(type, bad); return; }
     mark(type, true); fail(type, null);
     try {
-      const name = docObjectName(type, crypto.randomUUID().slice(0, 8), file.type);
-      const up = await supabase.storage.from("kyc-documents").upload(`${user.id}/${name}`, file, { contentType: file.type });
-      if (up.error) throw up.error;
-      // Só depois que o novo arquivo subiu é que os antigos do mesmo tipo saem: nunca fica sem documento.
-      const { data: now } = await supabase.storage.from("kyc-documents").list(user.id, { limit: 100 });
-      const old = staleNames(now ?? [], type, name).map((n) => `${user.id}/${n}`);
-      if (old.length) await supabase.storage.from("kyc-documents").remove(old);
+      // Confere e, se precisar, reduz/converte a foto antes de subir (HEIC, foto enorme, metadados da câmera).
+      const prepared = await prepareKycFile(raw, type);
+      if (!prepared.file) { fail(type, prepared.error); return; }
+      const res = await uploadKycDoc(user.id, type, prepared.file);
+      if (!res.ok) { fail(type, res.error); return; }
       await qc.invalidateQueries({ queryKey: kycDocsKey(user.id) });
     } catch {
       fail(type, "Não foi possível enviar. Confira a conexão e tente de novo.");
@@ -59,8 +55,13 @@ export const DocsSection = forwardRef<HTMLElement, { kyc: KycKey; isCnpj: boolea
   const submit = async () => {
     if (sending) return;
     setSending(true); setSendError(null);
-    const { error } = await supabase.rpc("mark_kyc_submitted");
-    if (error) { setSending(false); setSendError(kycSubmitError(error)); setConfirm(false); return; }
+    const res = await submitKyc();
+    if (!res.ok) {
+      setSending(false); setSendError(res.error); setConfirm(false);
+      // A pasta pode ter mudado em outra aba: relê para a contagem bater com o servidor.
+      if (user?.id) void qc.invalidateQueries({ queryKey: kycDocsKey(user.id) });
+      return;
+    }
     await refresh();
     setSending(false); setConfirm(false);
     toast.success("Documentos enviados para análise");
@@ -71,7 +72,7 @@ export const DocsSection = forwardRef<HTMLElement, { kyc: KycKey; isCnpj: boolea
       <PanelHead
         id="account-docs"
         title="Documentos"
-        subtitle={editable ? "Fotos nítidas, sem cortes e sem reflexo. JPG, PNG ou WebP de até 10 MB." : kyc === "pending_review" ? "Estes são os documentos que a equipe está analisando." : "Documentos enviados."}
+        subtitle={editable ? `Fotos nítidas, sem cortes e sem reflexo. JPG, PNG, WebP ou PDF (${isCnpj ? "CNH digital e cartão CNPJ" : "CNH digital"}), até 10 MB.` : kyc === "pending_review" ? "Estes são os documentos que a equipe está analisando." : "Documentos enviados."}
         aside={<span className="rounded-full bg-muted px-3 py-1 text-[13px] font-bold tabular-nums text-muted-foreground">{sent} de {steps.length}</span>}
       />
 

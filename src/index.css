@@ -5264,6 +5264,13 @@ html.vp-admin [role="dialog"], html.vp-admin [role="alertdialog"] {
 html.vp-admin.vp-noir [role="dialog"], html.vp-admin.vp-noir [role="alertdialog"] {
   --success: 152 65% 58%; --warning: 38 92% 62%; --info: 213 95% 72%; --destructive: 0 88% 70%;
 }
+/* Etiquetas de estado dentro dos diálogos: o portal fica fora da casca, onde os tokens --as-* não existem, e a
+   etiqueta perdia a cor (ficava texto solto). Aqui ela usa os tokens semânticos, já ajustados para contraste acima. */
+html.vp-admin :is([role="dialog"], [role="alertdialog"]) :is(.ax-tag, .ax-status) { background: hsl(var(--muted)); color: hsl(var(--muted-foreground)); }
+html.vp-admin :is([role="dialog"], [role="alertdialog"]) :is(.ax-tag, .ax-status)[data-tone="success"] { background: hsl(var(--success) / .13); color: hsl(var(--success)); }
+html.vp-admin :is([role="dialog"], [role="alertdialog"]) :is(.ax-tag, .ax-status)[data-tone="warning"] { background: hsl(var(--warning) / .14); color: hsl(var(--warning)); }
+html.vp-admin :is([role="dialog"], [role="alertdialog"]) :is(.ax-tag, .ax-status)[data-tone="destructive"] { background: hsl(var(--destructive) / .12); color: hsl(var(--destructive)); }
+html.vp-admin :is([role="dialog"], [role="alertdialog"]) :is(.ax-tag, .ax-status)[data-tone="info"] { background: hsl(var(--info) / .12); color: hsl(var(--info)); }
 html.vp-admin :is([role="dialog"], [role="alertdialog"]) .uppercase { text-transform: none !important; }
 html.vp-admin :is([role="dialog"], [role="alertdialog"]) :is([class*="tracking-w"], [class*="tracking-["]):not([class*="tracking-[-"]) { letter-spacing: 0 !important; }
 html.vp-admin :is([role="dialog"], [role="alertdialog"]) :is(.font-black, .font-extrabold) { font-weight: 700 !important; }

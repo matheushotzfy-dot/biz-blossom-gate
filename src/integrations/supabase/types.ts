@@ -1912,6 +1912,42 @@ export type Database = {
         }
         Relationships: []
       }
+      kyc_submissions: {
+        Row: {
+          document_type: string
+          documents: Json
+          id: string
+          review_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string
+          user_id: string
+        }
+        Insert: {
+          document_type?: string
+          documents?: Json
+          id?: string
+          review_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+          user_id: string
+        }
+        Update: {
+          document_type?: string
+          documents?: Json
+          id?: string
+          review_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lesson_attachments: {
         Row: {
           created_at: string
@@ -6808,6 +6844,16 @@ export type Database = {
         Returns: boolean
       }
       has_support_access: { Args: { _user_id: string }; Returns: boolean }
+      get_admin_kyc_queue: {
+        Args: {
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _status?: string
+        }
+        Returns: Json
+      }
+      get_kyc_review: { Args: { _seller: string }; Returns: Json }
       increment_payment_link_clicks: {
         Args: { _slug: string }
         Returns: undefined

@@ -38,6 +38,7 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 import { PremiumPanel, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
+import { SellerKycDocs } from "@/features/kyc/SellerKycDocs";
 import { cn, isApprovedTransaction } from "@/lib/utils";
 import { z } from "zod";
 import { functionErrorMessage } from "@/lib/functionError";
@@ -166,7 +167,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
   const [effectiveMaxTicket, setEffectiveMaxTicket] = useState<number | null>(null);
   const [balanceAdjustments, setBalanceAdjustments] = useState<BalanceAdjustment[]>([]);
   const [loading, setLoading] = useState(false);
-  const [kycImages, setKycImages] = useState<string[]>([]);
   const [adminNotes, setAdminNotes] = useState("");
   const [userDisputes, setUserDisputes] = useState<Dispute[]>([]);
   const [kycRejectReason, setKycRejectReason] = useState("");
@@ -236,7 +236,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       .catch(() => { /* silent */ });
     setUserLogs([]); setUserProducts([]); setUserWithdrawals([]);
     setUserTransactions([]); setUserPixKeys([]); setUserDisputes([]);
-    setBalanceAdjustments([]); setKycImages([]); setIpHistory([]);
+    setBalanceAdjustments([]); setIpHistory([]);
     setUserRetention(null); setRetentionForm({ pix_pct: "", card_pct: "", days: "", card_release_days: "7" });
     setAdminNotes("");
     setPiiRevealed(false); setRevealedDoc(null); setRevealedPixKeys(null); setRevealedLegacyPix(null);
@@ -301,19 +301,6 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
         if (requestId !== detailRequestRef.current) return;
         setEffectiveMaxTicket(eff != null ? Number(eff) : null);
       } catch { setEffectiveMaxTicket(null); }
-      try {
-        const { data: kycFiles } = await supabase.storage.from("kyc-documents").list(profile.user_id);
-        if (kycFiles && kycFiles.length > 0) {
-          const signedUrls = await Promise.all(
-            kycFiles.map(async (f) => {
-              const { data } = await supabase.storage.from("kyc-documents").createSignedUrl(`${profile.user_id}/${f.name}`, 3600);
-              return data?.signedUrl || null;
-            })
-          );
-          if (requestId !== detailRequestRef.current) return;
-          setKycImages(signedUrls.filter(Boolean) as string[]);
-        } else setKycImages([]);
-      } catch { setKycImages([]); }
     } catch (e) {
       if (requestId !== detailRequestRef.current) return;
       const msg = e instanceof Error ? e.message : "desconhecido";
@@ -333,7 +320,14 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       if (selectedUser?.user_id === userId) setSelectedUser(null);
     },
   });
-  const handleApproveKyc = (userId: string) => { void approveKyc(userId, approvalManager); };
+  // `admin_approve_seller_with_manager` exige senha confirmada nos últimos 10 minutos (`assert_recent_auth`):
+  // sem a confirmação aqui o servidor recusava e o botão só mostrava erro.
+  const handleApproveKyc = (userId: string) => {
+    if (!userId || kycBusy) return;
+    const blocked = selectedUser?.user_id === userId && selectedUser.account_status === "blocked";
+    confirm(blocked ? "Aprovar esta conta bloqueada. Ela volta a operar e o seller é avisado." : "Aprovar a verificação deste seller. Ele é avisado e passa a operar.",
+      async () => { await approveKyc(userId, approvalManager); });
+  };
   const handleRejectKyc = () => { void rejectKyc(rejectTargetUserId, kycRejectReason); };
 
   const handleFreezeBalance = async (userId: string, freeze: boolean) => {
@@ -833,31 +827,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                       })}
                     </div>
                   </div>
-                  {kycImages.length > 0 ? (
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-2">Documentos KYC:</p>
-                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                        {kycImages.map((url, i) => {
-                          const fileName = url.split("/").pop()?.split("?")[0] || "";
-                          const label = fileName.startsWith("front") ? "Frente" : fileName.startsWith("back") ? "Verso" : fileName.startsWith("selfie") ? "Selfie" : fileName.startsWith("cnpj_card") ? "Cartão CNPJ" : `Doc ${i + 1}`;
-                          return (
-                            <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border border-border hover:border-primary/30 transition-colors">
-                              <img src={url} alt={`KYC ${label}`} className="w-full h-40 object-cover" />
-                              <div className="px-3 py-2 bg-muted/20 text-center">
-                                <span className="text-[10px] font-display font-bold text-muted-foreground uppercase tracking-wider">{label}</span>
-                              </div>
-                            </a>
-                          );
-                        })}
-                      </div>
-                      {selectedUser?.document_type === "cnpj" && !kycImages.some(url => url.includes("cnpj_card")) && (
-                        <div className="mt-3 flex items-center gap-2 p-3 rounded-xl bg-warning/5 border border-warning/15">
-                          <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" />
-                          <p className="text-[10px] text-warning font-medium">Seller é CNPJ mas não enviou o Cartão CNPJ.</p>
-                        </div>
-                      )}
-                    </div>
-                  ) : <p className="text-xs text-muted-foreground">Nenhum documento KYC enviado</p>}
+                  {selectedUser && <SellerKycDocs sellerId={selectedUser.user_id} />}
                 </TabsContent>
 
                 {/* ── Observações Admin ── */}

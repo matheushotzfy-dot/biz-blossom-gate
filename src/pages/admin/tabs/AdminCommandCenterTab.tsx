@@ -143,7 +143,7 @@ export default function AdminCommandCenterTab({
 
   const queues: QueueItem[] = useMemo(() => [
     { key: "withdrawals", label: "Saques pendentes", hint: fmtCurrency(stats.pendingVolume), icon: ArrowDownToLine, count: pendingWithdrawalCount, tab: "withdrawals", tone: pendingWithdrawalCount > 0 ? "warning" : "neutral" },
-    { key: "kyc", label: "Contas aguardando aprovação", hint: "Verificação de cadastro", icon: UserCheck, count: pendingKyc, tab: "sellers", tone: pendingKyc > 0 ? "warning" : "neutral" },
+    { key: "kyc", label: "Verificações para analisar", hint: "Documentos enviados", icon: UserCheck, count: pendingKyc, tab: "kyc", tone: pendingKyc > 0 ? "warning" : "neutral" },
     { key: "disputes", label: "MED PIX em análise", hint: "MED e pré-MED em aberto", icon: ShieldAlert, count: disputesOpen, tab: "medpix", tone: disputesOpen > 0 ? "danger" : "neutral" },
     { key: "chargebacks", label: "Chargebacks abertos", hint: "Contestação de cartão", icon: CreditCard, count: operations?.chargebacks ?? 0, tab: "chargeback", tone: "warning" },
     { key: "refunds", label: "Reembolsos para confirmar", hint: "Aprovação manual do dono", icon: ArrowDownToLine, count: operations?.refunds ?? 0, tab: "refund-approvals", tone: "warning" },

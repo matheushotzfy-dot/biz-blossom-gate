@@ -1,12 +1,17 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { X } from "lucide-react";
+import { IdCard, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DialogBody, DialogHead, dialogBox } from "@/components/seller-ui/form";
+import { KycReviewPanel, type Decision } from "@/features/kyc/KycReviewPanel";
+import { kycReviewKey } from "@/features/kyc/useKycReview";
+import { reviewActionError } from "@/features/kyc/kycReviewModel";
 import { isKycPending, type StaffActionFlags } from "./staffActions";
 
 export interface StaffPanelSeller { seller_user_id: string; full_name: string | null; email: string | null; account_status: string | null }
@@ -23,7 +28,7 @@ export function StaffSellerPanel({ seller, flags, onClose, onChanged }: { seller
   const qc = useQueryClient();
   const id = seller.seller_user_id;
   const [busy, setBusy] = useState(false);
-  const [reason, setReason] = useState("");
+  const [reviewing, setReviewing] = useState(false);
   const [fees, setFees] = useState({ p: "", f: "", w: "" });
   const [note, setNote] = useState("");
 
@@ -40,9 +45,16 @@ export function StaffSellerPanel({ seller, flags, onClose, onChanged }: { seller
     finally { setBusy(false); }
   };
 
-  const review = async (approve: boolean) => {
-    if (!approve && reason.trim().length < 5) { toast.error("Informe um motivo com no mínimo 5 caracteres"); return; }
-    if (await run(() => supabase.rpc("staff_review_kyc", { _seller: id, _approve: approve, _reason: approve ? undefined : reason.trim() }), approve ? "KYC aprovado" : "KYC recusado")) { setReason(""); onChanged(); }
+  // A decisão sai da ficha de análise (documentos + cadastro); o servidor confere permissão, carteira e status.
+  const decide = async (kind: Decision, why: string): Promise<string | null> => {
+    const approve = kind === "approve";
+    const { error } = await supabase.rpc("staff_review_kyc", { _seller: id, _approve: approve, _reason: approve ? undefined : why });
+    if (error) return reviewActionError(error);
+    toast.success(approve ? "Verificação aprovada. O seller foi avisado." : "Verificação reprovada. O seller recebeu o motivo.");
+    setReviewing(false);
+    void qc.invalidateQueries({ queryKey: kycReviewKey(id), refetchType: "none" });
+    onChanged();
+    return null;
   };
   const saveFees = async () => {
     const [p, f, w] = [fees.p, fees.f, fees.w].map((v) => Number(v.replace(",", ".")));
@@ -65,10 +77,17 @@ export function StaffSellerPanel({ seller, flags, onClose, onChanged }: { seller
       {none && <p className="text-xs text-muted-foreground">Sua conta não tem permissões de ação para sellers.</p>}
       {(flags.approveKyc || flags.rejectKyc) && (
         <section className="space-y-2 border-t border-border pt-3"><h4 className="text-xs font-semibold uppercase text-muted-foreground">KYC</h4>
-          {!pending ? <p className="text-xs text-muted-foreground">Nenhuma análise pendente.</p> : <>
-            {flags.rejectKyc && <Textarea aria-label="Motivo da recusa" placeholder="Motivo (obrigatório para recusar)" maxLength={500} value={reason} onChange={(e) => setReason(e.target.value)} />}
-            <div className="flex gap-2">{flags.approveKyc && <Button size="sm" disabled={busy} onClick={() => void review(true)}>Aprovar</Button>}{flags.rejectKyc && <Button size="sm" variant="destructive" disabled={busy} onClick={() => void review(false)}>Recusar</Button>}</div>
-          </>}
+          {pending ? (
+            <Button size="sm" className="gap-1.5" onClick={() => setReviewing(true)}><IdCard className="h-3.5 w-3.5" />Analisar documentos</Button>
+          ) : (
+            <p className="text-xs text-muted-foreground">{seller.account_status === "pending" ? "O seller ainda não enviou os documentos para análise." : "Nenhuma análise pendente."}</p>
+          )}
+          <Dialog open={reviewing} onOpenChange={setReviewing}>
+            <DialogContent className={dialogBox("wide")}>
+              <DialogHead icon={<IdCard className="h-5 w-5" />} title={seller.full_name || "Verificação"} subtitle={seller.email || "Verificação de identidade"} />
+              <DialogBody>{reviewing && <KycReviewPanel sellerId={id} onDecide={decide} stickyDecision />}</DialogBody>
+            </DialogContent>
+          </Dialog>
         </section>)}
       {flags.editFees && (
         <section className="space-y-2 border-t border-border pt-3"><h4 className="text-xs font-semibold uppercase text-muted-foreground">Taxas</h4>

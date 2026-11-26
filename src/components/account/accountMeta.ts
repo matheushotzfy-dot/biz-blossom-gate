@@ -150,7 +150,7 @@ export function staleNames(files: readonly StoredFile[], type: KycDocType, keep:
   return files.filter((f) => docTypeOf(f.name) === type && f.name !== keep).map((f) => f.name);
 }
 
-export const DOC_EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+export const DOC_EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "application/pdf": "pdf" };
 
 export function docObjectName(type: KycDocType, token: string, mime: string): string {
   return `${type}_${token}.${DOC_EXT[mime] ?? "jpg"}`;
@@ -363,9 +363,20 @@ export function profileSaveError(err: unknown, fallback = "Não foi possível sa
   return friendlyError(err, fallback);
 }
 
+const KYC_DOC_LABEL: Record<string, string> = { front: "documento (frente)", back: "documento (verso)", selfie: "selfie com o documento", cnpj_card: "cartão CNPJ" };
+
+/** Erro do "Enviar para análise" (`mark_kyc_submitted`) em português, dizendo o que falta quando falta documento. */
 export function kycSubmitError(err: unknown): string {
   const raw = (err as DbError | null)?.message ?? "";
+  const missing = /missing_documents:([a-z_,]+)/i.exec(raw);
+  if (missing) {
+    const names = missing[1].split(",").filter(Boolean).map((t) => KYC_DOC_LABEL[t] ?? t);
+    const list = names.length <= 1 ? names.join("") : `${names.slice(0, -1).join(", ")} e ${names[names.length - 1]}`;
+    return `Ainda falta enviar: ${list}.`;
+  }
   if (/no_documents_uploaded/i.test(raw)) return "Ainda não encontramos documentos enviados. Envie as fotos e tente de novo.";
+  if (/kyc_not_editable/i.test(raw)) return "A sua verificação já foi enviada ou concluída. Atualize a página para ver a situação.";
+  if (/kyc_unchanged/i.test(raw)) return "Troque o documento apontado na reprovação antes de enviar de novo. Os arquivos são os mesmos do envio reprovado.";
   if (/not_authenticated/i.test(raw)) return "Sua sessão expirou. Entre de novo para continuar.";
   return friendlyError(err, "Não foi possível enviar para análise agora. Tente de novo.");
 }

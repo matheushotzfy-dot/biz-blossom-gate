@@ -25,6 +25,7 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
 const AdminOverviewTab = lazy(() => import("./tabs/AdminOverviewTab"));
 const AdminSellersTab = lazy(() => import("./tabs/AdminSellersTab"));
+const KycCenter = lazy(() => import("@/features/admin-kyc/KycCenter"));
 const ProductsCenter = lazy(() => import("@/features/admin-products/ProductsCenter"));
 const FinancialAuditTab = lazy(() => import("@/features/admin-finance/FinancialAuditTab"));
 const DisputesCenter = lazy(() => import("@/features/admin-disputes/DisputesCenter"));
@@ -672,6 +673,7 @@ export default function AdminDashboard() {
               {activeTab === "sellers" && isAdmin && (
                 <AdminSellersTab profiles={profiles} transactions={transactions} withdrawals={withdrawals} onReload={loadData} fmtCurrency={fmtCurrency} isAdmin={isAdmin} dateRange={dateRange} />
               )}
+              {activeTab === "kyc" && isAdmin && <KycCenter isAdmin={isAdmin} />}
               {activeTab === "products" && <ProductsCenter isAdmin={isAdmin} />}
               {activeTab === "top-sellers" && isAdmin && (
                 <AdminTopSellersTab dateRange={dateRange} fmtCurrency={fmtCurrency} />

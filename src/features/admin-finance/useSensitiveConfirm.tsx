@@ -15,12 +15,25 @@ export function useSensitiveConfirm(title = "Confirmação de operação finance
   const [busy, setBusy] = useState(false);
   const [description, setDescription] = useState("");
   const pending = useRef<Action | null>(null);
+  const cancelled = useRef<(() => void) | null>(null);
 
-  const confirm = useCallback((desc: string, action: Action) => {
+  /** `onCancel` (opcional) roda se a janela da senha for fechada sem confirmar. */
+  const confirm = useCallback((desc: string, action: Action, onCancel?: () => void) => {
     pending.current = action;
+    cancelled.current = onCancel ?? null;
     setDescription(desc);
     setOpen(true);
   }, []);
+
+  const onOpenChange = (next: boolean) => {
+    setOpen(next);
+    if (!next && pending.current) {
+      const cancel = cancelled.current;
+      pending.current = null;
+      cancelled.current = null;
+      cancel?.();
+    }
+  };
 
   const onConfirm = async (password: string) => {
     setBusy(true);
@@ -31,10 +44,14 @@ export function useSensitiveConfirm(title = "Confirmação de operação finance
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) { toast.error("Senha incorreta"); return; }
       setOpen(false);
-      await pending.current?.();
-    } finally {
-      setBusy(false);
+      const action = pending.current;
       pending.current = null;
+      cancelled.current = null;
+      await action?.();
+    } finally {
+      // Não limpa `pending` aqui: com a senha errada a janela continua aberta e a ação precisa sobreviver à
+      // próxima tentativa (antes o finally a apagava e a senha certa, na segunda vez, não fazia nada).
+      setBusy(false);
     }
   };
 
@@ -44,7 +61,7 @@ export function useSensitiveConfirm(title = "Confirmação de operação finance
       busy={busy}
       title={title}
       description={description}
-      onOpenChange={setOpen}
+      onOpenChange={onOpenChange}
       onConfirm={onConfirm}
     />
   );
