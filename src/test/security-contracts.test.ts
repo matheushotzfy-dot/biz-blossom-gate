@@ -46,4 +46,28 @@ describe("contratos de segurança", () => {
     expect(sql).toMatch(/order_bump_self/);
     expect(sql).toMatch(/_count >= 5/);
   });
+
+  it("disputa de reembolso perdida vira reembolso, não chargeback", () => {
+    const sql = lastMigrationWith(/handle_dispute_balance/);
+    expect(sql).toMatch(/WHEN NEW\.type = ''refund'' THEN ''refunded''/);
+  });
+
+  it("o ranking da corrida só mostra quem é valor fixo para o admin", () => {
+    const sql = lastMigrationWith(/race_leaderboard/);
+    expect(sql).toMatch(/has_role\(auth\.uid\(\), ''admin''::public\.app_role\) THEN is_manual ELSE NULL::boolean END AS is_manual/);
+  });
+
+  it("plano de assinatura custa pelo menos R$ 1 e só usa produto do próprio seller", () => {
+    const sql = lastMigrationWith(/guard_subscription_plans_admin_hold/);
+    expect(sql).toMatch(/NEW\.price < 1/);
+    expect(sql).toMatch(/p\.user_id = auth\.uid\(\)/);
+    expect(sql).toMatch(/CHECK \(price >= 1\)/);
+  });
+
+  it("curso novo de um produto chega a quem já comprou", () => {
+    const sql = lastMigrationWith(/grant_course_to_product_buyers/);
+    expect(sql).toMatch(/AFTER INSERT OR UPDATE OF product_id ON public\.courses/);
+    expect(sql).toMatch(/is_simulated = false/);
+    expect(sql).toMatch(/ON CONFLICT \(user_id, course_id\) DO NOTHING/);
+  });
 });

@@ -75,11 +75,13 @@ export function StaffRequestForm({ sellerHint }: { sellerHint?: string }) {
     if (invalid || busy) return;
     setBusy(true);
     try {
-      const { error: e } = await supabase.rpc("request_staff_action", {
+      const { data: requestId, error: e } = await supabase.rpc("request_staff_action", {
         _kind: kind, _reason: reason.trim(), _target_acquirer: needsAcq ? acq : undefined,
         _payload: { seller_email: needsSeller ? sellerEmail.trim().toLowerCase() : null, ...(kind === "acquirer_toggle" ? { active: active === "on" } : {}) },
       });
       if (e) { setError(staffError(e)); return; }
+      // O servidor não diz se o e-mail tem conta: sem conta ou fora da sua carteira, a resposta é a mesma (nada é gravado).
+      if (!requestId) { setError("Não encontramos esse seller entre as contas que você pode pedir. Confira o e-mail."); return; }
       toast.success("Pedido enviado ao dono.");
       setReason(""); setSellerEmail(""); setActive(""); setTried(false);
       void qc.invalidateQueries({ queryKey: ["my-staff-req"] });

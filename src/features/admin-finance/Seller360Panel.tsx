@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { brl, type Seller360 } from "./types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SellerAcquirersSection, SellerRewardsSection, SellerTransactionsSection, SellerWithdrawalsSection } from "./SellerDetailSections";
+import { SellerNotesSection } from "@/features/admin-tools/SellerNotesSection";
 
 interface Seller360PanelProps {
   userId: string;
@@ -104,11 +105,13 @@ export function Seller360Panel({ userId, onChanged }: Seller360PanelProps) {
           <TabsTrigger value="wd">Saques</TabsTrigger>
           <TabsTrigger value="acq">Adquirentes</TabsTrigger>
           <TabsTrigger value="rw">Premiações</TabsTrigger>
+          <TabsTrigger value="notes">Notas</TabsTrigger>
         </TabsList>
         <TabsContent value="tx" className="mt-3"><SellerTransactionsSection key={userId} userId={userId} /></TabsContent>
         <TabsContent value="wd" className="mt-3"><SellerWithdrawalsSection key={userId} userId={userId} onChanged={() => { void load(); onChanged?.(); }} /></TabsContent>
         <TabsContent value="acq" className="mt-3"><SellerAcquirersSection userId={userId} /></TabsContent>
         <TabsContent value="rw" className="mt-3"><SellerRewardsSection userId={userId} /></TabsContent>
+        <TabsContent value="notes" className="mt-3"><SellerNotesSection key={userId} userId={userId} /></TabsContent>
       </Tabs>
     </div>
   );

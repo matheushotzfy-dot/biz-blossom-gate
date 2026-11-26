@@ -59,7 +59,7 @@ export default function Assinaturas() {
       trial_days: trialDays(v.trial),
       product_id: v.product && v.product !== "none" ? v.product : null,
     });
-    if (error) { toast.error(friendlyError(error)); return false; }
+    if (error) { toast.error(planErrorMessage(error, friendlyError(error))); return false; }
     toast.success("Plano criado!");
     setShowCreate(false);
     await fetchData();

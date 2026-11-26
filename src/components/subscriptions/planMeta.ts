@@ -45,6 +45,8 @@ export function planErrorMessage(err: { message?: string } | null | undefined, f
   const m = (err?.message || "").toLowerCase();
   if (m.includes("equipe pausou")) return "A equipe pausou este plano. Fale com o suporte para liberar.";
   if (m.includes("tem assinantes")) return "Este plano tem assinantes e não pode ser apagado. Pause o plano em vez disso.";
+  if (m.includes("pelo menos r$ 1") || m.includes("valid_price")) return "O preço do plano precisa ser de pelo menos R$ 1,00.";
+  if (m.includes("produto seu")) return "Escolha um produto seu para este plano.";
   if (m.includes("jwt") || m.includes("401")) return "Sua sessão expirou. Entre de novo para continuar.";
   if (m.includes("permission") || m.includes("row-level")) return "Você não tem permissão para esta ação.";
   return fallback;

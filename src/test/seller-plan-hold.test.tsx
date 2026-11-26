@@ -38,6 +38,9 @@ describe("plano pausado pela equipe (visão do seller)", () => {
     expect(isHeldPlan({})).toBe(false);
     expect(planErrorMessage({ message: "A equipe pausou este plano e ele só volta com a liberação do suporte." }, "x")).toBe("A equipe pausou este plano. Fale com o suporte para liberar.");
     expect(planErrorMessage({ message: "Este plano tem assinantes e não pode ser apagado. Pause o plano em vez disso." }, "x")).toMatch(/tem assinantes/);
+    expect(planErrorMessage({ message: "O preço do plano precisa ser de pelo menos R$ 1,00." }, "x")).toBe("O preço do plano precisa ser de pelo menos R$ 1,00.");
+    expect(planErrorMessage({ message: 'new row for relation "subscription_plans" violates check constraint "valid_price"' }, "x")).toMatch(/R\$ 1,00/);
+    expect(planErrorMessage({ message: "Escolha um produto seu para este plano." }, "x")).toBe("Escolha um produto seu para este plano.");
     expect(planErrorMessage({ message: "JWT expired" }, "x")).toMatch(/sessão expirou/);
     expect(planErrorMessage({ message: "new row violates row-level security policy" }, "x")).toMatch(/permissão/);
     expect(planErrorMessage({ message: "algo" }, "Nada foi alterado.")).toBe("Nada foi alterado.");

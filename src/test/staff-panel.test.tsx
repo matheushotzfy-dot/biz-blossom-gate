@@ -260,6 +260,7 @@ describe("painel da equipe", () => {
 
 describe("pedido ao dono", () => {
   it("ligar/desligar adquirente exige dizer qual dos dois e manda isso ao servidor", async () => {
+    handlers.request_staff_action = () => ({ data: "sr1", error: null });
     handlers.list_acquirers_basic = () => ({ data: [{ id: "aq1", name: "Alfa" }], error: null });
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(<QueryClientProvider client={client}><StaffRequestForm /></QueryClientProvider>);
@@ -273,5 +274,18 @@ describe("pedido ao dono", () => {
     fireEvent.click(screen.getByRole("radio", { name: "Ligar" }));
     fireEvent.click(screen.getByRole("button", { name: "Enviar ao dono" }));
     await waitFor(() => expect(calls("request_staff_action")).toEqual([{ _kind: "acquirer_toggle", _reason: "Alfa voltou a aprovar bem", _target_acquirer: "aq1", _payload: { seller_email: null, active: true } }]));
+  });
+
+  it("e-mail sem conta (ou fora da carteira) recebe a mesma resposta neutra e nada é enviado como sucesso", async () => {
+    handlers.request_staff_action = () => ({ data: null, error: null });
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(<QueryClientProvider client={client}><StaffRequestForm /></QueryClientProvider>);
+    fireEvent.click(screen.getByRole("radio", { name: /Congelar seller/ }));
+    fireEvent.change(screen.getByLabelText("E-mail do seller"), { target: { value: "Ninguem@Exemplo.com " } });
+    fireEvent.change(screen.getByLabelText("Por quê"), { target: { value: "Muitos chargebacks seguidos" } });
+    fireEvent.click(screen.getByRole("button", { name: "Enviar ao dono" }));
+    expect(await screen.findByText(/Não encontramos esse seller entre as contas que você pode pedir/)).toBeInTheDocument();
+    expect(calls("request_staff_action")[0]).toMatchObject({ _kind: "seller_freeze", _payload: { seller_email: "ninguem@exemplo.com" } });
+    expect(toast.success).not.toHaveBeenCalled();
   });
 });

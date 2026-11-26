@@ -49,14 +49,9 @@ export function NotificationPanel({ open, onClose }: Props) {
 
   const loadNotifications = useCallback(async () => {
     if (!user) return;
-    const [userRes, globalRes] = await Promise.all([
-      supabase.from("notifications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30),
-      supabase.from("notifications").select("*").is("user_id", null).order("created_at", { ascending: false }).limit(10),
-    ]);
-    const all = [...(userRes.data || []), ...(globalRes.data || [])]
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 30);
-    setNotifications(all as Notification[]);
+    // Cada aviso (inclusive os em massa do admin) é uma linha com o user_id de quem recebe: a RLS só deixa ler as próprias.
+    const { data } = await supabase.from("notifications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30);
+    setNotifications((data || []) as Notification[]);
     setLoading(false);
   }, [user]);
 
@@ -72,36 +67,23 @@ export function NotificationPanel({ open, onClose }: Props) {
     if (!user) return;
     const channel = supabase
       .channel(uniqueChannelName(`notifications-realtime-${user.id}`))
-      .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, (payload) => {
-        const row = (payload.new || payload.old) as Notification | undefined;
-        if (!row) return;
-        if (row.user_id === user.id || row.user_id === null) {
-          loadNotifications();
-        }
-      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, () => { loadNotifications(); })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [user, loadNotifications]);
 
   const markAsRead = async (notif: Notification) => {
     if (!user) return;
-    // Global notifications (user_id null) are shared across all users — they must
-    // never be mutated in the DB by a single reader, only flipped locally.
-    if (notif.user_id === null) {
-      setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, is_read: true } : n));
-      return;
-    }
     await supabase.from("notifications").update({ is_read: true }).eq("id", notif.id).eq("user_id", user.id);
     setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, is_read: true } : n));
   };
 
   const markAllAsRead = async () => {
     if (!user) return;
-    const unreadUserIds = notifications.filter(n => !n.is_read && n.user_id === user.id).map(n => n.id);
-    if (unreadUserIds.length > 0) {
-      await supabase.from("notifications").update({ is_read: true }).in("id", unreadUserIds).eq("user_id", user.id);
+    const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id);
+    if (unreadIds.length > 0) {
+      await supabase.from("notifications").update({ is_read: true }).in("id", unreadIds).eq("user_id", user.id);
     }
-    // Global notifications are only flipped locally; user-owned ones are now persisted above.
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
   };
 
@@ -117,7 +99,6 @@ export function NotificationPanel({ open, onClose }: Props) {
     const Icon = config.icon;
     const timeAgo = formatDistanceToNow(new Date(notif.created_at), { addSuffix: true, locale: ptBR });
     const fullDate = format(new Date(notif.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
-    const isGlobal = notif.user_id === null;
     return (
       <button
         key={notif.id}
@@ -146,13 +127,8 @@ export function NotificationPanel({ open, onClose }: Props) {
               </h4>
               <div className="flex items-center gap-1 shrink-0">
                 {opts.important && (
-                  <span className="text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-primary text-primary-foreground">
+                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-primary text-primary-foreground">
                     Importante
-                  </span>
-                )}
-                {isGlobal && !opts.important && (
-                  <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-primary/8 text-primary border border-primary/10">
-                    Geral
                   </span>
                 )}
               </div>
@@ -231,7 +207,7 @@ export function NotificationPanel({ open, onClose }: Props) {
               <div>
                 {importantUnread.length > 0 && (
                   <div>
-                    <div className="px-5 pt-3 pb-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-primary/70">
+                    <div className="px-5 pt-3 pb-1.5 text-[11px] font-semibold text-primary">
                       Avisos importantes
                     </div>
                     {importantUnread.map((n, i) => renderItem(n, { important: true, isLast: i === importantUnread.length - 1 }))}
@@ -260,10 +236,8 @@ export function useNotificationCount() {
     // Debounced: bursts of inserts trigger one count, not one per event.
     let timer: ReturnType<typeof setTimeout> | undefined;
     const run = () => {
-      Promise.all([
-        supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false),
-        supabase.from("notifications").select("id", { count: "exact", head: true }).is("user_id", null).eq("is_read", false),
-      ]).then(([a, b]) => setCount((a.count || 0) + (b.count || 0)));
+      supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false)
+        .then(({ count: n }) => setCount(n || 0));
     };
     const load = () => { clearTimeout(timer); timer = setTimeout(run, 800); };
     run();
