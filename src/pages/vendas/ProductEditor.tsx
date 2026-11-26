@@ -1,3 +1,4 @@
+import { MAX_ORDER_BUMPS, orderBumpError, withVersion } from "@/components/products/orderBumps";
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type Dispatch, type SetStateAction, type RefObject } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -340,7 +341,7 @@ export default function ProductEditor() {
  const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true });
  if (error) { toast.error("Erro ao enviar imagem"); return null; }
  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
- return data.publicUrl;
+ return withVersion(data.publicUrl);
  };
 
    const handleSave = async () => {
@@ -603,12 +604,12 @@ export default function ProductEditor() {
 
  const addBump = async () => {
  if (!selectedBumpProduct || isNew) return;
- if (orderBumps.length >= 5) { toast.error("Máximo de 5 order bumps"); return; }
+ if (orderBumps.length >= MAX_ORDER_BUMPS) { toast.error(`Cada produto pode ter até ${MAX_ORDER_BUMPS} order bumps.`); return; }
  if (orderBumps.some(b => b.bump_product_id === selectedBumpProduct)) { toast.error("Produto já adicionado"); return; }
  const { data, error } = await supabase.from("order_bumps").insert({
  product_id: effectiveProductId!, bump_product_id: selectedBumpProduct, sort_order: orderBumps.length,
  }).select("id, bump_product_id").maybeSingle();
- if (error || !data) { toast.error("Erro ao adicionar"); return; }
+ if (error || !data) { toast.error(orderBumpError(error)); return; }
  setOrderBumps(prev => [...prev, data]);
  setSelectedBumpProduct("");
  toast.success("Order bump adicionado!");

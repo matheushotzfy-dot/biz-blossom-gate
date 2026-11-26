@@ -24,6 +24,7 @@ import { useCheckoutTracking } from "./useCheckoutTracking";
 import { useOfferTimer } from "./useOfferTimer";
 
 export const CHECKOUT_QUERY_KEY = "public-checkout";
+const NO_PIXELS: PixelConfig[] = [];
 
 export function CheckoutPage({ slug, processor = defaultCheckoutProcessor }: { slug: string | undefined; processor?: CheckoutProcessor }) {
   const safeSlug = safeCheckoutSlug(slug);
@@ -48,13 +49,18 @@ interface ExperienceProps {
   bumps: CheckoutBump[];
   pixels: PixelConfig[];
   processor: CheckoutProcessor;
+  /**
+   * Prévia do construtor (`/checkout-preview`, dentro de um iframe): a MESMA tela do comprador, sem efeitos de visita
+   * (afiliado, cupom do link, pixels, cobrança guardada na sessão) e sem título de página.
+   */
+  preview?: boolean;
 }
 
-function CheckoutExperience({ slug, product, bumps, pixels, processor }: ExperienceProps) {
+export function CheckoutExperience({ slug, product, bumps, pixels, processor, preview = false }: ExperienceProps) {
   const form = useCheckoutForm({ addressRequired: product.addressRequired, emailConfirm: product.emailConfirm });
-  const flow = useCheckoutFlow({ product, pixels, processor });
+  const flow = useCheckoutFlow({ product, pixels, processor, restore: !preview });
   const timer = useOfferTimer(product.id, product.timerEnabled, product.timerMinutes);
-  useCheckoutTracking(product, pixels);
+  useCheckoutTracking(product, preview ? NO_PIXELS : pixels);
 
   const [method, setMethod] = useState<CheckoutMethod>(product.methods[0] ?? "pix");
   const [installments, setInstallments] = useState(1);
@@ -62,9 +68,13 @@ function CheckoutExperience({ slug, product, bumps, pixels, processor }: Experie
   const [selectedBumps, setSelectedBumps] = useState<Set<string>>(new Set());
   const [affiliateSlug, setAffiliateSlug] = useState<string | null>(null);
   const [announce, setAnnounce] = useState("");
+  // A forma escolhida precisa existir na lista (na prévia o vendedor liga e desliga formas com a tela aberta).
+  useEffect(() => {
+    if (product.methods.length > 0 && !product.methods.includes(method)) { setMethod(product.methods[0]); setCardToken(null); }
+  }, [product.methods, method]);
 
   // Afiliado: guarda o link que trouxe o comprador e conta o clique uma vez por visita.
-  useEffect(() => { setAffiliateSlug(resolveAffiliateForVisit(product.id, window.location.search)); }, [product.id]);
+  useEffect(() => { if (!preview) setAffiliateSlug(resolveAffiliateForVisit(product.id, window.location.search)); }, [product.id, preview]);
 
   /* ── Cupom ── */
   const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
@@ -81,6 +91,7 @@ function CheckoutExperience({ slug, product, bumps, pixels, processor }: Experie
   }, [product.id, product.price]);
   const removeCoupon = useCallback(() => { setCoupon(null); setCouponError(null); }, []);
   useEffect(() => {
+    if (preview) return;
     const params = new URLSearchParams(window.location.search);
     const code = cleanCouponCode(params.get("cupom") || params.get("coupon"));
     if (code.length >= 3) void applyCoupon(code); // o servidor valida; se falhar, a pessoa ainda pode digitar o código
@@ -152,7 +163,7 @@ function CheckoutExperience({ slug, product, bumps, pixels, processor }: Experie
     lastPhase.current = state.phase;
     window.scrollTo({ top: 0 });
   }, [state.phase]);
-  const head = (
+  const head = preview ? null : (
     <Seo title={`${product.name} · Checkout`} description={(product.description || `Compre ${product.name} com pagamento seguro.`).slice(0, 155)} path={`/pay/${slug}`} noindex image={/^https:\/\//i.test(product.imageUrl ?? "") ? product.imageUrl : undefined} />
   );
 

@@ -129,8 +129,9 @@ export function PendingScreen({ product, record, onChangeMethod }: { product: Ch
       )}
 
       <p style={{ textAlign: "center", marginTop: 18 }}>
-        <button type="button" className="ck-link-btn" onClick={onChangeMethod}>Cancelar e escolher outra forma de pagamento</button>
+        <button type="button" className="ck-link-btn" onClick={onChangeMethod}>Escolher outra forma de pagamento</button>
       </p>
+      <p className="ck-msg" style={{ textAlign: "center" }}>Se já pagou este {record.method === "boleto" ? "boleto" : "código"}, não pague de novo: a confirmação chega sozinha.</p>
     </main>
   );
 }

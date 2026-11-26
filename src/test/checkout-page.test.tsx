@@ -466,7 +466,7 @@ describe("checkout público: pagamento", () => {
     fireEvent.click(submitButton());
     await screen.findByRole("heading", { name: "Pague com Pix" });
     expect(window.sessionStorage.getItem("vp-ck-pending:p1")).not.toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: /Cancelar e escolher outra forma/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Escolher outra forma de pagamento/ }));
     expect(await screen.findByRole("heading", { level: 1, name: "Método Escala 10x" })).toBeInTheDocument();
     expect(window.sessionStorage.getItem("vp-ck-pending:p1")).toBeNull();
   });

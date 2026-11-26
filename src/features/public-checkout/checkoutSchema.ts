@@ -10,6 +10,9 @@ const checkoutDocumentSchema = z.string().trim().min(1, "Informe seu CPF ou CNPJ
 
 const emailSchema = z.string().trim().toLowerCase().email("Informe um e-mail válido").max(255);
 
+/** As 27 siglas de estado. O CEP preenche sozinho; quem digita à mão não passa "XX". */
+export const BRAZIL_UFS = new Set(["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"]);
+
 export const checkoutCustomerSchema = z.object({
   name: z.string().trim().min(3, "Informe seu nome completo").max(120),
   email: emailSchema,
@@ -36,7 +39,8 @@ export const checkoutCustomerSchema = z.object({
   for (const [field, message] of required) {
     const fieldValue = value[field] ?? "";
     const validCep = field !== "cep" || fieldValue.replace(/\D/g, "").length === 8;
-    if (!fieldValue || !validCep) ctx.addIssue({ code: z.ZodIssueCode.custom, path: [field], message });
+    if (!fieldValue || !validCep) { ctx.addIssue({ code: z.ZodIssueCode.custom, path: [field], message }); continue; }
+    if (field === "state" && !BRAZIL_UFS.has(fieldValue.toUpperCase())) ctx.addIssue({ code: z.ZodIssueCode.custom, path: [field], message: "Use a sigla do estado (ex.: SP)" });
   }
 });
 

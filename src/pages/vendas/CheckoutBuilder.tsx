@@ -4,7 +4,10 @@
  * Tela cheia, fora do DashboardLayout: usa useSellerSkin() e a raiz `vp-seller-shell vp-stage`.
  */
 
-import { INSTALLMENT_MAX, installmentOption } from "@/features/public-checkout/pricing";
+import { PREVIEW_UPDATE, type PreviewUpdate } from "@/features/public-checkout/previewProtocol";
+import { CheckoutLivePreview } from "@/components/products/CheckoutLivePreview";
+import { defaultCheckoutProcessor } from "@/features/public-checkout/processor";
+import { MAX_ORDER_BUMPS, orderBumpError, withVersion } from "@/components/products/orderBumps";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +16,7 @@ import { useSellerSkin } from "@/hooks/useSellerSkin";
 import {
   Palette, CreditCard, ClipboardList, Layers, Zap, ArrowLeft, Timer, ShieldCheck, QrCode, FileText, MapPin,
   Mail, Hash, Monitor, Smartphone, Check, Copy, ExternalLink, ImagePlus, Upload, X, Plus, Package, Lock,
-  Loader2, Sparkles, Eye, SlidersHorizontal, Clock, AlertCircle,
+  Loader2, Eye, SlidersHorizontal, Clock, AlertCircle, Info,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -41,7 +44,7 @@ const normalizeCheckoutTheme = (value: unknown): Theme => (value === "white" ? "
 const getCheckoutTheme = (value: Tables<"products"> | null) => normalizeCheckoutTheme((value as ProductWithCheckoutTheme | null)?.checkout_theme);
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
-const MAX_BUMPS = 5;
+const MAX_BUMPS = MAX_ORDER_BUMPS;
 const MAX_BANNER = 5 * 1024 * 1024;
 const ALLOWED_BANNER = ["image/jpeg", "image/png", "image/webp"];
 const SAVE_DELAY = 1200;
@@ -59,15 +62,15 @@ const PRESET_COLORS = [
 
 const THEME_OPTIONS: { key: Theme; name: string; hint: string }[] = [
   { key: "gray", name: "Cinza suave", hint: "Fundo cinza claro" },
-  { key: "white", name: "Branco", hint: "Fundo quase branco" },
+  { key: "white", name: "Branco", hint: "Fundo branco" },
   { key: "dark", name: "Escuro", hint: "Fundo escuro" },
 ];
 
-/** Cores fixas da prévia: reproduzem o checkout público e não mudam com o tema do painel. */
-const PREVIEW_THEMES: Record<Theme, { bg: string; card: string; soft: string; border: string; text: string; muted: string }> = {
-  gray: { bg: "hsl(210 16% 94%)", card: "#ffffff", soft: "hsl(210 18% 97%)", border: "hsl(215 16% 84%)", text: "hsl(220 24% 14%)", muted: "hsl(220 10% 46%)" },
-  white: { bg: "hsl(210 20% 98%)", card: "#ffffff", soft: "hsl(210 20% 96%)", border: "hsl(215 18% 88%)", text: "hsl(220 24% 14%)", muted: "hsl(220 10% 46%)" },
-  dark: { bg: "hsl(220 18% 11%)", card: "hsl(220 16% 14%)", soft: "hsl(220 15% 18%)", border: "hsl(220 12% 24%)", text: "hsl(210 20% 96%)", muted: "hsl(215 12% 68%)" },
+/** Cores das miniaturas de tema: as mesmas de `checkout.css` (fundo, cartão, linha, texto), fixas nos dois temas do painel. */
+const PREVIEW_THEMES: Record<Theme, { bg: string; card: string; border: string; text: string }> = {
+  gray: { bg: "#eceff3", card: "#ffffff", border: "#d6dce4", text: "#141a24" },
+  white: { bg: "#ffffff", card: "#ffffff", border: "#dfe4ea", text: "#141a24" },
+  dark: { bg: "#10141c", card: "#1a1f2b", border: "#343e52", text: "#eef1f6" },
 };
 
 /* ─── Configurações editáveis e o que vai para o banco ─── */
@@ -182,154 +185,6 @@ function BannerSlot({ label, size, hint, preview, inputRef, onFile, onClear }: {
         </button>
       )}
       {hint && <FieldHint>{hint}</FieldHint>}
-    </div>
-  );
-}
-
-/* ─── Prévia do checkout (aproximação do checkout público) ─── */
-type PreviewProps = {
-  device: "desktop" | "mobile"; theme: Theme; color: string; timerEnabled: boolean; timerMinutes: string; banner: string;
-  name: string; description: string; price: number; image: string; card: boolean; pix: boolean; boleto: boolean;
-  emailConfirm: boolean; address: boolean; guarantee: boolean; url: string; bumps: { id: string; name: string; price: number; image: string }[];
-};
-
-function CheckoutPreview(p: PreviewProps) {
-  const T = PREVIEW_THEMES[p.theme];
-  const color = HEX_COLOR.test(p.color.trim()) ? p.color.trim() : "#10b981";
-  const mobile = p.device === "mobile";
-  const minutes = /^\d+$/.test(p.timerMinutes.trim()) && Number(p.timerMinutes) >= 1 ? Math.min(Number(p.timerMinutes), 60) : 15;
-  const mm = String(minutes).padStart(2, "0");
-  const anyMethod = p.pix || p.boleto || p.card;
-  const steps = p.address ? ["Identificação", "Endereço", "Pagamento"] : ["Identificação", "Pagamento"];
-  const host = (p.url || "seudominio.com.br/pay/seu-produto").replace(/^https?:\/\//, "");
-
-  // A regra global `[class*="border"]` força a cor da borda do painel; na prévia as bordas vão em style para manter as cores do checkout.
-  const bd = (color: string, width = 1, style: "solid" | "dashed" = "solid") => ({ border: `${width}px ${style} ${color}` });
-
-  const field = (label: string, placeholder: string) => (
-    <div className="min-w-0">
-      <p className="mb-1 text-[11.5px] font-semibold" style={{ color: T.muted }}>{label}</p>
-      <div className="flex h-9 items-center rounded-[10px] px-3 text-[12.5px]" style={{ background: T.soft, ...bd(T.border), color: T.muted }}>{placeholder}</div>
-    </div>
-  );
-  const sectionCard = "rounded-[16px] p-4";
-  const sectionStyle = { background: T.card, ...bd(T.border) };
-  const timeBox = (v: string) => (
-    <span className="rounded-lg px-2.5 py-1 text-[15px] font-extrabold tabular-nums" style={{ background: T.soft, ...bd(T.border) }}>{v}</span>
-  );
-
-  const content = (
-    <div style={{ background: T.bg, color: T.text }}>
-      {p.timerEnabled && (
-        <div className="flex items-center justify-between px-4 py-2.5" style={{ background: T.card, borderBottom: `1px solid ${T.border}` }}>
-          <span className="flex items-center gap-2 text-[12px] font-semibold" style={{ color: T.muted }}>
-            <span className="grid h-6 w-6 place-items-center rounded-lg" style={{ background: `${color}1f` }}><Zap className="h-3.5 w-3.5" style={{ color }} /></span>
-            Oferta expira em
-          </span>
-          <span className="flex items-center gap-1 font-mono">{timeBox(mm)}<span className="font-bold" style={{ color: T.muted }}>:</span>{timeBox("00")}</span>
-        </div>
-      )}
-      {p.banner && <img src={p.banner} alt="" className={cn("w-full object-cover", mobile ? "aspect-[2/1]" : "aspect-[3/1]")} />}
-
-      <div className={cn("space-y-3.5", mobile ? "p-4" : "p-5")}>
-        <div className={cn(sectionCard, "flex items-center gap-3.5")} style={sectionStyle}>
-          {p.image ? (
-            <img src={p.image} alt="" className="h-14 w-14 shrink-0 rounded-[14px] object-cover" style={bd(T.border)} />
-          ) : (
-            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-[14px]" style={{ background: `${color}14`, ...bd(T.border) }}><Sparkles className="h-6 w-6" style={{ color: `${color}99` }} /></span>
-          )}
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[14.5px] font-bold leading-tight">{p.name || "Nome do produto"}</p>
-            {p.description && <p className="mt-0.5 line-clamp-1 text-[11.5px]" style={{ color: T.muted }}>{p.description}</p>}
-          </div>
-          <div className="shrink-0 text-right">
-            <p className="text-[19px] font-extrabold leading-none tracking-tight" style={{ color }}>{formatCurrency(p.price)}</p>
-            {p.card && <p className="mt-1 text-[10.5px]" style={{ color: T.muted }}>ou 12x de {formatCurrency(installmentOption(p.price, INSTALLMENT_MAX).perInstallment)}</p>}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1.5" aria-hidden>
-          {steps.map((s, i) => (
-            <div key={s} className="min-w-0 flex-1">
-              <div className="h-1 rounded-full" style={{ background: i === 0 ? color : T.border }} />
-              <p className="mt-1 truncate text-[10.5px] font-semibold" style={{ color: i === 0 ? T.text : T.muted }}>{s}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className={cn(sectionCard, "space-y-3")} style={sectionStyle}>
-          <p className="text-[13px] font-bold">Identificação</p>
-          {field("Nome completo", "Seu nome completo")}
-          <div className={cn("grid gap-3", p.emailConfirm && !mobile ? "grid-cols-2" : "grid-cols-1")}>
-            {field("E-mail", "seu@email.com")}
-            {p.emailConfirm && field("Confirme seu e-mail", "Repita o e-mail")}
-          </div>
-          {field("CPF / CNPJ", "000.000.000-00")}
-          {p.address && (
-            <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3">
-              {field("CEP", "00000-000")}
-              {field("Endereço", "Rua e número")}
-            </div>
-          )}
-        </div>
-
-        <div className={cn(sectionCard, "space-y-3")} style={sectionStyle}>
-          <p className="text-[13px] font-bold">Forma de pagamento</p>
-          {anyMethod ? (
-            <div className="flex flex-wrap gap-2">
-              {p.pix && <span className="inline-flex items-center gap-1.5 rounded-[10px] px-3 py-2 text-[12px] font-bold" style={{ ...bd(`${color}66`), background: `${color}14`, color: T.text }}><QrCode className="h-3.5 w-3.5" style={{ color }} /> PIX</span>}
-              {p.card && <span className="inline-flex items-center gap-1.5 rounded-[10px] px-3 py-2 text-[12px] font-bold" style={{ ...bd(T.border), background: T.soft }}><CreditCard className="h-3.5 w-3.5" style={{ color: T.muted }} /> Cartão</span>}
-              {p.boleto && <span className="inline-flex items-center gap-1.5 rounded-[10px] px-3 py-2 text-[12px] font-bold" style={{ ...bd(T.border), background: T.soft }}><FileText className="h-3.5 w-3.5" style={{ color: T.muted }} /> Boleto</span>}
-            </div>
-          ) : (
-            <p className="rounded-[10px] px-3 py-3 text-center text-[12.5px] font-semibold" style={{ ...bd("hsl(0 72% 51% / .5)", 1, "dashed"), color: "hsl(0 72% 51%)" }}>Nenhuma forma de pagamento ativa</p>
-          )}
-        </div>
-
-        {p.bumps.length > 0 && (
-          <div className="space-y-2">
-            <p className="flex items-center gap-1.5 text-[12px] font-extrabold" style={{ color }}><Sparkles className="h-3.5 w-3.5" /> Oferta exclusiva</p>
-            {p.bumps.map((b) => (
-              <div key={b.id} className="flex items-center gap-3 rounded-[14px] p-3" style={{ ...bd(`${color}55`, 2, "dashed"), background: `${color}0d` }}>
-                {b.image ? <img src={b.image} alt="" className="h-11 w-11 shrink-0 rounded-[10px] object-cover" style={bd(T.border)} /> : <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[10px]" style={{ background: T.card, ...bd(T.border) }}><Package className="h-4 w-4" style={{ color }} /></span>}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[12.5px] font-bold">{b.name}</p>
-                  <p className="text-[10.5px]" style={{ color: T.muted }}>Adicione ao seu pedido</p>
-                  <p className="text-[13px] font-extrabold" style={{ color }}>+ {formatCurrency(b.price)}</p>
-                </div>
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[10px]" style={bd(`${color}66`, 2)}><Plus className="h-3.5 w-3.5" style={{ color }} /></span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {p.guarantee && (
-          <div className={cn(sectionCard, "flex items-center gap-3.5")} style={sectionStyle}>
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px]" style={{ background: `${color}12`, ...bd(`${color}33`) }}><ShieldCheck className="h-5 w-5" style={{ color }} /></span>
-            <div className="min-w-0">
-              <p className="text-[13px] font-bold">Garantia incondicional de 7 dias</p>
-              <p className="mt-0.5 text-[11.5px] leading-snug" style={{ color: T.muted }}>Não ficou satisfeito? Devolvemos 100% do valor.</p>
-            </div>
-          </div>
-        )}
-
-        <div className="flex h-12 w-full items-center justify-center gap-2 rounded-[14px] text-[14.5px] font-bold text-white" style={{ background: color, boxShadow: `0 10px 24px -10px ${color}` }}>
-          <Lock className="h-4 w-4" /> Comprar agora
-        </div>
-      </div>
-    </div>
-  );
-
-  if (mobile) {
-    return <div className="mx-auto w-[375px] max-w-full overflow-hidden rounded-[34px] shadow-[0_30px_60px_-30px_rgba(15,23,42,.45)]" style={{ border: "8px solid #111827", background: "#111827" }}><div className="overflow-hidden rounded-[26px]">{content}</div></div>;
-  }
-  return (
-    <div className="mx-auto w-full max-w-[660px] overflow-hidden rounded-[20px] border border-border bg-card shadow-[0_30px_60px_-34px_rgba(15,23,42,.35)]">
-      <div className="flex items-center gap-3 border-b border-border bg-muted/60 px-4 py-2.5">
-        <span aria-hidden className="flex gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-border" /><i className="h-2.5 w-2.5 rounded-full bg-border" /><i className="h-2.5 w-2.5 rounded-full bg-border" /></span>
-        <span className="flex min-w-0 flex-1 items-center gap-1.5 rounded-full bg-background px-3 py-1 text-[12px] text-muted-foreground"><Lock className="h-3 w-3 shrink-0" /><span className="truncate">{host}</span></span>
-      </div>
-      {content}
     </div>
   );
 }
@@ -452,7 +307,8 @@ export default function CheckoutBuilder() {
         const { error: upErr } = await supabase.storage.from("checkout-banners").upload(path, b.file, { upsert: true });
         if (upErr) throw new Error(`Não foi possível enviar o banner ${b.label}. Tente de novo.`);
         const { data: pub } = supabase.storage.from("checkout-banners").getPublicUrl(path);
-        if (b.kind === "desktop") desktopUrl = pub.publicUrl; else mobileUrl = pub.publicUrl;
+        const url = withVersion(pub.publicUrl);
+        if (b.kind === "desktop") desktopUrl = url; else mobileUrl = url;
       }
       // Nunca grava um endereço temporário do navegador.
       if (desktopUrl.startsWith("blob:") || mobileUrl.startsWith("blob:")) throw new Error("Não foi possível enviar o banner. Tente de novo.");
@@ -549,7 +405,7 @@ export default function CheckoutBuilder() {
     setAddingBump(true);
     const { data, error } = await supabase.from("order_bumps").insert({ product_id: productId, bump_product_id: selectedBumpProduct, sort_order: orderBumps.length }).select("id, bump_product_id").maybeSingle();
     setAddingBump(false);
-    if (error || !data) { toast.error("Não foi possível adicionar o order bump"); return; }
+    if (error || !data) { toast.error(orderBumpError(error)); return; }
     setOrderBumps((prev) => [...prev, data]);
     setSelectedBumpProduct("");
     toast.success("Order bump adicionado");
@@ -569,14 +425,38 @@ export default function CheckoutBuilder() {
     catch { toast.error("Não foi possível copiar. Copie o link da barra do navegador."); }
   };
 
-  const bumpsForPreview = orderBumps.map((b) => {
-    const prod = allProducts.find((p) => p.id === b.bump_product_id);
-    return { id: b.id, name: prod?.name || "Produto", price: Number(prod?.price || 0), image: prod?.image_url || "" };
-  });
+  /* O que a prévia mostra: o produto no formato de `products_public` com as escolhas desta tela (ainda não salvas também). */
+  const previewPayload = useMemo<PreviewUpdate>(() => ({
+    type: PREVIEW_UPDATE,
+    product: {
+      id: product?.id ?? productId ?? "preview",
+      name: product?.name ?? null,
+      description: product?.description ?? null,
+      price: Number(product?.price || 0),
+      image_url: product?.image_url ?? null,
+      display_name: product?.display_name ?? null,
+      checkout_button_color: buttonColor.trim(),
+      checkout_theme: theme,
+      checkout_timer_enabled: current.timerEnabled,
+      checkout_timer_minutes: /^\d+$/.test(timerMinutes.trim()) ? Number(timerMinutes) : null,
+      checkout_banner_desktop_url: bannerDesktopPreview || null,
+      checkout_banner_mobile_url: bannerMobilePreview || null,
+      checkout_guarantee_enabled: current.guaranteeEnabled,
+      checkout_address_required: current.address,
+      checkout_email_confirm: current.emailConfirm,
+      checkout_pix_enabled: current.pix,
+      checkout_credit_card_enabled: current.card,
+      checkout_boleto_enabled: current.boleto,
+    },
+    bumps: orderBumps.flatMap((b) => {
+      const prod = allProducts.find((p) => p.id === b.bump_product_id);
+      return prod ? [{ bumpId: b.id, id: prod.id, name: prod.name, description: prod.description, price: Number(prod.price || 0), image_url: prod.image_url }] : [];
+    }),
+  }), [product, productId, buttonColor, theme, current.timerEnabled, timerMinutes, bannerDesktopPreview, bannerMobilePreview, current.guaranteeEnabled, current.address, current.emailConfirm, current.pix, current.card, current.boleto, orderBumps, allProducts]);
 
   /* Recomendações da aba Conversão (o que está ligado agora) */
   const checklist: { id: string; ok: boolean; title: string; why: string; tab: TabId }[] = [
-    { id: "pix", ok: current.pix, title: "PIX ativo", why: "O pagamento é aprovado na hora.", tab: "payment" },
+    { id: "pix", ok: current.pix, title: "Pix ativo", why: "A confirmação costuma chegar em segundos.", tab: "payment" },
     { id: "card", ok: current.card, title: "Cartão ativo", why: "Permite parcelar em até 12x.", tab: "payment" },
     { id: "timer", ok: current.timerEnabled, title: "Timer de urgência", why: "Dá um prazo para o comprador decidir.", tab: "visual" },
     { id: "guarantee", ok: current.guaranteeEnabled, title: "Selo de garantia", why: "Reduz o receio de comprar.", tab: "visual" },
@@ -761,8 +641,8 @@ export default function CheckoutBuilder() {
                         </Notice>
                       )}
                       <GroupBox>
-                        <ToggleRow icon={<QrCode className="h-[18px] w-[18px]" />} title="PIX" description={allowed?.pix === false ? "Não liberado na sua conta." : "Confirmação rápida."} tone={allowed?.pix === false ? "muted" : "accent"}>
-                          <Switch checked={current.pix} onCheckedChange={setPixEnabled} disabled={allowed?.pix === false} {...switchLabel("Aceitar PIX")} />
+                        <ToggleRow icon={<QrCode className="h-[18px] w-[18px]" />} title="Pix" description={allowed?.pix === false ? "Não liberado na sua conta." : "Confirmação rápida."} tone={allowed?.pix === false ? "muted" : "accent"}>
+                          <Switch checked={current.pix} onCheckedChange={setPixEnabled} disabled={allowed?.pix === false} {...switchLabel("Aceitar Pix")} />
                         </ToggleRow>
                         <ToggleRow icon={<CreditCard className="h-[18px] w-[18px]" />} title="Cartão de crédito" description={allowed?.card === false ? "Não liberado na sua conta." : "Em até 12 parcelas."} tone={allowed?.card === false ? "muted" : "accent"}>
                           <Switch checked={current.card} onCheckedChange={setCreditCardEnabled} disabled={allowed?.card === false} {...switchLabel("Aceitar cartão de crédito")} />
@@ -771,8 +651,13 @@ export default function CheckoutBuilder() {
                           <Switch checked={current.boleto} onCheckedChange={setBoletoEnabled} disabled={allowed?.boleto === false} {...switchLabel("Aceitar boleto bancário")} />
                         </ToggleRow>
                       </GroupBox>
-                      <Notice icon={<Zap className="h-4 w-4" />} title="Combine PIX e cartão">
-                        PIX aprova na hora e o cartão atende quem prefere parcelar.
+                      {!defaultCheckoutProcessor.available && (
+                        <Notice tone="warn" icon={<Info className="h-4 w-4" />} title="Os pagamentos ainda não estão ligados">
+                          A plataforma ainda não tem adquirente conectada. Até lá o comprador vê o pedido com o aviso "Pagamentos indisponíveis agora" e nada é cobrado. As formas que você ligar aqui passam a valer assim que os pagamentos entrarem no ar.
+                        </Notice>
+                      )}
+                      <Notice icon={<Zap className="h-4 w-4" />} title="Combine Pix e cartão">
+                        O Pix confirma rápido e o cartão atende quem prefere parcelar.
                       </Notice>
                     </>
                   )}
@@ -814,8 +699,12 @@ export default function CheckoutBuilder() {
                                 <li key={bump.id} className="vp-r16 flex items-center gap-3 border border-border bg-card p-3">
                                   {prod?.image_url ? <img src={prod.image_url} alt="" className="h-11 w-11 shrink-0 rounded-[12px] border border-border object-cover" /> : <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-accent text-accent-foreground"><Package className="h-[18px] w-[18px]" /></span>}
                                   <div className="min-w-0 flex-1">
-                                    <p className="truncate text-[14.5px] font-semibold text-foreground">{prod?.name || "Produto indisponível"}</p>
-                                    <p className="text-[13.5px] font-bold vp-green-ink tabular-nums">+ {formatCurrency(Number(prod?.price || 0))}</p>
+                                    <p className="truncate text-[14.5px] font-semibold text-foreground">{prod?.name || "Produto fora do ar"}</p>
+                                    {prod ? (
+                                      <p className="text-[13.5px] font-bold vp-green-ink tabular-nums">+ {formatCurrency(Number(prod.price || 0))}</p>
+                                    ) : (
+                                      <p className="text-[13px] text-muted-foreground">Inativo ou excluído: não aparece no checkout. Remova ou reative o produto.</p>
+                                    )}
                                   </div>
                                   <button type="button" onClick={() => removeBump(bump.id)} aria-label={`Remover ${prod?.name || "order bump"}`} className="vp-orb !h-10 !w-10 text-destructive"><X className="h-4 w-4" /></button>
                                 </li>
@@ -903,7 +792,7 @@ export default function CheckoutBuilder() {
             <div className="flex items-center justify-between gap-3 border-b border-border bg-background px-4 py-2.5 sm:px-6">
               <div className="min-w-0">
                 <p className="text-[14.5px] font-bold text-foreground">Prévia</p>
-                <p className="truncate text-[12.5px] text-muted-foreground">Aproximação do que o comprador vê. Tema: {themeName}.</p>
+                <p className="truncate text-[12.5px] text-muted-foreground">A mesma página que o comprador abre, com o que você mudou aqui. Tema: {themeName}.</p>
               </div>
               <div className="flex shrink-0 items-center gap-1.5" role="group" aria-label="Tamanho da prévia">
                 <button type="button" aria-pressed={previewMode === "desktop"} onClick={() => setPreviewMode("desktop")} className="vp-pill"><Monitor className="h-4 w-4" /><span className="hidden sm:inline">Computador</span></button>
@@ -911,26 +800,7 @@ export default function CheckoutBuilder() {
               </div>
             </div>
             <div className="min-h-0 flex-1 overflow-auto px-4 py-6 sm:px-8 sm:py-8">
-              <CheckoutPreview
-                device={previewMode}
-                theme={theme}
-                color={buttonColor}
-                timerEnabled={current.timerEnabled}
-                timerMinutes={timerMinutes}
-                banner={previewMode === "desktop" ? bannerDesktopPreview : bannerMobilePreview || bannerDesktopPreview}
-                name={product.name}
-                description={product.description || ""}
-                price={Number(product.price || 0)}
-                image={product.image_url || ""}
-                card={current.card}
-                pix={current.pix}
-                boleto={current.boleto}
-                emailConfirm={current.emailConfirm}
-                address={current.address}
-                guarantee={current.guaranteeEnabled}
-                url={checkoutUrl}
-                bumps={bumpsForPreview}
-              />
+              <CheckoutLivePreview device={previewMode} payload={previewPayload} host={(checkoutUrl || "seu-checkout").replace(/^https?:\/\//, "")} />
             </div>
           </main>
         </div>

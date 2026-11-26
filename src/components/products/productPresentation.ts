@@ -48,6 +48,21 @@ export const getCheckoutLink = (checkoutUrl: string) => {
   return slug ? `${window.location.origin}/pay/${slug}` : "";
 };
 
+export type AllowedMethods = { pix: boolean; boleto: boolean; card: boolean };
+
+/** Formas que o comprador realmente vê: as ligadas no produto E liberadas na conta (o catálogo público faz a mesma conta). */
+export function checkoutMethods(
+  p: Pick<Product, "checkout_pix_enabled" | "checkout_boleto_enabled" | "checkout_credit_card_enabled">,
+  allowed: AllowedMethods | null,
+): string[] {
+  const ok = allowed ?? { pix: true, boleto: true, card: true };
+  const methods: string[] = [];
+  if (p.checkout_pix_enabled && ok.pix) methods.push("Pix");
+  if (p.checkout_credit_card_enabled && ok.card) methods.push("Cartão");
+  if (p.checkout_boleto_enabled && ok.boleto) methods.push("Boleto");
+  return methods;
+}
+
 /* ───────────────────────── Draft / completion helpers ───────────────────────── */
 
 export type ProductRequirement = {

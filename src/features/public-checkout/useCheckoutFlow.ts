@@ -34,10 +34,10 @@ function fireOnce(pixels: PixelConfig[], event: string, product: CheckoutProduct
   firePixelEvent(pixels, event, { content_name: product.name, content_id: product.id, value: record.total, session_key: record.transactionId });
 }
 
-export function useCheckoutFlow(opts: { product: CheckoutProduct; pixels: PixelConfig[]; processor: CheckoutProcessor }) {
-  const { product, pixels, processor } = opts;
+export function useCheckoutFlow(opts: { product: CheckoutProduct; pixels: PixelConfig[]; processor: CheckoutProcessor; restore?: boolean }) {
+  const { product, pixels, processor, restore = true } = opts;
   const [state, setState] = useState<FlowState>(() => {
-    const saved = readJson<PaymentRecord>("session", pendingKey(product.id));
+    const saved = restore ? readJson<PaymentRecord>("session", pendingKey(product.id)) : null;
     if (saved && typeof saved.transactionId === "string" && Date.now() - saved.savedAt < KEEP_PENDING_MS) {
       return { phase: "pending", record: saved, restored: true };
     }

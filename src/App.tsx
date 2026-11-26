@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
-import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { Loader2 } from "lucide-react";
 import Index from "./pages/Index";
@@ -61,6 +61,7 @@ const Gamificacao = lazy(() => import("./pages/Gamificacao"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const PublicCheckout = lazy(() => import("./pages/PublicCheckout"));
+const CheckoutPreview = lazy(() => import("./pages/CheckoutPreview"));
 const PublicPaymentLink = lazy(() => import("./pages/PublicPaymentLink"));
 const ImpersonateReceiver = lazy(() => import("./pages/ImpersonateReceiver"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -105,6 +106,18 @@ const persister = typeof window !== "undefined"
     })
   : undefined;
 
+/** Faixa de impersonação e aviso de cookies. A prévia do construtor de checkout (um iframe dentro do painel) não mostra nenhum dos dois. */
+function GlobalChrome() {
+  const { pathname } = useLocation();
+  if (pathname === "/checkout-preview") return null;
+  return (
+    <>
+      <ImpersonationBanner />
+      <CookieConsent />
+    </>
+  );
+}
+
 const RouteFallback = () => (
   <div className="flex min-h-[60vh] w-full items-center justify-center bg-background">
     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-label="Carregando" />
@@ -125,9 +138,8 @@ const App = () => (
         <ThemeProvider>
           <TooltipProvider>
             <Sonner />
-            <ImpersonationBanner />
+            <GlobalChrome />
             <ScrollToTop />
-            <CookieConsent />
 
             <Suspense fallback={<RouteFallback />}>
               <Routes>
@@ -136,6 +148,7 @@ const App = () => (
                 <Route path="/impersonate-receiver" element={<ImpersonateReceiver />} />
                 <Route path="/pay/:slug" element={<PublicCheckout />} />
                 <Route path="/checkout/:slug" element={<PublicCheckout />} />
+                <Route path="/checkout-preview" element={<CheckoutPreview />} />
                 <Route path="/pl/:slug" element={<PublicPaymentLink />} />
                 <Route path="/obrigado" element={<ThankYou />} />
                 <Route path="/termos-de-uso" element={<TermosDeUso />} />

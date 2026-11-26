@@ -45,6 +45,12 @@ export function normalizeProduct(row: Row): CheckoutProduct {
   };
 }
 
+/** Oferta como o comprador vê: só produto com preço e que não seja o próprio produto do checkout. O construtor usa a mesma regra na prévia. */
+export function toCheckoutBump(bumpId: string, item: Row, mainProductId: string): CheckoutBump | null {
+  if (!item || String(item.id) === mainProductId || num(item.price) <= 0) return null;
+  return { id: bumpId, productId: String(item.id), name: str(item.name) ?? "Oferta", description: str(item.description), price: num(item.price), imageUrl: str(item.image_url) };
+}
+
 export async function loadCheckout(rawSlug: string | undefined): Promise<CheckoutLoad> {
   const slug = safeCheckoutSlug(rawSlug);
   if (!slug) return { kind: "closed", linkStatus: null };
@@ -82,8 +88,8 @@ export async function loadCheckout(rawSlug: string | undefined): Promise<Checkou
       .eq("status", "active");
     bumps = bumpRows.flatMap((b) => {
       const item = (bumpProducts ?? []).find((p) => p.id === b.bump_product_id) as Row | undefined;
-      if (!item || item.id === product.id || num(item.price) <= 0) return [];
-      return [{ id: String(b.id), productId: String(item.id), name: str(item.name) ?? "Oferta", description: str(item.description), price: num(item.price), imageUrl: str(item.image_url) }];
+      const bump = item ? toCheckoutBump(String(b.id), item, product.id) : null;
+      return bump ? [bump] : [];
     });
   }
 

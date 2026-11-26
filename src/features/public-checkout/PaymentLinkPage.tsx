@@ -47,10 +47,11 @@ function Skeleton() {
   );
 }
 
-function methodsText(link: PublicPaymentLink): string {
-  if (link.acceptPix && link.acceptCard) return "Pix ou cartão de crédito";
-  if (link.acceptCard) return "Cartão de crédito";
-  return "Pix";
+export function methodsText(link: Pick<PublicPaymentLink, "acceptPix" | "acceptCard">): string {
+  if (link.acceptPix && link.acceptCard) return "Aceita Pix ou cartão de crédito";
+  if (link.acceptCard) return "Aceita cartão de crédito";
+  if (link.acceptPix) return "Aceita Pix";
+  return "Nenhuma forma de pagamento liberada";
 }
 
 function LinkView({ link }: { link: PublicPaymentLink }) {
@@ -85,7 +86,7 @@ function LinkView({ link }: { link: PublicPaymentLink }) {
               <span className="ck-total-label">Total</span>
               <span className="ck-total-value ck-num">{formatBRL(link.amount)}</span>
             </div>
-            <p className="ck-total-sub">Aceita {methodsText(link)}{remaining !== null ? ` · ${remaining} ${remaining === 1 ? "vaga" : "vagas"}` : ""}</p>
+            <p className="ck-total-sub">{methodsText(link)}{remaining !== null ? ` · ${remaining} ${remaining === 1 ? "vaga" : "vagas"}` : ""}</p>
             <div style={{ marginTop: 18 }}>
               <button type="button" className="ck-cta" disabled aria-describedby="pl-cta-help"><Lock size={18} aria-hidden="true" />Pagamento indisponível</button>
               <p id="pl-cta-help" className="ck-cta-help">Quando o pagamento estiver ativo, este link passa a funcionar sozinho.</p>

@@ -36,7 +36,7 @@ export function normalizePaymentLink(row: Row): PublicPaymentLink {
     description: text(row.description),
     coverUrl: text(row.cover_url),
     amount: Number.isFinite(amount) && amount > 0 ? amount : 0,
-    acceptPix: row.accept_pix !== false,
+    acceptPix: row.accept_pix === true,
     acceptCard: row.accept_card === true,
     maxUses: maxUses != null && Number.isFinite(maxUses) && maxUses > 0 ? maxUses : null,
     currentUses: Number.isFinite(Number(row.current_uses)) ? Number(row.current_uses) : 0,
