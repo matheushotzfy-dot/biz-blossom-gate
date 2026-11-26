@@ -29,7 +29,6 @@ export const routeLoaders: Record<string, Loader> = {
   "/financeiro/gastos": () => import("@/pages/financeiro/ControleGastos"),
   "/integracoes": () => import("@/pages/IntegracoesHub"),
   "/premiacoes": () => import("@/pages/PremiacoesHub"),
-  "/gamificacao": () => import("@/pages/Gamificacao"),
   "/perfil": () => import("@/pages/PerfilHub"),
   "/suporte": () => import("@/pages/Suporte"),
 };

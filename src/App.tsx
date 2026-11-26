@@ -43,21 +43,10 @@ const Afiliados = lazy(() => import("./pages/vendas/Afiliados"));
 const Coproducoes = lazy(() => import("./pages/vendas/Coproducoes"));
 const Cupons = lazy(() => import("./pages/vendas/Cupons"));
 const Assinaturas = lazy(() => import("./pages/vendas/Assinaturas"));
-const ABTesting = lazy(() => import("./pages/vendas/ABTesting"));
-const AutoCupons = lazy(() => import("./pages/vendas/AutoCupons"));
-const CalculadoraLucro = lazy(() => import("./pages/vendas/CalculadoraLucro"));
-const CheckoutWhatsApp = lazy(() => import("./pages/vendas/CheckoutWhatsApp"));
-const FunilVendas = lazy(() => import("./pages/vendas/FunilVendas"));
 const LinkPagamento = lazy(() => import("./pages/vendas/LinkPagamento"));
-const ProofPopup = lazy(() => import("./pages/vendas/ProofPopup"));
-const RecuperacaoWhatsApp = lazy(() => import("./pages/vendas/RecuperacaoWhatsApp"));
-const RelatorioChurn = lazy(() => import("./pages/vendas/RelatorioChurn"));
-const SmartCheckout = lazy(() => import("./pages/vendas/SmartCheckout"));
-const UpsellPosPagamento = lazy(() => import("./pages/vendas/UpsellPosPagamento"));
 const ControleGastos = lazy(() => import("./pages/financeiro/ControleGastos"));
 const Taxas = lazy(() => import("./pages/financeiro/Taxas"));
 const Suporte = lazy(() => import("./pages/Suporte"));
-const Gamificacao = lazy(() => import("./pages/Gamificacao"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const PublicCheckout = lazy(() => import("./pages/PublicCheckout"));
@@ -194,7 +183,7 @@ const App = () => (
                   {/* /financeiro/identidade já redirecionado na rota pública acima */}
                   <Route path="/premiacoes" element={<PremiacoesHub />} />
                   <Route path="/corrida" element={<Navigate to="/premiacoes?tab=corrida" replace />} />
-                  <Route path="/gamificacao" element={<Gamificacao />} />
+                  <Route path="/gamificacao" element={<Navigate to="/premiacoes" replace />} />
                   <Route path="/suporte" element={<Suporte />} />
                   <Route path="/financeiro/extrato" element={<Navigate to="/vendas" replace />} />
                   <Route path="/financeiro/saques" element={<SaquesHub />} />
@@ -216,19 +205,19 @@ const App = () => (
                   <Route path="/vendas/coproducoes" element={<Coproducoes />} />
                   <Route path="/vendas/assinaturas" element={<Assinaturas />} />
                   <Route path="/vendas/dashboard-afiliado" element={<Navigate to="/vendas/afiliados?tab=mine" replace />} />
-                  <Route path="/vendas/ab-testing" element={<ABTesting />} />
+                  <Route path="/vendas/ab-testing" element={<Navigate to="/vendas/checkout" replace />} />
 
-                  <Route path="/vendas/auto-cupons" element={<AutoCupons />} />
-                  <Route path="/vendas/calculadora-lucro" element={<CalculadoraLucro />} />
+                  <Route path="/vendas/auto-cupons" element={<Navigate to="/vendas/cupons" replace />} />
+                  <Route path="/vendas/calculadora-lucro" element={<Navigate to="/financeiro/taxas" replace />} />
                   <Route path="/vendas/central-ajuda" element={<Navigate to="/suporte" replace />} />
-                  <Route path="/vendas/checkout-whatsapp" element={<CheckoutWhatsApp />} />
-                  <Route path="/vendas/funil" element={<FunilVendas />} />
+                  <Route path="/vendas/checkout-whatsapp" element={<Navigate to="/vendas/checkout" replace />} />
+                  <Route path="/vendas/funil" element={<Navigate to="/vendas" replace />} />
                   <Route path="/vendas/link-pagamento" element={<LinkPagamento />} />
-                  <Route path="/vendas/prova-social" element={<ProofPopup />} />
-                  <Route path="/vendas/recuperacao-whatsapp" element={<RecuperacaoWhatsApp />} />
-                  <Route path="/vendas/churn" element={<RelatorioChurn />} />
-                  <Route path="/vendas/smart-checkout" element={<SmartCheckout />} />
-                  <Route path="/vendas/upsell" element={<UpsellPosPagamento />} />
+                  <Route path="/vendas/prova-social" element={<Navigate to="/vendas/checkout" replace />} />
+                  <Route path="/vendas/recuperacao-whatsapp" element={<Navigate to="/integracoes?tab=apps" replace />} />
+                  <Route path="/vendas/churn" element={<Navigate to="/vendas/assinaturas" replace />} />
+                  <Route path="/vendas/smart-checkout" element={<Navigate to="/vendas/checkout" replace />} />
+                  <Route path="/vendas/upsell" element={<Navigate to="/vendas/produtos" replace />} />
 
 
                   {/* Desativadas por enquanto: o menu mostra "Em breve" e quem chegar por link volta para Saldo e saques. */}

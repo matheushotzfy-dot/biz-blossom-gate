@@ -19,7 +19,6 @@ const OPERATIONAL_PATHS = [
   "/integracoes",
   "/marketplace",
   "/premiacoes",
-  "/gamificacao",
 ];
 
 const FREE_PATHS = ["/dashboard", "/perfil", "/suporte"];
