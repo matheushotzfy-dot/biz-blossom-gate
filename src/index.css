@@ -5300,3 +5300,11 @@ html.vp-admin :is([role="dialog"], [role="alertdialog"]) thead th { font-size: 1
 
 /* Tabelas em diálogos: o navegador centraliza <th> quando a tabela não define alinhamento. */
 :where([role="dialog"], [role="alertdialog"]) table { text-align: left; }
+
+/* Rodapé dos diálogos do admin no celular: botões em duas colunas (cinco botões empilhados
+   comiam metade da tela). O principal vem por último e ocupa a linha inteira quando sobra um. */
+@media (max-width: 639px) {
+  html.vp-admin .vp-foot-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html.vp-admin .vp-foot-actions > * { width: 100%; min-width: 0; white-space: normal; text-align: center; line-height: 1.2; font-size: 14px !important; padding-inline: 10px !important; }
+  html.vp-admin .vp-foot-actions > *:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}

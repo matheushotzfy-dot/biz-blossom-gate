@@ -32,7 +32,7 @@ export function DialogFoot({ children, lead, className }: { children: ReactNode;
   return (
     <div className={cn("flex shrink-0 flex-col gap-3 border-t border-border bg-card px-6 py-4 sm:flex-row sm:items-center sm:px-8", className)}>
       {lead && <div className="min-w-0 sm:flex-1">{lead}</div>}
-      <div className={cn("flex flex-col-reverse gap-2 sm:flex-row", !lead && "sm:flex-1 sm:justify-end")}>{children}</div>
+      <div className={cn("vp-foot-actions flex flex-col-reverse gap-2 sm:flex-row", !lead && "sm:flex-1 sm:justify-end")}>{children}</div>
     </div>
   );
 }

@@ -501,58 +501,57 @@ function CreateStaffDialog({ open, onOpenChange, role, onCreated }: {
         />
 
         <div className="max-h-[65vh] space-y-4 overflow-y-auto bg-card p-5">
-          <div className="rounded-lg border border-border bg-muted/20 p-4">
-            <p className="mb-3 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Identificação</p>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Nome completo</Label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 h-9 text-sm" />
+          <section className="space-y-3">
+            <h3 className="text-sm font-semibold">Identificação</h3>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="space-y-1">
+                <Label htmlFor="staff-new-name">Nome completo</Label>
+                <Input id="staff-new-name" value={name} onChange={(e) => setName(e.target.value)} className="h-10 text-sm" autoComplete="off" />
               </div>
-              <div>
-                <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">E-mail</Label>
-                <Input value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 h-9 text-sm" type="email" />
+              <div className="space-y-1">
+                <Label htmlFor="staff-new-email">E-mail</Label>
+                <Input id="staff-new-email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-10 text-sm" type="email" autoComplete="off" />
               </div>
             </div>
-          </div>
+          </section>
 
-          <div className="rounded-lg border border-border bg-muted/20 p-4">
-            <p className="mb-3 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Acesso & Comissão</p>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Senha inicial</Label>
-                <div className="mt-1 flex gap-1">
-                  <Input value={password} onChange={(e) => setPassword(e.target.value)} className="h-9 font-mono text-sm"
-                    type={showPw ? "text" : "password"} />
-                  <Button type="button" size="sm" variant="outline" onClick={() => setShowPw((v) => !v)} className="h-9 w-9 p-0">
-                    {showPw ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          <section className="space-y-3 border-t border-border pt-4">
+            <h3 className="text-sm font-semibold">Acesso e comissão</h3>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="space-y-1">
+                <Label htmlFor="staff-new-password">Senha inicial</Label>
+                <div className="flex gap-1">
+                  <Input id="staff-new-password" value={password} onChange={(e) => setPassword(e.target.value)} className="h-10 font-mono text-sm"
+                    type={showPw ? "text" : "password"} autoComplete="new-password" />
+                  <Button type="button" size="sm" variant="outline" onClick={() => setShowPw((v) => !v)} className="h-10 w-10 shrink-0 p-0" aria-label={showPw ? "Esconder senha" : "Mostrar senha"} title={showPw ? "Esconder senha" : "Mostrar senha"}>
+                    {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
-                  <Button type="button" size="sm" variant="outline" onClick={() => setPassword(generateStaffPassword())} className="h-9 w-9 p-0">
-                    <RefreshCw className="h-3.5 w-3.5" />
+                  <Button type="button" size="sm" variant="outline" onClick={() => setPassword(generateStaffPassword())} className="h-10 w-10 shrink-0 p-0" aria-label="Gerar outra senha" title="Gerar outra senha">
+                    <RefreshCw className="h-4 w-4" />
                   </Button>
-                  <Button type="button" size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(password); toast.success("Copiada"); }} className="h-9 w-9 p-0">
-                    <Copy className="h-3.5 w-3.5" />
+                  <Button type="button" size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(password).then(() => toast.success("Senha copiada"), () => toast.error("Não foi possível copiar")); }} className="h-10 w-10 shrink-0 p-0" aria-label="Copiar senha" title="Copiar senha">
+                    <Copy className="h-4 w-4" />
                   </Button>
                 </div>
+                <p className="text-xs text-muted-foreground">Mínimo de 8 caracteres. Envie à pessoa por um canal seguro.</p>
               </div>
-              <div>
-                <Label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">% comissão (sobre net)</Label>
-                <div className="mt-1 flex items-center gap-1 rounded-md border border-border bg-card px-3 focus-within:border-primary">
-                  <Input type="number" step="0.01" min="0" max="50" value={pct}
-                    onChange={(e) => setPct(parseFloat(e.target.value) || 0)}
-                    className="h-9 border-0 bg-transparent px-0 font-mono text-sm focus-visible:ring-0" />
-                  <Percent className="h-3.5 w-3.5 text-muted-foreground" />
-                </div>
+              <div className="space-y-1">
+                <Label htmlFor="staff-new-pct">Comissão (% do líquido das vendas)</Label>
+                <Input id="staff-new-pct" type="number" step="0.01" min="0" max="50" value={pct}
+                  onChange={(e) => setPct(parseFloat(e.target.value) || 0)}
+                  className="h-10 text-sm tabular-nums" />
+                <p className="text-xs text-muted-foreground">De 0 a 50%. Só gera comissão para gerente, sobre as vendas dos sellers da carteira.</p>
               </div>
             </div>
-          </div>
+          </section>
 
           <StaffLimitsFields limits={limits} onChange={setLimits} />
           <div className="rounded-lg border border-border bg-muted/20 p-4">
             <div className="mb-3 flex items-center justify-between">
-              <p className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                <Shield className="h-3 w-3" /> Permissões iniciais
+              <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                <Shield className="h-3.5 w-3.5 text-muted-foreground" /> Permissões iniciais
               </p>
-              <span className="text-[10px] font-black tabular-nums text-foreground">{perms.size}/{STAFF_PERMISSIONS.length}</span>
+              <span className="text-xs tabular-nums text-muted-foreground">{perms.size} de {STAFF_PERMISSIONS.length} ligadas</span>
             </div>
             <PermissionsGrid grouped={grouped} perms={perms} onToggle={toggle} />
           </div>

@@ -10,7 +10,7 @@ type Action = () => Promise<void>;
  * The admin re-enters the password (fresh session); the server rejects the
  * operation unless the password was confirmed in the last 10 minutes.
  */
-export function useSensitiveConfirm(title = "Confirmação de operação financeira") {
+export function useSensitiveConfirm(title = "Confirme sua senha") {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [description, setDescription] = useState("");
