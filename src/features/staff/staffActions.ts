@@ -1,5 +1,9 @@
-/** Maps the raw staff permission keys (as stored/returned by the backend) to panel actions. */
-export interface StaffActionFlags { approveKyc: boolean; rejectKyc: boolean; editFees: boolean; editNotes: boolean; viewTransactions: boolean }
+/** Liga as chaves de permissão da equipe (como o servidor devolve) às ações do painel. */
+export interface StaffActionFlags {
+  approveKyc: boolean; rejectKyc: boolean; editFees: boolean; editNotes: boolean; viewTransactions: boolean;
+  viewSellers: boolean; viewWithdrawals: boolean; viewDisputes: boolean; freezeWithdrawals: boolean;
+  viewSupport: boolean; respondSupport: boolean;
+}
 
 export function staffActionFlags(permissions: readonly string[] | undefined): StaffActionFlags {
   const has = (k: string) => (permissions ?? []).includes(k);
@@ -9,6 +13,12 @@ export function staffActionFlags(permissions: readonly string[] | undefined): St
     editFees: has("edit_fees"),
     editNotes: has("edit_seller_notes"),
     viewTransactions: has("view_transactions"),
+    viewSellers: has("view_sellers"),
+    viewWithdrawals: has("view_withdrawals"),
+    viewDisputes: has("view_disputes"),
+    freezeWithdrawals: has("freeze_seller_withdrawals"),
+    viewSupport: has("view_support") || has("respond_support"),
+    respondSupport: has("respond_support"),
   };
 }
 

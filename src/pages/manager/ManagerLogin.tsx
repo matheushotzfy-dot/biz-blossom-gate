@@ -1,162 +1,138 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import { AlertCircle, Eye, EyeOff, Loader2, Lock, Moon, ShieldAlert, Sun } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Flame, Eye, EyeOff, Lock, AlertTriangle, Users } from "lucide-react";
-import { toast } from "sonner";
-import { motion } from "framer-motion";
+import { VenxpayLogo } from "@/components/VenxpayLogo";
+import { useTheme } from "@/hooks/useTheme";
+import { describeLoginFailure, validateLoginFields, type LoginFieldErrors } from "@/lib/adminLoginErrors";
 
+interface FormProblem { message: string; locked: boolean }
+
+/**
+ * Entrada do painel da equipe (gerentes e funcionários), pela função `manager-login`. Ela responde 4xx/5xx com
+ * `{ success:false, error, locked? }`; o corpo vem em `error.context` e é lido por `describeLoginFailure` (antes
+ * qualquer falha, inclusive o bloqueio de 15 minutos, virava "credenciais inválidas").
+ */
 export default function ManagerLogin() {
- const [email, setEmail] = useState("");
- const [password, setPassword] = useState("");
- const [showPassword, setShowPassword] = useState(false);
- const [loading, setLoading] = useState(false);
- const [error, setError] = useState("");
- const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [show, setShow] = useState(false);
+  const [caps, setCaps] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
+  const [problem, setProblem] = useState<FormProblem | null>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
+  const dark = theme === "dark";
 
- const handleSubmit = async (e: React.FormEvent) => {
- e.preventDefault();
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loading) return;
+    const clean = email.trim().toLowerCase();
+    const invalid = validateLoginFields(clean, password);
+    setFieldErrors(invalid);
+    setProblem(null);
+    if (invalid.email) { emailRef.current?.focus(); return; }
+    if (invalid.password) { passwordRef.current?.focus(); return; }
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("manager-login", { body: { email: clean, password } });
+      if (error) {
+        const failure = await describeLoginFailure(error);
+        setProblem({ message: failure.message, locked: failure.locked });
+        if (!failure.locked) passwordRef.current?.select();
+        return;
+      }
+      if (!data?.success || !data.access_token) {
+        setProblem({ message: typeof data?.error === "string" ? data.error : "Não foi possível entrar.", locked: data?.locked === true });
+        return;
+      }
+      const { error: sessionError } = await supabase.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token });
+      if (sessionError) { setProblem({ message: "A senha está certa, mas não foi possível abrir a sessão. Tente de novo.", locked: false }); return; }
+      setPassword("");
+      toast.success("Bem-vindo ao painel da equipe.");
+      navigate("/gerentes/dashboard");
+    } finally {
+      setLoading(false);
+    }
+  };
 
- const trimmedEmail = email.trim().toLowerCase();
- if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
- setError("E-mail inválido.");
- return;
- }
- if (password.length < 6) {
- setError("Senha deve ter no mínimo 6 caracteres.");
- return;
- }
+  const checkCaps = (e: React.KeyboardEvent<HTMLInputElement>) => setCaps(e.getModifierState("CapsLock"));
+  const Icon = problem?.locked ? ShieldAlert : AlertCircle;
 
- setLoading(true);
- setError("");
+  return (
+    <div className="admin-frame flex min-h-[100dvh] flex-col">
+      <Helmet>
+        <title>Equipe · Vemprapay</title>
+        <meta name="robots" content="noindex,nofollow" />
+      </Helmet>
+      <header className="flex items-center justify-between px-5 py-4 sm:px-8 sm:py-5">
+        <div className="flex items-center gap-3">
+          <VenxpayLogo size={30} withWordmark className="text-[17px]" />
+          <span aria-hidden className="h-5 w-px af-border border-l" />
+          <span className="text-[13.5px] font-semibold af-muted">Equipe</span>
+        </div>
+        <button type="button" onClick={toggleTheme} aria-label={dark ? "Usar tema claro" : "Usar tema escuro"} title={dark ? "Tema claro" : "Tema escuro"}
+          className="inline-flex h-9 w-9 items-center justify-center border af-border af-surface af-text-2 transition-opacity hover:opacity-80">
+          {dark ? <Sun className="h-4 w-4" aria-hidden /> : <Moon className="h-4 w-4" aria-hidden />}
+        </button>
+      </header>
 
- try {
- const { data, error: fnError } = await supabase.functions.invoke("manager-login", {
- body: { email: trimmedEmail, password },
- });
-
- if (fnError) throw new Error("Erro de conexão.");
-
- if (!data?.success) {
- setError(data?.error || "Credenciais inválidas ou acesso não autorizado.");
- if (data?.locked) setError("Muitas tentativas. Aguarde 15 minutos.");
- return;
- }
-
- const { error: sessionError } = await supabase.auth.setSession({
- access_token: data.access_token,
- refresh_token: data.refresh_token,
- });
-
- if (sessionError) throw sessionError;
-
- toast.success("Acesso à equipe confirmado.");
- navigate("/gerentes/dashboard");
- } catch {
- setError("Credenciais inválidas ou acesso não autorizado.");
- } finally {
- setLoading(false);
- setPassword("");
- }
- };
-
- return (
- <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
-
- <motion.div
- initial={{ opacity: 0, y: 30 }}
- animate={{ opacity: 1, y: 0 }}
- transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
- className="relative w-full max-w-[440px] p-6"
- >
- {/* Logo & title */}
- <div className="flex flex-col items-center mb-10">
- <motion.div
- initial={{ scale: 0.8, opacity: 0 }}
- animate={{ scale: 1, opacity: 1 }}
- transition={{ delay: 0.15, duration: 0.5 }}
- className="relative mb-6"
- >
- <div className="h-[72px] w-[72px] rounded-[20px] bg-primary flex items-center justify-center">
- <Flame className="h-9 w-9 text-primary-foreground" />
- </div>
- <div className="absolute -bottom-1.5 -right-1.5 h-7 w-7 rounded-full bg-accent flex items-center justify-center border-[3px] border-background">
- <Users className="h-3 w-3 text-accent-foreground" />
- </div>
- </motion.div>
-
- <h1 className="text-[28px] font-bold text-foreground tracking-tight">Painel da Equipe</h1>
- <p className="text-[13px] text-muted-foreground mt-1.5 font-medium tracking-wide">Gestão de Contas · Vemprapay</p>
- </div>
-
- {/* Card */}
- <div className="bg-card rounded-[28px] border border-border p-8">
- {error && (
- <motion.div
- initial={{ opacity: 0, height: 0 }}
- animate={{ opacity: 1, height: "auto" }}
- className="flex items-center gap-2.5 bg-destructive/5 border border-destructive/20 rounded-2xl p-4 mb-6 text-[13px] text-destructive font-medium"
- >
- <AlertTriangle className="h-4 w-4 shrink-0" />
- {error}
- </motion.div>
- )}
-
- <form onSubmit={handleSubmit} className="space-y-5">
- <div>
- <Label className="text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-semibold">E-mail</Label>
- <Input
- value={email}
- onChange={(e) => setEmail(e.target.value)}
- type="email"
- required
- className="mt-2.5 bg-background border-border h-[52px] text-foreground placeholder:text-muted-foreground rounded-2xl text-[14px] focus:border-primary/40 focus:ring-primary/10 transition-all"
- placeholder="equipe@empresa.com"
- />
- </div>
- <div>
- <Label className="text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-semibold">Senha</Label>
- <div className="relative mt-2.5">
- <Input
- value={password}
- onChange={(e) => setPassword(e.target.value)}
- type={showPassword ? "text" : "password"}
- required
- minLength={6}
- className="bg-background border-border h-[52px] text-foreground placeholder:text-muted-foreground pr-12 rounded-2xl text-[14px] focus:border-primary/40 focus:ring-primary/10 transition-all"
- placeholder="••••••••"
- />
- <Button type="button" variant="ghost" size="icon" aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground">
- {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
- </Button>
- </div>
- </div>
-
- <Button
- type="submit"
- className="w-full h-[52px] bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-2xl transition-colors duration-300 text-[14px]"
- disabled={loading}
- >
- <Lock className="h-4 w-4 mr-2" />
- {loading ? "Autenticando..." : "Acessar Painel"}
- </Button>
- </form>
- </div>
-
- {/* Footer */}
- <div className="flex items-center justify-center gap-4 mt-8">
- <div className="flex items-center gap-1.5">
- <div className="h-1.5 w-1.5 rounded-full bg-success" />
- <span className="text-[10px] text-muted-foreground font-medium">SSL Ativo</span>
- </div>
- <span className="text-border">•</span>
- <span className="text-[10px] text-muted-foreground font-medium">Proteção ativa</span>
- <span className="text-border">•</span>
- <span className="text-[10px] text-muted-foreground font-medium">Acessos monitorados</span>
- </div>
- </motion.div>
- </div>
- );
+      <main className="flex flex-1 items-start justify-center px-5 pb-16 pt-[clamp(24px,12vh,128px)]">
+        <div className="w-full max-w-[420px]">
+          <div className="mb-6">
+            <h1 className="text-[28px] font-extrabold leading-[1.15] af-text">Painel da equipe</h1>
+            <p className="mt-2 text-[14px] leading-relaxed af-muted">Para gerentes e funcionários. Use o e-mail e a senha que o dono criou para você.</p>
+          </div>
+          <div className="rounded-[12px] border af-border af-surface p-6 sm:p-7">
+            <form onSubmit={(e) => void submit(e)} noValidate className="space-y-4" aria-busy={loading}>
+              {problem && (
+                <div role="alert" className="flex items-start gap-2.5 rounded-md px-3 py-2.5 text-[13px] leading-snug"
+                  style={{ background: "var(--as-danger-bg)", border: "1px solid color-mix(in srgb, var(--as-danger) 35%, transparent)", color: "var(--as-danger)" }}>
+                  <Icon className="mt-px h-4 w-4 shrink-0" aria-hidden /><span>{problem.message}</span>
+                </div>
+              )}
+              <div className="space-y-1.5">
+                <Label htmlFor="staff-email" className="text-[13px] font-semibold af-text-2">E-mail</Label>
+                <input ref={emailRef} id="staff-email" name="email" type="email" value={email} readOnly={loading} autoFocus autoComplete="username" autoCapitalize="none" spellCheck={false}
+                  onChange={(e) => { setEmail(e.target.value); if (fieldErrors.email) setFieldErrors((f) => ({ ...f, email: undefined })); }}
+                  placeholder="voce@empresa.com" aria-invalid={!!fieldErrors.email} aria-describedby={fieldErrors.email ? "staff-email-error" : undefined}
+                  className="af-input h-11 w-full rounded-md px-3 text-[14px] focus:outline-none" />
+                {fieldErrors.email && <p id="staff-email-error" className="text-[12.5px] font-medium" style={{ color: "var(--as-danger)" }}>{fieldErrors.email}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="staff-password" className="text-[13px] font-semibold af-text-2">Senha</Label>
+                <div className="relative">
+                  <input ref={passwordRef} id="staff-password" name="password" type={show ? "text" : "password"} value={password} readOnly={loading} autoComplete="current-password"
+                    onChange={(e) => { setPassword(e.target.value); if (fieldErrors.password) setFieldErrors((f) => ({ ...f, password: undefined })); }}
+                    onKeyDown={checkCaps} onKeyUp={checkCaps} onBlur={() => setCaps(false)} placeholder="Sua senha"
+                    aria-invalid={!!fieldErrors.password} aria-describedby={[fieldErrors.password ? "staff-password-error" : "", caps ? "staff-caps" : ""].filter(Boolean).join(" ") || undefined}
+                    className="af-input h-11 w-full rounded-md px-3 pr-11 text-[14px] focus:outline-none" />
+                  <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? "Ocultar senha" : "Mostrar senha"} aria-pressed={show}
+                    className="absolute right-1 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center af-muted transition-colors hover:af-text">
+                    {show ? <EyeOff className="h-4 w-4" aria-hidden /> : <Eye className="h-4 w-4" aria-hidden />}
+                  </button>
+                </div>
+                {fieldErrors.password && <p id="staff-password-error" className="text-[12.5px] font-medium" style={{ color: "var(--as-danger)" }}>{fieldErrors.password}</p>}
+                {caps && <p id="staff-caps" className="text-[12.5px] font-medium" style={{ color: "var(--as-warning)" }}>Caps Lock está ligado.</p>}
+              </div>
+              <Button type="submit" disabled={loading} className="af-accent-bg mt-1 h-11 w-full rounded-md text-[14px] font-semibold shadow-none">
+                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden /> : <Lock className="mr-2 h-4 w-4" aria-hidden />}
+                {loading ? "Entrando…" : "Entrar"}
+              </Button>
+            </form>
+          </div>
+          <p className="mt-5 text-center text-[12.5px] leading-relaxed af-muted">
+            As tentativas de entrada ficam registradas e 5 senhas erradas em 15 minutos pausam o acesso. Esqueceu a senha? Peça ao dono para criar uma nova.
+          </p>
+        </div>
+      </main>
+    </div>
+  );
 }

@@ -7,7 +7,7 @@ import { toast } from "sonner";
  * Resets timer on any pointer/keyboard/scroll activity.
  * Used to protect privileged admin sessions.
  */
-export function useIdleLogout(minutes = 15) {
+export function useIdleLogout(minutes = 15, redirectTo = "/admin-matheus") {
   const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export function useIdleLogout(minutes = 15) {
         await supabase.auth.signOut();
       } finally {
         toast.warning(`Sessão encerrada por inatividade (${minutes} min).`);
-        window.location.replace("/admin-matheus");
+        window.location.replace(redirectTo);
       }
     };
 
@@ -35,5 +35,5 @@ export function useIdleLogout(minutes = 15) {
       if (timerRef.current) window.clearTimeout(timerRef.current);
       events.forEach((e) => window.removeEventListener(e, reset));
     };
-  }, [minutes]);
+  }, [minutes, redirectTo]);
 }

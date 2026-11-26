@@ -44,6 +44,12 @@ export function useAdminGuard() {
           navigate("/admin-matheus", { replace: true });
           return;
         }
+        // Funcionário usa o painel da equipe (carteira, verificações, vendas, suporte). No painel do admin ele via
+        // abas vazias ou avisos de "só administrador".
+        if (!hasAdmin) {
+          navigate("/gerentes/dashboard", { replace: true });
+          return;
+        }
         setIsAdmin(hasAdmin);
         setIsEmployee(hasEmployee && !hasAdmin);
       } catch {

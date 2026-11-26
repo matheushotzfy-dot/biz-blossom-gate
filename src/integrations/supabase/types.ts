@@ -6816,6 +6816,7 @@ export type Database = {
         Args: { _from: string; _page?: number; _search?: string; _to: string }
         Returns: Json
       }
+      get_staff_seller_detail: { Args: { _seller: string }; Returns: Json }
       get_thank_you_summary: {
         Args: { _tx_id: string }
         Returns: {

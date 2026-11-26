@@ -64,9 +64,14 @@ export default function AdminLogin() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
 
-  const finishLogin = async (accessToken: string, refreshToken: string) => {
+  const finishLogin = async (accessToken: string, refreshToken: string, role?: string) => {
     const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
     if (error) throw error;
+    if (role === "employee") {
+      toast.success("Bem-vindo ao painel da equipe.");
+      navigate("/gerentes/dashboard");
+      return;
+    }
     toast.success("Bem-vindo ao painel administrativo.");
     navigate("/admin-matheus/dashboard");
   };
@@ -104,7 +109,7 @@ export default function AdminLogin() {
         return;
       }
       try {
-        await finishLogin(data.access_token, data.refresh_token);
+        await finishLogin(data.access_token, data.refresh_token, data.role);
       } catch {
         setProblem({ message: "A senha está certa, mas não foi possível abrir a sessão. Tente de novo.", locked: false });
       }
@@ -140,7 +145,7 @@ export default function AdminLogin() {
         return;
       }
       try {
-        await finishLogin(data.access_token, data.refresh_token);
+        await finishLogin(data.access_token, data.refresh_token, data.role);
       } catch {
         setProblem({ message: "O código está certo, mas não foi possível abrir a sessão. Tente de novo.", locked: false });
       }

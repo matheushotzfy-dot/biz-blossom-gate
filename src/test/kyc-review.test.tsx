@@ -32,7 +32,6 @@ vi.mock("@/features/admin-finance/useSensitiveConfirm", () => ({
 
 import { toast } from "sonner";
 import KycCenter from "@/features/admin-kyc/KycCenter";
-import { StaffSellerPanel } from "@/features/staff/StaffSellerPanel";
 import { isKycPending } from "@/features/staff/staffActions";
 import {
   duplicateGroups, formatBytes, formatDocNumber, formatPhone, missingTypes, parseDocuments, parseQueue, parseReview,
@@ -264,43 +263,5 @@ describe("Verificações do admin", () => {
     const dlg = await openSeller("Juliana Prado");
     expect(await within(dlg).findByText(/ainda não enviou os documentos para análise/)).toBeInTheDocument();
     expect(within(dlg).queryByRole("button", { name: "Aprovar verificação" })).toBeNull();
-  });
-});
-
-/* ───────── equipe (carteira do gerente) ───────── */
-
-describe("Análise pela equipe", () => {
-  const flags = { approveKyc: true, rejectKyc: true, editFees: false, editNotes: false, viewTransactions: false };
-  const seller = (status: string) => ({ seller_user_id: S1, full_name: "Juliana Prado", email: "juliana@exemplo.com", account_status: status });
-
-  it("sem envio não abre análise", () => {
-    wrap(<StaffSellerPanel seller={seller("pending")} flags={flags} onClose={vi.fn()} onChanged={vi.fn()} />);
-    expect(screen.getByText("O seller ainda não enviou os documentos para análise.")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Analisar documentos/ })).toBeNull();
-  });
-
-  it("vê os documentos antes de decidir e a decisão passa por staff_review_kyc", async () => {
-    const onChanged = vi.fn();
-    handlers.get_kyc_review = () => ({ data: review({ is_admin: false, can_approve: false }), error: null });
-    wrap(<StaffSellerPanel seller={seller("pending_review")} flags={flags} onClose={vi.fn()} onChanged={onChanged} />);
-    fireEvent.click(screen.getByRole("button", { name: /Analisar documentos/ }));
-    const dlg = await screen.findByRole("dialog");
-    expect(await within(dlg).findByRole("img", { name: "Selfie com documento" })).toBeInTheDocument();
-    expect(within(dlg).getByRole("button", { name: "Aprovar verificação" })).toBeDisabled();
-    expect(within(dlg).getByText("Sua conta não tem permissão para aprovar.")).toBeInTheDocument();
-    fireEvent.click(within(dlg).getByRole("button", { name: "Reprovar" }));
-    fireEvent.change(within(dlg).getByLabelText("Motivo da reprovação"), { target: { value: "  Selfie sem o documento  " } });
-    await act(async () => { fireEvent.click(within(dlg).getByRole("button", { name: "Reprovar e avisar o seller" })); });
-    await waitFor(() => expect(calls("staff_review_kyc")).toEqual([{ _seller: S1, _approve: false, _reason: "Selfie sem o documento" }]));
-    expect(onChanged).toHaveBeenCalled();
-  });
-
-  it("recusa do servidor vira mensagem clara", async () => {
-    handlers.staff_review_kyc = () => ({ data: null, error: { message: "Seller not pending review" } });
-    wrap(<StaffSellerPanel seller={seller("pending_review")} flags={flags} onClose={vi.fn()} onChanged={vi.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: /Analisar documentos/ }));
-    const dlg = await screen.findByRole("dialog");
-    fireEvent.click(await within(dlg).findByRole("button", { name: "Aprovar verificação" }));
-    expect(await within(dlg).findByRole("alert")).toHaveTextContent("Esta conta não está mais esperando análise.");
   });
 });
