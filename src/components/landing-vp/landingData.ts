@@ -1,45 +1,110 @@
 /**
- * Textos e dados de exemplo da landing. Tudo aqui precisa ser verdade sobre o produto:
+ * Textos e dados da landing. Tudo aqui precisa ser verdade sobre o produto:
  * nada de taxa de aprovação, prazo de saque ou "adquirência exclusiva" que o painel não prove.
- * Valores e nomes de vendas são exemplos e a página sempre avisa isso.
+ * As telas mostradas são capturas reais do painel e do checkout com dados de exemplo, e a página avisa isso.
  */
+import painelVendas from "@/assets/landing/painel-vendas.webp";
+import painelSaques from "@/assets/landing/painel-saques.webp";
+import painelWebhooks from "@/assets/landing/painel-webhooks.webp";
+import checkoutComputador from "@/assets/landing/checkout-computador.webp";
+import areaDoAluno from "@/assets/landing/area-do-aluno.webp";
 
 export const NAV_LINKS = [
-  { href: "#venda", label: "Como funciona" },
-  { href: "#vender", label: "Vender" },
+  { href: "#como-funciona", label: "Como funciona" },
+  { href: "#painel", label: "O painel" },
   { href: "#premiacoes", label: "Premiações" },
-  { href: "#integracao", label: "Para devs" },
   { href: "#seguranca", label: "Segurança" },
+  { href: "#devs", label: "Para devs" },
   { href: "#duvidas", label: "Dúvidas" },
 ] as const;
 
-export interface ExampleSale {
-  who: string;
-  what: string;
-  method: "Pix" | "Cartão 3x" | "Boleto";
-  cents: number;
-  /** Paga desde o começo da cena. */
-  paid: boolean;
-  /** Boleto que é pago durante a cena (o status muda na frente de quem olha). */
-  paysLater?: boolean;
+/**
+ * Quem está por trás da plataforma. Só aparece na página quando razão social e CNPJ estiverem preenchidos:
+ * enquanto estiverem vazios, a seção "Empresa" e a linha do rodapé ficam escondidas (nunca inventar dado de empresa).
+ */
+export const COMPANY: {
+  legalName: string | null;
+  cnpj: string | null;
+  city: string | null;
+  email: string | null;
+  whatsapp: string | null;
+} = {
+  legalName: null,
+  cnpj: null,
+  city: null,
+  email: null,
+  whatsapp: null,
+};
+
+export const hasCompany = (c = COMPANY) => !!(c.legalName?.trim() && c.cnpj?.trim());
+
+/** Provas que o visitante confere sozinho, sem criar conta. */
+export const PROOFS = [
+  { t: "Status ao vivo", d: "Veja agora se o servidor, o login e os pagamentos estão no ar.", to: "/status", cta: "Abrir o status" },
+  { t: "Documentação aberta", d: "Webhooks, assinatura e eventos explicados, sem precisar de cadastro.", to: "/documentacao", cta: "Ler a documentação" },
+  { t: "Regras por escrito", d: "Termos de uso e política de privacidade, escrita de acordo com a LGPD.", to: "/termos-de-uso", cta: "Ler os termos" },
+] as const;
+
+/** Do cadastro ao primeiro saque, na ordem em que acontece. */
+export const STEPS = [
+  { t: "Abra a conta", d: "Com CPF ou CNPJ, em poucos minutos. Depois envie os documentos para a verificação de identidade." },
+  { t: "Monte o produto", d: "Preço, formas de pagamento, o checkout com a sua cara e o curso, se tiver área de membros. A equipe revisa antes do checkout receber." },
+  { t: "Venda", d: "Mande o link do checkout ou crie um link de pagamento. O Pix aprovado entra no saldo na hora." },
+  { t: "Saque por Pix", d: "Peça o saque para a sua chave, confirmando com a sua senha, ou ligue o saque automático." },
+] as const;
+
+export interface TourTab {
+  id: string;
+  label: string;
+  title: string;
+  points: readonly string[];
+  image: string;
+  alt: string;
 }
 
-/**
- * O dia de exemplo do topo, do mais antigo para o mais novo. As `HERO_ROWS` primeiras já estão na tela;
- * as outras chegam uma a uma por cima, e o boleto `paysLater` muda para pago no fim.
- */
-export const EXAMPLE_SALES: ExampleSale[] = [
-  { who: "Ana T.", what: "Mentoria em grupo", method: "Pix", cents: 29700, paid: true },
-  { who: "Camila R.", what: "E-book Receitas Fit", method: "Pix", cents: 4700, paid: true },
-  { who: "Lucas A.", what: "Curso Marketing do Zero", method: "Boleto", cents: 19700, paid: false, paysLater: true },
-  { who: "João P.", what: "Mentoria em grupo", method: "Cartão 3x", cents: 49700, paid: true },
-  { who: "Bruna M.", what: "E-book Receitas Fit", method: "Pix", cents: 4700, paid: true },
-  { who: "Maria S.", what: "Curso Marketing do Zero", method: "Pix", cents: 19700, paid: true },
-  { who: "Rafael C.", what: "Comunidade VIP, mensal", method: "Cartão 3x", cents: 9700, paid: true },
+/** As telas do "painel por dentro": capturas reais com dados de exemplo. */
+export const TOUR: readonly TourTab[] = [
+  {
+    id: "vendas",
+    label: "Vendas",
+    title: "Cada pagamento com o status real.",
+    points: ["Filtros por período, status e produto", "Valor cobrado e líquido de cada venda", "Exporta a lista em CSV ou Excel"],
+    image: painelVendas,
+    alt: "Lista de vendas com cliente, forma de pagamento, status, horário e valor líquido",
+  },
+  {
+    id: "checkout",
+    label: "Checkout",
+    title: "O que o seu cliente vê na hora de pagar.",
+    points: ["Pix, cartão em até 12x e boleto, ligados por produto", "Order bumps, cupom e cronômetro de oferta", "Garantia de 7 dias e conexão protegida à vista"],
+    image: checkoutComputador,
+    alt: "Página de checkout com dados do comprador, ofertas adicionais e resumo do pedido",
+  },
+  {
+    id: "membros",
+    label: "Área de membros",
+    title: "O acesso sai quando o pagamento confirma.",
+    points: ["Cursos com módulos, aulas, materiais e quiz", "O aluno continua de onde parou", "Certificado quando conclui"],
+    image: areaDoAluno,
+    alt: "Área do aluno com o curso para continuar e a lista de cursos comprados",
+  },
+  {
+    id: "saques",
+    label: "Saques",
+    title: "Saque por Pix, com cada valor separado.",
+    points: ["Disponível, em análise e aguardando liberação, cada um no seu lugar", "O dia em que cada parte cai no saldo", "Saque automático quando o saldo chega ao valor que você escolher"],
+    image: painelSaques,
+    alt: "Tela de saldo e saques com valor disponível, valores aguardando liberação e histórico de saques",
+  },
+  {
+    id: "webhooks",
+    label: "Webhooks",
+    title: "O seu sistema fica sabendo na hora.",
+    points: ["Assinatura em todo envio", "Cada entrega com a resposta do seu servidor", "Teste e reenvio pelo próprio painel"],
+    image: painelWebhooks,
+    alt: "Tela de webhooks com endpoints, histórico de entregas e eventos assinados",
+  },
 ];
-
-/** Quantas vendas cabem no cartão do topo. */
-export const HERO_ROWS = 5;
 
 export const FAQ = [
   {
@@ -90,13 +155,16 @@ export const SECURITY_POINTS = [
   { t: "Extrato que não se apaga", d: "Venda, taxa, divisão e saque viram lançamentos no seu livro-razão, um por movimentação." },
   { t: "Segredos guardados com cuidado", d: "Credenciais de integração ficam criptografadas, e o segredo de uma chave de API só aparece uma vez." },
   { t: "Aparelhos sob controle", d: "Você vê o último acesso da conta e desconecta todos os outros aparelhos num clique." },
+  { t: "Documento travado", d: "O CPF ou CNPJ da conta fica criptografado e não muda depois do cadastro sem passar pela equipe." },
 ] as const;
 
 export const SELL_FEATURES = [
   { t: "Links de pagamento", d: "Gere um link em segundos e mande pelo WhatsApp, Instagram ou e-mail, sem precisar de site." },
   { t: "Checkout com a sua cara", d: "Cor do botão, banners, cronômetro de oferta e até 5 order bumps por produto." },
   { t: "Cupons de desconto", d: "Código com limite de usos e data de validade, e o painel mostra quanto cada cupom já abateu." },
+  { t: "Afiliados e coprodução", d: "Programa de afiliados por produto e convite de coprodutor, com a divisão feita sozinha." },
   { t: "Pixels por produto", d: "Meta, Google Ads e outros pixels disparam os eventos da compra só nos produtos que você escolher." },
+  { t: "Apps conectados", d: "UTMify e outros apps recebem as vendas sem você mexer em código." },
   { t: "Relatórios que saem do painel", d: "Filtre as vendas por período, status e produto, e baixe em CSV ou Excel." },
   { t: "Busca em qualquer tela", d: "Ctrl+K encontra venda, produto e cliente sem sair de onde você está." },
 ] as const;

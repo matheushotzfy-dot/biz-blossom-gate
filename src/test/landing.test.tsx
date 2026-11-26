@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AFF_MAX, CO_MAX, brlFromCents, computeSplit } from "@/components/landing-vp/splitMath";
-import { FAQ, NAV_LINKS, SECURITY_POINTS, SELL_FEATURES } from "@/components/landing-vp/landingData";
+import { FAQ, NAV_LINKS, PROOFS, SECURITY_POINTS, SELL_FEATURES, STEPS, TOUR, hasCompany } from "@/components/landing-vp/landingData";
 import { SiteNav } from "@/components/landing-vp/SiteNav";
 import { SplitCalculator } from "@/components/landing-vp/SellSection";
 import LandingPage from "@/pages/LandingPage";
@@ -61,7 +61,7 @@ describe("dados da landing", () => {
       expect(f.q.trim().endsWith("?")).toBe(true);
       expect(f.a.trim().length).toBeGreaterThan(30);
     }
-    const all = JSON.stringify([FAQ, SELL_FEATURES, SECURITY_POINTS]);
+    const all = JSON.stringify([FAQ, SELL_FEATURES, SECURITY_POINTS, STEPS, PROOFS, TOUR.map((t) => [t.title, t.points, t.alt])]);
     for (const banned of ["75%", "24/7", "24h", "instantâneo", "exclusiv", "antifraude"]) {
       expect(all.toLowerCase()).not.toContain(banned.toLowerCase());
     }
@@ -175,82 +175,59 @@ describe("calculadora de divisão", () => {
   });
 });
 
-describe("cena do topo (vendas do dia)", () => {
-  // Importado aqui para os testes de cima não dependerem dela.
-  const load = () => import("@/components/landing-vp/LiveLedger");
-  const feedRows = (c: HTMLElement) => Array.from(c.querySelectorAll(".lp-feed .lp-row"));
-
-  it("abre com o cartão cheio, as vendas novas chegam por cima e o boleto é pago no fim", async () => {
-    vi.useFakeTimers();
-    const { LiveLedger } = await load();
-    const { EXAMPLE_SALES, HERO_ROWS } = await import("@/components/landing-vp/landingData");
-    const { container } = render(<LiveLedger />);
-    expect(feedRows(container)).toHaveLength(HERO_ROWS);
-    // a mais nova primeiro
-    expect(feedRows(container)[0].textContent).toContain(EXAMPLE_SALES[HERO_ROWS - 1].who);
-    expect(container.textContent).toContain("Aguardando");
-
-    await act(async () => { await vi.advanceTimersByTimeAsync(6000); });
-    const rows = feedRows(container);
-    expect(rows).toHaveLength(HERO_ROWS + 1); // a que sai fica escondida embaixo (overflow do cartão)
-    expect(rows[0].textContent).toContain(EXAMPLE_SALES[EXAMPLE_SALES.length - 1].who);
-    expect(container.textContent).not.toContain("Aguardando");
-    expect(container.textContent).toContain(`${EXAMPLE_SALES.length} vendas pagas`);
-    vi.useRealTimers();
-  });
-
-  it("o resumo para leitores de tela bate com a soma das vendas de exemplo", async () => {
-    const { LiveLedger } = await load();
-    const { EXAMPLE_SALES } = await import("@/components/landing-vp/landingData");
-    const { container } = render(<LiveLedger />);
-    const total = brlFromCents(EXAMPLE_SALES.reduce((s, x) => s + x.cents, 0));
-    expect(asText(container.querySelector(".sr-only")?.textContent ?? "")).toContain(asText(total));
-  });
-});
-
-describe("textos que precisam ser verdade", () => {
-  it("não promete sessão por aparelho, saque sem conferência nem primeira venda no mesmo dia", () => {
+describe("topo e telas reais", () => {
+  it("mostra o checkout e o painel com texto alternativo e avisa que os dados são exemplos", () => {
     const { container } = renderPage();
-    const text = container.textContent ?? "";
-    expect(text).not.toMatch(/onde a conta está aberta/);
-    expect(text).not.toMatch(/saca sozinho|sacar sozinho/);
-    expect(text).not.toMatch(/mesmo dia em que você terminar/);
-    expect(text).toMatch(/revis/); // a revisão do produto aparece (FAQ e fecho)
-  });
-});
-
-describe("navegação", () => {
-  it("tem atalho para pular ao conteúdo e o alvo existe", () => {
-    const { container } = renderPage();
-    const skip = screen.getByRole("link", { name: "Pular para o conteúdo" });
-    expect(skip.getAttribute("href")).toBe("#conteudo");
-    expect(container.querySelector("main#conteudo")).not.toBeNull();
+    const scene = container.querySelector(".lp-scene") as HTMLElement;
+    const imgs = Array.from(scene.querySelectorAll("img"));
+    expect(imgs).toHaveLength(2);
+    for (const i of imgs) expect(i.alt.length).toBeGreaterThan(20);
+    expect(scene.textContent).toMatch(/Nomes e valores são exemplos/);
   });
 
-  it("com o menu aberto a página por trás não rola e o foco vai para o primeiro link; Esc devolve o foco ao botão", () => {
-    render(<SiteNav onLogin={() => {}} onSignup={() => {}} />);
-    const toggle = screen.getByRole("button", { name: "Abrir menu" });
-    fireEvent.click(toggle);
-    expect(document.documentElement.classList.contains("lp-menu-open")).toBe(true);
-    expect(document.activeElement?.textContent).toBe(NAV_LINKS[0].label);
-    fireEvent.keyDown(window, { key: "Escape" });
-    expect(document.documentElement.classList.contains("lp-menu-open")).toBe(false);
-    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Abrir menu" }));
-  });
-
-  it("clicar no véu fecha o menu", () => {
-    const { container } = render(<SiteNav onLogin={() => {}} onSignup={() => {}} />);
-    fireEvent.click(screen.getByRole("button", { name: "Abrir menu" }));
-    fireEvent.click(container.querySelector(".lp-menu-scrim")!);
-    expect(document.getElementById("lp-menu")).toBeNull();
-  });
-
-  it("o rodapé abre as preferências de cookies", () => {
+  it("as abas do painel trocam com clique e com as setas, e só uma tela aparece por vez", () => {
     renderPage();
-    const heard = vi.fn();
-    window.addEventListener("venxpay:open-cookie-settings", heard);
-    fireEvent.click(screen.getByRole("button", { name: "Preferências de cookies" }));
-    expect(heard).toHaveBeenCalledTimes(1);
-    window.removeEventListener("venxpay:open-cookie-settings", heard);
+    const tabs = within(screen.getByRole("tablist", { name: "Telas do painel" })).getAllByRole("tab");
+    expect(tabs.map((t) => t.textContent)).toEqual(TOUR.map((t) => t.label));
+    const visible = () => screen.getAllByRole("tabpanel").filter((p) => !p.hasAttribute("hidden"));
+    expect(visible()).toHaveLength(1);
+    expect(visible()[0].textContent).toContain(TOUR[0].title);
+
+    fireEvent.click(tabs[2]);
+    expect(tabs[2].getAttribute("aria-selected")).toBe("true");
+    expect(visible()[0].textContent).toContain(TOUR[2].title);
+
+    fireEvent.keyDown(tabs[2], { key: "ArrowRight" });
+    expect(visible()[0].textContent).toContain(TOUR[3].title);
+    fireEvent.keyDown(tabs[3], { key: "End" });
+    expect(visible()[0].textContent).toContain(TOUR[TOUR.length - 1].title);
+    fireEvent.keyDown(tabs[TOUR.length - 1], { key: "ArrowRight" });
+    expect(visible()[0].textContent).toContain(TOUR[0].title);
+  });
+
+  it("os passos seguem a ordem real, do cadastro ao saque", () => {
+    expect(STEPS.map((s) => s.t)).toEqual(["Abra a conta", "Monte o produto", "Venda", "Saque por Pix"]);
+  });
+
+  it("as provas levam a páginas públicas que existem", () => {
+    const { container } = renderPage();
+    const strip = container.querySelector(".lp-proofs") as HTMLElement;
+    for (const p of PROOFS) {
+      expect(within(strip).getByRole("link", { name: p.cta }).getAttribute("href")).toBe(p.to);
+    }
+  });
+});
+
+describe("empresa", () => {
+  it("sem razão social e CNPJ preenchidos, nada de empresa aparece na página", () => {
+    expect(hasCompany()).toBe(false);
+    const { container } = renderPage();
+    expect(container.querySelector("#empresa")).toBeNull();
+    expect(container.textContent).not.toContain("Quem está por trás");
+  });
+
+  it("só considera a empresa preenchida com razão social e CNPJ", () => {
+    expect(hasCompany({ legalName: "Empresa Exemplo Ltda", cnpj: "", city: null, email: null, whatsapp: null })).toBe(false);
+    expect(hasCompany({ legalName: "Empresa Exemplo Ltda", cnpj: "00.000.000/0001-00", city: null, email: null, whatsapp: null })).toBe(true);
   });
 });

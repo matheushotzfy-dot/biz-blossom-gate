@@ -46,9 +46,9 @@ export function AwardsShelf() {
 
   return (
     <section id="premiacoes" className="lp-stagebg py-24 sm:py-32">
-      <div className="mx-auto flex max-w-[1180px] flex-wrap items-end justify-between gap-x-12 gap-y-8 px-5 sm:px-8">
+      <div className="mx-auto flex max-w-[1200px] flex-wrap items-end justify-between gap-x-12 gap-y-8 px-5 sm:px-8">
         <div className="max-w-[40rem]">
-          <h2 className="text-[clamp(2rem,4.2vw,3.1rem)] font-extrabold leading-[1.07] tracking-[-0.04em]">
+          <h2 className="lp-h2">
             <Tight>Bateu a meta, a placa vai para a sua casa.</Tight>
           </h2>
           <p className="mt-5 max-w-[34rem] text-[17px] leading-[1.7]" style={{ color: "hsl(218 14% 72%)" }}>

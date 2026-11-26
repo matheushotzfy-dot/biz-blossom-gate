@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { SECURITY_POINTS } from "./landingData";
-import { RULE_BELOW, RULE_BOTH, line } from "./lines";
+import { line } from "./lines";
 import { Tight } from "./Tight";
 
 const SAMPLE = [
@@ -43,22 +43,48 @@ const FACTS = [
   "Chaves de API com o segredo mostrado uma única vez",
 ];
 
-export function DevAndSecurity() {
+export function SecuritySection() {
   return (
-    <section id="integracao" className="bg-background pt-24 sm:pt-32">
-      <div className="mx-auto max-w-[1180px] px-5 sm:px-8">
+    <section id="seguranca" className="bg-background py-24 sm:py-32">
+      <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-end">
+          <h2 className="lp-h2 max-w-[16ch] text-foreground"><Tight>Segurança que dá para conferir.</Tight></h2>
+          <p className="max-w-[34rem] text-[17px] leading-[1.7] text-muted-foreground lg:justify-self-end">
+            Sem selo inventado nem número bonito. Estas são as regras que o painel já aplica hoje, e você vê cada uma delas funcionando na sua conta.
+          </p>
+        </div>
+        <dl className="lp-kit">
+          {SECURITY_POINTS.map((s) => (
+            <div key={s.t} className="lp-kit-item">
+              <dt className="text-[1.1rem] font-extrabold tracking-[-0.025em] text-foreground">{s.t}</dt>
+              <dd className="m-0 mt-1.5 text-[15.5px] leading-[1.65] text-muted-foreground">{s.d}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-10 max-w-[44rem] text-[15px] leading-relaxed text-muted-foreground">
+          Quer ver se a plataforma está no ar agora? A <Link to="/status" className="lp-link">página de status</Link> confere o servidor, o login e os pagamentos direto do seu navegador.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+export function DevSection() {
+  return (
+    <section id="devs" className="bg-card py-24 sm:py-32">
+      <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)] lg:gap-20">
           <div>
-            <h2 className="text-[clamp(2rem,4.2vw,3.1rem)] font-extrabold leading-[1.07] tracking-[-0.04em] text-foreground">
+            <h2 className="lp-h2 max-w-[16ch] text-foreground">
               <Tight>O seu sistema fica sabendo no mesmo instante.</Tight>
             </h2>
-            <p className="mt-5 max-w-[32rem] text-[17px] leading-[1.7] text-muted-foreground">
+            <p className="mt-6 max-w-[32rem] text-[17px] leading-[1.7] text-muted-foreground">
               Cada venda, reembolso e saque vira um webhook para o endereço que você escolher. Você valida a assinatura, atualiza o pedido e responde 200.
             </p>
             <ul className="m-0 mt-7 grid gap-3 p-0" style={{ listStyle: "none" }}>
               {FACTS.map((f) => (
                 <li key={f} className="flex items-start gap-3 text-[15.5px] font-semibold text-foreground">
-                  <span aria-hidden className="mt-[0.55rem] h-1.5 w-4 shrink-0 rounded-full bg-primary" />{f}
+                  <span aria-hidden className="lp-tick mt-[0.3rem]" />{f}
                 </li>
               ))}
             </ul>
@@ -82,23 +108,6 @@ export function DevAndSecurity() {
               </code>
             </pre>
           </div>
-        </div>
-
-        <div id="seguranca" className="pb-24 pt-28 sm:pb-32 sm:pt-36">
-          <h2 className="max-w-[38rem] text-[clamp(2rem,4.2vw,3.1rem)] font-extrabold leading-[1.07] tracking-[-0.04em] text-foreground">
-            <Tight>Segurança, sem enfeite.</Tight>
-          </h2>
-          <p className="mt-5 max-w-[36rem] text-[17px] leading-[1.7] text-muted-foreground">
-            Não prometemos selo nem número bonito. Estas são as regras que o painel já aplica hoje.
-          </p>
-          <dl className="m-0 mt-12 grid gap-x-16 md:grid-cols-2">
-            {SECURITY_POINTS.map((s, i) => (
-              <div key={s.t} className="lp-line py-5" style={line(i < 2 ? RULE_BOTH : RULE_BELOW)}>
-                <dt className="text-[1.15rem] font-extrabold tracking-[-0.025em] text-foreground">{s.t}</dt>
-                <dd className="m-0 mt-1.5 max-w-[30rem] text-[15.5px] leading-[1.65] text-muted-foreground">{s.d}</dd>
-              </div>
-            ))}
-          </dl>
         </div>
       </div>
     </section>

@@ -1,6 +1,7 @@
 /**
  * LandingPage — página pública da Vemprapay (identidade fintech clara).
- * Apresentacional: sem consultas ao banco. Nomes, vendas e valores são exemplos e a página avisa.
+ * Apresentacional: sem consultas ao banco. As telas são capturas reais do painel com dados de exemplo, e a página avisa.
+ * Credibilidade vem de prova: telas reais, links que o visitante confere (status, documentação, termos) e a empresa.
  * Só afirma o que o produto faz hoje: nada de taxa de aprovação, prazo de saque ou número que o painel não prove.
  */
 import { useCallback, useEffect } from "react";
@@ -9,11 +10,12 @@ import { Seo } from "@/components/Seo";
 import "@/components/landing-vp/landing.css";
 import { SiteNav } from "@/components/landing-vp/SiteNav";
 import { HeroSection } from "@/components/landing-vp/HeroSection";
-import { SaleJourney } from "@/components/landing-vp/SaleJourney";
+import { HowItWorks, ProofStrip } from "@/components/landing-vp/ProofAndSteps";
+import { PanelTour } from "@/components/landing-vp/PanelTour";
 import { SellSection } from "@/components/landing-vp/SellSection";
 import { AwardsShelf } from "@/components/landing-vp/AwardsShelf";
-import { DevAndSecurity } from "@/components/landing-vp/DevAndSecurity";
-import { Closing, FAQ, FaqSection, SiteFooter } from "@/components/landing-vp/FaqAndFooter";
+import { DevSection, SecuritySection } from "@/components/landing-vp/DevAndSecurity";
+import { Closing, CompanySection, FAQ, FaqSection, SiteFooter } from "@/components/landing-vp/FaqAndFooter";
 
 const FAQ_JSONLD = {
   "@context": "https://schema.org",
@@ -44,11 +46,15 @@ export default function LandingPage() {
       <SiteNav onLogin={goLogin} onSignup={goSignup} />
       <main id="conteudo" tabIndex={-1} className="outline-none">
         <HeroSection onSignup={goSignup} />
-        <SaleJourney />
+        <ProofStrip />
+        <HowItWorks />
+        <PanelTour />
         <SellSection />
         <AwardsShelf />
-        <DevAndSecurity />
+        <SecuritySection />
+        <DevSection />
         <FaqSection />
+        <CompanySection />
         <Closing onSignup={goSignup} onLogin={goLogin} />
       </main>
       <SiteFooter />

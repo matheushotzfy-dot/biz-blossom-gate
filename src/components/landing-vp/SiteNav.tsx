@@ -51,7 +51,7 @@ export function SiteNav({ onLogin, onSignup }: SiteNavProps) {
       setOpen(false);
       toggleRef.current?.focus();
     };
-    const wide = window.matchMedia?.("(min-width: 1024px)");
+    const wide = window.matchMedia?.("(min-width: 1280px)");
     const onWide = () => { if (wide?.matches) setOpen(false); };
     window.addEventListener("keydown", onKey);
     wide?.addEventListener?.("change", onWide);
@@ -65,12 +65,12 @@ export function SiteNav({ onLogin, onSignup }: SiteNavProps) {
   return (
     <header className="lp-nav" data-scrolled={scrolled || open ? "" : undefined} data-open={open ? "" : undefined}>
       <a href="#conteudo" className="lp-skip">Pular para o conteúdo</a>
-      <div className="mx-auto flex h-16 max-w-[1180px] items-center gap-6 px-5 sm:px-8">
+      <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-6 px-5 sm:px-8">
         <a href="#topo" className="flex items-center gap-2.5 no-underline" aria-label="Vemprapay, início">
           <VenxpayLogo size={32} />
           <span className="text-[19px] font-extrabold tracking-[-0.035em] text-foreground">vempra<span className="text-primary">pay</span></span>
         </a>
-        <nav className="hidden flex-1 items-center gap-7 pl-4 lg:flex" aria-label="Seções da página">
+        <nav className="hidden flex-1 items-center gap-7 pl-4 xl:flex" aria-label="Seções da página">
           {NAV_LINKS.map((l) => (
             <a key={l.href} href={l.href} className="lp-navlink" aria-current={active === l.href.slice(1) ? "location" : undefined}>{l.label}</a>
           ))}
@@ -81,7 +81,7 @@ export function SiteNav({ onLogin, onSignup }: SiteNavProps) {
           <button
             ref={toggleRef}
             type="button"
-            className="lp-menu-btn lg:hidden"
+            className="lp-menu-btn xl:hidden"
             aria-label={open ? "Fechar menu" : "Abrir menu"}
             aria-expanded={open}
             aria-controls="lp-menu"
@@ -93,9 +93,9 @@ export function SiteNav({ onLogin, onSignup }: SiteNavProps) {
       </div>
       {open && (
         <>
-          <div className="lp-menu-scrim lg:hidden" aria-hidden="true" onClick={() => setOpen(false)} />
-          <div id="lp-menu" ref={menuRef} className="lp-menu lg:hidden">
-            <nav className="mx-auto flex max-w-[1180px] flex-col px-5 pb-6 pt-1 sm:px-8" aria-label="Seções da página">
+          <div className="lp-menu-scrim xl:hidden" aria-hidden="true" onClick={() => setOpen(false)} />
+          <div id="lp-menu" ref={menuRef} className="lp-menu xl:hidden">
+            <nav className="mx-auto flex max-w-[1200px] flex-col px-5 pb-6 pt-1 sm:px-8" aria-label="Seções da página">
               {NAV_LINKS.map((l) => (
                 <a
                   key={l.href}
