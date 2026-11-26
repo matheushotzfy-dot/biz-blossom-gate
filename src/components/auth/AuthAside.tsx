@@ -15,7 +15,7 @@ export interface AuthAsideProps {
 const MOVES = [
   { label: "Pix recebido", meta: "Curso completo · agora", value: "+ R$ 197,00", in: true },
   { label: "Cartão aprovado", meta: "Mentoria · 2 min", value: "+ R$ 497,00", in: true },
-  { label: "Saque via Pix", meta: "Conta pessoal · 9 min", value: "− R$ 1.200,00", in: false },
+  { label: "Saque via Pix", meta: "Chave cadastrada", value: "− R$ 1.200,00", in: false },
 ] as const;
 
 export function AuthAside({ className }: AuthAsideProps) {
@@ -74,7 +74,7 @@ export function AuthAside({ className }: AuthAsideProps) {
           <span className="grid h-8 w-8 place-items-center rounded-full bg-primary text-primary-foreground"><Check className="h-4 w-4" strokeWidth={3} /></span>
           <span>
             <span className="block text-[12px] font-bold text-foreground">Pix aprovado</span>
-            <span className="block text-[10.5px] text-muted-foreground">Saldo creditado na hora</span>
+            <span className="block text-[10.5px] text-muted-foreground">Entra no seu saldo</span>
           </span>
         </motion.div>
       </div>
@@ -82,9 +82,9 @@ export function AuthAside({ className }: AuthAsideProps) {
       <motion.div {...rise(0.4)} className="relative mt-8 max-w-[440px]">
         <h2 className="font-heading text-[30px] font-extrabold leading-[1.1] tracking-[-0.03em]">Receba, acompanhe e saque. Tudo em um só lugar.</h2>
         <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[13px] font-semibold opacity-90">
-          <li className="flex items-center gap-1.5"><Check className="h-4 w-4" /> Aprovação acima de 75%</li>
-          <li className="flex items-center gap-1.5"><Check className="h-4 w-4" /> Saque instantâneo</li>
-          <li className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4" /> Antifraude e LGPD</li>
+          <li className="flex items-center gap-1.5"><Check className="h-4 w-4" /> Pix, cartão e boleto</li>
+          <li className="flex items-center gap-1.5"><Check className="h-4 w-4" /> Saque por Pix com a sua senha</li>
+          <li className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4" /> Verificação de identidade</li>
         </ul>
       </motion.div>
     </aside>

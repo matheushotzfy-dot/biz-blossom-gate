@@ -6,7 +6,8 @@ import { useKycDecision } from "@/features/admin-finance/useKycDecision";
 import { useConfirm, useReason } from "@/components/seller-ui/confirm";
 import { useSensitiveConfirm } from "@/features/admin-finance/useSensitiveConfirm";
 import { validateSellerNumbers } from "@/features/admin-finance/sellersModel";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { REFERRAL_OPTIONS, REVENUE_OPTIONS, SEGMENT_OPTIONS } from "@/features/auth/authModel";
 import { SellerWithdrawalsSection } from "@/features/admin-finance/SellerDetailSections";
 import { Seller360Panel } from "@/features/admin-finance/Seller360Panel";
 import { NumberInput } from "@/components/ui/number-input";
@@ -736,6 +737,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <InfoRow label="Cadastro" value={selectedUser ? new Date(selectedUser.created_at).toLocaleString("pt-BR") : ""} />
                     <InfoRow label="Saldo Congelado" value={selectedUser && isFrozen(selectedUser) ? "SIM" : "NÃO"} />
                     <InfoRow label="E-mail verificado" value={emailVerified === null ? "—" : emailVerified ? "SIM" : "NÃO"} />
+                    {selectedUser && <SignupInfoRows userId={selectedUser.user_id} />}
                   </div>
 
                   {/* ── Histórico de IP ── */}
@@ -1379,6 +1381,35 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       </Dialog>
 
     </div>
+  );
+}
+
+const optionLabel = (options: ReadonlyArray<{ value: string; label: string }>, value: string | null | undefined) =>
+  value ? options.find((o) => o.value === value)?.label ?? value : null;
+
+/** O que o seller respondeu no cadastro (tabela `seller_signup_info`; contas antigas não têm). */
+function SignupInfoRows({ userId }: { userId: string }) {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["admin-seller-signup-info", userId],
+    queryFn: async () => {
+      const { data: row, error } = await supabase
+        .from("seller_signup_info")
+        .select("company_name, business_segment, monthly_revenue_band, referral_source")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (error) throw error;
+      return row;
+    },
+    staleTime: 60_000,
+  });
+  const fallback = isLoading ? "Carregando…" : isError ? "Não foi possível carregar" : null;
+  return (
+    <>
+      <InfoRow label="Razão social" value={fallback ?? data?.company_name} />
+      <InfoRow label="O que vende" value={fallback ?? optionLabel(SEGMENT_OPTIONS, data?.business_segment)} />
+      <InfoRow label="Faturamento mensal (informado)" value={fallback ?? optionLabel(REVENUE_OPTIONS, data?.monthly_revenue_band)} />
+      <InfoRow label="Como conheceu" value={fallback ?? optionLabel(REFERRAL_OPTIONS, data?.referral_source)} />
+    </>
   );
 }
 

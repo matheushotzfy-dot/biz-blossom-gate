@@ -3941,6 +3941,33 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_signup_info: {
+        Row: {
+          business_segment: string | null
+          company_name: string | null
+          created_at: string
+          monthly_revenue_band: string | null
+          referral_source: string | null
+          user_id: string
+        }
+        Insert: {
+          business_segment?: string | null
+          company_name?: string | null
+          created_at?: string
+          monthly_revenue_band?: string | null
+          referral_source?: string | null
+          user_id: string
+        }
+        Update: {
+          business_segment?: string | null
+          company_name?: string | null
+          created_at?: string
+          monthly_revenue_band?: string | null
+          referral_source?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       seller_withdrawal_blocks: {
         Row: {
           active: boolean

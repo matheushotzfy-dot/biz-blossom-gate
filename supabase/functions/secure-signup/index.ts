@@ -36,7 +36,9 @@ function sanitizeMetadata(value: unknown): Record<string, string | null> | null 
     if (rawValue === null) {
       sanitized[key] = null;
     } else if (typeof rawValue === "string") {
-      sanitized[key] = rawValue.trim().slice(0, key === "full_name" ? 120 : 254);
+      // Sem caracteres de controle e com espaços normais: o texto vai para o perfil e para o painel da equipe.
+      const clean = rawValue.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim();
+      sanitized[key] = clean.slice(0, key === "full_name" ? 120 : key === "nickname" ? 30 : key === "company_name" ? 160 : 254);
     } else {
       return null;
     }
@@ -78,8 +80,10 @@ Deno.serve(async (req) => {
     const metadata = sanitizeMetadata(body?.metadata);
     const documentNumber = metadata?.document_number?.replace(/\D/g, "") ?? "";
     const phone = metadata?.phone?.replace(/\D/g, "") ?? "";
+    const fullName = metadata?.full_name ?? "";
 
     if (!EMAIL_PATTERN.test(email) || email.length > 254 || !metadata
+      || fullName.replace(/[^\p{L}]/gu, "").length < 4 || !fullName.includes(" ")
       || !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,128}$/.test(password)
       || ![11, 14].includes(documentNumber.length) || !validCpfOrCnpj(documentNumber)
       || phone.length < 10 || phone.length > 13) {
@@ -87,6 +91,10 @@ Deno.serve(async (req) => {
     }
     metadata.document_number = documentNumber;
     metadata.phone = phone;
+    // O tipo do documento sai dos dígitos, nunca do que o navegador mandou; razão social só existe para CNPJ.
+    metadata.document_type = documentNumber.length === 14 ? "cnpj" : "cpf";
+    if (metadata.document_type === "cpf") metadata.company_name = null;
+    if (!metadata.nickname) metadata.nickname = fullName.split(" ")[0].slice(0, 30);
 
     const { data: setting } = await admin.from("platform_settings")
       .select("value").eq("key", "require_email_verification").maybeSingle();

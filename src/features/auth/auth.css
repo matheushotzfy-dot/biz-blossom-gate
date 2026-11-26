@@ -1,0 +1,15 @@
+/*
+ * Entrada, cadastro e recuperação (`src/features/auth`).
+ * Campo com erro: as regras globais antigas de `input` fixam a cor da borda com !important e anulam a variante
+ * `aria-[invalid=true]:` do Tailwind, então o estado de erro é declarado aqui, com especificidade maior.
+ */
+.auth-shell input[aria-invalid="true"]:not([type="checkbox"]):not([type="radio"]),
+.auth-shell select[aria-invalid="true"] {
+  border-color: hsl(var(--destructive)) !important;
+  box-shadow: 0 0 0 3px hsl(var(--destructive) / 0.14) !important;
+}
+
+/* Quem prefere menos movimento não vê o giro do botão de carregamento. */
+@media (prefers-reduced-motion: reduce) {
+  .auth-shell .animate-spin { animation: none; }
+}
