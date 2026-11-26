@@ -5776,6 +5776,10 @@ export type Database = {
       }
       admin_decrypt_field: { Args: { _cipher: string }; Returns: string }
       admin_delete_award_tier: { Args: { _id: string }; Returns: Json }
+      admin_disable_seller_auto_withdraw: {
+        Args: { _reason: string; _seller: string }
+        Returns: Json
+      }
       admin_delete_error_logs: {
         Args: { _reason: string; _scope: string }
         Returns: Json

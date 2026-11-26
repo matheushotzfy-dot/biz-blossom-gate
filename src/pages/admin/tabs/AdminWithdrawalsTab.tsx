@@ -69,7 +69,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onReload }:
   const autoQ = useQuery({
     queryKey: ["wd-auto"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("seller_auto_withdraw").select("id, user_id, enabled, max_amount, admin_user_id");
+      const { data, error } = await supabase.from("seller_auto_withdraw").select("id, user_id, enabled, target_amount, pix_key_id, updated_at");
       if (error) throw error;
       return (data ?? []) as AutoConfig[];
     },
@@ -228,7 +228,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onReload }:
     <div className="space-y-5 animate-fade-in">
       <AdminPageHeader
         eyebrow="Financeiro · Saques" title="Saques"
-        subtitle="Fila de pedidos dos sellers, ajustes de saldo e regras de auto-aprovação."
+        subtitle="Fila de pedidos dos sellers, ajustes de saldo e o saque automático de cada seller."
         status={heroStatus}
         actions={(
           <div className="flex flex-wrap items-center gap-2">
@@ -304,7 +304,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onReload }:
             {(autoQ.isError || lookupFailed) && (
               <p role="alert" className="flex flex-wrap items-center gap-2 text-[12.5px] text-warning">
                 <AlertTriangle className="h-3.5 w-3.5" />
-                {autoQ.isError ? "As regras de auto-aprovação não carregaram." : "Alguns nomes de seller não carregaram."}
+                {autoQ.isError ? "O saque automático dos sellers não carregou." : "Alguns nomes de seller não carregaram."}
                 <button type="button" className="font-semibold underline" onClick={() => void (autoQ.isError ? autoQ.refetch() : retryPeople())}>Tentar de novo</button>
               </p>
             )}

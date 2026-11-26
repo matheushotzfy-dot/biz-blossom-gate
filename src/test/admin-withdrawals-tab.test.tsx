@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 type Res = { data?: unknown; error?: unknown };
 const state = {
-  auto: { data: [{ id: "aw1", user_id: "s1", enabled: true, max_amount: 500, admin_user_id: "adm1" }] } as Res,
+  auto: { data: [{ id: "aw1", user_id: "s1", enabled: true, target_amount: 500, pix_key_id: "pk1", updated_at: "2026-11-20T10:00:00Z" }] } as Res,
   adjustments: { data: [] } as Res,
   extraProfiles: { data: [] } as Res,
   rejectResults: {} as Record<string, Res>,
@@ -84,7 +84,7 @@ const bodyRows = () => within(table()).getAllByRole("row").slice(1);
 
 beforeEach(() => {
   updates.length = 0;
-  state.auto = { data: [{ id: "aw1", user_id: "s1", enabled: true, max_amount: 500, admin_user_id: "adm1" }] };
+  state.auto = { data: [{ id: "aw1", user_id: "s1", enabled: true, target_amount: 500, pix_key_id: "pk1", updated_at: "2026-11-20T10:00:00Z" }] };
   state.adjustments = { data: [] };
   state.extraProfiles = { data: [] };
   state.rejectResults = {};

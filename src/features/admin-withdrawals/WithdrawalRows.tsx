@@ -6,7 +6,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { brl } from "@/features/admin-finance/types";
 import { cn } from "@/lib/utils";
 import { PayoutTarget } from "./PayoutTarget";
-import type { AutoConfig } from "./AutoApprovalDialog";
+import { autoWithdrawLabel, type AutoConfig } from "./AutoApprovalDialog";
 import { REVIEW_VALUE, STATUS_LABEL, fmtDateTime, waitingLabel, withdrawalFlags } from "./withdrawalsModel";
 
 type Withdrawal = Tables<"withdrawals">;
@@ -54,9 +54,11 @@ export function SellerCell({ w, ctx }: { w: Withdrawal; ctx: RowContext }) {
           {w.origin === "auto" && <Tag tone="primary">Pedido automático</Tag>}
         </div>
       )}
-      <button type="button" data-no-fluid onClick={() => ctx.onAuto(w.user_id)} style={{ minHeight: 0, padding: 0 }} className="mt-1.5 block text-left text-[12px] font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
-        {auto?.enabled ? `Auto-aprovação até ${brl(auto.max_amount)}` : "Configurar auto-aprovação"}
-      </button>
+      {autoWithdrawLabel(auto) && (
+        <button type="button" data-no-fluid onClick={() => ctx.onAuto(w.user_id)} style={{ minHeight: 0, padding: 0 }} className="mt-1.5 block text-left text-[12px] font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline" title="Ver o saque automático deste seller">
+          {autoWithdrawLabel(auto)} ligado
+        </button>
+      )}
     </div>
   );
 }

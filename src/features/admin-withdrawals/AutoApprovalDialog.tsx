@@ -2,43 +2,43 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { logAdminAction } from "@/lib/auditLog";
 import { friendlyError } from "@/lib/friendlyError";
-import { PAYOUTS_AVAILABLE, parseAmount, validateAutoLimit } from "./withdrawalsModel";
+import { brl } from "@/features/admin-finance/types";
+import { fmtDateTime } from "./withdrawalsModel";
 
-export interface AutoConfig { id: string; user_id: string; enabled: boolean; max_amount: number; admin_user_id: string }
+/**
+ * Saque automático configurado pelo PRÓPRIO seller (`seller_auto_withdraw`): quando o saldo chega em
+ * `target_amount`, `check_auto_withdrawal` cria um pedido na chave escolhida. Não existe aprovação
+ * automática de saque; o pedido entra na fila como qualquer outro.
+ */
+export interface AutoConfig { id: string; user_id: string; enabled: boolean; target_amount: number | null; pix_key_id: string | null; updated_at?: string | null }
 
-/** Regra de auto-aprovação de um seller: liga/desliga e valor máximo. */
-export function AutoApprovalDialog({ sellerId, sellerName, config, adminId, onClose, onSaved }: {
+export const autoWithdrawLabel = (c?: AutoConfig) =>
+  c?.enabled && c.target_amount ? `Saque automático de ${brl(Number(c.target_amount))}` : null;
+
+/** Mostra o saque automático do seller e deixa o admin desligá-lo (motivo obrigatório; o seller é avisado). */
+export function AutoApprovalDialog({ sellerId, sellerName, config, onClose, onSaved }: {
   sellerId: string | null; sellerName: string; config?: AutoConfig; adminId?: string; onClose: () => void; onSaved: () => void;
 }) {
-  const [enabled, setEnabled] = useState(false);
-  const [max, setMax] = useState("100,00");
+  const [reason, setReason] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const on = Boolean(config?.enabled);
 
-  useEffect(() => {
+  useEffect(() => { if (sellerId) { setReason(""); setError(""); } }, [sellerId]);
+
+  const disable = async () => {
+    const text = reason.trim();
+    if (text.length < 5) { setError("Explique o motivo com pelo menos 5 caracteres. O seller lê este texto."); return; }
     if (!sellerId) return;
-    setEnabled(config?.enabled ?? false);
-    setMax(config ? Number(config.max_amount).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "100,00");
-    setError("");
-  }, [sellerId, config]);
-
-  const save = async () => {
-    const problem = validateAutoLimit(max);
-    if (problem) { setError(problem); return; }
-    if (!sellerId || !adminId) { setError("Sessão inválida. Entre de novo."); return; }
     setError(""); setBusy(true);
     try {
-      const payload = { user_id: sellerId, enabled, max_amount: parseAmount(max) ?? 0, admin_user_id: adminId, updated_at: new Date().toISOString() };
-      const { error: upErr } = await supabase.from("seller_auto_withdraw").upsert(payload, { onConflict: "user_id" });
-      if (upErr) { setError(friendlyError(upErr, "Não foi possível salvar a regra.")); return; }
-      toast.success("Regra salva");
-      await logAdminAction("update_seller_auto_withdraw", "seller_auto_withdraw", sellerId, payload);
+      const { error: rpcErr } = await supabase.rpc("admin_disable_seller_auto_withdraw", { _seller: sellerId, _reason: text });
+      if (rpcErr) { setError(friendlyError(rpcErr, "Não foi possível desligar o saque automático.")); return; }
+      toast.success("Saque automático desligado. O seller foi avisado.");
       onSaved(); onClose();
     } finally { setBusy(false); }
   };
@@ -47,23 +47,38 @@ export function AutoApprovalDialog({ sellerId, sellerName, config, adminId, onCl
     <Dialog open={!!sellerId} onOpenChange={(o) => { if (!o && !busy) onClose(); }}>
       <DialogContent className="max-w-md gap-0 overflow-hidden p-0">
         <DialogHeader className="border-b border-border px-5 py-4 text-left">
-          <DialogTitle>Auto-aprovação de saques</DialogTitle>
+          <DialogTitle>Saque automático do seller</DialogTitle>
           <DialogDescription>{sellerName}</DialogDescription>
         </DialogHeader>
-        <form className="space-y-4 px-5 py-4" noValidate onSubmit={(e) => { e.preventDefault(); void save(); }}>
-          <label className="flex cursor-pointer items-center justify-between gap-4 rounded-[10px] border border-border bg-muted/30 p-3">
-            <span><span className="block text-[13.5px] font-semibold">Aprovar sozinho até o limite</span><span className="block text-[12px] text-muted-foreground">Acima do limite o saque espera a sua revisão.</span></span>
-            <Switch checked={enabled} onCheckedChange={setEnabled} aria-label="Aprovar sozinho até o limite" />
-          </label>
-          <div className="space-y-1">
-            <Label htmlFor="auto-max" className="text-[12px] font-medium text-muted-foreground">Limite por saque (R$)</Label>
-            <Input id="auto-max" inputMode="decimal" value={max} onChange={(e) => { setMax(e.target.value); if (error) setError(""); }} />
+        <form className="space-y-4 px-5 py-4" noValidate onSubmit={(e) => { e.preventDefault(); if (on) void disable(); }}>
+          <div className="rounded-[10px] border border-border bg-muted/30 p-3 text-[13.5px]">
+            {on ? (
+              <>
+                <p className="font-semibold text-foreground">Ligado pelo seller</p>
+                <p className="mt-1 text-muted-foreground">
+                  Quando o saldo chega em {config?.target_amount ? brl(Number(config.target_amount)) : "o valor escolhido"}, um pedido de saque desse valor entra na fila, na chave Pix que o seller escolheu. O pedido espera a sua aprovação como os outros.
+                </p>
+                {config?.updated_at && <p className="mt-1 text-[12px] text-muted-foreground">Última mudança em {fmtDateTime(config.updated_at)}.</p>}
+              </>
+            ) : (
+              <>
+                <p className="font-semibold text-foreground">Desligado</p>
+                <p className="mt-1 text-muted-foreground">Só o seller liga o saque automático, na tela de Saques do painel dele.</p>
+              </>
+            )}
           </div>
-          {!PAYOUTS_AVAILABLE && <p className="rounded-[10px] border border-warning/30 bg-warning/10 px-3 py-2 text-[12.5px] text-foreground">A regra fica salva, mas nenhum saque é pago enquanto não houver uma adquirente configurada.</p>}
-          {error && <p role="alert" className="text-[12.5px] font-medium text-destructive">{error}</p>}
+          {on && (
+            <div className="space-y-1">
+              <Label htmlFor="auto-reason" className="text-[12.5px] font-medium">Motivo para desligar</Label>
+              <Textarea id="auto-reason" rows={3} maxLength={300} value={reason} placeholder="Ex.: chave Pix em análise por suspeita de fraude"
+                onChange={(e) => { setReason(e.target.value); if (error) setError(""); }} aria-invalid={Boolean(error)} />
+              <p className="text-[12px] text-muted-foreground">O seller recebe um aviso com este motivo e pode ligar de novo.</p>
+            </div>
+          )}
+          {error && <p role="alert" className="text-[13px] font-medium text-destructive">{error}</p>}
           <DialogFooter className="gap-2 sm:gap-2">
-            <Button type="button" variant="outline" onClick={onClose} disabled={busy}>Cancelar</Button>
-            <Button type="submit" disabled={busy}>{busy ? "Salvando…" : "Salvar regra"}</Button>
+            <Button type="button" variant="outline" disabled={busy} onClick={onClose}>Fechar</Button>
+            {on && <Button type="submit" variant="destructive" disabled={busy}>{busy ? "Desligando…" : "Desligar saque automático"}</Button>}
           </DialogFooter>
         </form>
       </DialogContent>
