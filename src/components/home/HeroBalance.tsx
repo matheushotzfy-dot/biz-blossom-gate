@@ -59,10 +59,11 @@ export function HeroBalance(p: HeroBalanceProps) {
         </div>
       </div>
 
-      <div className="mt-auto flex flex-wrap gap-2.5 pt-8">
-        <button onClick={p.onPix} className="vp-bal-btn vp-bal-btn-main"><QrCode className="h-[18px] w-[18px]" strokeWidth={2.2} />Cobrar via Pix</button>
-        <button onClick={p.onWithdraw} className="vp-bal-btn vp-bal-btn-ghost"><ArrowDownToLine className="h-[18px] w-[18px]" strokeWidth={2.2} />Sacar</button>
-        <button onClick={p.onCharge} className="vp-bal-btn vp-bal-btn-ghost"><Share2 className="h-[18px] w-[18px]" strokeWidth={2.2} />Enviar link</button>
+      {/* No celular: "Cobrar via Pix" na linha toda e Sacar/Enviar link lado a lado (antes o terceiro botão caía sozinho numa linha). */}
+      <div className="mt-auto grid grid-cols-[repeat(2,minmax(0,1fr))] gap-2.5 pt-8 sm:flex sm:flex-wrap">
+        <button onClick={p.onPix} className="vp-bal-btn vp-bal-btn-main col-span-2 w-full justify-center sm:w-auto"><QrCode className="h-[18px] w-[18px]" strokeWidth={2.2} />Cobrar via Pix</button>
+        <button onClick={p.onWithdraw} className="vp-bal-btn vp-bal-btn-ghost w-full justify-center sm:w-auto"><ArrowDownToLine className="h-[18px] w-[18px]" strokeWidth={2.2} />Sacar</button>
+        <button onClick={p.onCharge} className="vp-bal-btn vp-bal-btn-ghost w-full justify-center sm:w-auto"><Share2 className="h-[18px] w-[18px]" strokeWidth={2.2} />Enviar link</button>
         <div className="hidden sm:block xl:max-[1399px]:hidden">
           <button onClick={p.onMore} className="vp-bal-btn vp-bal-btn-ghost"><Blocks className="h-[18px] w-[18px]" strokeWidth={2.2} />Integrações</button>
         </div>
