@@ -1,14 +1,30 @@
+import { useEffect, useState } from "react";
 import { Toaster as Sonner, toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
+
+/** No celular o aviso sai em cima: embaixo ele cobria os botões dos diálogos e a barra de navegação. */
+function useSmallScreen() {
+  const query = "(max-width: 639px)";
+  const [small, setSmall] = useState(() => typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia(query).matches);
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const mq = window.matchMedia(query);
+    const on = () => setSmall(mq.matches);
+    mq.addEventListener?.("change", on);
+    return () => mq.removeEventListener?.("change", on);
+  }, []);
+  return small;
+}
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
  const { theme } = useTheme();
+ const small = useSmallScreen();
  return (
  <Sonner
   theme={theme}
- position="bottom-right"
+ position={small ? "top-center" : "bottom-right"}
  className="toaster group"
  toastOptions={{
  style: {
