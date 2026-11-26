@@ -8,6 +8,7 @@ import { Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { brl, rpcErrorMessage } from "./types";
 import { useSensitiveConfirm } from "./useSensitiveConfirm";
+import { parseAmount, validateAdjustment } from "@/features/admin-withdrawals/withdrawalsModel";
 
 interface PendingRequest { id: string; type: string; amount: number; reason: string; created_at: string }
 
@@ -22,6 +23,7 @@ export function BalanceAdjustCard({ userId, onDone }: BalanceAdjustCardProps) {
   const [amount, setAmount] = useState("");
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
+  const [deciding, setDeciding] = useState<string | null>(null);
   const [pending, setPending] = useState<PendingRequest[]>([]);
   const { confirm, dialog } = useSensitiveConfirm();
 
@@ -35,9 +37,11 @@ export function BalanceAdjustCard({ userId, onDone }: BalanceAdjustCardProps) {
   useEffect(() => { void loadPending(); }, [loadPending]);
 
   const submit = async () => {
-    const value = Number(amount.replace(",", "."));
-    if (!Number.isFinite(value) || value <= 0 || value > 1000000) { toast.error("Informe um valor entre R$ 0,01 e R$ 1.000.000"); return; }
-    if (reason.trim().length < 5) { toast.error("Motivo obrigatório (mín. 5 caracteres)"); return; }
+    if (busy) return;
+    // mesmo parser do ajuste da aba Saques: "1.500" não vira R$ 1,50 por engano
+    const problem = validateAdjustment({ userId, amount, reason });
+    if (problem) { toast.error(problem); return; }
+    const value = parseAmount(amount) ?? 0;
     confirm(`${type === "credit" ? "Creditar" : "Debitar"} ${brl(value)} no saldo do seller.`, () => execute(value));
   };
 
@@ -60,10 +64,16 @@ export function BalanceAdjustCard({ userId, onDone }: BalanceAdjustCardProps) {
   };
 
   const executeDecision = async (id: string, approve: boolean) => {
-    const { error } = await supabase.rpc("admin_decide_balance_adjustment", { _request_id: id, _approve: approve });
-    if (error) { toast.error(rpcErrorMessage(error)); return; }
-    toast.success(approve ? "Ajuste aprovado" : "Ajuste recusado");
-    void loadPending(); onDone();
+    if (deciding) return;
+    setDeciding(id);
+    try {
+      const { error } = await supabase.rpc("admin_decide_balance_adjustment", { _request_id: id, _approve: approve });
+      if (error) { toast.error(rpcErrorMessage(error)); void loadPending(); return; }
+      toast.success(approve ? "Ajuste aprovado" : "Ajuste recusado");
+      void loadPending(); onDone();
+    } finally {
+      setDeciding(null);
+    }
   };
 
   return (
@@ -94,8 +104,8 @@ export function BalanceAdjustCard({ userId, onDone }: BalanceAdjustCardProps) {
                 <p className="truncate text-[11px] text-muted-foreground">{p.reason}</p>
               </div>
               <div className="flex gap-1">
-                <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => decide(p.id, true)} aria-label="Aprovar"><Check className="h-3.5 w-3.5" /></Button>
-                <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => decide(p.id, false)} aria-label="Recusar"><X className="h-3.5 w-3.5" /></Button>
+                <Button size="icon" variant="outline" className="h-7 w-7" disabled={deciding !== null} onClick={() => decide(p.id, true)} aria-label={`Aprovar ${p.type === "credit" ? "crédito" : "débito"} de ${brl(p.amount)}`}><Check className="h-3.5 w-3.5" /></Button>
+                <Button size="icon" variant="outline" className="h-7 w-7" disabled={deciding !== null} onClick={() => decide(p.id, false)} aria-label={`Recusar ${p.type === "credit" ? "crédito" : "débito"} de ${brl(p.amount)}`}><X className="h-3.5 w-3.5" /></Button>
               </div>
             </div>
           ))}

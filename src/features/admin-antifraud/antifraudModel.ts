@@ -155,8 +155,11 @@ export function validateDraft(r: VelocityRule, d: RuleDraft): { error: string | 
   if (!/^\d+$/.test(d.window.trim()) || win < 1 || win > 10080) return { error: "A janela deve ficar entre 1 minuto e 7 dias (10.080 minutos)." };
   let threshold: number | null = null;
   if (hasThreshold(r) && d.threshold.trim()) {
-    threshold = Number(d.threshold.replace(",", "."));
-    if (!Number.isFinite(threshold) || threshold < 0) return { error: "O valor mínimo precisa ser um número igual ou maior que zero." };
+    // em reais, como no resto do painel: "1.500" sem vírgula seria lido como R$ 1,50 e a regra pegaria quase toda venda
+    const typed = d.threshold.trim().replace(/\s/g, "");
+    const normalized = /,/.test(typed) ? typed.replace(/\./g, "").replace(",", ".") : typed;
+    if (!/^\d+(\.\d{1,2})?$/.test(normalized)) return { error: "O valor mínimo precisa ser um valor em reais, por exemplo 500 ou 250,50." };
+    threshold = Number(normalized);
   }
   return { error: null, value: { enabled: d.enabled, max, window: win, threshold, action: d.action } };
 }

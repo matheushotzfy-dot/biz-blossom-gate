@@ -313,7 +313,9 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
                   <td className={cn(premiumTable.td, "text-right")}>
                     <div className="inline-flex items-center gap-1 rounded-md border border-border bg-muted/30 px-1.5 py-0.5 focus-within:border-primary">
                       <input
+                        key={`${row.user_id}:${row.pct}`}
                         type="number" step="0.01" min="0" max="50"
+                        aria-label={`Comissão de ${row.full_name || row.email}, em %`}
                         defaultValue={row.pct}
                         onBlur={(e) => {
                           const v = parseFloat(e.target.value);

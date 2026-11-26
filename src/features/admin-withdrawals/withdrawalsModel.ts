@@ -87,6 +87,12 @@ export function parseAmount(input: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+/** Percentual digitado ("12,5", "12.5", "10") entre 0 e 100, até 2 casas; null se não der para entender. */
+export function parsePercent(input: string): number | null {
+  const n = parseAmount(input.trim().replace(/%$/, ""));
+  return n !== null && n <= 100 ? n : null;
+}
+
 export function validateAdjustment(input: { userId: string; amount: string; reason: string }): string | null {
   if (!input.userId) return "Escolha o seller.";
   const amount = parseAmount(input.amount);

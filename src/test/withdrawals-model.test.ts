@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildStatement, fmtDateTime, isHighValue, isNewSeller, parseAmount, sortQueue, summarizeWithdrawals, validateAdjustment, validateAutoLimit, waitingLabel, withdrawalFlags } from "@/features/admin-withdrawals/withdrawalsModel";
+import { buildStatement, fmtDateTime, isHighValue, isNewSeller, parseAmount, parsePercent, sortQueue, summarizeWithdrawals, validateAdjustment, validateAutoLimit, waitingLabel, withdrawalFlags } from "@/features/admin-withdrawals/withdrawalsModel";
 
 const NOW = new Date("2026-11-25T12:00:00Z").getTime();
 const w = (over: Record<string, unknown>) => ({ id: "w1", status: "pending", user_id: "u1", amount: 100, fee_amount: 5, net_amount: 95, processed_at: null, created_at: "2026-11-24T10:00:00Z", ...over }) as never;
@@ -65,6 +65,19 @@ describe("valores digitados", () => {
     expect(validateAutoLimit("abc")).toMatch(/maior que zero/);
     expect(validateAutoLimit("2.000.000,00")).toMatch(/máximo/);
     expect(validateAutoLimit("500,00")).toBeNull();
+  });
+});
+
+describe("percentual digitado", () => {
+  it("lê vírgula e ponto, de 0 a 100, com até 2 casas", () => {
+    expect(parsePercent("12,5")).toBe(12.5);
+    expect(parsePercent("12.5")).toBe(12.5);
+    expect(parsePercent("0")).toBe(0);
+    expect(parsePercent("100")).toBe(100);
+    expect(parsePercent(" 7,25% ")).toBe(7.25);
+  });
+  it("recusa o que não dá para entender, passa de 100 ou tem 3 casas", () => {
+    for (const bad of ["", "abc", "-1", "100,01", "101", "12,345", "1.500", "5%%"]) expect(parsePercent(bad)).toBeNull();
   });
 });
 

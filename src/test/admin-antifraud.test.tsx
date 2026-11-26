@@ -149,6 +149,10 @@ describe("antifraudModel", () => {
     const dh = draftFromRule(hv);
     expect(validateDraft(hv, { ...dh, threshold: "-1" }).error).toContain("valor mínimo");
     expect(validateDraft(hv, { ...dh, threshold: "250,50" }).value?.threshold).toBe(250.5);
+    expect(validateDraft(hv, { ...dh, threshold: "1.500,00" }).value?.threshold).toBe(1500);
+    expect(validateDraft(hv, { ...dh, threshold: "500" }).value?.threshold).toBe(500);
+    // "1.500" sem vírgula não pode virar R$ 1,50
+    expect(validateDraft(hv, { ...dh, threshold: "1.500" }).error).toContain("valor mínimo");
     expect(validateDraft(hv, { ...dh, threshold: "" }).value?.threshold).toBeNull();
   });
 

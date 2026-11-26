@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { PremiumMetric, PremiumMetricGrid, PremiumPanel, premiumTable, PremiumEmpty } from "./AdminPremium";
 import { friendlyError } from "@/lib/friendlyError";
 import { useSensitiveConfirm } from "@/features/admin-finance/useSensitiveConfirm";
+import { parseAmount, parsePercent } from "@/features/admin-withdrawals/withdrawalsModel";
 
 const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -336,6 +337,14 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
   const [newPct, setNewPct] = useState("");
   const [detailState, setDetailState] = useState<"loading" | "ok" | "error">("loading");
   const { confirm, dialog: confirmDialog } = useSensitiveConfirm();
+  // Uma gravação por vez: duplo clique não pode criar dois pagamentos nem dois overrides.
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+  const running = useRef(false);
+  const guarded = async (key: string, job: () => Promise<void>) => {
+    if (running.current) return;
+    running.current = true; setBusyKey(key);
+    try { await job(); } finally { running.current = false; setBusyKey(null); }
+  };
 
   const loadDetail = async (userId: string) => {
     setDetailState("loading");
@@ -359,41 +368,50 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
 
   if (!selected) return null;
 
-  const saveBasePct = async () => {
-    const v = parseFloat(newPct);
-    if (!Number.isFinite(v) || v < 0 || v > 100) { toast.error("% deve estar entre 0 e 100"); return; }
-    const { error } = await supabase.from("staff_commission_config").upsert({
-      user_id: selected.user_id, base_pct: v, base: "net_amount", is_active: true,
+  // A validação roda antes de travar: um valor errado só mostra o aviso, sem piscar "Salvando…".
+  const saveBasePct = () => {
+    if (running.current) return;
+    const v = parsePercent(newPct);
+    if (v === null) { toast.error("Informe uma % entre 0 e 100, com até 2 casas decimais."); return; }
+    void guarded("base", async () => {
+      const { error } = await supabase.from("staff_commission_config").upsert({
+        user_id: selected.user_id, base_pct: v, base: "net_amount", is_active: true,
+      });
+      if (error) { toast.error(friendlyError(error)); return; }
+      toast.success("Percentual padrão atualizado");
+      onChanged();
     });
-    if (error) { toast.error(friendlyError(error)); return; }
-    toast.success("Percentual padrão atualizado");
-    onChanged();
   };
 
-  const addOverride = async () => {
-    if (!newOverrideSeller || !newOverridePct) return;
-    const pctValue = parseFloat(newOverridePct);
-    if (!Number.isFinite(pctValue) || pctValue < 0 || pctValue > 100) { toast.error("% override deve estar entre 0 e 100"); return; }
-    const { error } = await supabase.from("staff_commission_overrides").insert({
-      staff_user_id: selected.user_id, seller_user_id: newOverrideSeller, pct: pctValue,
+  const addOverride = () => {
+    if (running.current) return;
+    if (!newOverrideSeller) { toast.error("Escolha o seller do override."); return; }
+    const pctValue = parsePercent(newOverridePct);
+    if (pctValue === null) { toast.error("Informe uma % entre 0 e 100, com até 2 casas decimais."); return; }
+    if (overrides.some((o) => o.seller_user_id === newOverrideSeller)) { toast.error("Esse seller já tem override. Remova o atual antes de criar outro."); return; }
+    void guarded("override", async () => {
+      const { error } = await supabase.from("staff_commission_overrides").insert({
+        staff_user_id: selected.user_id, seller_user_id: newOverrideSeller, pct: pctValue,
+      });
+      if (error) { toast.error(friendlyError(error)); return; }
+      setNewOverrideSeller(""); setNewOverridePct("");
+      toast.success("Override adicionado");
+      const { data } = await supabase.from("staff_commission_overrides").select("*").eq("staff_user_id", selected.user_id);
+      setOverrides(data ?? []);
     });
-    if (error) { toast.error(friendlyError(error)); return; }
-    setNewOverrideSeller(""); setNewOverridePct("");
-    toast.success("Override adicionado");
-    const { data } = await supabase.from("staff_commission_overrides").select("*").eq("staff_user_id", selected.user_id);
-    setOverrides(data ?? []);
   };
 
-  const removeOverride = async (id: string) => {
+  const removeOverride = (id: string) => guarded(`rm:${id}`, async () => {
     const { error } = await supabase.from("staff_commission_overrides").delete().eq("id", id);
     if (error) { toast.error(friendlyError(error)); return; }
-    setOverrides(overrides.filter((o) => o.id !== id));
+    setOverrides((cur) => cur.filter((o) => o.id !== id));
     toast.success("Override removido");
-  };
+  });
 
   const createPayout = () => {
-    const v = parseFloat(payoutAmount);
-    if (!Number.isFinite(v) || v <= 0) { toast.error("Valor inválido"); return; }
+    if (running.current) return;
+    const v = parseAmount(payoutAmount);
+    if (v === null || v <= 0) { toast.error("Informe o valor em reais maior que zero, com até 2 casas decimais."); return; }
     // pagamentos já registrados e ainda pendentes também saem do mesmo saldo
     const pendingSum = payouts.filter((x) => x.status === "pending").reduce((sum, x) => sum + Number(x.amount), 0);
     const free = Math.round((selected.balance - pendingSum) * 100) / 100;
@@ -404,31 +422,32 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
     confirm(`Registrar pagamento de ${fmt(v)} para ${selected.full_name}.`, () => executeCreatePayout(v));
   };
 
-  const executeCreatePayout = async (v: number) => {
+  const executeCreatePayout = (v: number) => guarded("payout", async () => {
     const { error } = await supabase.from("staff_commission_payouts").insert({
-      staff_user_id: selected.user_id, amount: v, method: payoutMethod, notes: payoutNotes, status: "pending",
+      staff_user_id: selected.user_id, amount: v, method: payoutMethod.trim() || "PIX", notes: payoutNotes.trim(), status: "pending",
     });
     if (error) { toast.error(friendlyError(error)); return; }
     setPayoutAmount(""); setPayoutNotes("");
     toast.success("Pagamento criado como pendente");
     const { data } = await supabase.from("staff_commission_payouts").select("*").eq("staff_user_id", selected.user_id).order("created_at", { ascending: false });
     setPayouts(data ?? []);
-  };
+  });
 
   const markPaid = (id: string) => {
+    if (running.current) return;
     const payout = payouts.find((x) => x.id === id);
-    if (!payout) return;
+    if (!payout || payout.status !== "pending") return;
     confirm(`Marcar como pago ${fmt(Number(payout.amount))} para ${selected.full_name}. O saldo da conta é debitado e isso não dá para desfazer aqui.`, () => executeMarkPaid(id));
   };
 
-  const executeMarkPaid = async (id: string) => {
+  const executeMarkPaid = (id: string) => guarded(`paid:${id}`, async () => {
     const { error } = await supabase.from("staff_commission_payouts").update({ status: "paid" }).eq("id", id);
     if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Pagamento efetivado");
     const { data } = await supabase.from("staff_commission_payouts").select("*").eq("staff_user_id", selected.user_id).order("created_at", { ascending: false });
     setPayouts(data ?? []);
     onChanged();
-  };
+  });
 
   const role = selected.role;
   const tabs = [
@@ -481,7 +500,7 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
             </Label>
             <Input id="commission-base-pct" value={newPct} onChange={(e) => setNewPct(e.target.value)} type="number" step="0.01" min="0" max="100"
               className="h-8 w-24 shrink-0 font-mono text-sm" />
-            <Button size="sm" onClick={saveBasePct} className="h-8">Salvar</Button>
+            <Button size="sm" onClick={saveBasePct} disabled={busyKey !== null} className="h-8">{busyKey === "base" ? "Salvando…" : "Salvar"}</Button>
           </div>
 
           <div className="flex max-w-full gap-1 overflow-x-auto rounded-lg border border-border bg-muted/30 p-0.5">
@@ -554,8 +573,8 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
                 <p className="mb-3 text-[12px] font-semibold text-muted-foreground">Novo override: percentual específico para um seller</p>
                 <div className="flex flex-col gap-3 md:flex-row md:items-end">
                   <div className="flex-1">
-                    <Label className="text-[12px] font-semibold text-muted-foreground">Seller</Label>
-                    <select value={newOverrideSeller} onChange={(e) => setNewOverrideSeller(e.target.value)}
+                    <Label htmlFor="override-seller" className="text-[12px] font-semibold text-muted-foreground">Seller</Label>
+                    <select id="override-seller" value={newOverrideSeller} onChange={(e) => setNewOverrideSeller(e.target.value)}
                       className="mt-1 h-9 w-full rounded-md border border-border bg-card px-3 text-sm text-foreground transition-colors focus:border-primary focus:outline-none">
                       <option value="">Selecione um seller…</option>
                       {profiles.map((p) => (
@@ -564,11 +583,11 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
                     </select>
                   </div>
                   <div className="w-32">
-                    <Label className="text-[12px] font-semibold text-muted-foreground">% específica</Label>
-                    <Input value={newOverridePct} onChange={(e) => setNewOverridePct(e.target.value)}
-                      type="number" step="0.01" placeholder="0.00" className="mt-1 h-9 font-mono text-sm" />
+                    <Label htmlFor="override-pct" className="text-[12px] font-semibold text-muted-foreground">% específica</Label>
+                    <Input id="override-pct" value={newOverridePct} onChange={(e) => setNewOverridePct(e.target.value)}
+                      type="number" step="0.01" min="0" max="100" placeholder="0,00" className="mt-1 h-9 font-mono text-sm" />
                   </div>
-                  <Button size="sm" onClick={addOverride} className="h-9 gap-1.5"><Plus className="h-3.5 w-3.5" /> Adicionar</Button>
+                  <Button size="sm" onClick={addOverride} disabled={busyKey !== null} className="h-9 gap-1.5"><Plus className="h-3.5 w-3.5" /> {busyKey === "override" ? "Adicionando…" : "Adicionar"}</Button>
                 </div>
               </div>
 
@@ -599,7 +618,7 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
                                 </span>
                               </td>
                               <td className="px-5 py-3 text-right">
-                                <Button size="sm" variant="ghost" onClick={() => removeOverride(o.id)} aria-label="Remover override"
+                                <Button size="sm" variant="ghost" onClick={() => void removeOverride(o.id)} disabled={busyKey !== null} aria-label="Remover override"
                                   className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive">
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </Button>
@@ -620,21 +639,21 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
                 <p className="mb-3 text-[12px] font-semibold text-muted-foreground">Registrar novo pagamento</p>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
                   <div>
-                    <Label className="text-[12px] font-semibold text-muted-foreground">Valor (R$)</Label>
-                    <Input value={payoutAmount} onChange={(e) => setPayoutAmount(e.target.value)} type="number" step="0.01" placeholder="0.00" className="mt-1 h-9 font-mono" />
+                    <Label htmlFor="payout-amount" className="text-[12px] font-semibold text-muted-foreground">Valor (R$)</Label>
+                    <Input id="payout-amount" value={payoutAmount} onChange={(e) => setPayoutAmount(e.target.value)} type="number" step="0.01" min="0" placeholder="0,00" className="mt-1 h-9 font-mono" />
                   </div>
                   <div>
-                    <Label className="text-[12px] font-semibold text-muted-foreground">Método</Label>
-                    <Input value={payoutMethod} onChange={(e) => setPayoutMethod(e.target.value)} className="mt-1 h-9" />
+                    <Label htmlFor="payout-method" className="text-[12px] font-semibold text-muted-foreground">Método</Label>
+                    <Input id="payout-method" value={payoutMethod} onChange={(e) => setPayoutMethod(e.target.value)} maxLength={40} className="mt-1 h-9" />
                   </div>
                   <div className="md:col-span-2">
-                    <Label className="text-[12px] font-semibold text-muted-foreground">Observação</Label>
-                    <Input value={payoutNotes} onChange={(e) => setPayoutNotes(e.target.value)} placeholder="ID da transação, comprovante…" className="mt-1 h-9" />
+                    <Label htmlFor="payout-notes" className="text-[12px] font-semibold text-muted-foreground">Observação</Label>
+                    <Input id="payout-notes" value={payoutNotes} onChange={(e) => setPayoutNotes(e.target.value)} maxLength={300} placeholder="ID da transação, comprovante…" className="mt-1 h-9" />
                   </div>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <p className="text-[10px] font-bold text-muted-foreground">Saldo disponível: <span className="font-mono font-black text-success">{fmt(selected.balance)}</span></p>
-                  <Button size="sm" onClick={createPayout} className="h-9 gap-1.5">
+                  <Button size="sm" onClick={createPayout} disabled={busyKey !== null} className="h-9 gap-1.5">
                     <ArrowDownToLine className="h-3.5 w-3.5" /> Registrar pagamento
                   </Button>
                 </div>
@@ -672,8 +691,8 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
                             <td className="px-5 py-3 text-[11px] text-muted-foreground truncate max-w-[200px]">{p.notes || "—"}</td>
                             <td className="px-5 py-3 text-right">
                               {p.status === "pending" && (
-                                <Button size="sm" onClick={() => markPaid(p.id)} className="h-7 gap-1 text-[10px]">
-                                  <CheckCircle2 className="h-3 w-3" /> Marcar pago
+                                <Button size="sm" onClick={() => markPaid(p.id)} disabled={busyKey !== null} className="h-7 gap-1 text-[10px]">
+                                  <CheckCircle2 className="h-3 w-3" /> {busyKey === `paid:${p.id}` ? "Efetivando…" : "Marcar pago"}
                                 </Button>
                               )}
                             </td>

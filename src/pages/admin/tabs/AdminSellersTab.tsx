@@ -2,6 +2,7 @@ import { WithdrawalBlockControl } from "@/features/staff/WithdrawalBlockControl"
 import { useEffect, useState, useRef } from "react";
 import { SellersDirectory } from "@/features/admin-finance/SellersDirectory";
 import { BalanceAdjustCard } from "@/features/admin-finance/BalanceAdjustCard";
+import { useKycDecision } from "@/features/admin-finance/useKycDecision";
 import { useConfirm, useReason } from "@/components/seller-ui/confirm";
 import { useSensitiveConfirm } from "@/features/admin-finance/useSensitiveConfirm";
 import { validateSellerNumbers } from "@/features/admin-finance/sellersModel";
@@ -26,7 +27,7 @@ import { toast } from "sonner";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -322,28 +323,17 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
     }
   };
 
-  const handleApproveKyc = async (userId: string) => {
-    if (!isAdmin) return;
-    const managerId = approvalManager === "default" || approvalManager === "none" ? null : approvalManager;
-    const { error } = await supabase.rpc("admin_approve_seller_with_manager" as never, { _seller: userId, _manager: managerId } as never);
-    if (error) { toast.error(friendlyError(error)); return; }
-    toast.success(approvalManager === "none" ? "KYC aprovado sem gerente." : "KYC aprovado e carteira atribuída.");
-    setApprovalManager("default");
-    reloadSeller();
-    if (selectedUser?.user_id === userId) setSelectedUser(null);
-  };
-
-  const handleRejectKyc = async () => {
-    if (!isAdmin) return;
-    if (!kycRejectReason.trim()) { toast.error("Informe o motivo da recusa"); return; }
-    const { error } = await supabase.rpc("admin_reject_kyc", { _user_id: rejectTargetUserId, _reason: kycRejectReason.trim() });
-    if (error) { toast.error("Erro ao recusar KYC"); return; }
-    toast.success("KYC recusado. Motivo registrado.");
-    setShowRejectDialog(false);
-    setKycRejectReason("");
-    reloadSeller();
-    if (selectedUser?.user_id === rejectTargetUserId) setSelectedUser(null);
-  };
+  const { busy: kycBusy, approve: approveKyc, reject: rejectKyc } = useKycDecision({
+    enabled: isAdmin,
+    onDone: (userId, kind) => {
+      if (kind === "approved") setApprovalManager("default");
+      else { setShowRejectDialog(false); setKycRejectReason(""); }
+      reloadSeller();
+      if (selectedUser?.user_id === userId) setSelectedUser(null);
+    },
+  });
+  const handleApproveKyc = (userId: string) => { void approveKyc(userId, approvalManager); };
+  const handleRejectKyc = () => { void rejectKyc(rejectTargetUserId, kycRejectReason); };
 
   const handleFreezeBalance = async (userId: string, freeze: boolean) => {
     if (!isAdmin) return;
@@ -601,22 +591,23 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
       {confirmDialog}
 
       {/* ═══ KYC Reject Dialog ═══ */}
-      <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+      <Dialog open={showRejectDialog} onOpenChange={(open) => { if (!kycBusy) setShowRejectDialog(open); }}>
         <DialogContent className="z-[120] max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <XCircle className="h-5 w-5" /> Recusar KYC
             </DialogTitle>
+            <DialogDescription>O seller recebe o motivo na notificação e pode corrigir e reenviar os documentos.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Informe o motivo da recusa. O seller será notificado.</p>
-            <textarea value={kycRejectReason} onChange={e => setKycRejectReason(e.target.value)} rows={4}
+            <label htmlFor="kyc-reject-reason" className="text-sm font-medium text-foreground">Motivo da recusa</label>
+            <textarea id="kyc-reject-reason" value={kycRejectReason} maxLength={500} onChange={e => setKycRejectReason(e.target.value)} rows={4}
               placeholder="Ex: Documento ilegível, foto cortada, nome divergente..."
               className="w-full px-4 py-3 bg-muted/30 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/30 resize-none" />
             <div className="flex gap-2 justify-end">
-              <Button variant="ghost" size="sm" onClick={() => setShowRejectDialog(false)}>Cancelar</Button>
-              <Button size="sm" variant="destructive" className="rounded-xl" disabled={!kycRejectReason.trim()} onClick={handleRejectKyc}>
-                <Send className="h-3 w-3 mr-1" /> Enviar Recusa
+              <Button variant="ghost" size="sm" disabled={kycBusy} onClick={() => setShowRejectDialog(false)}>Cancelar</Button>
+              <Button size="sm" variant="destructive" className="rounded-xl" disabled={kycBusy || kycRejectReason.trim().length < 5} onClick={handleRejectKyc}>
+                <Send className="h-3 w-3 mr-1" /> {kycBusy ? "Enviando..." : "Enviar recusa"}
               </Button>
             </div>
           </div>
@@ -679,7 +670,7 @@ export default function AdminSellersTab({ profiles, transactions, withdrawals, o
                     <Unlock className="h-3 w-3" /> Descongelar
                   </Button>
                 )}
-                {selectedUser?.account_status !== "approved" && <div className="flex gap-1.5"><Select value={approvalManager} onValueChange={setApprovalManager}><SelectTrigger className="h-8 w-48 text-[11px]" aria-label="Gerente na aprovação"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="default">Gerente padrão</SelectItem><SelectItem value="none">Sem gerente</SelectItem>{managerOptions.map(manager => <SelectItem key={manager.user_id} value={manager.user_id}>{manager.label}</SelectItem>)}</SelectContent></Select><Button size="sm" variant="outline" className="h-8 gap-1.5 border-success/30 text-success hover:bg-success/10" onClick={() => handleApproveKyc(selectedUser?.user_id ?? "")}><CheckCircle2 className="h-3 w-3" /> Aprovar</Button></div>}
+                {selectedUser?.account_status !== "approved" && <div className="flex gap-1.5"><Select value={approvalManager} onValueChange={setApprovalManager}><SelectTrigger className="h-8 w-48 text-[11px]" aria-label="Gerente na aprovação"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="default">Gerente padrão</SelectItem><SelectItem value="none">Sem gerente</SelectItem>{managerOptions.map(manager => <SelectItem key={manager.user_id} value={manager.user_id}>{manager.label}</SelectItem>)}</SelectContent></Select><Button size="sm" variant="outline" className="h-8 gap-1.5 border-success/30 text-success hover:bg-success/10" disabled={kycBusy} onClick={() => handleApproveKyc(selectedUser?.user_id ?? "")}><CheckCircle2 className="h-3 w-3" /> {kycBusy ? "Aprovando..." : "Aprovar"}</Button></div>}
                 {selectedUser && ["pending", "pending_review"].includes(selectedUser.account_status || "") && <Button size="sm" variant="outline" className="h-8 gap-1.5 text-destructive" onClick={() => { setRejectTargetUserId(selectedUser.user_id); setKycRejectReason(""); setShowRejectDialog(true); }}><XCircle className="h-3 w-3" />Recusar KYC</Button>}
                 {selectedUser && emailVerified !== true && (
                   <Button size="sm" variant="outline" disabled={emailVerifyLoading} className="h-8 rounded-lg text-[11px] gap-1.5 border-success/30 text-success hover:bg-success/10" onClick={() => handleSetEmailVerified(selectedUser.user_id, true)}>
