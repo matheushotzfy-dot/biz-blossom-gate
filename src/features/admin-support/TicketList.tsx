@@ -29,7 +29,7 @@ export function TicketList({ rows, selectedId, onSelect }: { rows: TicketRow[]; 
                 <ToneTag tone={stage.tone}>{stage.label}</ToneTag>
                 {hot && <ToneTag tone={prio.tone}>{prio.label}</ToneTag>}
                 {unread && (
-                  <span className="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[11.5px] font-bold tabular-nums text-primary-foreground">
+                  <span className="ax-count ml-auto">
                     {r.unread_by_staff}<span className="sr-only"> {r.unread_by_staff === 1 ? "mensagem nova" : "mensagens novas"}</span>
                   </span>
                 )}

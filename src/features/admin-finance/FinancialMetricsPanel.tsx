@@ -124,39 +124,31 @@ export function FinancialMetricsPanel({ profiles, allowSellerFilter = true }: { 
 
   return (
     <div className="space-y-6">
-      <PremiumPanel
-        title="Filtros"
-        action={
-          <Button type="button" variant="outline" size="sm" onClick={refresh} disabled={q.isFetching} className="h-8 gap-1.5 text-[12px]">
-            {q.isFetching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />} Atualizar
-          </Button>
-        }
-      >
-        <div className="space-y-4">
-          <PremiumSegmented value={preset} options={PRESETS} onChange={pickPreset} />
-          <div className={cn("grid grid-cols-[repeat(2,minmax(0,1fr))] gap-3", withSeller ? "lg:grid-cols-[repeat(4,minmax(0,1fr))]" : "lg:grid-cols-[repeat(3,minmax(0,1fr))]")}>
-            <div className="space-y-1"><Label htmlFor="fm-from" className="text-[12px] font-medium text-muted-foreground">De</Label>
-              <Input id="fm-from" type="date" value={from} max={to || undefined} onChange={(e) => { setPreset("custom"); setFrom(e.target.value); }} /></div>
-            <div className="space-y-1"><Label htmlFor="fm-to" className="text-[12px] font-medium text-muted-foreground">Até</Label>
-              <Input id="fm-to" type="date" value={to} min={from || undefined} onChange={(e) => { setPreset("custom"); setTo(e.target.value); }} /></div>
-            {withSeller && (
-              <div className="col-span-2 space-y-1 lg:col-span-1"><Label className="text-[12px] font-medium text-muted-foreground">Seller</Label>
-                <SellerSelect profiles={profiles ?? []} value={seller} onChange={setSeller} allowAll /></div>
-            )}
-            <div className="col-span-2 space-y-1 lg:col-span-1"><Label className="text-[12px] font-medium text-muted-foreground">Adquirente</Label>
-              <Select value={acquirer} onValueChange={setAcquirer}>
-                <SelectTrigger aria-label="Adquirente"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas</SelectItem>
-                  {(acqs.data ?? []).map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-              {acqs.isError && <p className="text-[11px] text-muted-foreground">Não foi possível carregar a lista de adquirentes; o filtro "Todas" continua valendo.</p>}
-            </div>
-          </div>
-          {range.error && <p role="alert" className="text-[12.5px] font-medium text-destructive">{range.error}</p>}
+      <section aria-label="Filtros" className="ax-toolbar">
+        <PremiumSegmented value={preset} options={PRESETS} onChange={pickPreset} />
+        <div className="space-y-1"><Label htmlFor="fm-from" className="text-[13px] font-medium text-muted-foreground">De</Label>
+          <Input id="fm-from" type="date" className="w-[150px]" value={from} max={to || undefined} onChange={(e) => { setPreset("custom"); setFrom(e.target.value); }} /></div>
+        <div className="space-y-1"><Label htmlFor="fm-to" className="text-[13px] font-medium text-muted-foreground">Até</Label>
+          <Input id="fm-to" type="date" className="w-[150px]" value={to} min={from || undefined} onChange={(e) => { setPreset("custom"); setTo(e.target.value); }} /></div>
+        {withSeller && (
+          <div className="min-w-[200px] flex-1 space-y-1"><Label className="text-[13px] font-medium text-muted-foreground">Seller</Label>
+            <SellerSelect profiles={profiles ?? []} value={seller} onChange={setSeller} allowAll /></div>
+        )}
+        <div className="min-w-[180px] flex-1 space-y-1"><Label className="text-[13px] font-medium text-muted-foreground">Adquirente</Label>
+          <Select value={acquirer} onValueChange={setAcquirer}>
+            <SelectTrigger aria-label="Adquirente"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas</SelectItem>
+              {(acqs.data ?? []).map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
-      </PremiumPanel>
+        <Button type="button" variant="outline" size="icon" onClick={refresh} disabled={q.isFetching} aria-label="Atualizar métricas" title="Atualizar métricas">
+          {q.isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+        </Button>
+        {acqs.isError && <p className="w-full text-xs text-muted-foreground">Não foi possível carregar a lista de adquirentes; o filtro "Todas" continua valendo.</p>}
+        {range.error && <p role="alert" className="w-full text-[13px] font-medium text-destructive">{range.error}</p>}
+      </section>
 
       {!range.error && <FinancialCharts from={range.s} to={range.e} seller={seller} acquirer={acquirer === "all" ? undefined : acquirer} />}
 

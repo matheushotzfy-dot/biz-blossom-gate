@@ -30,8 +30,8 @@ export function OverviewCharts({ data }: { data: OverviewMetrics }) {
     <PremiumPanel title="Pulso de volume" eyebrow={`${data.from.split("-").reverse().join("/")} — ${data.to.split("-").reverse().join("/")}`} action={<MetricSwitch value={pulseMetric} onChange={setPulseMetric} />}>
       <div className="h-[280px] min-w-0"><ResponsiveContainer width="100%" height="100%"><AreaChart data={daily} margin={{ left: 0, right: 12, top: 12 }}>
         <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
-        <XAxis dataKey="label" minTickGap={32} fontSize={11} stroke="hsl(var(--muted-foreground))" />
-        <YAxis width={55} tickFormatter={compact} allowDecimals={pulseMetric !== "sales"} fontSize={11} stroke="hsl(var(--muted-foreground))" />
+        <XAxis dataKey="label" minTickGap={32} fontSize={12} stroke="hsl(var(--muted-foreground))" />
+        <YAxis width={55} tickFormatter={compact} allowDecimals={pulseMetric !== "sales"} fontSize={12} stroke="hsl(var(--muted-foreground))" />
         <Tooltip content={<ChartTip />} />
         <Area type="monotone" dataKey={pulseMetric} stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.12} strokeWidth={2} isAnimationActive={false} />
         {daily.length > 14 && <Brush dataKey="label" height={25} stroke="hsl(var(--primary))" fill="hsl(var(--card))" travellerWidth={8} />}
@@ -41,8 +41,8 @@ export function OverviewCharts({ data }: { data: OverviewMetrics }) {
       <PremiumPanel title="Volume por horário" eyebrow="Horários de Brasília · soma do período" action={<MetricSwitch value={hourMetric} onChange={setHourMetric} />}>
         <div className="h-[250px] min-w-0"><ResponsiveContainer width="100%" height="100%"><BarChart data={data.hourly} margin={{ left: 0, right: 8 }}>
           <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
-          <XAxis dataKey="hour" tickFormatter={h => `${h}h`} interval={2} fontSize={11} stroke="hsl(var(--muted-foreground))" />
-          <YAxis width={55} tickFormatter={compact} allowDecimals={hourMetric !== "sales"} fontSize={11} stroke="hsl(var(--muted-foreground))" />
+          <XAxis dataKey="hour" tickFormatter={h => `${h}h`} interval={2} fontSize={12} stroke="hsl(var(--muted-foreground))" />
+          <YAxis width={55} tickFormatter={compact} allowDecimals={hourMetric !== "sales"} fontSize={12} stroke="hsl(var(--muted-foreground))" />
           <Tooltip content={<ChartTip hourly />} cursor={false} />
           <Bar dataKey={hourMetric} fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} isAnimationActive={false} />
         </BarChart></ResponsiveContainer></div>
@@ -50,7 +50,7 @@ export function OverviewCharts({ data }: { data: OverviewMetrics }) {
       <PremiumPanel title="Taxas e custo da operação" eyebrow="Taxas arrecadadas − adquirente = resultado">
         <div className="flex flex-wrap gap-4 pb-3 text-xs text-muted-foreground">{["fees", "acquirer", "profit"].map(key => <span key={key} className={cn(key === "profit" && "text-success")}>{names[key]}</span>)}</div>
         <div className="h-[225px] min-w-0"><ResponsiveContainer width="100%" height="100%"><AreaChart data={daily} margin={{ left: 0, right: 8 }}>
-          <CartesianGrid vertical={false} stroke="hsl(var(--border))" /><XAxis dataKey="label" minTickGap={35} fontSize={11} stroke="hsl(var(--muted-foreground))" /><YAxis width={55} tickFormatter={compact} fontSize={11} stroke="hsl(var(--muted-foreground))" />
+          <CartesianGrid vertical={false} stroke="hsl(var(--border))" /><XAxis dataKey="label" minTickGap={35} fontSize={12} stroke="hsl(var(--muted-foreground))" /><YAxis width={55} tickFormatter={compact} fontSize={12} stroke="hsl(var(--muted-foreground))" />
           <Tooltip content={<ChartTip />} />
           <Area dataKey="fees" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.08} isAnimationActive={false} />
           <Area dataKey="acquirer" stroke="hsl(var(--warning))" fillOpacity={0} isAnimationActive={false} />

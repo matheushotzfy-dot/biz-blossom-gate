@@ -202,8 +202,8 @@ export default function AdminStaffCommissionsTab({ profiles }: Props) {
   );
 
   const roleBadge = (role: "manager" | "employee") => role === "manager"
-    ? <span className="inline-flex items-center gap-1 rounded border border-success/40 bg-success/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-success"><Briefcase className="h-2.5 w-2.5" />Gerente</span>
-    : <span className="inline-flex items-center gap-1 rounded border border-info/40 bg-info/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-info"><Shield className="h-2.5 w-2.5" />Staff</span>;
+    ? <span className="ax-tag" data-tone="success">Gerente</span>
+    : <span className="ax-tag" data-tone="info">Staff</span>;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -283,38 +283,24 @@ export default function AdminStaffCommissionsTab({ profiles }: Props) {
                     className={cn(premiumTable.row, "cursor-pointer transition-colors duration-150 hover:bg-muted/40")}>
                     <td className={premiumTable.td}>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/30 text-xs font-black text-foreground">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-foreground">
                           {(r.full_name || "?")[0]?.toUpperCase()}
                         </div>
                         <div className="min-w-0">
-                          <p className="truncate text-xs font-black text-foreground">{r.full_name}</p>
-                          <p className="truncate text-[10px] font-bold text-muted-foreground">{r.email}</p>
+                          <p className="truncate font-medium text-foreground">{r.full_name}</p>
+                          <p className="truncate text-xs text-muted-foreground">{r.email}</p>
                         </div>
                       </div>
                     </td>
                     <td className={premiumTable.td}>{roleBadge(r.role)}</td>
+                    <td className={premiumTable.td}><span className="tabular-nums">{r.base_pct.toFixed(2).replace(".", ",")}%</span></td>
+                    <td className={premiumTable.td}><span className="font-semibold tabular-nums">{fmt(r.accrued)}</span></td>
+                    <td className={premiumTable.td}><span className={cn("tabular-nums", r.clawbacks > 0 ? "text-destructive" : "text-muted-foreground")}>{r.clawbacks > 0 ? `−${fmt(r.clawbacks)}` : fmt(0)}</span></td>
+                    <td className={premiumTable.td}><span className="tabular-nums">{fmt(r.paid)}</span></td>
+                    <td className={premiumTable.td}><span className={cn("font-semibold tabular-nums", r.balance > 0 ? "text-success" : "text-muted-foreground")}>{fmt(r.balance)}</span></td>
                     <td className={premiumTable.td}>
-                      <span className="inline-flex items-center gap-1 rounded border border-border bg-muted/30 px-2 py-0.5 text-[10px] font-black tabular-nums text-foreground">
-                        <Percent className="h-2.5 w-2.5 text-muted-foreground" />{r.base_pct.toFixed(2)}%
-                      </span>
-                    </td>
-                    <td className={premiumTable.td}><span className="text-xs font-black text-foreground tabular-nums">{fmt(r.accrued)}</span></td>
-                    <td className={premiumTable.td}><span className={cn("text-xs font-black tabular-nums", r.clawbacks > 0 ? "text-destructive" : "text-muted-foreground")}>{r.clawbacks > 0 ? `−${fmt(r.clawbacks)}` : fmt(0)}</span></td>
-                    <td className={premiumTable.td}><span className="text-xs font-black text-info tabular-nums">{fmt(r.paid)}</span></td>
-                    <td className={premiumTable.td}>
-                      <span className={cn("inline-flex items-center gap-1.5 rounded border px-2 py-0.5 text-xs font-black tabular-nums",
-                        r.balance > 0 ? "border-success/40 bg-success/10 text-success" : "border-border bg-muted/30 text-muted-foreground")}>
-                        {fmt(r.balance)}
-                      </span>
-                    </td>
-                    <td className={premiumTable.td}>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          {r.last_payout_at ? new Date(r.last_payout_at).toLocaleDateString("pt-BR") : "sem pagto"}
-                        </span>
-                        <span className="text-[9px] font-bold text-muted-foreground tabular-nums">{r.ledger_count} mov</span>
-                      </div>
+                      <p className="text-[13px]">{r.last_payout_at ? `Pago em ${new Date(r.last_payout_at).toLocaleDateString("pt-BR")}` : "Nunca pago"}</p>
+                      <p className="text-xs tabular-nums text-muted-foreground">{r.ledger_count} {r.ledger_count === 1 ? "movimentação" : "movimentações"}</p>
                     </td>
                     <td className={premiumTable.td}><ChevronRight className="h-4 w-4 text-muted-foreground" /></td>
                   </tr>
@@ -465,8 +451,8 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
                 <DialogTitle className="truncate font-display text-lg font-black tracking-tight text-foreground">{selected.full_name}</DialogTitle>
                 <DialogDescription className="sr-only">Comissões, overrides e pagamentos desta conta</DialogDescription>
                 {role === "manager"
-                  ? <span className="inline-flex items-center gap-1 rounded border border-success/40 bg-success/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-success"><Briefcase className="h-2.5 w-2.5" />Gerente</span>
-                  : <span className="inline-flex items-center gap-1 rounded border border-info/40 bg-info/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-info"><Shield className="h-2.5 w-2.5" />Staff</span>}
+                  ? <span className="ax-tag" data-tone="success">Gerente</span>
+                  : <span className="ax-tag" data-tone="info">Staff</span>}
               </div>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] font-bold text-muted-foreground">
                 <span className="inline-flex items-center gap-1"><Mail className="h-3 w-3" />{selected.email}</span>
@@ -512,7 +498,7 @@ function StaffCommissionPanel({ selected, onClose, onChanged, profiles, onCopy }
         </div>
 
         {/* Body */}
-        <div className="max-h-[55vh] overflow-auto bg-card">
+        <div className="max-h-[55vh] min-h-[340px] overflow-auto bg-card">
           {detailState === "loading" && <p role="status" className="py-14 text-center text-xs font-bold text-muted-foreground">Carregando…</p>}
           {detailState === "error" && (
             <div role="alert" className="flex flex-col items-center gap-3 py-14 text-center">

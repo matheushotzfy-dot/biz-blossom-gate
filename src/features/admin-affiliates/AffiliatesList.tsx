@@ -29,7 +29,7 @@ function State({ a }: { a: AffiliateItem }) {
       <p className="text-[12.5px] text-muted-foreground">
         {a.links_held > 0 ? plural(a.links_held, "link pausado", "links pausados") : `${plural(a.links_active, "link no ar", "links no ar")} de ${int(a.links)}`}
       </p>
-      {a.hold_reason && <p className="line-clamp-2 max-w-[220px] text-[12.5px] text-muted-foreground">Motivo: {a.hold_reason}</p>}
+      {a.hold_reason && <p className="line-clamp-2 max-w-[190px] text-[12.5px] text-muted-foreground">Motivo: {a.hold_reason}</p>}
       {attention && <p className="text-[12.5px] font-medium text-warning">{attention}</p>}
     </div>
   );
@@ -70,7 +70,7 @@ export function AffiliatesTable({ rows, onOpen }: { rows: AffiliateItem[]; onOpe
         <tbody>
           {rows.map((a) => (
             <tr key={a.user_id} className="border-b border-border/40 align-middle last:border-b-0">
-              <td className="max-w-[230px] px-3 py-3"><Name a={a} /></td>
+              <td className="max-w-[200px] px-3 py-3"><Name a={a} /></td>
               <td className="px-3 py-3"><State a={a} /></td>
               <td className="whitespace-nowrap px-3 py-3"><Reach a={a} /></td>
               <td className="whitespace-nowrap px-3 py-3"><Sales a={a} /></td>
@@ -152,7 +152,7 @@ export function ProductsTable({ rows }: { rows: ProductItem[] }) {
         <tbody>
           {rows.map((p) => (
             <tr key={p.product_id} className="border-b border-border/40 align-middle last:border-b-0">
-              <td className="max-w-[260px] px-3 py-3"><PName p={p} /></td>
+              <td className="max-w-[230px] px-3 py-3"><PName p={p} /></td>
               <td className="px-3 py-3"><PState p={p} /></td>
               <td className="whitespace-nowrap px-3 py-3"><PReach p={p} /></td>
               <td className="whitespace-nowrap px-3 py-3"><PSales p={p} /></td>

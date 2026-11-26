@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  ALL_TAB_IDS, DATE_PRESETS, EMPLOYEE_ALLOWED_TABS, NAV_SECTIONS, canOpenTab, compactBRL, matchDatePreset,
+  ALL_TAB_IDS, DATE_PRESETS, EMPLOYEE_ALLOWED_TABS, NAV_SECTIONS, PERIOD_TABS, canOpenTab, compactBRL, matchDatePreset,
   presetRange, resolveActiveTab, searchSections, sectionsFor,
 } from "@/pages/admin/adminNav";
 
@@ -12,6 +12,11 @@ describe("navegação do admin", () => {
   it("não repete id de aba", () => {
     const ids = NAV_SECTIONS.flatMap((s) => s.items.map((i) => i.id));
     expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("a barra de período só aparece em abas que existem", () => {
+    for (const id of PERIOD_TABS) expect(ALL_TAB_IDS).toContain(id);
+    expect(PERIOD_TABS.has("fin-metrics")).toBe(false);
   });
 
   it("staff só abre o que está liberado, e Suporte só com a permissão", () => {

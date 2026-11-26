@@ -16,6 +16,11 @@ import { differenceInCalendarDays, endOfDay, startOfDay, subDays } from "date-fn
 export interface NavItem { id: string; label: string; icon: LucideIcon; employeeAccess: boolean }
 export interface NavSection { id: string; label: string; items: NavItem[] }
 
+/** Abas que realmente usam o período do topo; nas outras a barra de período some (cada uma tem o seu filtro, quando precisa). */
+export const PERIOD_TABS: ReadonlySet<string> = new Set([
+  "god-mode", "command-center", "analytics", "transactions", "sellers", "top-sellers", "top-products", "withdrawals", "tools",
+]);
+
 export const NAV_SECTIONS: NavSection[] = [
   {
     id: "core", label: "Operacional",

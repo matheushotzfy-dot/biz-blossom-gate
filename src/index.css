@@ -5044,7 +5044,7 @@ html.vp-noir .fixed.inset-0[aria-hidden="true"][data-state="open"] { background-
 .admin-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 .admin-shell textarea, .admin-shell select, .admin-shell [role="combobox"],
 .admin-frame .af-input { border-radius: 8px !important; border-color: var(--as-border-strong) !important; }
-.admin-shell button.bg-primary, .admin-shell button.bg-slate-900 { background-color: var(--as-accent) !important; border-color: var(--as-accent) !important; }
+.admin-shell button.bg-primary, .admin-shell button.bg-slate-900 { background-color: var(--as-accent) !important; border-color: var(--as-accent) !important; color: var(--as-on-accent) !important; }
 .admin-shell button.bg-primary:hover, .admin-shell button.bg-slate-900:hover { background-color: var(--as-accent-hover) !important; }
 
 /* Abas do shadcn: mesma peça do segmentado (trilho cinza claro, ativa em branco com contorno), nunca preenchidas de verde */
@@ -5073,13 +5073,13 @@ html.vp-noir .fixed.inset-0[aria-hidden="true"][data-state="open"] { background-
   font-size: 12.5px !important;
   font-weight: 600 !important;
   color: var(--as-muted) !important;
-  padding: 11px 16px !important;
+  padding: 10px 14px !important;
   white-space: nowrap;
   font-family: inherit !important;
 }
 .admin-shell tbody td {
   font-size: 13.5px !important;
-  padding: 14px 16px !important;
+  padding: 12px 14px !important;
   color: var(--as-text-2);
   vertical-align: middle;
 }
@@ -5235,3 +5235,57 @@ html.vp-noir .fixed.inset-0[aria-hidden="true"][data-state="open"] { background-
 .admin-shell .font-bold { font-weight: 600 !important; }
 
 @media (min-width: 1280px) { .ax-kpis-grid[data-cols="6"] .ax-metric { padding: 16px 16px 18px; } .ax-kpis-grid[data-cols="6"] .ax-metric-value { font-size: 20px; } }
+
+/* Cores de status com contraste legível (≥4,5:1) em texto sobre fundo claro ou tingido. */
+.admin-frame [data-admin-content] {
+  --success: 153 100% 22%; --warning: 30 100% 28%; --info: 217 85% 40%; --destructive: 0 72% 42%;
+}
+.dark .admin-frame [data-admin-content] {
+  --success: 152 65% 58%; --warning: 38 92% 62%; --info: 213 95% 72%; --destructive: 0 88% 70%;
+}
+
+/* Sem espaçamento largo entre letras (vinha de tracking-widest e afins). */
+.admin-shell [class*="tracking-w"], .admin-shell [class*="tracking-["]:not([class*="tracking-[-"]) { letter-spacing: 0 !important; }
+
+/* Celular: alvo de toque confortável em botões soltos (interruptor e caixa de marcar ficam como estão). */
+@media (max-width: 640px) {
+  .admin-shell button:not([role="switch"]):not([role="checkbox"]):not([role="tab"]):not(.ax-metric-btn) { min-height: 36px; min-width: 36px; }
+}
+
+.admin-shell [class*="text-[9px]"], .admin-shell [class*="text-[9.5px]"] { font-size: 11.5px !important; }
+/* Tabela sozinha dentro do painel: sem moldura dupla. */
+.ax-panel-body:has(> .ax-table-wrap:only-child) { padding: 0; }
+.ax-panel-body > .ax-table-wrap:only-child { border: 0; border-radius: 0 0 12px 12px; }
+
+/* Diálogos do admin (portal fora da casca): mesma limpeza de texto e cores de status legíveis. */
+html.vp-admin [role="dialog"], html.vp-admin [role="alertdialog"] {
+  --success: 153 100% 22%; --warning: 30 100% 28%; --info: 217 85% 40%; --destructive: 0 72% 42%;
+}
+html.vp-admin.vp-noir [role="dialog"], html.vp-admin.vp-noir [role="alertdialog"] {
+  --success: 152 65% 58%; --warning: 38 92% 62%; --info: 213 95% 72%; --destructive: 0 88% 70%;
+}
+html.vp-admin :is([role="dialog"], [role="alertdialog"]) .uppercase { text-transform: none !important; }
+html.vp-admin :is([role="dialog"], [role="alertdialog"]) :is([class*="tracking-w"], [class*="tracking-["]):not([class*="tracking-[-"]) { letter-spacing: 0 !important; }
+html.vp-admin :is([role="dialog"], [role="alertdialog"]) :is(.font-black, .font-extrabold) { font-weight: 700 !important; }
+html.vp-admin :is([role="dialog"], [role="alertdialog"]) .font-bold { font-weight: 600 !important; }
+html.vp-admin :is([role="dialog"], [role="alertdialog"]) :is([class*="text-[9px]"], [class*="text-[9.5px]"], [class*="text-[10px]"], [class*="text-[10.5px]"]) { font-size: 11.5px !important; }
+html.vp-admin :is([role="dialog"], [role="alertdialog"]) :is([class*="text-[11px]"], [class*="text-[11.5px]"]) { font-size: 12px !important; }
+
+/* Mono só para hash e chave longa (break-all); datas, valores e IDs curtos usam a fonte do painel com algarismos tabulares. */
+.admin-shell .font-mono:not(.break-all), html.vp-admin :is([role="dialog"], [role="alertdialog"]) .font-mono:not(.break-all) { font-family: inherit !important; font-variant-numeric: tabular-nums; }
+html.vp-admin :is([role="dialog"], [role="alertdialog"]) thead th { font-size: 12.5px; font-weight: 600; text-transform: none; letter-spacing: 0; color: hsl(var(--muted-foreground)); white-space: nowrap; font-family: inherit; }
+
+/* Barra de filtros de uma linha, no topo da lista */
+.ax-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 14px; padding: 14px 16px; border: 1px solid var(--as-border); border-radius: 12px; background: var(--as-surface); }
+
+/* Texto na cor da marca: verde escuro no claro, verde claro no escuro (passa de 4.5:1 sobre fundo tingido). */
+.admin-frame [data-admin-content] .text-primary:not(button.bg-primary *), html.vp-admin :is([role="dialog"], [role="alertdialog"]) .text-primary { color: #006a47; }
+.dark .admin-frame [data-admin-content] .text-primary:not(button.bg-primary *), html.vp-admin.vp-noir :is([role="dialog"], [role="alertdialog"]) .text-primary { color: #4fdba2; }
+
+/* Contador de não lidas (lista de chamados etc.) */
+.admin-shell .ax-count { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--as-accent) !important; color: var(--as-on-accent) !important; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* Link-botão de texto precisa de área de toque decente no celular */
+@media (max-width: 640px) {
+  .admin-shell button[data-no-fluid] { min-height: 32px !important; }
+}

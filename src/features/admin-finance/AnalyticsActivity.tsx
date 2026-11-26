@@ -12,8 +12,8 @@ export function AnalyticsActivity({ daily }: { daily: AnalyticsData["daily"] }) 
   return <PremiumPanel title="Atividade por dia" eyebrow="Vendas pagas · horário de Brasília" action={<div className="flex flex-wrap gap-1">{(Object.keys(labels) as ActivityMetric[]).map(key => <Button key={key} size="sm" variant={key === metric ? "secondary" : "ghost"} onClick={() => setMetric(key)}>{labels[key]}</Button>)}</div>}>
     <div className="h-[250px] min-w-0"><ResponsiveContainer width="100%" height="100%"><BarChart data={data}>
       <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
-      <XAxis dataKey="label" minTickGap={35} fontSize={11} stroke="hsl(var(--muted-foreground))" />
-      <YAxis allowDecimals={false} width={45} fontSize={11} stroke="hsl(var(--muted-foreground))" />
+      <XAxis dataKey="label" minTickGap={35} fontSize={12} stroke="hsl(var(--muted-foreground))" />
+      <YAxis allowDecimals={false} width={45} fontSize={12} stroke="hsl(var(--muted-foreground))" />
       <Tooltip content={({ active, payload }) => {
         const row = payload?.[0]?.payload as AnalyticsData["daily"][number] | undefined;
         if (!active || !row) return null;

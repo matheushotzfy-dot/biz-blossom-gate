@@ -10,8 +10,8 @@ interface Series {
   sellers: { seller: string; name: string; entradas: number; taxas: number; vendas: number }[];
 }
 const short = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
-const compact = (v: number) => (Math.abs(v) >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(Math.round(v)));
-const axis = { stroke: "hsl(var(--muted-foreground))", fontSize: 11, tickLine: false, axisLine: false } as const;
+const compact = (v: number) => v.toLocaleString("pt-BR", { notation: "compact", maximumFractionDigits: 1 });
+const axis = { stroke: "hsl(var(--muted-foreground))", fontSize: 12, tickLine: false, axisLine: false } as const;
 const tip = { contentStyle: { background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }, formatter: (v: number) => brl(Number(v)) };
 
 /** Entradas × saídas × taxas por dia, e ranking de sellers no mesmo filtro. */
@@ -48,7 +48,7 @@ export function FinancialCharts({ from, to, seller, acquirer }: { from: string; 
                 <XAxis dataKey="day" tickFormatter={short} {...axis} minTickGap={16} />
                 <YAxis tickFormatter={compact} {...axis} width={44} />
                 <Tooltip {...tip} labelFormatter={(l: string) => short(l)} />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Area type="monotone" dataKey="entradas" name="Entradas" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.15} strokeWidth={2} />
                 <Area type="monotone" dataKey="saidas" name="Saídas" stroke="hsl(var(--destructive))" fill="hsl(var(--destructive))" fillOpacity={0.1} strokeWidth={2} />
                 <Area type="monotone" dataKey="taxas" name="Taxas" stroke="hsl(var(--accent-foreground))" fill="transparent" strokeWidth={2} strokeDasharray="4 3" />
@@ -65,8 +65,9 @@ export function FinancialCharts({ from, to, seller, acquirer }: { from: string; 
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={s.sellers} layout="vertical" margin={{ left: 0, right: 8 }}>
                 <XAxis type="number" tickFormatter={compact} {...axis} />
-                <YAxis type="category" dataKey="name" width={96} {...axis} tickFormatter={(n: string) => (n.length > 13 ? `${n.slice(0, 13)}…` : n)} />
+                <YAxis type="category" dataKey="name" width={120} {...axis} tickFormatter={(n: string) => (n.length > 17 ? `${n.slice(0, 17)}…` : n)} />
                 <Tooltip {...tip} />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Bar dataKey="entradas" name="Entradas" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
                 <Bar dataKey="taxas" name="Taxas" fill="hsl(var(--muted-foreground))" radius={[0, 4, 4, 0]} />
               </BarChart>

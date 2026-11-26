@@ -20,7 +20,7 @@ import { startOfDay, endOfDay } from "date-fns";
 import { todayInSaoPaulo } from "@/components/period/periodMeta";
 import type { AdminFinancialOverview } from "./tabs/AdminOverviewTab";
 import AdminDateBar from "./AdminDateBar";
-import { canOpenTab, compactBRL, resolveActiveTab, searchSections, sectionsFor, NAV_SECTIONS } from "./adminNav";
+import { canOpenTab, compactBRL, resolveActiveTab, searchSections, sectionsFor, NAV_SECTIONS, PERIOD_TABS } from "./adminNav";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
 const AdminOverviewTab = lazy(() => import("./tabs/AdminOverviewTab"));
@@ -71,6 +71,11 @@ export default function AdminDashboard() {
   const { theme, toggleTheme } = useTheme();
   // Os diálogos do admin (portais fora da casca) usam o kit seller-ui, que depende destas classes no <html>.
   useSellerSkin();
+  // Diálogos e menus saem da casca (portal); esta marca deixa o CSS do admin valer para eles também.
+  useEffect(() => {
+    document.documentElement.classList.add("vp-admin");
+    return () => document.documentElement.classList.remove("vp-admin");
+  }, []);
   const { ask: askReason, dialog: reasonDialog } = useReason();
   const [transactions, setTransactions] = useState<Tables<"transactions">[]>([]);
   const [profiles, setProfiles] = useState<Tables<"profiles">[]>([]);
@@ -557,14 +562,14 @@ export default function AdminDashboard() {
             ) : null}
           </div>
 
-          <AdminDateBar range={dateRange} onChange={setDateRange} />
+          {PERIOD_TABS.has(activeTab) ? <AdminDateBar range={dateRange} onChange={setDateRange} /> : <div className="flex-1" />}
 
           {/* Right controls */}
           <div className="flex items-center gap-2 shrink-0">
             {isEmployee && (
               <span className="ax-tag" data-tone="warning">Equipe</span>
             )}
-            {periodVolume != null && (
+            {periodVolume != null && PERIOD_TABS.has(activeTab) && (
               <span title="Volume bruto aprovado no período selecionado" className="ax-topchip hidden min-[1480px]:flex">
                 <span className="h-1.5 w-1.5 rounded-full bg-success" />
                 Volume {compactBRL(Number(periodVolume))}
