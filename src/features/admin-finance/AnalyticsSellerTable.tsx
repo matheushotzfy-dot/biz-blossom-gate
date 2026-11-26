@@ -17,7 +17,7 @@ export function AnalyticsSellerTable({ data, filters, onFilters, fmtCurrency: mo
   const pages = sellerPageCount(data.seller_count, data.page_size);
   const change = (next: Partial<AnalyticsFilters>) => onFilters({ ...filters, ...next, page: 0 });
   return <>
-    <PremiumPanel title={ranked ? "Ranking de sellers" : "Desempenho de cada seller"} eyebrow={`${data.seller_count.toLocaleString("pt-BR")} contas · período selecionado`}>
+    <PremiumPanel title={ranked ? "Ranking de sellers" : "Desempenho de cada seller"} description={`${data.seller_count.toLocaleString("pt-BR")} ${data.seller_count === 1 ? "conta" : "contas"} no período escolhido.`}>
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <form className="flex min-w-0 basis-full gap-2 sm:basis-0 sm:flex-1" onSubmit={event => { event.preventDefault(); change({ search: search.trim() }); }}>
           <Input value={search} onChange={event => setSearch(event.target.value)} maxLength={120} aria-label="Buscar seller" placeholder="Nome, e-mail ou ID do seller" className="min-w-0" />
@@ -28,7 +28,7 @@ export function AnalyticsSellerTable({ data, filters, onFilters, fmtCurrency: mo
       </div>
       <div className={premiumTable.wrapper}><table className={premiumTable.table}><thead><tr className={premiumTable.headRow}>{["Seller", "Situação atual", "Vendas", "Movimentado", "Clientes", "Ticket médio", "Conversão", "Taxas", "Adquirente", "Resultado de taxas", "Reembolsos", "Chargebacks", "MED PIX", "Ficha"].map(label => <th key={label} className={premiumTable.th}>{label}</th>)}</tr></thead><tbody>
         {data.sellers.map((seller, index) => <tr key={seller.user_id} className={premiumTable.row}>
-          <td className={premiumTable.td}><p className="max-w-[220px] truncate text-sm font-semibold">{ranked && <span className="mr-2 font-mono text-primary">#{data.page * data.page_size + index + 1}</span>}{seller.name}</p><p className="max-w-[220px] truncate text-xs text-muted-foreground">{seller.email}</p><p className="mt-1 font-mono text-[10px] text-muted-foreground">{seller.user_id}</p></td>
+          <td className={premiumTable.td}><p className="max-w-[220px] truncate text-sm font-semibold">{ranked && <span className="mr-2 tabular-nums text-primary">#{data.page * data.page_size + index + 1}</span>}{seller.name}</p><p className="max-w-[220px] truncate text-xs text-muted-foreground">{seller.email}</p><p className="mt-1 max-w-[220px] truncate font-mono text-[11px] text-muted-foreground" title={seller.user_id}>{seller.user_id}</p></td>
           <td className={premiumTable.td}><span className="whitespace-nowrap text-xs">{seller.active ? "Ativa" : "Não ativa"}</span></td>
           <td className={premiumTable.td}>{seller.sales.toLocaleString("pt-BR")}</td>
           <td className={`${premiumTable.td} whitespace-nowrap`}>{money(seller.volume)}</td><td className={premiumTable.td}>{seller.clients}</td>

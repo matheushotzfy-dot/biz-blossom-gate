@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Download, RefreshCw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { PremiumMetric, PremiumMetricGrid } from "@/pages/admin/tabs/AdminPremium";
 import { useAnalytics } from "@/features/admin-finance/useAnalytics";
 import { initialAnalyticsFilters } from "@/features/admin-finance/analyticsModel";
 import { AnalyticsSellerTable } from "@/features/admin-finance/AnalyticsSellerTable";
@@ -36,16 +38,17 @@ function TopSellersContent({ dateRange, fmtCurrency: money }: AdminTopSellersPro
     { label: "Custo adquirentes", value: metrics ? money(metrics.summary.acquirer) : "—" },
   ];
   return <div className="space-y-5">
-    <header className="flex flex-wrap items-start justify-between gap-4 border-b border-border pb-5">
-      <div><h1 className="font-display text-2xl font-semibold">Top Sellers</h1><p className="mt-2 text-xs text-muted-foreground">{from.split("-").reverse().join("/")} — {to.split("-").reverse().join("/")} · Brasília</p></div>
-      <div className="flex flex-wrap gap-2"><Button variant="outline" size="icon" aria-label="Atualizar Top Sellers" disabled={busy} onClick={refresh}><RefreshCw className="h-4 w-4" /></Button><Button variant="outline" disabled={busy || failed || !data?.sellers.length} onClick={exportPage}><Download className="mr-2 h-4 w-4" />CSV desta página</Button></div>
-    </header>
+    <AdminPageHeader
+      title="Top Sellers"
+      subtitle={`Ranking de quem mais vendeu entre ${from.split("-").reverse().join("/")} e ${to.split("-").reverse().join("/")}, no horário de Brasília.`}
+      actions={<><Button variant="outline" size="icon" aria-label="Atualizar Top Sellers" title="Atualizar Top Sellers" disabled={busy} onClick={refresh}><RefreshCw className={`h-4 w-4${busy ? " animate-spin" : ""}`} /></Button><Button variant="outline" disabled={busy || failed || !data?.sellers.length} onClick={exportPage}><Download className="mr-2 h-4 w-4" />CSV desta página</Button></>}
+    />
     {failed ? <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 p-4 text-sm"><p>Não foi possível carregar Top Sellers. Dados ausentes não representam zero.</p><Button variant="outline" disabled={busy} onClick={refresh}>Tentar novamente</Button></div> : <>
-      <section aria-label="Totais do período" className="grid grid-cols-2 gap-5 border-b border-border pb-5 lg:grid-cols-6">{cards.map(card => <div key={card.label}><p className="text-xs text-muted-foreground">{card.label}</p><p className="mt-2 break-words font-mono text-lg font-semibold">{card.value}</p></div>)}</section>
+      <section aria-label="Totais do período"><PremiumMetricGrid cols={6}>{cards.map(card => <PremiumMetric key={card.label} label={card.label} value={card.value} />)}</PremiumMetricGrid></section>
       {!data || !metrics ? <div role="status" className="flex items-center justify-center gap-2 py-16 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" />Carregando Top Sellers…</div> : <>
         <AnalyticsSellerTable ranked data={data} filters={filters} onFilters={setFilters} fmtCurrency={money} busy={busy} />
         <p className="text-xs text-muted-foreground">Totais de toda a operação no período, independentes da busca. Vendas atualmente pagas; reembolsos por confirmação e disputas por abertura. MED PIX não significa perda confirmada.</p>
-        <p className="text-xs text-muted-foreground">Consultado em {new Date(data.checked_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })} · Brasília</p>
+        <p className="text-xs text-muted-foreground">Consultado em {new Date(data.checked_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })} (Brasília).</p>
       </>}
     </>}
   </div>;

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import { PremiumMetric, PremiumMetricGrid } from "@/pages/admin/tabs/AdminPremium";
 import { OverviewCharts } from "./OverviewCharts";
 import { dateKey, overviewSchema, ratio } from "./overviewModel";
 
@@ -22,7 +22,7 @@ export function AdminOverviewMetrics({ dateRange, refreshSignal, onNavigate }: A
     return overviewSchema.parse(data);
   } });
   useEffect(() => { void client.invalidateQueries({ queryKey: ["admin-overview-metrics", user?.id] }); }, [client, user?.id, refreshSignal]);
-  if (query.isPending) return <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{["a", "b", "c", "d", "e", "f", "g", "h"].map(key => <Skeleton key={key} className="h-28 rounded-lg" />)}</div>;
+  if (query.isPending) return <Skeleton className="h-[236px] rounded-xl" />;
   if (query.isError) return <div role="alert" className="flex flex-wrap items-center gap-4 rounded-lg border border-destructive p-4"><p className="text-sm text-destructive">Não foi possível carregar os indicadores deste período.</p><Button variant="outline" onClick={() => void query.refetch()}>Tentar novamente</Button></div>;
   const data = query.data;
   const s = data.summary;
@@ -37,9 +37,7 @@ export function AdminOverviewMetrics({ dateRange, refreshSignal, onNavigate }: A
     { title: "KYC pendente", value: data.kyc_pending.toLocaleString("pt-BR"), sub: "Fila atual de aprovação", tab: "sellers" },
   ];
   return <div className="space-y-5">
-    <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-3 xl:grid-cols-[repeat(4,minmax(0,1fr))]">{cards.map(card => <Button key={card.title} variant="outline" onClick={() => onNavigate?.(card.tab)} className="h-auto min-h-28 flex-col items-start gap-2 whitespace-normal rounded-lg border-border bg-card px-3 py-4 text-left sm:px-4">
-      <span className="text-xs font-medium text-muted-foreground">{card.title}</span><strong className={cn("max-w-full break-words font-display text-xl font-semibold tabular-nums sm:text-2xl", card.danger ? "text-destructive" : "text-foreground")}>{card.value}</strong><span className="text-xs font-normal text-muted-foreground">{card.sub}</span>
-    </Button>)}</div>
+    <PremiumMetricGrid cols={4}>{cards.map(card => <PremiumMetric key={card.title} label={card.title} value={card.value} sub={card.sub} tone={card.danger ? "destructive" : "neutral"} onClick={() => onNavigate?.(card.tab)} />)}</PremiumMetricGrid>
     <p className="text-xs text-muted-foreground">¹ Resultado das vendas pagas após adquirente; não inclui despesas administrativas, impostos ou custos não registrados.</p>
     <OverviewCharts data={data} />
     <div className="flex flex-wrap gap-x-8 gap-y-3 border-y border-border py-4 text-sm">{data.methods.map(method => <div key={method.method}><span className="font-medium">{method.method === "pix" ? "PIX" : method.method === "credit_card" ? "Cartão" : method.method}</span><span className="ml-3 tabular-nums text-muted-foreground">{method.sales}/{method.total} · {ratio(method.sales, method.total).toFixed(1)}% · {money(method.gross)}</span></div>)}{data.methods.length === 0 && <p className="text-muted-foreground">Nenhuma transação real neste período.</p>}</div>

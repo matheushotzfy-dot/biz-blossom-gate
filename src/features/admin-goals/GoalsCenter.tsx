@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { CheckCircle2, Gift, Loader2, Plus, Target, Timer, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { ToneTag } from "@/features/admin-products/parts";
 import { uniqueChannelName } from "@/lib/realtime";
@@ -55,7 +55,7 @@ function Center() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero eyebrow="Sistema" title="Metas de faturamento" status={heroStatus(q.data, q.isError)}
+      <AdminPageHeader eyebrow="Sistema" title="Metas de faturamento" status={heroStatus(q.data, q.isError)}
         subtitle="Metas com prêmio para quem faturar um valor dentro de um período: acompanhe quem bateu e registre a entrega do prêmio." />
 
       <p role="note" className="rounded-[12px] bg-muted/40 px-4 py-3 text-[13.5px] leading-relaxed text-muted-foreground">

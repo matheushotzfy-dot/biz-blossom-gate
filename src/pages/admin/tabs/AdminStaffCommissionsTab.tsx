@@ -13,7 +13,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { PremiumMetric, PremiumMetricGrid, PremiumPanel, premiumTable, PremiumEmpty } from "./AdminPremium";
 import { friendlyError } from "@/lib/friendlyError";
 import { useSensitiveConfirm } from "@/features/admin-finance/useSensitiveConfirm";
@@ -207,7 +207,7 @@ export default function AdminStaffCommissionsTab({ profiles }: Props) {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <FinanceiroHero
+      <AdminPageHeader
         eyebrow="Operações · Comissões"
         title="Comissões Staff & Gerentes"
         subtitle="Comissão calculada sobre o valor líquido da venda. Reembolsos e MEDs descontam automaticamente do saldo."

@@ -4,7 +4,7 @@ import { Archive, CheckCircle2, Clock, Loader2, Package, PackageX, Search, Shiel
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import AdminPager from "@/components/admin/AdminPager";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { useDebouncedValue } from "@/features/admin-antifraud/antifraudModel";
 import { uniqueChannelName } from "@/lib/realtime";
@@ -66,7 +66,7 @@ function Center() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero eyebrow="Conteúdo" title="Produtos" subtitle="Aprove o que entra no ar, tire o que não deveria estar e acompanhe as vendas de cada produto."
+      <AdminPageHeader eyebrow="Conteúdo" title="Produtos" subtitle="Aprove o que entra no ar, tire o que não deveria estar e acompanhe as vendas de cada produto."
         status={heroStatus} />
 
       <PremiumMetricGrid cols={4}>

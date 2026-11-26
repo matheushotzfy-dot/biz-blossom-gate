@@ -4,7 +4,7 @@ import { Clock, Lock, Loader2, Plus, Scale, Search, ShieldCheck, Undo2, X, Check
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import AdminPager from "@/components/admin/AdminPager";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { useDebouncedValue } from "@/features/admin-antifraud/antifraudModel";
 import { brl } from "@/features/admin-finance/types";
@@ -77,7 +77,7 @@ export default function DisputesCenter({ initialType = "all", onNavigate }: Prop
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero eyebrow="Financeiro" title={copy.title} subtitle={copy.subtitle} status={heroStatus}
+      <AdminPageHeader eyebrow="Financeiro" title={copy.title} subtitle={copy.subtitle} status={heroStatus}
         actions={<>
           <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => setRefundDialog(true)}><Undo2 className="h-3.5 w-3.5" /> Reembolsar venda</Button>
           <Button type="button" size="sm" className="gap-1.5" onClick={() => setOpenDialog(true)}><Plus className="h-3.5 w-3.5" /> Abrir disputa</Button>

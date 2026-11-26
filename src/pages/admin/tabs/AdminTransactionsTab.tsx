@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { brl } from "@/features/admin-finance/types";
 import { SellerSelect } from "@/features/admin-finance/SellerSelect";
 import { usePeople } from "@/features/admin-finance/usePeople";
@@ -139,7 +139,7 @@ export default function AdminTransactionsTab({ profiles, products, dateRange, on
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero
+      <AdminPageHeader
         eyebrow="Financeiro · Transações" title="Transações"
         subtitle="Todas as vendas da plataforma no período escolhido no topo. Clique numa transação para ver o dossiê."
         status={heroStatus}

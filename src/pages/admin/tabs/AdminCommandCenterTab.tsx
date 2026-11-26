@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCommandCenter } from "@/features/admin-finance/useCommandCenter";
 import { validateCommandSearch } from "@/features/admin-finance/commandCenterModel";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
 interface Props {
   dateRange: { from: Date; to: Date };
@@ -184,7 +184,7 @@ export default function AdminCommandCenterTab({
           <Button variant="outline" size="sm" disabled={loading} onClick={() => void command.refetch()}>Tentar de novo</Button>
         </div>
       )}
-      <FinanceiroHero
+      <AdminPageHeader
         eyebrow="Admin · Operações"
         title="Centro de Comando"
         subtitle={`Período: ${dateRange.from.toLocaleDateString("pt-BR")} a ${dateRange.to.toLocaleDateString("pt-BR")} · Filas atuais · Atualizado ${new Date(command.data.operations.checked_at).toLocaleTimeString("pt-BR")}`}

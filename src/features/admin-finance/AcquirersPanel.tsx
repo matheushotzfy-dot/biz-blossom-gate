@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { PremiumEmpty, PremiumMetric, PremiumMetricGrid, PremiumPanel, premiumTable } from "@/pages/admin/tabs/AdminPremium";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
@@ -67,7 +67,7 @@ export default function AcquirersPanel({ profiles }: { profiles: Tables<"profile
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <FinanceiroHero
+      <AdminPageHeader
         eyebrow="Financeiro · Adquirentes"
         title="Adquirentes"
         subtitle="A padrão é a primeira ativa da lista. Se o seller não tiver adquirente própria, ou ela estiver fora do ar, a venda vai para a próxima reserva."

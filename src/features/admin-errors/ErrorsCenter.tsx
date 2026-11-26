@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import AdminPager from "@/components/admin/AdminPager";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useConfirm } from "@/components/seller-ui/confirm";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { useDebouncedValue } from "@/features/admin-antifraud/antifraudModel";
@@ -100,7 +100,7 @@ function Center() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero eyebrow="Sistema" title="Error Logs" status={heroStatus}
+      <AdminPageHeader eyebrow="Sistema" title="Error Logs" status={heroStatus}
         subtitle="Erros que o site mostrou para vendedores, alunos e compradores. O mesmo erro repetido vira uma linha só, com a contagem de vezes, e um erro resolvido que volta a acontecer reabre sozinho." />
 
       <PremiumMetricGrid cols={4}>

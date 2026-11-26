@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { RefreshCw, Loader2, Users, TrendingUp, ShieldAlert, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { PremiumMetricGrid, PremiumPanel } from "./AdminPremium";
 import { AnalyticsMetric as PremiumMetric } from "@/features/admin-finance/AnalyticsMetric";
 import { useAnalytics } from "@/features/admin-finance/useAnalytics";
@@ -24,7 +24,7 @@ function AnalyticsContent({ dateRange, fmtCurrency: money }: Props) {
   const refresh = () => { void details.refetch(); void overview.refetch(); };
   const period = `${dateKey(dateRange.from).split("-").reverse().join("/")} — ${dateKey(dateRange.to).split("-").reverse().join("/")}`;
   return <div className="space-y-5">
-    <FinanceiroHero eyebrow="Admin · Analytics" title="Visão completa da operação" subtitle={`${period} · Brasília · apenas transações reais`} status={{ tone: failed ? "warning" : "neutral", label: failed ? "Consulta incompleta" : busy ? "Atualizando" : "Dados consultados", pulse: false }} actions={<Button variant="outline" onClick={refresh} disabled={busy}><RefreshCw className="mr-2 h-4 w-4" />Atualizar</Button>} />
+    <AdminPageHeader eyebrow="Admin · Analytics" title="Visão completa da operação" subtitle={`${period} · Brasília · apenas transações reais`} status={{ tone: failed ? "warning" : "neutral", label: failed ? "Consulta incompleta" : busy ? "Atualizando" : "Dados consultados", pulse: false }} actions={<Button variant="outline" onClick={refresh} disabled={busy}><RefreshCw className="mr-2 h-4 w-4" />Atualizar</Button>} />
     {failed && <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-card p-4 text-sm"><p>{data || metrics ? "Não foi possível atualizar todos os indicadores. O que aparece pode estar incompleto." : "Não foi possível carregar o Analytics deste período."}</p><Button variant="outline" onClick={refresh} disabled={busy}>Tentar novamente</Button></div>}
     {!failed && (!data || !metrics) && <div role="status" className="flex items-center justify-center gap-2 py-16 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" />Carregando Analytics…</div>}
     {data && metrics && <>

@@ -4,7 +4,7 @@ import { Bell, Clock, Eye, Inbox, Loader2, Megaphone, Search, Send, Trash2, X } 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import AdminPager from "@/components/admin/AdminPager";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { useDebouncedValue } from "@/features/admin-antifraud/antifraudModel";
 import { agoLabel, dayLabel, sizeLabel } from "@/features/admin-errors/errorsModel";
@@ -82,7 +82,7 @@ function Center() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero eyebrow="Sistema" title="Notificações" status={heroStatus}
+      <AdminPageHeader eyebrow="Sistema" title="Notificações" status={heroStatus}
         subtitle="Os avisos que você manda aos sellers e tudo o que o sistema avisa a eles, como venda aprovada e saque pago. Tudo aparece no sino do painel de cada um."
         actions={<Button type="button" size="sm" className="gap-1.5" onClick={() => setComposing(true)}><Send className="h-3.5 w-3.5" /> Novo aviso</Button>} />
 

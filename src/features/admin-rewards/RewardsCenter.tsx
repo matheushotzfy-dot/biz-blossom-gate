@@ -4,7 +4,7 @@ import { CheckCircle2, Clock, Loader2, Package, Search, Timer, Trophy, X } from 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import AdminPager from "@/components/admin/AdminPager";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { useDebouncedValue } from "@/features/admin-antifraud/antifraudModel";
 import { agoLabel } from "@/features/admin-errors/errorsModel";
@@ -74,7 +74,7 @@ function Center() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero eyebrow="Conteúdo" title="Premiações" status={heroStatus}
+      <AdminPageHeader eyebrow="Conteúdo" title="Premiações" status={heroStatus}
         subtitle="Os pedidos de brinde que os sellers fazem ao bater uma meta, e as peças que aparecem na página de Premiações deles." />
 
       <PremiumMetricGrid cols={4}>

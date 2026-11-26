@@ -32,7 +32,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
-import { FinanceiroHero, FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { FinanceiroKpi, FinanceiroKpiGrid } from "@/components/financeiro/FinanceiroHero";
 import { PremiumPanel, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { logAdminAction } from "@/lib/auditLog";
 import { cn, isApprovedTransaction } from "@/lib/utils";

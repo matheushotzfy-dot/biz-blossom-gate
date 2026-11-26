@@ -21,7 +21,7 @@ import { todayInSaoPaulo } from "@/components/period/periodMeta";
 import type { AdminFinancialOverview } from "./tabs/AdminOverviewTab";
 import AdminDateBar from "./AdminDateBar";
 import { canOpenTab, compactBRL, resolveActiveTab, searchSections, sectionsFor, NAV_SECTIONS } from "./adminNav";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
 const AdminOverviewTab = lazy(() => import("./tabs/AdminOverviewTab"));
 const AdminSellersTab = lazy(() => import("./tabs/AdminSellersTab"));
@@ -272,6 +272,7 @@ export default function AdminDashboard() {
   const fmtCurrency = (v: number) => v === 0 ? "R$ 0,00" : `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const pendingWdCount = withdrawals.filter(w => w.status === "pending").length;
   const activeTabLabel = NAV_SECTIONS.flatMap(s => s.items).find(i => i.id === activeTab)?.label || "";
+  const activeSectionLabel = NAV_SECTIONS.find(s => s.items.some(i => i.id === activeTab))?.label || "";
 
   const handleTabChange = useCallback((tabId: TabId) => {
     if (!canOpenTab(tabId, { isEmployee, hasSupportPerm })) {
@@ -393,13 +394,13 @@ export default function AdminDashboard() {
       >
         {/* Brand */}
         <div className="h-[64px] flex items-center px-4 gap-3 af-border border-b shrink-0">
-          <div className="h-9 w-9 rounded-md af-accent-bg flex items-center justify-center shrink-0 text-primary-foreground">
+          <div className="ax-brand-mark">
             <Shield className="h-[18px] w-[18px]" strokeWidth={2.25} />
           </div>
           {!collapsed && (
             <div className="min-w-0 flex-1">
-              <h1 className="text-[15px] font-semibold tracking-tight af-text leading-tight">Vemprapay</h1>
-              <p className="text-[11px] af-muted leading-tight">{isEmployee ? "Staff Panel" : "Admin Panel"}</p>
+              <h1 className="ax-brand-name">Vemprapay</h1>
+              <p className="ax-brand-sub">{isEmployee ? "Painel da equipe" : "Painel admin"}</p>
             </div>
           )}
           <button
@@ -425,11 +426,11 @@ export default function AdminDashboard() {
                   if (e.key === "Enter") { e.preventDefault(); openFirstMatch(); }
                   if (e.key === "Escape" && navQuery) { e.stopPropagation(); setNavQuery(""); }
                 }}
-                placeholder="Buscar aba..."
+                placeholder="Buscar aba"
                 aria-label="Buscar aba do painel"
                 className="af-input w-full h-9 pl-9 pr-12 text-[13px] rounded-md focus:outline-none"
               />
-              <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold af-muted-2 pointer-events-none max-lg:hidden">⌘K</kbd>
+              <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded border af-border px-1.5 py-px text-[11px] font-semibold af-muted pointer-events-none max-lg:hidden">⌘K</kbd>
             </div>
           </div>
         )}
@@ -446,14 +447,12 @@ export default function AdminDashboard() {
             </div>
           )}
           {filteredSections.map(section => (
-            <div key={section.id} className="mb-4">
+            <div key={section.id}>
               {!collapsed && (
-                <p className="text-[10.5px] font-semibold uppercase tracking-[0.08em] af-muted-2 px-2.5 mb-1.5 mt-1">
-                  {section.label}
-                </p>
+                <p className="ax-side-label">{section.label}</p>
               )}
               {collapsed && <div className="h-px af-border border-t mx-2 mb-1.5" />}
-              <div className="space-y-px">
+              <div className="space-y-0.5">
                 {section.items.map((item) => {
                   const isActive = activeTab === item.id;
                   const hasBadge = item.id === "withdrawals" && pendingWdCount > 0;
@@ -465,16 +464,11 @@ export default function AdminDashboard() {
                       aria-label={collapsed ? item.label : undefined}
                       aria-current={isActive ? "page" : undefined}
                       data-active={isActive ? "true" : "false"}
-                      className={cn(
-                        "admin-nav-item relative w-full flex items-center gap-3 rounded-md group",
-                        collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2",
-                        isActive ? "af-accent-bg" : "af-text-3 hover:af-surface-2 hover:af-text"
-                      )}
+                      data-collapsed={collapsed ? "true" : "false"}
+                      className="admin-nav-item ax-nav-item"
                     >
-                      <item.icon className={cn("h-4 w-4 shrink-0", isActive ? "" : "af-muted group-hover:af-text")} strokeWidth={2} />
-                      {!collapsed && (
-                        <span className={cn("text-[13.5px] truncate", isActive ? "font-semibold" : "font-medium")}>{item.label}</span>
-                      )}
+                      <item.icon strokeWidth={2} />
+                      {!collapsed && <span className="truncate">{item.label}</span>}
                       {hasBadge && (
                         <span
                           aria-label={`${pendingWdCount} saque(s) pendente(s)`}
@@ -498,28 +492,28 @@ export default function AdminDashboard() {
         <div className="af-border border-t p-2 space-y-0.5 shrink-0">
           <button
             onClick={toggleTheme}
-            className="w-full flex items-center justify-center gap-2 px-2.5 py-1.5 rounded-md af-muted hover:af-surface-2 hover:af-text transition-colors sm:hidden"
+            className="ax-side-foot flex sm:hidden"
           >
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            <span className="text-[11.5px] font-medium">{themeButtonLabel}</span>
+            <span>{themeButtonLabel}</span>
           </button>
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
             title={collapsed ? "Expandir menu" : undefined}
-            className="w-full flex items-center justify-center gap-2 px-2.5 py-1.5 rounded-md af-muted hover:af-surface-2 hover:af-text transition-colors max-lg:hidden"
+            className="ax-side-foot flex max-lg:hidden"
           >
             {collapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
-            {!collapsed && <span className="text-[11.5px] font-medium">Recolher</span>}
+            {!collapsed && <span>Recolher</span>}
           </button>
           <button
             onClick={handleLogout}
             aria-label="Sair do painel"
             title={collapsed ? "Sair" : undefined}
-            className="w-full flex items-center justify-center gap-2 px-2.5 py-1.5 rounded-md af-muted hover:af-surface-2 transition-colors"
+            className="ax-side-foot flex"
           >
             <LogOut className="h-4 w-4" />
-            {!collapsed && <span className="text-[11.5px] font-medium">Sair</span>}
+            {!collapsed && <span>Sair</span>}
           </button>
         </div>
       </aside>
@@ -534,29 +528,29 @@ export default function AdminDashboard() {
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Abrir menu"
               aria-expanded={mobileMenuOpen}
-              className="lg:hidden h-9 w-9 shrink-0 rounded-md flex items-center justify-center af-border border af-text-3 hover:af-surface-2"
+              className="ax-iconbtn grid lg:hidden"
             >
               <PanelLeft className="h-4 w-4" />
             </button>
 
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="text-[12px] font-medium af-muted-2 hidden sm:inline">Admin</span>
-              <ChevronDown className="h-3 w-3 af-muted-2 -rotate-90 hidden sm:inline" />
-              <h2 className="text-[15px] sm:text-[16px] font-semibold af-text truncate">{activeTabLabel}</h2>
+            <div className="ax-crumb hidden sm:flex">
+              {activeSectionLabel && <span className="ax-crumb-section hidden sm:inline">{activeSectionLabel}</span>}
+              {activeSectionLabel && <ChevronDown className="ax-crumb-sep h-3 w-3 -rotate-90 hidden sm:inline" />}
+              <h2 className="ax-crumb-title">{activeTabLabel}</h2>
             </div>
 
             {syncing ? (
-              <span role="status" className="hidden 2xl:flex items-center gap-1.5 whitespace-nowrap text-[11.5px] font-medium af-muted af-surface-2 af-border border rounded-md px-2.5 py-1">
+              <span role="status" className="hidden 2xl:flex items-center gap-1.5 whitespace-nowrap text-[12.5px] font-medium af-muted">
                 <RefreshCw className="h-3 w-3 animate-spin" />
                 Sincronizando
               </span>
             ) : loadError ? (
-              <span className="hidden 2xl:flex items-center gap-1.5 whitespace-nowrap text-[11.5px] font-semibold text-destructive">
+              <span className="hidden 2xl:flex items-center gap-1.5 whitespace-nowrap text-[12.5px] font-semibold text-destructive">
                 <AlertTriangle className="h-3 w-3" />
                 Falha ao atualizar
               </span>
             ) : lastSync ? (
-              <span className="hidden 2xl:flex items-center gap-1.5 whitespace-nowrap text-[11.5px] font-medium af-muted-2" title="Atualiza automaticamente a cada 60s">
+              <span className="hidden 2xl:flex items-center gap-1.5 whitespace-nowrap text-[12.5px] font-medium af-muted" title="Atualiza automaticamente a cada 60s">
                 <Clock className="h-3 w-3" />
                 {lastSync.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
               </span>
@@ -568,10 +562,10 @@ export default function AdminDashboard() {
           {/* Right controls */}
           <div className="flex items-center gap-2 shrink-0">
             {isEmployee && (
-              <span className="rounded-md border border-warning/30 bg-warning/10 px-2 py-0.5 text-[10px] font-semibold text-warning">STAFF</span>
+              <span className="ax-tag" data-tone="warning">Equipe</span>
             )}
             {periodVolume != null && (
-              <span title="Volume bruto aprovado no período selecionado" className="hidden min-[1480px]:flex items-center gap-1.5 text-[12px] font-medium af-muted af-surface-2 af-border border rounded-md px-3 py-1.5">
+              <span title="Volume bruto aprovado no período selecionado" className="ax-topchip hidden min-[1480px]:flex">
                 <span className="h-1.5 w-1.5 rounded-full bg-success" />
                 Volume {compactBRL(Number(periodVolume))}
               </span>
@@ -580,7 +574,7 @@ export default function AdminDashboard() {
             <button
               onClick={toggleTheme}
               aria-label={themeButtonLabel}
-              className="hidden sm:flex h-9 w-9 rounded-md items-center justify-center af-border border af-text-3 hover:af-surface-2 transition-colors"
+              className="ax-iconbtn hidden sm:grid"
               title={themeButtonLabel}
             >
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -589,7 +583,7 @@ export default function AdminDashboard() {
             <button
               onClick={() => handleTabChange(pendingWdCount > 0 && isAdmin ? "withdrawals" : isAdmin ? "notifications" : "god-mode")}
               aria-label={pendingWdCount > 0 ? `${pendingWdCount} saque(s) pendente(s). Abrir Saques` : "Abrir Notificações"}
-              className="relative h-9 w-9 rounded-md flex items-center justify-center af-border border af-text-3 hover:af-surface-2 transition-colors"
+              className="ax-iconbtn grid"
               title={pendingWdCount > 0 ? `${pendingWdCount} saque(s) pendente(s)` : "Notificações"}
             >
               <Bell className="h-4 w-4" />
@@ -605,10 +599,10 @@ export default function AdminDashboard() {
               disabled={syncing}
               aria-label="Atualizar dados"
               title={lastSync ? `Atualizar agora. Última atualização às ${lastSync.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}; o painel atualiza sozinho a cada minuto.` : "Atualizar agora"}
-              className="af-accent-bg flex h-9 items-center gap-2 px-2.5 sm:px-3 rounded-md text-[12.5px] font-semibold transition-colors disabled:opacity-60"
+              className="ax-refresh flex"
             >
               <RefreshCw className={cn("h-3.5 w-3.5", syncing && "animate-spin")} />
-              <span className="hidden sm:inline">Sync</span>
+              <span className="hidden sm:inline">Atualizar</span>
             </button>
           </div>
         </header>
@@ -616,7 +610,7 @@ export default function AdminDashboard() {
         {/* Main content */}
         <main className="flex-1 overflow-y-auto af-bg-soft scrollbar-thin admin-shell" data-admin-content>
           <div className="p-5 lg:p-7 xl:p-9 admin-fluid" key={activeTab}>
-            <div className="mx-auto max-w-[1800px]">
+            <div className="mx-auto max-w-[1600px]">
               {loadError && (
                 <div role="alert" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                   <span className="flex min-w-0 items-start gap-2">
@@ -693,7 +687,7 @@ export default function AdminDashboard() {
               {activeTab === "acquirers-panel" && isAdmin && <AcquirersPanel profiles={profiles} />}
               {activeTab === "fin-metrics" && isAdmin && (
                 <div className="space-y-6 animate-fade-in">
-                  <FinanceiroHero
+                  <AdminPageHeader
                     eyebrow="Financeiro · Métricas"
                     title="Métricas financeiras"
                     subtitle="Quanto entra, quanto sai e cada tipo de taxa, por período, seller e adquirente. O período daqui é próprio e não segue o seletor do topo."

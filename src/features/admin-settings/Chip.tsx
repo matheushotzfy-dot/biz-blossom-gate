@@ -10,7 +10,7 @@ export function Chip({ active, onClick, children, className }: { active: boolean
   return (
     <button type="button" aria-pressed={active} onClick={onClick}
       style={active ? undefined : { boxShadow: "inset 0 0 0 1px hsl(var(--border))" }}
-      className={cn("vp-pill !h-10 justify-center px-4 text-[14px] font-semibold", className)}>
+      className={cn("vp-pill justify-center font-semibold", className)}>
       {children}
     </button>
   );

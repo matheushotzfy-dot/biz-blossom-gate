@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, ChevronRight, Compass, Loader2, PauseCircle, Settings, ShieldCheck, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { uniqueChannelName } from "@/lib/realtime";
 import { PremiumEmpty, PremiumPanel } from "@/pages/admin/tabs/AdminPremium";
@@ -52,7 +52,7 @@ function Center({ onNavigate }: { onNavigate?: (tab: string) => void }) {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero eyebrow="Sistema" title="Configurações" status={status}
+      <AdminPageHeader eyebrow="Sistema" title="Configurações" status={status}
         subtitle="As taxas, o prazo do cartão, o limite por venda e as regras de cadastro de toda a plataforma. Cada mudança pede o motivo e a sua senha, e fica no histórico." />
 
       {q.isError && !q.isFetching && !d ? (

@@ -19,7 +19,7 @@ export function AnalyticsActivity({ daily }: { daily: AnalyticsData["daily"] }) 
         if (!active || !row) return null;
         return <div className="rounded-lg border border-border bg-popover p-3 text-xs text-popover-foreground"><strong>{row.day.split("-").reverse().join("/")}</strong>{(Object.keys(labels) as ActivityMetric[]).map(key => <p key={key} className="flex justify-between gap-6 pt-2"><span>{labels[key]}</span><b>{row[key].toLocaleString("pt-BR")}</b></p>)}<p className="pt-2">Volume: {row.volume.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p></div>;
       }} cursor={false} />
-      <Bar dataKey={metric} fill="hsl(var(--info))" radius={[3, 3, 0, 0]} isAnimationActive={false} />
+      <Bar dataKey={metric} fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} isAnimationActive={false} />
     </BarChart></ResponsiveContainer></div>
   </PremiumPanel>;
 }

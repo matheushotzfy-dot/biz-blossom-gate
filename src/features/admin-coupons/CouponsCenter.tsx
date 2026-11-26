@@ -4,7 +4,7 @@ import { AlertTriangle, CheckCircle2, Loader2, Receipt, Search, ShieldOff, Tag, 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import AdminPager from "@/components/admin/AdminPager";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { useDebouncedValue } from "@/features/admin-antifraud/antifraudModel";
 import { brl } from "@/features/admin-finance/types";
@@ -62,7 +62,7 @@ function Center() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero eyebrow="Conteúdo" title="Cupons" subtitle="Os cupons que os sellers criaram. Veja quanto desconto saiu e pause o que estiver sendo usado de forma indevida." status={heroStatus} />
+      <AdminPageHeader eyebrow="Conteúdo" title="Cupons" subtitle="Os cupons que os sellers criaram. Veja quanto desconto saiu e pause o que estiver sendo usado de forma indevida." status={heroStatus} />
 
       <PremiumMetricGrid cols={4}>
         <PremiumMetric icon={CheckCircle2} label="No ar" value={n(s?.active)} tone="success" sub={s ? `de ${s.all.toLocaleString("pt-BR")} ${s.all === 1 ? "cupom" : "cupons"}` : pending} />

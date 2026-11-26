@@ -4,7 +4,7 @@ import { CheckCircle2, Handshake, Loader2, MousePointerClick, Receipt, Search, W
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import AdminPager from "@/components/admin/AdminPager";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { useDebouncedValue } from "@/features/admin-antifraud/antifraudModel";
 import { brl } from "@/features/admin-finance/types";
@@ -90,7 +90,7 @@ function Center() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero eyebrow="Conteúdo" title="Afiliados" subtitle="Quem divulga os produtos dos sellers. Veja quanto cada afiliado vendeu e pause quem estiver burlando o programa." status={heroStatus} />
+      <AdminPageHeader eyebrow="Conteúdo" title="Afiliados" subtitle="Quem divulga os produtos dos sellers. Veja quanto cada afiliado vendeu e pause quem estiver burlando o programa." status={heroStatus} />
 
       <PremiumMetricGrid cols={4}>
         <PremiumMetric icon={Handshake} label="Afiliados" value={n(prog?.affiliates)} sub={prog ? `${prog.links.toLocaleString("pt-BR")} ${prog.links === 1 ? "link criado" : "links criados"}` : pending} />

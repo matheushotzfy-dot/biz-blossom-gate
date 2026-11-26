@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Tables } from "@/integrations/supabase/types";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { PremiumSegmented } from "@/pages/admin/tabs/AdminPremium";
 import { FinancialHistoryPanel } from "./FinancialHistoryPanel";
 import { SellerRiskAnalysis } from "./SellerRiskAnalysis";
@@ -13,7 +13,7 @@ export default function FinancialAuditTab({ profiles }: { profiles: Tables<"prof
   const [section, setSection] = useState<Section>("history");
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero
+      <AdminPageHeader
         eyebrow="Financeiro · Auditoria" title="Auditoria financeira"
         subtitle="Quem mexeu no dinheiro, quando e por quê. Também reúne a análise de risco por IA e o que cada cargo pode fazer."
         status={{ tone: "info", label: "Só o dono vê esta área" }}

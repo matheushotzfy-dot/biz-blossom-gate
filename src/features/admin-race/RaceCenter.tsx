@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Banknote, Flag, Loader2, Plus, Timer, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { ToneTag } from "@/features/admin-products/parts";
 import { uniqueChannelName } from "@/lib/realtime";
@@ -53,7 +53,7 @@ function Center() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero eyebrow="Conteúdo" title="Corridas" status={heroStatus(q.data, q.isError)}
+      <AdminPageHeader eyebrow="Conteúdo" title="Corridas" status={heroStatus(q.data, q.isError)}
         subtitle="A disputa de faturamento que os sellers veem em Premiações: período, prêmios, ranking e quem leva cada prêmio." />
 
       <PremiumMetricGrid cols={4}>

@@ -4,7 +4,7 @@ import { AlertTriangle, CheckCircle2, FileEdit, GraduationCap, Loader2, Search, 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import AdminPager from "@/components/admin/AdminPager";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { useDebouncedValue } from "@/features/admin-antifraud/antifraudModel";
 import { uniqueChannelName } from "@/lib/realtime";
@@ -62,7 +62,7 @@ function Center() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero eyebrow="Conteúdo" title="Cursos" subtitle="Os cursos das áreas de membros dos sellers. Veja o que está no ar e tire do ar o que não deveria estar." status={heroStatus} />
+      <AdminPageHeader eyebrow="Conteúdo" title="Cursos" subtitle="Os cursos das áreas de membros dos sellers. Veja o que está no ar e tire do ar o que não deveria estar." status={heroStatus} />
 
       <PremiumMetricGrid cols={4}>
         <PremiumMetric icon={CheckCircle2} label="No ar" value={n(s?.published)} tone="success" sub={s ? "visíveis aos alunos" : pending} />

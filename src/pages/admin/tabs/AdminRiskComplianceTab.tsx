@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Ban, Radar, RefreshCw, ShieldAlert, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { defaultCheckoutProcessor } from "@/features/public-checkout/processor";
 import { BlacklistPanel, ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { RadarPanel } from "@/features/admin-antifraud/RadarPanel";
@@ -47,7 +47,7 @@ export default function AdminRiskComplianceTab() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero
+      <AdminPageHeader
         eyebrow="Risco · Anti-Fraude" title="Anti-fraude"
         subtitle="O que o servidor barra antes de cobrar, quais sellers estão com chargeback alto e o histórico do que já foi barrado."
         status={heroStatus}

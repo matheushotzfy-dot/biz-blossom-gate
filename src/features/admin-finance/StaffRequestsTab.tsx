@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { PremiumEmpty, PremiumPanel, PremiumSegmented } from "@/pages/admin/tabs/AdminPremium";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
@@ -76,7 +76,7 @@ export default function StaffRequestsTab({ profiles }: { profiles: Tables<"profi
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <FinanceiroHero
+      <AdminPageHeader
         eyebrow="Financeiro · Equipe"
         title="Pedidos da equipe"
         subtitle="Sócios e gerentes não executam nada sensível: enviam pedidos e só você decide."

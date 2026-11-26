@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Download, History, Loader2, StickyNote, Wrench, CreditCard, Landmark } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { uniqueChannelName } from "@/lib/realtime";
 import { PremiumEmpty, PremiumMetric, PremiumMetricGrid, PremiumPanel } from "@/pages/admin/tabs/AdminPremium";
@@ -50,7 +50,7 @@ function Center({ dateRange }: { dateRange: Period }) {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero eyebrow="Sistema" title="Ferramentas" status={status}
+      <AdminPageHeader eyebrow="Sistema" title="Ferramentas" status={status}
         subtitle="Pause pagamentos ou saques numa emergência, exporte dados com registro na auditoria e deixe notas internas sobre sellers." />
 
       <PremiumMetricGrid cols={4}>

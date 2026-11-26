@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Users, TrendingUp, ShieldAlert, FileCheck, Search, RefreshCw, ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
+import { Search, RefreshCw, ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatusBadge } from "@/components/StatusBadge";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { PremiumMetric, PremiumMetricGrid, premiumTable } from "@/pages/admin/tabs/AdminPremium";
 import { cn } from "@/lib/utils";
 import { useSellersPage } from "./useSellersPage";
 import { initialSellerFilters, type SellerFilters } from "./sellersModel";
@@ -24,16 +26,14 @@ export function SellersDirectory({ range, onOpen, money, enabled }: SellersDirec
   const summary = query.data?.summary;
   const pages = Math.max(1, Math.ceil((query.data?.total ?? 0) / (query.data?.page_size ?? 25)));
   return <section className="space-y-5" aria-label="Gestão de sellers">
-    <header className="flex items-start justify-between gap-4 border-b border-border pb-5">
-      <div><div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground"><Users className="h-4 w-4" />Operação / Sellers</div><h1 className="font-display text-2xl font-semibold">Sellers</h1></div>
-      <Button variant="outline" size="icon" aria-label="Atualizar sellers" disabled={query.isFetching} onClick={() => void query.refetch()}><RefreshCw className={cn("h-4 w-4", query.isFetching && "animate-spin")} /></Button>
-    </header>
-    <div className="grid grid-cols-2 gap-x-6 gap-y-4 border-b border-border pb-5 lg:grid-cols-6">
-      {[{ label: "Contas cadastradas", value: summary?.registered, icon: Users, state: "all" }, { label: "Vendendo no período", value: summary?.selling, icon: TrendingUp, sellingOnly: true }, { label: "KYC pendente", value: summary?.kyc, icon: FileCheck, state: "kyc" }, { label: "Volume aprovado", value: summary ? money(summary.volume) : undefined, icon: TrendingUp }, { label: "MED PIX", value: summary?.med, icon: ShieldAlert, risk: "med" }, { label: "Chargebacks", value: summary?.chargebacks, icon: ShieldAlert, risk: "chargeback" }].map(metric => <div key={metric.label}>
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><metric.icon className="h-3.5 w-3.5" />{metric.label}</div>
-        <Button variant="ghost" className="mt-1 h-auto justify-start p-0 font-mono text-xl font-semibold" disabled={metric.value === undefined} onClick={() => change({ state: metric.state ?? "all", risk: metric.risk ?? "all", sellingOnly: metric.sellingOnly ?? false })}>{metric.value ?? "—"}</Button>
-      </div>)}
-    </div>
+    <AdminPageHeader
+      title="Sellers"
+      subtitle="Todas as contas, com vendas, riscos e situação cadastral no período do topo."
+      actions={<Button variant="outline" size="icon" aria-label="Atualizar sellers" title="Atualizar sellers" disabled={query.isFetching} onClick={() => void query.refetch()}><RefreshCw className={cn("h-4 w-4", query.isFetching && "animate-spin")} /></Button>}
+    />
+    <PremiumMetricGrid cols={6}>
+      {[{ label: "Contas cadastradas", value: summary?.registered, state: "all" }, { label: "Vendendo no período", value: summary?.selling, sellingOnly: true }, { label: "KYC pendente", value: summary?.kyc, state: "kyc" }, { label: "Volume aprovado", value: summary ? money(summary.volume) : undefined }, { label: "MED PIX", value: summary?.med, risk: "med" }, { label: "Chargebacks", value: summary?.chargebacks, risk: "chargeback" }].map(metric => <PremiumMetric key={metric.label} label={metric.label} value={String(metric.value ?? "—")} tone={(metric.risk && Number(metric.value) > 0) ? "destructive" : "neutral"} onClick={metric.value === undefined ? undefined : () => change({ state: metric.state ?? "all", risk: metric.risk ?? "all", sellingOnly: metric.sellingOnly ?? false })} />)}
+    </PremiumMetricGrid>
     <div className="space-y-3">
       <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-3 xl:flex">
         <form className="col-span-2 flex min-w-0 flex-1 gap-2" onSubmit={event => { event.preventDefault(); change({ search: search.trim() }); }}><Input aria-label="Buscar seller" placeholder="Nome, e-mail ou ID" value={search} maxLength={120} onChange={event => setSearch(event.target.value)} /><Button variant="outline" size="icon" type="submit" aria-label="Aplicar busca"><Search className="h-4 w-4" /></Button></form>
@@ -43,13 +43,13 @@ export function SellersDirectory({ range, onOpen, money, enabled }: SellersDirec
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground"><label className="flex items-center gap-2"><Checkbox checked={filters.sellingOnly} onCheckedChange={value => change({ sellingOnly: value === true })} />Só quem vendeu no período</label><span>{query.data?.total ?? "—"} sellers encontrados</span></div>
     </div>
-    {query.isError ? <div role="alert" className="flex flex-wrap items-center justify-between gap-3 border border-destructive/30 bg-card p-4 text-sm text-destructive">Não foi possível carregar os sellers.<Button variant="outline" onClick={() => void query.refetch()}>Tentar novamente</Button></div> : <div className="overflow-x-auto rounded-lg border border-border" aria-busy={query.isFetching}>
-      <table className="w-full text-left text-sm"><thead className="border-b border-border bg-muted"><tr>{["Seller", "Situação", "Vendas", "Volume aprovado", "Ticket médio", "Conversão", "MED PIX", "Chargebacks", "Reembolsos", ""].map(label => <th key={label} className={cn("whitespace-nowrap px-4 py-3 text-xs font-medium text-muted-foreground", (label === "Ticket médio" || label === "Conversão") && "hidden 2xl:table-cell")}>{label}</th>)}</tr></thead><tbody className="divide-y divide-border">
-        {query.data?.rows.map(seller => <tr key={seller.user_id} className="cursor-pointer bg-card transition-colors hover:bg-muted/40" onClick={() => onOpen(seller.user_id)}>
+    {query.isError ? <div role="alert" className="flex flex-wrap items-center justify-between gap-3 border border-destructive/30 bg-card p-4 text-sm text-destructive">Não foi possível carregar os sellers.<Button variant="outline" onClick={() => void query.refetch()}>Tentar novamente</Button></div> : <div className={premiumTable.wrapper} aria-busy={query.isFetching}>
+      <table className={premiumTable.table}><thead><tr className={premiumTable.headRow}>{["Seller", "Situação", "Vendas", "Volume aprovado", "Ticket médio", "Conversão", "MED PIX", "Chargebacks", "Reembolsos", ""].map(label => <th key={label} className={cn(premiumTable.th, "whitespace-nowrap px-4", (label === "Ticket médio" || label === "Conversão") && "hidden 2xl:table-cell")}>{label}</th>)}</tr></thead><tbody>
+        {query.data?.rows.map(seller => <tr key={seller.user_id} className={cn(premiumTable.row, "cursor-pointer")} onClick={() => onOpen(seller.user_id)}>
           <td className="px-4 py-4"><div className="flex items-center gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-muted font-display text-primary">{(seller.full_name || seller.email || "S")[0].toUpperCase()}</span><div className="min-w-[150px]"><Button variant="link" className="h-auto max-w-[220px] truncate p-0 text-foreground" onClick={event => { event.stopPropagation(); onOpen(seller.user_id); }}>{seller.full_name || "Sem nome"}</Button><p className="max-w-[220px] truncate text-xs text-muted-foreground">{seller.email}</p><p className="mt-1 text-[10px] text-muted-foreground">{seller.seller_type?.toUpperCase() || "Sem classificação"}</p><p className="mt-1 text-[11px] font-medium tabular-nums text-foreground sm:hidden">{seller.sales} {seller.sales === 1 ? "venda" : "vendas"} · {money(seller.volume)}</p></div></div></td>
           <td className="whitespace-nowrap px-4 py-3"><StatusBadge status={seller.account_status || "pending_review"} />{seller.balance_frozen && <p className="mt-1 text-xs text-destructive">Saldo congelado</p>}</td>
-          <td className="px-4 py-3 font-mono">{seller.sales}<p className="whitespace-nowrap text-[10px] text-muted-foreground">{seller.attempts} tentativas</p></td><td className="whitespace-nowrap px-4 py-3 font-mono font-semibold">{money(seller.volume)}</td><td className="hidden whitespace-nowrap px-4 py-3 font-mono 2xl:table-cell">{money(seller.sales ? seller.volume / seller.sales : 0)}</td><td className="hidden px-4 py-3 font-mono 2xl:table-cell">{(seller.attempts ? seller.sales / seller.attempts * 100 : 0).toFixed(1)}%</td>
-          {[{ count: seller.med, amount: seller.med_amount }, { count: seller.chargebacks, amount: seller.chargeback_amount }, { count: seller.refunds, amount: seller.refund_amount }].map((risk, index) => <td key={["med", "cb", "rf"][index]} className="px-4 py-3"><span className={cn("font-mono", risk.count > 0 && "text-destructive")}>{risk.count}</span><p className="whitespace-nowrap text-[10px] text-muted-foreground">{money(risk.amount)}</p></td>)}
+          <td className="px-4 py-3">{seller.sales}<p className="whitespace-nowrap text-[10px] text-muted-foreground">{seller.attempts} tentativas</p></td><td className="whitespace-nowrap px-4 py-3 font-semibold">{money(seller.volume)}</td><td className="hidden whitespace-nowrap px-4 py-3 2xl:table-cell">{money(seller.sales ? seller.volume / seller.sales : 0)}</td><td className="hidden px-4 py-3 2xl:table-cell">{(seller.attempts ? seller.sales / seller.attempts * 100 : 0).toFixed(1)}%</td>
+          {[{ count: seller.med, amount: seller.med_amount }, { count: seller.chargebacks, amount: seller.chargeback_amount }, { count: seller.refunds, amount: seller.refund_amount }].map((risk, index) => <td key={["med", "cb", "rf"][index]} className="px-4 py-3"><span className={cn("tabular-nums", risk.count > 0 && "text-destructive")}>{risk.count}</span><p className="whitespace-nowrap text-[10px] text-muted-foreground">{money(risk.amount)}</p></td>)}
           <td className="px-4 py-3"><Button variant="outline" size="icon" aria-label={`Ver detalhes de ${seller.full_name || seller.email}`} onClick={event => { event.stopPropagation(); onOpen(seller.user_id); }}><ArrowUpRight className="h-4 w-4" /></Button></td>
         </tr>)}
         {!query.data?.rows.length && <tr><td colSpan={10} className="py-12 text-center text-muted-foreground">{query.isPending ? "Carregando sellers…" : "Nenhum seller encontrado para estes filtros."}</td></tr>}

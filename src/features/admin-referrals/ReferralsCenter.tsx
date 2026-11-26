@@ -4,7 +4,7 @@ import { BadgeCheck, Banknote, Clock, Loader2, Plus, Search, Share2, X } from "l
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import AdminPager from "@/components/admin/AdminPager";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { useDebouncedValue } from "@/features/admin-antifraud/antifraudModel";
 import { brl } from "@/features/admin-finance/types";
@@ -78,7 +78,7 @@ function Center() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero eyebrow="Conteúdo" title="Indicações" status={heroStatus}
+      <AdminPageHeader eyebrow="Conteúdo" title="Indicações" status={heroStatus}
         subtitle="Quem um seller indicou e a recompensa de cada indicação. Qualifique quando o indicado criar conta e registre o pagamento depois de pagar."
         actions={<Button type="button" size="sm" className="gap-1.5" onClick={() => setCreating(true)}><Plus className="h-3.5 w-3.5" /> Registrar indicação</Button>} />
 

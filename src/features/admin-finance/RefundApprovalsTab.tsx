@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { PremiumEmpty, PremiumPanel, PremiumSegmented } from "@/pages/admin/tabs/AdminPremium";
 import { cn } from "@/lib/utils";
 import { brl, rpcErrorMessage } from "./types";
@@ -94,7 +94,7 @@ export default function RefundApprovalsTab() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <FinanceiroHero
+      <AdminPageHeader
         eyebrow="Financeiro · Aprovações"
         title="Pendentes de aprovação"
         subtitle="O valor do reembolso já foi descontado do seller. Confirme que a devolução ao comprador foi feita, ou marque como não efetivada para devolver o saldo ao seller."

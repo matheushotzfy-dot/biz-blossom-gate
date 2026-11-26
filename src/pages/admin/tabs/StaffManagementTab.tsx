@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { PremiumPanel, PremiumMetric, PremiumMetricGrid, PremiumEmpty, premiumTable } from "./AdminPremium";
 import { friendlyError } from "@/lib/friendlyError";
 import { logAdminAction } from "@/lib/auditLog";
@@ -194,7 +194,7 @@ export default function StaffManagementTab({ profiles, onReload, role }: Props) 
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <FinanceiroHero
+      <AdminPageHeader
         eyebrow={isManager ? "Admin · Gerentes" : "Admin · Staff"}
         title={heading}
         subtitle={isManager

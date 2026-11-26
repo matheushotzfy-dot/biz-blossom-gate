@@ -11,7 +11,7 @@ import { useReason } from "@/components/seller-ui/confirm";
 import { logAdminAction } from "@/lib/auditLog";
 import { friendlyError } from "@/lib/friendlyError";
 import AdminPager from "@/components/admin/AdminPager";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { brl } from "@/features/admin-finance/types";
 import { usePeople } from "@/features/admin-finance/usePeople";
 import { PremiumEmpty, PremiumMetric, PremiumMetricGrid, PremiumPanel, PremiumSegmented } from "./AdminPremium";
@@ -226,7 +226,7 @@ export default function AdminWithdrawalsTab({ withdrawals, profiles, onReload }:
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero
+      <AdminPageHeader
         eyebrow="Financeiro · Saques" title="Saques"
         subtitle="Fila de pedidos dos sellers, ajustes de saldo e regras de auto-aprovação."
         status={heroStatus}

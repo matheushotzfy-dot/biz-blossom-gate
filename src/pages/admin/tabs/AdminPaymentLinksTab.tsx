@@ -4,7 +4,7 @@ import { AlertTriangle, Ban, CircleDollarSign, Link as LinkIcon, Loader2, Refres
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import AdminPager from "@/components/admin/AdminPager";
 import { useConfirm, useReason } from "@/components/seller-ui/confirm";
 import { brl } from "@/features/admin-finance/types";
@@ -97,7 +97,7 @@ export default function AdminPaymentLinksTab() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero
+      <AdminPageHeader
         eyebrow="Operação · Links de pagamento" title="Links de Pagamento"
         subtitle="Links de cobrança criados pelos vendedores. Daqui você revisa, bloqueia e acompanha o histórico de cada um."
         status={heroStatus}

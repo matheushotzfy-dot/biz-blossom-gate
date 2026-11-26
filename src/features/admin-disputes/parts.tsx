@@ -3,16 +3,8 @@ import { cn } from "@/lib/utils";
 import { safeNavigationUrl } from "@/lib/safeUrl";
 import type { Tone } from "./disputesModel";
 
-const TONE: Record<Tone, string> = {
-  success: "border-success/25 bg-success/10 text-success",
-  warning: "border-warning/30 bg-warning/10 text-warning",
-  info: "border-info/25 bg-info/10 text-info",
-  neutral: "border-border bg-muted/40 text-muted-foreground",
-  destructive: "border-destructive/25 bg-destructive/10 text-destructive",
-};
-
 export const ToneTag = ({ tone, children, className }: { tone: Tone; children: ReactNode; className?: string }) => (
-  <span className={cn("inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[12px] font-semibold", TONE[tone], className)}>{children}</span>
+  <span className={cn("ax-tag", className)} data-tone={tone}>{children}</span>
 );
 
 /** Um dado com rótulo em cima (venda, seller, comprador…). */

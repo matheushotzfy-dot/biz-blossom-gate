@@ -4,7 +4,7 @@ import { AlertTriangle, CheckCircle2, Clock3, Loader2, PackageCheck, RefreshCw, 
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import AdminPager from "@/components/admin/AdminPager";
 import { useSensitiveConfirm } from "@/features/admin-finance/useSensitiveConfirm";
 import { waitingLabel } from "@/features/admin-finance/format";
@@ -82,7 +82,7 @@ export default function AdminCheckoutDeliveriesTab() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero
+      <AdminPageHeader
         eyebrow="Pós-venda · Entregas" title="Entregas do checkout"
         subtitle="Cada compra confirmada vira acesso ao curso. Aqui você vê o que ficou preso e reprocessa sem duplicar o acesso."
         status={heroStatus}

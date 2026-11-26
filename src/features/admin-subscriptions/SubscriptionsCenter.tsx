@@ -4,7 +4,7 @@ import { AlertTriangle, CheckCircle2, Layers, Loader2, Repeat, Search, TrendingU
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import AdminPager from "@/components/admin/AdminPager";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { useDebouncedValue } from "@/features/admin-antifraud/antifraudModel";
 import { brl } from "@/features/admin-finance/types";
@@ -106,7 +106,7 @@ function Center() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero eyebrow="Conteúdo" title="Assinaturas" subtitle="Planos recorrentes dos sellers e quem assina. Veja o que está atrasado, pause um plano com problema ou cancele uma assinatura." status={heroStatus} />
+      <AdminPageHeader eyebrow="Conteúdo" title="Assinaturas" subtitle="Planos recorrentes dos sellers e quem assina. Veja o que está atrasado, pause um plano com problema ou cancele uma assinatura." status={heroStatus} />
 
       <PremiumMetricGrid cols={4}>
         <PremiumMetric icon={CheckCircle2} label="Assinaturas ativas" value={n(prog?.active)} tone="success" sub={prog ? (prog.trial > 0 ? `${prog.trial.toLocaleString("pt-BR")} em teste` : `${prog.subs.toLocaleString("pt-BR")} no total`) : pending} />

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Ban, Fingerprint, LockKeyhole, RefreshCw, ShieldAlert } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { ActivityPanel } from "@/features/admin-abuse/ActivityPanel";
 import { IpsPanel } from "@/features/admin-abuse/IpsPanel";
@@ -43,7 +43,7 @@ export default function AdminAbuseMetricsTab() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero
+      <AdminPageHeader
         eyebrow="Segurança" title="Abuso e logins"
         subtitle="Tentativas de login com erro, IPs que insistem e quem está travado agora. O IP aparece só como código, nunca como número."
         status={heroStatus}

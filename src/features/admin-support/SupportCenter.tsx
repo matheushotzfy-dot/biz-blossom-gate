@@ -4,7 +4,7 @@ import { AlertTriangle, Clock, Inbox, LifeBuoy, Loader2, MailOpen, MessageSquare
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import AdminPager from "@/components/admin/AdminPager";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { useDebouncedValue } from "@/features/admin-antifraud/antifraudModel";
 import { agoLabel } from "@/features/admin-errors/errorsModel";
@@ -97,7 +97,7 @@ function Center() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero eyebrow="Sistema" title="Suporte" status={heroStatus}
+      <AdminPageHeader eyebrow="Sistema" title="Suporte" status={heroStatus}
         subtitle="Os chamados que os sellers abrem no painel. A resposta chega para eles na hora, com aviso, e o chamado volta para a fila quando o seller escreve de novo." />
 
       <PremiumMetricGrid cols={4}>

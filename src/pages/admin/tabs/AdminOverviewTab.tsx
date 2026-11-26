@@ -9,7 +9,7 @@ import {
 import type { Tables } from "@/integrations/supabase/types";
 import { cn, isApprovedTransaction } from "@/lib/utils";
 import { TransactionDetailPanel } from "@/components/transactions/TransactionDetailPanel";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { PremiumPanel, PremiumMetric, PremiumMetricGrid, premiumTable } from "./AdminPremium";
 import { AdminOverviewMetrics } from "@/features/admin-finance/AdminOverviewMetrics";
 import { AdminAlertsBanner } from "@/components/admin/AdminAlertsBanner";
@@ -170,17 +170,15 @@ export default function AdminOverviewTab({
   if (isEmployee) {
     return (
       <div className="space-y-6 animate-fade-in">
-        <FinanceiroHero
-          eyebrow="Painel Staff"
+        <AdminPageHeader
           title="Visão geral"
-          subtitle="Acesso restrito a operações autorizadas."
-          status={{ tone: "info", label: "Staff", pulse: true }}
+          subtitle="Acesso restrito às operações que a sua função permite."
         />
         <PremiumMetricGrid cols={4}>
-          <PremiumMetric icon={Users} label="Sellers" value={String(profiles.length)} sub="Cadastrados" tone="primary" />
-          <PremiumMetric icon={Package} label="Produtos" value={String(products.length)} sub={`${products.filter(p => p.status === "active").length} ativos`} tone="info" />
-          <PremiumMetric icon={CreditCard} label="Transações" value={String(allTx.length)} sub={`${approved.length} aprovadas`} tone="success" />
-          <PremiumMetric icon={Percent} label="Conversão" value={`${conversionRate}%`} sub={`${summaryApprovedCount.toLocaleString("pt-BR")}/${summaryTotalCount.toLocaleString("pt-BR")}`} tone="warning" />
+          <PremiumMetric icon={Users} label="Sellers" value={String(profiles.length)} sub="Cadastrados" />
+          <PremiumMetric icon={Package} label="Produtos" value={String(products.length)} sub={`${products.filter(p => p.status === "active").length} ativos`} />
+          <PremiumMetric icon={CreditCard} label="Transações" value={String(allTx.length)} sub={`${approved.length} aprovadas`} />
+          <PremiumMetric icon={Percent} label="Conversão" value={`${conversionRate}%`} sub={`${summaryApprovedCount.toLocaleString("pt-BR")}/${summaryTotalCount.toLocaleString("pt-BR")}`} />
         </PremiumMetricGrid>
       </div>
     );
@@ -192,11 +190,9 @@ export default function AdminOverviewTab({
   return (
     <div className="space-y-6 animate-fade-in">
       {/* ── Hero (matches seller Financeiro aesthetic) ── */}
-      <FinanceiroHero
-        eyebrow="Admin · Command Center"
+      <AdminPageHeader
         title="Visão Geral"
-        subtitle={`Operação em tempo real · ${rangeLabel}`}
-        status={{ tone: "info", label: "Dados reais", pulse: false }}
+        subtitle={`Resumo da operação no período escolhido no topo (${rangeLabel}).`}
       />
 
       {/* ── Alertas críticos abertos ── */}

@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import AdminPager from "@/components/admin/AdminPager";
-import { FinanceiroHero } from "@/components/financeiro/FinanceiroHero";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ErrorBlock } from "@/features/admin-antifraud/BlacklistPanel";
 import { useDebouncedValue } from "@/features/admin-antifraud/antifraudModel";
 import { useSensitiveConfirm } from "@/features/admin-finance/useSensitiveConfirm";
@@ -114,7 +114,7 @@ function Center() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <FinanceiroHero eyebrow="Sistema" title="Auditoria" status={status}
+      <AdminPageHeader eyebrow="Sistema" title="Auditoria" status={status}
         subtitle="O que administradores, equipe e vendedores fizeram de importante: quem fez, em quê e o que mudou. Esta tela só lê: não edita nem apaga nada. Senhas, chaves e documentos nunca aparecem." />
 
       <PremiumMetricGrid cols={4}>

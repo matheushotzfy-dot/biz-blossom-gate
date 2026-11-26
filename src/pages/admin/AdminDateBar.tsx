@@ -9,7 +9,6 @@ import { CalendarDays, ChevronDown } from "lucide-react";
 import { PeriodPicker } from "@/components/PeriodPicker";
 import { periodLabel, todayInSaoPaulo } from "@/components/period/periodMeta";
 import { useMinWidth } from "@/hooks/useMinWidth";
-import { cn } from "@/lib/utils";
 import { DATE_PRESETS, matchDatePreset, presetRange } from "./adminNav";
 
 export interface AdminRange { from: Date; to: Date }
@@ -46,9 +45,9 @@ export default function AdminDateBar({ range, onChange }: Props) {
       <button
         type="button"
         aria-label={`Período: ${label}. Escolher outro`}
-        className="flex h-9 shrink-0 items-center gap-1.5 rounded-md af-border border af-surface-2 px-2.5 text-[12.5px] font-semibold af-text"
+        className="ax-period-solo shrink-0"
       >
-        <CalendarDays className="h-3.5 w-3.5 af-muted" />
+        <CalendarDays className="h-4 w-4 af-muted" />
         <span className="max-w-[112px] truncate">{label}</span>
         <ChevronDown className="h-3.5 w-3.5 af-muted" />
       </button>,
@@ -56,17 +55,13 @@ export default function AdminDateBar({ range, onChange }: Props) {
   }
 
   return (
-    <div role="group" aria-label="Período" className="flex items-center gap-px rounded-md af-surface-2 af-border border p-0.5">
+    <div role="group" aria-label="Período" className="ax-period">
       {DATE_PRESETS.map((p) => (
         <button
           key={p.id}
           type="button"
           aria-pressed={active === p.id}
           onClick={() => onChange(presetRange(p.id, today))}
-          className={cn(
-            "shrink-0 rounded px-2.5 py-1.5 text-[12px] font-semibold transition-colors md:px-3",
-            active === p.id ? "af-surface af-text af-border border" : "af-muted hover:af-text",
-          )}
         >
           {p.label}
         </button>
@@ -76,13 +71,10 @@ export default function AdminDateBar({ range, onChange }: Props) {
           type="button"
           aria-label={active ? "Escolher período personalizado" : `Período: ${label}. Escolher outro`}
           title="Período personalizado"
-          className={cn(
-            "flex shrink-0 items-center gap-1.5 rounded px-2 py-1.5 transition-colors",
-            active ? "af-muted hover:af-text hover:af-surface" : "af-surface af-text af-border border",
-          )}
+          data-on={active ? undefined : "true"}
         >
-          <CalendarDays className="h-3.5 w-3.5" />
-          {!active && <span className="whitespace-nowrap text-[11.5px] font-semibold">{label}</span>}
+          <CalendarDays className="h-4 w-4" />
+          {!active && <span className="whitespace-nowrap">{label}</span>}
         </button>,
       )}
     </div>
