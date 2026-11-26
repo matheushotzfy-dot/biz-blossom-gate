@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { buildCorsHeaders as buildCors, safeError } from "../_shared/security.ts";
+import { buildCorsHeaders as buildCors, safeError, clientIp, sha256Hex } from "../_shared/security.ts";
 
 /** Password login for admin/employee accounts. The email-code step is currently off (owner's decision); failures answer 4xx with { success:false, error, locked? }. */
 Deno.serve(async (req) => {
@@ -55,23 +55,34 @@ Deno.serve(async (req) => {
     }
 
     // ===== SERVER-SIDE RATE LIMITING =====
+    // Três travas, todas por 15 minutos:
+    //  - este e-mail NESTE IP: 5 erros (o ataque comum);
+    //  - este IP em qualquer e-mail: 20 erros;
+    //  - este e-mail somando TODOS os IPs: 30 erros (ataque distribuído).
+    // Antes era só "5 erros no e-mail": qualquer pessoa, de qualquer lugar, trancava o dono fora do painel por 15 min.
+    const ipKey = (await sha256Hex(clientIp(req))).slice(0, 32);
+    const pairKey = `admin_login_pair:${trimmedEmail}:${ipKey}`;
+    const ipBucket = `admin_login_ip:${ipKey}`;
     const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
 
-    const { data: recentAttempts, error: attemptsError } = await adminClient
-      .from("admin_login_attempts")
-      .select("id, success")
-      .eq("email", trimmedEmail)
-      .eq("scope", "admin")
-      .gte("created_at", fifteenMinAgo)
-      .eq("success", false);
+    const [pairLimit, ipLimit, emailFails] = await Promise.all([
+      adminClient.rpc("peek_rate_limit", { _bucket_key: pairKey, _window_seconds: 900, _max_count: 5 }),
+      adminClient.rpc("peek_rate_limit", { _bucket_key: ipBucket, _window_seconds: 900, _max_count: 20 }),
+      adminClient
+        .from("admin_login_attempts")
+        .select("id", { count: "exact", head: true })
+        .eq("email", trimmedEmail)
+        .eq("scope", "admin")
+        .eq("success", false)
+        .gte("created_at", fifteenMinAgo),
+    ]);
+    const pairRow = Array.isArray(pairLimit.data) ? pairLimit.data[0] : null;
+    const ipRow = Array.isArray(ipLimit.data) ? ipLimit.data[0] : null;
+    // Falha ao consultar uma trava = trava fechada (nunca deixa passar por erro).
+    const locked = pairLimit.error || ipLimit.error || emailFails.error
+      || pairRow?.allowed !== true || ipRow?.allowed !== true || (emailFails.count ?? 0) >= 30;
 
-    if (!attemptsError && recentAttempts && recentAttempts.length >= 5) {
-      await adminClient.from("admin_login_attempts").insert({
-        email: trimmedEmail,
-        success: false,
-        scope: "admin",
-      });
-
+    if (locked) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -82,6 +93,12 @@ Deno.serve(async (req) => {
       );
     }
 
+    const countFailure = () => Promise.all([
+      adminClient.from("admin_login_attempts").insert({ email: trimmedEmail, success: false, scope: "admin" }),
+      adminClient.rpc("bump_rate_limit", { _bucket_key: pairKey, _window_seconds: 900, _max_count: 5 }),
+      adminClient.rpc("bump_rate_limit", { _bucket_key: ipBucket, _window_seconds: 900, _max_count: 20 }),
+    ]);
+
     // ===== AUTHENTICATE =====
     const { data: authData, error: authError } = await authClient.auth.signInWithPassword({
       email: trimmedEmail,
@@ -89,11 +106,7 @@ Deno.serve(async (req) => {
     });
 
     if (authError || !authData.user || !authData.session) {
-      await adminClient.from("admin_login_attempts").insert({
-        email: trimmedEmail,
-        success: false,
-        scope: "admin",
-      });
+      await countFailure();
 
       return new Response(
         JSON.stringify({ success: false, error: "Credenciais inválidas ou acesso não autorizado." }),
@@ -118,11 +131,9 @@ Deno.serve(async (req) => {
     const isEmployee = roles.includes("employee");
 
     if (!isAdmin && !isEmployee) {
-      await adminClient.from("admin_login_attempts").insert({
-        email: trimmedEmail,
-        success: false,
-        scope: "admin",
-      });
+      await countFailure();
+      // A senha estava certa, mas a conta não é da equipe: encerra a sessão que acabou de abrir.
+      try { await adminClient.auth.admin.signOut(authData.session.access_token, "local"); } catch (_) { /* best-effort */ }
 
       return new Response(
         JSON.stringify({ success: false, error: "Credenciais inválidas ou acesso não autorizado." }),
