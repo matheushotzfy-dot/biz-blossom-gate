@@ -13,9 +13,6 @@ import { RequireAuth } from "@/hooks/useAuth";
 import { RequireAdmin } from "@/hooks/useAdminGuard";
 import { RequireManager } from "@/hooks/useManagerGuard";
 import { ThemeProvider } from "@/hooks/useTheme";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
 import ImpersonationBanner from "./components/ImpersonationBanner";
 import CookieConsent from "./components/CookieConsent";
 
@@ -24,6 +21,10 @@ import CookieConsent from "./components/CookieConsent";
  * Only the landing page, auth and the seller dashboard ship in the main bundle;
  * every other route is fetched on demand, which keeps the initial payload small.
  */
+// Só a landing (Index) vai no pacote inicial: quem abre o site não baixa o painel, o login nem os gráficos.
+const Auth = lazy(() => import("./pages/Auth"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const DashboardLayout = lazy(() => import("@/components/layout/DashboardLayout").then((m) => ({ default: m.DashboardLayout })));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const DocumentacaoPublica = lazy(() => import("./pages/DocumentacaoPublica"));
 const PerfilHub = lazy(() => import("./pages/PerfilHub"));

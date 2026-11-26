@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
+import { openCookieSettings } from "@/components/CookieConsent";
 import { FAQ, NAV_LINKS } from "./landingData";
+import { RULE_ABOVE } from "./lines";
 import { Tight } from "./Tight";
 
 export { FAQ };
@@ -27,16 +29,21 @@ export function FaqSection() {
 
 export function Closing({ onSignup, onLogin }: { onSignup: () => void; onLogin: () => void }) {
   return (
-    <section id="comecar" className="bg-card py-24 sm:py-32">
-      <div className="mx-auto grid max-w-[1180px] items-end gap-10 px-5 sm:px-8 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,.75fr)] lg:gap-20">
-        <h2 className="text-[clamp(2.4rem,6vw,4.6rem)] font-extrabold leading-[1.02] tracking-[-0.048em] text-foreground">
-          <Tight>Abra a conta, crie o produto, mande o link.</Tight>
-        </h2>
-        <div>
-          <p className="max-w-[24rem] text-[17px] leading-[1.7] text-muted-foreground">Grátis para abrir e sem mensalidade. A primeira venda pode sair no mesmo dia em que você terminar o cadastro.</p>
-          <div className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-4">
-            <button type="button" onClick={onSignup} className="lp-btn">Abrir minha conta</button>
-            <button type="button" onClick={onLogin} className="lp-link bg-transparent p-0 text-[16px]" style={{ border: 0, cursor: "pointer" }}>Já tenho conta</button>
+    <section id="comecar" className="bg-background px-3 pb-6 sm:px-5">
+      {/* O mesmo cartão verde do topo da página: a conversa começa e termina no saldo. */}
+      <div className="vp-balance mx-auto max-w-[1340px] px-5 py-20 sm:px-8 sm:py-24 lg:py-28">
+        <div className="relative z-10 mx-auto grid max-w-[1180px] items-end gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,.75fr)] lg:gap-20">
+          <h2 className="text-[clamp(2.4rem,6vw,4.6rem)] font-extrabold leading-[1.02] tracking-[-0.048em]">
+            <Tight>Abra a conta, crie o produto, mande o link.</Tight>
+          </h2>
+          <div>
+            <p className="max-w-[24rem] text-[17px] leading-[1.7] text-white/85">
+              Grátis para abrir e sem mensalidade. Você monta o produto, a equipe revisa e o seu checkout começa a receber.
+            </p>
+            <div className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-4">
+              <button type="button" onClick={onSignup} className="lp-btn lp-btn-light">Abrir minha conta</button>
+              <button type="button" onClick={onLogin} className="lp-link lp-link-light bg-transparent p-0 text-[16px]" style={{ border: 0, cursor: "pointer" }}>Já tenho conta</button>
+            </div>
           </div>
         </div>
       </div>
@@ -71,9 +78,10 @@ export function SiteFooter() {
             <p className="text-[14px] font-extrabold text-foreground">Legal</p>
             <Link to="/termos-de-uso">Termos de uso</Link>
             <Link to="/politica-de-privacidade">Política de privacidade</Link>
+            <button type="button" className="lp-foot-btn" onClick={openCookieSettings}>Preferências de cookies</button>
           </nav>
         </div>
-        <p className="mt-14 pt-6 text-[13.5px] text-muted-foreground" style={{ boxShadow: "0 -1px 0 hsl(var(--border))" }}>© {year} Vemprapay. Todos os direitos reservados.</p>
+        <p className="mt-14 pt-6 text-[13.5px] text-muted-foreground" style={{ boxShadow: RULE_ABOVE }}>© {year} Vemprapay. Todos os direitos reservados.</p>
       </div>
     </footer>
   );

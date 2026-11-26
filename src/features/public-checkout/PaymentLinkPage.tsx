@@ -57,7 +57,7 @@ function LinkView({ link }: { link: PublicPaymentLink }) {
   const remaining = link.maxUses !== null ? Math.max(link.maxUses - link.currentUses, 0) : null;
   return (
     <CheckoutShell mode="gray">
-      <Seo title={`${link.title} · Pagar`} description={link.description ?? `Cobrança de ${formatBRL(link.amount)}`} path={`/pl/${link.slug}`} noindex />
+      <Seo title={`${link.title} · Pagar`} description={link.description ?? `Cobrança de ${formatBRL(link.amount)}`} path={`/pl/${link.slug}`} noindex image={/^https:\/\//i.test(link.coverUrl ?? "") ? link.coverUrl : undefined} />
       <main className="ck-wrap ck-wrap-narrow">
         <header className="ck-head">
           <div className="ck-thumb" aria-hidden="true">{link.coverUrl ? <img src={link.coverUrl} alt="" /> : <ImageIcon size={26} />}</div>

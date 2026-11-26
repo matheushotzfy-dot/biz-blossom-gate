@@ -1,0 +1,27 @@
+/* Página de status (prefixo st-). Usa os tokens claros da landing (.vp-site.lp).
+   Contornos em --lp-shadow: a regra global antiga zera box-shadow em div/section/li (ver landing.css). */
+.vp-site.lp.lp :is(.st-summary, .st-list, .st-row) { box-shadow: var(--lp-shadow, none) !important; }
+
+.st-summary { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.35rem; border-radius: 20px; background: hsl(var(--card)); --lp-shadow: 0 0 0 1px hsl(var(--border)); }
+.st-summary[data-tone="ok"] { background: hsl(var(--accent)); --lp-shadow: 0 0 0 1px hsl(var(--primary) / .22); }
+.st-summary[data-tone="warn"] { background: hsl(var(--warning) / .1); --lp-shadow: 0 0 0 1px hsl(var(--warning) / .3); }
+.st-summary[data-tone="down"] { background: hsl(var(--destructive) / .08); --lp-shadow: 0 0 0 1px hsl(var(--destructive) / .3); }
+
+.st-list { list-style: none; padding: 0; border-radius: 20px; background: hsl(var(--card)); overflow: hidden; --lp-shadow: 0 0 0 1px hsl(var(--border)); }
+.st-row { display: flex; align-items: center; gap: 1rem; padding: 1.1rem 1.35rem; }
+.st-row + .st-row { --lp-shadow: 0 -1px 0 hsl(var(--border)); }
+
+.st-dot { flex: none; width: .75rem; height: .75rem; border-radius: 50%; background: hsl(var(--muted-foreground) / .45); }
+.st-dot[data-health="ok"] { background: hsl(var(--primary)); box-shadow: 0 0 0 4px hsl(var(--primary) / .16); }
+.st-dot[data-health="slow"], .st-dot[data-health="paused"] { background: hsl(var(--warning)); box-shadow: 0 0 0 4px hsl(var(--warning) / .18); }
+.st-dot[data-health="down"] { background: hsl(var(--destructive)); box-shadow: 0 0 0 4px hsl(var(--destructive) / .16); }
+.st-dot[data-health="setup"] { background: hsl(var(--muted-foreground)); }
+.st-dot[data-health="checking"] { animation: st-pulse 1.1s ease-in-out infinite; }
+@keyframes st-pulse { 50% { opacity: .35; } }
+
+.st-label { font-size: .85rem; font-weight: 700; color: hsl(var(--muted-foreground)); }
+.st-label[data-health="ok"] { color: hsl(var(--accent-foreground)); }
+.st-label[data-health="slow"], .st-label[data-health="paused"] { color: hsl(var(--warning)); }
+.st-label[data-health="down"] { color: hsl(var(--destructive)); }
+
+@media (prefers-reduced-motion: reduce) { .st-dot[data-health="checking"] { animation: none; } }

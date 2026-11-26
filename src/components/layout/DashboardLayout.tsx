@@ -8,7 +8,8 @@ import { GlobalSearchDialog } from "./GlobalSearchDialog";
 import { NotificationPanel, useNotificationCount } from "@/components/NotificationPanel";
 import { KycOnboardingPopup } from "@/components/KycOnboardingPopup";
 import { Outlet, useNavigate } from "react-router-dom";
-import { AlertTriangle, ArrowRight, X as XIcon, CheckCircle2, Wallet, Search } from "lucide-react";
+
+import { AlertTriangle, ArrowRight, X as XIcon, CheckCircle2, Wallet, Search, Loader2 } from "lucide-react";
 import { IrisIcon, SunDialIcon, MoonDialIcon, SignalBellIcon, PanelToggleIcon } from "@/components/icons/ShellIcons";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,7 +18,7 @@ import { ProfileProvider, useProfile } from "@/hooks/useProfile";
 import { usePrefetchDashboardData, useWithdrawals, useLedgerBalance } from "@/hooks/useQueryData";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 import { useSupportAlerts } from "@/hooks/useSupportUnread";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useKycStatus } from "@/hooks/useKycStatus";
@@ -26,6 +27,15 @@ import { prefetchIdleRoutes } from "@/lib/routePrefetch";
 import { kycBanner, topbarKyc, type KycKey } from "@/components/account/accountMeta";
 
 
+
+/** Enquanto a página do painel carrega, a casca (menu, topo) continua na tela. */
+function PageFallback() {
+  return (
+    <div className="flex min-h-[50vh] w-full items-center justify-center">
+      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-label="Carregando" />
+    </div>
+  );
+}
 
 function DashboardLayoutInner() {
  const { user } = useAuth();
@@ -162,7 +172,7 @@ function DashboardLayoutInner() {
              <div ref={scrollRef} className={cn("dashboard-scroll-field relative z-10 flex-1 min-h-0", pathname === "/suporte" ? "flex flex-col overflow-hidden pb-20 xl:pb-0" : "overflow-y-auto overscroll-contain px-3 sm:px-5 md:px-8 pb-28 xl:pb-12")}>
    <div className={cn("mx-auto w-full", pathname === "/suporte" ? "flex min-h-0 flex-1 flex-col max-w-none" : "py-3 md:pb-8 md:pt-1", pathname !== "/suporte" && (pathname.startsWith("/premiacoes") ? "max-w-none" : "max-w-[1440px]"))}>
   <div key={routeKey} className={cn("page-fluid", pathname === "/suporte" && "flex min-h-0 flex-1 flex-col")}>
-  <Outlet />
+  <Suspense fallback={<PageFallback />}><Outlet /></Suspense>
   </div>
   </div>
  </div>

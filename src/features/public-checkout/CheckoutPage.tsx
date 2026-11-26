@@ -153,7 +153,7 @@ function CheckoutExperience({ slug, product, bumps, pixels, processor }: Experie
     window.scrollTo({ top: 0 });
   }, [state.phase]);
   const head = (
-    <Seo title={`${product.name} · Checkout`} description={(product.description || `Compre ${product.name} com pagamento seguro.`).slice(0, 155)} path={`/pay/${slug}`} noindex />
+    <Seo title={`${product.name} · Checkout`} description={(product.description || `Compre ${product.name} com pagamento seguro.`).slice(0, 155)} path={`/pay/${slug}`} noindex image={/^https:\/\//i.test(product.imageUrl ?? "") ? product.imageUrl : undefined} />
   );
 
   if (state.phase !== "form") {

@@ -2,6 +2,7 @@ import { useId, useMemo, useState } from "react";
 import { maskBRL, parseBRL } from "@/components/seller-ui/money";
 import { SELL_FEATURES } from "./landingData";
 import { AFF_MAX, CO_MAX, brlFromCents, computeSplit } from "./splitMath";
+import { RULE_BELOW, RULE_BOTH, line } from "./lines";
 import { Tight } from "./Tight";
 
 const COLORS = { owner: "hsl(var(--primary))", partner: "hsl(222 47% 11%)", affiliate: "hsl(var(--warning))" } as const;
@@ -85,7 +86,7 @@ export function SellSection() {
         <div className="mt-14 grid gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-20">
           <dl className="m-0 grid">
             {SELL_FEATURES.map((f, i) => (
-              <div key={f.t} className="py-5" style={{ boxShadow: i === 0 ? "0 1px 0 hsl(var(--border)), 0 -1px 0 hsl(var(--border))" : "0 1px 0 hsl(var(--border))" }}>
+              <div key={f.t} className="lp-line py-5" style={line(i === 0 ? RULE_BOTH : RULE_BELOW)}>
                 <dt className="text-[1.15rem] font-extrabold tracking-[-0.025em] text-foreground">{f.t}</dt>
                 <dd className="m-0 mt-1.5 max-w-[32rem] text-[15.5px] leading-[1.65] text-muted-foreground">{f.d}</dd>
               </div>

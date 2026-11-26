@@ -1,202 +1,151 @@
-import { useEffect, useState } from "react";
+/**
+ * Status dos serviços (`/status`). Mesma identidade clara da landing (`.vp-site.lp`).
+ * Mede a partir do navegador de quem abre: servidor (`get_platform_pauses`, que também diz se a equipe pausou
+ * pagamentos ou saques), login (`/auth/v1/health`) e se o checkout já tem adquirente. Regras em `features/status/statusModel.ts`.
+ */
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle2, AlertTriangle, Clock, Activity, Server, CreditCard, Shield, Zap, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
 import { Seo } from "@/components/Seo";
+import { VenxpayLogo } from "@/components/VenxpayLogo";
+import { parsePauses } from "@/hooks/usePlatformPauses";
+import { defaultCheckoutProcessor } from "@/features/public-checkout/processor";
+import { HEALTH_LABEL, buildRows, summarize, type Health, type Probe, type StatusInput } from "@/features/status/statusModel";
+import "@/components/landing-vp/landing.css";
+import "@/features/status/status.css";
 
-type ServiceStatus = "operational" | "degraded" | "down" | "checking";
+const REFRESH_MS = 60_000;
+const TIMEOUT_MS = 10_000;
 
-interface ServiceInfo {
- name: string;
- icon: typeof Server;
- status: ServiceStatus;
- latency?: number;
- description: string;
+async function timed<T>(job: () => Promise<T>): Promise<{ value: T | null; ms: number; ok: boolean }> {
+  const start = performance.now();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const value = await Promise.race([
+      job(),
+      new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new Error("timeout")), TIMEOUT_MS); }),
+    ]);
+    return { value, ms: Math.round(performance.now() - start), ok: true };
+  } catch {
+    return { value: null, ms: Math.round(performance.now() - start), ok: false };
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 }
 
-const STATUS_CONFIG: Record<ServiceStatus, { label: string; color: string; bgColor: string; dotColor: string }> = {
- operational: { label: "Operacional", color: "text-emerald-400", bgColor: "bg-emerald-500/10 border-emerald-500/20", dotColor: "bg-emerald-500" },
- degraded: { label: "Degradado", color: "text-yellow-400", bgColor: "bg-yellow-500/10 border-yellow-500/20", dotColor: "bg-yellow-500" },
- down: { label: "Indisponível", color: "text-red-400", bgColor: "bg-red-500/10 border-red-500/20", dotColor: "bg-red-500" },
- checking: { label: "Verificando...", color: "text-white/40", bgColor: "bg-white/5 border-white/10", dotColor: "bg-white/30" },
-};
+async function checkAll(): Promise<StatusInput> {
+  const [api, auth] = await Promise.all([
+    timed(async () => {
+      const { data, error } = await supabase.rpc("get_platform_pauses" as never);
+      if (error) throw error;
+      return parsePauses(data);
+    }),
+    timed(async () => {
+      const url = import.meta.env.VITE_SUPABASE_URL;
+      const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const res = await fetch(`${url}/auth/v1/health`, { headers: { apikey: key }, cache: "no-store" });
+      if (!res.ok) throw new Error(String(res.status));
+      return true;
+    }),
+  ]);
+  const probe = (r: { ms: number; ok: boolean }): Probe => ({ ok: r.ok, ms: r.ms });
+  return { api: probe(api), auth: probe(auth), pauses: api.value, paymentsLive: defaultCheckoutProcessor.available };
+}
+
+const EMPTY: StatusInput = { api: null, auth: null, pauses: null, paymentsLive: defaultCheckoutProcessor.available };
+
+function Dot({ health }: { health: Health }) {
+  return <span className="st-dot" data-health={health} aria-hidden="true" />;
+}
 
 export default function StatusPage() {
- const [services, setServices] = useState<ServiceInfo[]>([
- { name: "Plataforma Vemprapay", icon: Server, status: "checking", description: "Dashboard, gerenciamento de produtos e área do vendedor" },
- { name: "Gateway de Pagamento", icon: CreditCard, status: "checking", description: "Processamento de pagamentos PIX, cartão e boleto" },
- { name: "Autenticação", icon: Shield, status: "checking", description: "Login, registro e gerenciamento de sessões" },
- { name: "Área de Membros", icon: Zap, status: "checking", description: "Acesso a cursos, vídeos e conteúdo digital" },
- { name: "Banco de dados público", icon: Activity, status: "checking", description: "Disponibilidade da base de dados pública de produtos" },
- ]);
- const [lastChecked, setLastChecked] = useState<Date | null>(null);
- const [overallStatus, setOverallStatus] = useState<ServiceStatus>("checking");
+  const navigate = useNavigate();
+  const [input, setInput] = useState<StatusInput>(EMPTY);
+  const [checkedAt, setCheckedAt] = useState<Date | null>(null);
+  const [busy, setBusy] = useState(false);
+  const running = useRef(false);
 
- const checkServices = async () => {
- const newServices: ServiceInfo[] = [...services];
+  const run = useCallback(async () => {
+    if (running.current) return;
+    running.current = true;
+    setBusy(true);
+    const next = await checkAll();
+    setInput(next);
+    setCheckedAt(new Date());
+    setBusy(false);
+    running.current = false;
+  }, []);
 
- // Check platform (Supabase connection)
- try {
- const start = Date.now();
- const { error } = await supabase.from("products_public").select("id").limit(1);
- const latency = Date.now() - start;
- newServices[0] = { ...newServices[0], status: error ? "degraded" : "operational", latency };
- } catch {
- newServices[0] = { ...newServices[0], status: "down" };
- }
+  useEffect(() => {
+    document.documentElement.classList.add("vx-scroll");
+    void run();
+    // Só confere de novo com a aba visível; ao voltar para a aba, confere na hora.
+    const tick = window.setInterval(() => { if (document.visibilityState === "visible") void run(); }, REFRESH_MS);
+    const onVisible = () => { if (document.visibilityState === "visible") void run(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearInterval(tick);
+      document.removeEventListener("visibilitychange", onVisible);
+      document.documentElement.classList.remove("vx-scroll");
+    };
+  }, [run]);
 
-  newServices[1] = { ...newServices[1], status: "degraded", latency: undefined, description: "Sem adquirente configurada" };
+  const rows = buildRows(input);
+  const summary = summarize(rows);
+  const time = checkedAt?.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "America/Sao_Paulo" });
 
- // Check auth
- try {
- const start = Date.now();
- const { error } = await supabase.auth.getSession();
- const latency = Date.now() - start;
- newServices[2] = { ...newServices[2], status: error ? "degraded" : "operational", latency };
- } catch {
- newServices[2] = { ...newServices[2], status: "down" };
- }
+  return (
+    <div className="vp-site lp min-h-dvh bg-background text-foreground">
+      <Seo title="Status dos serviços — Vemprapay" description="Veja agora se o painel, o login, os pagamentos e os saques da Vemprapay estão funcionando." path="/status" />
+      <header className="mx-auto flex h-16 max-w-[760px] items-center justify-between px-5 sm:px-8">
+        <Link to="/" className="flex items-center gap-2.5 no-underline" aria-label="Vemprapay, página inicial">
+          <VenxpayLogo size={30} />
+          <span className="text-[18px] font-extrabold tracking-[-0.035em] text-foreground">vempra<span className="text-primary">pay</span></span>
+        </Link>
+        <button type="button" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))} className="lp-btn lp-btn-sm lp-btn-text">
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Voltar
+        </button>
+      </header>
 
- // Check member area (courses table)
- try {
- const start = Date.now();
- const { error } = await supabase.from("courses").select("id").limit(1);
- const latency = Date.now() - start;
- newServices[3] = { ...newServices[3], status: error ? "degraded" : "operational", latency };
- } catch {
- newServices[3] = { ...newServices[3], status: "down" };
- }
+      <main className="mx-auto max-w-[760px] px-5 pb-20 pt-8 sm:px-8 sm:pt-14">
+        <h1 className="text-[clamp(2rem,5vw,2.8rem)] font-extrabold leading-[1.08] tracking-[-0.04em]">Status dos serviços</h1>
 
- // Check the public integration surface without querying internal acquirer data.
- try {
- const start = Date.now();
- const { error } = await supabase.from("products_public").select("id").limit(1);
- const latency = Date.now() - start;
- newServices[4] = { ...newServices[4], status: error ? "degraded" : "operational", latency };
- } catch {
- newServices[4] = { ...newServices[4], status: "down" };
- }
+        <section className="st-summary mt-8" data-tone={summary.tone} aria-live="polite">
+          <Dot health={summary.tone === "ok" ? "ok" : summary.tone === "down" ? "down" : summary.tone === "warn" ? "paused" : "checking"} />
+          <div className="min-w-0 flex-1">
+            <p className="text-[1.15rem] font-extrabold tracking-[-0.02em]">{summary.title}</p>
+            <p className="mt-0.5 text-[13.5px] text-muted-foreground">
+              {time ? `Conferido às ${time} (horário de Brasília), a partir do seu navegador.` : "Conferindo agora, a partir do seu navegador."}
+            </p>
+          </div>
+          <button type="button" className="lp-btn lp-btn-sm lp-btn-ghost shrink-0" onClick={() => void run()} disabled={busy} aria-label="Conferir de novo">
+            <RefreshCw className={busy ? "h-4 w-4 animate-spin motion-reduce:animate-none" : "h-4 w-4"} aria-hidden="true" />
+            <span className="hidden sm:inline">{busy ? "Conferindo…" : "Conferir de novo"}</span>
+          </button>
+        </section>
 
- setServices(newServices);
- setLastChecked(new Date());
+        <ul className="st-list mt-6" aria-label="Serviços">
+          {rows.map((r) => (
+            <li key={r.id} className="st-row">
+              <Dot health={r.health} />
+              <div className="min-w-0 flex-1">
+                <p className="text-[15.5px] font-bold text-foreground">{r.name}</p>
+                <p className="mt-0.5 text-[13.5px] leading-snug text-muted-foreground">{r.detail}</p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="st-label" data-health={r.health}>{HEALTH_LABEL[r.health]}</p>
+                {r.ms !== undefined && <p className="mt-0.5 text-[12px] tabular-nums text-muted-foreground">{r.ms} ms</p>}
+              </div>
+            </li>
+          ))}
+        </ul>
 
- // Determine overall status
- const statuses = newServices.map(s => s.status);
- if (statuses.some(s => s === "down")) {
- setOverallStatus("down");
- } else if (statuses.some(s => s === "degraded")) {
- setOverallStatus("degraded");
- } else {
- setOverallStatus("operational");
- }
- };
-
- useEffect(() => {
- checkServices();
- const interval = setInterval(checkServices, 60000); // Re-check every 60s
- return () => clearInterval(interval);
- }, []);
-
- const overall = STATUS_CONFIG[overallStatus];
-
- return (
- <div className="min-h-screen bg-[#050505] text-white">
- <Seo
-   title="Status dos serviços — Vemprapay"
-   description="Acompanhe em tempo real a disponibilidade da plataforma Vemprapay: gateway de pagamento, autenticação, área de membros e API."
-   path="/status"
- />
- {/* Header */}
- <header className="border-b border-white/[0.06]">
- <div className="max-w-3xl mx-auto px-6 py-6 flex items-center justify-between">
- <div className="flex items-center gap-3">
- <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
- <Activity className="h-5 w-5 text-white" />
- </div>
- <div>
- <h1 className="text-lg font-bold tracking-tight">Vemprapay Status</h1>
- <p className="text-[11px] text-white/30 font-medium">Status dos serviços em tempo real</p>
- </div>
- </div>
- <Link to="/auth" className="flex items-center gap-1.5 text-[12px] text-white/30 hover:text-white/50 transition-colors">
- <ArrowLeft className="h-3.5 w-3.5" />
- Voltar
- </Link>
- </div>
- </header>
-
- <main className="max-w-3xl mx-auto px-6 py-10">
- {/* Overall Status */}
- <div className={`rounded-2xl border p-6 mb-8 ${overall.bgColor}`}>
- <div className="flex items-center gap-3">
- {overallStatus === "operational" ? (
- <CheckCircle2 className={`h-7 w-7 ${overall.color}`} />
- ) : overallStatus === "degraded" ? (
- <AlertTriangle className={`h-7 w-7 ${overall.color}`} />
- ) : (
- <Clock className={`h-7 w-7 ${overall.color}`} />
- )}
- <div>
- <h2 className={`text-xl font-bold ${overall.color}`}>
- {overallStatus === "operational"
- ? "Todos os sistemas operacionais"
- : overallStatus === "degraded"
- ? "Performance degradada"
- : overallStatus === "down"
- ? "Interrupção parcial"
- : "Verificando serviços..."}
- </h2>
- {lastChecked && (
- <p className="text-[12px] text-white/25 mt-1">
- Última verificação: {lastChecked.toLocaleTimeString("pt-BR")}
- </p>
- )}
- </div>
- </div>
- </div>
-
- {/* Services List */}
- <div className="space-y-3">
- {services.map((service) => {
- const cfg = STATUS_CONFIG[service.status];
- return (
- <div
- key={service.name}
- className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 flex items-center gap-4"
- >
- <div className="h-10 w-10 rounded-xl bg-white/[0.04] flex items-center justify-center shrink-0">
- <service.icon className="h-5 w-5 text-white/40" />
- </div>
- <div className="flex-1 min-w-0">
- <h3 className="text-[14px] font-semibold text-white/90">{service.name}</h3>
- <p className="text-[12px] text-white/25 mt-0.5">{service.description}</p>
- </div>
- <div className="flex items-center gap-3 shrink-0">
- {service.latency !== undefined && (
- <span className="text-[11px] text-white/20 font-mono">
- {service.latency}ms
- </span>
- )}
- <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border ${cfg.bgColor}`}>
- <div className={`h-1.5 w-1.5 rounded-full ${cfg.dotColor} ${service.status === "operational" ? "animate-pulse" : ""}`} />
- <span className={`text-[11px] font-semibold ${cfg.color}`}>{cfg.label}</span>
- </div>
- </div>
- </div>
- );
- })}
- </div>
-
- {/* Uptime info */}
- <div className="mt-10 text-center">
- <p className="text-[12px] text-white/15 font-medium">
- Status atualizado automaticamente a cada 60 segundos
- </p>
- <p className="text-[11px] text-white/10 mt-1">
- © {new Date().getFullYear()} Vemprapay — Todos os direitos reservados
- </p>
- </div>
- </main>
- </div>
- );
+        <p className="mt-8 max-w-[38rem] text-[13.5px] leading-relaxed text-muted-foreground">
+          A página confere de novo a cada minuto enquanto estiver aberta. Se algo aparece fora do ar só para você, pode ser a sua conexão.
+          Precisa de ajuda? Entre no painel e abra um chamado em <Link to="/suporte" className="lp-link text-[13.5px]">Suporte</Link>.
+        </p>
+      </main>
+    </div>
+  );
 }

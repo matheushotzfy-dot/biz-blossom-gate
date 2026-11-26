@@ -2,6 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://hotzfy.com.br/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>https://hotzfy.com.br/auth</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://hotzfy.com.br/documentacao</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://hotzfy.com.br/status</loc><changefreq>daily</changefreq><priority>0.5</priority></url>
   <url><loc>https://hotzfy.com.br/termos-de-uso</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://hotzfy.com.br/politica-de-privacidade</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>

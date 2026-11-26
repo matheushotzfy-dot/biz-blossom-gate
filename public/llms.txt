@@ -1,13 +1,14 @@
 # Vemprapay
 
-> Plataforma brasileira de pagamentos e gestão para infoprodutores: checkout de alta conversão, área de membros, analytics em tempo real e antifraude integrado.
+> Plataforma brasileira para vender produtos digitais: checkout com Pix, cartão e boleto, links de pagamento, área de membros, divisão de vendas com coprodutor e afiliado, webhooks assinados e saque por Pix.
 
-Vemprapay permite vender, gerenciar e escalar produtos digitais com PIX, cartão e boleto, sistema de afiliados, coproduções, cupons e saques rápidos.
+A conta é grátis e sem mensalidade. As taxas de cada forma de pagamento ficam no painel do vendedor (Financeiro > Taxas). Cada produto novo passa por revisão da equipe antes de o checkout aceitar pagamentos, e o saque só é processado depois da verificação de identidade.
 
 ## Pages
 
-- [Home](/): Visão geral da plataforma, recursos, preços e FAQ.
-- [Login / Criar conta](/auth): Acesso ao painel do produtor.
+- [Home](/): O que a plataforma faz, do checkout ao saque, e perguntas frequentes.
+- [Login / Criar conta](/auth): Acesso ao painel do vendedor.
+- [Documentação](/documentacao): Webhooks (formato, assinatura HMAC-SHA256, eventos) e chaves de API.
 - [Status](/status): Status operacional dos serviços.
 - [Termos de Uso](/termos-de-uso): Termos e condições da plataforma.
 - [Política de Privacidade](/politica-de-privacidade): Tratamento de dados pessoais (LGPD).

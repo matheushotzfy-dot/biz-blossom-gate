@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AFF_MAX, CO_MAX, brlFromCents, computeSplit } from "@/components/landing-vp/splitMath";
@@ -172,5 +172,85 @@ describe("calculadora de divisão", () => {
     fireEvent.change(screen.getByLabelText("Coprodutor"), { target: { value: "0" } });
     fireEvent.change(screen.getByLabelText("Afiliado"), { target: { value: "0" } });
     expect(lines()).toEqual(["VocêR$ 100,00", "CoprodutorR$ 0,00", "AfiliadoR$ 0,00"]);
+  });
+});
+
+describe("cena do topo (vendas do dia)", () => {
+  // Importado aqui para os testes de cima não dependerem dela.
+  const load = () => import("@/components/landing-vp/LiveLedger");
+  const feedRows = (c: HTMLElement) => Array.from(c.querySelectorAll(".lp-feed .lp-row"));
+
+  it("abre com o cartão cheio, as vendas novas chegam por cima e o boleto é pago no fim", async () => {
+    vi.useFakeTimers();
+    const { LiveLedger } = await load();
+    const { EXAMPLE_SALES, HERO_ROWS } = await import("@/components/landing-vp/landingData");
+    const { container } = render(<LiveLedger />);
+    expect(feedRows(container)).toHaveLength(HERO_ROWS);
+    // a mais nova primeiro
+    expect(feedRows(container)[0].textContent).toContain(EXAMPLE_SALES[HERO_ROWS - 1].who);
+    expect(container.textContent).toContain("Aguardando");
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(6000); });
+    const rows = feedRows(container);
+    expect(rows).toHaveLength(HERO_ROWS + 1); // a que sai fica escondida embaixo (overflow do cartão)
+    expect(rows[0].textContent).toContain(EXAMPLE_SALES[EXAMPLE_SALES.length - 1].who);
+    expect(container.textContent).not.toContain("Aguardando");
+    expect(container.textContent).toContain(`${EXAMPLE_SALES.length} vendas pagas`);
+    vi.useRealTimers();
+  });
+
+  it("o resumo para leitores de tela bate com a soma das vendas de exemplo", async () => {
+    const { LiveLedger } = await load();
+    const { EXAMPLE_SALES } = await import("@/components/landing-vp/landingData");
+    const { container } = render(<LiveLedger />);
+    const total = brlFromCents(EXAMPLE_SALES.reduce((s, x) => s + x.cents, 0));
+    expect(asText(container.querySelector(".sr-only")?.textContent ?? "")).toContain(asText(total));
+  });
+});
+
+describe("textos que precisam ser verdade", () => {
+  it("não promete sessão por aparelho, saque sem conferência nem primeira venda no mesmo dia", () => {
+    const { container } = renderPage();
+    const text = container.textContent ?? "";
+    expect(text).not.toMatch(/onde a conta está aberta/);
+    expect(text).not.toMatch(/saca sozinho|sacar sozinho/);
+    expect(text).not.toMatch(/mesmo dia em que você terminar/);
+    expect(text).toMatch(/revis/); // a revisão do produto aparece (FAQ e fecho)
+  });
+});
+
+describe("navegação", () => {
+  it("tem atalho para pular ao conteúdo e o alvo existe", () => {
+    const { container } = renderPage();
+    const skip = screen.getByRole("link", { name: "Pular para o conteúdo" });
+    expect(skip.getAttribute("href")).toBe("#conteudo");
+    expect(container.querySelector("main#conteudo")).not.toBeNull();
+  });
+
+  it("com o menu aberto a página por trás não rola e o foco vai para o primeiro link; Esc devolve o foco ao botão", () => {
+    render(<SiteNav onLogin={() => {}} onSignup={() => {}} />);
+    const toggle = screen.getByRole("button", { name: "Abrir menu" });
+    fireEvent.click(toggle);
+    expect(document.documentElement.classList.contains("lp-menu-open")).toBe(true);
+    expect(document.activeElement?.textContent).toBe(NAV_LINKS[0].label);
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(document.documentElement.classList.contains("lp-menu-open")).toBe(false);
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Abrir menu" }));
+  });
+
+  it("clicar no véu fecha o menu", () => {
+    const { container } = render(<SiteNav onLogin={() => {}} onSignup={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "Abrir menu" }));
+    fireEvent.click(container.querySelector(".lp-menu-scrim")!);
+    expect(document.getElementById("lp-menu")).toBeNull();
+  });
+
+  it("o rodapé abre as preferências de cookies", () => {
+    renderPage();
+    const heard = vi.fn();
+    window.addEventListener("venxpay:open-cookie-settings", heard);
+    fireEvent.click(screen.getByRole("button", { name: "Preferências de cookies" }));
+    expect(heard).toHaveBeenCalledTimes(1);
+    window.removeEventListener("venxpay:open-cookie-settings", heard);
   });
 });

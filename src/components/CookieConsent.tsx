@@ -10,8 +10,7 @@
  * - Link para Política de Privacidade
  * - Possibilidade de revogar/reconfigurar a qualquer momento
  */
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { Cookie, Shield, BarChart3, Target, X, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -83,6 +82,7 @@ export function CookieConsent() {
   const [visible, setVisible] = useState(false);
   const [managing, setManaging] = useState(false);
   const [prefs, setPrefs] = useState({ analytics: false, marketing: false });
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const existing = loadConsent();
@@ -106,6 +106,15 @@ export function CookieConsent() {
     return () => window.removeEventListener("venxpay:open-cookie-settings", handler);
   }, []);
 
+  // Ao abrir as preferências o foco vai para o painel; Esc volta para o aviso compacto.
+  useEffect(() => {
+    if (!visible || !managing) return undefined;
+    panelRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setManaging(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [visible, managing]);
+
   const acceptAll = () => {
     saveConsent({ analytics: true, marketing: true });
     setVisible(false);
@@ -125,17 +134,15 @@ export function CookieConsent() {
   };
 
   return (
-    <AnimatePresence>
+    <>
       {visible && (
         <>
           {/* Backdrop apenas ao gerenciar */}
           {managing && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+            <div
+              aria-hidden="true"
               onClick={() => setManaging(false)}
-              className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm animate-in fade-in-0 duration-200"
             />
           )}
 
@@ -145,15 +152,13 @@ export function CookieConsent() {
               managing ? "max-w-2xl" : "max-w-3xl",
             )}
           >
-            <motion.div
-              role="dialog"
-              aria-modal={managing ? "true" : "false"}
+            <div
+              ref={panelRef}
+              role={managing ? "dialog" : "region"}
+              aria-modal={managing ? true : undefined}
               aria-labelledby="cookie-consent-title"
-              initial={{ y: 40, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 40, opacity: 0 }}
-              transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
-              className="pointer-events-auto w-full"
+              tabIndex={-1}
+              className="pointer-events-auto w-full outline-none animate-in fade-in-0 slide-in-from-bottom-6 duration-300 motion-reduce:animate-none"
             >
             <div className="relative overflow-hidden rounded-2xl border border-sidebar-border/80 bg-background/95 backdrop-blur-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)]">
               {/* subtle emerald accent */}
@@ -310,11 +315,11 @@ export function CookieConsent() {
                 </div>
               )}
             </div>
-            </motion.div>
+            </div>
           </div>
         </>
       )}
-    </AnimatePresence>
+    </>
   );
 }
 

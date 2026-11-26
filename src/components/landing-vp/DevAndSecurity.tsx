@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { SECURITY_POINTS } from "./landingData";
+import { RULE_BELOW, RULE_BOTH, line } from "./lines";
 import { Tight } from "./Tight";
 
 const SAMPLE = [
@@ -44,7 +45,7 @@ const FACTS = [
 
 export function DevAndSecurity() {
   return (
-    <section id="integracao" className="bg-background py-24 sm:py-32">
+    <section id="integracao" className="bg-background pt-24 sm:pt-32">
       <div className="mx-auto max-w-[1180px] px-5 sm:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)] lg:gap-20">
           <div>
@@ -68,7 +69,7 @@ export function DevAndSecurity() {
           </div>
 
           <div className="lp-code" role="group" aria-label="Exemplo de webhook de pagamento aprovado">
-            <div className="flex items-center justify-between gap-4 px-5 py-3.5" style={{ boxShadow: "0 1px 0 hsl(220 16% 16%)" }}>
+            <div className="lp-line flex items-center justify-between gap-4 px-5 py-3.5" style={line("0 1px 0 hsl(220 16% 16%)")}>
               <span className="font-mono text-[12.5px] font-semibold" style={{ color: "hsl(218 14% 70%)" }}>POST seu-servidor.com.br/webhooks</span>
               <span className="rounded-full px-2.5 py-0.5 text-[11.5px] font-bold" style={{ background: "hsl(152 45% 14%)", color: "hsl(150 80% 66%)" }}>Exemplo</span>
             </div>
@@ -83,7 +84,7 @@ export function DevAndSecurity() {
           </div>
         </div>
 
-        <div id="seguranca" className="mt-28 sm:mt-36">
+        <div id="seguranca" className="pb-24 pt-28 sm:pb-32 sm:pt-36">
           <h2 className="max-w-[38rem] text-[clamp(2rem,4.2vw,3.1rem)] font-extrabold leading-[1.07] tracking-[-0.04em] text-foreground">
             <Tight>Segurança, sem enfeite.</Tight>
           </h2>
@@ -92,7 +93,7 @@ export function DevAndSecurity() {
           </p>
           <dl className="m-0 mt-12 grid gap-x-16 md:grid-cols-2">
             {SECURITY_POINTS.map((s, i) => (
-              <div key={s.t} className="py-5" style={{ boxShadow: i < 2 ? "0 1px 0 hsl(var(--border)), 0 -1px 0 hsl(var(--border))" : "0 1px 0 hsl(var(--border))" }}>
+              <div key={s.t} className="lp-line py-5" style={line(i < 2 ? RULE_BOTH : RULE_BELOW)}>
                 <dt className="text-[1.15rem] font-extrabold tracking-[-0.025em] text-foreground">{s.t}</dt>
                 <dd className="m-0 mt-1.5 max-w-[30rem] text-[15.5px] leading-[1.65] text-muted-foreground">{s.d}</dd>
               </div>

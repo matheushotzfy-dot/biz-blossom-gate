@@ -42,7 +42,7 @@ export default function LandingPage() {
         jsonLd={FAQ_JSONLD}
       />
       <SiteNav onLogin={goLogin} onSignup={goSignup} />
-      <main>
+      <main id="conteudo" tabIndex={-1} className="outline-none">
         <HeroSection onSignup={goSignup} />
         <SaleJourney />
         <SellSection />

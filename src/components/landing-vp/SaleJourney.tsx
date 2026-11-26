@@ -25,7 +25,7 @@ const STAGES: Array<{ title: string; text: string; specimen: ReactNode }> = [
   },
   {
     title: "O dinheiro vai para o seu saldo",
-    text: "Com coprodutor ou afiliado, a divisão já chega feita: cada um vê a sua parte no próprio saldo. Do seu, você pede o saque por Pix, ou liga o saque automático para sacar sozinho ao chegar no valor que escolher.",
+    text: "Com coprodutor ou afiliado, a divisão já chega feita: cada um vê a sua parte no próprio saldo. Do seu, você pede o saque por Pix, ou liga o saque automático, que pede o saque sozinho quando o saldo chega ao valor que você escolheu.",
     specimen: <PayoutSpecimen />,
   },
 ];

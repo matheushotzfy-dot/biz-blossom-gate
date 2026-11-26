@@ -18,17 +18,28 @@ export interface ExampleSale {
   what: string;
   method: "Pix" | "Cartão 3x" | "Boleto";
   cents: number;
+  /** Paga desde o começo da cena. */
   paid: boolean;
+  /** Boleto que é pago durante a cena (o status muda na frente de quem olha). */
+  paysLater?: boolean;
 }
 
-/** Vendas de exemplo do topo da página (a soma só conta as pagas). */
+/**
+ * O dia de exemplo do topo, do mais antigo para o mais novo. As `HERO_ROWS` primeiras já estão na tela;
+ * as outras chegam uma a uma por cima, e o boleto `paysLater` muda para pago no fim.
+ */
 export const EXAMPLE_SALES: ExampleSale[] = [
-  { who: "Maria S.", what: "Curso Marketing do Zero", method: "Pix", cents: 19700, paid: true },
-  { who: "João P.", what: "Mentoria em grupo", method: "Cartão 3x", cents: 49700, paid: true },
-  { who: "Lucas A.", what: "Curso Marketing do Zero", method: "Boleto", cents: 19700, paid: false },
-  { who: "Camila R.", what: "E-book Receitas Fit", method: "Pix", cents: 4700, paid: true },
   { who: "Ana T.", what: "Mentoria em grupo", method: "Pix", cents: 29700, paid: true },
+  { who: "Camila R.", what: "E-book Receitas Fit", method: "Pix", cents: 4700, paid: true },
+  { who: "Lucas A.", what: "Curso Marketing do Zero", method: "Boleto", cents: 19700, paid: false, paysLater: true },
+  { who: "João P.", what: "Mentoria em grupo", method: "Cartão 3x", cents: 49700, paid: true },
+  { who: "Bruna M.", what: "E-book Receitas Fit", method: "Pix", cents: 4700, paid: true },
+  { who: "Maria S.", what: "Curso Marketing do Zero", method: "Pix", cents: 19700, paid: true },
+  { who: "Rafael C.", what: "Comunidade VIP, mensal", method: "Cartão 3x", cents: 9700, paid: true },
 ];
+
+/** Quantas vendas cabem no cartão do topo. */
+export const HERO_ROWS = 5;
 
 export const FAQ = [
   {
@@ -37,7 +48,7 @@ export const FAQ = [
   },
   {
     q: "Quando o dinheiro chega ao meu saldo?",
-    a: "O Pix entra no saldo assim que é aprovado. Cartão e boleto seguem o prazo mostrado na página Taxas do painel. Do saldo, você pede o saque por Pix para a chave que cadastrou, ou liga o saque automático para sacar sozinho quando o saldo chegar ao valor que você escolher.",
+    a: "O Pix entra no saldo assim que é aprovado. Cartão e boleto seguem o prazo mostrado na página Taxas do painel. Do saldo, você pede o saque por Pix para a chave que cadastrou, ou liga o saque automático, que pede o saque sozinho quando o saldo chega ao valor que você escolheu.",
   },
   {
     q: "Quais formas de pagamento posso aceitar?",
@@ -46,6 +57,10 @@ export const FAQ = [
   {
     q: "Preciso ter CNPJ?",
     a: "Não. Você abre a conta como pessoa física, com CPF, ou como empresa, com CNPJ. Nos dois casos a conta passa por uma verificação de identidade com envio de documentos, e o saque só é processado depois que ela é aprovada.",
+  },
+  {
+    q: "Em quanto tempo começo a vender?",
+    a: "A conta abre em poucos minutos e você já pode montar o produto. Cada produto novo passa por uma revisão da equipe antes de o checkout aceitar pagamentos, e você acompanha essa revisão no painel. O saque só é processado depois que a verificação de identidade for aprovada.",
   },
   {
     q: "Como funciona a área de membros?",
@@ -74,7 +89,7 @@ export const SECURITY_POINTS = [
   { t: "Saque com a senha de novo", d: "Pedir saque, trocar chave Pix ou ligar o saque automático exigem a sua senha na hora." },
   { t: "Extrato que não se apaga", d: "Venda, taxa, divisão e saque viram lançamentos no seu livro-razão, um por movimentação." },
   { t: "Segredos guardados com cuidado", d: "Credenciais de integração ficam criptografadas, e o segredo de uma chave de API só aparece uma vez." },
-  { t: "Aparelhos sob controle", d: "Você vê onde a conta está aberta e pode sair de todos os outros aparelhos num clique." },
+  { t: "Aparelhos sob controle", d: "Você vê o último acesso da conta e desconecta todos os outros aparelhos num clique." },
 ] as const;
 
 export const SELL_FEATURES = [

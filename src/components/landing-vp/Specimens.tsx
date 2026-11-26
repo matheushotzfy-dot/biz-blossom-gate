@@ -1,5 +1,6 @@
 import { ArrowDownLeft, Check, GraduationCap, KeyRound, Play, RefreshCw, Timer, X, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RULE_ABOVE, line } from "./lines";
 
 /** O "V" da marca desenhado como um check, para marcar cada etapa. */
 export function CheckMark({ className }: { className?: string }) {
@@ -103,7 +104,7 @@ export function WebhookSpecimen() {
         { ok: true, t: "Pagamento aprovado", c: "payment.approved", m: "Seu servidor respondeu 200", w: "agora" },
         { ok: false, t: "Cobrança expirada", c: "payment.expired", m: "Seu servidor respondeu 503. Nova tentativa em 30 s", w: "há 2 min" },
       ].map((r) => (
-        <div key={r.c} className="flex items-center gap-3.5 px-5 py-3.5" style={{ boxShadow: "0 -1px 0 hsl(var(--border))" }}>
+        <div key={r.c} className="lp-line flex items-center gap-3.5 px-5 py-3.5" style={line(RULE_ABOVE)}>
           <span className={cn("grid h-8 w-8 shrink-0 place-items-center rounded-full", r.ok ? "bg-accent text-accent-foreground" : "bg-destructive/15 text-destructive")}>
             {r.ok ? <Check className="h-4 w-4" strokeWidth={3} /> : <X className="h-4 w-4" strokeWidth={3} />}
           </span>
@@ -114,7 +115,7 @@ export function WebhookSpecimen() {
           <span className="shrink-0 text-[12px] text-muted-foreground">{r.w}</span>
         </div>
       ))}
-      <div className="flex items-center gap-2 px-5 py-3.5 text-[13px] font-bold text-primary" style={{ boxShadow: "0 -1px 0 hsl(var(--border))" }}>
+      <div className="lp-line flex items-center gap-2 px-5 py-3.5 text-[13px] font-bold text-primary" style={line(RULE_ABOVE)}>
         <RefreshCw className="h-4 w-4" /> Reenviar o que falhou
       </div>
     </div>
@@ -164,7 +165,7 @@ export function PayoutSpecimen() {
         </span>
       </div>
       <div className="mt-3 flex items-center gap-2.5 rounded-[14px] bg-accent px-3.5 py-3 text-[13px] font-semibold leading-snug text-accent-foreground">
-        <Zap className="h-4 w-4 shrink-0" /> Saque automático ligado: saca sozinho quando o saldo chegar a R$ 1.500,00
+        <Zap className="h-4 w-4 shrink-0" /> Saque automático ligado: o pedido sai sozinho quando o saldo chegar a R$ 1.500,00
       </div>
       <span className="lp-btn lp-btn-sm mt-4 pointer-events-none w-full">Solicitar saque</span>
     </div>
