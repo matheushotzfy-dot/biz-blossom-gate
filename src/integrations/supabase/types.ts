@@ -1535,30 +1535,45 @@ export type Database = {
         Row: {
           created_at: string
           error_type: string
+          fingerprint: string | null
           id: string
+          last_seen_at: string
           message: string
           metadata: Json | null
+          occurrences: number
           resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
           stack_trace: string | null
           user_id: string | null
         }
         Insert: {
           created_at?: string
           error_type?: string
+          fingerprint?: string | null
           id?: string
+          last_seen_at?: string
           message: string
           metadata?: Json | null
+          occurrences?: number
           resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
           stack_trace?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
           error_type?: string
+          fingerprint?: string | null
           id?: string
+          last_seen_at?: string
           message?: string
           metadata?: Json | null
+          occurrences?: number
           resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
           stack_trace?: string | null
           user_id?: string | null
         }
@@ -2194,6 +2209,7 @@ export type Database = {
       }
       notifications: {
         Row: {
+          batch_id: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -2204,6 +2220,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          batch_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -2214,6 +2231,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          batch_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -5597,9 +5615,33 @@ export type Database = {
       }
     }
     Functions: {
+      admin_abuse_block_ip: {
+        Args: { _ip_hash: string; _minutes: number; _reason: string }
+        Returns: Json
+      }
+      admin_abuse_release_block: {
+        Args: { _id: string; _reason: string }
+        Returns: undefined
+      }
+      admin_add_reward_claim_note: {
+        Args: { _id: string; _note: string }
+        Returns: Json
+      }
+      admin_add_seller_note: {
+        Args: { _content: string; _seller_id: string }
+        Returns: Json
+      }
       admin_approve_kyc: { Args: { _user_id: string }; Returns: undefined }
       admin_approve_seller_with_manager: {
         Args: { _manager?: string; _seller: string }
+        Returns: undefined
+      }
+      admin_blacklist_add: {
+        Args: { _reason: string; _type: string; _value: string }
+        Returns: Json
+      }
+      admin_blacklist_remove: {
+        Args: { _id: string; _reason: string }
         Returns: undefined
       }
       admin_bulk_assign_acquirer: {
@@ -5614,6 +5656,18 @@ export type Database = {
           success: boolean
         }[]
       }
+      admin_cancel_subscription: {
+        Args: { _id: string; _reason: string }
+        Returns: Json
+      }
+      admin_clean_notifications: {
+        Args: { _reason: string; _scope: string }
+        Returns: Json
+      }
+      admin_clear_card_release: {
+        Args: { _reason: string; _user_id: string }
+        Returns: Json
+      }
       admin_configure_staff: {
         Args: {
           _commission: number
@@ -5624,6 +5678,15 @@ export type Database = {
           _withdrawal: number
         }
         Returns: undefined
+      }
+      admin_create_referral: {
+        Args: {
+          _email: string
+          _reason: string
+          _referrer: string
+          _reward: number
+        }
+        Returns: Json
       }
       admin_decide_balance_adjustment: {
         Args: { _approve: boolean; _request_id: string }
@@ -5643,6 +5706,36 @@ export type Database = {
         Returns: Json
       }
       admin_decrypt_field: { Args: { _cipher: string }; Returns: string }
+      admin_delete_award_tier: { Args: { _id: string }; Returns: Json }
+      admin_delete_error_logs: {
+        Args: { _reason: string; _scope: string }
+        Returns: Json
+      }
+      admin_delete_goal: {
+        Args: { _id: string; _reason: string }
+        Returns: Json
+      }
+      admin_delete_product: {
+        Args: { _id: string; _reason: string }
+        Returns: Json
+      }
+      admin_delete_race: { Args: { _id: string }; Returns: Json }
+      admin_delete_race_entry: {
+        Args: { _id: string; _reason: string }
+        Returns: Json
+      }
+      admin_delete_race_prize: { Args: { _id: string }; Returns: Json }
+      admin_export_page: {
+        Args: {
+          _after_at?: string
+          _after_id?: string
+          _from: string
+          _kind: string
+          _limit?: number
+          _to: string
+        }
+        Returns: Json
+      }
       admin_freeze_account: {
         Args: { _freeze: boolean; _reason?: string; _user_id: string }
         Returns: undefined
@@ -5656,6 +5749,15 @@ export type Database = {
       }
       admin_list_refund_requests: {
         Args: { _limit?: number; _offset?: number; _status?: string }
+        Returns: Json
+      }
+      admin_mark_ticket_read: { Args: { _ticket_id: string }; Returns: Json }
+      admin_move_award_tier: {
+        Args: { _dir: string; _id: string }
+        Returns: Json
+      }
+      admin_move_race_prize: {
+        Args: { _dir: string; _id: string }
         Returns: Json
       }
       admin_open_dispute: {
@@ -5675,6 +5777,20 @@ export type Database = {
         Args: { _reason: string; _user_id: string }
         Returns: undefined
       }
+      admin_release_login_lockout: {
+        Args: {
+          _email: string
+          _ip_hash: string
+          _kind: string
+          _reason: string
+          _scope: string
+        }
+        Returns: Json
+      }
+      admin_reply_ticket: {
+        Args: { _attachments?: Json; _body: string; _ticket_id: string }
+        Returns: Json
+      }
       admin_request_balance_adjustment: {
         Args: {
           _amount: number
@@ -5684,6 +5800,8 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_reset_custom_fees: { Args: { _reason: string }; Returns: Json }
+      admin_resolve_all_errors: { Args: { _area?: string }; Returns: Json }
       admin_resolve_dispute: {
         Args: {
           _dispute_id: string
@@ -5693,6 +5811,11 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_restore_product: {
+        Args: { _id: string; _reason: string }
+        Returns: Json
+      }
+      admin_retract_notification: { Args: { _batch_id: string }; Returns: Json }
       admin_retry_checkout_delivery: {
         Args: { _delivery_id: string }
         Returns: Json
@@ -5731,6 +5854,74 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_save_award_tier: {
+        Args: {
+          _create: boolean
+          _description: string
+          _id: string
+          _image_url: string
+          _is_active: boolean
+          _phrase: string
+          _rewards: string[]
+          _tier: string
+          _title: string
+          _value: number
+        }
+        Returns: Json
+      }
+      admin_save_goal: {
+        Args: {
+          _description: string
+          _ends_at: string
+          _id: string
+          _reward_description: string
+          _reward_title: string
+          _starts_at: string
+          _target: number
+          _title: string
+        }
+        Returns: Json
+      }
+      admin_save_race: {
+        Args: {
+          _banner_url: string
+          _description: string
+          _ends_at: string
+          _id: string
+          _logo_url: string
+          _starts_at: string
+          _title: string
+        }
+        Returns: Json
+      }
+      admin_save_race_entry: {
+        Args: {
+          _avatar_url: string
+          _display_name: string
+          _id: string
+          _race_id: string
+          _reason: string
+          _revenue_cents: number
+          _sales_count: number
+          _seller_id: string
+        }
+        Returns: Json
+      }
+      admin_save_race_prize: {
+        Args: {
+          _description: string
+          _goal_cents: number
+          _id: string
+          _image_url: string
+          _kind: string
+          _position: number
+          _race_id: string
+          _title: string
+        }
+        Returns: Json
+      }
+      admin_search_sales: { Args: { _query: string }; Returns: Json }
+      admin_search_sellers: { Args: { _query: string }; Returns: Json }
       admin_search_transactions: {
         Args: { _query: string }
         Returns: {
@@ -5742,17 +5933,112 @@ export type Database = {
           status: string
         }[]
       }
+      admin_send_notification: {
+        Args: {
+          _audience: string
+          _message: string
+          _title: string
+          _type?: string
+          _user_id: string
+        }
+        Returns: Json
+      }
       admin_set_acquirer_active: {
         Args: { _acquirer_id: string; _active: boolean; _reason?: string }
+        Returns: Json
+      }
+      admin_set_affiliate_hold: {
+        Args: {
+          _affiliate_user_id: string
+          _hold: boolean
+          _link_id: string
+          _reason: string
+        }
+        Returns: Json
+      }
+      admin_set_card_release: {
+        Args: { _days: number; _reason: string; _user_id: string }
+        Returns: Json
+      }
+      admin_set_coupon_hold: {
+        Args: { _hold: boolean; _id: string; _reason: string }
+        Returns: Json
+      }
+      admin_set_course_hold: {
+        Args: { _hold: boolean; _id: string; _reason: string }
         Returns: Json
       }
       admin_set_dispute_review: {
         Args: { _dispute_id: string; _note?: string }
         Returns: undefined
       }
+      admin_set_email_verification: {
+        Args: { _enabled: boolean; _reason: string }
+        Returns: Json
+      }
+      admin_set_error_resolved: {
+        Args: { _id: string; _resolved: boolean }
+        Returns: Json
+      }
+      admin_set_goal_active: {
+        Args: { _active: boolean; _id: string }
+        Returns: Json
+      }
+      admin_set_goal_award: {
+        Args: {
+          _goal_id: string
+          _note: string
+          _seller_id: string
+          _status: string
+        }
+        Returns: Json
+      }
+      admin_set_kill_switch: {
+        Args: { _key: string; _paused: boolean; _reason: string }
+        Returns: Json
+      }
       admin_set_manual_approval: { Args: { _value: Json }; Returns: Json }
+      admin_set_max_ticket: {
+        Args: { _reason: string; _scope: string; _value: number }
+        Returns: Json
+      }
       admin_set_payment_link_status: {
         Args: { _payment_link_id: string; _reason?: string; _status: string }
+        Returns: Json
+      }
+      admin_set_plan_hold: {
+        Args: { _hold: boolean; _plan_id: string; _reason: string }
+        Returns: Json
+      }
+      admin_set_platform_fee: {
+        Args: { _id: string; _value: number }
+        Returns: Json
+      }
+      admin_set_product_classification: {
+        Args: { _class: string; _id: string; _note?: string }
+        Returns: Json
+      }
+      admin_set_product_status: {
+        Args: { _id: string; _reason?: string; _status: string }
+        Returns: Json
+      }
+      admin_set_race_active: {
+        Args: { _active: boolean; _id: string; _replace?: boolean }
+        Returns: Json
+      }
+      admin_set_referral_status: {
+        Args: { _id: string; _reason: string; _status: string }
+        Returns: Json
+      }
+      admin_set_reward_claim: {
+        Args: {
+          _carrier: string
+          _code: string
+          _id: string
+          _message: string
+          _status: string
+          _url: string
+        }
         Returns: Json
       }
       admin_set_seller_acquirer: {
@@ -5763,7 +6049,43 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_set_ticket_priority: {
+        Args: { _priority: string; _ticket_id: string }
+        Returns: Json
+      }
+      admin_set_ticket_status: {
+        Args: { _status: string; _ticket_id: string }
+        Returns: Json
+      }
       admin_unverify_email: { Args: { _user_id: string }; Returns: undefined }
+      admin_update_reward_claim_shipping: {
+        Args: {
+          _city: string
+          _complement: string
+          _document: string
+          _id: string
+          _neighborhood: string
+          _number: string
+          _phone: string
+          _reason: string
+          _recipient_name: string
+          _state: string
+          _street: string
+          _zip: string
+        }
+        Returns: Json
+      }
+      admin_update_velocity_rule: {
+        Args: {
+          _action: string
+          _enabled: boolean
+          _id: string
+          _max_attempts: number
+          _threshold: number
+          _window_minutes: number
+        }
+        Returns: Json
+      }
       apply_transaction_splits: { Args: { _tx_id: string }; Returns: undefined }
       assign_staff_seller: {
         Args: { _seller: string; _staff: string }
@@ -5842,6 +6164,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      claim_my_pending_deliveries: { Args: never; Returns: number }
       claim_webhook_deliveries: {
         Args: { _limit?: number }
         Returns: {
@@ -5875,10 +6198,38 @@ export type Database = {
       decrypt_field: { Args: { _cipher: string }; Returns: string }
       detect_negative_balances: { Args: never; Returns: Json }
       encrypt_field: { Args: { _plain: string }; Returns: string }
-      enqueue_test_webhook: { Args: { _config_id: string; _event?: string }; Returns: string }
+      enqueue_test_webhook: {
+        Args: { _config_id: string; _event?: string }
+        Returns: string
+      }
       expire_stale_pix_transactions: { Args: never; Returns: number }
       get_acquirer_overview: {
         Args: { _from: string; _to: string }
+        Returns: Json
+      }
+      get_admin_abuse_ips: {
+        Args: {
+          _hours?: number
+          _page?: number
+          _page_size?: number
+          _search?: string
+        }
+        Returns: Json
+      }
+      get_admin_abuse_overview: { Args: { _hours?: number }; Returns: Json }
+      get_admin_abuse_waiting: { Args: never; Returns: Json }
+      get_admin_affiliate_detail: { Args: { _user_id: string }; Returns: Json }
+      get_admin_affiliate_products_page: {
+        Args: { _page?: number; _page_size?: number; _search?: string }
+        Returns: Json
+      }
+      get_admin_affiliates_page: {
+        Args: {
+          _filter?: string
+          _page?: number
+          _page_size?: number
+          _search?: string
+        }
         Returns: Json
       }
       get_admin_analytics: { Args: { _period_days?: number }; Returns: Json }
@@ -5893,8 +6244,78 @@ export type Database = {
         }
         Returns: Json
       }
+      get_admin_antifraud_overview: { Args: { _days?: number }; Returns: Json }
+      get_admin_audit_entry: {
+        Args: { _id: string; _source: string }
+        Returns: Json
+      }
+      get_admin_audit_page: {
+        Args: {
+          _actor?: string
+          _days?: number
+          _entity?: string
+          _export?: boolean
+          _only_sensitive?: boolean
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _source?: string
+          _until?: string
+        }
+        Returns: Json
+      }
+      get_admin_award_tiers: { Args: never; Returns: Json }
+      get_admin_blacklist_page: {
+        Args: {
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _status?: string
+          _type?: string
+        }
+        Returns: Json
+      }
+      get_admin_chargeback_radar: {
+        Args: {
+          _days?: number
+          _level?: string
+          _page?: number
+          _page_size?: number
+          _search?: string
+        }
+        Returns: Json
+      }
+      get_admin_checkout_deliveries_page: {
+        Args: {
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _status?: string
+        }
+        Returns: Json
+      }
       get_admin_command_center: {
         Args: { _from: string; _to: string }
+        Returns: Json
+      }
+      get_admin_coupon_detail: { Args: { _id: string }; Returns: Json }
+      get_admin_coupons_page: {
+        Args: {
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _status?: string
+        }
+        Returns: Json
+      }
+      get_admin_course_detail: { Args: { _id: string }; Returns: Json }
+      get_admin_courses_page: {
+        Args: {
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _status?: string
+        }
         Returns: Json
       }
       get_admin_dashboard_data: {
@@ -5908,10 +6329,43 @@ export type Database = {
         }
         Returns: Json
       }
+      get_admin_dispute_events: { Args: { _id: string }; Returns: Json }
+      get_admin_disputes_page: {
+        Args: {
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _status?: string
+          _type?: string
+        }
+        Returns: Json
+      }
+      get_admin_error_log_detail: { Args: { _id: string }; Returns: Json }
+      get_admin_error_logs_page: {
+        Args: {
+          _area?: string
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _status?: string
+        }
+        Returns: Json
+      }
       get_admin_financial_overview: {
         Args: { _bucket?: string; _from: string; _to: string }
         Returns: Json
       }
+      get_admin_fraud_trail: {
+        Args: {
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _type?: string
+        }
+        Returns: Json
+      }
+      get_admin_goal_detail: { Args: { _id: string }; Returns: Json }
+      get_admin_goals: { Args: never; Returns: Json }
       get_admin_inactive_sellers: {
         Args: { _days_threshold?: number }
         Returns: Json
@@ -5922,6 +6376,21 @@ export type Database = {
           _page?: number
           _search?: string
           _sort?: string
+        }
+        Returns: Json
+      }
+      get_admin_notification_audiences: { Args: never; Returns: Json }
+      get_admin_notification_batch: {
+        Args: { _batch_id: string }
+        Returns: Json
+      }
+      get_admin_notifications_page: {
+        Args: {
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _type?: string
+          _view?: string
         }
         Returns: Json
       }
@@ -5939,6 +6408,43 @@ export type Database = {
         }
         Returns: Json
       }
+      get_admin_product_detail: { Args: { _id: string }; Returns: Json }
+      get_admin_products_page: {
+        Args: {
+          _class?: string
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _status?: string
+        }
+        Returns: Json
+      }
+      get_admin_race_detail: { Args: { _id: string }; Returns: Json }
+      get_admin_races: { Args: never; Returns: Json }
+      get_admin_referral_detail: { Args: { _id: string }; Returns: Json }
+      get_admin_referrals_page: {
+        Args: {
+          _filter?: string
+          _page?: number
+          _page_size?: number
+          _search?: string
+        }
+        Returns: Json
+      }
+      get_admin_reward_claim_detail: { Args: { _id: string }; Returns: Json }
+      get_admin_reward_claims_page: {
+        Args: {
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _status?: string
+        }
+        Returns: Json
+      }
+      get_admin_seller_notes: {
+        Args: { _limit?: number; _seller_id?: string }
+        Returns: Json
+      }
       get_admin_sellers_page: {
         Args: {
           _from: string
@@ -5948,6 +6454,52 @@ export type Database = {
           _selling_only?: boolean
           _sort?: string
           _state?: string
+          _to: string
+        }
+        Returns: Json
+      }
+      get_admin_settings: { Args: never; Returns: Json }
+      get_admin_subscription_detail: { Args: { _id: string }; Returns: Json }
+      get_admin_subscription_plan_detail: {
+        Args: { _id: string }
+        Returns: Json
+      }
+      get_admin_subscription_plans_page: {
+        Args: {
+          _filter?: string
+          _page?: number
+          _page_size?: number
+          _search?: string
+        }
+        Returns: Json
+      }
+      get_admin_subscriptions_page: {
+        Args: {
+          _filter?: string
+          _page?: number
+          _page_size?: number
+          _search?: string
+        }
+        Returns: Json
+      }
+      get_admin_support_page: {
+        Args: {
+          _filter?: string
+          _page?: number
+          _page_size?: number
+          _search?: string
+        }
+        Returns: Json
+      }
+      get_admin_support_ticket: { Args: { _id: string }; Returns: Json }
+      get_admin_tools: { Args: never; Returns: Json }
+      get_admin_top_products: {
+        Args: {
+          _from: string
+          _page?: number
+          _page_size?: number
+          _search?: string
+          _sort?: string
           _to: string
         }
         Returns: Json
@@ -6029,13 +6581,17 @@ export type Database = {
       }
       get_ledger_balance: { Args: { _user_id: string }; Returns: number }
       get_ledger_integrity_report: { Args: never; Returns: Json }
-      get_my_goal_progress: { Args: { _goal_id: string }; Returns: number }
-      get_my_lifetime_revenue: { Args: never; Returns: number }
       get_lesson_comment_authors: {
         Args: { _lesson_id: string }
-        Returns: { user_id: string; display_name: string | null; is_producer: boolean }[]
+        Returns: {
+          display_name: string
+          is_producer: boolean
+          user_id: string
+        }[]
       }
-      claim_my_pending_deliveries: { Args: never; Returns: number }
+      get_my_card_release_days: { Args: never; Returns: number }
+      get_my_goal_progress: { Args: { _goal_id: string }; Returns: number }
+      get_my_lifetime_revenue: { Args: never; Returns: number }
       get_my_max_ticket: { Args: never; Returns: number }
       get_my_payment_link_dashboard: {
         Args: {
@@ -6072,6 +6628,7 @@ export type Database = {
           value: number
         }[]
       }
+      get_platform_pauses: { Args: never; Returns: Json }
       get_product_link_status: { Args: { _slug: string }; Returns: string }
       get_public_payment_link: {
         Args: { _slug: string }
@@ -6256,6 +6813,16 @@ export type Database = {
           type: string
         }[]
       }
+      log_client_error: {
+        Args: {
+          _context?: string
+          _message: string
+          _route?: string
+          _stack?: string
+          _ua?: string
+        }
+        Returns: boolean
+      }
       log_security_event: {
         Args: {
           _actor_role?: string
@@ -6268,6 +6835,17 @@ export type Database = {
           _user_id?: string
         }
         Returns: string
+      }
+      log_seller_export: {
+        Args: {
+          _count: number
+          _format: string
+          _has_search: boolean
+          _privacy: boolean
+          _range_from: string
+          _range_to: string
+        }
+        Returns: undefined
       }
       log_transaction_event: {
         Args: {
@@ -6334,7 +6912,10 @@ export type Database = {
         }
         Returns: Json
       }
-      register_affiliate_click: { Args: { _product_id: string; _slug: string }; Returns: boolean }
+      register_affiliate_click: {
+        Args: { _product_id: string; _slug: string }
+        Returns: boolean
+      }
       release_due_card_holds: { Args: never; Returns: number }
       remove_seller_manager: {
         Args: { _reason: string; _seller: string }
@@ -6396,10 +6977,19 @@ export type Database = {
         }
         Returns: string
       }
+      resend_failed_webhook_deliveries: {
+        Args: { _config_id: string }
+        Returns: number
+      }
+      resend_webhook_delivery: {
+        Args: { _delivery_id: string }
+        Returns: string
+      }
       resolve_admin_alert: { Args: { _kind: string }; Returns: undefined }
-      resend_failed_webhook_deliveries: { Args: { _config_id: string }; Returns: number }
-      resend_webhook_delivery: { Args: { _delivery_id: string }; Returns: string }
-      resolve_affiliate_link: { Args: { _product_id: string; _slug: string }; Returns: string }
+      resolve_affiliate_link: {
+        Args: { _product_id: string; _slug: string }
+        Returns: string
+      }
       resolve_commission_pct: {
         Args: { _seller: string; _staff: string }
         Returns: number
@@ -6420,6 +7010,17 @@ export type Database = {
       }
       run_ledger_reconciliation: { Args: never; Returns: Json }
       run_monitoring_checks: { Args: never; Returns: Json }
+      screen_checkout_attempt: {
+        Args: {
+          _bin?: string
+          _document?: string
+          _email?: string
+          _ip?: string
+          _product_id?: string
+          _seller_user_id?: string
+        }
+        Returns: Json
+      }
       seller_refund_transaction: {
         Args: { _amount: number; _reason: string; _transaction_id: string }
         Returns: Json
@@ -6432,13 +7033,11 @@ export type Database = {
         Args: { _enabled: boolean; _manager: string }
         Returns: undefined
       }
-      set_max_ticket_for_all: { Args: { _new_value: number }; Returns: Json }
-      set_max_ticket_new_users_only: {
-        Args: { _new_value: number }
-        Returns: Json
-      }
       set_my_theme_preference: { Args: { _theme: string }; Returns: string }
-      set_my_ticket_status: { Args: { _status: string; _ticket_id: string }; Returns: string }
+      set_my_ticket_status: {
+        Args: { _status: string; _ticket_id: string }
+        Returns: string
+      }
       set_seller_withdrawal_block: {
         Args: { _block: boolean; _reason: string; _seller: string }
         Returns: undefined
