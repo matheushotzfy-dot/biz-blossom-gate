@@ -477,7 +477,7 @@ export default function AdminDashboard() {
                       {!collapsed && <span className="truncate">{item.label}</span>}
                       {hasBadge && (
                         <span
-                          aria-label={`${pendingWdCount} saque(s) pendente(s)`}
+                          aria-label={(pendingWdCount === 1 ? "1 saque pendente" : `${pendingWdCount} saques pendentes`)}
                           className={cn(
                             "h-4 min-w-[16px] px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center",
                             collapsed ? "absolute -top-0.5 -right-0.5 h-3.5 min-w-[14px]" : "ml-auto"
@@ -588,9 +588,9 @@ export default function AdminDashboard() {
 
             <button
               onClick={() => handleTabChange(pendingWdCount > 0 && isAdmin ? "withdrawals" : isAdmin ? "notifications" : "god-mode")}
-              aria-label={pendingWdCount > 0 ? `${pendingWdCount} saque(s) pendente(s). Abrir Saques` : "Abrir Notificações"}
+              aria-label={pendingWdCount > 0 ? `${pendingWdCount === 1 ? "1 saque pendente" : `${pendingWdCount} saques pendentes`}. Abrir Saques` : "Abrir Notificações"}
               className="ax-iconbtn grid"
-              title={pendingWdCount > 0 ? `${pendingWdCount} saque(s) pendente(s)` : "Notificações"}
+              title={pendingWdCount > 0 ? (pendingWdCount === 1 ? "1 saque pendente" : `${pendingWdCount} saques pendentes`) : "Notificações"}
             >
               <Bell className="h-4 w-4" />
               {pendingWdCount > 0 && (

@@ -156,7 +156,7 @@ html.ck-scroll #root { overflow: visible !important; height: auto !important; }
 .ck-slip { filter: drop-shadow(0 1px 1px rgb(var(--ck-outline) / 0.1)) drop-shadow(0 0 0.6px rgb(var(--ck-outline) / 0.45)); }
 .ck-receipt { position: relative; background: var(--ck-card); padding: 22px 22px 20px; border-radius: 12px 12px 0 0; }
 .ck-receipt::after { content: ""; position: absolute; left: 0; right: 0; top: calc(100% - 1px); height: 10px; background: radial-gradient(circle at 9px 100%, transparent 6.5px, var(--ck-card) 7px) 0 0 / 18px 10px repeat-x; }
-.ck-receipt h2 { font-size: 13px; font-weight: 800; letter-spacing: 0.04em !important; text-transform: uppercase; color: var(--ck-muted); margin-bottom: 14px; }
+.ck-receipt h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.005em !important; color: var(--ck-text); margin-bottom: 14px; }
 .ck-lines { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
 .ck-line { display: flex; align-items: flex-end; gap: 8px; font-size: 15px; min-width: 0; }
 .ck-line-name { min-width: 0; overflow-wrap: anywhere; }

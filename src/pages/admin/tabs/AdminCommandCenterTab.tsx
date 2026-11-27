@@ -190,7 +190,7 @@ export default function AdminCommandCenterTab({
         subtitle={`Período: ${dateRange.from.toLocaleDateString("pt-BR")} a ${dateRange.to.toLocaleDateString("pt-BR")} · Filas atuais · Atualizado ${new Date(command.data.operations.checked_at).toLocaleTimeString("pt-BR")}`}
         status={{
           tone: alerts.length > 0 ? "warning" : "success",
-          label: alerts.length > 0 ? `${alerts.length} alerta(s) ativo(s)` : "Sem alertas nos dados consultados",
+          label: alerts.length > 0 ? (alerts.length === 1 ? "1 alerta ativo" : `${alerts.length} alertas ativos`) : "Sem alertas nos dados consultados",
           pulse: alerts.length > 0,
         }}
       />

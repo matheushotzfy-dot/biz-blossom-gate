@@ -1,66 +1,58 @@
-import { useLocation, Link } from "react-router-dom";
-import { Home, ArrowLeft, Search, Rocket } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+import { Seo } from "@/components/Seo";
+import { VenxpayLogo } from "@/components/VenxpayLogo";
+import "@/components/landing-vp/landing.css";
+
+/** Endereço que não existe. Mesma identidade clara da landing; quem chega aqui pode ser comprador, aluno ou vendedor. */
+const DESTINATIONS = [
+  { to: "/membros-area", title: "Área de membros", text: "Comprou um curso? Entre com o e-mail da compra." },
+  { to: "/dashboard", title: "Painel do vendedor", text: "Vendas, saques, produtos e links de pagamento." },
+  { to: "/status", title: "Status dos serviços", text: "Veja se o painel, o login e os pagamentos estão no ar." },
+] as const;
 
 const NotFound = () => {
- const location = useLocation();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const shown = pathname.length > 60 ? `${pathname.slice(0, 57)}…` : pathname;
 
- return (
- <div className="flex min-h-screen items-center justify-center bg-background relative overflow-hidden">
- {/* Ambient glow */}
- <div className="pointer-events-none absolute inset-0">
+  return (
+    <div className="vp-site lp min-h-dvh bg-background text-foreground">
+      <Seo title="Página não encontrada — Vemprapay" description="Este endereço não leva a nenhuma página da Vemprapay." path={pathname} noindex />
+      <header className="mx-auto flex h-16 max-w-[760px] items-center justify-between px-5 sm:px-8">
+        <Link to="/" className="flex items-center gap-2.5 no-underline" aria-label="Vemprapay, página inicial">
+          <VenxpayLogo size={30} />
+          <span className="text-[18px] font-extrabold tracking-[-0.035em] text-foreground">vempra<span className="text-primary">pay</span></span>
+        </Link>
+        <button type="button" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))} className="lp-btn lp-btn-sm lp-btn-text">
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Voltar
+        </button>
+      </header>
 
+      <main id="conteudo" className="mx-auto max-w-[760px] px-5 pb-16 pt-10 sm:px-8 sm:pt-16">
+        <p className="text-[14px] font-semibold text-primary">Erro 404</p>
+        <h1 className="mt-2 text-[34px] font-extrabold leading-[1.08] tracking-[-0.035em] sm:text-[44px]">Esta página não existe.</h1>
+        <p className="mt-4 max-w-[560px] text-[16px] leading-relaxed text-muted-foreground">
+          O endereço <code className="break-all rounded-md bg-muted px-1.5 py-0.5 font-mono text-[14px] text-foreground">{shown}</code> não leva a nenhuma página.
+          Ele pode ter sido digitado errado ou o link pode ser antigo.
+        </p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link to="/" className="lp-btn">Ir para o início</Link>
+          <Link to="/auth" className="lp-btn lp-btn-ghost">Entrar na conta</Link>
+        </div>
 
- </div>
-
- <div className="relative z-10 text-center px-6 max-w-lg">
- {/* 404 Number */}
- <div className="relative mb-6">
- <h1 className="text-[140px] md:text-[180px] font-display font-black leading-none tracking-[-0.06em] text-foreground/[0.04] select-none">
- 404
- </h1>
- <div className="absolute inset-0 flex items-center justify-center">
- <div className="h-24 w-24 rounded-3xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-2xl shadow-primary/10">
- <Search className="h-10 w-10 text-primary/60" />
- </div>
- </div>
- </div>
-
- {/* Text */}
- <h2 className="text-2xl md:text-3xl font-display font-black text-foreground tracking-[-0.03em] mb-3">
- Página não encontrada
- </h2>
- <p className="text-sm text-muted-foreground/70 mb-2 leading-relaxed max-w-sm mx-auto">
- A página <span className="font-mono text-xs bg-muted/50 px-2 py-0.5 rounded-lg text-foreground/60">{location.pathname}</span> não existe ou foi removida.
- </p>
- <p className="text-[12px] text-muted-foreground/40 mb-8">
- Verifique o endereço ou volte para o painel principal.
- </p>
-
- {/* Actions */}
- <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
- <Button asChild className="gap-2 rounded-xl h-11 px-6 font-bold shadow-lg shadow-primary/20">
- <Link to="/dashboard">
- <Home className="h-4 w-4" /> Ir ao Dashboard
- </Link>
- </Button>
- <Button asChild variant="outline" className="gap-2 rounded-xl h-11 px-6 font-bold border-border/50">
- <Link to="/auth">
- <ArrowLeft className="h-4 w-4" /> Voltar ao Login
- </Link>
- </Button>
- </div>
-
- {/* Footer */}
- <div className="mt-12 flex items-center justify-center gap-2 text-muted-foreground/30">
- <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center">
- <Rocket className="h-3 w-3 text-primary/50" />
- </div>
- <span className="text-[11px] font-bold tracking-wider">Vemprapay</span>
- </div>
- </div>
- </div>
- );
+        <h2 className="mt-14 text-[15px] font-bold text-foreground">Talvez você esteja procurando</h2>
+        <ul className="mt-3 grid gap-x-8 gap-y-5 sm:grid-cols-[repeat(3,minmax(0,1fr))]">
+          {DESTINATIONS.map((d) => (
+            <li key={d.to}>
+              <Link to={d.to} className="lp-link text-[15px] font-semibold">{d.title}</Link>
+              <p className="mt-1 text-[14px] leading-relaxed text-muted-foreground">{d.text}</p>
+            </li>
+          ))}
+        </ul>
+      </main>
+    </div>
+  );
 };
 
 export default NotFound;
