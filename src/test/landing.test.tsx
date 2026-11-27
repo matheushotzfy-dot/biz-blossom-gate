@@ -2,57 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import { AFF_MAX, CO_MAX, brlFromCents, computeSplit } from "@/components/landing-vp/splitMath";
 import { FAQ, NAV_LINKS, PROOFS, SECURITY_POINTS, SELL_FEATURES, STEPS, TOUR, hasCompany } from "@/components/landing-vp/landingData";
 import { SiteNav } from "@/components/landing-vp/SiteNav";
-import { SplitCalculator } from "@/components/landing-vp/SellSection";
 import LandingPage from "@/pages/LandingPage";
-
-const asText = (html: string) => html.replace(new RegExp(String.fromCharCode(160), "g"), " ");
-
-describe("divisão de venda (espelha apply_transaction_splits)", () => {
-  it("sem coprodutor nem afiliado, tudo fica com quem vende", () => {
-    expect(computeSplit(10000, 0, 0)).toEqual({ owner: 10000, partner: 0, affiliate: 0, capped: false });
-  });
-
-  it("calcula cada parte sobre o valor líquido e a soma fecha no centavo", () => {
-    const s = computeSplit(10000, 30, 10);
-    expect(s).toEqual({ owner: 6000, partner: 3000, affiliate: 1000, capped: false });
-    expect(s.owner + s.partner + s.affiliate).toBe(10000);
-  });
-
-  it("arredonda ao centavo sem perder nem criar dinheiro", () => {
-    const s = computeSplit(3333, 33, 7);
-    expect(s.partner).toBe(1100);
-    expect(s.affiliate).toBe(233);
-    expect(s.owner + s.partner + s.affiliate).toBe(3333);
-  });
-
-  it("a comissão do afiliado nunca passa do que sobra depois do coprodutor", () => {
-    const s = computeSplit(10000, 99, 90);
-    expect(s.partner).toBe(9900);
-    expect(s.affiliate).toBe(100);
-    expect(s.owner).toBe(0);
-    expect(s.capped).toBe(true);
-  });
-
-  it("respeita os limites da plataforma (coprodutor até 99%, afiliado até 90%)", () => {
-    expect(CO_MAX).toBe(99);
-    expect(AFF_MAX).toBe(90);
-    expect(computeSplit(10000, 150, 0).partner).toBe(9900);
-    expect(computeSplit(10000, 0, 150).affiliate).toBe(9000);
-  });
-
-  it("ignora valores inválidos em vez de quebrar", () => {
-    expect(computeSplit(Number.NaN, 30, 10)).toEqual({ owner: 0, partner: 0, affiliate: 0, capped: false });
-    expect(computeSplit(-500, 30, 10).owner).toBe(0);
-    expect(computeSplit(10000, Number.NaN, Number.NaN).owner).toBe(10000);
-  });
-
-  it("formata em reais", () => {
-    expect(asText(brlFromCents(123456))).toBe("R$ 1.234,56");
-  });
-});
 
 describe("dados da landing", () => {
   it("todas as perguntas têm resposta e nenhuma promete número que o painel não prova", () => {
@@ -92,6 +44,13 @@ describe("página", () => {
     expect(document.documentElement.classList.contains("vx-scroll")).toBe(true);
     unmount();
     expect(document.documentElement.classList.contains("vx-scroll")).toBe(false);
+  });
+
+  it("não tem mais a calculadora de divisão de venda", () => {
+    const { container } = renderPage();
+    expect(container.querySelector(".lp-split")).toBeNull();
+    expect(screen.queryByLabelText("Valor líquido da venda")).toBeNull();
+    expect(container.textContent).not.toContain("Para onde vai cada real");
   });
 
   it("tem um único h1 e não promete taxa de aprovação", () => {
@@ -143,38 +102,6 @@ describe("menu no celular", () => {
   });
 });
 
-describe("calculadora de divisão", () => {
-  const lines = () => within(screen.getByRole("list")).getAllByRole("listitem").map((li) => asText(li.textContent ?? ""));
-
-  it("começa com um exemplo coerente", () => {
-    render(<SplitCalculator />);
-    expect(lines()).toEqual(["Você" + "R$ 60,00", "Coprodutor, 30%R$ 30,00", "Afiliado, 10%R$ 10,00"]);
-  });
-
-  it("recalcula ao mexer nos controles e avisa quando a comissão é reduzida", () => {
-    render(<SplitCalculator />);
-    fireEvent.change(screen.getByLabelText("Coprodutor"), { target: { value: "99" } });
-    fireEvent.change(screen.getByLabelText("Afiliado"), { target: { value: "90" } });
-    expect(lines()).toEqual(["VocêR$ 0,00", "Coprodutor, 99%R$ 99,00", "Afiliado, 90%R$ 1,00"]);
-    expect(screen.getByText(/foi reduzida/)).toBeTruthy();
-  });
-
-  it("aceita outro valor líquido com máscara de reais", () => {
-    render(<SplitCalculator />);
-    const input = screen.getByLabelText("Valor líquido da venda") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "25000" } });
-    expect(input.value).toBe("250,00");
-    expect(lines()[0]).toBe("VocêR$ 150,00");
-  });
-
-  it("zerar coprodutor e afiliado devolve tudo a quem vende", () => {
-    render(<SplitCalculator />);
-    fireEvent.change(screen.getByLabelText("Coprodutor"), { target: { value: "0" } });
-    fireEvent.change(screen.getByLabelText("Afiliado"), { target: { value: "0" } });
-    expect(lines()).toEqual(["VocêR$ 100,00", "CoprodutorR$ 0,00", "AfiliadoR$ 0,00"]);
-  });
-});
-
 describe("topo e telas reais", () => {
   it("mostra o checkout e o painel com texto alternativo e avisa que os dados são exemplos", () => {
     const { container } = renderPage();
@@ -183,6 +110,18 @@ describe("topo e telas reais", () => {
     expect(imgs).toHaveLength(2);
     for (const i of imgs) expect(i.alt.length).toBeGreaterThan(20);
     expect(scene.textContent).toMatch(/Nomes e valores são exemplos/);
+    // O aviso da venda repete o título da notificação real do painel (notify_transaction_paid).
+    expect(scene.textContent).toContain("Nova venda aprovada");
+  });
+
+  it("as abas do painel também andam com as setas para cima e para baixo", () => {
+    renderPage();
+    const tabs = within(screen.getByRole("tablist", { name: "Telas do painel" })).getAllByRole("tab");
+    const visible = () => screen.getAllByRole("tabpanel").filter((p) => !p.hasAttribute("hidden"));
+    fireEvent.keyDown(tabs[0], { key: "ArrowDown" });
+    expect(visible()[0].textContent).toContain(TOUR[1].title);
+    fireEvent.keyDown(tabs[1], { key: "ArrowUp" });
+    expect(visible()[0].textContent).toContain(TOUR[0].title);
   });
 
   it("as abas do painel trocam com clique e com as setas, e só uma tela aparece por vez", () => {

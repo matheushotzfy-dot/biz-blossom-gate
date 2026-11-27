@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { BadgeCheck, FileLock2, KeyRound, LockKeyhole, MonitorSmartphone, ScrollText, type LucideIcon } from "lucide-react";
+import { ProofStrip } from "./ProofAndSteps";
 import { SECURITY_POINTS } from "./landingData";
 import { line } from "./lines";
 import { Tight } from "./Tight";
@@ -43,27 +45,38 @@ const FACTS = [
   "Chaves de API com o segredo mostrado uma única vez",
 ];
 
+const RULE_ICONS: Record<string, LucideIcon> = {
+  "Identidade verificada": BadgeCheck,
+  "Saque com a senha de novo": KeyRound,
+  "Extrato que não se apaga": ScrollText,
+  "Segredos guardados com cuidado": LockKeyhole,
+  "Aparelhos sob controle": MonitorSmartphone,
+  "Documento travado": FileLock2,
+};
+
 export function SecuritySection() {
   return (
-    <section id="seguranca" className="bg-background py-24 sm:py-32">
+    <section id="seguranca" className="lp-section lp-mist">
       <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-end">
-          <h2 className="lp-h2 max-w-[16ch] text-foreground"><Tight>Segurança que dá para conferir.</Tight></h2>
-          <p className="max-w-[34rem] text-[17px] leading-[1.7] text-muted-foreground lg:justify-self-end">
-            Sem selo inventado nem número bonito. Estas são as regras que o painel já aplica hoje, e você vê cada uma delas funcionando na sua conta.
-          </p>
+        <div className="lp-head">
+          <h2 className="lp-h2 max-w-[14ch] text-foreground"><Tight>Segurança que dá para conferir.</Tight></h2>
+          <p className="lp-lead">Sem selo inventado nem número bonito. Estas são regras que o painel já aplica hoje, e você vê cada uma funcionando na sua conta.</p>
         </div>
-        <dl className="lp-kit">
-          {SECURITY_POINTS.map((s) => (
-            <div key={s.t} className="lp-kit-item">
-              <dt className="text-[1.1rem] font-extrabold tracking-[-0.025em] text-foreground">{s.t}</dt>
-              <dd className="m-0 mt-1.5 text-[15.5px] leading-[1.65] text-muted-foreground">{s.d}</dd>
-            </div>
-          ))}
-        </dl>
-        <p className="mt-10 max-w-[44rem] text-[15px] leading-relaxed text-muted-foreground">
-          Quer ver se a plataforma está no ar agora? A <Link to="/status" className="lp-link">página de status</Link> confere o servidor, o login e os pagamentos direto do seu navegador.
-        </p>
+        <ul className="lp-rules">
+          {SECURITY_POINTS.map((s) => {
+            const Icon = RULE_ICONS[s.t] ?? BadgeCheck;
+            return (
+              <li key={s.t}>
+                <span className="lp-icon" aria-hidden="true"><Icon /></span>
+                <div>
+                  <h3>{s.t}</h3>
+                  <p>{s.d}</p>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+        <ProofStrip />
       </div>
     </section>
   );
@@ -71,7 +84,7 @@ export function SecuritySection() {
 
 export function DevSection() {
   return (
-    <section id="devs" className="bg-card py-24 sm:py-32">
+    <section id="devs" className="lp-section">
       <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)] lg:gap-20">
           <div>

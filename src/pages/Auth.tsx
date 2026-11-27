@@ -16,6 +16,7 @@ import { LoginForm, type LoginNotice } from "@/features/auth/LoginForm";
 import { RecoveryFlow } from "@/features/auth/RecoveryFlow";
 import { SignupFlow } from "@/features/auth/SignupFlow";
 import { linkButtonClass } from "@/features/auth/fields";
+import type { AccountPreview } from "@/features/auth/authModel";
 import "@/features/auth/auth.css";
 
 type Mode = "login" | "signup" | "recovery";
@@ -44,6 +45,8 @@ export default function Auth() {
   const modeChanged = useRef(false);
   // Passo do cadastro, para o painel ao lado explicar por que pedimos cada dado.
   const [signupStep, setSignupStep] = useState(1);
+  // Prévia da conta que se monta no painel ao lado enquanto a pessoa preenche.
+  const [preview, setPreview] = useState<AccountPreview | null>(null);
 
   const go = (next: Mode, email = "", notice: LoginNotice | null = null) => {
     modeChanged.current = true;
@@ -90,6 +93,7 @@ export default function Auth() {
                   {mode === "signup" && (
                     <SignupFlow
                       onStepChange={setSignupStep}
+                      onPreviewChange={setPreview}
                       onSuccess={() => navigate("/dashboard", { replace: true })}
                       onLogin={(email, notice) => go("login", email ?? "", notice ?? null)}
                       onRecover={(email) => go("recovery", email)}
@@ -115,7 +119,7 @@ export default function Auth() {
           </div>
 
           {/* ═══ DIREITA — painel autoral (sem fotos de terceiros) ═══ */}
-          <AuthAside className="hidden lg:flex" mode={mode} step={signupStep} />
+          <AuthAside className="hidden lg:flex" mode={mode} step={signupStep} preview={preview} />
         </div>
       </div>
     </MotionConfig>

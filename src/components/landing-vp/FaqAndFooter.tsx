@@ -9,7 +9,7 @@ export { FAQ };
 
 export function FaqSection() {
   return (
-    <section id="duvidas" className="bg-background pb-24 pt-8 sm:pb-32">
+    <section id="duvidas" className="lp-section lp-mist">
       <div className="mx-auto grid max-w-[1200px] gap-10 px-5 sm:px-8 lg:grid-cols-[minmax(0,.7fr)_minmax(0,1.3fr)] lg:gap-20">
         <h2 className="lp-h2 text-foreground lg:sticky lg:top-28 lg:self-start">
           <Tight>Perguntas que todo mundo faz.</Tight>
@@ -32,7 +32,7 @@ export function CompanySection() {
   if (!hasCompany()) return null;
   const phone = COMPANY.whatsapp?.replace(/\D/g, "") ?? "";
   return (
-    <section id="empresa" className="bg-background pb-24 sm:pb-28">
+    <section id="empresa" className="lp-mist pb-24 sm:pb-28">
       <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
         <div className="lp-company">
           <div>
@@ -56,21 +56,19 @@ export function CompanySection() {
 
 export function Closing({ onSignup, onLogin }: { onSignup: () => void; onLogin: () => void }) {
   return (
-    <section id="comecar" className="bg-background px-3 pb-6 sm:px-5">
-      {/* O mesmo cartão verde do topo da página: a conversa começa e termina no saldo. */}
-      <div className="vp-balance mx-auto max-w-[1340px] px-5 py-20 sm:px-8 sm:py-24 lg:py-28">
-        <div className="relative z-10 mx-auto grid max-w-[1200px] items-end gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,.75fr)] lg:gap-20">
-          <h2 className="text-[clamp(2.4rem,6vw,4.6rem)] font-extrabold leading-[1.02] tracking-[-0.048em]">
-            <Tight>Abra a conta, crie o produto, mande o link.</Tight>
-          </h2>
-          <div>
-            <p className="max-w-[24rem] text-[17px] leading-[1.7] text-white/85">
-              Grátis para abrir e sem mensalidade. Você monta o produto, a equipe revisa e o seu checkout começa a receber.
-            </p>
-            <div className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-4">
-              <button type="button" onClick={onSignup} className="lp-btn lp-btn-light">Abrir minha conta</button>
-              <button type="button" onClick={onLogin} className="lp-link lp-link-light bg-transparent p-0 text-[16px]" style={{ border: 0, cursor: "pointer" }}>Já tenho conta</button>
-            </div>
+    <section id="comecar" className="lp-closing lp-on-green">
+      {/* O mesmo verde do topo: a página começa e termina na marca. */}
+      <div className="mx-auto grid max-w-[1200px] items-end gap-10 px-5 py-24 sm:px-8 sm:py-32 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,.8fr)] lg:gap-20">
+        <h2 className="text-[clamp(2.6rem,6.4vw,5rem)] font-extrabold leading-[.98] tracking-[-0.05em]">
+          <Tight>Abra a conta, crie o produto, mande o link.</Tight>
+        </h2>
+        <div>
+          <p className="lp-lead max-w-[25rem]">
+            Grátis para abrir e sem mensalidade. Você monta o produto, a equipe revisa e o seu checkout começa a receber.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
+            <button type="button" onClick={onSignup} className="lp-btn lp-btn-light">Abrir minha conta</button>
+            <button type="button" onClick={onLogin} className="lp-link lp-link-light bg-transparent p-0 text-[16px]" style={{ border: 0, cursor: "pointer" }}>Já tenho conta</button>
           </div>
         </div>
       </div>
@@ -81,13 +79,13 @@ export function Closing({ onSignup, onLogin }: { onSignup: () => void; onLogin: 
 export function SiteFooter() {
   const year = new Date().getFullYear();
   return (
-    <footer className="lp-foot bg-background pb-12 pt-16">
+    <footer className="lp-foot bg-background pb-12 pt-20">
       <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
         <div className="grid grid-cols-2 gap-x-8 gap-y-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="col-span-2 lg:col-span-1">
             <a href="#topo" className="inline-flex items-center gap-2.5 no-underline" aria-label="Vemprapay, voltar ao topo">
               <VenxpayLogo size={30} />
-              <span className="text-[18px] font-extrabold tracking-[-0.035em] text-foreground">vempra<span className="text-primary">pay</span></span>
+              <span className="lp-wordmark text-[18px]">vempra<b>pay</b></span>
             </a>
             <p className="mt-4 max-w-[19rem] text-[14.5px] leading-relaxed text-muted-foreground">Checkout, área de membros, divisão de vendas e saque por Pix num painel só.</p>
           </div>

@@ -9,8 +9,8 @@ import {
 } from "./authApi";
 import {
   EMPTY_SIGNUP, PASSWORD_MAX, REFERRAL_OPTIONS, REVENUE_OPTIONS, SEGMENT_OPTIONS, SIGNUP_STEPS, STEP_REASONS, TOTAL_STEPS, ACCOUNT_TYPE_OPTIONS,
-  buildSignupRequest, fieldsOfStep, firstInvalidStep, formatDocument, formatPhone, normalizeEmail, stepErrors, suggestEmail,
-  summarySections, type SignupField, type SignupForm,
+  buildAccountPreview, buildSignupRequest, fieldsOfStep, firstInvalidStep, formatDocument, formatPhone, normalizeEmail, stepErrors, suggestEmail,
+  summarySections, type AccountPreview, type SignupField, type SignupForm,
 } from "./authModel";
 import {
   AuthHeading, ChoiceGroup, FormNotice, PasswordField, PasswordHelp, Spinner, TextField,
@@ -25,6 +25,8 @@ type Phase = "form" | "creating" | "signing-in" | "verify";
 interface SignupFlowProps {
   /** Avisa o passo atual (o painel ao lado muda o texto com ele). */
   onStepChange?: (step: number) => void;
+  /** Prévia da conta para o painel ao lado (dados mascarados; a senha só como força). */
+  onPreviewChange?: (preview: AccountPreview) => void;
   onSuccess: () => void;
   onLogin: (email?: string, notice?: LoginNotice) => void;
   onRecover: (email: string) => void;
@@ -35,7 +37,7 @@ const ACCOUNT_CHOICES: Choice[] = ACCOUNT_TYPE_OPTIONS.map((o) => ({
   icon: o.value === "cnpj" ? <Building2 className="h-[18px] w-[18px]" aria-hidden="true" /> : <User className="h-[18px] w-[18px]" aria-hidden="true" />,
 }));
 
-export function SignupFlow({ onStepChange, onSuccess, onLogin, onRecover }: SignupFlowProps) {
+export function SignupFlow({ onStepChange, onPreviewChange, onSuccess, onLogin, onRecover }: SignupFlowProps) {
   const [form, setForm] = useState<SignupForm>(EMPTY_SIGNUP);
   const [step, setStep] = useState(1);
   const [touched, setTouched] = useState<Partial<Record<SignupField, boolean>>>({});
@@ -60,6 +62,7 @@ export function SignupFlow({ onStepChange, onSuccess, onLogin, onRecover }: Sign
   const set = <K extends SignupField>(key: K, value: SignupForm[K]) => setForm((current) => ({ ...current, [key]: value }));
 
   useEffect(() => { onStepChange?.(step); }, [step, onStepChange]);
+  useEffect(() => { onPreviewChange?.(buildAccountPreview(form, step, phase === "verify")); }, [form, step, phase, onPreviewChange]);
 
   // Cada passo novo leva o foco ao primeiro campo (ou ao título, na revisão), para teclado e leitor de tela.
   useEffect(() => {

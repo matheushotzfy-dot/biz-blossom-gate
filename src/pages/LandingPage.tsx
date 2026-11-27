@@ -10,9 +10,9 @@ import { Seo } from "@/components/Seo";
 import "@/components/landing-vp/landing.css";
 import { SiteNav } from "@/components/landing-vp/SiteNav";
 import { HeroSection } from "@/components/landing-vp/HeroSection";
-import { HowItWorks, ProofStrip } from "@/components/landing-vp/ProofAndSteps";
+import { HowItWorks } from "@/components/landing-vp/ProofAndSteps";
 import { PanelTour } from "@/components/landing-vp/PanelTour";
-import { SellSection } from "@/components/landing-vp/SellSection";
+import { FeaturesSection } from "@/components/landing-vp/Features";
 import { AwardsShelf } from "@/components/landing-vp/AwardsShelf";
 import { DevSection, SecuritySection } from "@/components/landing-vp/DevAndSecurity";
 import { Closing, CompanySection, FAQ, FaqSection, SiteFooter } from "@/components/landing-vp/FaqAndFooter";
@@ -46,10 +46,9 @@ export default function LandingPage() {
       <SiteNav onLogin={goLogin} onSignup={goSignup} />
       <main id="conteudo" tabIndex={-1} className="outline-none">
         <HeroSection onSignup={goSignup} />
-        <ProofStrip />
         <HowItWorks />
         <PanelTour />
-        <SellSection />
+        <FeaturesSection />
         <AwardsShelf />
         <SecuritySection />
         <DevSection />

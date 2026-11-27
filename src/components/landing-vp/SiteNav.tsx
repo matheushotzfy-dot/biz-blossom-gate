@@ -34,7 +34,7 @@ export function SiteNav({ onLogin, onSignup }: SiteNavProps) {
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 4);
+    const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -63,12 +63,12 @@ export function SiteNav({ onLogin, onSignup }: SiteNavProps) {
   }, [open]);
 
   return (
-    <header className="lp-nav" data-scrolled={scrolled || open ? "" : undefined} data-open={open ? "" : undefined}>
+    <header className="lp-nav" data-top={!scrolled && !open ? "" : undefined} data-open={open ? "" : undefined}>
       <a href="#conteudo" className="lp-skip">Pular para o conteúdo</a>
       <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-6 px-5 sm:px-8">
         <a href="#topo" className="flex items-center gap-2.5 no-underline" aria-label="Vemprapay, início">
-          <VenxpayLogo size={32} />
-          <span className="text-[19px] font-extrabold tracking-[-0.035em] text-foreground">vempra<span className="text-primary">pay</span></span>
+          <VenxpayLogo size={32} className="lp-logo" />
+          <span className="lp-wordmark">vempra<b>pay</b></span>
         </a>
         <nav className="hidden flex-1 items-center gap-7 pl-4 xl:flex" aria-label="Seções da página">
           {NAV_LINKS.map((l) => (

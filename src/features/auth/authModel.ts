@@ -96,6 +96,68 @@ export const STEP_REASONS = [
   { title: "Confira antes de criar.", text: "Dá para voltar e corrigir qualquer passo. Os termos e a política de privacidade abrem numa aba nova." },
 ] as const;
 
+/* ───────────────────────── prévia da conta (painel ao lado) ───────────────────────── */
+
+/**
+ * O que o painel ao lado mostra enquanto a pessoa preenche: a conta "se montando" com os dados dela.
+ * Nada aqui sai do navegador; o documento aparece mascarado (só os últimos números) e a senha só como força.
+ */
+export interface AccountPreview {
+  step: number;
+  typeLabel: string;
+  initials: string;
+  greetingName: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  documentLabel: "CPF" | "CNPJ";
+  documentMasked: string;
+  companyName: string;
+  segmentLabel: string;
+  passwordLevel: 0 | 1 | 2 | 3;
+  passwordLabel: string;
+  /** Todos os dados preenchidos (pronta para criar). */
+  ready: boolean;
+  /** A conta já foi criada (tela de confirmar o e-mail). */
+  created: boolean;
+}
+
+/** CPF/CNPJ completo mostrado só com o fim: •••.•••.247-25 e ••.•••.678/0001-90. Incompleto não aparece. */
+export function maskDocumentPreview(value: string, type: AccountType): string {
+  const d = onlyDigits(value);
+  if (type === "cpf") return d.length === 11 ? `•••.•••.${d.slice(6, 9)}-${d.slice(9)}` : "";
+  return d.length === 14 ? `••.•••.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}` : "";
+}
+
+export function buildAccountPreview(form: SignupForm, step: number, created = false): AccountPreview {
+  const fullName = form.fullName.replace(/\s+/g, " ").trim();
+  const words = fullName.split(" ").filter(Boolean);
+  const initials = ((words[0]?.[0] ?? "") + (words.length > 1 ? words[words.length - 1][0] : "")).toUpperCase();
+  const nickname = form.nickname.trim();
+  const email = form.email.trim();
+  const strength = passwordStrength(form.password);
+  const preview: AccountPreview = {
+    step,
+    typeLabel: form.accountType === "cnpj" ? "Pessoa jurídica" : "Pessoa física",
+    initials,
+    greetingName: nickname || words[0] || "",
+    fullName,
+    email: /.+@.+/.test(email) ? email.toLowerCase() : "",
+    phone: phoneDigits(form.phone).length >= 10 ? formatPhone(form.phone) : "",
+    documentLabel: form.accountType === "cnpj" ? "CNPJ" : "CPF",
+    documentMasked: maskDocumentPreview(form.document, form.accountType),
+    companyName: form.accountType === "cnpj" ? form.companyName.replace(/\s+/g, " ").trim() : "",
+    segmentLabel: SEGMENT_OPTIONS.find((o) => o.value === form.segment)?.label ?? "",
+    passwordLevel: strength.level,
+    passwordLabel: strength.label,
+    ready: false,
+    created,
+  };
+  preview.ready = !!(preview.fullName && preview.email && preview.phone && preview.documentMasked
+    && (form.accountType === "cpf" || preview.companyName) && preview.segmentLabel && strength.level >= 2);
+  return preview;
+}
+
 export const TOTAL_STEPS = SIGNUP_STEPS.length;
 
 /** Campos que cada passo valida (o passo 6 só tem o aceite). */

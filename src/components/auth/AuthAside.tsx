@@ -1,14 +1,17 @@
+import { Bell, Check, Lock, User } from "lucide-react";
 import painelInicio from "@/assets/landing/painel-inicio.webp";
 import { cn } from "@/lib/utils";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
-import { STEP_REASONS } from "@/features/auth/authModel";
+import { SIGNUP_STEPS, STEP_REASONS, type AccountPreview } from "@/features/auth/authModel";
+import { Tight } from "@/components/landing-vp/Tight";
 
 /**
  * Painel ao lado do formulário (computador). Muda com a tela:
- * - entrar: a tela real do painel (captura com dados de exemplo, avisado);
- * - cadastro: por que pedimos o dado daquele passo e o que acontece depois do cadastro;
+ * - entrar: a tela real do painel (captura com dados de exemplo, avisado) com o aviso de venda que o painel mostra;
+ * - cadastro: a conta se montando com o que a pessoa digita (documento mascarado, senha só como força) e,
+ *   embaixo, por que pedimos o dado daquele passo;
  * - recuperação: os três passos e o que muda depois da troca.
- * Tudo aqui precisa ser verdade sobre o produto (sem prazo, número ou selo inventado).
+ * Tudo aqui precisa ser verdade sobre o produto (sem prazo, número ou selo inventado): o saldo de uma conta nova é R$ 0,00.
  */
 export type AsideMode = "login" | "signup" | "recovery";
 
@@ -16,88 +19,150 @@ export interface AuthAsideProps {
   mode?: AsideMode;
   /** Passo atual do cadastro (1 a 6). */
   step?: number;
+  /** Prévia da conta enquanto a pessoa preenche o cadastro. */
+  preview?: AccountPreview | null;
   className?: string;
 }
 
-const AFTER_SIGNUP = [
-  { t: "Conta criada", d: "Você entra no painel e já pode montar o primeiro produto." },
-  { t: "Documentos enviados", d: "Documento com foto e uma selfie, pelo próprio painel. O saque é liberado depois da aprovação." },
-  { t: "Produto revisado", d: "A equipe revisa cada produto antes do checkout começar a receber." },
-  { t: "Primeira venda", d: "O Pix aprovado entra no saldo, e o saque sai por Pix para a sua chave." },
-] as const;
-
 const RECOVERY_STEPS = [
-  "Informe o e-mail da sua conta.",
-  "Digite o código de 6 números que chega no e-mail.",
-  "Crie a nova senha.",
+  { t: "Informe o e-mail da conta", d: "O mesmo que você usa para entrar no painel." },
+  { t: "Digite o código", d: "Seis números que chegam nesse e-mail." },
+  { t: "Crie a nova senha", d: "Com 8 ou mais caracteres, maiúscula, minúscula e número." },
 ] as const;
 
 function Brand() {
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="relative flex items-center gap-2.5">
       <span className="vp-auth-logo-tile"><VenxpayLogo size={30} plate={false} /></span>
       <span className="text-[19px] font-extrabold tracking-[-0.035em]">vemprapay</span>
     </div>
   );
 }
 
-export function AuthAside({ mode = "login", step = 1, className }: AuthAsideProps) {
-  const reason = STEP_REASONS[Math.min(Math.max(step, 1), STEP_REASONS.length) - 1];
+function greeting(now = new Date()): string {
+  const h = now.getHours();
+  return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+}
+
+/** Uma linha da prévia: o valor quando já foi preenchido, um traço cinza quando ainda não. */
+function Row({ label, value, active, locked }: { label: string; value: string; active: boolean; locked?: boolean }) {
+  return (
+    <div className="vp-acct-row" data-active={active ? "" : undefined} data-filled={value ? "" : undefined}>
+      <dt>{label}</dt>
+      <dd>
+        {value ? (
+          <>
+            <span className="vp-acct-value">{value}</span>
+            {locked ? <Lock className="vp-acct-mark" /> : <Check className="vp-acct-mark" />}
+          </>
+        ) : (
+          <span className="vp-acct-bar" />
+        )}
+      </dd>
+    </div>
+  );
+}
+
+const EMPTY_PREVIEW: AccountPreview = {
+  step: 1, typeLabel: "Pessoa física", initials: "", greetingName: "", fullName: "", email: "", phone: "",
+  documentLabel: "CPF", documentMasked: "", companyName: "", segmentLabel: "", passwordLevel: 0, passwordLabel: "", ready: false, created: false,
+};
+
+/** A conta montada com o que a pessoa digitou. Repete o formulário, então fica fora do leitor de tela. */
+export function AccountCard({ preview, step }: { preview: AccountPreview; step: number }) {
+  const p = preview;
+  const chip = p.created ? "Conta criada" : p.ready && step === 6 ? "Pronta para criar" : p.typeLabel;
+  const password = p.passwordLevel > 0 ? `•••••••• ${p.passwordLabel.toLowerCase()}` : "";
+  return (
+    <div className="vp-acct" aria-hidden="true" data-testid="account-preview">
+      <div className="vp-acct-head">
+        <span className="vp-acct-avatar">{p.initials || <User />}</span>
+        <div className="min-w-0 flex-1">
+          <p className="vp-acct-hello">{p.greetingName ? `${greeting()}, ${p.greetingName}` : "Sua conta"}</p>
+          {p.email ? <p className="vp-acct-sub">{p.email}</p> : <span className="vp-acct-bar mt-1.5" style={{ width: "58%" }} />}
+        </div>
+        <span className="vp-acct-chip" data-tone={p.created || (p.ready && step === 6) ? "ok" : undefined}>{chip}</span>
+      </div>
+
+      <div className="vp-acct-balance">
+        <p className="text-[13px] font-semibold text-white/85">Saldo disponível</p>
+        <p className="vp-acct-money">R$ <b>0</b>,00</p>
+        <p className="text-[12.5px] text-white/80">Sua primeira venda aparece aqui.</p>
+      </div>
+
+      <dl className="vp-acct-rows">
+        <Row label="Nome completo" value={p.fullName} active={step === 1} />
+        <Row label="WhatsApp" value={p.phone} active={step === 2} />
+        <Row label={p.documentLabel} value={p.documentMasked} active={step === 3} locked />
+        {p.documentLabel === "CNPJ" && <Row label="Razão social" value={p.companyName} active={step === 3} />}
+        <Row label="Você vende" value={p.segmentLabel} active={step === 4} />
+        <Row label="Senha" value={password} active={step === 5} locked />
+      </dl>
+    </div>
+  );
+}
+
+export function AuthAside({ mode = "login", step = 1, preview, className }: AuthAsideProps) {
+  const current = Math.min(Math.max(step, 1), STEP_REASONS.length);
+  const reason = STEP_REASONS[current - 1];
+  const created = !!preview?.created;
 
   return (
     <aside className={cn("vp-auth-aside relative isolate flex h-full flex-col overflow-hidden px-10 py-9 xl:px-14", className)} aria-label="Sobre a Vemprapay" data-mode={mode}>
-      <span aria-hidden className="vp-auth-ring vp-auth-ring-a" />
-      <span aria-hidden className="vp-auth-ring vp-auth-ring-b" />
       <Brand />
 
       {mode === "login" && (
         <>
-          <div className="relative mt-14 max-w-[460px]">
-            <h2 className="vp-auth-title">Saldo, vendas e saques do jeito que estão agora.</h2>
-            <p className="vp-auth-text mt-4">Entre para ver cada venda com o status real e o seu saldo separado entre disponível, em análise e aguardando liberação.</p>
+          <div className="relative mt-14 max-w-[470px]">
+            <h2 className="vp-auth-title"><Tight>Seu saldo, suas vendas e seus saques, do jeito que estão agora.</Tight></h2>
+            <p className="vp-auth-text mt-4">Entre para ver cada venda com o status real e o saldo separado entre disponível, em análise e aguardando liberação.</p>
           </div>
-          <figure className="vp-auth-shot" aria-label="Tela real do painel">
-            <img src={painelInicio} width={1440} height={900} alt="Painel do vendedor com saldo disponível, vendas de hoje e faturamento" decoding="async" />
+          <figure className="vp-auth-stage" aria-label="Tela real do painel">
+            <div className="vp-auth-window">
+              <div className="vp-auth-window-bar" aria-hidden="true"><i /><i /><i /><span><Lock />Painel do vendedor</span></div>
+              <img src={painelInicio} width={1440} height={900} alt="Painel do vendedor com saldo disponível, vendas de hoje e faturamento" decoding="async" />
+            </div>
+            <div className="vp-auth-note" aria-hidden="true">
+              <span className="vp-auth-note-icon"><Bell /></span>
+              <span className="min-w-0"><b>Nova venda aprovada</b><small>Você recebeu R$ 278,42 líquidos.</small></span>
+            </div>
             <figcaption>Tela real do painel. Nomes e valores são exemplos.</figcaption>
           </figure>
         </>
       )}
 
       {mode === "signup" && (
-        <div className="relative mt-auto flex min-h-0 flex-col gap-10 pb-2 pt-10">
-          <div key={step} className="vp-auth-swap max-w-[460px]" aria-live="polite">
-            <h2 className="vp-auth-title">{reason.title}</h2>
-            <p className="vp-auth-text mt-4">{reason.text}</p>
+        <div className="relative my-auto flex w-full max-w-[480px] flex-col gap-7 py-8">
+          <div>
+            <h2 className="vp-auth-title"><Tight>{created ? "Falta só confirmar o seu e-mail." : "A sua conta, montada enquanto você preenche."}</Tight></h2>
+            <p className="vp-auth-text mt-3">
+              {created
+                ? "Abra o link que enviamos e entre no painel. Depois é enviar os documentos e montar o primeiro produto."
+                : "O que você digita aparece aqui. Nada é criado antes de você confirmar, no último passo."}
+            </p>
           </div>
-          <div className="vp-auth-after">
-            <h3 className="text-[15px] font-bold">Depois do cadastro</h3>
-            <ol className="mt-4 grid gap-0">
-              {AFTER_SIGNUP.map((item, i) => (
-                <li key={item.t} className="vp-auth-after-item" data-current={i === 0 ? "" : undefined}>
-                  <span className="vp-auth-dot" aria-hidden>{i + 1}</span>
-                  <div className="min-w-0">
-                    <p className="text-[14.5px] font-bold leading-snug">{item.t}{i === 0 && <span className="vp-auth-here">você está aqui</span>}</p>
-                    <p className="vp-auth-text mt-1 text-[13.5px]">{item.d}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
+          <AccountCard preview={preview ?? EMPTY_PREVIEW} step={created ? 6 : current} />
+          {!created && (
+            <p key={current} className="vp-auth-swap vp-auth-reason" aria-live="polite">
+              <span className="vp-auth-reason-n">{current}/{SIGNUP_STEPS.length}</span>
+              <span><b>{reason.title}</b> {reason.text}</span>
+            </p>
+          )}
         </div>
       )}
 
       {mode === "recovery" && (
         <div className="relative my-auto max-w-[460px] py-10">
-          <h2 className="vp-auth-title">Recupere o acesso em três passos.</h2>
-          <ol className="mt-8 grid gap-0">
-            {RECOVERY_STEPS.map((t, i) => (
-              <li key={t} className="vp-auth-after-item">
+          <h2 className="vp-auth-title"><Tight>Recupere o acesso em três passos.</Tight></h2>
+          <ol className="vp-auth-steps">
+            {RECOVERY_STEPS.map((s, i) => (
+              <li key={s.t}>
                 <span className="vp-auth-dot" aria-hidden>{i + 1}</span>
-                <p className="pt-1 text-[15px] font-semibold leading-snug">{t}</p>
+                <div><p className="text-[16px] font-bold leading-snug">{s.t}</p><p className="vp-auth-text mt-1 text-[14.5px]">{s.d}</p></div>
               </li>
             ))}
           </ol>
-          <p className="vp-auth-text mt-8">Depois da troca, todos os aparelhos conectados saem da conta. Quem estava usando a sua senha antiga perde o acesso na hora.</p>
+          <p className="vp-auth-text mt-9 rounded-[16px] bg-white/10 px-5 py-4">Depois da troca, todos os aparelhos conectados saem da conta. Quem estava usando a sua senha antiga perde o acesso na hora.</p>
         </div>
       )}
     </aside>

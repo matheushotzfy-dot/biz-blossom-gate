@@ -605,9 +605,44 @@ describe("painel ao lado do formulário", () => {
     expect(screen.getByRole("img", { name: /Painel do vendedor/ })).toBeTruthy();
     expect(screen.getByText(/Nomes e valores são exemplos/)).toBeTruthy();
     rerender(<AuthAside mode="signup" step={3} />);
-    expect(screen.getByRole("heading", { level: 2 }).textContent).toBe(STEP_REASONS[2].title);
-    expect(screen.getByText("você está aqui")).toBeTruthy();
+    expect(screen.getByText(STEP_REASONS[2].title)).toBeTruthy();
+    expect(screen.getByText("3/6")).toBeTruthy();
     rerender(<AuthAside mode="recovery" />);
     expect(screen.getByText(/todos os aparelhos conectados saem da conta/)).toBeTruthy();
+  });
+
+  it("monta a prévia da conta com o que a pessoa digitou, com o documento mascarado e sem a senha", async () => {
+    const { buildAccountPreview, EMPTY_SIGNUP } = await import("@/features/auth/authModel");
+    const form = {
+      ...EMPTY_SIGNUP, fullName: "  maria  da   Silva ", nickname: "Mari", email: " Maria@Gmail.com ", phone: "11912345678",
+      document: "529.982.247-25", segment: "infoproduto", monthlyRevenue: "10k_50k", referralSource: "instagram",
+      password: "Abcdef12!", confirmPassword: "Abcdef12!",
+    };
+    const p = buildAccountPreview(form, 6);
+    expect(p).toMatchObject({
+      initials: "MS", greetingName: "Mari", fullName: "maria da Silva", email: "maria@gmail.com", phone: "(11) 91234-5678",
+      documentLabel: "CPF", documentMasked: "•••.•••.247-25", segmentLabel: "Curso / Infoproduto", passwordLevel: 3, ready: true, created: false,
+    });
+    expect(JSON.stringify(p)).not.toContain("Abcdef12");
+    expect(JSON.stringify(p)).not.toContain("529");
+    // Documento incompleto não aparece; CNPJ exige a razão social para ficar pronta.
+    expect(buildAccountPreview({ ...form, document: "529.982" }, 3).documentMasked).toBe("");
+    const pj = buildAccountPreview({ ...form, accountType: "cnpj", document: "11.222.333/0001-81" }, 6);
+    expect(pj.documentMasked).toBe("••.•••.333/0001-81");
+    expect(pj.ready).toBe(false);
+    expect(buildAccountPreview({ ...form, accountType: "cnpj", document: "11.222.333/0001-81", companyName: "Loja da Mari Ltda" }, 6).ready).toBe(true);
+  });
+
+  it("mostra a prévia no painel do cadastro, fora do leitor de tela, com o saldo zerado de conta nova", async () => {
+    const { AuthAside } = await import("@/components/auth/AuthAside");
+    const { buildAccountPreview, EMPTY_SIGNUP } = await import("@/features/auth/authModel");
+    const preview = buildAccountPreview({ ...EMPTY_SIGNUP, fullName: "Maria da Silva", nickname: "Mari", document: "52998224725" }, 3);
+    render(<AuthAside mode="signup" step={3} preview={preview} />);
+    const card = screen.getByTestId("account-preview");
+    expect(card.getAttribute("aria-hidden")).toBe("true");
+    expect(card.textContent).toContain("Maria da Silva");
+    expect(card.textContent).toContain("•••.•••.247-25");
+    expect(card.textContent).toContain("R$ 0,00");
+    expect(card.textContent).not.toContain("52998224725");
   });
 });
