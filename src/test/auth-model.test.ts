@@ -224,7 +224,7 @@ describe("envio", () => {
     expect(sections.map((s) => [s.title, s.step])).toEqual([["Você", 1], ["Contato", 2], ["Documento", 3], ["Negócio", 4]]);
     const rows = Object.fromEntries(sections.flatMap((s) => s.rows).map((r) => [r.label, r.value]));
     expect(rows["O que vende"]).toBe("Curso / Infoproduto");
-    expect(rows["Faturamento mensal"]).toBe("Até R$ 10 mil");
+    expect(rows["Faturamento"]).toBe("Até R$ 10 mil por mês");
     expect(rows["Conheceu por"]).toBe("Instagram");
     expect(rows["CPF"]).toBe(VALID_CPF);
     expect(rows["WhatsApp"]).toBe("(11) 91234-5678");

@@ -1,8 +1,8 @@
-import { Bell, Check, Lock, User } from "lucide-react";
+import { Bell, Check, ChevronDown, Lock, User } from "lucide-react";
 import painelInicio from "@/assets/landing/painel-inicio.webp";
 import { cn } from "@/lib/utils";
 import { VenxpayLogo } from "@/components/VenxpayLogo";
-import { SIGNUP_STEPS, STEP_REASONS, type AccountPreview } from "@/features/auth/authModel";
+import { AFTER_SIGNUP, SIGNUP_STEPS, STEP_REASONS, type AccountPreview } from "@/features/auth/authModel";
 import { Tight } from "@/components/landing-vp/Tight";
 
 /**
@@ -68,17 +68,33 @@ const EMPTY_PREVIEW: AccountPreview = {
   documentLabel: "CPF", documentMasked: "", companyName: "", segmentLabel: "", passwordLevel: 0, passwordLabel: "", ready: false, created: false,
 };
 
+/** As linhas da conta (nome, contato, documento, negócio, senha); a do passo atual fica destacada. */
+function AccountRows({ preview: p, step }: { preview: AccountPreview; step: number }) {
+  const password = p.passwordLevel > 0 ? `•••••••• ${p.passwordLabel.toLowerCase()}` : "";
+  return (
+    <dl className="vp-acct-rows">
+      <Row label="Nome completo" value={p.fullName} active={step === 1} />
+      <Row label="WhatsApp" value={p.phone} active={step === 2} />
+      <Row label={p.documentLabel} value={p.documentMasked} active={step === 3} locked />
+      {p.documentLabel === "CNPJ" && <Row label="Razão social" value={p.companyName} active={step === 3} />}
+      <Row label="Você vende" value={p.segmentLabel} active={step === 4} />
+      <Row label="Senha" value={password} active={step === 5} locked />
+    </dl>
+  );
+}
+
+const helloOf = (p: AccountPreview) => (p.greetingName ? `${greeting()}, ${p.greetingName}` : "Sua conta");
+
 /** A conta montada com o que a pessoa digitou. Repete o formulário, então fica fora do leitor de tela. */
 export function AccountCard({ preview, step }: { preview: AccountPreview; step: number }) {
   const p = preview;
   const chip = p.created ? "Conta criada" : p.ready && step === 6 ? "Pronta para criar" : p.typeLabel;
-  const password = p.passwordLevel > 0 ? `•••••••• ${p.passwordLabel.toLowerCase()}` : "";
   return (
     <div className="vp-acct" aria-hidden="true" data-testid="account-preview">
       <div className="vp-acct-head">
         <span className="vp-acct-avatar">{p.initials || <User />}</span>
         <div className="min-w-0 flex-1">
-          <p className="vp-acct-hello">{p.greetingName ? `${greeting()}, ${p.greetingName}` : "Sua conta"}</p>
+          <p className="vp-acct-hello">{helloOf(p)}</p>
           {p.email ? <p className="vp-acct-sub">{p.email}</p> : <span className="vp-acct-bar mt-1.5" style={{ width: "58%" }} />}
         </div>
         <span className="vp-acct-chip" data-tone={p.created || (p.ready && step === 6) ? "ok" : undefined}>{chip}</span>
@@ -90,15 +106,46 @@ export function AccountCard({ preview, step }: { preview: AccountPreview; step: 
         <p className="text-[12.5px] text-white/80">Sua primeira venda aparece aqui.</p>
       </div>
 
-      <dl className="vp-acct-rows">
-        <Row label="Nome completo" value={p.fullName} active={step === 1} />
-        <Row label="WhatsApp" value={p.phone} active={step === 2} />
-        <Row label={p.documentLabel} value={p.documentMasked} active={step === 3} locked />
-        {p.documentLabel === "CNPJ" && <Row label="Razão social" value={p.companyName} active={step === 3} />}
-        <Row label="Você vende" value={p.segmentLabel} active={step === 4} />
-        <Row label="Senha" value={password} active={step === 5} locked />
-      </dl>
+      <AccountRows preview={p} step={step} />
     </div>
+  );
+}
+
+/**
+ * Celular e tablet (sem o painel ao lado): a mesma conta numa faixa que abre. Fechada, mostra só a saudação e o
+ * e-mail, que mudam enquanto a pessoa digita; aberta, as linhas da conta e por que o passo pede o que pede.
+ */
+export function AccountStrip({ preview, step }: { preview: AccountPreview; step: number }) {
+  const p = preview;
+  const current = Math.min(Math.max(step, 1), STEP_REASONS.length);
+  const reason = STEP_REASONS[current - 1];
+  return (
+    <details className="auth-mini" data-testid="account-strip">
+      <summary>
+        <span className="vp-acct-avatar" aria-hidden="true">{p.initials || <User />}</span>
+        <span className="min-w-0 flex-1">
+          <span className="auth-mini-hello">{helloOf(p)}</span>
+          <span className="auth-mini-sub">{p.email || "Seus dados aparecem aqui."}</span>
+        </span>
+        <span className="auth-mini-more">Ver conta<ChevronDown aria-hidden="true" /></span>
+      </summary>
+      <div aria-hidden="true"><AccountRows preview={p} step={current} /></div>
+      <p className="auth-mini-why"><b>{reason.title}</b> {reason.text}</p>
+    </details>
+  );
+}
+
+/** Revisão: o que vem depois de criar a conta, em ordem. */
+export function AfterSignupList({ className, tone = "light" }: { className?: string; tone?: "light" | "green" }) {
+  return (
+    <ol className={cn("auth-next", className)} data-tone={tone} aria-label="Depois de criar a conta">
+      {AFTER_SIGNUP.map((item, index) => (
+        <li key={item.title}>
+          <span className="auth-next-n" aria-hidden="true">{index + 1}</span>
+          <span><b>{item.title}</b> {item.text}</span>
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -132,7 +179,7 @@ export function AuthAside({ mode = "login", step = 1, preview, className }: Auth
       )}
 
       {mode === "signup" && (
-        <div className="relative my-auto flex w-full max-w-[480px] flex-col gap-7 py-8">
+        <div className="relative my-auto flex w-full max-w-[480px] flex-col gap-7 py-8" data-final={!created && current === SIGNUP_STEPS.length ? "" : undefined}>
           <div>
             <h2 className="vp-auth-title"><Tight>{created ? "Falta só confirmar o seu e-mail." : "A sua conta, montada enquanto você preenche."}</Tight></h2>
             <p className="vp-auth-text mt-3">
@@ -142,11 +189,17 @@ export function AuthAside({ mode = "login", step = 1, preview, className }: Auth
             </p>
           </div>
           <AccountCard preview={preview ?? EMPTY_PREVIEW} step={created ? 6 : current} />
-          {!created && (
+          {!created && current < SIGNUP_STEPS.length && (
             <p key={current} className="vp-auth-swap vp-auth-reason" aria-live="polite">
               <span className="vp-auth-reason-n">{current}/{SIGNUP_STEPS.length}</span>
               <span><b>{reason.title}</b> {reason.text}</span>
             </p>
+          )}
+          {!created && current === SIGNUP_STEPS.length && (
+            <div key="next" className="vp-auth-swap">
+              <p className="text-[14.5px] font-bold">Depois de criar a conta</p>
+              <AfterSignupList tone="green" className="mt-3" />
+            </div>
           )}
         </div>
       )}

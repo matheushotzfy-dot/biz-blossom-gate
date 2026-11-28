@@ -96,15 +96,57 @@
   .vp-acct-balance { padding: .8rem 1rem .85rem; }
   .vp-acct-money b { font-size: 1.75rem; }
   .vp-acct-row { min-height: 2.25rem; padding-top: .2rem; padding-bottom: .2rem; }
+  .vp-auth-aside .auth-next[data-tone="green"] { gap: .5rem; font-size: 13.5px; }
 }
+/* Último passo: o painel troca o motivo pelo "depois de criar"; para caber (conta PJ tem uma linha a mais), saem o
+   subtítulo e o saldo de exemplo, e a conta fica só com os dados conferidos. */
+.vp-auth-aside [data-final] .vp-auth-title + .vp-auth-text,
+.vp-auth-aside [data-final] .vp-acct-balance { display: none; }
 @media (prefers-reduced-motion: reduce) { .vp-auth-swap, .vp-acct-value, .vp-auth-note { animation: none; } .vp-acct-row { transition: none; } }
 
 /* Título das telas: mesmo desenho dos títulos da landing (sem `font-heading`, que sobrescreve o tracking). */
 .auth-shell .auth-title { font-size: clamp(1.75rem, 3.4vw, 2.1rem); font-weight: 800; line-height: 1.1; letter-spacing: -.035em; }
 .auth-shell .auth-step-n { display: grid; place-items: center; flex: none; width: 1.5rem; height: 1.5rem; border-radius: 999px; font-size: 12px; font-weight: 800; background: hsl(var(--accent)); color: hsl(var(--accent-foreground)); }
-.auth-shell .auth-why { border-radius: 12px; background: hsl(var(--muted) / .6); padding: .7rem .95rem; font-size: 13px; }
-.auth-shell .auth-why summary { cursor: pointer; font-weight: 600; color: hsl(var(--foreground)); list-style: none; }
-.auth-shell .auth-why summary::-webkit-details-marker { display: none; }
-.auth-shell .auth-why summary::after { content: "+"; float: right; font-weight: 700; color: hsl(var(--primary)); }
-.auth-shell .auth-why[open] summary::after { content: "−"; }
-.auth-shell .auth-why p { margin-top: .45rem; line-height: 1.6; color: hsl(var(--muted-foreground)); }
+/* Celular e tablet: a conta montada numa faixa que abre (no computador ela fica no painel ao lado).
+   Cores pelos tokens do tema, porque aqui a faixa está sobre o fundo do formulário, não sobre o verde. */
+.auth-shell .auth-mini { border-radius: 16px; background: hsl(var(--muted) / .6); }
+.auth-shell .auth-mini summary { display: flex; align-items: center; gap: .75rem; padding: .65rem .85rem .65rem .65rem; cursor: pointer; list-style: none; border-radius: 16px; }
+.auth-shell .auth-mini summary::-webkit-details-marker { display: none; }
+.auth-shell .auth-mini summary:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.auth-shell .auth-mini .vp-acct-avatar { width: 2.5rem; height: 2.5rem; font-size: .86rem; background: hsl(var(--accent)); color: hsl(var(--accent-foreground)); }
+.auth-shell .auth-mini .vp-acct-avatar svg { width: 1.1rem; height: 1.1rem; }
+.auth-mini-hello { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14.5px; font-weight: 800; letter-spacing: -.02em; color: hsl(var(--foreground)); }
+.auth-mini-sub { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: .05rem; font-size: 12.5px; color: hsl(var(--muted-foreground)); }
+.auth-mini-more { display: inline-flex; flex: none; align-items: center; gap: .25rem; font-size: 12.5px; font-weight: 700; color: hsl(var(--primary)); }
+.auth-mini-more svg { width: 1rem; height: 1rem; transition: transform .2s ease; }
+.auth-mini[open] .auth-mini-more svg { transform: rotate(180deg); }
+.auth-shell .auth-mini .vp-acct-rows { margin: 0; padding: 0 .4rem .3rem; }
+.auth-shell .auth-mini .vp-acct-row { grid-template-columns: 6.75rem minmax(0, 1fr); min-height: 2.35rem; }
+.auth-shell .auth-mini .vp-acct-row dt { color: hsl(var(--muted-foreground)); }
+.auth-shell .auth-mini .vp-acct-value { color: hsl(var(--foreground)); }
+.auth-shell .auth-mini .vp-acct-mark { color: hsl(var(--primary)); }
+.auth-shell .auth-mini .vp-acct-bar { background: hsl(var(--foreground) / .08); }
+.auth-shell .auth-mini .vp-acct-row[data-active] { background: hsl(var(--background)); }
+.auth-shell .auth-mini .vp-acct-row[data-active] .vp-acct-bar { background: hsl(var(--primary) / .18); }
+.auth-shell .auth-mini .vp-acct-row[data-active]::before { background: hsl(var(--primary)); }
+.auth-mini-why { margin: .2rem .9rem 0; padding: .75rem 0 .9rem; border-top: 1px solid hsl(var(--border)); font-size: 12.5px; line-height: 1.6; color: hsl(var(--muted-foreground)); }
+.auth-mini-why b { color: hsl(var(--foreground)); font-weight: 700; }
+
+/* Revisão: um bloco por passo, com o botão de editar ao lado do título. */
+.auth-shell .auth-review { display: grid; gap: .45rem; }
+.auth-shell .auth-review-block { padding: .65rem .8rem .8rem; border-radius: 14px; background: hsl(var(--muted) / .5); }
+.auth-shell .auth-review-icon { display: grid; place-items: center; flex: none; width: 1.85rem; height: 1.85rem; border-radius: 10px; background: hsl(var(--background)); color: hsl(var(--primary)); }
+.auth-shell .auth-review-icon svg { width: 1rem; height: 1rem; }
+.auth-shell .auth-review-edit { display: inline-flex; align-items: center; gap: .35rem; min-height: 2.1rem; padding: 0 .75rem; background: hsl(var(--background)); color: hsl(var(--primary)); font-size: 12.5px; font-weight: 700; }
+.auth-shell .auth-review-edit:hover { background: hsl(var(--accent)); }
+.auth-shell .auth-review-edit:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.auth-shell .auth-review-edit svg { width: .85rem; height: .85rem; }
+
+/* Depois de criar a conta: três passos em ordem (no formulário e, no computador, no painel verde). */
+.auth-next { margin: 0; padding: 0; list-style: none; display: grid; gap: .55rem; font-size: 13px; line-height: 1.55; color: hsl(var(--muted-foreground)); }
+.auth-next li { display: flex; align-items: flex-start; gap: .7rem; }
+.auth-next b { color: hsl(var(--foreground)); font-weight: 700; }
+.auth-next-n { display: grid; place-items: center; flex: none; width: 1.4rem; height: 1.4rem; margin-top: .05rem; border-radius: 999px; background: hsl(var(--accent)); color: hsl(var(--accent-foreground)); font-size: 11.5px; font-weight: 800; }
+.auth-next[data-tone="green"] { gap: .8rem; font-size: 14.5px; color: hsl(0 0% 100% / .84); }
+.auth-next[data-tone="green"] b { color: #fff; }
+.auth-next[data-tone="green"] .auth-next-n { width: 1.6rem; height: 1.6rem; background: #fff; color: hsl(158 100% 22%); font-size: 12px; }

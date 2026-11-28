@@ -1,14 +1,15 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Building2, Mail, Shield, User } from "lucide-react";
+import { ArrowRight, Briefcase, Building2, Mail, PenLine, Shield, User } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { AccountStrip, AfterSignupList } from "@/components/auth/AuthAside";
 import { Button } from "@/components/ui/button";
 import {
   requestSignup, resendSignupEmail, signInSeller, type SignupFailureKind,
 } from "./authApi";
 import {
-  EMPTY_SIGNUP, PASSWORD_MAX, REFERRAL_OPTIONS, REVENUE_OPTIONS, SEGMENT_OPTIONS, SIGNUP_STEPS, STEP_REASONS, TOTAL_STEPS, ACCOUNT_TYPE_OPTIONS,
+  EMPTY_SIGNUP, PASSWORD_MAX, REFERRAL_OPTIONS, REVENUE_OPTIONS, SEGMENT_OPTIONS, SIGNUP_STEPS, TOTAL_STEPS, ACCOUNT_TYPE_OPTIONS,
   buildAccountPreview, buildSignupRequest, fieldsOfStep, firstInvalidStep, formatDocument, formatPhone, normalizeEmail, stepErrors, suggestEmail,
   summarySections, type AccountPreview, type SignupField, type SignupForm,
 } from "./authModel";
@@ -37,6 +38,14 @@ const ACCOUNT_CHOICES: Choice[] = ACCOUNT_TYPE_OPTIONS.map((o) => ({
   icon: o.value === "cnpj" ? <Building2 className="h-[18px] w-[18px]" aria-hidden="true" /> : <User className="h-[18px] w-[18px]" aria-hidden="true" />,
 }));
 
+/** Ícone de cada bloco da revisão (pelo passo em que o dado foi preenchido). */
+const SECTION_ICONS: Record<number, ReactNode> = {
+  1: <User aria-hidden="true" />,
+  2: <Mail aria-hidden="true" />,
+  3: <Shield aria-hidden="true" />,
+  4: <Briefcase aria-hidden="true" />,
+};
+
 export function SignupFlow({ onStepChange, onPreviewChange, onSuccess, onLogin, onRecover }: SignupFlowProps) {
   const [form, setForm] = useState<SignupForm>(EMPTY_SIGNUP);
   const [step, setStep] = useState(1);
@@ -62,7 +71,8 @@ export function SignupFlow({ onStepChange, onPreviewChange, onSuccess, onLogin, 
   const set = <K extends SignupField>(key: K, value: SignupForm[K]) => setForm((current) => ({ ...current, [key]: value }));
 
   useEffect(() => { onStepChange?.(step); }, [step, onStepChange]);
-  useEffect(() => { onPreviewChange?.(buildAccountPreview(form, step, phase === "verify")); }, [form, step, phase, onPreviewChange]);
+  const preview = useMemo(() => buildAccountPreview(form, step, phase === "verify"), [form, step, phase]);
+  useEffect(() => { onPreviewChange?.(preview); }, [preview, onPreviewChange]);
 
   // Cada passo novo leva o foco ao primeiro campo (ou ao título, na revisão), para teclado e leitor de tela.
   useEffect(() => {
@@ -232,11 +242,12 @@ export function SignupFlow({ onStepChange, onPreviewChange, onSuccess, onLogin, 
         </div>
       </div>
 
-      {/* No celular o painel ao lado não aparece: o motivo de cada passo fica aqui, fechado. */}
-      <details className="auth-why mt-4 lg:hidden">
-        <summary>Por que pedimos isso?</summary>
-        <p>{STEP_REASONS[step - 1]?.text}</p>
-      </details>
+      {/* Sem o painel ao lado (celular e tablet), a conta montada e o motivo do passo ficam nesta faixa. */}
+      {step < TOTAL_STEPS && (
+        <div className="mt-4 lg:hidden">
+          <AccountStrip preview={preview} step={step} />
+        </div>
+      )}
 
       <form ref={formRef} onSubmit={handleSubmit} noValidate className="mt-5" aria-label={`Cadastro, passo ${step} de ${TOTAL_STEPS}`}>
         <motion.div key={step} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="space-y-4">
@@ -421,26 +432,27 @@ export function SignupFlow({ onStepChange, onPreviewChange, onSuccess, onLogin, 
 
           {step === 6 && (
             <>
-              <div className="divide-y divide-border overflow-hidden rounded-[12px] ring-1 ring-border">
+              <div className="auth-review">
                 {summarySections(form).map((section) => (
-                  <section key={section.title} aria-label={section.title} className="px-4 py-3">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-[12px] font-semibold text-foreground/70">{section.title}</h2>
+                  <section key={section.title} aria-labelledby={`su-review-${section.step}`} className="auth-review-block">
+                    <div className="flex items-center gap-2.5">
+                      <span className="auth-review-icon">{SECTION_ICONS[section.step]}</span>
+                      <h2 id={`su-review-${section.step}`} className="flex-1 text-[13.5px] font-bold text-foreground">{section.title}</h2>
                       <button
                         type="button"
                         onClick={() => { setReturnToReview(true); setStep(section.step); }}
                         disabled={working}
                         aria-label={`Editar ${section.title.toLowerCase()}`}
-                        className={`text-[12px] ${linkButtonClass}`}
+                        className="auth-review-edit rounded-full"
                       >
-                        Editar
+                        <PenLine aria-hidden="true" />Editar
                       </button>
                     </div>
-                    <dl className="mt-1.5 space-y-1">
+                    <dl className="mt-2 grid gap-1 sm:pl-[2.6rem]">
                       {section.rows.map((row) => (
-                        <div key={row.label} className="flex items-baseline justify-between gap-4">
-                          <dt className="shrink-0 text-[13px] text-muted-foreground">{row.label}</dt>
-                          <dd className="min-w-0 truncate text-right text-[13px] font-medium text-foreground">{row.value || "—"}</dd>
+                        <div key={row.label} className="grid grid-cols-[minmax(0,7.25rem)_minmax(0,1fr)] items-baseline gap-3">
+                          <dt className="text-[13px] text-muted-foreground">{row.label}</dt>
+                          <dd className="text-[13.5px] font-semibold text-foreground [overflow-wrap:anywhere]">{row.value || "—"}</dd>
                         </div>
                       ))}
                     </dl>
@@ -448,8 +460,13 @@ export function SignupFlow({ onStepChange, onPreviewChange, onSuccess, onLogin, 
                 ))}
               </div>
 
+              {/* No computador o "depois" aparece no painel ao lado. */}
+              <div className="lg:hidden">
+                <p className="text-[13px] font-bold text-foreground">Depois de criar a conta</p>
+                <AfterSignupList className="mt-2.5" />
+              </div>
               <div>
-                <label className="flex cursor-pointer items-start gap-3 rounded-[10px] p-4 ring-1 ring-border transition-colors hover:bg-muted/30">
+                <label className="flex cursor-pointer items-start gap-3 rounded-[12px] px-4 py-3.5 ring-1 ring-border transition-colors hover:bg-muted/30">
                   <input
                     id="su-acceptTerms"
                     type="checkbox"
@@ -471,9 +488,6 @@ export function SignupFlow({ onStepChange, onPreviewChange, onSuccess, onLogin, 
                 )}
               </div>
 
-              <p className="text-[12.5px] leading-relaxed text-muted-foreground">
-                Depois de criar a conta, você envia seus documentos para verificação. O saque só é processado depois que ela for aprovada.
-              </p>
             </>
           )}
 

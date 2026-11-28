@@ -96,6 +96,16 @@ export const STEP_REASONS = [
   { title: "Confira antes de criar.", text: "Dá para voltar e corrigir qualquer passo. Os termos e a política de privacidade abrem numa aba nova." },
 ] as const;
 
+/**
+ * O que acontece depois de criar a conta (mostrado na revisão). Só o que é verdade hoje: produto novo e saque
+ * exigem o cadastro aprovado (`enforce_account_status_on_product`, `enforce_kyc_on_withdrawal`).
+ */
+export const AFTER_SIGNUP = [
+  { title: "Você entra no painel", text: "com o e-mail e a senha que criou." },
+  { title: "Envia os documentos", text: "de identidade pelo painel." },
+  { title: "A equipe confere o cadastro.", text: "Aprovado, você cria produtos e saca." },
+] as const;
+
 /* ───────────────────────── prévia da conta (painel ao lado) ───────────────────────── */
 
 /**
@@ -459,7 +469,7 @@ export function summarySections(form: SignupForm): SummarySection[] {
       step: 4,
       rows: [
         { label: "O que vende", value: labelOf(SEGMENT_OPTIONS, form.segment) },
-        { label: "Faturamento mensal", value: labelOf(REVENUE_OPTIONS, form.monthlyRevenue) },
+        { label: "Faturamento", value: labelOf(REVENUE_OPTIONS, form.monthlyRevenue) ? `${labelOf(REVENUE_OPTIONS, form.monthlyRevenue)} por mês` : "" },
         { label: "Conheceu por", value: labelOf(REFERRAL_OPTIONS, form.referralSource) },
       ],
     },

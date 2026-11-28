@@ -298,7 +298,7 @@ describe("tela de cadastro", () => {
     const person = screen.getByRole("region", { name: "Você" });
     expect(within(person).getByText("Maria da Silva")).toBeTruthy();
     expect(within(screen.getByRole("region", { name: "Documento" })).getByText("529.982.247-25")).toBeTruthy();
-    expect(within(screen.getByRole("region", { name: "Negócio" })).getByText("R$ 10 a 50 mil")).toBeTruthy();
+    expect(within(screen.getByRole("region", { name: "Negócio" })).getByText("R$ 10 a 50 mil por mês")).toBeTruthy();
     expect(screen.queryByText(/Abcdef12/)).toBeNull();
     click("Criar conta");
     expect(screen.getByText(/Aceite os Termos de Uso/)).toBeTruthy();
@@ -456,7 +456,7 @@ describe("tela de cadastro", () => {
     reachReview();
     const text = document.body.textContent ?? "";
     expect(text).not.toMatch(/256|SSL|aviso[s]? de (venda|saque) por e-mail/i);
-    expect(text).toMatch(/O saque só é processado depois que ela for aprovada/);
+    expect(text).toMatch(/A equipe confere o cadastro\. Aprovado, você cria produtos e saca\./);
   });
 });
 
@@ -644,5 +644,29 @@ describe("painel ao lado do formulário", () => {
     expect(card.textContent).toContain("•••.•••.247-25");
     expect(card.textContent).toContain("R$ 0,00");
     expect(card.textContent).not.toContain("52998224725");
+  });
+
+  it("no último passo troca o motivo pelo que acontece depois de criar a conta", async () => {
+    const { AuthAside } = await import("@/components/auth/AuthAside");
+    const { buildAccountPreview, EMPTY_SIGNUP, STEP_REASONS } = await import("@/features/auth/authModel");
+    const preview = buildAccountPreview({ ...EMPTY_SIGNUP, fullName: "Maria da Silva", nickname: "Mari" }, 6);
+    render(<AuthAside mode="signup" step={6} preview={preview} />);
+    expect(screen.queryByText(STEP_REASONS[5].title)).toBeNull();
+    const next = screen.getByRole("list", { name: "Depois de criar a conta" });
+    expect(within(next).getAllByRole("listitem")).toHaveLength(3);
+    expect(next.textContent).toMatch(/Aprovado, você cria produtos e saca\./);
+  });
+
+  it("no celular a conta aparece numa faixa que abre, com o motivo do passo, e some na revisão", async () => {
+    const { SignupFlow } = await import("@/features/auth/SignupFlow");
+    const { STEP_REASONS } = await import("@/features/auth/authModel");
+    render(<SignupFlow onSuccess={vi.fn()} onLogin={vi.fn()} onRecover={vi.fn()} />);
+    const strip = screen.getByTestId("account-strip");
+    expect(strip.textContent).toContain("Sua conta");
+    expect(strip.textContent).toContain(STEP_REASONS[0].title);
+    fireEvent.change(field("su-fullName"), { target: { value: "Maria da Silva" } });
+    fireEvent.change(field("su-nickname"), { target: { value: "Mari" } });
+    expect(strip.textContent).toMatch(/(Bom dia|Boa tarde|Boa noite), Mari/);
+    expect(strip.querySelector("dl")?.closest("[aria-hidden]")).toBeTruthy();
   });
 });

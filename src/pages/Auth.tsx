@@ -70,7 +70,7 @@ export default function Auth() {
         <div className="auth-mobile-ambient pointer-events-none fixed inset-0 lg:hidden" aria-hidden="true" />
         <Seo title={seo.title} description={seo.description} path="/auth" />
 
-        <div className="relative grid min-h-[100dvh] lg:h-full lg:min-h-0 lg:grid-cols-[minmax(0,50%)_minmax(0,50%)]">
+        <div className="relative grid min-h-[100dvh] grid-cols-[minmax(0,1fr)] lg:h-full lg:min-h-0 lg:grid-cols-[minmax(0,50%)_minmax(0,50%)]">
           {/* ═══ ESQUERDA — formulário ═══ */}
           <div role="main" className="auth-form-panel relative z-10 flex min-h-[100dvh] flex-col px-5 py-6 sm:px-10 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:px-14 lg:py-7 xl:px-20">
             <a href="/" className="inline-flex w-fit items-center gap-2.5 opacity-95 transition-opacity hover:opacity-100" aria-label="Vemprapay, página inicial">
