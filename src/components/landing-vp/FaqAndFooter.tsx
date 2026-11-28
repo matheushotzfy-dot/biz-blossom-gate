@@ -64,7 +64,7 @@ export function Closing({ onSignup, onLogin }: { onSignup: () => void; onLogin: 
         </h2>
         <div>
           <p className="lp-lead max-w-[25rem]">
-            Grátis para abrir e sem mensalidade. Você monta o produto, a equipe revisa e o seu checkout começa a receber.
+            Grátis para abrir e sem mensalidade. Com o cadastro aprovado, você monta o produto, a equipe revisa e o seu checkout começa a receber.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
             <button type="button" onClick={onSignup} className="lp-btn lp-btn-light">Abrir minha conta</button>

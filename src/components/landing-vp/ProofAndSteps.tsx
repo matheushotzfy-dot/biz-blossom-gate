@@ -80,7 +80,7 @@ export function HowItWorks() {
       <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
         <div className="lp-head">
           <h2 className="lp-h2 max-w-[15ch] text-foreground"><Tight>Do cadastro ao primeiro saque.</Tight></h2>
-          <p className="lp-lead">Quatro passos, nesta ordem. A conta abre em poucos minutos e você monta o produto enquanto os documentos são analisados.</p>
+          <p className="lp-lead">Quatro passos, nesta ordem. A conta abre em poucos minutos e, com a verificação de identidade aprovada, você monta o produto.</p>
         </div>
         <ol className="lp-steps">
           {STEPS.map((s, i) => (

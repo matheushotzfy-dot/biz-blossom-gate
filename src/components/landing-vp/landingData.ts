@@ -48,7 +48,7 @@ export const PROOFS = [
 /** Do cadastro ao primeiro saque, na ordem em que acontece. */
 export const STEPS = [
   { t: "Abra a conta", d: "Com CPF ou CNPJ, em poucos minutos. Depois envie os documentos para a verificação de identidade." },
-  { t: "Monte o produto", d: "Preço, formas de pagamento, o checkout com a sua cara e o curso, se tiver área de membros. A equipe revisa antes do checkout receber." },
+  { t: "Monte o produto", d: "Com a conta aprovada, defina preço, formas de pagamento, o checkout com a sua cara e o curso. A equipe revisa antes do checkout receber." },
   { t: "Venda", d: "Mande o link do checkout ou crie um link de pagamento. O Pix aprovado entra no saldo na hora." },
   { t: "Saque por Pix", d: "Peça o saque para a sua chave, confirmando com a sua senha, ou ligue o saque automático." },
 ] as const;
@@ -125,7 +125,7 @@ export const FAQ = [
   },
   {
     q: "Em quanto tempo começo a vender?",
-    a: "A conta abre em poucos minutos e você já pode montar o produto. Cada produto novo passa por uma revisão da equipe antes de o checkout aceitar pagamentos, e você acompanha essa revisão no painel. O saque só é processado depois que a verificação de identidade for aprovada.",
+    a: "A conta abre em poucos minutos. Depois você envia os documentos pelo painel e, com a verificação de identidade aprovada, cria os produtos e pede saques. Cada produto novo ainda passa por uma revisão da equipe antes de o checkout aceitar pagamentos, e você acompanha essa revisão no painel.",
   },
   {
     q: "Como funciona a área de membros?",

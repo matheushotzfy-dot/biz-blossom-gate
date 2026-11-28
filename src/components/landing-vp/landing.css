@@ -178,8 +178,8 @@ html.vx-scroll.lp-menu-open, html.vx-scroll.lp-menu-open body { overflow: hidden
 @media (min-width: 1240px) { .lp-toast { right: 6%; } }
 @keyframes lp-rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
 @keyframes lp-toast { from { opacity: 0; transform: translateY(-10px) scale(.97); } to { opacity: 1; transform: none; } }
-.lp-caption { margin-top: 4rem; font-size: .9rem; line-height: 1.5; color: hsl(var(--muted-foreground)); text-align: right; }
-@media (min-width: 640px) { .lp-caption { margin-top: 4.5rem; } }
+.lp-caption { margin-top: 4rem; font-size: .9rem; line-height: 1.5; color: hsl(var(--muted-foreground)); }
+@media (min-width: 640px) { .lp-caption { margin-top: 4.5rem; text-align: right; } }
 
 /* ══ Seções ══ */
 .lp-section { padding: 6rem 0; }
