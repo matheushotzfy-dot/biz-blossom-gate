@@ -196,7 +196,7 @@ Deno.serve(async (req) => {
 
     if (operationError) {
       safeError("sensitive-financial-action", operationError);
-      const knownMessage = /Saldo insuficiente|saques.*pausad|Máximo de 3|congelado|Primeiro saque crypto|Limite diário/i.test(operationError.message)
+      const knownMessage = /Saldo insuficiente|saques.*pausad|Máximo de 3|congelado|bloquead|não foi aprovado|Primeiro saque crypto|Limite diário/i.test(operationError.message)
         ? operationError.message
         : "Não foi possível concluir a operação.";
       return json(req, { success: false, error: knownMessage }, 400);

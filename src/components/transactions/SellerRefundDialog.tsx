@@ -63,7 +63,11 @@ export function SellerRefundDialog({ tx, onClose, onDone }: SellerRefundDialogPr
       _transaction_id: tx.id, _amount: Math.round(value * 100) / 100, _reason: cleanReason,
     });
     setBusy(false);
-    if (err) { setError(err.message.replace(/^.*?:\s*/, "") || "Não foi possível reembolsar."); return; }
+    if (err) {
+      const text = err.message.replace(/^P\d{4}:\s*/, "").trim();
+      setError(text ? text.charAt(0).toUpperCase() + text.slice(1) : "Não foi possível reembolsar.");
+      return;
+    }
     toast.success("Reembolso registrado e descontado do seu saldo");
     await qc.invalidateQueries();
     onDone?.();
